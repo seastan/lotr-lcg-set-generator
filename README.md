@@ -8,3 +8,5 @@
 
 3. Open the setGenerator.ipynb notebook
 4. Run through the notebook to make the set
+
+Here is also an updated version of Bulk Export plugin with 800 dpi support (see BulkExport.seplugin).
