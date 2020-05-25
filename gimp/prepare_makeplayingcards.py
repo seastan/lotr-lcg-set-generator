@@ -106,7 +106,7 @@ register(
     'A.R.',
     'A.R.',
     '2020',
-    'Prepare MakePlayingCards Batch',
+    'Prepare MakePlayingCards Folder',
     '*',
     [
         (PF_DIRNAME, 'input_folder', 'Input folder', None),
