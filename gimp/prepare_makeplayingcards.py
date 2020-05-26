@@ -61,8 +61,9 @@ def prepare_makeplayingcards(img, drawable, output_folder):
         pdb.gimp_layer_resize(drawable, new_width, new_height, -clip_size,
                               -clip_size)
 
-    pdb.file_png_save(img, drawable, os.path.join(output_folder, file_name),
-                      file_name, 0, 9, 1, 0, 0, 1, 1)
+        pdb.file_png_save(img, drawable,
+                          os.path.join(output_folder, file_name), file_name,
+                          0, 9, 1, 0, 0, 1, 1)
 
     pdb.gimp_undo_push_group_end(img)
 
