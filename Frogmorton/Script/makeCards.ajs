@@ -143,11 +143,19 @@ function main( progress, target ) {
 		// add Keywords to the begging of Rules
 		if (card['Type']=='Rules' && card['Keywords']) s.set('Rules','\n<se>'+card['Keywords']+'</se>\n\n'+s.get('Rules'));
 		else if (card['Keywords']) s.set('Rules',card['Keywords']+'\n\n'+s.get('Rules'));
-		s.set('Portrait-external-path', 'project:imagesRaw/' + card['Name'] + '.jpg');
-		s.set('Collection-external-path', 'project:imagesIcons/' + 'CycleIcon.png');
+		if (card['Artwork']) {
+			s.set('Portrait-external-path', 'project:imagesRaw/' + card['Artwork']);
+		}
+		s.set('Collection-external-path', ('project:imagesIcons/' + card['Set'] + '.png').replace(/ /g, '-'));
 		if (card['Encounter Set']) {
 			s.set('EncounterSet-external-path', ('project:imagesIcons/' + card['Encounter Set'] + '.png').replace(/ /g, '-'));
 		}
+		if (card['Quest Encounter Sets']) {
+			s.set('EncounterSet-external-path', ('project:imagesIcons/' + card['Encounter Set'] + '.png').replace(/ /g, '-'));
+		}
+//		EncounterSet1-external-path
+		s.set('CollectionInfo', '');
+		s.set('Copyright', '©Middle-earth Enterprises ©FFG ©ALeP');
 		// save new .eon file in the 'new' folder
 		var cardnum = parseInt(card['Card Number']);
 		var zeros = "";
