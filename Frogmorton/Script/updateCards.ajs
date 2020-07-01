@@ -1,0 +1,230 @@
+ 
+//useLibrary( 'imageutils' );
+//ImageUtils.get(url)
+useLibrary( 'threads' );
+importPackage( arkham.project );
+importClass( javax.xml.parsers.DocumentBuilderFactory);
+importClass( javax.xml.parsers.DocumentBuilder);
+importClass( org.w3c.dom.Document);
+importClass( org.w3c.dom.NodeList);
+importClass( org.w3c.dom.Node);
+importClass( org.w3c.dom.Element);
+importClass( java.io.File);
+
+Thread.busyWindow( main, 'Making Cards...', true );
+
+/*
+Reads the setEons.xml file in same directory as this Strange Eons project and 
+updates the cards in the 'current' folder to produce a .eon file in the 'update' folder for each card.
+This keeps the art in place.
+*/
+function main( progress, target ) {
+	// First delete previous cards
+	var delCards = project.findChild('Decks/updated').iterator();
+	while (delCards.hasNext()) 
+		delCards.next().deleteFile();
+
+	// Open xml containing the card data
+	var fXmlFile = new File('setEons.xml');
+	var dbFactory = DocumentBuilderFactory.newInstance();
+	var dBuilder = dbFactory.newDocumentBuilder();
+	var doc = dBuilder.parse(fXmlFile);
+	doc.getDocumentElement().normalize();
+	//Console.err.println("Root element :" + doc.getDocumentElement().getNodeName());
+	var cardSet = doc.getDocumentElement().getAttribute("name");
+	var nList = doc.getElementsByTagName("card");
+	//Console.err.println("--------------------------------------");
+	// Loop over cards in set
+	for (let i = 0; i < nList.getLength(); i++) {
+		// Create a dictionary called card that contains all the card info in the xml file
+		var card = {};
+		card['Set'] = cardSet;
+		var nNode = nList.item(i);
+		//Console.err.println("\nCurrent Element :" + nNode.getNodeName());
+		if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+			//Console.err.println("\n\tCard id : " + nNode.getAttribute("id"));
+			card['octgn'] = nNode.getAttribute("id");
+			//Console.err.println("\n\tName : " + nNode.getAttribute("name"));
+			card['Name'] = nNode.getAttribute("name");
+			var propList = nNode.getElementsByTagName("property");
+			for (let j = 0; j < propList.getLength(); j++) {
+				var nProp = propList.item(j);
+				if (!nProp.getParentNode().isSameNode(nNode)) continue;
+				if (nProp && nProp.getNodeType() == Node.ELEMENT_NODE) {
+					//Console.err.println("\n\t" + nProp.getAttribute("name")+': '+nProp.getAttribute("value"));
+					card[nProp.getAttribute("name")] = nProp.getAttribute("value");
+				}
+			}
+			var altList = nNode.getElementsByTagName("alternate");
+			for (let k = 0; k < altList.getLength(); k++) {
+				var nAlternate = altList.item(k);
+				if (nAlternate && nAlternate.getNodeType() == Node.ELEMENT_NODE) {
+					//Console.err.println("\n\t\tSide B: " + nAlter'../../../../Street-Fighting.jpg'nate.getAttribute("name"));
+					card['BName'] = nAlternate.getAttribute("name");
+					var altPropList = nAlternate.getElementsByTagName("property");
+					for (let l = 0; l < altPropList.getLength(); l++) {
+						var nAltProp = altPropList.item(l);
+						if (nAltProp && nAltProp.getNodeType() == Node.ELEMENT_NODE) {
+							//Console.err.println("\n\t\t" + nAltProp.getAttribute("name")+': '+nAltProp.getAttribute("value"));
+							card['B'+nAltProp.getAttribute("name")] = nAltProp.getAttribute("value");
+						}
+					}
+				}
+			}
+		}
+		if (!card['Type']) {
+			Console.err.println('\n'+card['Name']);
+			continue;	
+		}			
+		if (card['Type']=='Side Quest') {
+			if (card['Encounter Set']!='') card['Type']='Encounter Side Quest';
+			else card['Type']='Player Side Quest';
+		}
+		if (card['BQuest Points']) card['Quest Points']=card['BQuest Points'];
+
+		// Create a new .eon file, using the appropriate template in the template folder
+		progress.status = card['Name'];
+		var cardnum = parseInt(card['Card Number']);
+		var zeros = "";
+		if (cardnum<10) zeros = "00";
+		else if (cardnum<100) zeros = "0";
+		var fname = (zeros+card['Card Number']+'-'+card['Quantity']+'-'+card['Name']+Array(60).join("-")).substring(0,50)+card['octgn']+'.eon';
+		var newCard = ResourceKit.getGameComponentFromFile( getProjectMember('Decks/current/'+fname).file, false );
+		var s = newCard.settings;
+		var translate = [
+			// Convert from member name in xml file to member name in eon file
+			// [eon,xml]
+			['Threat','Threat'],
+			['Progress','Quest Points'],
+			['Trait','Traits'],
+			['Name','Name'],
+			['Flavour','Flavour'],
+			['Rules','Text'],
+			['Willpower','Willpower'],
+			['Threat','Threat'],
+			['Attack','Attack'],
+			['Defense','Defense'],
+			['HitPoints','Health'],
+			['Unique','Unique'],
+			['Shadow','Shadow'],
+			['Flavour','Flavour'],
+			['CollectionNumber','Card Number'],
+			['ThreatCost','Cost'],
+			['Stage','Cost'],
+			['ResourceCost','Cost'],
+			['Engagement','Engagement Cost'],
+			['RulesBack','BText'],
+			['Adventure','Set'],
+			['Story','Flavour'],
+			['StoryBack','BFlavour'],
+			['Artist','Artist'], // Comment out to input the artist manually
+			//['ArtistBack','BArtist'],
+			['ConditionBack','BCondition'],
+			['NameBack','BName'],
+			['Victory','Victory Points'],
+			['OptionRight','Victory Points'],
+			['Template','Sphere'],
+			['',''],
+			['',''],
+			['',''],
+			['',''],
+			['',''],
+			['','']
+		];
+		
+		// change the details in the template card
+		for (let i = 0; i < translate.length; i++) {
+			var nEon = translate[i][0];
+			s.set(nEon,'');
+			var nXml = translate[i][1];
+			//if (card['Name']=='Through the Wilderland') Console.err.println(nEon+' '+nXml);
+			var vXml = card[nXml];
+			//if (nXml=='Victory') Console.err.println(card['Name']+'\n');
+			if (!vXml) continue;
+			if (nXml=='Victory Points') vXml = 'VICTORY '+vXml;
+			if (vXml=='-') vXml='minus';
+			if (vXml=='\u2030') vXml='1';
+			if (nXml=='Text' && card['Type']=='Treachery' && card['Traits'] == '') vXml = '\n'+vXml;
+			//if (card['Name']=='The Growing Shadow') Console.err.println(nEon+' '+nXml+' '+vXml);
+			vXml=markUp(vXml); // make stuff like 'Response' appear bold
+			s.set(nEon,vXml);			}
+		// add Keywords to the begging of Rules
+		if (card['Type']=='Rules' && card['Keywords']) s.set('Rules','\n<se>'+card['Keywords']+'</se>\n\n'+s.get('Rules'));
+		else if (card['Keywords']) s.set('Rules',card['Keywords']+'\n\n'+s.get('Rules'));
+		// save new .eon file in the 'new' folder
+		// ResourceKit.writeGameComponentToFile( new File( getProjectMember('Decks/updated/').file, card['octgn']+'.eon' ), newCard );
+		//outname = outname.substring(0,50)+card['octgn']+'.eon';
+		ResourceKit.writeGameComponentToFile( new File( getProjectMember('Decks/updated/').file, fname ), newCard );
+//			var fieldlist = newCard.settings.getClass().getDeclaredFields();
+//			Console.err.println("Card:");
+//			for (let i=0; i<fieldlist.length; i++) {
+//				field = fieldlist[i];
+//    			field.setAccessible(true);
+//    			var name = field.getName();
+//				//if (name != 'p') continue;
+//    			var value = field.get(newCard.settings);
+//				//if (value.get("Artist") != "Jon Bosco") continue;
+//   			    Console.err.println("Field name:"+name+", Field value: "+value+"\n");
+//			}
+
+	}
+	return;
+}
+
+
+function markUp(vXml) {
+	vXml=vXml.replace("Setup:","<b>Setup</b>:");
+	vXml=vXml.replace("Quest Resolution:","<b>Quest Resolution</b>:");
+	vXml=vXml.replace("Quest Resolution (resolve only once the main quest is defeated):","<b>Quest Resolution</b> (resolve only once the main quest is defeated):");
+	vXml=vXml.replace("When Revealed:","<b>When Revealed</b>:");
+	vXml=vXml.replace("Forced:","<b>Forced</b>:");
+	vXml=vXml.replace("Resource Action:","<b>Resource Action</b>:");
+	vXml=vXml.replace("Planning Action:","<b>Planning Action</b>:");
+	vXml=vXml.replace("Quest Action:","<b>Quest Action</b>:");
+	vXml=vXml.replace("Travel Action:","<b>Travel Action</b>:");
+	vXml=vXml.replace("Encounter Action:","<b>Encounter Action</b>:");
+	vXml=vXml.replace("Combat Action:","<b>Combat Action</b>:");
+	vXml=vXml.replace("Refresh Action:","<b>Refresh Action</b>:");
+	vXml=vXml.replace("Action:","<b>Action</b>:");
+	vXml=vXml.replace("Response:","<b>Response</b>:");
+	vXml=vXml.replace("Travel:","<b>Travel</b>:");
+	vXml=vXml.replace("Condition","<b>Condition</b>");
+	vXml=vXml.replace("Shadow:","<b>Shadow</b>:");
+	vXml=vXml.replace("$","<thr>");	
+	vXml=vXml.replace("\u00db","<att>");	
+	vXml=vXml.replace("\u00da","<def>");	
+	vXml=vXml.replace("\u00d2","<wil>");	
+	vXml=vXml.replace("\u00cc","<lea>");	
+	vXml=vXml.replace("\u00ce","<lor>");	
+	vXml=vXml.replace("\u00ca","<spi>");	
+	vXml=vXml.replace("\u00cf","<tac>");
+	vXml=vXml.replace("[Threat]","<thr>");	
+	vXml=vXml.replace("[Attack]","<att>");	
+	vXml=vXml.replace("[Defense]","<def>");	
+	vXml=vXml.replace("[Willpower]","<wil>");	
+	vXml=vXml.replace("[Leadership]","<lea>");	
+	vXml=vXml.replace("[Lore]","<lor>");	
+	vXml=vXml.replace("[Spirit]","<spi>");	
+	vXml=vXml.replace("[Tactics]","<tac>");
+	vXml=vXml.replace("^","<b><i>");	
+	vXml=vXml.replace("*","</i></b>");
+	vXml=vXml.replace("~","<b>");	
+	vXml=vXml.replace("%","</b>");
+	vXml=vXml.replace("Custom Set - ","");	
+	return vXml;
+}
+
+
+/**
+ * getProjectMember( path )
+ *   path : a path relative to the project folder
+ * Given a /-separated path in the project, returns a Member for
+ * the file represented by that path.
+ */
+function getProjectMember( path ) {
+	var member = project.findChild( path );
+	if( member == null ) {
+		throw new Error( 'missing required project file: ' + path );
+	}
+	return member;
+}

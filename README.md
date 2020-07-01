@@ -1,15 +1,40 @@
-1. Clone the repo
-2. Install Anaconda and use it to open a JupyterHub.  As another option, you can use VirtualEnv:
+1. Clone this repo to a local folder.
 
-   - `virtualenv env --python=python3.7`
-   - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
-   - `pip install jupyter requests xlwings`
-   - `jupyter notebook`
+2. Add the folder with the cropped artwork to your own Google Drive to be able to sync it locally.
+This feature is currently hidden on the Google Drive UI, but may still be accessed by a shortcut
+(see https://support.google.com/drive/thread/35817359?hl=en).  If this feature is removed
+completely, you will need to download updates to that folder manually.
 
-3. Open the setGenerator.ipynb notebook
-4. Run through the notebook to make the set
+3. Install Backup and Sync from Google (if it's not installed yet) and make sure that the folder
+with the cropped artwork is being synced.
 
-`BulkExport.seplugin`: an updated version of Bulk Export plugin with 800 dpi support (450 dpi has been removed).
+4. Install the latest available version of Strange Eons (https://strangeeons.cgjennings.ca/download.html)
+and the `The Lord of the Rings LCG` plugin.  Additionally, install `Bulk Export`, `Developer Tools`
+and `The Lord of the Rings LCG, HD` plugins.
+
+5. Go to plugins folder (`Strange Eons` -> `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`) and
+replace `TheLordOfTheRingsLCG.seext` and `BulkExport.seplugin` with the custom versions from this repo.
+
+6. Install GIMP (https://www.gimp.org/downloads/).
+
+7. Make sure that macros are enabled in Microsoft Excel.
+
+8. Go to the repo folder.  Either install Anaconda and use it to open a JupyterHub or use VirtualEnv:
+
+  - Install Python 3.7 (or other Python 3 version), Pip and VirtualEnv.
+  - `virtualenv env --python=python3.7`
+  - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
+  - `pip install jupyter pyyaml requests xlwings`
+  - `jupyter notebook`
+
+9. Edit `configuration.yaml`:
+
+  - Set `sheet_gdid` (Google Drive ID of the cards spreadsheet).
+  - If needed, update `sheet_type` (either `xlsm` or `xlsx`).
+  - Set `artwork_path` (local path to the folder with the cropped artwork).
+
+10. Open `setGenerator.ipynb` and follow further instructions.
+
 
 **GIMP Plugins**
 

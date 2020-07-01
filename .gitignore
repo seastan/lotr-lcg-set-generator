@@ -1,0 +1,9 @@
+.ipynb_checkpoints/
+Frogmorton/imagesRaw/*.jpg
+Frogmorton/imagesRaw/*.png
+setOCTGN/*/*
+
+macros_copy.xlsm
+setEons.xml
+setExcel.xlsm
+setExcel.xlsx
