@@ -1,5 +1,3 @@
-
-
 useLibrary( 'threads' );
 importPackage( arkham.project );
 importClass( javax.xml.parsers.DocumentBuilderFactory);
@@ -146,15 +144,18 @@ function main( progress, target ) {
 		if (card['Artwork']) {
 			s.set('Portrait-external-path', 'project:imagesRaw/' + card['Artwork']);
 		}
+		s.set('Collection', 'CustomIcon');
 		s.set('Collection-external-path', ('project:imagesIcons/' + card['Set'] + '.png').replace(/ /g, '-'));
 		if (card['Encounter Set']) {
+			s.set('EncounterSet', 'CustomIcon');
 			s.set('EncounterSet-external-path', ('project:imagesIcons/' + card['Encounter Set'] + '.png').replace(/ /g, '-'));
 		}
-		if (card['Quest Encounter Sets']) {
-			s.set('EncounterSet-external-path', ('project:imagesIcons/' + card['Encounter Set'] + '.png').replace(/ /g, '-'));
-		}
+//		if (card['Quest Encounter Sets']) {
+//			s.set('EncounterSet-external-path', ('project:imagesIcons/' + card['Encounter Set'] + '.png').replace(/ /g, '-'));
+//		}
 //		EncounterSet1-external-path
-		s.set('CollectionInfo', '');
+		s.set('CollectionInfo', ' ');
+		s.set('CollectionInfo_en_US', ' ');
 		s.set('Copyright', '©Middle-earth Enterprises ©FFG ©ALeP');
 		// save new .eon file in the 'new' folder
 		var cardnum = parseInt(card['Card Number']);

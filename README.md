@@ -12,8 +12,9 @@ with the cropped artwork is being synced.
 and the `The Lord of the Rings LCG` plugin.  Additionally, install `Bulk Export`, `Developer Tools`
 and `The Lord of the Rings LCG, HD` plugins.
 
-5. Go to plugins folder (`Strange Eons` -> `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`) and
-replace `TheLordOfTheRingsLCG.seext` and `BulkExport.seplugin` with the custom versions from this repo.
+5. Go to plugins folder (`Strange Eons` -> `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`),
+close Strange Eons and replace `TheLordOfTheRingsLCG.seext` and `BulkExport.seplugin` with the custom
+versions from this repo.
 
 6. Install GIMP (https://www.gimp.org/downloads/).
 

@@ -1,6 +1,9 @@
 .ipynb_checkpoints/
 Frogmorton/imagesRaw/*.jpg
 Frogmorton/imagesRaw/*.png
+imagesEons/*.jpg
+imagesEons/*.png
+imagesOCTGN/*/*
 setOCTGN/*/*
 
 macros_copy.xlsm
@@ -8,4 +11,4 @@ setEons.xml
 setExcel.xlsm
 setExcel.xlsx
 setGenerator.seproject
-setGenerator.zip
+*.o8c
