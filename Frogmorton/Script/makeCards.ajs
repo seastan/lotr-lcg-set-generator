@@ -72,7 +72,6 @@ function main( progress, target ) {
 			Console.err.println('\n'+card['Name']);
 			continue;	
 		}
-	//	if (card['Type']!='Rules') continue;
 		if (card['Type']=='Side Quest') {
 			if (card['Encounter Set']) card['Type']='Encounter Side Quest';
 			else card['Type']='Player Side Quest';
@@ -107,7 +106,6 @@ function main( progress, target ) {
 			['ResourceCost','Cost'],
 			['Engagement','Engagement Cost'],
 			['RulesBack','BText'],
-			['Adventure','Set'],
 			['Story','Flavour'],
 			['StoryBack','BFlavour'],
 			['Artist','Artist'],
@@ -116,13 +114,7 @@ function main( progress, target ) {
 			['NameBack','BName'],
 			['Victory','Victory Points'],
 			['OptionRight','Victory Points'],
-			['Template','Sphere'],
-			['',''],
-			['',''],
-			['',''],
-			['',''],
-			['',''],
-			['','']
+			['Template','Sphere']
 		];
 		// change the details in the template card
 		for (let i = 0; i < translate.length; i++) {
@@ -134,11 +126,13 @@ function main( progress, target ) {
 			if (nXml=='Victory Points') vXml = 'VICTORY '+vXml;
 			if (vXml=='-') vXml='minus';
 			if (vXml=='\u2030') vXml='1';
-			if (nXml=='Text' && card['Type']=='Treachery' && card['Traits'] == '') vXml = '\n'+vXml;
+			if (nXml=='Text' &&
+				(['Hero', 'Ally', 'Attachment', 'Event', 'Enemy', 'Location', 'Treachery', 'Objective', 'Objective Ally'].indexOf(card['Type']+'') > -1) &&
+				! card['Traits']) vXml = '\n'+vXml;
 			vXml=markUp(vXml); // make stuff like 'Response' appear bold
 			s.set(nEon,vXml);
 		}
-		// add Keywords to the begging of Rules
+		// add Keywords to the beginning of Rules
 		if (card['Type']=='Rules' && card['Keywords']) s.set('Rules','\n<se>'+card['Keywords']+'</se>\n\n'+s.get('Rules'));
 		else if (card['Keywords']) s.set('Rules',card['Keywords']+'\n\n'+s.get('Rules'));
 		if (card['Artwork']) {
@@ -149,11 +143,14 @@ function main( progress, target ) {
 		if (card['Encounter Set']) {
 			s.set('EncounterSet', 'CustomIcon');
 			s.set('EncounterSet-external-path', ('project:imagesIcons/' + card['Encounter Set'] + '.png').replace(/ /g, '-'));
+			s.set('Adventure', card['Encounter Set']);
 		}
-//		if (card['Quest Encounter Sets']) {
-//			s.set('EncounterSet-external-path', ('project:imagesIcons/' + card['Encounter Set'] + '.png').replace(/ /g, '-'));
-//		}
-//		EncounterSet1-external-path
+		if (card['Quest Encounter Sets']) {
+			var encounterSets = card['Quest Encounter Sets'].split(',');
+			for (let i = 0; i < encounterSets.length; i++) {
+				s.set('EncounterSet' + (i + 1) + '-external-path', ('project:imagesIcons/' + encounterSets[i].trim() + '.png').replace(/ /g, '-'));
+			}
+		}
 		s.set('CollectionInfo', ' ');
 		s.set('CollectionInfo_en_US', ' ');
 		s.set('Copyright', '©Middle-earth Enterprises ©FFG ©ALeP');
