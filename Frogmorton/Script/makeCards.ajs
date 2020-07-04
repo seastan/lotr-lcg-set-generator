@@ -133,8 +133,8 @@ function main( progress, target ) {
 			s.set(nEon,vXml);
 		}
 		// add Keywords to the beginning of Rules
-		if (card['Type']=='Rules' && card['Keywords']) s.set('Rules','\n<se>'+card['Keywords']+'</se>\n\n'+s.get('Rules'));
-		else if (card['Keywords']) s.set('Rules',card['Keywords']+'\n\n'+s.get('Rules'));
+		if (card['Type']=='Rules' && card['Keywords']) s.set('Rules','\n<se>'+card['Keywords']+'</se>\n<vs>\n'+s.get('Rules'));
+		else if (card['Keywords']) s.set('Rules',card['Keywords']+'\n<vs>\n'+s.get('Rules'));
 		if (card['Artwork']) {
 			s.set('Portrait-external-path', 'project:imagesRaw/' + card['Artwork']);
 		}
@@ -152,7 +152,6 @@ function main( progress, target ) {
 			}
 		}
 		s.set('CollectionInfo', ' ');
-		s.set('CollectionInfo_en_US', ' ');
 		s.set('Copyright', '©Middle-earth Ent. ©FFG ©ALeP');
 		// save new .eon file in the 'new' folder
 		var cardnum = parseInt(card['Card Number']);
@@ -193,6 +192,7 @@ function markUp(vXml) {
 	vXml=vXml.replace("\u00ce","<lor>");	
 	vXml=vXml.replace("\u00ca","<spi>");	
 	vXml=vXml.replace("\u00cf","<tac>");	
+	vXml=vXml.replace("\u2030","<uni>");
 	vXml=vXml.replace("[Threat]","<thr>");	
 	vXml=vXml.replace("[Attack]","<att>");	
 	vXml=vXml.replace("[Defense]","<def>");	
@@ -201,6 +201,8 @@ function markUp(vXml) {
 	vXml=vXml.replace("[Lore]","<lor>");	
 	vXml=vXml.replace("[Spirit]","<spi>");	
 	vXml=vXml.replace("[Tactics]","<tac>");
+	vXml=vXml.replace("[Unique]","<uni>");
+	vXml=vXml.replace("\n\n","\n<vs>\n");
 	vXml=vXml.replace("^","<b><i>");	
 	vXml=vXml.replace("*","</i></b>");	
 	vXml=vXml.replace("~","<b>");	
