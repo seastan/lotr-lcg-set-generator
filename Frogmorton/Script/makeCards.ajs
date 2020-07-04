@@ -151,6 +151,12 @@ function main( progress, target ) {
 				s.set('EncounterSet' + (i + 1) + '-external-path', ('project:imagesIcons/' + encounterSets[i].trim() + '.png').replace(/ /g, '-'));
 			}
 		}
+		if (card['Encounter Set Number']) {
+			s.set('EncounterSetNumber', card['Encounter Set Number']);
+		}
+		if (card['Encounter Set Total']) {
+			s.set('EncounterSetTotal', card['Encounter Set Total']);
+		}
 		s.set('CollectionInfo', ' ');
 		s.set('Copyright', '©Middle-earth Ent. ©FFG ©ALeP');
 		// save new .eon file in the 'new' folder
