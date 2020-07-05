@@ -78,95 +78,97 @@ function main( progress, target ) {
 		}
 		if (card['BQuest Points']) card['Quest Points']=card['BQuest Points'];
 		
-		// Create a new .eon file, using the appropriate template in the template folder
-		progress.status = card['Name'];
-		var newCard = ResourceKit.getGameComponentFromFile( getProjectMember('Decks/template/'+card['Type']+'.eon').file, false );
-		var s = newCard.settings;
-		//Console.err.println(s.keySet);
-		var translate = [
-			// Convert from member name in xml file to member name in eon file
-			// [eon,xml]
-			['Threat','Threat'],
-			['Progress','Quest Points'],
-			['Trait','Traits'],
-			['Name','Name'],
-			['Flavour','Flavour'],
-			['Rules','Text'],
-			['Willpower','Willpower'],
-			['Threat','Threat'],
-			['Attack','Attack'],
-			['Defense','Defense'],
-			['HitPoints','Health'],
-			['Unique','Unique'],
-			['Shadow','Shadow'],
-			['Flavour','Flavour'],
-			['CollectionNumber','Card Number'],
-			['ThreatCost','Cost'],
-			['Stage','Cost'],
-			['ResourceCost','Cost'],
-			['Engagement','Engagement Cost'],
-			['RulesBack','BText'],
-			['Story','Flavour'],
-			['StoryBack','BFlavour'],
-			['Artist','Artist'],
-			['ArtistBack','BArtist'],
-			['ConditionBack','BCondition'],
-			['NameBack','BName'],
-			['Victory','Victory Points'],
-			['OptionRight','Victory Points'],
-			['Template','Sphere']
-		];
-		// change the details in the template card
-		for (let i = 0; i < translate.length; i++) {
-			var nEon = translate[i][0];
-			s.set(nEon,'');
-			var nXml = translate[i][1];
-			var vXml = card[nXml];
-			if (!vXml) continue;
-			if (nXml=='Victory Points') vXml = 'VICTORY '+vXml;
-			if (vXml=='-') vXml='minus';
-			if (vXml=='\u2030') vXml='1';
-			if (nXml=='Text' &&
-				(['Hero', 'Ally', 'Attachment', 'Event', 'Enemy', 'Location', 'Treachery', 'Objective', 'Objective Ally'].indexOf(card['Type']+'') > -1) &&
-				! card['Traits']) vXml = '\n'+vXml;
-			vXml=markUp(vXml); // make stuff like 'Response' appear bold
-			s.set(nEon,vXml);
-		}
-		// add Keywords to the beginning of Rules
-		if (card['Type']=='Rules' && card['Keywords']) s.set('Rules','\n<se>'+card['Keywords']+'</se>\n<vs>\n'+s.get('Rules'));
-		else if (card['Keywords']) s.set('Rules',card['Keywords']+'\n<vs>\n'+s.get('Rules'));
-		if (card['Artwork']) {
-			s.set('Portrait-external-path', 'project:imagesRaw/' + card['Artwork']);
-		}
-		s.set('Collection', 'CustomIcon');
-		s.set('Collection-external-path', ('project:imagesIcons/' + card['Set'] + '.png').replace(/ /g, '-'));
-		if (card['Encounter Set']) {
-			s.set('EncounterSet', 'CustomIcon');
-			s.set('EncounterSet-external-path', ('project:imagesIcons/' + card['Encounter Set'] + '.png').replace(/ /g, '-'));
-			s.set('Adventure', card['Encounter Set']);
-		}
-		if (card['Quest Encounter Sets']) {
-			var encounterSets = card['Quest Encounter Sets'].split(',');
-			for (let i = 0; i < encounterSets.length; i++) {
-				s.set('EncounterSet' + (i + 1) + '-external-path', ('project:imagesIcons/' + encounterSets[i].trim() + '.png').replace(/ /g, '-'));
+		for (let j = 0; j < card['Quantity']; j++) {
+			// Create a new .eon file, using the appropriate template in the template folder
+			progress.status = card['Name'];
+			var newCard = ResourceKit.getGameComponentFromFile( getProjectMember('Decks/template/'+card['Type']+'.eon').file, false );
+			var s = newCard.settings;
+			//Console.err.println(s.keySet);
+			var translate = [
+				// Convert from member name in xml file to member name in eon file
+				// [eon,xml]
+				['Threat','Threat'],
+				['Progress','Quest Points'],
+				['Trait','Traits'],
+				['Name','Name'],
+				['Flavour','Flavour'],
+				['Rules','Text'],
+				['Willpower','Willpower'],
+				['Threat','Threat'],
+				['Attack','Attack'],
+				['Defense','Defense'],
+				['HitPoints','Health'],
+				['Unique','Unique'],
+				['Shadow','Shadow'],
+				['Flavour','Flavour'],
+				['CollectionNumber','Card Number'],
+				['ThreatCost','Cost'],
+				['Stage','Cost'],
+				['ResourceCost','Cost'],
+				['Engagement','Engagement Cost'],
+				['RulesBack','BText'],
+				['Story','Flavour'],
+				['StoryBack','BFlavour'],
+				['Artist','Artist'],
+				['ArtistBack','BArtist'],
+				['ConditionBack','BCondition'],
+				['NameBack','BName'],
+				['Victory','Victory Points'],
+				['OptionRight','Victory Points'],
+				['Adventure','Adventure'],
+				['Template','Sphere']
+			];
+			// change the details in the template card
+			for (let k = 0; k < translate.length; k++) {
+				var nEon = translate[k][0];
+				s.set(nEon,'');
+				var nXml = translate[k][1];
+				var vXml = card[nXml];
+				if (!vXml) continue;
+				if (nXml=='Victory Points') vXml = 'VICTORY '+vXml;
+				if (vXml=='-') vXml='minus';
+				if (vXml=='\u2030') vXml='1';
+				if (nXml=='Text' &&
+					(['Hero', 'Ally', 'Attachment', 'Event', 'Enemy', 'Location', 'Treachery', 'Objective', 'Objective Ally'].indexOf(card['Type']+'') > -1) &&
+					! card['Traits']) vXml = '\n'+vXml;
+				vXml=markUp(vXml); // make stuff like 'Response' appear bold
+				s.set(nEon,vXml);
 			}
+			// add Keywords to the beginning of Rules
+			if (card['Type']=='Rules' && card['Keywords']) s.set('Rules','\n<se>'+card['Keywords']+'</se>\n<vs>\n'+s.get('Rules'));
+			else if (card['Keywords']) s.set('Rules',card['Keywords']+'\n<vs>\n'+s.get('Rules'));
+			if (card['Artwork']) {
+				s.set('Portrait-external-path', 'project:imagesRaw/' + card['Artwork']);
+			}
+			s.set('Collection', 'CustomIcon');
+			s.set('Collection-external-path', ('project:imagesIcons/' + card['Set'] + '.png').replace(/ /g, '-'));
+			if (card['Encounter Set']) {
+				s.set('EncounterSet', 'CustomIcon');
+				s.set('EncounterSet-external-path', ('project:imagesIcons/' + card['Encounter Set'] + '.png').replace(/ /g, '-'));
+			}
+			if (card['Quest Encounter Sets']) {
+				var encounterSets = card['Quest Encounter Sets'].split(',');
+				for (let k = 0; k < encounterSets.length; k++) {
+					s.set('EncounterSet' + (k + 1) + '-external-path', ('project:imagesIcons/' + encounterSets[k].trim() + '.png').replace(/ /g, '-'));
+				}
+			}
+			if (card['Encounter Set Number']) {
+				s.set('EncounterSetNumber', parseInt(card['Encounter Set Number']) + j);
+			}
+			if (card['Encounter Set Total']) {
+				s.set('EncounterSetTotal', card['Encounter Set Total']);
+			}
+			s.set('CollectionInfo', ' ');
+			s.set('Copyright', '©Middle-earth Ent. ©FFG ©ALeP');
+			// save new .eon file in the 'new' folder
+			var cardnum = parseInt(card['Card Number']);
+			var zeros = "";
+			if (cardnum<10) zeros = "00";
+			else if (cardnum<100) zeros = "0";
+			var fname = (zeros+card['Card Number']+'-'+(j + 1)+'-'+card['Name']+Array(60).join("-")).substring(0,50)+card['octgn']+'.eon';
+			progress.status = fname;
+			ResourceKit.writeGameComponentToFile( new File( getProjectMember('Decks/new/').file, fname ), newCard );
 		}
-		if (card['Encounter Set Number']) {
-			s.set('EncounterSetNumber', card['Encounter Set Number']);
-		}
-		if (card['Encounter Set Total']) {
-			s.set('EncounterSetTotal', card['Encounter Set Total']);
-		}
-		s.set('CollectionInfo', ' ');
-		s.set('Copyright', '©Middle-earth Ent. ©FFG ©ALeP');
-		// save new .eon file in the 'new' folder
-		var cardnum = parseInt(card['Card Number']);
-		var zeros = "";
-		if (cardnum<10) zeros = "00";
-		else if (cardnum<100) zeros = "0";
-		var fname = (zeros+card['Card Number']+'-'+card['Quantity']+'-'+card['Name']+Array(60).join("-")).substring(0,50)+card['octgn']+'.eon';
-		progress.status = fname;
-		ResourceKit.writeGameComponentToFile( new File( getProjectMember('Decks/new/').file, fname ), newCard );
 	}
 	
 	return;
