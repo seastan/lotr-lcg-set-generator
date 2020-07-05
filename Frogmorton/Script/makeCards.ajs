@@ -77,7 +77,10 @@ function main( progress, target ) {
 			else card['Type']='Player Side Quest';
 		}
 		if (card['BQuest Points']) card['Quest Points']=card['BQuest Points'];
-		
+
+		if ((['Ally', 'Attachment', 'Event', 'Player Side Quest'].indexOf(card['Type']+'') > -1) && card['Quantity'] == 3) {
+			card['Quantity'] = 1;
+		}
 		for (let j = 0; j < card['Quantity']; j++) {
 			// Create a new .eon file, using the appropriate template in the template folder
 			progress.status = card['Name'];
@@ -158,6 +161,9 @@ function main( progress, target ) {
 			if (card['Encounter Set Total']) {
 				s.set('EncounterSetTotal', card['Encounter Set Total']);
 			}
+			if (card['Removed for Easy Mode'] && j >= parseInt(card['Quantity']) - parseInt(card['Removed for Easy Mode'])) {
+				s.set('Template', 'Gold');
+			}
 			s.set('CollectionInfo', ' ');
 			s.set('Copyright', '©Middle-earth Ent. ©FFG ©ALeP');
 			// save new .eon file in the 'new' folder
@@ -165,7 +171,10 @@ function main( progress, target ) {
 			var zeros = "";
 			if (cardnum<10) zeros = "00";
 			else if (cardnum<100) zeros = "0";
-			var fname = (zeros+card['Card Number']+'-'+(j + 1)+'-'+card['Name']+Array(60).join("-")).substring(0,50)+card['octgn']+'.eon';
+			var copies;
+			if ((['Ally', 'Attachment', 'Event', 'Player Side Quest'].indexOf(card['Type']+'') > -1) && card['Quantity'] == 1) copies = 'p';
+			else copies = j + 1;
+			var fname = (zeros+card['Card Number']+'-'+copies+'-'+card['Name']+Array(60).join("-")).substring(0,50)+card['octgn']+'.eon';
 			progress.status = fname;
 			ResourceKit.writeGameComponentToFile( new File( getProjectMember('Decks/new/').file, fname ), newCard );
 		}
