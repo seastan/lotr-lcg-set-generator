@@ -131,15 +131,20 @@ function main( progress, target ) {
 				if (nXml=='Victory Points') vXml = 'VICTORY '+vXml;
 				if (vXml=='-') vXml='minus';
 				if (vXml=='\u2030') vXml='1';
-				if (nXml=='Text' &&
-					(['Hero', 'Ally', 'Attachment', 'Event', 'Enemy', 'Location', 'Treachery', 'Objective', 'Objective Ally'].indexOf(card['Type']+'') > -1) &&
-					! card['Traits']) vXml = '\n'+vXml;
+				if (nXml=='Text') {
+					// add Keywords to the beginning of Rules
+					if (card['Keywords']) {
+						if (card['Type']=='Rules') vXml = '\n<se>' + card['Keywords'] + '</se>\n\n' + vXml;
+						else vXml = card['Keywords'] + '\n\n' + vXml;
+					}
+					if ((['Hero', 'Ally', 'Attachment', 'Event', 'Enemy', 'Location', 'Treachery', 'Objective', 'Objective Ally'
+						].indexOf(card['Type']+'') > -1) && ! card['Traits']) {
+						vXml = '\n'+vXml;
+					}
+				}
 				vXml=markUp(vXml); // make stuff like 'Response' appear bold
 				s.set(nEon,vXml);
 			}
-			// add Keywords to the beginning of Rules
-			if (card['Type']=='Rules' && card['Keywords']) s.set('Rules','\n<se>'+card['Keywords']+'</se>\n<vs>\n'+s.get('Rules'));
-			else if (card['Keywords']) s.set('Rules',card['Keywords']+'\n<vs>\n'+s.get('Rules'));
 			if (card['Artwork']) {
 				s.set('Portrait-external-path', 'project:imagesRaw/' + card['Artwork']);
 			}
