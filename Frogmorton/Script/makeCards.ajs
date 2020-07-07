@@ -69,10 +69,6 @@ function main( progress, target ) {
 			}
 		}
 
-		if (!card['Type']) {
-			Console.err.println('\n' + card['Name']);
-			continue;	
-		}
 		if (card['Type'] == 'Side Quest') {
 			if (card['Encounter Set']) {
 				card['Type'] = 'Encounter Side Quest';
@@ -81,135 +77,189 @@ function main( progress, target ) {
 				card['Type'] = 'Player Side Quest';
 			}
 		}
+		if (card['BType'] == 'Side Quest') {
+			if (card['Encounter Set']) {
+				card['BType'] = 'Encounter Side Quest';
+			}
+			else {
+				card['BType'] = 'Player Side Quest';
+			}
+		}
+
 		if (card['Type'] == 'Quest' && card['BQuest Points']) {
 			card['Quest Points'] = card['BQuest Points'];
 		}
+
 		if (['Ally', 'Attachment', 'Event', 'Player Side Quest'].indexOf(card['Type'] + '') > -1 && card['Quantity'] == 3) {
 			card['Quantity'] = 1;
 		}
 
 		for (let j = 0; j < card['Quantity']; j++) {
-			// Create a new .eon file, using the appropriate template in the template folder
-			progress.status = card['Name'];
-			var newCard = ResourceKit.getGameComponentFromFile(getProjectMember('Decks/template/' + card['Type'] + '.eon').file, false);
-			var s = newCard.settings;
-			var translate = [
-				// Convert from member name in xml file to member name in eon file
-				// [eon,xml]
-				['CollectionNumber', 'Card Number'],
-				['Name', 'Name'],
-				['Unique', 'Unique'],
-				// Type
-				['Template', 'Sphere'],
-				['Trait', 'Traits'],
-				// Keywords
-				['ResourceCost', 'Cost'],
-				['ThreatCost', 'Cost'],
-				['Stage', 'Cost'],
-				['Engagement', 'Engagement Cost'],
-				['Threat', 'Threat'],
-				['Willpower', 'Willpower'],
-				['Attack', 'Attack'],
-				['Defense', 'Defense'],
-				['HitPoints', 'Health'],
-				['Progress', 'Quest Points'],
-				['Victory', 'Victory Points'],
-				['OptionRight', 'Victory Points'],
-				['Rules', 'Text'],
-				['Shadow', 'Shadow'],
-				['Flavour', 'Flavour'],
-				['Story', 'Flavour'],
-				['Artist', 'Artist'],
-				['NameBack', 'BName'],
-				['RulesBack', 'BText'],
-				['StoryBack', 'BFlavour'],
-				['ArtistBack', 'BArtist'],
-				['Adventure', 'Adventure']
-			];
+			var sides = ['front'];
+			if (['Quest', 'Rules'].indexOf(card['Type'] + '') == -1 && card['BName']) {
+				sides.push('back');
+			}
+			for (let s = 0; s < sides.length; s++) {
+				var side = sides[s];
+				var card_name, card_type, translate;
+				if (side == 'front') {
+					card_name = card['Name'];
+					card_name = card['Type'];
+					translate= [
+						// Convert from member name in xml file to member name in eon file
+						// [eon,xml]
+						['CollectionNumber', 'Card Number'],
+						['Name', 'Name'],
+						['Unique', 'Unique'],
+						['Template', 'Sphere'],
+						['Trait', 'Traits'],
+						// Keywords
+						['ResourceCost', 'Cost'],
+						['ThreatCost', 'Cost'],
+						['Stage', 'Cost'],
+						['Engagement', 'Engagement Cost'],
+						['Threat', 'Threat'],
+						['Willpower', 'Willpower'],
+						['Attack', 'Attack'],
+						['Defense', 'Defense'],
+						['HitPoints', 'Health'],
+						['Progress', 'Quest Points'],
+						['Victory', 'Victory Points'],
+						['OptionRight', 'Victory Points'],
+						['Rules', 'Text'],
+						['Shadow', 'Shadow'],
+						['Flavour', 'Flavour'],
+						['Story', 'Flavour'],
+						['Artist', 'Artist'],
+						['NameBack', 'BName'],
+						['RulesBack', 'BText'],
+						['FlavourBack', 'BFlavour'],
+						['StoryBack', 'BFlavour'],
+						['ArtistBack', 'BArtist'],
+						['Adventure', 'Adventure']
+					];
+				}
+				else {
+					card_name = card['BName'];
+					card_name = card['BType'];
+					translate= [
+						// Convert from member name in xml file to member name in eon file
+						// [eon,xml]
+						['CollectionNumber', 'Card Number'],
+						['Name', 'BName'],
+						['Unique', 'BUnique'],
+						['Template', 'BSphere'],
+						['Trait', 'BTraits'],
+						// Keywords
+						['ResourceCost', 'BCost'],
+						['ThreatCost', 'BCost'],
+						['Stage', 'BCost'],
+						['Engagement', 'BEngagement Cost'],
+						['Threat', 'BThreat'],
+						['Willpower', 'BWillpower'],
+						['Attack', 'BAttack'],
+						['Defense', 'BDefense'],
+						['HitPoints', 'BHealth'],
+						['Progress', 'BQuest Points'],
+						['Victory', 'BVictory Points'],
+						['OptionRight', 'BVictory Points'],
+						['Rules', 'BText'],
+						['Shadow', 'BShadow'],
+						['Flavour', 'BFlavour'],
+						['Story', 'Flavour'],
+						['Artist', 'Artist']
+					];
+				}
 
-			// change the details in the template card
-			for (let k = 0; k < translate.length; k++) {
-				var nEon = translate[k][0];
-				s.set(nEon, '');
-				var nXml = translate[k][1];
-				var vXml = card[nXml];
-				if (!vXml) {
-					continue;
-				}
-				if (vXml == '-') {
-					vXml = 'minus';
-				}
-				if (vXml == '\u2030') {
-					vXml = '1';
-				}
-				if (nXml == 'Victory Points') {
-					vXml = 'VICTORY ' + vXml;
-				}
-				if (nXml == 'Text') {
-					if (card['Keywords']) {
-						if (card['Type'] == 'Rules') {
-							vXml = '\n<se>' + card['Keywords'] + '</se>\n\n' + vXml;
+				// Create a new .eon file, using the appropriate template in the template folder
+				progress.status = card_name;
+				var newCard = ResourceKit.getGameComponentFromFile(getProjectMember('Decks/template/' + card_type + '.eon').file, false);
+				var s = newCard.settings;
+
+				// change the details in the template card
+				for (let k = 0; k < translate.length; k++) {
+					var nEon = translate[k][0];
+					s.set(nEon, '');
+					var nXml = translate[k][1];
+					var vXml = card[nXml];
+					if (!vXml) {
+						continue;
+					}
+					if (vXml == '-') {
+						vXml = 'minus';
+					}
+					if (vXml == '\u2030') {
+						vXml = '1';
+					}
+					if (nXml == 'Victory Points') {
+						vXml = 'VICTORY ' + vXml;
+					}
+					if (nXml == 'Text') {
+						if (card['Keywords']) {
+							if (card['Type'] == 'Rules') {
+								vXml = '\n<se>' + card['Keywords'] + '</se>\n\n' + vXml;
+							}
+							else {
+								vXml = card['Keywords'] + '\n\n' + vXml;
+							}
 						}
-						else {
-							vXml = card['Keywords'] + '\n\n' + vXml;
+						if (['Hero', 'Ally', 'Attachment', 'Event', 'Enemy', 'Location', 'Treachery', 'Objective', 'Objective Ally'
+							].indexOf(card['Type'] + '') > -1 && !card['Traits']) {
+							vXml = '\n' + vXml;
 						}
 					}
-					if (['Hero', 'Ally', 'Attachment', 'Event', 'Enemy', 'Location', 'Treachery', 'Objective', 'Objective Ally'
-						].indexOf(card['Type'] + '') > -1 && !card['Traits']) {
-						vXml = '\n' + vXml;
+					vXml = markUp(vXml); // make stuff like 'Response:' appear bold
+					s.set(nEon, vXml);
+				}
+
+				if (card['Type'] == 'Quest') {
+					s.set('NameShare', 0);
+				}
+				if (card['Artwork']) {
+					s.set('Portrait-external-path', 'project:imagesRaw/' + card['Artwork']);
+				}
+				if (card['BArtwork']) {
+					s.set('PortraitBack-external-path', 'project:imagesRaw/' + card['BArtwork']);
+					s.set('PortraitShare', 0);
+				}
+				s.set('Collection', 'CustomIcon');
+				s.set('Collection-external-path', ('project:imagesIcons/' + card['Set'] + '.png').replace(/ /g, '-'));
+				if (card['Encounter Set']) {
+					s.set('EncounterSet', 'CustomIcon');
+					s.set('EncounterSet-external-path', ('project:imagesIcons/' + card['Encounter Set'] + '.png').replace(/ /g, '-'));
+				}
+				if (card['Additional Encounter Sets']) {
+					var encounterSets = card['Additional Encounter Sets'].split(',');
+					for (let k = 0; k < encounterSets.length; k++) {
+						s.set('EncounterSet' + (k + 1) + '-external-path',
+							('project:imagesIcons/' + encounterSets[k].trim() + '.png').replace(/ /g, '-'));
 					}
 				}
-				vXml = markUp(vXml); // make stuff like 'Response:' appear bold
-				s.set(nEon, vXml);
-			}
-
-			if (card['Type'] == 'Quest') {
-				s.set('NameShare', 0);
-			}
-			if (card['Artwork']) {
-				s.set('Portrait-external-path', 'project:imagesRaw/' + card['Artwork']);
-			}
-			if (card['BArtwork']) {
-				s.set('PortraitBack-external-path', 'project:imagesRaw/' + card['BArtwork']);
-				s.set('PortraitShare', 0);
-			}
-			s.set('Collection', 'CustomIcon');
-			s.set('Collection-external-path', ('project:imagesIcons/' + card['Set'] + '.png').replace(/ /g, '-'));
-			if (card['Encounter Set']) {
-				s.set('EncounterSet', 'CustomIcon');
-				s.set('EncounterSet-external-path', ('project:imagesIcons/' + card['Encounter Set'] + '.png').replace(/ /g, '-'));
-			}
-			if (card['Quest Encounter Sets']) {
-				var encounterSets = card['Quest Encounter Sets'].split(',');
-				for (let k = 0; k < encounterSets.length; k++) {
-					s.set('EncounterSet' + (k + 1) + '-external-path',
-						('project:imagesIcons/' + encounterSets[k].trim() + '.png').replace(/ /g, '-'));
+				if (card['Encounter Set Number']) {
+					s.set('EncounterSetNumber', parseInt(card['Encounter Set Number']) + j);
 				}
-			}
-			if (card['Encounter Set Number']) {
-				s.set('EncounterSetNumber', parseInt(card['Encounter Set Number']) + j);
-			}
-			if (card['Encounter Set Total']) {
-				s.set('EncounterSetTotal', card['Encounter Set Total']);
-			}
-			if (card['Removed for Easy Mode'] && j >= parseInt(card['Quantity']) - parseInt(card['Removed for Easy Mode'])) {
-				s.set('Template', 'Gold');
-			}
-			s.set('CollectionInfo', ' ');
-			s.set('Copyright', '©Middle-earth Ent. ©FFG ©ALeP');
+				if (card['Encounter Set Total']) {
+					s.set('EncounterSetTotal', card['Encounter Set Total']);
+				}
+				if (card['Removed for Easy Mode'] && j >= parseInt(card['Quantity']) - parseInt(card['Removed for Easy Mode'])) {
+					s.set('Template', 'Gold');
+				}
+				s.set('CollectionInfo', ' ');
+				s.set('Copyright', '©Middle-earth Ent. ©FFG ©ALeP');
 
-			// save new .eon file in the 'new' folder
-			var copy;
-			if (['Ally', 'Attachment', 'Event', 'Player Side Quest'].indexOf(card['Type'] + '') > -1 && card['Quantity'] == 1) {
-				copy = 'p';
+				// save new .eon file in the 'new' folder
+				var copy;
+				if (['Ally', 'Attachment', 'Event', 'Player Side Quest'].indexOf(card['Type'] + '') > -1 && card['Quantity'] == 1) {
+					copy = 'p';
+				}
+				else {
+					copy = j + 1;
+				}
+				var fname = (Array(4 - (card['Card Number'] + '').length).join('0') + card['Card Number'] + '-' + copy + '-' +
+					card['Name'] + Array(50).join('-')).substring(0, 50) + card['octgn'] + '.eon';
+				progress.status = fname;
+				ResourceKit.writeGameComponentToFile(new File(getProjectMember('Decks/new/').file, fname), newCard);
 			}
-			else {
-				copy = j + 1;
-			}
-			var fname = (Array(4 - (card['Card Number'] + '').length).join('0') + card['Card Number'] + '-' + copy + '-' +
-				card['Name'] + Array(50).join('-')).substring(0, 50) + card['octgn'] + '.eon';
-			progress.status = fname;
-			ResourceKit.writeGameComponentToFile(new File(getProjectMember('Decks/new/').file, fname), newCard);
 		}
 	}
 	return;
