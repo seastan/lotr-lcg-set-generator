@@ -68,85 +68,110 @@ function main( progress, target ) {
 				}
 			}
 		}
+
 		if (!card['Type']) {
-			Console.err.println('\n'+card['Name']);
+			Console.err.println('\n' + card['Name']);
 			continue;	
 		}
-		if (card['Type']=='Side Quest') {
-			if (card['Encounter Set']) card['Type']='Encounter Side Quest';
-			else card['Type']='Player Side Quest';
+		if (card['Type'] == 'Side Quest') {
+			if (card['Encounter Set']) {
+				card['Type'] = 'Encounter Side Quest';
+			}
+			else {
+				card['Type'] = 'Player Side Quest';
+			}
 		}
-		if (card['BQuest Points']) card['Quest Points']=card['BQuest Points'];
-
-		if ((['Ally', 'Attachment', 'Event', 'Player Side Quest'].indexOf(card['Type']+'') > -1) && card['Quantity'] == 3) {
+		if (card['Type'] == 'Quest' && card['BQuest Points']) {
+			card['Quest Points'] = card['BQuest Points'];
+		}
+		if (['Ally', 'Attachment', 'Event', 'Player Side Quest'].indexOf(card['Type'] + '') > -1 && card['Quantity'] == 3) {
 			card['Quantity'] = 1;
 		}
+
 		for (let j = 0; j < card['Quantity']; j++) {
 			// Create a new .eon file, using the appropriate template in the template folder
 			progress.status = card['Name'];
-			var newCard = ResourceKit.getGameComponentFromFile( getProjectMember('Decks/template/'+card['Type']+'.eon').file, false );
+			var newCard = ResourceKit.getGameComponentFromFile(getProjectMember('Decks/template/' + card['Type'] + '.eon').file, false);
 			var s = newCard.settings;
-			//Console.err.println(s.keySet);
 			var translate = [
 				// Convert from member name in xml file to member name in eon file
 				// [eon,xml]
-				['Threat','Threat'],
-				['Progress','Quest Points'],
-				['Trait','Traits'],
-				['Name','Name'],
-				['Flavour','Flavour'],
-				['Rules','Text'],
-				['Willpower','Willpower'],
-				['Threat','Threat'],
-				['Attack','Attack'],
-				['Defense','Defense'],
-				['HitPoints','Health'],
-				['Unique','Unique'],
-				['Shadow','Shadow'],
-				['Flavour','Flavour'],
-				['CollectionNumber','Card Number'],
-				['ThreatCost','Cost'],
-				['Stage','Cost'],
-				['ResourceCost','Cost'],
-				['Engagement','Engagement Cost'],
-				['RulesBack','BText'],
-				['Story','Flavour'],
-				['StoryBack','BFlavour'],
-				['Artist','Artist'],
-				['ArtistBack','BArtist'],
-				['ConditionBack','BCondition'],
-				['NameBack','BName'],
-				['Victory','Victory Points'],
-				['OptionRight','Victory Points'],
-				['Adventure','Adventure'],
-				['Template','Sphere']
+				['CollectionNumber', 'Card Number'],
+				['Name', 'Name'],
+				['Unique', 'Unique'],
+				// Type
+				['Template', 'Sphere'],
+				['Trait', 'Traits'],
+				// Keywords
+				['ResourceCost', 'Cost'],
+				['ThreatCost', 'Cost'],
+				['Stage', 'Cost'],
+				['Engagement', 'Engagement Cost'],
+				['Threat', 'Threat'],
+				['Willpower', 'Willpower'],
+				['Attack', 'Attack'],
+				['Defense', 'Defense'],
+				['HitPoints', 'Health'],
+				['Progress', 'Quest Points'],
+				['Victory', 'Victory Points'],
+				['OptionRight', 'Victory Points'],
+				['Rules', 'Text'],
+				['Shadow', 'Shadow'],
+				['Flavour', 'Flavour'],
+				['Story', 'Flavour'],
+				['Artist', 'Artist'],
+				['NameBack', 'BName'],
+				['RulesBack', 'BText'],
+				['StoryBack', 'BFlavour'],
+				['ArtistBack', 'BArtist'],
+				['Adventure', 'Adventure']
 			];
+
 			// change the details in the template card
 			for (let k = 0; k < translate.length; k++) {
 				var nEon = translate[k][0];
-				s.set(nEon,'');
+				s.set(nEon, '');
 				var nXml = translate[k][1];
 				var vXml = card[nXml];
-				if (!vXml) continue;
-				if (nXml=='Victory Points') vXml = 'VICTORY '+vXml;
-				if (vXml=='-') vXml='minus';
-				if (vXml=='\u2030') vXml='1';
-				if (nXml=='Text') {
-					// add Keywords to the beginning of Rules
+				if (!vXml) {
+					continue;
+				}
+				if (vXml == '-') {
+					vXml = 'minus';
+				}
+				if (vXml == '\u2030') {
+					vXml = '1';
+				}
+				if (nXml == 'Victory Points') {
+					vXml = 'VICTORY ' + vXml;
+				}
+				if (nXml == 'Text') {
 					if (card['Keywords']) {
-						if (card['Type']=='Rules') vXml = '\n<se>' + card['Keywords'] + '</se>\n\n' + vXml;
-						else vXml = card['Keywords'] + '\n\n' + vXml;
+						if (card['Type'] == 'Rules') {
+							vXml = '\n<se>' + card['Keywords'] + '</se>\n\n' + vXml;
+						}
+						else {
+							vXml = card['Keywords'] + '\n\n' + vXml;
+						}
 					}
-					if ((['Hero', 'Ally', 'Attachment', 'Event', 'Enemy', 'Location', 'Treachery', 'Objective', 'Objective Ally'
-						].indexOf(card['Type']+'') > -1) && ! card['Traits']) {
-						vXml = '\n'+vXml;
+					if (['Hero', 'Ally', 'Attachment', 'Event', 'Enemy', 'Location', 'Treachery', 'Objective', 'Objective Ally'
+						].indexOf(card['Type'] + '') > -1 && !card['Traits']) {
+						vXml = '\n' + vXml;
 					}
 				}
-				vXml=markUp(vXml); // make stuff like 'Response' appear bold
-				s.set(nEon,vXml);
+				vXml = markUp(vXml); // make stuff like 'Response:' appear bold
+				s.set(nEon, vXml);
+			}
+
+			if (card['Type'] == 'Quest') {
+				s.set('NameShare', 0);
 			}
 			if (card['Artwork']) {
 				s.set('Portrait-external-path', 'project:imagesRaw/' + card['Artwork']);
+			}
+			if (card['BArtwork']) {
+				s.set('PortraitBack-external-path', 'project:imagesRaw/' + card['BArtwork']);
+				s.set('PortraitShare', 0);
 			}
 			s.set('Collection', 'CustomIcon');
 			s.set('Collection-external-path', ('project:imagesIcons/' + card['Set'] + '.png').replace(/ /g, '-'));
@@ -157,7 +182,8 @@ function main( progress, target ) {
 			if (card['Quest Encounter Sets']) {
 				var encounterSets = card['Quest Encounter Sets'].split(',');
 				for (let k = 0; k < encounterSets.length; k++) {
-					s.set('EncounterSet' + (k + 1) + '-external-path', ('project:imagesIcons/' + encounterSets[k].trim() + '.png').replace(/ /g, '-'));
+					s.set('EncounterSet' + (k + 1) + '-external-path',
+						('project:imagesIcons/' + encounterSets[k].trim() + '.png').replace(/ /g, '-'));
 				}
 			}
 			if (card['Encounter Set Number']) {
@@ -171,65 +197,43 @@ function main( progress, target ) {
 			}
 			s.set('CollectionInfo', ' ');
 			s.set('Copyright', '©Middle-earth Ent. ©FFG ©ALeP');
+
 			// save new .eon file in the 'new' folder
-			var cardnum = parseInt(card['Card Number']);
-			var zeros = "";
-			if (cardnum<10) zeros = "00";
-			else if (cardnum<100) zeros = "0";
-			var copies;
-			if ((['Ally', 'Attachment', 'Event', 'Player Side Quest'].indexOf(card['Type']+'') > -1) && card['Quantity'] == 1) copies = 'p';
-			else copies = j + 1;
-			var fname = (zeros+card['Card Number']+'-'+copies+'-'+card['Name']+Array(60).join("-")).substring(0,50)+card['octgn']+'.eon';
+			var copy;
+			if (['Ally', 'Attachment', 'Event', 'Player Side Quest'].indexOf(card['Type'] + '') > -1 && card['Quantity'] == 1) {
+				copy = 'p';
+			}
+			else {
+				copy = j + 1;
+			}
+			var fname = (Array(4 - (card['Card Number'] + '').length).join('0') + card['Card Number'] + '-' + copy + '-' +
+				card['Name'] + Array(50).join('-')).substring(0, 50) + card['octgn'] + '.eon';
 			progress.status = fname;
-			ResourceKit.writeGameComponentToFile( new File( getProjectMember('Decks/new/').file, fname ), newCard );
+			ResourceKit.writeGameComponentToFile(new File(getProjectMember('Decks/new/').file, fname), newCard);
 		}
 	}
-	
 	return;
 }
 
 function markUp(vXml) { 
-	vXml=vXml.replace("Setup:","<b>Setup</b>:");
-	vXml=vXml.replace("Quest Resolution:","<b>Quest Resolution</b>:");
-	vXml=vXml.replace("Quest Resolution (resolve only once the main quest is defeated):","<b>Quest Resolution</b> (resolve only once the main quest is defeated):");
-	vXml=vXml.replace("When Revealed:","<b>When Revealed</b>:");
-	vXml=vXml.replace("Forced:","<b>Forced</b>:");
-	vXml=vXml.replace("Resource Action:","<b>Resource Action</b>:");
-	vXml=vXml.replace("Planning Action:","<b>Planning Action</b>:");
-	vXml=vXml.replace("Quest Action:","<b>Quest Action</b>:");
-	vXml=vXml.replace("Travel Action:","<b>Travel Action</b>:");
-	vXml=vXml.replace("Encounter Action:","<b>Encounter Action</b>:");
-	vXml=vXml.replace("Combat Action:","<b>Combat Action</b>:");
-	vXml=vXml.replace("Refresh Action:","<b>Refresh Action</b>:");
-	vXml=vXml.replace("Action:","<b>Action</b>:");
-	vXml=vXml.replace("Response:","<b>Response</b>:");
-	vXml=vXml.replace("Travel:","<b>Travel</b>:");
-	vXml=vXml.replace("Condition","<b>Condition</b>");
-	vXml=vXml.replace("Shadow:","<b>Shadow</b>:");
-	vXml=vXml.replace("$","<thr>");	
-	vXml=vXml.replace("\u00db","<att>");	
-	vXml=vXml.replace("\u00da","<def>");	
-	vXml=vXml.replace("\u00d2","<wil>");	
-	vXml=vXml.replace("\u00cc","<lea>");	
-	vXml=vXml.replace("\u00ce","<lor>");	
-	vXml=vXml.replace("\u00ca","<spi>");	
-	vXml=vXml.replace("\u00cf","<tac>");	
-	vXml=vXml.replace("\u2030","<uni>");
-	vXml=vXml.replace("[Threat]","<thr>");	
-	vXml=vXml.replace("[Attack]","<att>");	
-	vXml=vXml.replace("[Defense]","<def>");	
-	vXml=vXml.replace("[Willpower]","<wil>");	
-	vXml=vXml.replace("[Leadership]","<lea>");	
-	vXml=vXml.replace("[Lore]","<lor>");	
-	vXml=vXml.replace("[Spirit]","<spi>");	
-	vXml=vXml.replace("[Tactics]","<tac>");
-	vXml=vXml.replace("[Unique]","<uni>");
-	vXml=vXml.replace("\n\n","\n<vs>\n");
-	vXml=vXml.replace("^","<b><i>");	
-	vXml=vXml.replace("*","</i></b>");	
-	vXml=vXml.replace("~","<b>");	
-	vXml=vXml.replace("%","</b>");
-	vXml=vXml.replace("Custom Set - ","");
+	vXml = (vXml + '').replace(/\bQuest Resolution( \([^\)]+\))?:/g, '<b>Quest Resolution</b>$1:');
+	vXml = vXml.replace(/\b(Resource |Planning |Quest |Travel |Encounter |Combat |Refresh )?Action:/g, '<b>$1Action</b>:');
+	vXml = vXml.replace(/\b(When Revealed|Setup|Forced|Response|Travel|Shadow):/g, '<b>$1</b>:');
+	vXml = vXml.replace(/\bCondition\b/g, '<b><i>Condition</i></b>');
+	vXml = vXml.replace(/\$|\[Threat\]/g, '<thr>');
+	vXml = vXml.replace(/\u00db|\[Attack\]/g, '<att>');	
+	vXml = vXml.replace(/\u00da|\[Defense\]/g, '<def>');	
+	vXml = vXml.replace(/\u00d2|\[Willpower\]/g, '<wil>');	
+	vXml = vXml.replace(/\u00cc|\[Leadership\]/g, '<lea>');	
+	vXml = vXml.replace(/\u00ce|\[Lore\]/g, '<lor>');	
+	vXml = vXml.replace(/\u00ca|\[Spirit\]/g, '<spi>');	
+	vXml = vXml.replace(/\u00cf|\[Tactics\]/g, '<tac>');	
+	vXml = vXml.replace(/\u2030|\[Unique\]/g, '<uni>');
+	vXml = vXml.replace(/\^/g, '<b><i>');
+	vXml = vXml.replace(/\*/g, '</i></b>');
+	vXml = vXml.replace(/~/g, '<b>');
+	vXml = vXml.replace(/%/g, '</b>');
+	vXml = vXml.replace(/\n\n/g, '\n<vs>\n');
 	return vXml;
 }
 
