@@ -90,21 +90,26 @@ function main( progress, target ) {
 			card['Quest Points'] = card['BQuest Points'];
 		}
 
+		var player_copies = false;
 		if (['Ally', 'Attachment', 'Event', 'Player Side Quest'].indexOf(card['Type'] + '') > -1 && card['Quantity'] == 3) {
+			player_copies = true;
 			card['Quantity'] = 1;
 		}
 
 		for (let j = 0; j < card['Quantity']; j++) {
 			var sides = ['front'];
 			if (['Quest', 'Rules'].indexOf(card['Type'] + '') == -1 && card['BName']) {
+				Console.err.println(card['BName']);
 				sides.push('back');
 			}
 			for (let s = 0; s < sides.length; s++) {
 				var side = sides[s];
-				var card_name, card_type, translate;
+				var card_name, card_type, keywords, traits, translate;
 				if (side == 'front') {
 					card_name = card['Name'];
-					card_name = card['Type'];
+					card_type = card['Type'] + '';
+					keywords = card['Keywords'];
+					traits = card['Traits'];
 					translate= [
 						// Convert from member name in xml file to member name in eon file
 						// [eon,xml]
@@ -113,7 +118,6 @@ function main( progress, target ) {
 						['Unique', 'Unique'],
 						['Template', 'Sphere'],
 						['Trait', 'Traits'],
-						// Keywords
 						['ResourceCost', 'Cost'],
 						['ThreatCost', 'Cost'],
 						['Stage', 'Cost'],
@@ -131,17 +135,23 @@ function main( progress, target ) {
 						['Flavour', 'Flavour'],
 						['Story', 'Flavour'],
 						['Artist', 'Artist'],
-						['NameBack', 'BName'],
-						['RulesBack', 'BText'],
-						['FlavourBack', 'BFlavour'],
-						['StoryBack', 'BFlavour'],
-						['ArtistBack', 'BArtist'],
 						['Adventure', 'Adventure']
 					];
+					if (['Quest', 'Rules'].indexOf(card_type) > -1) {
+						translate = translate.concat([
+							['NameBack', 'BName'],
+							['RulesBack', 'BText'],
+							['FlavourBack', 'BFlavour'],
+							['StoryBack', 'BFlavour'],
+							['ArtistBack', 'BArtist']
+						]);
+					}
 				}
 				else {
 					card_name = card['BName'];
-					card_name = card['BType'];
+					card_type = card['BType'] + '';
+					keywords = card['BKeywords'];
+					traits = card['BTraits'];
 					translate= [
 						// Convert from member name in xml file to member name in eon file
 						// [eon,xml]
@@ -150,7 +160,6 @@ function main( progress, target ) {
 						['Unique', 'BUnique'],
 						['Template', 'BSphere'],
 						['Trait', 'BTraits'],
-						// Keywords
 						['ResourceCost', 'BCost'],
 						['ThreatCost', 'BCost'],
 						['Stage', 'BCost'],
@@ -166,8 +175,9 @@ function main( progress, target ) {
 						['Rules', 'BText'],
 						['Shadow', 'BShadow'],
 						['Flavour', 'BFlavour'],
-						['Story', 'Flavour'],
-						['Artist', 'Artist']
+						['Story', 'BFlavour'],
+						['Artist', 'BArtist'],
+						['Adventure', 'Adventure']
 					];
 				}
 
@@ -191,20 +201,20 @@ function main( progress, target ) {
 					if (vXml == '\u2030') {
 						vXml = '1';
 					}
-					if (nXml == 'Victory Points') {
+					if (nXml == 'Victory Points' || nXml == 'BVictory Points') {
 						vXml = 'VICTORY ' + vXml;
 					}
-					if (nXml == 'Text') {
-						if (card['Keywords']) {
-							if (card['Type'] == 'Rules') {
-								vXml = '\n<se>' + card['Keywords'] + '</se>\n\n' + vXml;
+					if (nXml == 'Text' || nXml == 'BText') {
+						if (keywords) {
+							if (card_type == 'Rules') {
+								vXml = '\n<se>' + keywords + '</se>\n\n' + vXml;
 							}
 							else {
-								vXml = card['Keywords'] + '\n\n' + vXml;
+								vXml = keywords + '\n\n' + vXml;
 							}
 						}
 						if (['Hero', 'Ally', 'Attachment', 'Event', 'Enemy', 'Location', 'Treachery', 'Objective', 'Objective Ally'
-							].indexOf(card['Type'] + '') > -1 && !card['Traits']) {
+							].indexOf(card_type) > -1 && !traits) {
 							vXml = '\n' + vXml;
 						}
 					}
@@ -212,15 +222,26 @@ function main( progress, target ) {
 					s.set(nEon, vXml);
 				}
 
-				if (card['Type'] == 'Quest') {
+				if (card_type == 'Rules') {
+					s.set('Flavour', '');
+					s.set('FlavourBack', '');
+				}
+				if (card_type == 'Quest') {
 					s.set('NameShare', 0);
 				}
-				if (card['Artwork']) {
-					s.set('Portrait-external-path', 'project:imagesRaw/' + card['Artwork']);
+				if (side == 'front') {
+					if (card['Artwork']) {
+						s.set('Portrait-external-path', 'project:imagesRaw/' + card['Artwork']);
+					}
+					if (['Quest', 'Rules'].indexOf(card_type) > -1 && card['BArtwork']) {
+						s.set('PortraitBack-external-path', 'project:imagesRaw/' + card['BArtwork']);
+						s.set('PortraitShare', 0);
+					}
 				}
-				if (card['BArtwork']) {
-					s.set('PortraitBack-external-path', 'project:imagesRaw/' + card['BArtwork']);
-					s.set('PortraitShare', 0);
+				else {
+					if (card['BArtwork']) {
+						s.set('Portrait-external-path', 'project:imagesRaw/' + card['BArtwork']);
+					}
 				}
 				s.set('Collection', 'CustomIcon');
 				s.set('Collection-external-path', ('project:imagesIcons/' + card['Set'] + '.png').replace(/ /g, '-'));
@@ -249,14 +270,14 @@ function main( progress, target ) {
 
 				// save new .eon file in the 'new' folder
 				var copy;
-				if (['Ally', 'Attachment', 'Event', 'Player Side Quest'].indexOf(card['Type'] + '') > -1 && card['Quantity'] == 1) {
+				if (player_copies) {
 					copy = 'p';
 				}
 				else {
 					copy = j + 1;
 				}
 				var fname = (Array(4 - (card['Card Number'] + '').length).join('0') + card['Card Number'] + '-' + copy + '-' +
-					card['Name'] + Array(50).join('-')).substring(0, 50) + card['octgn'] + '.eon';
+					card_name + Array(50).join('-')).substring(0, 50) + card['octgn'] + '.eon';
 				progress.status = fname;
 				ResourceKit.writeGameComponentToFile(new File(getProjectMember('Decks/new/').file, fname), newCard);
 			}
