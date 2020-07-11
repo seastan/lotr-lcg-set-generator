@@ -1,3 +1,4 @@
+useLibrary('imageutils');
 useLibrary('threads');
 importPackage(arkham.project);
 importClass(javax.xml.parsers.DocumentBuilderFactory);
@@ -301,13 +302,39 @@ function main(progress, target) {
 					copy = j + 1;
 				}
 				var fname = (Array(4 - (card['Card Number'] + '').length).join('0') + card['Card Number'] + '-' + copy + '-' +
-					card['Name'] + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix + '.eon';
+					card['Name'] + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix;
 				progress.status = fname;
-				ResourceKit.writeGameComponentToFile(new File(getProjectMember('Decks/new/').file, fname), newCard);
+				ResourceKit.writeGameComponentToFile(new File(getProjectMember('Decks/new/').file, fname + '.eon'), newCard);
+				var num_sheets;
+				if (['Quest', 'Rules'].indexOf(card['Type'] + '') > -1) {
+					num_sheets = 2;
+				}
+				else {
+					num_sheets = 1;
+				}
+				exportCard(newCard, fname, num_sheets);
 			}
 		}
 	}
 	return;
+}
+
+function exportCard(card, fname, num_sheets) {
+	// create the sheets that will paint the faces of the component
+	let sheets = card.createDefaultSheets();
+	if (!sheets) {
+		return;
+	}
+
+	// for each sheet, paint it and save it to a file
+	for (let i = 0; i < sheets.length; i++ ) {
+		let bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 300);
+		let file = new File(getProjectMember('Decks/new/').file, fname + '-' + (i + 1) + '.' + ImageUtils.FORMAT_JPEG);
+		ImageUtils.write(bi, file, ImageUtils.FORMAT_JPEG, 0.9, false, 300);
+		if (i + 1 == num_sheets) {
+			break;
+		}
+	}
 }
 
 function markUp(vXml) { 
