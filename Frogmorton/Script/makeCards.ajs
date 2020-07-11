@@ -20,8 +20,8 @@ function main(progress, target) {
 	while (delCards.hasNext()) {
 		delCards.next().deleteFile();
 	}
-	
-	var fXmlFile = new File('setEons.xml');
+
+	var fXmlFile = new File(getProjectMember('XML/').file, 'setEons.xml');
 	Console.err.println('Reading ' + fXmlFile);
 	var dbFactory = DocumentBuilderFactory.newInstance();
 	var dBuilder = dbFactory.newDocumentBuilder();
