@@ -3,7 +3,7 @@
 #longer appear to be a project/task in Strange Eons.
 #Sat May 09 22:53:03 PDT 2020
 first-row=0
-open-folders=/:Cards/:Export/:imagesIcons/:imagesRaw/:Script/:Templates/:XML/
+open-folders=/:Cards/:Export/:Export/jpg300NoBleed/:Export/png300Bleed/:Export/png300NoBleed/:Export/png800Bleed/:imagesIcons/:imagesRaw/:Script/:Templates/:XML/
 res-id=cgj
 notes=
 type=PROJECT

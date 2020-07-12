@@ -21,7 +21,19 @@ function main(progress, target) {
 	while (delCards.hasNext()) {
 		delCards.next().deleteFile();
 	}
-	delCards = project.findChild('Export').iterator();
+	delCards = project.findChild('Export').findChild('jpg300NoBleed').iterator();
+	while (delCards.hasNext()) {
+		delCards.next().deleteFile();
+	}
+	delCards = project.findChild('Export').findChild('png300Bleed').iterator();
+	while (delCards.hasNext()) {
+		delCards.next().deleteFile();
+	}
+	delCards = project.findChild('Export').findChild('png300NoBleed').iterator();
+	while (delCards.hasNext()) {
+		delCards.next().deleteFile();
+	}
+	delCards = project.findChild('Export').findChild('png800Bleed').iterator();
 	while (delCards.hasNext()) {
 		delCards.next().deleteFile();
 	}
@@ -349,8 +361,20 @@ function exportCard(card, fname, num_sheets) {
 	// for each sheet, paint it and save it to a file
 	for (let i = 0; i < sheets.length; i++ ) {
 		let bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 300);
-		let file = new File(getProjectMember('Export/').file, fname + '-' + (i + 1) + '.' + ImageUtils.FORMAT_JPEG);
+		let file = new File(getProjectMember('Export/jpg300NoBleed/').file, fname + '-' + (i + 1) + '.' + ImageUtils.FORMAT_JPEG);
 		ImageUtils.write(bi, file, ImageUtils.FORMAT_JPEG, 0.9, false, 300);
+
+		file = new File(getProjectMember('Export/png300NoBleed/').file, fname + '-' + (i + 1) + '.' + ImageUtils.FORMAT_PNG);
+		ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 300);
+
+		bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 300, true);
+		file = new File(getProjectMember('Export/png300Bleed/').file, fname + '-' + (i + 1) + '.' + ImageUtils.FORMAT_PNG);
+		ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 300);
+
+		bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 800, true);
+		file = new File(getProjectMember('Export/png800Bleed/').file, fname + '-' + (i + 1) + '.' + ImageUtils.FORMAT_PNG);
+		ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 800);
+
 		if (i + 1 == num_sheets) {
 			break;
 		}
