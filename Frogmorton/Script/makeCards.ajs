@@ -162,7 +162,7 @@ function main(progress, target) {
 				else {
 					card_name = card['BName'];
 					card_type = card['BType'] + '';
-					if (['Quest', 'Rules'].indexOf(card_type) != -1) {
+					if (['Quest', 'Rules'].indexOf(card_type) > -1) {
 						Console.err.println('\nIncorrect card type for back side for ' + card['Name'] + ': ' + card_type);
 						continue;	
 					}
@@ -293,7 +293,6 @@ function main(progress, target) {
 				s.set('CollectionInfo', ' ');
 				s.set('Copyright', '©Middle-earth Ent. ©FFG ©ALeP');
 
-				// save new .eon file in the 'new' folder
 				var copy;
 				if (player_copies) {
 					copy = 'p';
@@ -301,8 +300,24 @@ function main(progress, target) {
 				else {
 					copy = j + 1;
 				}
+
+				var back;
+				if (side == 'back') {
+					back = '-';
+				}
+				else if (['Quest', 'Rules'].indexOf(card_type) > -1 || card['BName']) {
+					back = '-';
+				}
+				else if (['Hero', 'Ally', 'Attachment', 'Event', 'Player Side Quest'].indexOf(card_type) > -1 && (keywords + '').search('Encounter.') == -1) {
+					back = 'p';
+				}
+				else {
+					back = 'e';
+				}
+
+				// save new .eon file in the 'new' folder
 				var fname = (Array(4 - (card['Card Number'] + '').length).join('0') + card['Card Number'] + '-' + copy + '-' +
-					card['Name'] + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix;
+					back + '-' + card['Name'] + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix;
 				progress.status = fname;
 				ResourceKit.writeGameComponentToFile(new File(getProjectMember('Decks/new/').file, fname + '.eon'), newCard);
 				var num_sheets;
