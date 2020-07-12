@@ -3,8 +3,8 @@ Frogmorton/imagesRaw/*.jpg
 Frogmorton/imagesRaw/*.png
 Frogmorton/XML/*.xml
 imagesEons/*/*
+Output/OCTGN/*/*
 setEons/*/*
-setOCTGN/*/*
 
 macros_copy.xlsm
 setExcel.xlsm
