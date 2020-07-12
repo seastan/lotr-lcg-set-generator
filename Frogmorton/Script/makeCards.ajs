@@ -37,40 +37,41 @@ function main(progress, target) {
 	//Console.err.println('--------------------------------------');
 	// Loop over cards in set
 	for (let i = 0; i < nList.getLength(); i++) {
+		var nNode = nList.item(i);
+		if (nNode.getAttribute('skip') == '1') {
+			continue;
+		}
+
 		// Create a dictionary called card that contains all the card info in the xml file
 		var card = {};
 		card['Set'] = cardSet;
-		var nNode = nList.item(i);
-		//Console.err.println('\nCurrent Element :' + nNode.getNodeName());
-		if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-			//Console.err.println('\n\tCard id : ' + nNode.getAttribute('id'));
-			card['octgn'] = nNode.getAttribute('id');
-			//Console.err.println('\n\tName : ' + nNode.getAttribute('name'));
-			card['Name'] = nNode.getAttribute('name');
-			var propList = nNode.getElementsByTagName('property');
-			for (let j = 0; j < propList.getLength(); j++) {
-				var nProp = propList.item(j);
-				if (!nProp.getParentNode().isSameNode(nNode)) {
-					continue;
-				}
-				if (nProp && nProp.getNodeType() == Node.ELEMENT_NODE) {
-					//Console.err.println('\n\t' + nProp.getAttribute('name')+': '+nProp.getAttribute('value'));
-					card[nProp.getAttribute('name')] = nProp.getAttribute('value');
-				}
+		//Console.err.println('\n\tCard id : ' + nNode.getAttribute('id'));
+		card['octgn'] = nNode.getAttribute('id');
+		//Console.err.println('\n\tName : ' + nNode.getAttribute('name'));
+		card['Name'] = nNode.getAttribute('name');
+		var propList = nNode.getElementsByTagName('property');
+		for (let j = 0; j < propList.getLength(); j++) {
+			var nProp = propList.item(j);
+			if (!nProp.getParentNode().isSameNode(nNode)) {
+				continue;
 			}
-			var altList = nNode.getElementsByTagName('alternate');
-			for (let k = 0; k < altList.getLength(); k++) {
-				var nAlternate = altList.item(k);
-				if (nAlternate && nAlternate.getNodeType() == Node.ELEMENT_NODE) {
-					//Console.err.println('\n\t\tSide B: ' + nAlternate.getAttribute('name'));
-					card['BName'] = nAlternate.getAttribute('name');
-					var altPropList = nAlternate.getElementsByTagName('property');
-					for (let l = 0; l < altPropList.getLength(); l++) {
-						var nAltProp = altPropList.item(l);
-						if (nAltProp && nAltProp.getNodeType() == Node.ELEMENT_NODE) {
-							//Console.err.println('\n\t\t' + nAltProp.getAttribute('name')+': '+nAltProp.getAttribute('value'));
-							card['B'+nAltProp.getAttribute('name')] = nAltProp.getAttribute('value');
-						}
+			if (nProp && nProp.getNodeType() == Node.ELEMENT_NODE) {
+				//Console.err.println('\n\t' + nProp.getAttribute('name')+': '+nProp.getAttribute('value'));
+				card[nProp.getAttribute('name')] = nProp.getAttribute('value');
+			}
+		}
+		var altList = nNode.getElementsByTagName('alternate');
+		for (let k = 0; k < altList.getLength(); k++) {
+			var nAlternate = altList.item(k);
+			if (nAlternate && nAlternate.getNodeType() == Node.ELEMENT_NODE) {
+				//Console.err.println('\n\t\tSide B: ' + nAlternate.getAttribute('name'));
+				card['BName'] = nAlternate.getAttribute('name');
+				var altPropList = nAlternate.getElementsByTagName('property');
+				for (let l = 0; l < altPropList.getLength(); l++) {
+					var nAltProp = altPropList.item(l);
+					if (nAltProp && nAltProp.getNodeType() == Node.ELEMENT_NODE) {
+						//Console.err.println('\n\t\t' + nAltProp.getAttribute('name')+': '+nAltProp.getAttribute('value'));
+						card['B'+nAltProp.getAttribute('name')] = nAltProp.getAttribute('value');
 					}
 				}
 			}
