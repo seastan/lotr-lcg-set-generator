@@ -337,25 +337,26 @@ function main(progress, target) {
 					back + '-' + card['Name'] + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix;
 				progress.status = fname;
 				ResourceKit.writeGameComponentToFile(new File(getProjectMember('Cards/').file, fname + '.eon'), newCard);
-				var num_sheets;
-				if (['Quest', 'Rules'].indexOf(card['Type'] + '') > -1) {
-					num_sheets = 2;
-				}
-				else {
-					num_sheets = 1;
-				}
-				exportCard(newCard, fname, num_sheets);
+				exportCard(newCard, fname);
 			}
 		}
 	}
 	return;
 }
 
-function exportCard(card, fname, num_sheets) {
+function exportCard(card, fname) {
 	// create the sheets that will paint the faces of the component
 	let sheets = card.createDefaultSheets();
 	if (!sheets) {
 		return;
+	}
+
+	var num_sheets;
+	if (card.getFaceStyle() + '' == 'TWO_FACES') {
+		num_sheets = 2;
+	}
+	else {
+		num_sheets = 1;
 	}
 
 	// for each sheet, paint it and save it to a file
