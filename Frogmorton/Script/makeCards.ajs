@@ -21,22 +21,15 @@ function main(progress, target) {
 	while (delCards.hasNext()) {
 		delCards.next().deleteFile();
 	}
-	delCards = project.findChild('Export').findChild('jpg300NoBleed').iterator();
-	while (delCards.hasNext()) {
-		delCards.next().deleteFile();
+	var subfolders = ['jpg300NoBleed', 'png300Bleed', 'png300NoBleed', 'png800Bleed'];
+	for (let i = 0; i < subfolders.length; i++) {
+		delCards = project.findChild('Export').findChild(subfolders[i]).iterator();
+		while (delCards.hasNext()) {
+			delCards.next().deleteFile();
+		}
 	}
-	delCards = project.findChild('Export').findChild('png300Bleed').iterator();
-	while (delCards.hasNext()) {
-		delCards.next().deleteFile();
-	}
-	delCards = project.findChild('Export').findChild('png300NoBleed').iterator();
-	while (delCards.hasNext()) {
-		delCards.next().deleteFile();
-	}
-	delCards = project.findChild('Export').findChild('png800Bleed').iterator();
-	while (delCards.hasNext()) {
-		delCards.next().deleteFile();
-	}
+
+	var backTypes = ['Quest', 'Rules'];
 
 	var fXmlFile = new File(getProjectMember('XML/').file, 'setEons.xml');
 	Console.err.println('Reading ' + fXmlFile);
@@ -119,23 +112,23 @@ function main(progress, target) {
 			card['Quest Points'] = card['BQuest Points'];
 		}
 
-		var player_copies = false;
+		var playerCopies = false;
 		if (['Ally', 'Attachment', 'Event', 'Player Side Quest'].indexOf(card['Type'] + '') > -1 && card['Quantity'] == 3) {
-			player_copies = true;
+			playerCopies = true;
 			card['Quantity'] = 1;
 		}
 
 		for (let j = 0; j < card['Quantity']; j++) {
 			var sides = ['front'];
-			if (['Quest', 'Rules'].indexOf(card['Type'] + '') == -1 && card['BName']) {
+			if (backTypes.indexOf(card['Type'] + '') == -1 && card['BName']) {
 				sides.push('back');
 			}
 			for (let idx = 0; idx < sides.length; idx++) {
 				var side = sides[idx];
-				var card_name, card_type, keywords, traits, suffix, translate;
+				var cardName, cardType, keywords, traits, suffix, translate;
 				if (side == 'front') {
-					card_name = card['Name'];
-					card_type = card['Type'] + '';
+					cardName = card['Name'];
+					cardType = card['Type'] + '';
 					keywords = card['Keywords'];
 					traits = card['Traits'];
 					suffix = '';
@@ -166,7 +159,7 @@ function main(progress, target) {
 						['Artist', 'Artist'],
 						['Adventure', 'Adventure']
 					];
-					if (['Quest', 'Rules'].indexOf(card_type) > -1) {
+					if (backTypes.indexOf(cardType) > -1) {
 						translate = translate.concat([
 							['NameBack', 'BName'],
 							['RulesBack', 'BText'],
@@ -177,10 +170,10 @@ function main(progress, target) {
 					}
 				}
 				else {
-					card_name = card['BName'];
-					card_type = card['BType'] + '';
-					if (['Quest', 'Rules'].indexOf(card_type) > -1) {
-						Console.err.println('\nIncorrect card type for back side for ' + card['Name'] + ': ' + card_type);
+					cardName = card['BName'];
+					cardType = card['BType'] + '';
+					if (backTypes.indexOf(cardType) > -1) {
+						Console.err.println('\nIncorrect card type for back side for ' + card['Name'] + ': ' + cardType);
 						continue;	
 					}
 					keywords = card['BKeywords'];
@@ -216,8 +209,8 @@ function main(progress, target) {
 				}
 
 				// Create a new .eon file, using the appropriate template in the template folder
-				progress.status = card_name;
-				var newCard = ResourceKit.getGameComponentFromFile(getProjectMember('Templates/' + card_type + '.eon').file, false);
+				progress.status = cardName;
+				var newCard = ResourceKit.getGameComponentFromFile(getProjectMember('Templates/' + cardType + '.eon').file, false);
 				var s = newCard.settings;
 
 				// change the details in the template card
@@ -240,7 +233,7 @@ function main(progress, target) {
 					}
 					if (nXml == 'Text' || nXml == 'BText') {
 						if (keywords) {
-							if (card_type == 'Rules') {
+							if (cardType == 'Rules') {
 								vXml = '\n<se>' + keywords + '</se>\n\n' + vXml;
 							}
 							else {
@@ -248,7 +241,7 @@ function main(progress, target) {
 							}
 						}
 						if (['Hero', 'Ally', 'Attachment', 'Event', 'Enemy', 'Location', 'Treachery', 'Objective', 'Objective Ally'
-							].indexOf(card_type) > -1 && !traits) {
+							].indexOf(cardType) > -1 && !traits) {
 							vXml = '\n' + vXml;
 						}
 					}
@@ -256,21 +249,21 @@ function main(progress, target) {
 					s.set(nEon, vXml);
 				}
 
-				if (card_type == 'Rules') {
+				if (cardType == 'Rules') {
 					s.set('Flavour', '');
 					s.set('FlavourBack', '');
 				}
-				if (['Event', 'Treachery', 'Player Side Quest', 'Encounter Side Quest', 'Quest', 'Rules'].indexOf(card_type) > -1) {
+				if (['Event', 'Treachery', 'Player Side Quest', 'Encounter Side Quest', 'Quest', 'Rules'].indexOf(cardType) > -1) {
 					s.set('Unique', '');
 				}
-				if (card_type == 'Quest') {
+				if (cardType == 'Quest') {
 					s.set('NameShare', 0);
 				}
 				if (side == 'front') {
 					if (card['Artwork']) {
 						s.set('Portrait-external-path', 'project:imagesRaw/' + card['Artwork']);
 					}
-					if (card_type == 'Quest') {
+					if (cardType == 'Quest') {
 						if (card['BArtwork']) {
 							s.set('PortraitBack-external-path', 'project:imagesRaw/' + card['BArtwork']);
 							s.set('PortraitShare', 0);
@@ -311,7 +304,7 @@ function main(progress, target) {
 				s.set('Copyright', '©Middle-earth Ent. ©FFG ©ALeP');
 
 				var copy;
-				if (player_copies) {
+				if (playerCopies) {
 					copy = 'p';
 				}
 				else {
@@ -322,10 +315,10 @@ function main(progress, target) {
 				if (side == 'back') {
 					back = '-';
 				}
-				else if (['Quest', 'Rules'].indexOf(card_type) > -1 || card['BName']) {
+				else if (backTypes.indexOf(cardType) > -1 || card['BName']) {
 					back = '-';
 				}
-				else if (['Hero', 'Ally', 'Attachment', 'Event', 'Player Side Quest'].indexOf(card_type) > -1 && (keywords + '').search('Encounter.') == -1) {
+				else if (['Hero', 'Ally', 'Attachment', 'Event', 'Player Side Quest'].indexOf(cardType) > -1 && (keywords + '').search('Encounter.') == -1) {
 					back = 'p';
 				}
 				else {
@@ -351,12 +344,12 @@ function exportCard(card, fname) {
 		return;
 	}
 
-	var num_sheets;
+	var numSheets;
 	if (card.getFaceStyle() + '' == 'TWO_FACES') {
-		num_sheets = 2;
+		numSheets = 2;
 	}
 	else {
-		num_sheets = 1;
+		numSheets = 1;
 	}
 
 	// for each sheet, paint it and save it to a file
@@ -376,7 +369,7 @@ function exportCard(card, fname) {
 		file = new File(getProjectMember('Export/png800Bleed/').file, fname + '-' + (i + 1) + '.' + ImageUtils.FORMAT_PNG);
 		ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 800);
 
-		if (i + 1 == num_sheets) {
+		if (i + 1 == numSheets) {
 			break;
 		}
 	}
