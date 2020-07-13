@@ -38,6 +38,7 @@ from this repo, click `OK` and then close GIMP.
   - Set `sheet_gdid` (Google Drive ID of the cards spreadsheet).
   - If needed, update `sheet_type` (either `xlsm` or `xlsx`).
   - Set `artwork_path` (local path to the folder with the cropped artwork).
+  - Set `gimp_console_path` (path to GIMP console executable).
 
 11. Open `setGenerator.ipynb` and follow further instructions.
 
