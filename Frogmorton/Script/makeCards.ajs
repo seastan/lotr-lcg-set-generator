@@ -278,6 +278,9 @@ function main(progress, target) {
 						s.set('Portrait-external-path', 'project:imagesRaw/' + card['BArtwork']);
 					}
 				}
+				s.set('#LRL-Illustrator', 'Frog');
+				s.set('Illustrator', 'Frog');
+				s.set('LRL-Illustrator', 'Frog');
 				s.set('Collection', 'CustomIcon');
 				s.set('Collection-external-path', ('project:imagesIcons/' + card['Set'] + '.png').replace(/ /g, '-'));
 				if (card['Encounter Set']) {

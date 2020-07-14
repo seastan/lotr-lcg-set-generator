@@ -30,7 +30,7 @@ from this repo, click `OK` and then close GIMP.
   - Install Python 3.7 (or other Python 3 version), Pip and VirtualEnv.
   - `virtualenv env --python=python3.7`
   - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
-  - `pip install jupyter pylint pyyaml requests xlwings`
+  - `pip install jupyter pylint pyyaml reportlab requests xlwings`
   - `jupyter notebook`
 
 10. Edit `configuration.yaml`:
@@ -69,10 +69,10 @@ For a folder:
 
 From CLI:
 
-`gimp-console-2.10 -i -b "(python-<lowercase script name with dashes>-folder 1 \"<path to input folder>\" \"path to output folder\")"`
+`gimp-console-2.10 -i -b "(python-<lowercase script name with dashes>-folder 1 \"<path to input folder>\" \"path to output folder\")" -b "(gimp-quit 0)"`
 
 For example:
 
-`gimp-console-2.10 -i -b "(python-prepare-makeplayingcards-folder 1 \"Input\" \"Output\")"`
+`gimp-console-2.10 -i -b "(python-prepare-makeplayingcards-folder 1 \"Input\" \"Output\")" -b "(gimp-quit 0)"`
 
 Please note that the name of GIMP console executable on your environment may be slightly different.
