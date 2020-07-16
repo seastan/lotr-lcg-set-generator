@@ -25,7 +25,8 @@ from this repo, click `OK` and then close GIMP.
 
 8. Make sure that macros are enabled in Microsoft Excel.
 
-9. Go to the repo folder.  Either install Anaconda and use it to open a JupyterHub or use VirtualEnv:
+9. Go to the repo folder.  Either use Anaconda to install Python dependenices and open a JupyterHub
+or just use VirtualEnv:
 
   - Install Python 3.7 (or other Python 3 version), Pip and VirtualEnv.
   - `virtualenv env --python=python3.7`
@@ -37,7 +38,7 @@ from this repo, click `OK` and then close GIMP.
 
   - Set `sheet_gdid` (Google Drive ID of the cards spreadsheet).
   - If needed, update `sheet_type` (either `xlsm` or `xlsx`).
-  - Set `artwork_path` (local path to the folder with the cropped artwork).
+  - Set `artwork_path` (local path to the folder with the cropped artwork, don't use any existing folder in this repo).
   - Set `gimp_console_path` (path to GIMP console executable).
 
 11. Open `setGenerator.ipynb` and follow further instructions.
