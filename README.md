@@ -31,7 +31,7 @@ or just use VirtualEnv:
   - Install Python 3.7 (or other Python 3 version), Pip and VirtualEnv.
   - `virtualenv env --python=python3.7`
   - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
-  - `pip install jupyter pylint pyyaml reportlab requests xlwings`
+  - `pip install jupyter py7zr pylint pyyaml reportlab requests xlwings`
   - `jupyter notebook`
 
 10. Edit `configuration.yaml`:
