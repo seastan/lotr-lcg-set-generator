@@ -34,12 +34,14 @@ or just use VirtualEnv:
   - `pip install jupyter py7zr pylint pyyaml reportlab requests xlwings`
   - `jupyter notebook`
 
-10. Edit `configuration.yaml`:
+10. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
-  - Set `sheet_gdid` (Google Drive ID of the cards spreadsheet).
-  - If needed, update `sheet_type` (either `xlsm` or `xlsx`).
-  - Set `artwork_path` (local path to the folder with the cropped artwork, don't use any existing folder in this repo).
-  - Set `gimp_console_path` (path to GIMP console executable).
+  - `sheet_gdid`: Google Drive ID of the cards spreadsheet
+  - `sheet_type`: spreadsheet type, either `xlsm` (default) or `xlsx`
+  - `artwork_path`: local path to the folder with the cropped artwork (don't use for that any existing folder in this repo!)
+  - `gimp_console_path`: path to GIMP console executable
+  - `from_scratch`: whether to generate all cards from scratch (`true`) or to update only the cards, changed since the previous script run (`false`)
+  - `set_ids`: list of set IDs to work on
 
 11. Open `setGenerator.ipynb` and follow further instructions.
 

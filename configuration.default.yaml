@@ -1,0 +1,20 @@
+# Google Drive ID of the cards spreadsheet
+sheet_gdid: ***
+
+# Spreadsheet type, either "xlsm" (default) or "xlsx"
+sheet_type: xlsm
+
+# Local path to the folder with the cropped artwork
+artwork_path: C:\Google Drive\Artwork\
+
+# Path to GIMP console executable
+gimp_console_path: C:\Program Files\GIMP 2\bin\gimp-console-2.10.exe
+
+# Whether to generate all cards from scratch ("true") or to update only
+# the cards, changed since the previous script run ("false")
+from_scratch: true
+
+# List of set IDs to work on
+set_ids:
+  - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f
+  - 17b90ca1-7e3e-4891-99da-954a7833e88e
