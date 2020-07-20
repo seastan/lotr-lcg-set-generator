@@ -42,6 +42,7 @@ or just use VirtualEnv:
   - `gimp_console_path`: path to GIMP console executable
   - `from_scratch`: whether to generate all cards from scratch (`true`) or to update only the cards, changed since the previous script run (`false`)
   - `set_ids`: list of set IDs to work on
+  - `outputs`: list of outputs
 
 11. Open `setGenerator.ipynb` and follow further instructions.
 

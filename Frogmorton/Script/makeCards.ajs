@@ -28,8 +28,25 @@ function run(progress, target, setID) {
 	var doc = dBuilder.parse(fXmlFile);
 	doc.getDocumentElement().normalize();
 	var cardSet = doc.getDocumentElement().getAttribute('name');
-	var nList = doc.getElementsByTagName('card');
 
+	var jpg300NoBleed = false;
+	var png300NoBleed = false;
+	var png300Bleed = false;
+	var png800Bleed = false;
+	if (doc.getDocumentElement().getAttribute('jpg300NoBleed') + '' == '1') {
+		jpg300NoBleed = true;
+	}
+	if (doc.getDocumentElement().getAttribute('png300NoBleed') + '' == '1') {
+		png300NoBleed = true;
+	}
+	if (doc.getDocumentElement().getAttribute('png300Bleed') + '' == '1') {
+		png300Bleed = true;
+	}
+	if (doc.getDocumentElement().getAttribute('png800Bleed') + '' == '1') {
+		png800Bleed = true;
+	}
+
+	var nList = doc.getElementsByTagName('card');
 	for (let i = 0; i < nList.getLength(); i++) {
 		let nNode = nList.item(i);
 		if (nNode.getAttribute('skip') == '1') {
@@ -321,14 +338,14 @@ function run(progress, target, setID) {
 					back + '-' + card['Name'] + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix;
 				progress.status = fname;
 				// ResourceKit.writeGameComponentToFile(new File(getProjectMember('Cards/').file, fname + '.' + setID + '.eon'), newCard);
-				exportCard(newCard, fname, setID);
+				exportCard(newCard, fname, setID, jpg300NoBleed, png300NoBleed, png300Bleed, png800Bleed);
 			}
 		}
 	}
 	return;
 }
 
-function exportCard(card, fname, setID) {
+function exportCard(card, fname, setID, jpg300NoBleed, png300NoBleed, png300Bleed, png800Bleed) {
 	var sheets = card.createDefaultSheets();
 	var numSheets;
 	if (card.getFaceStyle() + '' == 'TWO_FACES') {
@@ -339,20 +356,32 @@ function exportCard(card, fname, setID) {
 	}
 
 	for (let i = 0; i < numSheets; i++ ) {
-		let bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 300);
-		let file = new File(getProjectMember('Export/jpg300NoBleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + ImageUtils.FORMAT_JPEG);
-		ImageUtils.write(bi, file, ImageUtils.FORMAT_JPEG, 0.9, false, 300);
+		let bi;
+		let file;
 
-		file = new File(getProjectMember('Export/png300NoBleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + ImageUtils.FORMAT_PNG);
-		ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 300);
+		if (jpg300NoBleed) {
+			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 300);
+			file = new File(getProjectMember('Export/jpg300NoBleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + ImageUtils.FORMAT_JPEG);
+			ImageUtils.write(bi, file, ImageUtils.FORMAT_JPEG, 0.9, false, 300);
+		}
 
-		bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 300, true);
-		file = new File(getProjectMember('Export/png300Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + ImageUtils.FORMAT_PNG);
-		ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 300);
+		if (png300NoBleed) {
+			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 300);
+			file = new File(getProjectMember('Export/png300NoBleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + ImageUtils.FORMAT_PNG);
+			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 300);
+		}
 
-		bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 800, true);
-		file = new File(getProjectMember('Export/png800Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + ImageUtils.FORMAT_PNG);
-		ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 800);
+		if (png300Bleed) {
+			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 300, true);
+			file = new File(getProjectMember('Export/png300Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + ImageUtils.FORMAT_PNG);
+			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 300);
+		}
+
+		if (png800Bleed) {
+			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 800, true);
+			file = new File(getProjectMember('Export/png800Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + ImageUtils.FORMAT_PNG);
+			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 800);
+		}
 	}
 }
 
