@@ -26,20 +26,20 @@ from this repo, click `OK` and then close GIMP.
 
 9. Go to the repo folder and follow these steps:
 
-    - Install Python 3.7 (or other Python 3 version), Pip and VirtualEnv.
-    - `virtualenv env --python=python3.7`
-    - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
-    - `pip install jupyter py7zr pylint pyyaml reportlab requests xlwings`
+  - Install Python 3.7 (or other Python 3 version), Pip and VirtualEnv.
+  - `virtualenv env --python=python3.7`
+  - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
+  - `pip install jupyter py7zr pylint pyyaml reportlab requests xlwings`
 
 10. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
-    - `sheet_gdid`: Google Drive ID of the cards spreadsheet
-    - `sheet_type`: spreadsheet type, either `xlsm` (default) or `xlsx`
-    - `artwork_path`: local path to the folder with the cropped artwork (don't use for that any existing folder in this repo)
-    - `gimp_console_path`: path to GIMP console executable
-    - `from_scratch`: whether to generate all cards from scratch (`true`) or to update only the cards, changed since the previous script run (`false`)
-    - `set_ids`: list of set IDs to work on
-    - `outputs`: list of outputs
+  - `sheet_gdid`: Google Drive ID of the cards spreadsheet
+  - `sheet_type`: spreadsheet type, either `xlsm` (default) or `xlsx`
+  - `artwork_path`: local path to the folder with the cropped artwork (don't use for that any existing folder in this repo)
+  - `gimp_console_path`: path to GIMP console executable
+  - `from_scratch`: whether to generate all cards from scratch (`true`) or to update only the cards, changed since the previous script run (`false`)
+  - `set_ids`: list of set IDs to work on
+  - `outputs`: list of outputs
 
 **Usage**
 
