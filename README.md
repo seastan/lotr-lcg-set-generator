@@ -26,41 +26,43 @@ from this repo, click `OK` and then close GIMP.
 
 9. Go to the repo folder and follow these steps:
 
-  - Install Python 3.7 (or other Python 3 version), Pip and VirtualEnv.
-  - `virtualenv env --python=python3.7`
-  - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
-  - `pip install jupyter py7zr pylint pyyaml reportlab requests xlwings`
+    - Install Python 3.7 (or other Python 3 version), Pip and VirtualEnv.
+    - `virtualenv env --python=python3.7`
+    - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
+    - `pip install jupyter py7zr pylint pyyaml reportlab requests xlwings`
 
 10. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
-  - `sheet_gdid`: Google Drive ID of the cards spreadsheet
-  - `sheet_type`: spreadsheet type, either `xlsm` (default) or `xlsx`
-  - `artwork_path`: local path to the folder with the cropped artwork (don't use for that any existing folder in this repo)
-  - `gimp_console_path`: path to GIMP console executable
-  - `from_scratch`: whether to generate all cards from scratch (`true`) or to update only the cards, changed since the previous script run (`false`)
-  - `set_ids`: list of set IDs to work on
-  - `outputs`: list of outputs
+    - `sheet_gdid`: Google Drive ID of the cards spreadsheet
+    - `sheet_type`: spreadsheet type, either `xlsm` (default) or `xlsx`
+    - `artwork_path`: local path to the folder with the cropped artwork (don't use for that any existing folder in this repo)
+    - `gimp_console_path`: path to GIMP console executable
+    - `from_scratch`: whether to generate all cards from scratch (`true`) or to update only the cards, changed since the previous script run (`false`)
+    - `set_ids`: list of set IDs to work on
+    - `outputs`: list of outputs
 
-11. To run the workflow, go to the repo folder and follow these steps:
+**Usage**
 
-  - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
-  - `python run_before_se.py`
-  - Open `setGenerator.seproject` in Strange Eons and run `Script/makeCards` script by double clicking it.
-    Once completed, close Strange Eons (wait until it finished packing the project).
-  - `python run_after_se.py`
+To run the workflow, go to the repo folder and follow these steps:
 
-  For debugging purposes you can also run these steps using the Jupyter notebook:
+    - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
+    - `python run_before_se.py`
+    - Open `setGenerator.seproject` in Strange Eons and run `Script/makeCards` script by double clicking it.
+      Once completed, close Strange Eons (wait until it finished packing the project).
+    - `python run_after_se.py`
 
-  - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
-  - `jupyter notebook`
-  - Open `setGenerator.ipynb` in the browser.
+For debugging purposes you can also run these steps using the Jupyter notebook:
 
-  Now there should be the following outputs:
+    - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
+    - `jupyter notebook`
+    - Open `setGenerator.ipynb` in the browser.
 
-  - `Output/DB/<set name>/`: 300 dpi JPG images for general purposes.
-  - `Output/MakePlayingCards/<set name>`: `zip` and `7z` archives of 800 dpi PNG images to be printed on MakePlayingCards.com.
-  - `Output/OCTGN/<octgnid>/:` `set.xml` and `o8c` image pack (300 dpi JPG) for OCTGN.  Add the latter using the "Add Image Packs" button from within OCTGN.
-  - `Output/PDF/<set name>/`: PDF files in `A4` and `letter` format for home printing.
+Now there should be the following outputs:
+
+    - `Output/DB/<set name>/`: 300 dpi JPG images for general purposes.
+    - `Output/MakePlayingCards/<set name>`: `zip` and `7z` archives of 800 dpi PNG images to be printed on MakePlayingCards.com.
+    - `Output/OCTGN/<octgnid>/:` `set.xml` and `o8c` image pack (300 dpi JPG) for OCTGN.  Add the latter using the "Add Image Packs" button from within OCTGN.
+    - `Output/PDF/<set name>/`: PDF files in `A4` and `letter` format for home printing.
 
 **GIMP Plugins**
 
