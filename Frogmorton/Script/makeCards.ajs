@@ -1,13 +1,13 @@
 useLibrary('imageutils');
 useLibrary('threads');
 importPackage(arkham.project);
-importClass(javax.xml.parsers.DocumentBuilderFactory);
-importClass(javax.xml.parsers.DocumentBuilder);
-importClass(org.w3c.dom.Document);
-importClass(org.w3c.dom.NodeList);
-importClass(org.w3c.dom.Node);
-importClass(org.w3c.dom.Element);
 importClass(java.io.File);
+importClass(javax.xml.parsers.DocumentBuilder);
+importClass(javax.xml.parsers.DocumentBuilderFactory);
+importClass(org.w3c.dom.Document);
+importClass(org.w3c.dom.Element);
+importClass(org.w3c.dom.Node);
+importClass(org.w3c.dom.NodeList);
 
 Thread.busyWindow(main, 'Updating cards...', true);
 
@@ -56,9 +56,7 @@ function run(progress, target, setID) {
 		// Create a dictionary called card that contains all the card info in the xml file
 		let card = {};
 		card['Set'] = cardSet;
-		//Console.err.println('\n\tCard id : ' + nNode.getAttribute('id'));
 		card['octgn'] = nNode.getAttribute('id');
-		//Console.err.println('\n\tName : ' + nNode.getAttribute('name'));
 		card['Name'] = nNode.getAttribute('name');
 		var propList = nNode.getElementsByTagName('property');
 		for (let j = 0; j < propList.getLength(); j++) {
@@ -67,7 +65,6 @@ function run(progress, target, setID) {
 				continue;
 			}
 			if (nProp && nProp.getNodeType() == Node.ELEMENT_NODE) {
-				//Console.err.println('\n\t' + nProp.getAttribute('name')+': '+nProp.getAttribute('value'));
 				card[nProp.getAttribute('name')] = nProp.getAttribute('value');
 			}
 		}
@@ -75,13 +72,11 @@ function run(progress, target, setID) {
 		for (let k = 0; k < altList.getLength(); k++) {
 			let nAlternate = altList.item(k);
 			if (nAlternate && nAlternate.getNodeType() == Node.ELEMENT_NODE) {
-				//Console.err.println('\n\t\tSide B: ' + nAlternate.getAttribute('name'));
 				card['BName'] = nAlternate.getAttribute('name');
 				let altPropList = nAlternate.getElementsByTagName('property');
 				for (let l = 0; l < altPropList.getLength(); l++) {
 					let nAltProp = altPropList.item(l);
 					if (nAltProp && nAltProp.getNodeType() == Node.ELEMENT_NODE) {
-						//Console.err.println('\n\t\t' + nAltProp.getAttribute('name')+': '+nAltProp.getAttribute('value'));
 						card['B'+nAltProp.getAttribute('name')] = nAltProp.getAttribute('value');
 					}
 				}
@@ -251,7 +246,7 @@ function run(progress, target, setID) {
 							vXml = '\n' + vXml;
 						}
 					}
-					vXml = markUp(vXml); // make stuff like 'Response:' appear bold
+					vXml = markUp(vXml);
 					s.set(nEon, vXml);
 				}
 
@@ -284,9 +279,6 @@ function run(progress, target, setID) {
 						s.set('Portrait-external-path', 'project:imagesRaw/' + card['BArtwork']);
 					}
 				}
-				s.set('#LRL-Illustrator', 'Frog');
-				s.set('Illustrator', 'Frog');
-				s.set('LRL-Illustrator', 'Frog');
 				s.set('Collection', 'CustomIcon');
 				s.set('Collection-external-path', ('project:imagesIcons/' + card['Set'] + '.png').replace(/ /g, '-'));
 				if (card['Encounter Set']) {

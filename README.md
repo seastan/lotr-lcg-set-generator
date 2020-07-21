@@ -45,7 +45,7 @@ from this repo, click `OK` and then close GIMP.
 
   - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
   - `python run_before_se.py`
-  - Open `setGenerator.seproject` generated above in Strange Eons and run `Script/makeCards` script by double clicking it.
+  - Open `setGenerator.seproject` in Strange Eons and run `Script/makeCards` script by double clicking it.
     Once completed, close Strange Eons (wait until it finished packing the project).
   - `python run_after_se.py`
 

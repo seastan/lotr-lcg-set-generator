@@ -5,6 +5,7 @@ import os
 from gimpfu import (gimp, pdb, register, main, PF_IMAGE, PF_DRAWABLE,
                     PF_DIRNAME, ROTATE_90, ROTATE_270)
 
+
 def _get_filename_backside(img):
     """ Determine card side and output file name.
     """
@@ -14,6 +15,7 @@ def _get_filename_backside(img):
     back_side = file_name.endswith('-Back-Face') or file_name.endswith('-2')
     file_name = file_name + '.png'
     return (file_name, back_side)
+
 
 def _get_rotation(drawable):
     """ Determine whether an image should be rotated or not.
@@ -25,6 +27,7 @@ def _get_rotation(drawable):
                 or (drawable.width == 2800 and drawable.height == 2000)
                 or (drawable.width == 3000 and drawable.height == 2200))
     return rotation
+
 
 def _get_mpc_clip_size(drawable):
     """ Determine MakePlayingCards clip size.
@@ -43,6 +46,7 @@ def _get_mpc_clip_size(drawable):
 
     return size
 
+
 def _get_pdf_margin_size(drawable):
     """ Determine PDF bleed margin size.
     """
@@ -60,6 +64,7 @@ def _get_pdf_margin_size(drawable):
 
     return size
 
+
 def _rotate(drawable, back_side):
     """ Rotate an image.
     """
@@ -72,6 +77,7 @@ def _rotate(drawable, back_side):
                                               drawable.width / 2,
                                               drawable.width / 2)
 
+
 def _clip(img, drawable, size):
     """ Clip an image.
     """
@@ -81,6 +87,7 @@ def _clip(img, drawable, size):
         pdb.gimp_image_resize(img, new_width, new_height, -size, -size)
         pdb.gimp_layer_resize(drawable, new_width, new_height, -size, -size)
 
+
 def _add_margin(img, drawable, size):
     """ Add bleed margin to an image.
     """
@@ -89,6 +96,7 @@ def _add_margin(img, drawable, size):
         new_height = drawable.height + 2 * size
         pdb.gimp_image_resize(img, new_width, new_height, size, size)
         pdb.gimp_layer_resize(drawable, new_width, new_height, size, size)
+
 
 def _iterate_folder(input_folder, output_folder, func):
     """ Apply a given function to a folder of images.
@@ -101,6 +109,7 @@ def _iterate_folder(input_folder, output_folder, func):
                                  file_name)
         drawable = img.layers[0]
         func(img, drawable, output_folder)
+
 
 def prepare_pdf_front(img, drawable, output_folder):
     """ Prepare a front image for PDF document.
@@ -130,6 +139,7 @@ def prepare_pdf_front(img, drawable, output_folder):
                       0, 9, 1, 0, 0, 1, 1)
     pdb.gimp_undo_push_group_end(img)
 
+
 def prepare_pdf_back(img, drawable, output_folder):
     """ Prepare a back image for PDF document.
     """
@@ -156,6 +166,7 @@ def prepare_pdf_back(img, drawable, output_folder):
                       0, 9, 1, 0, 0, 1, 1)
     pdb.gimp_undo_push_group_end(img)
 
+
 def prepare_makeplayingcards(img, drawable, output_folder):
     """ Prepare an image for MakePlayingCards printing.
     """
@@ -180,12 +191,14 @@ def prepare_makeplayingcards(img, drawable, output_folder):
                       0, 9, 1, 0, 0, 1, 1)
     pdb.gimp_undo_push_group_end(img)
 
+
 def prepare_pdf_front_folder(input_folder, output_folder):
     """ Prepare a folder of front images for PDF document.
     """
     gimp.progress_init(
         'Prepare a folder of front images for PDF document...')
     _iterate_folder(input_folder, output_folder, prepare_pdf_front)
+
 
 def prepare_pdf_back_folder(input_folder, output_folder):
     """ Prepare a folder of back images for PDF document.
@@ -194,12 +207,14 @@ def prepare_pdf_back_folder(input_folder, output_folder):
         'Prepare a folder of back images for PDF document...')
     _iterate_folder(input_folder, output_folder, prepare_pdf_back)
 
+
 def prepare_makeplayingcards_folder(input_folder, output_folder):
     """ Prepare a folder of images for MakePlayingCards printing.
     """
     gimp.progress_init(
         'Prepare a folder of images for MakePlayingCards printing...')
     _iterate_folder(input_folder, output_folder, prepare_makeplayingcards)
+
 
 register(
     'python_prepare_pdf_front',
