@@ -45,24 +45,24 @@ from this repo, click `OK` and then close GIMP.
 
 To run the workflow, go to the repo folder and follow these steps:
 
-    - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
-    - `python run_before_se.py`
-    - Open `setGenerator.seproject` in Strange Eons and run `Script/makeCards` script by double clicking it.
-      Once completed, close Strange Eons (wait until it finished packing the project).
-    - `python run_after_se.py`
+  - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
+  - `python run_before_se.py`
+  - Open `setGenerator.seproject` in Strange Eons and run `Script/makeCards` script by double clicking it.
+    Once completed, close Strange Eons (wait until it finished packing the project).
+  - `python run_after_se.py`
 
 For debugging purposes you can also run these steps using the Jupyter notebook:
 
-    - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
-    - `jupyter notebook`
-    - Open `setGenerator.ipynb` in the browser.
+  - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
+  - `jupyter notebook`
+  - Open `setGenerator.ipynb` in the browser.
 
 Now there should be the following outputs:
 
-    - `Output/DB/<set name>/`: 300 dpi JPG images for general purposes.
-    - `Output/MakePlayingCards/<set name>`: `zip` and `7z` archives of 800 dpi PNG images to be printed on MakePlayingCards.com.
-    - `Output/OCTGN/<octgnid>/:` `set.xml` and `o8c` image pack (300 dpi JPG) for OCTGN.  Add the latter using the "Add Image Packs" button from within OCTGN.
-    - `Output/PDF/<set name>/`: PDF files in `A4` and `letter` format for home printing.
+  - `Output/DB/<set name>/`: 300 dpi JPG images for general purposes.
+  - `Output/MakePlayingCards/<set name>`: `zip` and `7z` archives of 800 dpi PNG images to be printed on MakePlayingCards.com.
+  - `Output/OCTGN/<octgnid>/:` `set.xml` and `o8c` image pack (300 dpi JPG) for OCTGN.  Add the latter using the "Add Image Packs" button from within OCTGN.
+  - `Output/PDF/<set name>/`: PDF files in `A4` and `letter` format for home printing.
 
 **GIMP Plugins**
 
