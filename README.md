@@ -11,12 +11,11 @@ completely, you will need to download updates to that folder manually.
 with the cropped artwork is being synced.
 
 4. Install the latest available version of Strange Eons (https://strangeeons.cgjennings.ca/download.html)
-and the `The Lord of the Rings LCG` plugin.  Additionally, install `Bulk Export`, `Developer Tools`
-and `The Lord of the Rings LCG, HD` plugins.
+and the `The Lord of the Rings LCG` plugin.  Then, install `The Lord of the Rings LCG, HD` plugin
+as well.
 
 5. Go to plugins folder (`Strange Eons` -> `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`),
-close Strange Eons and replace `TheLordOfTheRingsLCG.seext` and `BulkExport.seplugin` with the custom
-versions from this repo.
+close Strange Eons and replace `TheLordOfTheRingsLCG.seext` with the custom version from this repo.
 
 6. Install GIMP (https://www.gimp.org/downloads/).
 
@@ -25,27 +24,43 @@ from this repo, click `OK` and then close GIMP.
 
 8. Make sure that macros are enabled in Microsoft Excel.
 
-9. Go to the repo folder.  Either use Anaconda to install Python dependenices and open a JupyterHub
-or just use VirtualEnv:
+9. Go to the repo folder and follow these steps:
 
   - Install Python 3.7 (or other Python 3 version), Pip and VirtualEnv.
   - `virtualenv env --python=python3.7`
   - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
   - `pip install jupyter py7zr pylint pyyaml reportlab requests xlwings`
-  - `jupyter notebook`
 
 10. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
   - `sheet_gdid`: Google Drive ID of the cards spreadsheet
   - `sheet_type`: spreadsheet type, either `xlsm` (default) or `xlsx`
-  - `artwork_path`: local path to the folder with the cropped artwork (don't use for that any existing folder in this repo!)
+  - `artwork_path`: local path to the folder with the cropped artwork (don't use for that any existing folder in this repo)
   - `gimp_console_path`: path to GIMP console executable
   - `from_scratch`: whether to generate all cards from scratch (`true`) or to update only the cards, changed since the previous script run (`false`)
   - `set_ids`: list of set IDs to work on
   - `outputs`: list of outputs
 
-11. Open `setGenerator.ipynb` and follow further instructions.
+11. To run the workflow, go to the repo folder and follow these steps:
 
+  - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
+  - `python run_before_se.py`
+  - Open `setGenerator.seproject` generated above in Strange Eons and run `Script/makeCards` script by double clicking it.
+    Once completed, close Strange Eons (wait until it finished packing the project).
+  - `python run_after_se.py`
+
+  For debugging purposes you can also run these steps using the Jupyter notebook:
+
+  - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
+  - `jupyter notebook`
+  - Open `setGenerator.ipynb` in the browser.
+
+  Now there should be the following outputs:
+
+  - `Output/DB/<set name>/`: 300 dpi JPG images for general purposes.
+  - `Output/MakePlayingCards/<set name>`: `zip` and `7z` archives of 800 dpi PNG images to be printed on MakePlayingCards.com.
+  - `Output/OCTGN/<octgnid>/:` `set.xml` and `o8c` image pack (300 dpi JPG) for OCTGN.  Add the latter using the "Add Image Packs" button from within OCTGN.
+  - `Output/PDF/<set name>/`: PDF files in `A4` and `letter` format for home printing.
 
 **GIMP Plugins**
 

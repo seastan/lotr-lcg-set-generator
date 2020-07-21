@@ -1,4 +1,4 @@
-"""LotR ALeP workflow.
+""" Helper functions for LotR ALeP workflow.
 """
 import hashlib
 import math
