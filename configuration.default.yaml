@@ -26,3 +26,5 @@ outputs:
   - pdf
   - makeplayingcards_zip
   - makeplayingcards_7z
+  - drivethrucards_zip
+  - drivethrucards_7z

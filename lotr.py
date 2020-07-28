@@ -34,6 +34,7 @@ MACROS_PATH = 'macros.xlsm'
 MACROS_COPY_PATH = 'macros_copy.xlsm'
 OCTGN_ZIP_PATH = 'imagesOCTGN/a21af4e8-be4b-4cda-a6b6-534f9717391f/Sets'
 OUTPUT_DB_PATH = os.path.join('Output', 'DB')
+OUTPUT_DTC_PATH = os.path.join('Output', 'DriveThruCards')
 OUTPUT_MPC_PATH = os.path.join('Output', 'MakePlayingCards')
 OUTPUT_OCTGN_PATH = os.path.join('Output', 'OCTGN')
 OUTPUT_PDF_PATH = os.path.join('Output', 'PDF')
@@ -118,6 +119,11 @@ def read_conf():
     if ('makeplayingcards_zip' in conf['outputs']
             or 'makeplayingcards_7z' in conf['outputs']):
         conf['outputs'].add('makeplayingcards')
+
+    if ('drivethrucards_zip' in conf['outputs']
+            or 'drivethrucards_7z' in conf['outputs']):
+        conf['outputs'].add('drivethrucards')
+
 
     return conf
 
@@ -246,6 +252,8 @@ def _set_outputs(conf, root):
 
     if 'pdf' in conf['outputs']:
         root.set('png300NoBleed', '1')
+
+    if 'pdf' in conf['outputs'] or 'drivethrucards' in conf['outputs']:
         root.set('png300Bleed', '1')
 
     if 'makeplayingcards' in conf['outputs']:
@@ -542,6 +550,39 @@ def generate_png800_bleedmpc(conf, set_id, skip_ids):
     _clear_folder(TEMP_PATH)
 
 
+def generate_png300_bleeddtc(conf, set_id, skip_ids):
+    """ Generate images for DriveThruCards outputs for the set.
+    """
+    print('  Generating images for DriveThruCards outputs')
+    output_path = os.path.join(IMAGES_EONS_PATH, 'png300BleedDTC', set_id)
+    _create_folder(output_path)
+    _clear_modified_images(output_path, skip_ids)
+    _clear_folder(TEMP_PATH)
+
+    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+        filelist = [f for f in zip_obj.namelist()
+                    if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
+                                                  'png300Bleed'))
+                    and f.split('.')[-1] == 'png'
+                    and f.split('.')[-2] == set_id]
+        for filename in filelist:
+            output_filename = _update_zip_filename(filename)
+            with zip_obj.open(filename) as zip_file:
+                with open(os.path.join(TEMP_PATH, output_filename),
+                          'wb') as output_file:
+                    shutil.copyfileobj(zip_file, output_file)
+
+    cmd = GIMP_COMMAND.format(
+        conf['gimp_console_path'],
+        'python-prepare-drivethrucards-folder',
+        TEMP_PATH.replace('\\', '\\\\'),
+        output_path.replace('\\', '\\\\'))
+    res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+    print('    {}'.format(res))
+
+    _clear_folder(TEMP_PATH)
+
+
 def generate_db(set_id, set_name):
     """ Generate DB outputs for the set.
     """
@@ -690,8 +731,8 @@ def generate_pdf(set_id, set_name):  # pylint: disable=R0914
         canvas.save()
 
 
-def _generate_mpc(input_path, obj):
-    """ Generate MakePlayingCards outputs in the given format.
+def _generate_mpc_dtc(input_path, obj, official_back):
+    """ Generate MakePlayingCards/DriveThruCards outputs in the given format.
     """
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
@@ -703,11 +744,15 @@ def _generate_mpc(input_path, obj):
                                      '{}-2.png'.format('-'.join(parts[:-1])))
             if not os.path.exists(back_path):
                 if parts[2] == 'p':
-                    back_path = os.path.join(IMAGES_BACK_PATH,
-                                             'playerBackUnofficialMPC.png')
+                    back_path = os.path.join(
+                        IMAGES_BACK_PATH,
+                        official_back and 'playerBackOfficialDTC.png'
+                        or 'playerBackUnofficialMPC.png')
                 elif parts[2] == 'e':
-                    back_path = os.path.join(IMAGES_BACK_PATH,
-                                             'encounterBackUnofficialMPC.png')
+                    back_path = os.path.join(
+                        IMAGES_BACK_PATH,
+                        official_back and 'encounterBackOfficialDTC.png'
+                        or 'encounterBackUnofficialMPC.png')
                 else:
                     print('Missing card back for {}, removing the file'
                           .format(filename))
@@ -758,7 +803,7 @@ def generate_mpc_zip(set_id, set_name):
 
     with zipfile.ZipFile(
             os.path.join(output_path, '{}.zip'.format(set_name)), 'w') as obj:
-        _generate_mpc(input_path, obj)
+        _generate_mpc_dtc(input_path, obj, False)
 
 
 def generate_mpc_7z(set_id, set_name):
@@ -771,4 +816,30 @@ def generate_mpc_7z(set_id, set_name):
 
     with py7zr.SevenZipFile(
             os.path.join(output_path, '{}.7z'.format(set_name)), 'w') as obj:
-        _generate_mpc(input_path, obj)
+        _generate_mpc_dtc(input_path, obj, False)
+
+
+def generate_dtc_zip(set_id, set_name):
+    """ Generate DriveThruCards zip outputs for the set.
+    """
+    print('  Generating DriveThruCards zip outputs')
+    input_path = os.path.join(IMAGES_EONS_PATH, 'png300BleedDTC', set_id)
+    output_path = os.path.join(OUTPUT_DTC_PATH, set_name)
+    _create_folder(output_path)
+
+    with zipfile.ZipFile(
+            os.path.join(output_path, '{}.zip'.format(set_name)), 'w') as obj:
+        _generate_mpc_dtc(input_path, obj, True)
+
+
+def generate_dtc_7z(set_id, set_name):
+    """ Generate DriveThruCards 7z outputs for the set.
+    """
+    print('  Generating DriveThruCards 7z outputs')
+    input_path = os.path.join(IMAGES_EONS_PATH, 'png300BleedDTC', set_id)
+    output_path = os.path.join(OUTPUT_DTC_PATH, set_name)
+    _create_folder(output_path)
+
+    with py7zr.SevenZipFile(
+            os.path.join(output_path, '{}.7z'.format(set_name)), 'w') as obj:
+        _generate_mpc_dtc(input_path, obj, True)

@@ -20,6 +20,8 @@ def main():
             lotr.generate_png300_pdf(conf, set_id, skip_ids)
         if 'makeplayingcards' in conf['outputs']:
             lotr.generate_png800_bleedmpc(conf, set_id, skip_ids)
+        if 'drivethrucards' in conf['outputs']:
+            lotr.generate_png300_bleeddtc(conf, set_id, skip_ids)
 
         if 'db' in conf['outputs']:
             lotr.generate_db(set_id, set_name)
@@ -31,6 +33,10 @@ def main():
             lotr.generate_mpc_zip(set_id, set_name)
         if 'makeplayingcards_7z' in conf['outputs']:
             lotr.generate_mpc_7z(set_id, set_name)
+        if 'drivethrucards_zip' in conf['outputs']:
+            lotr.generate_dtc_zip(set_id, set_name)
+        if 'drivethrucards_7z' in conf['outputs']:
+            lotr.generate_dtc_7z(set_id, set_name)
 
     print('Done')
 
