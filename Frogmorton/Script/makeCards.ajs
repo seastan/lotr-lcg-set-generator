@@ -157,7 +157,7 @@ function run(progress, target, setID) {
 						['Shadow', 'Shadow'],
 						['Flavour', 'Flavour'],
 						['Story', 'Flavour'],
-						['Artist', 'Artist'],
+						['Artist-external', 'Artist'],
 						['Adventure', 'Adventure']
 					];
 					if (backTypes.indexOf(cardType) > -1) {
@@ -166,7 +166,7 @@ function run(progress, target, setID) {
 							['RulesBack', 'BText'],
 							['FlavourBack', 'BFlavour'],
 							['StoryBack', 'BFlavour'],
-							['ArtistBack', 'BArtist']
+							['ArtistBack-external', 'BArtist']
 						]);
 					}
 				}
@@ -204,7 +204,7 @@ function run(progress, target, setID) {
 						['Shadow', 'BShadow'],
 						['Flavour', 'BFlavour'],
 						['Story', 'BFlavour'],
-						['Artist', 'BArtist'],
+						['Artist-external', 'BArtist'],
 						['Adventure', 'Adventure']
 					];
 				}
@@ -231,6 +231,9 @@ function run(progress, target, setID) {
 					}
 					if (nXml == 'Victory Points' || nXml == 'BVictory Points') {
 						vXml = 'VICTORY ' + vXml;
+					}
+					if (nXml == 'Artist' || nXml == 'BArtist') {
+						vXml = 'Illus. ' + vXml;
 					}
 					if (nXml == 'Text' || nXml == 'BText') {
 						if (keywords) {
