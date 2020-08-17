@@ -1,0 +1,14 @@
+.ipynb_checkpoints/
+__pycache__/
+Frogmorton/imagesRaw/*.jpg
+Frogmorton/imagesRaw/*.png
+Frogmorton/XML/*.xml
+imagesEons/*/*/*
+Output/*/*/*
+setEons/*/*
+Temp/*.png
+
+macros_copy.xlsm
+setExcel.xlsm
+setExcel.xlsx
+setGenerator.seproject
