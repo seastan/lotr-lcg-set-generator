@@ -19,7 +19,7 @@ def main():
         for lang in conf['languages']:
             print('Processing set {} ({}):'.format(set_name, lang))
             lotr.backup_previous_xml(conf, set_id, lang)
-            lotr.generate_xml(conf, set_row, lang)
+            lotr.generate_xml(conf, set_id, set_row, lang)
             lotr.update_xml(conf, set_id, lang)
             lotr.calculate_hashes(set_id, lang)
             lotr.copy_raw_images(conf, set_id, lang)

@@ -18,12 +18,9 @@ from reportlab.lib.pagesizes import landscape, letter, A4
 from reportlab.lib.units import inch
 from reportlab.pdfgen.canvas import Canvas
 
-CARDS_RANGE = 'A2:AU1001'
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 PROJECT_FOLDER = 'Frogmorton'
-SET_IDS_ROWS = (3, 102)
 SHEET_NAME = 'setExcel'
-TRANSLATED_RANGES = ['2:1001', '2:1001', '2:1001', '2:1001', '2:1001', '2:1001']
 
 CONFIGURATION_PATH = 'configuration.yaml'
 IMAGES_BACK_PATH = 'imagesBack'
@@ -165,7 +162,7 @@ def get_sets(conf):
         try:
             sets = []
             sheet = xlwb.sheets['Sets']
-            for row in range(*SET_IDS_ROWS):
+            for row in range(3, 103):
                 set_id = sheet.range((row, 1)).value
                 if set_id and set_id in conf['set_ids']:
                     sets.append((set_id, sheet.range((row, 2)).value, row))
@@ -212,9 +209,9 @@ def _run_macro(conf, set_row, callback):
                 xlwb_target.sheets['Sets'].range('A3:C3').value = data
 
                 card_sheet = xlwb_target.sheets['Card Data']
-                data = xlwb_source.sheets['Card Data'].range(CARDS_RANGE).value
-                card_sheet.range(CARDS_RANGE).value = data
-                card_sheet.range(CARDS_RANGE).api.Sort(
+                data = xlwb_source.sheets['Card Data'].range('A2:AU1001').value
+                card_sheet.range('A2:AU1001').value = data
+                card_sheet.range('A2:AU1001').api.Sort(
                     Key1=card_sheet.range('Set').api,
                     Order1=xw.constants.SortOrder.xlAscending,
                     Key2=card_sheet.range('CardNumber').api,
@@ -240,11 +237,32 @@ def generate_octgn_xml(conf, set_name, set_row):
     _run_macro(conf, set_row, _callback)
 
 
-def generate_xml(conf, set_row, lang):
+def generate_xml(conf, set_id, set_row, lang):
     """ Generate xml file for Strange Eons.
     """
-    def _callback(_, xlwb_target):
-#        if lang != 'English':
+    def _callback(xlwb_source, xlwb_target):
+        if lang != 'English':
+            translated = []
+            tr_sheet = xlwb_source.sheets[lang]
+            for source_row in range(2, 1002):
+                if tr_sheet.range((source_row, 1)).value == set_id:
+                    card_id = tr_sheet.range((source_row, 2)).value
+                    if card_id:
+                        translated.append((card_id, source_row))
+
+            tr_ranges = ['G{}:G{}', 'K{}:L{}', 'V{}:X{}', 'Z{}:Z{}',
+                         'AD{}:AE{}', 'AO{}:AQ{}', 'AU{}:AU{}']
+            api = xlwb_target.sheets['Card Data'].api
+            card_sheet = xlwb_target.sheets['Card Data']
+            for card_id, source_row in translated:
+                cell = api.UsedRange.Find(card_id)
+                if cell:
+                    target_row = cell.row
+                    for tr_range in tr_ranges:
+                        source_range = tr_range.format(source_row, source_row)
+                        target_range = tr_range.format(target_row, target_row)
+                        data = tr_sheet.range(source_range).value
+                        card_sheet.range(target_range).value = data
 
         xlwb_target.sheets['Sets'].range('D3').value = lang
         xlwb_target.macro('SaveXML')()
@@ -372,9 +390,9 @@ def update_xml(conf, set_id, lang):  # pylint: disable=R0914
 
 
 def calculate_hashes(set_id, lang):
-    """ Update the Strange Eons xml file with hashes and skip flag.
+    """ Update the Strange Eons xml file with hashes and skip flags.
     """
-    print('  Updating the Strange Eons xml file with hashes and skip flag')
+    print('  Updating the Strange Eons xml file with hashes and skip flags')
     new_path = os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id, lang))
     tree = ET.parse(new_path)
     root = tree.getroot()
