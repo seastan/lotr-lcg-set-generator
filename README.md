@@ -39,6 +39,7 @@ from this repo, click `OK` and then close GIMP.
   - `gimp_console_path`: path to GIMP console executable
   - `from_scratch`: whether to generate all cards from scratch (`true`) or to update only the cards, changed since the previous script run (`false`)
   - `set_ids`: list of set IDs to work on
+  - `languages`: list of languages
   - `outputs`: list of outputs
 
 **Usage**

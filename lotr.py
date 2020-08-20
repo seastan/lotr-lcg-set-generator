@@ -21,9 +21,9 @@ from reportlab.pdfgen.canvas import Canvas
 CARDS_RANGE = 'A2:AU1001'
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 PROJECT_FOLDER = 'Frogmorton'
-SET_EONS_NAME = 'setEons.xml'
 SET_IDS_ROWS = (3, 102)
 SHEET_NAME = 'setExcel'
+TRANSLATED_RANGES = ['2:1001', '2:1001', '2:1001', '2:1001', '2:1001', '2:1001']
 
 CONFIGURATION_PATH = 'configuration.yaml'
 IMAGES_BACK_PATH = 'imagesBack'
@@ -57,7 +57,7 @@ def _clear_folder(folder):
 
 
 def _get_artwork_path(conf, set_id):
-    """ Get path to the folder with the cropped artwork for the set.
+    """ Get path to the folder with the cropped artwork.
     """
     artwork_path = os.path.join(conf['artwork_path'], set_id)
     if not os.path.exists(artwork_path):
@@ -124,7 +124,6 @@ def read_conf():
             or 'drivethrucards_7z' in conf['outputs']):
         conf['outputs'].add('drivethrucards')
 
-
     return conf
 
 
@@ -159,16 +158,21 @@ def get_sets(conf):
     print('Getting all sets to work on')
     sheet_path = os.path.join(SHEET_ROOT_PATH,
                               '{}.{}'.format(SHEET_NAME, conf['sheet_type']))
-    xlwb = xw.Book(sheet_path)
+
+    excel_app = xw.App(visible=False, add_book=False)
     try:
-        sets = []
-        sheet = xlwb.sheets['Sets']
-        for row in range(*SET_IDS_ROWS):
-            set_id = sheet.range((row, 1)).value
-            if set_id and set_id in conf['set_ids']:
-                sets.append((set_id, sheet.range((row, 2)).value, row))
+        xlwb = excel_app.books.open(sheet_path)
+        try:
+            sets = []
+            sheet = xlwb.sheets['Sets']
+            for row in range(*SET_IDS_ROWS):
+                set_id = sheet.range((row, 1)).value
+                if set_id and set_id in conf['set_ids']:
+                    sets.append((set_id, sheet.range((row, 2)).value, row))
+        finally:
+            xlwb.close()
     finally:
-        xlwb.close()
+        excel_app.quit()
 
     if not sets:
         print('No sets found')
@@ -176,13 +180,13 @@ def get_sets(conf):
     return sets
 
 
-def backup_previous_xml(conf, set_id):
-    """ Backup a previous Strange Eons xml file for the set.
+def backup_previous_xml(conf, set_id, lang):
+    """ Backup a previous Strange Eons xml file.
     """
     print('  Backing up a previous Strange Eons xml file')
-    new_path = os.path.join(SET_EONS_PATH, set_id, SET_EONS_NAME)
-    old_path = os.path.join(SET_EONS_PATH, set_id,
-                            '{}.old'.format(SET_EONS_NAME))
+    new_path = os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id, lang))
+    old_path = os.path.join(SET_EONS_PATH, '{}.{}.xml.old'.format(set_id,
+                                                                  lang))
     if os.path.exists(new_path):
         shutil.move(new_path, old_path)
 
@@ -190,43 +194,63 @@ def backup_previous_xml(conf, set_id):
         os.remove(old_path)
 
 
-def generate_xml(conf, set_row):
-    """ Generate xml files for StrangeEons and OCTGN for the set.
-
-    Copy the data over to sheet that contains the macros, and run the macros.
-    This will create two xml files with the card data.  One is setEons.xml,
-    needed by Strange Eons.  The second is set.xml and required by OCTGN.
+def _run_macro(conf, set_row, callback):
+    """ Prepare a context to run an Excel macro and execute the callback.
     """
-    print('  Generating xml files for StrangeEons and OCTGN')
     shutil.copyfile(MACROS_PATH, MACROS_COPY_PATH)
     sheet_path = os.path.join(SHEET_ROOT_PATH,
                               '{}.{}'.format(SHEET_NAME, conf['sheet_type']))
 
-    xlwb1 = xw.Book(sheet_path)
+    excel_app = xw.App(visible=False, add_book=False)
     try:
-        xlwb2 = xw.Book(MACROS_COPY_PATH)
+        xlwb_source = excel_app.books.open(sheet_path)
         try:
-            data = xlwb1.sheets['Sets'].range(
-                'A{}:B{}'.format(set_row, set_row)).value  # pylint: disable=W1308
-            xlwb2.sheets['Sets'].range('A3:B3').value = data
+            xlwb_target = excel_app.books.open(MACROS_COPY_PATH)
+            try:
+                data = xlwb_source.sheets['Sets'].range(
+                    'A{}:C{}'.format(set_row, set_row)).value  # pylint: disable=W1308
+                xlwb_target.sheets['Sets'].range('A3:C3').value = data
 
-            card_sheet = xlwb2.sheets['Card Data']
-            data = xlwb1.sheets['Card Data'].range(CARDS_RANGE).value
-            card_sheet.range(CARDS_RANGE).value = data
+                card_sheet = xlwb_target.sheets['Card Data']
+                data = xlwb_source.sheets['Card Data'].range(CARDS_RANGE).value
+                card_sheet.range(CARDS_RANGE).value = data
+                card_sheet.range(CARDS_RANGE).api.Sort(
+                    Key1=card_sheet.range('Set').api,
+                    Order1=xw.constants.SortOrder.xlAscending,
+                    Key2=card_sheet.range('CardNumber').api,
+                    Order2=xw.constants.SortOrder.xlAscending)
 
-            card_sheet.range(CARDS_RANGE).api.Sort(
-                Key1=card_sheet.range('Set').api,
-                Order1=xw.constants.SortOrder.xlAscending,
-                Key2=card_sheet.range('CardNumber').api,
-                Order2=xw.constants.SortOrder.xlAscending)
-
-            xlwb2.macro('SaveOCTGN')()
-            xlwb2.macro('SaveXML')()
-            xlwb2.save()
+                callback(xlwb_source, xlwb_target)
+                xlwb_target.save()
+            finally:
+                xlwb_target.close()
         finally:
-            xlwb2.close()
+            xlwb_source.close()
     finally:
-        xlwb1.close()
+        excel_app.quit()
+
+
+def generate_octgn_xml(conf, set_name, set_row):
+    """ Generate set.xml file for OCTGN.
+    """
+    def _callback(_, xlwb_target):
+        xlwb_target.macro('SaveOCTGN')()
+
+    print('Generating set.xml file for OCTGN for set {}'.format(set_name))
+    _run_macro(conf, set_row, _callback)
+
+
+def generate_xml(conf, set_row, lang):
+    """ Generate xml file for Strange Eons.
+    """
+    def _callback(_, xlwb_target):
+#        if lang != 'English':
+
+        xlwb_target.sheets['Sets'].range('D3').value = lang
+        xlwb_target.macro('SaveXML')()
+
+    print('  Generating xml file for Strange Eons')
+    _run_macro(conf, set_row, _callback)
 
 
 def _collect_artwork_images(artwork_path):
@@ -273,13 +297,13 @@ def _get_property(parent, name):
     return prop
 
 
-def update_xml(conf, set_id):  # pylint: disable=R0914
-    """ Update the Strange Eons xml file for the set with additional data.
+def update_xml(conf, set_id, lang):  # pylint: disable=R0914
+    """ Update the Strange Eons xml file with additional data.
     """
     print('  Updating the Strange Eons xml file with additional data')
     artwork_path = _get_artwork_path(conf, set_id)
     images = _collect_artwork_images(artwork_path)
-    xml_path = os.path.join(SET_EONS_PATH, set_id, SET_EONS_NAME)
+    xml_path = os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id, lang))
 
     tree = ET.parse(xml_path)
     root = tree.getroot()
@@ -347,11 +371,11 @@ def update_xml(conf, set_id):  # pylint: disable=R0914
     tree.write(xml_path)
 
 
-def calculate_hashes(set_id):
-    """ Update the Strange Eons xml file for the set with hashes and skip flag.
+def calculate_hashes(set_id, lang):
+    """ Update the Strange Eons xml file with hashes and skip flag.
     """
     print('  Updating the Strange Eons xml file with hashes and skip flag')
-    new_path = os.path.join(SET_EONS_PATH, set_id, SET_EONS_NAME)
+    new_path = os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id, lang))
     tree = ET.parse(new_path)
     root = tree.getroot()
 
@@ -361,8 +385,8 @@ def calculate_hashes(set_id):
                    ).encode()).hexdigest()
         card.set('hash', card_hash)
 
-    old_path = os.path.join(SET_EONS_PATH, set_id,
-                            '{}.old'.format(SET_EONS_NAME))
+    old_path = os.path.join(SET_EONS_PATH, '{}.{}.xml.old'.format(set_id,
+                                                                  lang))
     if os.path.exists(old_path):
         old_hashes = {}
         skip_ids = set()
@@ -380,20 +404,22 @@ def calculate_hashes(set_id):
     tree.write(new_path)
 
 
-def copy_raw_images(conf, set_id):
-    """ Copy raw image files for the set into the project folder.
+def copy_raw_images(conf, set_id, lang):
+    """ Copy raw image files into the project folder.
     """
     print('  Copying raw image files into the project folder')
     artwork_path = _get_artwork_path(conf, set_id)
-    tree = ET.parse(os.path.join(SET_EONS_PATH, set_id, SET_EONS_NAME))
+    tree = ET.parse(os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id,
+                                                                   lang)))
     root = tree.getroot()
     for card in root[0]:
         if card.attrib.get('skip') != '1':
             filename = _find_properties(card, 'Artwork')
             if filename:
                 filename = filename[0].attrib['value']
-                shutil.copyfile(os.path.join(artwork_path, filename),
-                                os.path.join(IMAGES_RAW_PATH, filename))
+                path = os.path.join(IMAGES_RAW_PATH, filename)
+                if not os.path.exists(path):
+                    shutil.copyfile(os.path.join(artwork_path, filename), path)
 
             alternate = [a for a in card if a.attrib.get('type') == 'B']
             if alternate:
@@ -401,16 +427,19 @@ def copy_raw_images(conf, set_id):
                 filename = _find_properties(alternate, 'Artwork')
                 if filename:
                     filename = filename[0].attrib['value']
-                    shutil.copyfile(os.path.join(artwork_path, filename),
-                                    os.path.join(IMAGES_RAW_PATH, filename))
+                    path = os.path.join(IMAGES_RAW_PATH, filename)
+                    if not os.path.exists(path):
+                        shutil.copyfile(os.path.join(artwork_path, filename),
+                                        path)
 
 
-def copy_xml(set_id):
+def copy_xml(set_id, lang):
     """ Copy the Strange Eons xml file into the project.
     """
-    print('  Copying the Strange Eons xml file for the set into the project')
-    shutil.copyfile(os.path.join(SET_EONS_PATH, set_id, SET_EONS_NAME),
-                    os.path.join(XML_PATH, '{}.xml'.format(set_id)))
+    print('  Copying the Strange Eons xml file into the project')
+    shutil.copyfile(os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id,
+                                                                   lang)),
+                    os.path.join(XML_PATH, '{}.{}.xml'.format(set_id, lang)))
 
 
 def create_project():
@@ -423,12 +452,13 @@ def create_project():
                 zip_obj.write(os.path.join(root, filename))
 
 
-def get_skip_cards(set_id):
-    """ Get cards for the set to skip.
+def get_skip_cards(set_id, lang):
+    """ Get cards to skip.
     """
     print('  Getting cards to skip')
     skip_ids = set()
-    tree = ET.parse(os.path.join(SET_EONS_PATH, set_id, SET_EONS_NAME))
+    tree = ET.parse(os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id,
+                                                                   lang)))
     root = tree.getroot()
     for card in root[0]:
         if card.attrib.get('skip') == '1':
@@ -438,7 +468,7 @@ def get_skip_cards(set_id):
 
 
 def generate_jpg300_nobleed(set_id, skip_ids):
-    """ Generate images for DB and OCTGN outputs for the set.
+    """ Generate images for DB and OCTGN outputs.
     """
     print('  Generating images for DB and OCTGN outputs')
     output_path = os.path.join(IMAGES_EONS_PATH, 'jpg300NoBleed', set_id)
@@ -460,7 +490,7 @@ def generate_jpg300_nobleed(set_id, skip_ids):
 
 
 def generate_png300_pdf(conf, set_id, skip_ids):
-    """ Generate images for PDF outputs for the set.
+    """ Generate images for PDF outputs.
     """
     print('  Generating images for PDF outputs')
     output_path = os.path.join(IMAGES_EONS_PATH, 'png300PDF', set_id)
@@ -518,7 +548,7 @@ def generate_png300_pdf(conf, set_id, skip_ids):
 
 
 def generate_png800_bleedmpc(conf, set_id, skip_ids):
-    """ Generate images for MakePlayingCards outputs for the set.
+    """ Generate images for MakePlayingCards outputs.
     """
     print('  Generating images for MakePlayingCards outputs')
     output_path = os.path.join(IMAGES_EONS_PATH, 'png800BleedMPC', set_id)
@@ -551,7 +581,7 @@ def generate_png800_bleedmpc(conf, set_id, skip_ids):
 
 
 def generate_png300_bleeddtc(conf, set_id, skip_ids):
-    """ Generate images for DriveThruCards outputs for the set.
+    """ Generate images for DriveThruCards outputs.
     """
     print('  Generating images for DriveThruCards outputs')
     output_path = os.path.join(IMAGES_EONS_PATH, 'png300BleedDTC', set_id)
@@ -584,7 +614,7 @@ def generate_png300_bleeddtc(conf, set_id, skip_ids):
 
 
 def generate_db(set_id, set_name):
-    """ Generate DB outputs for the set.
+    """ Generate DB outputs.
     """
     print('  Generating DB outputs')
     input_path = os.path.join(IMAGES_EONS_PATH, 'jpg300NoBleed', set_id)
@@ -611,16 +641,16 @@ def generate_db(set_id, set_name):
         break
 
 
-def generate_octgn(set_id):
-    """ Generate OCTGN outputs for the set.
+def generate_octgn(set_id, set_name):
+    """ Generate OCTGN outputs.
     """
     print('  Generating OCTGN outputs')
     input_path = os.path.join(IMAGES_EONS_PATH, 'jpg300NoBleed', set_id)
-    output_path = os.path.join(OUTPUT_OCTGN_PATH, set_id)
+    output_path = os.path.join(OUTPUT_OCTGN_PATH, set_name)
     _create_folder(output_path)
 
     known_filenames = set()
-    pack_path = os.path.join(output_path, 'imagePack_{}.o8c'.format(set_id))
+    pack_path = os.path.join(output_path, '{}.o8c'.format(set_name))
     with zipfile.ZipFile(pack_path, 'w', zipfile.ZIP_DEFLATED) as zip_obj:
         for _, _, filenames in os.walk(input_path):
             for filename in filenames:
@@ -681,7 +711,7 @@ def _collect_pdf_images(input_path):
 
 
 def generate_pdf(set_id, set_name):  # pylint: disable=R0914
-    """ Generate PDF outputs for the set.
+    """ Generate PDF outputs.
     """
     print('  Generating PDF outputs')
     input_path = os.path.join(IMAGES_EONS_PATH, 'png300PDF', set_id)
@@ -794,7 +824,7 @@ def _generate_mpc_dtc(input_path, obj, official_back):
 
 
 def generate_mpc_zip(set_id, set_name):
-    """ Generate MakePlayingCards zip outputs for the set.
+    """ Generate MakePlayingCards zip outputs.
     """
     print('  Generating MakePlayingCards zip outputs')
     input_path = os.path.join(IMAGES_EONS_PATH, 'png800BleedMPC', set_id)
@@ -807,7 +837,7 @@ def generate_mpc_zip(set_id, set_name):
 
 
 def generate_mpc_7z(set_id, set_name):
-    """ Generate MakePlayingCards 7z outputs for the set.
+    """ Generate MakePlayingCards 7z outputs.
     """
     print('  Generating MakePlayingCards 7z outputs')
     input_path = os.path.join(IMAGES_EONS_PATH, 'png800BleedMPC', set_id)
@@ -820,7 +850,7 @@ def generate_mpc_7z(set_id, set_name):
 
 
 def generate_dtc_zip(set_id, set_name):
-    """ Generate DriveThruCards zip outputs for the set.
+    """ Generate DriveThruCards zip outputs.
     """
     print('  Generating DriveThruCards zip outputs')
     input_path = os.path.join(IMAGES_EONS_PATH, 'png300BleedDTC', set_id)
@@ -833,7 +863,7 @@ def generate_dtc_zip(set_id, set_name):
 
 
 def generate_dtc_7z(set_id, set_name):
-    """ Generate DriveThruCards 7z outputs for the set.
+    """ Generate DriveThruCards 7z outputs.
     """
     print('  Generating DriveThruCards 7z outputs')
     input_path = os.path.join(IMAGES_EONS_PATH, 'png300BleedDTC', set_id)

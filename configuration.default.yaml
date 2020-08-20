@@ -19,6 +19,12 @@ set_ids:
   - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f
   - 17b90ca1-7e3e-4891-99da-954a7833e88e
 
+# List of languages
+languages:
+  - English
+  - German
+  - Spanish
+
 # List of outputs
 outputs:
   - db
