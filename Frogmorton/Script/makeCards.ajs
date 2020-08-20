@@ -10,23 +10,24 @@ importClass(org.w3c.dom.Node);
 importClass(org.w3c.dom.NodeList);
 
 var translate = {};
-translate['Ally'] = {'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado'};
-translate['Attachment'] = {'German': 'Verst\u00e4rkung', 'Spanish': 'Vinculada'};
-translate['Contract'] = {'German': 'Abkommen', 'Spanish': 'T.B.D.'};
-translate['Encounter Side Quest'] = {'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria de Encuentro'};
-translate['Enemy'] = {'German': 'Gegner', 'Spanish': 'Enemigo'};
-translate['Event'] = {'German': 'Ereignis', 'Spanish': 'Evento'};
-translate['Hero'] = {'German': 'Held', 'Spanish': 'H\u00e9roe'};
-translate['Location'] = {'German': 'Ort', 'Spanish': 'Lugar'};
-translate['Objective'] = {'German': 'Ziel', 'Spanish': 'Objetivo'};
-translate['Objective Ally'] = {'German': 'Ziel-Verb\u00fcndeter', 'Spanish': 'Objetivo-Aliado'};
-translate['Player Side Quest'] = {'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria de Jugador'};
-translate['Quest'] = {'German': 'Abenteuer', 'Spanish': 'Misi\u00f3n'};
-translate['Rules'] = {'German': 'Reglement', 'Spanish': 'Reglas'};
-translate['Treachery'] = {'German': 'Verrat', 'Spanish': 'Traici\u00f3n'};
-translate['Illus.'] = {'German': 'Illus.', 'Spanish': 'Ilus.'};
-translate['Unknown Artist'] = {'German': 'Unbekannter K\u00fcnstler', 'Spanish': 'Artista Desconocido'};
-translate['Victory'] = {'German': 'Sieg', 'Spanish': 'T.B.D.'};
+translate['Ally'] = {'English': 'Ally', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado'};
+translate['Attachment'] = {'English': 'Attachment', 'German': 'Verst\u00e4rkung', 'Spanish': 'Vinculada'};
+translate['Contract'] = {'English': 'Contract', 'German': 'Abkommen', 'Spanish': 'Contrato'};
+translate['Encounter Side Quest'] = {'English': 'Side Quest', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria'};
+translate['Enemy'] = {'English': 'Enemy', 'German': 'Gegner', 'Spanish': 'Enemigo'};
+translate['Event'] = {'English': 'Event', 'German': 'Ereignis', 'Spanish': 'Evento'};
+translate['Hero'] = {'English': 'Hero', 'German': 'Held', 'Spanish': 'H\u00e9roe'};
+translate['Location'] = {'English': 'Location', 'German': 'Ort', 'Spanish': 'Lugar'};
+translate['Objective'] = {'English': 'Objective', 'German': 'Ziel', 'Spanish': 'Objetivo'};
+translate['Objective Ally'] = {'English': 'Objective-Ally', 'German': 'Ziel-Verb\u00fcndeter', 'Spanish': 'Objetivo-Aliado'};
+translate['Player Side Quest'] = {'English': 'Side Quest', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria'};
+translate['Quest'] = {'English': 'Quest', 'German': 'Abenteuer', 'Spanish': 'Misi\u00f3n'};
+translate['Rules'] = {'English': 'Rules', 'German': 'Reglement', 'Spanish': 'Reglas'};
+translate['Treachery'] = {'English': 'Treachery', 'German': 'Verrat', 'Spanish': 'Traici\u00f3n'};
+translate['Encounter Keyword'] = {'English': 'Encounter.', 'German': 'T.B.D.', 'Spanish': 'T.B.D.'};
+translate['Illustration'] = {'English': 'Illus.', 'German': 'Illus.', 'Spanish': 'Ilus.'};
+translate['Unknown Artist'] = {'English': 'Unknown Artist', 'German': 'Unbekannter K\u00fcnstler', 'Spanish': 'Artista Desconocido'};
+translate['Victory'] = {'English': 'Victory', 'German': 'Sieg', 'Spanish': 'Victoria'};
 
 Thread.busyWindow(main, 'Updating cards...', true);
 
@@ -251,19 +252,17 @@ function run(progress, target, filename) {
 						vXml = '1';
 					}
 					if (nXml == 'Victory Points' || nXml == 'BVictory Points') {
-						vXml = 'VICTORY' + ' ' + vXml;
+						vXml = translate['Victory'][lang].toUpperCase() + ' ' + vXml;
 					}
 					if (nXml == 'Artist' || nXml == 'BArtist') {
-						vXml = 'Illus. ' + vXml;
+						if (vXml == 'Unknown Artist') {
+							vXml = translate['Unknown Artist'][lang];
+						}
+						vXml = translate['Illustration'][lang] + ' ' + vXml;
 					}
 					if (nXml == 'Text' || nXml == 'BText') {
 						if (keywords) {
-							if (cardType == 'Rules') {
-								vXml = '\n<se>' + keywords + '</se>\n\n' + vXml;
-							}
-							else {
-								vXml = keywords + '\n\n' + vXml;
-							}
+							vXml = keywords + '\n\n' + vXml;
 						}
 						if (['Hero', 'Ally', 'Attachment', 'Event', 'Enemy', 'Location', 'Treachery', 'Objective', 'Objective Ally'
 							].indexOf(cardType) > -1 && !traits) {
@@ -303,7 +302,7 @@ function run(progress, target, filename) {
 						s.set('Portrait-external-path', 'project:imagesRaw/' + card['BArtwork']);
 					}
 				}
-				s.set('Type', cardType.toUpperCase().replace(/ /g, '-'));
+				s.set('Type', translate[cardType][lang].toUpperCase());
 				s.set('Collection', 'CustomIcon');
 				s.set('Collection-external-path', ('project:imagesIcons/' + card['Set'] + '.png').replace(/ /g, '-'));
 				if (card['Encounter Set']) {
@@ -345,7 +344,7 @@ function run(progress, target, filename) {
 					back = '-';
 				}
 				else if (['Hero', 'Ally', 'Attachment', 'Event', 'Player Side Quest', 'Contract'].indexOf(cardType) > -1 &&
-					(keywords + '').search('Encounter.') == -1) {
+					(keywords + '').search(translate['Encounter Keyword'][lang]) == -1) {
 					back = 'p';
 				}
 				else {
@@ -355,15 +354,15 @@ function run(progress, target, filename) {
 				let fname = (Array(4 - (card['Card Number'] + '').length).join('0') + card['Card Number'] + '-' + copy + '-' +
 					back + '-' + card['Name'] + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix;
 				progress.status = fname;
-				// ResourceKit.writeGameComponentToFile(new File(getProjectMember('Cards/').file, fname + '.' + setID + '.eon'), newCard);
-				exportCard(newCard, fname, setID, jpg300NoBleed, png300NoBleed, png300Bleed, png800Bleed);
+				ResourceKit.writeGameComponentToFile(new File(getProjectMember('Cards/').file, fname + '.' + setID + '.' + lang + '.eon'), newCard);
+				exportCard(newCard, fname, setID, lang, jpg300NoBleed, png300NoBleed, png300Bleed, png800Bleed);
 			}
 		}
 	}
 	return;
 }
 
-function exportCard(card, fname, setID, jpg300NoBleed, png300NoBleed, png300Bleed, png800Bleed) {
+function exportCard(card, fname, setID, lang, jpg300NoBleed, png300NoBleed, png300Bleed, png800Bleed) {
 	var sheets = card.createDefaultSheets();
 	var numSheets;
 	if (card.getFaceStyle() + '' == 'TWO_FACES') {
@@ -379,35 +378,35 @@ function exportCard(card, fname, setID, jpg300NoBleed, png300NoBleed, png300Blee
 
 		if (jpg300NoBleed) {
 			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 300);
-			file = new File(getProjectMember('Export/jpg300NoBleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + ImageUtils.FORMAT_JPEG);
+			file = new File(getProjectMember('Export/jpg300NoBleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_JPEG);
 			ImageUtils.write(bi, file, ImageUtils.FORMAT_JPEG, 0.9, false, 300);
 		}
 
 		if (png300NoBleed) {
 			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 300);
-			file = new File(getProjectMember('Export/png300NoBleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + ImageUtils.FORMAT_PNG);
+			file = new File(getProjectMember('Export/png300NoBleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_PNG);
 			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 300);
 		}
 
 		if (png300Bleed) {
 			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 300, true);
-			file = new File(getProjectMember('Export/png300Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + ImageUtils.FORMAT_PNG);
+			file = new File(getProjectMember('Export/png300Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_PNG);
 			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 300);
 		}
 
 		if (png800Bleed) {
 			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 800, true);
-			file = new File(getProjectMember('Export/png800Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + ImageUtils.FORMAT_PNG);
+			file = new File(getProjectMember('Export/png800Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_PNG);
 			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 800);
 		}
 	}
 }
 
 function markUp(vXml) {
-	vXml = (vXml + '').replace(/\bQuest Resolution( \([^\)]+\))?:/g, '<b>Quest Resolution</b>$1:');
-	vXml = vXml.replace(/\b(Resource |Planning |Quest |Travel |Encounter |Combat |Refresh )?Action:/g, '<b>$1Action</b>:');
+	vXml = (vXml + '').replace(/\b(Quest Resolution)( \([^\)]+\))?:/g, '<b>$1</b>$2:');
+	vXml = vXml.replace(/\b(Resource |Planning |Quest |Travel |Encounter |Combat |Refresh )?(Action):/g, '<b>$1$2</b>:');
 	vXml = vXml.replace(/\b(When Revealed|Setup|Forced|Response|Travel|Shadow):/g, '<b>$1</b>:');
-	vXml = vXml.replace(/\bCondition\b/g, '<b><i>Condition</i></b>');
+	vXml = vXml.replace(/\b(Condition)\b/g, '<b><i>$1</i></b>');
 	vXml = vXml.replace(/\$|\[Threat\]/g, '<thr>');
 	vXml = vXml.replace(/\u00db|\[Attack\]/g, '<att>');
 	vXml = vXml.replace(/\u00da|\[Defense\]/g, '<def>');

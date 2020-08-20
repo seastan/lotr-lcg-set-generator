@@ -485,7 +485,7 @@ def get_skip_cards(set_id, lang):
     return skip_ids
 
 
-def generate_jpg300_nobleed(set_id, skip_ids):
+def generate_jpg300_nobleed(set_id, lang, skip_ids):
     """ Generate images for DB and OCTGN outputs.
     """
     print('  Generating images for DB and OCTGN outputs')
@@ -507,7 +507,7 @@ def generate_jpg300_nobleed(set_id, skip_ids):
                     shutil.copyfileobj(zip_file, output_file)
 
 
-def generate_png300_pdf(conf, set_id, skip_ids):
+def generate_png300_pdf(conf, set_id, lang, skip_ids):
     """ Generate images for PDF outputs.
     """
     print('  Generating images for PDF outputs')
@@ -565,7 +565,7 @@ def generate_png300_pdf(conf, set_id, skip_ids):
     _clear_folder(TEMP_PATH)
 
 
-def generate_png800_bleedmpc(conf, set_id, skip_ids):
+def generate_png800_bleedmpc(conf, set_id, lang, skip_ids):
     """ Generate images for MakePlayingCards outputs.
     """
     print('  Generating images for MakePlayingCards outputs')
@@ -598,7 +598,7 @@ def generate_png800_bleedmpc(conf, set_id, skip_ids):
     _clear_folder(TEMP_PATH)
 
 
-def generate_png300_bleeddtc(conf, set_id, skip_ids):
+def generate_png300_bleeddtc(conf, set_id, lang, skip_ids):
     """ Generate images for DriveThruCards outputs.
     """
     print('  Generating images for DriveThruCards outputs')
@@ -631,7 +631,7 @@ def generate_png300_bleeddtc(conf, set_id, skip_ids):
     _clear_folder(TEMP_PATH)
 
 
-def generate_db(set_id, set_name):
+def generate_db(set_id, set_name, lang):
     """ Generate DB outputs.
     """
     print('  Generating DB outputs')
@@ -659,7 +659,7 @@ def generate_db(set_id, set_name):
         break
 
 
-def generate_octgn(set_id, set_name):
+def generate_octgn(set_id, set_name, lang):
     """ Generate OCTGN outputs.
     """
     print('  Generating OCTGN outputs')
@@ -728,7 +728,7 @@ def _collect_pdf_images(input_path):
     return images
 
 
-def generate_pdf(set_id, set_name):  # pylint: disable=R0914
+def generate_pdf(set_id, set_name, lang):  # pylint: disable=R0914
     """ Generate PDF outputs.
     """
     print('  Generating PDF outputs')
@@ -841,7 +841,7 @@ def _generate_mpc_dtc(input_path, obj, official_back):
         break
 
 
-def generate_mpc_zip(set_id, set_name):
+def generate_mpc_zip(set_id, set_name, lang):
     """ Generate MakePlayingCards zip outputs.
     """
     print('  Generating MakePlayingCards zip outputs')
@@ -854,7 +854,7 @@ def generate_mpc_zip(set_id, set_name):
         _generate_mpc_dtc(input_path, obj, False)
 
 
-def generate_mpc_7z(set_id, set_name):
+def generate_mpc_7z(set_id, set_name, lang):
     """ Generate MakePlayingCards 7z outputs.
     """
     print('  Generating MakePlayingCards 7z outputs')
@@ -867,7 +867,7 @@ def generate_mpc_7z(set_id, set_name):
         _generate_mpc_dtc(input_path, obj, False)
 
 
-def generate_dtc_zip(set_id, set_name):
+def generate_dtc_zip(set_id, set_name, lang):
     """ Generate DriveThruCards zip outputs.
     """
     print('  Generating DriveThruCards zip outputs')
@@ -880,7 +880,7 @@ def generate_dtc_zip(set_id, set_name):
         _generate_mpc_dtc(input_path, obj, True)
 
 
-def generate_dtc_7z(set_id, set_name):
+def generate_dtc_7z(set_id, set_name, lang):
     """ Generate DriveThruCards 7z outputs.
     """
     print('  Generating DriveThruCards 7z outputs')
