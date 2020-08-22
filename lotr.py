@@ -97,7 +97,7 @@ def _update_zip_filename(filename):
     output_filename = output_filename.encode('ascii', errors='replace'
                                              ).decode().replace('?', ' ')
     parts = output_filename.split('.')
-    output_filename = '.'.join(parts[:-2] + [parts[-1]])
+    output_filename = '.'.join(parts[:-3] + [parts[-1]])
     output_filename = re.sub(r'-2-1(?=\.(?:jpg|png)$)', '-2', output_filename)
     return output_filename
 
@@ -489,7 +489,8 @@ def generate_jpg300_nobleed(set_id, lang, skip_ids):
     """ Generate images for DB and OCTGN outputs.
     """
     print('  Generating images for DB and OCTGN outputs')
-    output_path = os.path.join(IMAGES_EONS_PATH, 'jpg300NoBleed', set_id)
+    output_path = os.path.join(IMAGES_EONS_PATH, 'jpg300NoBleed',
+                               '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
 
@@ -498,7 +499,8 @@ def generate_jpg300_nobleed(set_id, lang, skip_ids):
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
                                                   'jpg300NoBleed'))
                     and f.split('.')[-1] == 'jpg'
-                    and f.split('.')[-2] == set_id]
+                    and f.split('.')[-2] == lang
+                    and f.split('.')[-3] == set_id]
         for filename in filelist:
             output_filename = _update_zip_filename(filename)
             with zip_obj.open(filename) as zip_file:
@@ -511,7 +513,8 @@ def generate_png300_pdf(conf, set_id, lang, skip_ids):
     """ Generate images for PDF outputs.
     """
     print('  Generating images for PDF outputs')
-    output_path = os.path.join(IMAGES_EONS_PATH, 'png300PDF', set_id)
+    output_path = os.path.join(IMAGES_EONS_PATH, 'png300PDF',
+                               '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
     _clear_folder(TEMP_PATH)
@@ -521,7 +524,8 @@ def generate_png300_pdf(conf, set_id, lang, skip_ids):
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
                                                   'png300Bleed'))
                     and f.split('.')[-1] == 'png'
-                    and f.split('.')[-2] == set_id]
+                    and f.split('.')[-2] == lang
+                    and f.split('.')[-3] == set_id]
         for filename in filelist:
             output_filename = _update_zip_filename(filename)
             if output_filename.endswith('-2.png'):
@@ -545,7 +549,8 @@ def generate_png300_pdf(conf, set_id, lang, skip_ids):
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
                                                   'png300NoBleed'))
                     and f.split('.')[-1] == 'png'
-                    and f.split('.')[-2] == set_id]
+                    and f.split('.')[-2] == lang
+                    and f.split('.')[-3] == set_id]
         for filename in filelist:
             output_filename = _update_zip_filename(filename)
             if output_filename.endswith('-1.png'):
@@ -569,7 +574,8 @@ def generate_png800_bleedmpc(conf, set_id, lang, skip_ids):
     """ Generate images for MakePlayingCards outputs.
     """
     print('  Generating images for MakePlayingCards outputs')
-    output_path = os.path.join(IMAGES_EONS_PATH, 'png800BleedMPC', set_id)
+    output_path = os.path.join(IMAGES_EONS_PATH, 'png800BleedMPC',
+                               '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
     _clear_folder(TEMP_PATH)
@@ -579,7 +585,8 @@ def generate_png800_bleedmpc(conf, set_id, lang, skip_ids):
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
                                                   'png800Bleed'))
                     and f.split('.')[-1] == 'png'
-                    and f.split('.')[-2] == set_id]
+                    and f.split('.')[-2] == lang
+                    and f.split('.')[-3] == set_id]
         for filename in filelist:
             output_filename = _update_zip_filename(filename)
             with zip_obj.open(filename) as zip_file:
@@ -602,7 +609,8 @@ def generate_png300_bleeddtc(conf, set_id, lang, skip_ids):
     """ Generate images for DriveThruCards outputs.
     """
     print('  Generating images for DriveThruCards outputs')
-    output_path = os.path.join(IMAGES_EONS_PATH, 'png300BleedDTC', set_id)
+    output_path = os.path.join(IMAGES_EONS_PATH, 'png300BleedDTC',
+                               '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
     _clear_folder(TEMP_PATH)
@@ -612,7 +620,8 @@ def generate_png300_bleeddtc(conf, set_id, lang, skip_ids):
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
                                                   'png300Bleed'))
                     and f.split('.')[-1] == 'png'
-                    and f.split('.')[-2] == set_id]
+                    and f.split('.')[-2] == lang
+                    and f.split('.')[-3] == set_id]
         for filename in filelist:
             output_filename = _update_zip_filename(filename)
             with zip_obj.open(filename) as zip_file:
@@ -635,8 +644,9 @@ def generate_db(set_id, set_name, lang):
     """ Generate DB outputs.
     """
     print('  Generating DB outputs')
-    input_path = os.path.join(IMAGES_EONS_PATH, 'jpg300NoBleed', set_id)
-    output_path = os.path.join(OUTPUT_DB_PATH, set_name)
+    input_path = os.path.join(IMAGES_EONS_PATH, 'jpg300NoBleed',
+                              '{}.{}'.format(set_id, lang))
+    output_path = os.path.join(OUTPUT_DB_PATH, '{}.{}'.format(set_name, lang))
     _create_folder(output_path)
     _clear_folder(output_path)
 
@@ -663,12 +673,13 @@ def generate_octgn(set_id, set_name, lang):
     """ Generate OCTGN outputs.
     """
     print('  Generating OCTGN outputs')
-    input_path = os.path.join(IMAGES_EONS_PATH, 'jpg300NoBleed', set_id)
+    input_path = os.path.join(IMAGES_EONS_PATH, 'jpg300NoBleed',
+                              '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_OCTGN_PATH, set_name)
     _create_folder(output_path)
 
     known_filenames = set()
-    pack_path = os.path.join(output_path, '{}.o8c'.format(set_name))
+    pack_path = os.path.join(output_path, '{}.{}.o8c'.format(set_name, lang))
     with zipfile.ZipFile(pack_path, 'w', zipfile.ZIP_DEFLATED) as zip_obj:
         for _, _, filenames in os.walk(input_path):
             for filename in filenames:
@@ -732,8 +743,9 @@ def generate_pdf(set_id, set_name, lang):  # pylint: disable=R0914
     """ Generate PDF outputs.
     """
     print('  Generating PDF outputs')
-    input_path = os.path.join(IMAGES_EONS_PATH, 'png300PDF', set_id)
-    output_path = os.path.join(OUTPUT_PDF_PATH, set_name)
+    input_path = os.path.join(IMAGES_EONS_PATH, 'png300PDF',
+                              '{}.{}'.format(set_id, lang))
+    output_path = os.path.join(OUTPUT_PDF_PATH, '{}.{}'.format(set_name, lang))
     _create_folder(output_path)
 
     images = _collect_pdf_images(input_path)
@@ -750,13 +762,14 @@ def generate_pdf(set_id, set_name, lang):  # pylint: disable=R0914
                      back_page[5], back_page[4], back_page[3]]
         pages.extend([front_page, back_page])
 
-    formats = {'A4': A4, 'letter': letter}
+    formats = {'A4': A4, 'Letter': letter}
     card_width = 2.75 * inch
     card_height = 3.75 * inch
 
     for page_format in formats:
         canvas = Canvas(
-            os.path.join(output_path, '{}.pdf'.format(page_format)),
+            os.path.join(output_path, '{}.{}.{}.pdf'.format(page_format,
+                                                            set_name, lang)),
             pagesize=landscape(formats[page_format]))
         width, height = landscape(formats[page_format])
         width_margin = (width - 3 * card_width) / 2
@@ -845,12 +858,14 @@ def generate_mpc_zip(set_id, set_name, lang):
     """ Generate MakePlayingCards zip outputs.
     """
     print('  Generating MakePlayingCards zip outputs')
-    input_path = os.path.join(IMAGES_EONS_PATH, 'png800BleedMPC', set_id)
-    output_path = os.path.join(OUTPUT_MPC_PATH, set_name)
+    input_path = os.path.join(IMAGES_EONS_PATH, 'png800BleedMPC',
+                              '{}.{}'.format(set_id, lang))
+    output_path = os.path.join(OUTPUT_MPC_PATH, '{}.{}'.format(set_name, lang))
     _create_folder(output_path)
 
     with zipfile.ZipFile(
-            os.path.join(output_path, '{}.zip'.format(set_name)), 'w') as obj:
+            os.path.join(output_path, '{}.{}.zip'.format(set_name, lang)),
+            'w') as obj:
         _generate_mpc_dtc(input_path, obj, False)
 
 
@@ -858,12 +873,14 @@ def generate_mpc_7z(set_id, set_name, lang):
     """ Generate MakePlayingCards 7z outputs.
     """
     print('  Generating MakePlayingCards 7z outputs')
-    input_path = os.path.join(IMAGES_EONS_PATH, 'png800BleedMPC', set_id)
-    output_path = os.path.join(OUTPUT_MPC_PATH, set_name)
+    input_path = os.path.join(IMAGES_EONS_PATH, 'png800BleedMPC',
+                              '{}.{}'.format(set_id, lang))
+    output_path = os.path.join(OUTPUT_MPC_PATH, '{}.{}'.format(set_name, lang))
     _create_folder(output_path)
 
     with py7zr.SevenZipFile(
-            os.path.join(output_path, '{}.7z'.format(set_name)), 'w') as obj:
+            os.path.join(output_path, '{}.{}.7z'.format(set_name, lang)),
+            'w') as obj:
         _generate_mpc_dtc(input_path, obj, False)
 
 
@@ -871,12 +888,14 @@ def generate_dtc_zip(set_id, set_name, lang):
     """ Generate DriveThruCards zip outputs.
     """
     print('  Generating DriveThruCards zip outputs')
-    input_path = os.path.join(IMAGES_EONS_PATH, 'png300BleedDTC', set_id)
-    output_path = os.path.join(OUTPUT_DTC_PATH, set_name)
+    input_path = os.path.join(IMAGES_EONS_PATH, 'png300BleedDTC',
+                              '{}.{}'.format(set_id, lang))
+    output_path = os.path.join(OUTPUT_DTC_PATH, '{}.{}'.format(set_name, lang))
     _create_folder(output_path)
 
     with zipfile.ZipFile(
-            os.path.join(output_path, '{}.zip'.format(set_name)), 'w') as obj:
+            os.path.join(output_path, '{}.{}.zip'.format(set_name, lang)),
+            'w') as obj:
         _generate_mpc_dtc(input_path, obj, True)
 
 
@@ -884,10 +903,12 @@ def generate_dtc_7z(set_id, set_name, lang):
     """ Generate DriveThruCards 7z outputs.
     """
     print('  Generating DriveThruCards 7z outputs')
-    input_path = os.path.join(IMAGES_EONS_PATH, 'png300BleedDTC', set_id)
-    output_path = os.path.join(OUTPUT_DTC_PATH, set_name)
+    input_path = os.path.join(IMAGES_EONS_PATH, 'png300BleedDTC',
+                              '{}.{}'.format(set_id, lang))
+    output_path = os.path.join(OUTPUT_DTC_PATH, '{}.{}'.format(set_name, lang))
     _create_folder(output_path)
 
     with py7zr.SevenZipFile(
-            os.path.join(output_path, '{}.7z'.format(set_name)), 'w') as obj:
+            os.path.join(output_path, '{}.{}.7z'.format(set_name, lang)),
+            'w') as obj:
         _generate_mpc_dtc(input_path, obj, True)
