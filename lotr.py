@@ -792,9 +792,11 @@ def generate_pdf(set_id, set_name, lang):  # pylint: disable=R0914
         canvas.save()
 
 
-def _generate_mpc_dtc(input_path, obj, official_back):
+def _generate_mpc_dtc(input_path, obj, official_back):  # pylint: disable=R0912
     """ Generate MakePlayingCards/DriveThruCards outputs in the given format.
     """
+    _clear_folder(TEMP_PATH)
+
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
             parts = filename.split('-')
@@ -822,36 +824,55 @@ def _generate_mpc_dtc(input_path, obj, official_back):
             if parts[1] == 'p':
                 for i in range(3):
                     parts[1] = str(i + 1)
-                    front_zippath = re.sub(
+                    front_output_path = os.path.join(
+                        TEMP_PATH, re.sub(
+                            r'-(?:e|p)-', '-',
+                            re.sub('-+', '-',
+                                   re.sub(r'.{36}(?=-1\.png)', '',
+                                          '-'.join(parts)))))
+                    back_output_path = os.path.join(
+                        TEMP_PATH, re.sub(
+                            r'-(?:e|p)-', '-',
+                            re.sub('-+', '-',
+                                   re.sub(r'.{36}(?=-2\.png)', '',
+                                          '{}-2.png'.format(
+                                              '-'.join(parts[:-1]))))))
+                    shutil.copyfile(os.path.join(input_path, filename),
+                                    front_output_path)
+                    shutil.copyfile(back_path, back_output_path)
+
+            else:
+                front_output_path = os.path.join(
+                    TEMP_PATH, re.sub(
                         r'-(?:e|p)-', '-',
                         re.sub('-+', '-',
                                re.sub(r'.{36}(?=-1\.png)', '',
-                                      'front/{}'.format('-'.join(parts)))))
-                    back_zippath = re.sub(
+                                      '-'.join(parts)))))
+                back_output_path = os.path.join(
+                    TEMP_PATH, re.sub(
                         r'-(?:e|p)-', '-',
                         re.sub('-+', '-',
                                re.sub(r'.{36}(?=-2\.png)', '',
-                                      'back/{}'.format('{}-2.png'.format(
+                                      '{}-2.png'.format(
                                           '-'.join(parts[:-1]))))))
-                    obj.write(os.path.join(input_path, filename),
-                              front_zippath)
-                    obj.write(back_path, back_zippath)
-            else:
-                front_zippath = re.sub(
-                    r'-(?:e|p)-', '-',
-                    re.sub('-+', '-',
-                           re.sub(r'.{36}(?=-1\.png)', '',
-                                  'front/{}'.format('-'.join(parts)))))
-                back_zippath = re.sub(
-                    r'-(?:e|p)-', '-',
-                    re.sub('-+', '-',
-                           re.sub(r'.{36}(?=-2\.png)', '',
-                                  'back/{}'.format('{}-2.png'.format(
-                                      '-'.join(parts[:-1]))))))
-                obj.write(os.path.join(input_path, filename), front_zippath)
-                obj.write(back_path, back_zippath)
+                shutil.copyfile(os.path.join(input_path, filename),
+                                front_output_path)
+                shutil.copyfile(back_path, back_output_path)
 
         break
+
+    for _, _, filenames in os.walk(TEMP_PATH):
+        for filename in filenames:
+            if filename.endswith('-1.png'):
+                obj.write(os.path.join(TEMP_PATH, filename),
+                          'front/{}'.format(filename))
+            elif filename.endswith('-2.png'):
+                obj.write(os.path.join(TEMP_PATH, filename),
+                          'back/{}'.format(filename))
+
+        break
+
+    _clear_folder(TEMP_PATH)
 
 
 def generate_mpc_zip(set_id, set_name, lang):
