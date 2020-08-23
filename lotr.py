@@ -864,7 +864,7 @@ def generate_mpc_zip(set_id, set_name, lang):
     _create_folder(output_path)
 
     with zipfile.ZipFile(
-            os.path.join(output_path, '{}.{}.zip'.format(set_name, lang)),
+            os.path.join(output_path, 'MPC.{}.{}.zip'.format(set_name, lang)),
             'w') as obj:
         _generate_mpc_dtc(input_path, obj, False)
 
@@ -879,7 +879,7 @@ def generate_mpc_7z(set_id, set_name, lang):
     _create_folder(output_path)
 
     with py7zr.SevenZipFile(
-            os.path.join(output_path, '{}.{}.7z'.format(set_name, lang)),
+            os.path.join(output_path, 'MPC.{}.{}.7z'.format(set_name, lang)),
             'w') as obj:
         _generate_mpc_dtc(input_path, obj, False)
 
@@ -894,7 +894,7 @@ def generate_dtc_zip(set_id, set_name, lang):
     _create_folder(output_path)
 
     with zipfile.ZipFile(
-            os.path.join(output_path, '{}.{}.zip'.format(set_name, lang)),
+            os.path.join(output_path, 'DTC.{}.{}.zip'.format(set_name, lang)),
             'w') as obj:
         _generate_mpc_dtc(input_path, obj, True)
 
@@ -909,6 +909,6 @@ def generate_dtc_7z(set_id, set_name, lang):
     _create_folder(output_path)
 
     with py7zr.SevenZipFile(
-            os.path.join(output_path, '{}.{}.7z'.format(set_name, lang)),
+            os.path.join(output_path, 'DTC.{}.{}.7z'.format(set_name, lang)),
             'w') as obj:
         _generate_mpc_dtc(input_path, obj, True)
