@@ -9,6 +9,7 @@ import subprocess
 import zipfile
 
 import xml.etree.ElementTree as ET
+import png
 import py7zr
 import requests
 import xlwings as xw
@@ -21,6 +22,7 @@ from reportlab.pdfgen.canvas import Canvas
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 PROJECT_FOLDER = 'Frogmorton'
 SHEET_NAME = 'setExcel'
+TEXT_CHUNK_FLAG = b'tEXt'
 
 CONFIGURATION_PATH = 'configuration.yaml'
 IMAGES_BACK_PATH = 'imagesBack'
@@ -792,6 +794,17 @@ def generate_pdf(set_id, set_name, lang):  # pylint: disable=R0914
         canvas.save()
 
 
+def _insert_png_text(filepath, text):
+    """ Insert text into a PNG file.
+    """
+    reader = png.Reader(filename=filepath)
+    chunk_list = list(reader.chunks())
+    chunk_item = tuple([TEXT_CHUNK_FLAG, bytes(text, 'utf-8')])
+    chunk_list.insert(1, chunk_item)
+    with open(filepath, 'wb') as obj:
+        png.write_chunks(obj, chunk_list)
+
+
 def _generate_mpc_dtc(input_path, obj, official_back):  # pylint: disable=R0912
     """ Generate MakePlayingCards/DriveThruCards outputs in the given format.
     """
@@ -863,16 +876,15 @@ def _generate_mpc_dtc(input_path, obj, official_back):  # pylint: disable=R0912
 
     for _, _, filenames in os.walk(TEMP_PATH):
         for filename in filenames:
+            filepath = os.path.join(TEMP_PATH, filename)
             if filename.endswith('-1.png'):
-                obj.write(os.path.join(TEMP_PATH, filename),
-                          'front/{}'.format(filename))
+                _insert_png_text(filepath, filename)
+                obj.write(filepath, 'front/{}'.format(filename))
             elif filename.endswith('-2.png'):
-                obj.write(os.path.join(TEMP_PATH, filename),
-                          'back/{}'.format(filename))
+                _insert_png_text(filepath, filename)
+                obj.write(filepath, 'back/{}'.format(filename))
 
         break
-
-    _clear_folder(TEMP_PATH)
 
 
 def generate_mpc_zip(set_id, set_name, lang):
@@ -889,6 +901,8 @@ def generate_mpc_zip(set_id, set_name, lang):
             'w') as obj:
         _generate_mpc_dtc(input_path, obj, False)
 
+    _clear_folder(TEMP_PATH)
+
 
 def generate_mpc_7z(set_id, set_name, lang):
     """ Generate MakePlayingCards 7z outputs.
@@ -903,6 +917,8 @@ def generate_mpc_7z(set_id, set_name, lang):
             os.path.join(output_path, 'MPC.{}.{}.7z'.format(set_name, lang)),
             'w') as obj:
         _generate_mpc_dtc(input_path, obj, False)
+
+    _clear_folder(TEMP_PATH)
 
 
 def generate_dtc_zip(set_id, set_name, lang):
@@ -919,6 +935,8 @@ def generate_dtc_zip(set_id, set_name, lang):
             'w') as obj:
         _generate_mpc_dtc(input_path, obj, True)
 
+    _clear_folder(TEMP_PATH)
+
 
 def generate_dtc_7z(set_id, set_name, lang):
     """ Generate DriveThruCards 7z outputs.
@@ -933,3 +951,5 @@ def generate_dtc_7z(set_id, set_name, lang):
             os.path.join(output_path, 'DTC.{}.{}.7z'.format(set_name, lang)),
             'w') as obj:
         _generate_mpc_dtc(input_path, obj, True)
+
+    _clear_folder(TEMP_PATH)

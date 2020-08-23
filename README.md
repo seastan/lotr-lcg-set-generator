@@ -29,7 +29,7 @@ from this repo, click `OK` and then close GIMP.
   - Install Python 3.7 (or other Python 3 version), Pip and VirtualEnv.
   - `virtualenv env --python=python3.7`
   - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
-  - `pip install jupyter py7zr pylint pyyaml reportlab requests xlwings`
+  - `pip install jupyter py7zr pylint pypng pyyaml reportlab requests xlwings`
 
 10. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
