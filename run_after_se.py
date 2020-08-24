@@ -30,14 +30,10 @@ def main():  # pylint: disable=R0912
                 lotr.generate_octgn(set_id, set_name, lang)
             if 'pdf' in conf['outputs']:
                 lotr.generate_pdf(set_id, set_name, lang)
-            if 'makeplayingcards_zip' in conf['outputs']:
-                lotr.generate_mpc_zip(set_id, set_name, lang)
-            if 'makeplayingcards_7z' in conf['outputs']:
-                lotr.generate_mpc_7z(set_id, set_name, lang)
-            if 'drivethrucards_zip' in conf['outputs']:
-                lotr.generate_dtc_zip(set_id, set_name, lang)
-            if 'drivethrucards_7z' in conf['outputs']:
-                lotr.generate_dtc_7z(set_id, set_name, lang)
+            if 'makeplayingcards' in conf['outputs']:
+                lotr.generate_mpc(conf, set_id, set_name, lang)
+            if 'drivethrucards' in conf['outputs']:
+                lotr.generate_dtc(conf, set_id, set_name, lang)
 
     print('Done')
 

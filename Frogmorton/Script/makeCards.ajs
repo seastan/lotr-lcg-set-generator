@@ -24,7 +24,7 @@ translate['Player Side Quest'] = {'English': 'Side Quest', 'German': 'Nebenabent
 translate['Quest'] = {'English': 'Quest', 'German': 'Abenteuer', 'Spanish': 'Misi\u00f3n'};
 translate['Rules'] = {'English': 'Rules', 'German': 'Reglement', 'Spanish': 'Reglas'};
 translate['Treachery'] = {'English': 'Treachery', 'German': 'Verrat', 'Spanish': 'Traici\u00f3n'};
-translate['Encounter Keyword'] = {'English': 'Encounter.', 'German': 'T.B.D.', 'Spanish': 'Encuentro.'};
+translate['Encounter Keyword'] = {'English': 'Encounter.', 'German': 'Begegnung.', 'Spanish': 'Encuentro.'};
 translate['Illustration'] = {'English': 'Illus.', 'German': 'Illus.', 'Spanish': 'Ilus.'};
 translate['Unknown Artist'] = {'English': 'Unknown Artist', 'German': 'Unbekannter K\u00fcnstler', 'Spanish': 'Artista Desconocido'};
 translate['Victory'] = {'English': 'Victory', 'German': 'Sieg', 'Spanish': 'Victoria'};
@@ -406,20 +406,20 @@ function markUp(vXml, lang) {
 	vXml = vXml + '';
 	if (lang == 'English') {
 		vXml = vXml.replace(/\b(Quest Resolution)( \([^\)]+\))?:/g, '<b>$1</b>$2:');
-		vXml = vXml.replace(/\b(Resource |Planning |Quest |Travel |Encounter |Combat |Refresh )?(Action):/g, '<b>$1$2</b>:');
-		vXml = vXml.replace(/\b(When Revealed|Setup|Forced|Response|Travel|Shadow):/g, '<b>$1</b>:');
+		vXml = vXml.replace(/\b(Valour )?(Resource |Planning |Quest |Travel |Encounter |Combat |Refresh )?(Action):/g, '<b>$1$2$3</b>:');
+		vXml = vXml.replace(/\b(When Revealed|Setup|Forced|Valour Response|Response|Travel|Shadow):/g, '<b>$1</b>:');
 		vXml = vXml.replace(/\b(Condition)\b/g, '<b><i>$1</i></b>');
 	}
 	else if (lang == 'German') {
-		vXml = vXml.replace(/\b(Quest Resolution)( \([^\)]+\))?:/g, '<b>$1</b>$2:');
-		vXml = vXml.replace(/\b(Resource |Planning |Quest |Travel |Encounter |Combat |Refresh )?(Action):/g, '<b>$1$2</b>:');
-		vXml = vXml.replace(/\b(When Revealed|Setup|Forced|Response|Travel|Shadow):/g, '<b>$1</b>:');
-		vXml = vXml.replace(/\b(Condition)\b/g, '<b><i>$1</i></b>');
+		vXml = vXml.replace(/\b(Abenteuer bestehen)( \([^\)]+\))?:/g, '<b>$1</b>$2:');
+		vXml = vXml.replace(/\b(Ehrenvolle )?(Ressourcenaktion|Planungsaktion|Abenteueraktion|Reiseaktion|Begegnungsaktion|Kampfaktion|Auffrischungsaktion|Aktion):/g, '<b>$1$2</b>:');
+		vXml = vXml.replace(/\b(Wenn aufgedeckt|Vorbereitung|Erzwungen|Ehrenvolle Reaktion|Reaktion|Reise|Schatten):/g, '<b>$1</b>:');
+		vXml = vXml.replace(/\b(Zustand)\b/g, '<b><i>$1</i></b>');
 	}
 	else if (lang == 'Spanish') {
 		vXml = vXml.replace(/\b(Resolución de la misión)( \([^\)]+\))?:/g, '<b>$1</b>$2:');
-		vXml = vXml.replace(/\b(Acción)( de Recursos| de Planificación| de Misión| de Viaje| de Encuentros| de Combate| de Recuperación)?:/g, '<b>$1$2</b>:');
-		vXml = vXml.replace(/\b(Al ser revelada|Preparación|Obligado|Respuesta|Viaje|Sombra):/g, '<b>$1</b>:');
+		vXml = vXml.replace(/\b(Valour )?(Acción)( de Recursos| de Planificación| de Misión| de Viaje| de Encuentros| de Combate| de Recuperación)?:/g, '<b>$1$2$3</b>:');
+		vXml = vXml.replace(/\b(Al ser revelada|Preparación|Obligado|Valour Respuesta|Respuesta|Viaje|Sombra):/g, '<b>$1</b>:');
 		vXml = vXml.replace(/\b(Condición)\b/g, '<b><i>$1</i></b>');
 	}
 

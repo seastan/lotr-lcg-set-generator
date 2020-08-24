@@ -805,11 +805,9 @@ def _insert_png_text(filepath, text):
         png.write_chunks(obj, chunk_list)
 
 
-def _generate_mpc_dtc(input_path, obj, official_back):  # pylint: disable=R0912
-    """ Generate MakePlayingCards/DriveThruCards outputs in the given format.
+def _prepare_printing_images(input_path, output_path, official_back):
+    """ Prepare images for MakePlayingCards/DriveThruCards.
     """
-    _clear_folder(TEMP_PATH)
-
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
             parts = filename.split('-')
@@ -838,13 +836,13 @@ def _generate_mpc_dtc(input_path, obj, official_back):  # pylint: disable=R0912
                 for i in range(3):
                     parts[1] = str(i + 1)
                     front_output_path = os.path.join(
-                        TEMP_PATH, re.sub(
+                        output_path, re.sub(
                             r'-(?:e|p)-', '-',
                             re.sub('-+', '-',
                                    re.sub(r'.{36}(?=-1\.png)', '',
                                           '-'.join(parts)))))
                     back_output_path = os.path.join(
-                        TEMP_PATH, re.sub(
+                        output_path, re.sub(
                             r'-(?:e|p)-', '-',
                             re.sub('-+', '-',
                                    re.sub(r'.{36}(?=-2\.png)', '',
@@ -856,13 +854,13 @@ def _generate_mpc_dtc(input_path, obj, official_back):  # pylint: disable=R0912
 
             else:
                 front_output_path = os.path.join(
-                    TEMP_PATH, re.sub(
+                    output_path, re.sub(
                         r'-(?:e|p)-', '-',
                         re.sub('-+', '-',
                                re.sub(r'.{36}(?=-1\.png)', '',
                                       '-'.join(parts)))))
                 back_output_path = os.path.join(
-                    TEMP_PATH, re.sub(
+                    output_path, re.sub(
                         r'-(?:e|p)-', '-',
                         re.sub('-+', '-',
                                re.sub(r'.{36}(?=-2\.png)', '',
@@ -874,9 +872,13 @@ def _generate_mpc_dtc(input_path, obj, official_back):  # pylint: disable=R0912
 
         break
 
-    for _, _, filenames in os.walk(TEMP_PATH):
+
+def _prepare_printing_archive(input_path, obj):
+    """ Prepare archive for MakePlayingCards/DriveThruCards.
+    """
+    for _, _, filenames in os.walk(input_path):
         for filename in filenames:
-            filepath = os.path.join(TEMP_PATH, filename)
+            filepath = os.path.join(input_path, filename)
             if filename.endswith('-1.png'):
                 _insert_png_text(filepath, filename)
                 obj.write(filepath, 'front/{}'.format(filename))
@@ -887,69 +889,59 @@ def _generate_mpc_dtc(input_path, obj, official_back):  # pylint: disable=R0912
         break
 
 
-def generate_mpc_zip(set_id, set_name, lang):
-    """ Generate MakePlayingCards zip outputs.
+def generate_mpc(conf, set_id, set_name, lang):
+    """ Generate MakePlayingCards outputs.
     """
-    print('  Generating MakePlayingCards zip outputs')
+    print('  Generating MakePlayingCards outputs')
     input_path = os.path.join(IMAGES_EONS_PATH, 'png800BleedMPC',
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_MPC_PATH, '{}.{}'.format(set_name, lang))
     _create_folder(output_path)
+    _clear_folder(TEMP_PATH)
 
-    with zipfile.ZipFile(
-            os.path.join(output_path, 'MPC.{}.{}.zip'.format(set_name, lang)),
-            'w') as obj:
-        _generate_mpc_dtc(input_path, obj, False)
+    _prepare_printing_images(input_path, TEMP_PATH, False)
+
+    if 'makeplayingcards_zip' in conf['outputs']:
+        with zipfile.ZipFile(
+                os.path.join(output_path,
+                             'MPC.{}.{}.zip'.format(set_name, lang)),
+                'w') as obj:
+            _prepare_printing_archive(TEMP_PATH, obj)
+
+    if 'makeplayingcards_7z' in conf['outputs']:
+        with py7zr.SevenZipFile(
+                os.path.join(output_path,
+                             'MPC.{}.{}.7z'.format(set_name, lang)),
+                'w') as obj:
+            _prepare_printing_archive(TEMP_PATH, obj)
 
     _clear_folder(TEMP_PATH)
 
 
-def generate_mpc_7z(set_id, set_name, lang):
-    """ Generate MakePlayingCards 7z outputs.
+def generate_dtc(conf, set_id, set_name, lang):
+    """ Generate DriveThruCards outputs.
     """
-    print('  Generating MakePlayingCards 7z outputs')
-    input_path = os.path.join(IMAGES_EONS_PATH, 'png800BleedMPC',
-                              '{}.{}'.format(set_id, lang))
-    output_path = os.path.join(OUTPUT_MPC_PATH, '{}.{}'.format(set_name, lang))
-    _create_folder(output_path)
-
-    with py7zr.SevenZipFile(
-            os.path.join(output_path, 'MPC.{}.{}.7z'.format(set_name, lang)),
-            'w') as obj:
-        _generate_mpc_dtc(input_path, obj, False)
-
-    _clear_folder(TEMP_PATH)
-
-
-def generate_dtc_zip(set_id, set_name, lang):
-    """ Generate DriveThruCards zip outputs.
-    """
-    print('  Generating DriveThruCards zip outputs')
+    print('  Generating DriveThruCards outputs')
     input_path = os.path.join(IMAGES_EONS_PATH, 'png300BleedDTC',
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_DTC_PATH, '{}.{}'.format(set_name, lang))
     _create_folder(output_path)
-
-    with zipfile.ZipFile(
-            os.path.join(output_path, 'DTC.{}.{}.zip'.format(set_name, lang)),
-            'w') as obj:
-        _generate_mpc_dtc(input_path, obj, True)
-
     _clear_folder(TEMP_PATH)
 
+    _prepare_printing_images(input_path, TEMP_PATH, True)
 
-def generate_dtc_7z(set_id, set_name, lang):
-    """ Generate DriveThruCards 7z outputs.
-    """
-    print('  Generating DriveThruCards 7z outputs')
-    input_path = os.path.join(IMAGES_EONS_PATH, 'png300BleedDTC',
-                              '{}.{}'.format(set_id, lang))
-    output_path = os.path.join(OUTPUT_DTC_PATH, '{}.{}'.format(set_name, lang))
-    _create_folder(output_path)
+    if 'drivethrucards_zip' in conf['outputs']:
+        with zipfile.ZipFile(
+                os.path.join(output_path,
+                             'DTC.{}.{}.zip'.format(set_name, lang)),
+                'w') as obj:
+            _prepare_printing_archive(TEMP_PATH, obj)
 
-    with py7zr.SevenZipFile(
-            os.path.join(output_path, 'DTC.{}.{}.7z'.format(set_name, lang)),
-            'w') as obj:
-        _generate_mpc_dtc(input_path, obj, True)
+    if 'drivethrucards_7z' in conf['outputs']:
+        with py7zr.SevenZipFile(
+                os.path.join(output_path,
+                             'DTC.{}.{}.7z'.format(set_name, lang)),
+                'w') as obj:
+            _prepare_printing_archive(TEMP_PATH, obj)
 
     _clear_folder(TEMP_PATH)
