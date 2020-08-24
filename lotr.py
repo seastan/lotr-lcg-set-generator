@@ -907,6 +907,7 @@ def generate_mpc(conf, set_id, set_name, lang):
                              'MPC.{}.{}.zip'.format(set_name, lang)),
                 'w') as obj:
             _prepare_printing_archive(TEMP_PATH, obj)
+            obj.write('MakePlayingCards.pdf', 'MakePlayingCards.pdf')
 
     if 'makeplayingcards_7z' in conf['outputs']:
         with py7zr.SevenZipFile(
@@ -914,6 +915,7 @@ def generate_mpc(conf, set_id, set_name, lang):
                              'MPC.{}.{}.7z'.format(set_name, lang)),
                 'w') as obj:
             _prepare_printing_archive(TEMP_PATH, obj)
+            obj.write('MakePlayingCards.pdf', 'MakePlayingCards.pdf')
 
     _clear_folder(TEMP_PATH)
 

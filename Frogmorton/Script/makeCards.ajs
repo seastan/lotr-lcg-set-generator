@@ -418,8 +418,8 @@ function markUp(vXml, lang) {
 	}
 	else if (lang == 'Spanish') {
 		vXml = vXml.replace(/\b(Resolución de la misión)( \([^\)]+\))?:/g, '<b>$1</b>$2:');
-		vXml = vXml.replace(/\b(Valour )?(Acción)( de Recursos| de Planificación| de Misión| de Viaje| de Encuentros| de Combate| de Recuperación)?:/g, '<b>$1$2$3</b>:');
-		vXml = vXml.replace(/\b(Al ser revelada|Preparación|Obligado|Valour Respuesta|Respuesta|Viaje|Sombra):/g, '<b>$1</b>:');
+		vXml = vXml.replace(/\b(Acción)( de Recursos| de Planificación| de Misión| de Viaje| de Encuentros| de Combate| de Recuperación)?( de Valor)?:/g, '<b>$1$2$3</b>:');
+		vXml = vXml.replace(/\b(Al ser revelada|Preparación|Obligado|Respuesta de Valor|Respuesta|Viaje|Sombra):/g, '<b>$1</b>:');
 		vXml = vXml.replace(/\b(Condición)\b/g, '<b><i>$1</i></b>');
 	}
 
