@@ -317,7 +317,7 @@ def _get_property(parent, name):
     return prop
 
 
-def update_xml(conf, set_id, lang):  # pylint: disable=R0914
+def update_xml(conf, set_id, lang):  # pylint: disable=R0914,R0915
     """ Update the Strange Eons xml file with additional data.
     """
     print('  Updating the Strange Eons xml file with additional data')
@@ -332,7 +332,12 @@ def update_xml(conf, set_id, lang):  # pylint: disable=R0914
     encounter_cards = {}
 
     for card in root[0]:
-        card_type = _find_properties(card, 'Type')[0].attrib['value']
+        card_type = _find_properties(card, 'Type')
+        if not card_type:
+            print('ERROR: Skipping a card without card type')
+            continue
+
+        card_type = card_type[0].attrib['value']
         encounter_set = _find_properties(card, 'Encounter Set')
         if card_type != 'Quest' and encounter_set:
             encounter_set = encounter_set[0].attrib['value']
