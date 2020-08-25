@@ -44,7 +44,7 @@ function run(progress, target, filename) {
 	var lang = filename.split('.')[1];
 	var backTypes = ['Quest', 'Rules'];
 	var fXmlFile = new File(getProjectMember('XML/').file, filename + '.xml');
-	Console.err.println('Reading ' + fXmlFile);
+	Console.err.println('\nReading ' + fXmlFile);
 	var dbFactory = DocumentBuilderFactory.newInstance();
 	var dBuilder = dbFactory.newDocumentBuilder();
 	var doc = dBuilder.parse(fXmlFile);
@@ -114,6 +114,7 @@ function run(progress, target, filename) {
 			Console.err.println('\nUnknown card type for ' + card['Name'] + ': ' + card['Type']);
 			continue;
 		}
+		// Console.err.println('\nProcessing ' + card['Name']);
 		if (card['Type'] == 'Side Quest') {
 			if (card['Encounter Set']) {
 				card['Type'] = 'Encounter Side Quest';

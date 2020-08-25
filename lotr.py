@@ -810,6 +810,17 @@ def _insert_png_text(filepath, text):
         png.write_chunks(obj, chunk_list)
 
 
+def _make_unique_png(input_path):
+    """ Make unique PNG files for MakePlayingCards.
+    """
+    for _, _, filenames in os.walk(input_path):
+        for filename in filenames:
+            if filename.endswith('-1.png') or filename.endswith('-2.png'):
+                _insert_png_text(os.path.join(input_path, filename), filename)
+
+        break
+
+
 def _prepare_printing_images(input_path, output_path, official_back):
     """ Prepare images for MakePlayingCards/DriveThruCards.
     """
@@ -878,18 +889,51 @@ def _prepare_printing_images(input_path, output_path, official_back):
         break
 
 
-def _prepare_printing_archive(input_path, obj):
-    """ Prepare archive for MakePlayingCards/DriveThruCards.
+def _prepare_mpc_printing_archive(input_path, obj):
+    """ Prepare archive for MakePlayingCards.
     """
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
-            filepath = os.path.join(input_path, filename)
             if filename.endswith('-1.png'):
-                _insert_png_text(filepath, filename)
-                obj.write(filepath, 'front/{}'.format(filename))
+                obj.write(os.path.join(input_path, filename),
+                          'front/{}'.format(filename))
             elif filename.endswith('-2.png'):
-                _insert_png_text(filepath, filename)
-                obj.write(filepath, 'back/{}'.format(filename))
+                obj.write(os.path.join(input_path, filename),
+                          'back/{}'.format(filename))
+
+        break
+
+
+def _deck_name(current_cnt, total_cnt):
+    """ Get deck name for DriveThruCards.
+    """
+    if total_cnt > 130:
+        return 'deck{}/'.format(min(math.floor(current_cnt / 120) + 1,
+                                    ((total_cnt - 10) / 120) + 1))
+
+    return ''
+
+
+def _prepare_dtc_printing_archive(input_path, obj):
+    """ Prepare archive for DriveThruCards.
+    """
+    for _, _, filenames in os.walk(input_path):
+        front_cnt = 0
+        back_cnt = 0
+        filenames = sorted(f for f in filenames if filename.endswith('-1.png')
+                           or filename.endswith('-2.png'))
+        total_cnt = len(filenames) / 2
+        for filename in filenames:
+            if filename.endswith('-1.png'):
+                obj.write(os.path.join(input_path, filename),
+                          '{}front/{}'.format(_deck_name(front_cnt, total_cnt),
+                                              filename))
+                front_cnt += 1
+            elif filename.endswith('-2.png'):
+                obj.write(os.path.join(input_path, filename),
+                          '{}back/{}'.format(_deck_name(back_cnt, total_cnt),
+                                             filename))
+                back_cnt += 1
 
         break
 
@@ -905,13 +949,14 @@ def generate_mpc(conf, set_id, set_name, lang):
     _clear_folder(TEMP_PATH)
 
     _prepare_printing_images(input_path, TEMP_PATH, False)
+    _make_unique_png(TEMP_PATH)
 
     if 'makeplayingcards_zip' in conf['outputs']:
         with zipfile.ZipFile(
                 os.path.join(output_path,
                              'MPC.{}.{}.zip'.format(set_name, lang)),
                 'w') as obj:
-            _prepare_printing_archive(TEMP_PATH, obj)
+            _prepare_mpc_printing_archive(TEMP_PATH, obj)
             obj.write('MakePlayingCards.pdf', 'MakePlayingCards.pdf')
 
     if 'makeplayingcards_7z' in conf['outputs']:
@@ -919,7 +964,7 @@ def generate_mpc(conf, set_id, set_name, lang):
                 os.path.join(output_path,
                              'MPC.{}.{}.7z'.format(set_name, lang)),
                 'w') as obj:
-            _prepare_printing_archive(TEMP_PATH, obj)
+            _prepare_mpc_printing_archive(TEMP_PATH, obj)
             obj.write('MakePlayingCards.pdf', 'MakePlayingCards.pdf')
 
     _clear_folder(TEMP_PATH)
@@ -942,13 +987,13 @@ def generate_dtc(conf, set_id, set_name, lang):
                 os.path.join(output_path,
                              'DTC.{}.{}.zip'.format(set_name, lang)),
                 'w') as obj:
-            _prepare_printing_archive(TEMP_PATH, obj)
+            _prepare_dtc_printing_archive(TEMP_PATH, obj)
 
     if 'drivethrucards_7z' in conf['outputs']:
         with py7zr.SevenZipFile(
                 os.path.join(output_path,
                              'DTC.{}.{}.7z'.format(set_name, lang)),
                 'w') as obj:
-            _prepare_printing_archive(TEMP_PATH, obj)
+            _prepare_dtc_printing_archive(TEMP_PATH, obj)
 
     _clear_folder(TEMP_PATH)
