@@ -9,7 +9,9 @@ setEons/*.xml
 setEons/*.xml.old
 Temp/*.png
 
+configuration.yaml
 macros_copy.xlsm
 setExcel.xlsm
 setExcel.xlsx
 setGenerator.seproject
+~*.*

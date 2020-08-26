@@ -7,14 +7,14 @@ from gimpfu import (gimp, pdb, register, main, PF_IMAGE, PF_DRAWABLE,
                     PF_DIRNAME, ROTATE_90, ROTATE_270)
 
 
-def _get_filename_backside(img):
+def _get_filename_backside(img, file_type='png'):
     """ Determine card side and output file name.
     """
     file_name = pdb.gimp_image_get_filename(img)
     file_name = os.path.split(file_name)[-1]
     file_name = '.'.join(file_name.split('.')[:-1])
     back_side = file_name.endswith('-Back-Face') or file_name.endswith('-2')
-    file_name = file_name + '.png'
+    file_name = file_name + '.' + file_type
     return (file_name, back_side)
 
 
@@ -224,7 +224,7 @@ def prepare_drivethrucards(img, drawable, output_folder):
     pdb.gimp_undo_push_group_start(img)
 
     try:
-        file_name, back_side = _get_filename_backside(img)
+        file_name, back_side = _get_filename_backside(img, 'jpg')
     except Exception:  # pylint: disable=W0703
         pdb.gimp_undo_push_group_end(img)
         return
@@ -238,9 +238,9 @@ def prepare_drivethrucards(img, drawable, output_folder):
     if clip_size:
         _clip(img, drawable, clip_size, rotation and back_side)
 
-    pdb.file_png_save(img, drawable,
-                      os.path.join(output_folder, file_name), file_name,
-                      0, 9, 1, 0, 0, 1, 1)
+    pdb.file_jpeg_save(img, drawable,
+                       os.path.join(output_folder, file_name), file_name,
+                       1, 0, 1, 0, '', 2, 1, 0, 0)
     pdb.gimp_undo_push_group_end(img)
 
 

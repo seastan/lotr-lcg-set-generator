@@ -22,7 +22,7 @@ def main():  # pylint: disable=R0912
             if 'makeplayingcards' in conf['outputs']:
                 lotr.generate_png800_bleedmpc(conf, set_id, lang, skip_ids)
             if 'drivethrucards' in conf['outputs']:
-                lotr.generate_png300_bleeddtc(conf, set_id, lang, skip_ids)
+                lotr.generate_jpg300_bleeddtc(conf, set_id, lang, skip_ids)
 
             if 'db' in conf['outputs']:
                 lotr.generate_db(set_id, set_name, lang)

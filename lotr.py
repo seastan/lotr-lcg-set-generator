@@ -1,3 +1,4 @@
+# pylint: disable=C0302
 """ Helper functions for LotR ALeP workflow.
 """
 import hashlib
@@ -612,11 +613,11 @@ def generate_png800_bleedmpc(conf, set_id, lang, skip_ids):
     _clear_folder(TEMP_PATH)
 
 
-def generate_png300_bleeddtc(conf, set_id, lang, skip_ids):
+def generate_jpg300_bleeddtc(conf, set_id, lang, skip_ids):
     """ Generate images for DriveThruCards outputs.
     """
     print('  Generating images for DriveThruCards outputs')
-    output_path = os.path.join(IMAGES_EONS_PATH, 'png300BleedDTC',
+    output_path = os.path.join(IMAGES_EONS_PATH, 'jpg300BleedDTC',
                                '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
@@ -821,28 +822,29 @@ def _make_unique_png(input_path):
         break
 
 
-def _prepare_printing_images(input_path, output_path, official_back):
+def _prepare_printing_images(input_path, output_path, service):
     """ Prepare images for MakePlayingCards/DriveThruCards.
     """
+    file_type = 'png' if service == 'mpc' else 'jpg'
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
             parts = filename.split('-')
-            if parts[-1] != '1.png':
+            if parts[-1] not in '1.{}'.format(file_type):
                 continue
 
-            back_path = os.path.join(input_path,
-                                     '{}-2.png'.format('-'.join(parts[:-1])))
+            back_path = os.path.join(input_path, '{}-2.{}'.format(
+                '-'.join(parts[:-1]), file_type))
             if not os.path.exists(back_path):
                 if parts[2] == 'p':
                     back_path = os.path.join(
                         IMAGES_BACK_PATH,
-                        official_back and 'playerBackOfficialDTC.png'
-                        or 'playerBackUnofficialMPC.png')
+                        service == 'mpc' and 'playerBackUnofficialMPC.png'
+                        or 'playerBackOfficialDTC.jpg')
                 elif parts[2] == 'e':
                     back_path = os.path.join(
                         IMAGES_BACK_PATH,
-                        official_back and 'encounterBackOfficialDTC.png'
-                        or 'encounterBackUnofficialMPC.png')
+                        service == 'mpc' and 'encounterBackUnofficialMPC.png'
+                        or 'encounterBackOfficialDTC.jpg')
                 else:
                     print('Missing card back for {}, removing the file'
                           .format(filename))
@@ -855,15 +857,16 @@ def _prepare_printing_images(input_path, output_path, official_back):
                         output_path, re.sub(
                             r'-(?:e|p)-', '-',
                             re.sub('-+', '-',
-                                   re.sub(r'.{36}(?=-1\.png)', '',
+                                   re.sub(r'.{36}(?=-1\.(?:png|jpg))', '',
                                           '-'.join(parts)))))
                     back_output_path = os.path.join(
                         output_path, re.sub(
                             r'-(?:e|p)-', '-',
                             re.sub('-+', '-',
-                                   re.sub(r'.{36}(?=-2\.png)', '',
-                                          '{}-2.png'.format(
-                                              '-'.join(parts[:-1]))))))
+                                   re.sub(r'.{36}(?=-2\.(?:png|jpg))', '',
+                                          '{}-2.{}'.format(
+                                              '-'.join(parts[:-1]),
+                                              file_type)))))
                     shutil.copyfile(os.path.join(input_path, filename),
                                     front_output_path)
                     shutil.copyfile(back_path, back_output_path)
@@ -873,15 +876,16 @@ def _prepare_printing_images(input_path, output_path, official_back):
                     output_path, re.sub(
                         r'-(?:e|p)-', '-',
                         re.sub('-+', '-',
-                               re.sub(r'.{36}(?=-1\.png)', '',
+                               re.sub(r'.{36}(?=-1\.(?:png|jpg))', '',
                                       '-'.join(parts)))))
                 back_output_path = os.path.join(
                     output_path, re.sub(
                         r'-(?:e|p)-', '-',
                         re.sub('-+', '-',
-                               re.sub(r'.{36}(?=-2\.png)', '',
-                                      '{}-2.png'.format(
-                                          '-'.join(parts[:-1]))))))
+                               re.sub(r'.{36}(?=-2\.(?:png|jpg))', '',
+                                      '{}-2.{}'.format(
+                                          '-'.join(parts[:-1]),
+                                          file_type)))))
                 shutil.copyfile(os.path.join(input_path, filename),
                                 front_output_path)
                 shutil.copyfile(back_path, back_output_path)
@@ -920,16 +924,16 @@ def _prepare_dtc_printing_archive(input_path, obj):
     for _, _, filenames in os.walk(input_path):
         front_cnt = 0
         back_cnt = 0
-        filenames = sorted(f for f in filenames if filename.endswith('-1.png')
-                           or filename.endswith('-2.png'))
+        filenames = sorted(f for f in filenames if f.endswith('-1.jpg')
+                           or f.endswith('-2.jpg'))
         total_cnt = len(filenames) / 2
         for filename in filenames:
-            if filename.endswith('-1.png'):
+            if filename.endswith('-1.jpg'):
                 front_cnt += 1
                 obj.write(os.path.join(input_path, filename),
                           '{}front/{}'.format(_deck_name(front_cnt, total_cnt),
                                               filename))
-            elif filename.endswith('-2.png'):
+            elif filename.endswith('-2.jpg'):
                 back_cnt += 1
                 obj.write(os.path.join(input_path, filename),
                           '{}back/{}'.format(_deck_name(back_cnt, total_cnt),
@@ -948,7 +952,7 @@ def generate_mpc(conf, set_id, set_name, lang):
     _create_folder(output_path)
     _clear_folder(TEMP_PATH)
 
-    _prepare_printing_images(input_path, TEMP_PATH, False)
+    _prepare_printing_images(input_path, TEMP_PATH, 'mpc')
     _make_unique_png(TEMP_PATH)
 
     if 'makeplayingcards_zip' in conf['outputs']:
@@ -974,13 +978,13 @@ def generate_dtc(conf, set_id, set_name, lang):
     """ Generate DriveThruCards outputs.
     """
     print('  Generating DriveThruCards outputs')
-    input_path = os.path.join(IMAGES_EONS_PATH, 'png300BleedDTC',
+    input_path = os.path.join(IMAGES_EONS_PATH, 'jpg300BleedDTC',
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_DTC_PATH, '{}.{}'.format(set_name, lang))
     _create_folder(output_path)
     _clear_folder(TEMP_PATH)
 
-    _prepare_printing_images(input_path, TEMP_PATH, True)
+    _prepare_printing_images(input_path, TEMP_PATH, 'dtc')
 
     if 'drivethrucards_zip' in conf['outputs']:
         with zipfile.ZipFile(
