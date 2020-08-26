@@ -908,8 +908,8 @@ def _deck_name(current_cnt, total_cnt):
     """ Get deck name for DriveThruCards.
     """
     if total_cnt > 130:
-        return 'deck{}/'.format(min(math.floor(current_cnt / 120) + 1,
-                                    ((total_cnt - 10) / 120) + 1))
+        return 'deck{}/'.format(min(math.floor((current_cnt - 1) / 120) + 1,
+                                    math.ceil((total_cnt - 10) / 120)))
 
     return ''
 
@@ -925,15 +925,15 @@ def _prepare_dtc_printing_archive(input_path, obj):
         total_cnt = len(filenames) / 2
         for filename in filenames:
             if filename.endswith('-1.png'):
+                front_cnt += 1
                 obj.write(os.path.join(input_path, filename),
                           '{}front/{}'.format(_deck_name(front_cnt, total_cnt),
                                               filename))
-                front_cnt += 1
             elif filename.endswith('-2.png'):
+                back_cnt += 1
                 obj.write(os.path.join(input_path, filename),
                           '{}back/{}'.format(_deck_name(back_cnt, total_cnt),
                                              filename))
-                back_cnt += 1
 
         break
 
