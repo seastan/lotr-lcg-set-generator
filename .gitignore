@@ -7,7 +7,7 @@ imagesEons/*/*/*
 Output/*/*/*
 setEons/*.xml
 setEons/*.xml.old
-Temp/*.png
+Temp/*/*
 
 configuration.yaml
 macros_copy.xlsm

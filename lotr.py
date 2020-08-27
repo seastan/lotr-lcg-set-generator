@@ -41,19 +41,36 @@ OUTPUT_PDF_PATH = os.path.join('Output', 'PDF')
 PROJECT_PATH = 'setGenerator.seproject'
 SET_EONS_PATH = 'setEons'
 SHEET_ROOT_PATH = ''
-TEMP_PATH = 'Temp'
+TEMP_ROOT_PATH = 'Temp'
 XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
 
 
 def _clear_folder(folder):
     """ Clear the folder.
     """
+    if not os.path.exists(folder):
+        return
+
     for _, _, filenames in os.walk(folder):
         for filename in filenames:
             if filename not in ('seproject', '.gitignore'):
                 os.remove(os.path.join(folder, filename))
 
         break
+
+
+def _create_folder(folder):
+    """ Create the folder if needed.
+    """
+    if not os.path.exists(folder):
+        os.mkdir(folder)
+
+
+def _delete_folder(folder):
+    """ Delete the folder.
+    """
+    if os.path.exists(folder):
+        shutil.rmtree(folder, ignore_errors=True)
 
 
 def _get_artwork_path(conf, set_id):
@@ -71,13 +88,6 @@ def _find_properties(parent, name):
     """
     properties = [p for p in parent if p.attrib.get('name') == name]
     return properties
-
-
-def _create_folder(folder):
-    """ Create the folder if needed.
-    """
-    if not os.path.exists(folder):
-        os.mkdir(folder)
 
 
 def _clear_modified_images(folder, skip_ids):
@@ -536,7 +546,10 @@ def generate_png300_pdf(conf, set_id, lang, skip_ids):
                                '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
-    _clear_folder(TEMP_PATH)
+    temp_path = os.path.join(TEMP_ROOT_PATH,
+                             'generate_png300_pdf.{}.{}'.format(set_id, lang))
+    _create_folder(temp_path)
+    _clear_folder(temp_path)
 
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
@@ -549,19 +562,19 @@ def generate_png300_pdf(conf, set_id, lang, skip_ids):
             output_filename = _update_zip_filename(filename)
             if output_filename.endswith('-2.png'):
                 with zip_obj.open(filename) as zip_file:
-                    with open(os.path.join(TEMP_PATH, output_filename),
+                    with open(os.path.join(temp_path, output_filename),
                               'wb') as output_file:
                         shutil.copyfileobj(zip_file, output_file)
 
     cmd = GIMP_COMMAND.format(
         conf['gimp_console_path'],
         'python-prepare-pdf-back-folder',
-        TEMP_PATH.replace('\\', '\\\\'),
+        temp_path.replace('\\', '\\\\'),
         output_path.replace('\\', '\\\\'))
     res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
     print('    {}'.format(res))
 
-    _clear_folder(TEMP_PATH)
+    _clear_folder(temp_path)
 
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
@@ -574,19 +587,19 @@ def generate_png300_pdf(conf, set_id, lang, skip_ids):
             output_filename = _update_zip_filename(filename)
             if output_filename.endswith('-1.png'):
                 with zip_obj.open(filename) as zip_file:
-                    with open(os.path.join(TEMP_PATH, output_filename),
+                    with open(os.path.join(temp_path, output_filename),
                               'wb') as output_file:
                         shutil.copyfileobj(zip_file, output_file)
 
     cmd = GIMP_COMMAND.format(
         conf['gimp_console_path'],
         'python-prepare-pdf-front-folder',
-        TEMP_PATH.replace('\\', '\\\\'),
+        temp_path.replace('\\', '\\\\'),
         output_path.replace('\\', '\\\\'))
     res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
     print('    {}'.format(res))
 
-    _clear_folder(TEMP_PATH)
+    _delete_folder(temp_path)
 
 
 def generate_png800_bleedmpc(conf, set_id, lang, skip_ids):
@@ -597,7 +610,11 @@ def generate_png800_bleedmpc(conf, set_id, lang, skip_ids):
                                '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
-    _clear_folder(TEMP_PATH)
+    temp_path = os.path.join(TEMP_ROOT_PATH,
+                             'generate_png800_bleedmpc.{}.{}'.format(set_id,
+                                                                     lang))
+    _create_folder(temp_path)
+    _clear_folder(temp_path)
 
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
@@ -609,19 +626,19 @@ def generate_png800_bleedmpc(conf, set_id, lang, skip_ids):
         for filename in filelist:
             output_filename = _update_zip_filename(filename)
             with zip_obj.open(filename) as zip_file:
-                with open(os.path.join(TEMP_PATH, output_filename),
+                with open(os.path.join(temp_path, output_filename),
                           'wb') as output_file:
                     shutil.copyfileobj(zip_file, output_file)
 
     cmd = GIMP_COMMAND.format(
         conf['gimp_console_path'],
         'python-prepare-makeplayingcards-folder',
-        TEMP_PATH.replace('\\', '\\\\'),
+        temp_path.replace('\\', '\\\\'),
         output_path.replace('\\', '\\\\'))
     res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
     print('    {}'.format(res))
 
-    _clear_folder(TEMP_PATH)
+    _delete_folder(temp_path)
 
 
 def generate_jpg300_bleeddtc(conf, set_id, lang, skip_ids):
@@ -632,7 +649,11 @@ def generate_jpg300_bleeddtc(conf, set_id, lang, skip_ids):
                                '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
-    _clear_folder(TEMP_PATH)
+    temp_path = os.path.join(TEMP_ROOT_PATH,
+                             'generate_jpg300_bleeddtc.{}.{}'.format(set_id,
+                                                                     lang))
+    _create_folder(temp_path)
+    _clear_folder(temp_path)
 
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
@@ -644,19 +665,19 @@ def generate_jpg300_bleeddtc(conf, set_id, lang, skip_ids):
         for filename in filelist:
             output_filename = _update_zip_filename(filename)
             with zip_obj.open(filename) as zip_file:
-                with open(os.path.join(TEMP_PATH, output_filename),
+                with open(os.path.join(temp_path, output_filename),
                           'wb') as output_file:
                     shutil.copyfileobj(zip_file, output_file)
 
     cmd = GIMP_COMMAND.format(
         conf['gimp_console_path'],
         'python-prepare-drivethrucards-folder',
-        TEMP_PATH.replace('\\', '\\\\'),
+        temp_path.replace('\\', '\\\\'),
         output_path.replace('\\', '\\\\'))
     res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
     print('    {}'.format(res))
 
-    _clear_folder(TEMP_PATH)
+    _delete_folder(temp_path)
 
 
 def generate_db(set_id, set_name, lang):
@@ -961,17 +982,20 @@ def generate_mpc(conf, set_id, set_name, lang):
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_MPC_PATH, '{}.{}'.format(set_name, lang))
     _create_folder(output_path)
-    _clear_folder(TEMP_PATH)
+    temp_path = os.path.join(TEMP_ROOT_PATH,
+                             'generate_mpc.{}.{}'.format(set_id, lang))
+    _create_folder(temp_path)
+    _clear_folder(temp_path)
 
-    _prepare_printing_images(input_path, TEMP_PATH, 'mpc')
-    _make_unique_png(TEMP_PATH)
+    _prepare_printing_images(input_path, temp_path, 'mpc')
+    _make_unique_png(temp_path)
 
     if 'makeplayingcards_zip' in conf['outputs']:
         with zipfile.ZipFile(
                 os.path.join(output_path,
                              'MPC.{}.{}.zip'.format(set_name, lang)),
                 'w') as obj:
-            _prepare_mpc_printing_archive(TEMP_PATH, obj)
+            _prepare_mpc_printing_archive(temp_path, obj)
             obj.write('MakePlayingCards.pdf', 'MakePlayingCards.pdf')
 
     if 'makeplayingcards_7z' in conf['outputs']:
@@ -979,10 +1003,10 @@ def generate_mpc(conf, set_id, set_name, lang):
                 os.path.join(output_path,
                              'MPC.{}.{}.7z'.format(set_name, lang)),
                 'w') as obj:
-            _prepare_mpc_printing_archive(TEMP_PATH, obj)
+            _prepare_mpc_printing_archive(temp_path, obj)
             obj.write('MakePlayingCards.pdf', 'MakePlayingCards.pdf')
 
-    _clear_folder(TEMP_PATH)
+    _delete_folder(temp_path)
 
 
 def generate_dtc(conf, set_id, set_name, lang):
@@ -993,22 +1017,25 @@ def generate_dtc(conf, set_id, set_name, lang):
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_DTC_PATH, '{}.{}'.format(set_name, lang))
     _create_folder(output_path)
-    _clear_folder(TEMP_PATH)
+    temp_path = os.path.join(TEMP_ROOT_PATH,
+                             'generate_dtc.{}.{}'.format(set_id, lang))
+    _create_folder(temp_path)
+    _clear_folder(temp_path)
 
-    _prepare_printing_images(input_path, TEMP_PATH, 'dtc')
+    _prepare_printing_images(input_path, temp_path, 'dtc')
 
     if 'drivethrucards_zip' in conf['outputs']:
         with zipfile.ZipFile(
                 os.path.join(output_path,
                              'DTC.{}.{}.zip'.format(set_name, lang)),
                 'w') as obj:
-            _prepare_dtc_printing_archive(TEMP_PATH, obj)
+            _prepare_dtc_printing_archive(temp_path, obj)
 
     if 'drivethrucards_7z' in conf['outputs']:
         with py7zr.SevenZipFile(
                 os.path.join(output_path,
                              'DTC.{}.{}.7z'.format(set_name, lang)),
                 'w') as obj:
-            _prepare_dtc_printing_archive(TEMP_PATH, obj)
+            _prepare_dtc_printing_archive(temp_path, obj)
 
-    _clear_folder(TEMP_PATH)
+    _delete_folder(temp_path)
