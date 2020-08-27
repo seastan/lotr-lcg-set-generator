@@ -411,6 +411,12 @@ def calculate_hashes(set_id, lang):
                    ).encode()).hexdigest()
         card.set('hash', card_hash)
 
+    new_file_hash = hashlib.md5(
+        re.sub(r'\n\s*', '', ET.tostring(root, encoding='unicode').strip()
+               ).encode()).hexdigest()
+    root.set('hash', new_file_hash)
+
+    old_file_hash = ''
     old_path = os.path.join(SET_EONS_PATH, '{}.{}.xml.old'.format(set_id,
                                                                   lang))
     if os.path.exists(old_path):
@@ -419,6 +425,10 @@ def calculate_hashes(set_id, lang):
 
         tree_old = ET.parse(old_path)
         root_old = tree_old.getroot()
+        old_file_hash = root_old.attrib['hash']
+        if old_file_hash == new_file_hash:
+            root.set('skip', '1')
+
         for card in root_old[0]:
             old_hashes[card.attrib['id']] = card.attrib['hash']
 
@@ -428,6 +438,7 @@ def calculate_hashes(set_id, lang):
                 card.set('skip', '1')
 
     tree.write(new_path)
+    return (new_file_hash, old_file_hash)
 
 
 def copy_raw_images(conf, set_id, lang):
