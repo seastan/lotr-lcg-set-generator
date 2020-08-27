@@ -14,6 +14,9 @@ gimp_console_path: C:\Program Files\GIMP 2\bin\gimp-console-2.10.exe
 # or update only the cards, changed since the previous script run (false)
 from_scratch: true
 
+# Number of parallel processes
+parallelism: 3
+
 # List of set IDs to work on
 set_ids:
   - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f

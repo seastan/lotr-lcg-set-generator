@@ -564,23 +564,24 @@ def create_project():
                  round(time.time() - timestamp, 3))
 
 
-def get_skip_cards(set_id, set_name, lang):
-    """ Get cards to skip.
+def get_skip_info(set_id, set_name, lang):
+    """ Get skip information for the set and individual cards.
     """
-    logging.info('[%s, %s] Getting cards to skip...', set_name, lang)
+    logging.info('[%s, %s] Getting skip information...', set_name, lang)
     timestamp = time.time()
 
     skip_ids = set()
     tree = ET.parse(os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id,
                                                                    lang)))
     root = tree.getroot()
+    skip_set = root.attrib.get('skip') == '1'
     for card in root[0]:
         if card.attrib.get('skip') == '1':
             skip_ids.add(card.attrib['id'])
 
-    logging.info('[%s, %s] ...Getting cards to skip (%ss)',
+    logging.info('[%s, %s] ...Getting skip information (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
-    return skip_ids
+    return skip_set, skip_ids
 
 
 def generate_jpg300_nobleed(set_id, set_name, lang, skip_ids):
@@ -850,10 +851,13 @@ def generate_octgn(set_id, set_name, lang):
 def _collect_pdf_images(input_path):
     """ Collect image filenames for generated PDF.
     """
-    images = {'player': [],
-              'encounter': [],
-              'custom': []}
     for _, _, filenames in os.walk(input_path):
+        if not filenames:
+            return {}
+
+        images = {'player': [],
+                  'encounter': [],
+                  'custom': []}
         for filename in filenames:
             parts = filename.split('-')
             if parts[-1] != '1.png':
