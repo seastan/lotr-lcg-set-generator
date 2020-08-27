@@ -2,11 +2,13 @@
 """ Helper functions for LotR ALeP workflow.
 """
 import hashlib
+import logging
 import math
 import os
 import re
 import shutil
 import subprocess
+import time
 import zipfile
 
 import xml.etree.ElementTree as ET
@@ -118,7 +120,9 @@ def _update_zip_filename(filename):
 def read_conf():
     """ Read project configuration.
     """
-    print('Reading project configuration')
+    logging.info('Reading project configuration...')
+    timestamp = time.time()
+
     with open(CONFIGURATION_PATH, 'r') as f_conf:
         conf = yaml.safe_load(f_conf)
 
@@ -134,21 +138,29 @@ def read_conf():
             or 'drivethrucards_7z' in conf['outputs']):
         conf['outputs'].add('drivethrucards')
 
+    logging.info('...Reading project configuration (%ss)',
+                 round(time.time() - timestamp, 3))
     return conf
 
 
 def clear_project_folders():
     """ Clear raw image files and xml files in the project folders.
     """
-    print('Clearing the project folders')
+    logging.info('Clearing the project folders...')
+    timestamp = time.time()
+
     _clear_folder(IMAGES_RAW_PATH)
     _clear_folder(XML_PATH)
+    logging.info('...Clearing the project folders (%ss)',
+                 round(time.time() - timestamp, 3))
 
 
 def download_sheet(conf):
     """ Download cards spreadsheet from Google Drive.
     """
-    print('Downloading cards spreadsheet from Google Drive')
+    logging.info('Downloading cards spreadsheet from Google Drive...')
+    timestamp = time.time()
+
     sheet_path = os.path.join(SHEET_ROOT_PATH,
                               '{}.{}'.format(SHEET_NAME, conf['sheet_type']))
     if conf['sheet_type'] == 'xlsm':
@@ -161,11 +173,16 @@ def download_sheet(conf):
     with open(sheet_path, 'wb') as f_sheet:
         f_sheet.write(requests.get(url).content)
 
+    logging.info('...Downloading cards spreadsheet from Google Drive (%ss)',
+                 round(time.time() - timestamp, 3))
+
 
 def get_sets(conf):
     """ Get all sets to work on and return (id, name, row) tuples.
     """
-    print('Getting all sets to work on')
+    logging.info('Getting all sets to work on...')
+    timestamp = time.time()
+
     sheet_path = os.path.join(SHEET_ROOT_PATH,
                               '{}.{}'.format(SHEET_NAME, conf['sheet_type']))
 
@@ -185,15 +202,20 @@ def get_sets(conf):
         excel_app.quit()
 
     if not sets:
-        print('No sets found')
+        logging.error('ERROR: No sets found')
 
+    logging.info('...Getting all sets to work on (%ss)',
+                 round(time.time() - timestamp, 3))
     return sets
 
 
-def backup_previous_xml(conf, set_id, lang):
+def backup_previous_xml(conf, set_id, set_name, lang):
     """ Backup a previous Strange Eons xml file.
     """
-    print('  Backing up a previous Strange Eons xml file')
+    logging.info('[%s, %s] Backing up a previous Strange Eons xml file...',
+                 set_name, lang)
+    timestamp = time.time()
+
     new_path = os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id, lang))
     old_path = os.path.join(SET_EONS_PATH, '{}.{}.xml.old'.format(set_id,
                                                                   lang))
@@ -202,6 +224,9 @@ def backup_previous_xml(conf, set_id, lang):
 
     if conf['from_scratch'] and os.path.exists(old_path):
         os.remove(old_path)
+
+    logging.info('[%s, %s] ...Backing up a previous Strange Eons xml file'
+                 ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
 def _run_macro(conf, set_row, callback):
@@ -246,11 +271,15 @@ def generate_octgn_xml(conf, set_name, set_row):
     def _callback(_, xlwb_target):
         xlwb_target.macro('SaveOCTGN')()
 
-    print('Generating set.xml file for OCTGN for set {}'.format(set_name))
+    logging.info('[%s] Generating set.xml file for OCTGN...', set_name)
+    timestamp = time.time()
+
     _run_macro(conf, set_row, _callback)
+    logging.info('[%s] ...Generating set.xml file for OCTGN (%ss)',
+                 set_name, round(time.time() - timestamp, 3))
 
 
-def generate_xml(conf, set_id, set_row, lang):
+def generate_xml(conf, set_id, set_name, set_row, lang):
     """ Generate xml file for Strange Eons.
     """
     def _callback(xlwb_source, xlwb_target):
@@ -280,8 +309,13 @@ def generate_xml(conf, set_id, set_row, lang):
         xlwb_target.sheets['Sets'].range('D3').value = lang
         xlwb_target.macro('SaveXML')()
 
-    print('  Generating xml file for Strange Eons')
+    logging.info('[%s, %s] Generating xml file for Strange Eons...',
+                 set_name, lang)
+    timestamp = time.time()
+
     _run_macro(conf, set_row, _callback)
+    logging.info('[%s, %s] ...Generating xml file for Strange Eons (%ss)',
+                 set_name, lang, round(time.time() - timestamp, 3))
 
 
 def _collect_artwork_images(artwork_path):
@@ -328,10 +362,13 @@ def _get_property(parent, name):
     return prop
 
 
-def update_xml(conf, set_id, lang):  # pylint: disable=R0914,R0915
+def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0914,R0915
     """ Update the Strange Eons xml file with additional data.
     """
-    print('  Updating the Strange Eons xml file with additional data')
+    logging.info('[%s, %s] Updating the Strange Eons xml file with additional'
+                 ' data...', set_name, lang)
+    timestamp = time.time()
+
     artwork_path = _get_artwork_path(conf, set_id)
     images = _collect_artwork_images(artwork_path)
     xml_path = os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id, lang))
@@ -345,7 +382,8 @@ def update_xml(conf, set_id, lang):  # pylint: disable=R0914,R0915
     for card in root[0]:
         card_type = _find_properties(card, 'Type')
         if not card_type:
-            print('ERROR: Skipping a card without card type')
+            logging.error('[%s, %s] ERROR: Skipping a card without card type',
+                          set_name, lang)
             continue
 
         card_type = card_type[0].attrib['value']
@@ -405,12 +443,18 @@ def update_xml(conf, set_id, lang):  # pylint: disable=R0914,R0915
                 encounter_sets[encounter_cards[card.attrib['id']]]))
 
     tree.write(xml_path)
+    logging.info('[%s, %s] ...Updating the Strange Eons xml file with'
+                 ' additional data (%ss)',
+                 set_name, lang, round(time.time() - timestamp, 3))
 
 
-def calculate_hashes(set_id, lang):
+def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0914
     """ Update the Strange Eons xml file with hashes and skip flags.
     """
-    print('  Updating the Strange Eons xml file with hashes and skip flags')
+    logging.info('[%s, %s] Updating the Strange Eons xml file with hashes and'
+                 ' skip flags...', set_name, lang)
+    timestamp = time.time()
+
     new_path = os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id, lang))
     tree = ET.parse(new_path)
     root = tree.getroot()
@@ -448,13 +492,20 @@ def calculate_hashes(set_id, lang):
                 card.set('skip', '1')
 
     tree.write(new_path)
+
+    logging.info('[%s, %s] ...Updating the Strange Eons xml file with hashes'
+                 ' and skip flags (%ss)',
+                 set_name, lang, round(time.time() - timestamp, 3))
     return (new_file_hash, old_file_hash)
 
 
-def copy_raw_images(conf, set_id, lang):
+def copy_raw_images(conf, set_id, set_name, lang):
     """ Copy raw image files into the project folder.
     """
-    print('  Copying raw image files into the project folder')
+    logging.info('[%s, %s] Copying raw image files into the project folder...',
+                 set_name, lang)
+    timestamp = time.time()
+
     artwork_path = _get_artwork_path(conf, set_id)
     tree = ET.parse(os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id,
                                                                    lang)))
@@ -479,30 +530,46 @@ def copy_raw_images(conf, set_id, lang):
                         shutil.copyfile(os.path.join(artwork_path, filename),
                                         path)
 
+    logging.info('[%s, %s] ...Copying raw image files into the project folder'
+                 ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
-def copy_xml(set_id, lang):
+
+def copy_xml(set_id, set_name, lang):
     """ Copy the Strange Eons xml file into the project.
     """
-    print('  Copying the Strange Eons xml file into the project')
+    logging.info('[%s, %s] Copying the Strange Eons xml file into'
+                 ' the project...', set_name, lang)
+    timestamp = time.time()
+
     shutil.copyfile(os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id,
                                                                    lang)),
                     os.path.join(XML_PATH, '{}.{}.xml'.format(set_id, lang)))
+    logging.info('[%s, %s] ...Copying the Strange Eons xml file into the'
+                 ' project (%ss)',
+                 set_name, lang, round(time.time() - timestamp, 3))
 
 
 def create_project():
     """ Create a Strange Eons project archive.
     """
-    print('Creating a Strange Eons project archive')
+    logging.info('Creating a Strange Eons project archive...')
+    timestamp = time.time()
+
     with zipfile.ZipFile(PROJECT_PATH, 'w') as zip_obj:
         for root, _, filenames in os.walk(PROJECT_FOLDER):
             for filename in filenames:
                 zip_obj.write(os.path.join(root, filename))
 
+    logging.info('...Creating a Strange Eons project archive (%ss)',
+                 round(time.time() - timestamp, 3))
 
-def get_skip_cards(set_id, lang):
+
+def get_skip_cards(set_id, set_name, lang):
     """ Get cards to skip.
     """
-    print('  Getting cards to skip')
+    logging.info('[%s, %s] Getting cards to skip...', set_name, lang)
+    timestamp = time.time()
+
     skip_ids = set()
     tree = ET.parse(os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id,
                                                                    lang)))
@@ -511,13 +578,18 @@ def get_skip_cards(set_id, lang):
         if card.attrib.get('skip') == '1':
             skip_ids.add(card.attrib['id'])
 
+    logging.info('[%s, %s] ...Getting cards to skip (%ss)',
+                 set_name, lang, round(time.time() - timestamp, 3))
     return skip_ids
 
 
-def generate_jpg300_nobleed(set_id, lang, skip_ids):
+def generate_jpg300_nobleed(set_id, set_name, lang, skip_ids):
     """ Generate images for DB and OCTGN outputs.
     """
-    print('  Generating images for DB and OCTGN outputs')
+    logging.info('[%s, %s] Generating images for DB and OCTGN outputs...',
+                 set_name, lang)
+    timestamp = time.time()
+
     output_path = os.path.join(IMAGES_EONS_PATH, 'jpg300NoBleed',
                                '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
@@ -537,11 +609,17 @@ def generate_jpg300_nobleed(set_id, lang, skip_ids):
                           'wb') as output_file:
                     shutil.copyfileobj(zip_file, output_file)
 
+    logging.info('[%s, %s] ...Generating images for DB and OCTGN outputs'
+                 ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
-def generate_png300_pdf(conf, set_id, lang, skip_ids):
+
+def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
     """ Generate images for PDF outputs.
     """
-    print('  Generating images for PDF outputs')
+    logging.info('[%s, %s] Generating images for PDF outputs...',
+                 set_name, lang)
+    timestamp = time.time()
+
     output_path = os.path.join(IMAGES_EONS_PATH, 'png300PDF',
                                '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
@@ -572,7 +650,7 @@ def generate_png300_pdf(conf, set_id, lang, skip_ids):
         temp_path.replace('\\', '\\\\'),
         output_path.replace('\\', '\\\\'))
     res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
-    print('    {}'.format(res))
+    logging.info('[%s, %s] %s', set_name, lang, res)
 
     _clear_folder(temp_path)
 
@@ -597,15 +675,20 @@ def generate_png300_pdf(conf, set_id, lang, skip_ids):
         temp_path.replace('\\', '\\\\'),
         output_path.replace('\\', '\\\\'))
     res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
-    print('    {}'.format(res))
+    logging.info('[%s, %s] %s', set_name, lang, res)
 
     _delete_folder(temp_path)
+    logging.info('[%s, %s] ...Generating images for PDF outputs (%ss)',
+                 set_name, lang, round(time.time() - timestamp, 3))
 
 
-def generate_png800_bleedmpc(conf, set_id, lang, skip_ids):
+def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
     """ Generate images for MakePlayingCards outputs.
     """
-    print('  Generating images for MakePlayingCards outputs')
+    logging.info('[%s, %s] Generating images for MakePlayingCards outputs...',
+                 set_name, lang)
+    timestamp = time.time()
+
     output_path = os.path.join(IMAGES_EONS_PATH, 'png800BleedMPC',
                                '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
@@ -636,15 +719,20 @@ def generate_png800_bleedmpc(conf, set_id, lang, skip_ids):
         temp_path.replace('\\', '\\\\'),
         output_path.replace('\\', '\\\\'))
     res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
-    print('    {}'.format(res))
+    logging.info('[%s, %s] %s', set_name, lang, res)
 
     _delete_folder(temp_path)
+    logging.info('[%s, %s] ...Generating images for MakePlayingCards outputs'
+                 ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
-def generate_jpg300_bleeddtc(conf, set_id, lang, skip_ids):
+def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
     """ Generate images for DriveThruCards outputs.
     """
-    print('  Generating images for DriveThruCards outputs')
+    logging.info('[%s, %s] Generating images for DriveThruCards outputs...',
+                 set_name, lang)
+    timestamp = time.time()
+
     output_path = os.path.join(IMAGES_EONS_PATH, 'jpg300BleedDTC',
                                '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
@@ -675,23 +763,31 @@ def generate_jpg300_bleeddtc(conf, set_id, lang, skip_ids):
         temp_path.replace('\\', '\\\\'),
         output_path.replace('\\', '\\\\'))
     res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
-    print('    {}'.format(res))
+    logging.info('[%s, %s] %s', set_name, lang, res)
 
     _delete_folder(temp_path)
+    logging.info('[%s, %s] ...Generating images for DriveThruCards outputs'
+                 ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
 def generate_db(set_id, set_name, lang):
     """ Generate DB outputs.
     """
-    print('  Generating DB outputs')
+    logging.info('[%s, %s] Generating DB outputs...', set_name, lang)
+    timestamp = time.time()
+
     input_path = os.path.join(IMAGES_EONS_PATH, 'jpg300NoBleed',
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_DB_PATH, '{}.{}'.format(set_name, lang))
-    _create_folder(output_path)
-    _clear_folder(output_path)
 
     known_filenames = set()
     for _, _, filenames in os.walk(input_path):
+        if not filenames:
+            logging.error('[%s, %s] ERROR: No cards found', set_name, lang)
+            break
+
+        _create_folder(output_path)
+        _clear_folder(output_path)
         for filename in filenames:
             if filename.split('.')[-1] != 'jpg':
                 continue
@@ -708,20 +804,29 @@ def generate_db(set_id, set_name, lang):
 
         break
 
+    logging.info('[%s, %s] ...Generating DB outputs (%ss)',
+                 set_name, lang, round(time.time() - timestamp, 3))
+
 
 def generate_octgn(set_id, set_name, lang):
     """ Generate OCTGN outputs.
     """
-    print('  Generating OCTGN outputs')
+    logging.info('[%s, %s] Generating OCTGN outputs...', set_name, lang)
+    timestamp = time.time()
+
     input_path = os.path.join(IMAGES_EONS_PATH, 'jpg300NoBleed',
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_OCTGN_PATH, set_name)
-    _create_folder(output_path)
+    pack_path = os.path.join(output_path, '{}.{}.o8c'.format(set_name, lang))
 
     known_filenames = set()
-    pack_path = os.path.join(output_path, '{}.{}.o8c'.format(set_name, lang))
-    with zipfile.ZipFile(pack_path, 'w', zipfile.ZIP_DEFLATED) as zip_obj:
-        for _, _, filenames in os.walk(input_path):
+    for _, _, filenames in os.walk(input_path):
+        if not filenames:
+            logging.error('[%s, %s] ERROR: No cards found', set_name, lang)
+            break
+
+        _create_folder(output_path)
+        with zipfile.ZipFile(pack_path, 'w', zipfile.ZIP_DEFLATED) as zip_obj:
             for filename in filenames:
                 if filename.split('.')[-1] != 'jpg':
                     continue
@@ -736,7 +841,10 @@ def generate_octgn(set_id, set_name, lang):
                                                           set_id,
                                                           octgn_filename))
 
-            break
+        break
+
+    logging.info('[%s, %s] ...Generating OCTGN outputs (%ss)',
+                 set_name, lang, round(time.time() - timestamp, 3))
 
 
 def _collect_pdf_images(input_path):
@@ -765,8 +873,8 @@ def _collect_pdf_images(input_path):
                     back_path = os.path.join(IMAGES_BACK_PATH,
                                              'encounterBackOfficial.png')
                 else:
-                    print('Missing card back for {}, removing the file'
-                          .format(filename))
+                    logging.error('ERROR: Missing card back for %s, removing'
+                                  ' the file', filename)
                     continue
 
             copies = 3 if parts[1] == 'p' else 1
@@ -782,13 +890,21 @@ def _collect_pdf_images(input_path):
 def generate_pdf(set_id, set_name, lang):  # pylint: disable=R0914
     """ Generate PDF outputs.
     """
-    print('  Generating PDF outputs')
+    logging.info('[%s, %s] Generating PDF outputs...', set_name, lang)
+    timestamp = time.time()
+
     input_path = os.path.join(IMAGES_EONS_PATH, 'png300PDF',
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_PDF_PATH, '{}.{}'.format(set_name, lang))
-    _create_folder(output_path)
 
     images = _collect_pdf_images(input_path)
+    if not images:
+        logging.error('[%s, %s] ERROR: No cards found', set_name, lang)
+        logging.info('[%s, %s] ...Generating PDF outputs (%ss)',
+                     set_name, lang, round(time.time() - timestamp, 3))
+        return
+
+    _create_folder(output_path)
     pages_raw = []
     for key in images:
         pages_raw.extend([(images[key][i * 6:(i + 1) * 6] + [None] * 6)[:6]
@@ -830,6 +946,9 @@ def generate_pdf(set_id, set_name, lang):  # pylint: disable=R0914
             canvas.showPage()
 
         canvas.save()
+
+    logging.info('[%s, %s] ...Generating PDF outputs (%ss)',
+                 set_name, lang, round(time.time() - timestamp, 3))
 
 
 def _insert_png_text(filepath, text):
@@ -878,8 +997,8 @@ def _prepare_printing_images(input_path, output_path, service):
                         service == 'mpc' and 'encounterBackUnofficialMPC.png'
                         or 'encounterBackOfficialDTC.jpg')
                 else:
-                    print('Missing card back for {}, removing the file'
-                          .format(filename))
+                    logging.error('ERROR: Missing card back for %s, removing'
+                                  ' the file', filename)
                     continue
 
             if parts[1] == 'p':
@@ -977,16 +1096,29 @@ def _prepare_dtc_printing_archive(input_path, obj):
 def generate_mpc(conf, set_id, set_name, lang):
     """ Generate MakePlayingCards outputs.
     """
-    print('  Generating MakePlayingCards outputs')
+    logging.info('[%s, %s] Generating MakePlayingCards outputs...',
+                 set_name, lang)
+    timestamp = time.time()
+
     input_path = os.path.join(IMAGES_EONS_PATH, 'png800BleedMPC',
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_MPC_PATH, '{}.{}'.format(set_name, lang))
-    _create_folder(output_path)
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_mpc.{}.{}'.format(set_id, lang))
+
+    for _, _, filenames in os.walk(input_path):
+        if not filenames:
+            logging.error('[%s, %s] ERROR: No cards found', set_name, lang)
+            logging.info('[%s, %s] ...Generating MakePlayingCards outputs '
+                         '(%ss)',
+                         set_name, lang, round(time.time() - timestamp, 3))
+            return
+
+        break
+
+    _create_folder(output_path)
     _create_folder(temp_path)
     _clear_folder(temp_path)
-
     _prepare_printing_images(input_path, temp_path, 'mpc')
     _make_unique_png(temp_path)
 
@@ -1007,21 +1139,35 @@ def generate_mpc(conf, set_id, set_name, lang):
             obj.write('MakePlayingCards.pdf', 'MakePlayingCards.pdf')
 
     _delete_folder(temp_path)
+    logging.info('[%s, %s] ...Generating MakePlayingCards outputs (%ss)',
+                 set_name, lang, round(time.time() - timestamp, 3))
 
 
 def generate_dtc(conf, set_id, set_name, lang):
     """ Generate DriveThruCards outputs.
     """
-    print('  Generating DriveThruCards outputs')
+    logging.info('[%s, %s] Generating DriveThruCards outputs...',
+                 set_name, lang)
+    timestamp = time.time()
+
     input_path = os.path.join(IMAGES_EONS_PATH, 'jpg300BleedDTC',
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_DTC_PATH, '{}.{}'.format(set_name, lang))
-    _create_folder(output_path)
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_dtc.{}.{}'.format(set_id, lang))
+
+    for _, _, filenames in os.walk(input_path):
+        if not filenames:
+            logging.error('[%s, %s] ERROR: No cards found', set_name, lang)
+            logging.info('[%s, %s] ...Generating DriveThruCards outputs (%ss)',
+                         set_name, lang, round(time.time() - timestamp, 3))
+            return
+
+        break
+
+    _create_folder(output_path)
     _create_folder(temp_path)
     _clear_folder(temp_path)
-
     _prepare_printing_images(input_path, temp_path, 'dtc')
 
     if 'drivethrucards_zip' in conf['outputs']:
@@ -1039,3 +1185,5 @@ def generate_dtc(conf, set_id, set_name, lang):
             _prepare_dtc_printing_archive(temp_path, obj)
 
     _delete_folder(temp_path)
+    logging.info('[%s, %s] ...Generating DriveThruCards outputs (%ss)',
+                 set_name, lang, round(time.time() - timestamp, 3))
