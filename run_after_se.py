@@ -2,7 +2,7 @@
 """
 import logging
 import time
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 
 import lotr
 
@@ -80,8 +80,15 @@ def main():
                 tasks.append([generate_dtc, conf, set_id, set_name, lang,
                               skip_ids])
 
-    with Pool(processes=conf['parallelism']) as pool:
-        pool.map(run, tasks)
+    if tasks:
+        processes = (cpu_count() - 1 if conf['parallelism'] == 'default'
+                     else conf['parallelism'])
+        logging.info('Starting a pull of %s processes for %s tasks',
+                     processes, len(tasks))
+        with Pool(processes=processes) as pool:
+            pool.map(run, tasks)
+    else:
+        logging.info('No tasks to run')
 
     logging.info('Done (%ss)', round(time.time() - timestamp, 3))
 

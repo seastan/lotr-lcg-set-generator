@@ -15,7 +15,7 @@ gimp_console_path: C:\Program Files\GIMP 2\bin\gimp-console-2.10.exe
 from_scratch: true
 
 # Number of parallel processes
-parallelism: 3
+parallelism: default
 
 # List of set IDs to work on
 set_ids:

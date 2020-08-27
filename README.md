@@ -38,6 +38,7 @@ from this repo, click `OK` and then close GIMP.
   - `artwork_path`: local path to the folder with the cropped artwork (don't use for that any existing folder in this repo)
   - `gimp_console_path`: path to GIMP console executable
   - `from_scratch`: whether to generate all cards from scratch (`true`) or to update only the cards, changed since the previous script run (`false`)
+  - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`)
   - `set_ids`: list of set IDs to work on
   - `languages`: list of languages
   - `outputs`: list of outputs
@@ -52,7 +53,7 @@ To run the workflow, go to the repo folder and follow these steps:
   Once completed, close Strange Eons (wait until it finished packing the project).
 - `python run_after_se.py`
 
-For debugging purposes you can also run these steps using the Jupyter notebook:
+For debugging purposes you can also run these steps using the Jupyter notebook (it doesn't use parallelism):
 
 - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
 - `jupyter notebook`
