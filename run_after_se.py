@@ -1,6 +1,7 @@
 """ LotR ALeP workflow (Part 2, after Strange Eons).
 """
 import logging
+import signal
 import time
 from multiprocessing import Pool, cpu_count
 
@@ -47,6 +48,12 @@ def run(args):
     func(*args)
 
 
+def initializer():
+    """ Ignore CTRL+C in the worker process.
+    """
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+
+
 def main():
     """ Main function.
     """
@@ -81,12 +88,18 @@ def main():
                               skip_ids])
 
     if tasks:
-        processes = (cpu_count() - 1 if conf['parallelism'] == 'default'
+        processes = (max(1, cpu_count() - 1)
+                     if conf['parallelism'] == 'default'
                      else conf['parallelism'])
         logging.info('Starting a pull of %s processes for %s tasks',
                      processes, len(tasks))
-        with Pool(processes=processes) as pool:
-            pool.map(run, tasks)
+        with Pool(processes=processes, initializer=initializer) as pool:
+            try:
+                pool.map(run, tasks)
+            except KeyboardInterrupt:
+                logging.info('Program was terminated!')
+                pool.terminate()
+                return
     else:
         logging.info('No tasks to run')
 
