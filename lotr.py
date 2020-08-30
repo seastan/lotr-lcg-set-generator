@@ -1191,3 +1191,5 @@ def generate_dtc(conf, set_id, set_name, lang):
     _delete_folder(temp_path)
     logging.info('[%s, %s] ...Generating DriveThruCards outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
+
+# magick.exe mogrify -colorspace cmyk c:\lotr\test\*.jpg
