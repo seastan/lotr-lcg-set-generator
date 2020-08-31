@@ -1180,6 +1180,7 @@ def generate_dtc(conf, set_id, set_name, lang):
                              'DTC.{}.{}.zip'.format(set_name, lang)),
                 'w') as obj:
             _prepare_dtc_printing_archive(temp_path, obj)
+            obj.write('DriveThruCards.pdf', 'DriveThruCards.pdf')
 
     if 'drivethrucards_7z' in conf['outputs']:
         with py7zr.SevenZipFile(
@@ -1187,6 +1188,7 @@ def generate_dtc(conf, set_id, set_name, lang):
                              'DTC.{}.{}.7z'.format(set_name, lang)),
                 'w') as obj:
             _prepare_dtc_printing_archive(temp_path, obj)
+            obj.write('DriveThruCards.pdf', 'DriveThruCards.pdf')
 
     _delete_folder(temp_path)
     logging.info('[%s, %s] ...Generating DriveThruCards outputs (%ss)',
