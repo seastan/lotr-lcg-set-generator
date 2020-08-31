@@ -1,50 +1,105 @@
-1. Clone the repo
-2. Install Anaconda and use it to open a JupyterHub.  As another option, you can use VirtualEnv:
+**Setup**
 
-   - `virtualenv env --python=python3.7`
-   - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
-   - `pip install jupyter requests xlwings`
-   - `jupyter notebook`
+1. Clone this repo to a local folder.
 
-3. Open the setGenerator.ipynb notebook
-4. Run through the notebook to make the set
+2. Add the folder with the cropped artwork to your own Google Drive to be able to sync it locally.
+This feature is currently hidden on the Google Drive UI, but may still be accessed by a shortcut
+(see https://support.google.com/drive/thread/35817359?hl=en).  If this feature is removed
+completely, you will need to download updates to that folder manually.
 
-`BulkExport.seplugin`: an updated version of Bulk Export plugin with 800 dpi support (450 dpi has been removed).
+3. Install Backup and Sync from Google (if it's not installed yet) and make sure that the folder
+with the cropped artwork is being synced.
+
+4. Install the latest available version of Strange Eons (https://strangeeons.cgjennings.ca/download.html)
+and the `The Lord of the Rings LCG` plugin.  Then, install `The Lord of the Rings LCG, HD` plugin
+as well.
+
+5. Go to plugins folder (`Strange Eons` -> `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`),
+close Strange Eons and replace `TheLordOfTheRingsLCG.seext` with the custom version from this repo.
+
+6. Install GIMP (https://www.gimp.org/downloads/).
+
+7. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `gimp` folder
+from this repo, click `OK` and then close GIMP.
+
+8. Install ImageMagick (https://imagemagick.org/script/download.php).
+
+9. Make sure that macros are enabled in Microsoft Excel.
+
+10. Go to the repo folder and follow these steps:
+
+  - Install Python 3.7 (or other Python 3 version), Pip and VirtualEnv.
+  - `virtualenv env --python=python3.7`
+  - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
+  - `pip install jupyter py7zr pylint pypng pyyaml reportlab requests xlwings`
+
+11. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
+
+  - `sheet_gdid`: Google Drive ID of the cards spreadsheet
+  - `sheet_type`: spreadsheet type, either `xlsm` (default) or `xlsx`
+  - `artwork_path`: local path to the folder with the cropped artwork (don't use for that any existing folder in this repo)
+  - `gimp_console_path`: path to GIMP console executable
+  - `magick_path`: path to ImageMagick executable
+  - `from_scratch`: whether to generate all cards from scratch (`true`) or to process only the cards, changed since the previous script run (`false`)
+  - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`)
+  - `set_ids`: list of set IDs to work on
+  - `languages`: list of languages
+  - `outputs`: list of outputs (if you added new outputs, you also need to set `from_scratch` to `true`)
+
+**Usage**
+
+To run the workflow, go to the repo folder and follow these steps:
+
+- `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
+- `python run_before_se.py`
+- Open `setGenerator.seproject` in Strange Eons and run `Script/makeCards` script by double clicking it.
+  Once completed, close Strange Eons (wait until it finished packing the project).
+- `python run_after_se.py`
+
+For debugging purposes you can also run these steps using the Jupyter notebook (it doesn't use parallelism):
+
+- `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
+- `jupyter notebook`
+- Open `setGenerator.ipynb` in the browser.
+
+Now there should be the following outputs:
+
+- `Output/OCTGN/<set name>/`: `<octgn id>/set.xml` and `<set name>.<language>.o8c` image packs for OCTGN (300 dpi JPG).
+- `Output/DB/<set name>.<language>/`: 300 dpi JPG images for general purposes.
+- `Output/PDF/<set name>.<language>/`: PDF files in `A4` and `letter` format for home printing.
+- `Output/DriveThruCards/<set name>.<language>/`: `zip` and `7z` archives of 300 dpi PNG images to be printed on DriveThruCards.com.
+- `Output/MakePlayingCards/<set name>.<language>/`: `zip` and `7z` archives of 800 dpi PNG images to be printed on MakePlayingCards.com.
 
 **GIMP Plugins**
 
-`prepare_makeplayingcards.py`: two plugins to prepare images for MakePlayingCards printing (one for a single image,
-another for a folder).  At the moment they make 3 things:
+You may use GIMP plugins separately.  See description of each of them in `gimp/scripts.py`.
 
-1. rotate landscape images (if image name ends with `-Back-Face` or `-2` then clockwise, otherwise counter-clockwise);
-2. crop bleed margins to satisfy MakePlayingCards requirements;
-3. export to PNG with the maximum compression level (still lossless, just saves some space).
+Setup:
 
-They support images in 300, 600 and 800 dpi images (original resolution is preserved).
-
-Installation:
-
-1. Open GIMP
-2. Edit -> Preferences -> Folders -> Plug-ins
-3. Add `gimp` folder from this repo
-4. Restart GIMP
+1. Install GIMP (https://www.gimp.org/downloads/).
+2. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `gimp` folder
+from this repo, click `OK` and then restart GIMP.
 
 Usage:
 
 For a single image:
 
-1. Open image file in GIMP
-2. Filters -> Prepare MakePlayingCards
+1. Open the image file in GIMP
+2. Filters -> Script Name
 3. Specify Output folder
 
 For a folder:
 
-1. Open GIMP
-2. Filters -> Prepare MakePlayingCards Folder
+1. Open any image file in GIMP
+2. Filters -> Script Name (with "Folder" at the end)
 3. Specify Input folder and Output folder
 
-or from CLI:
+From CLI:
 
-`gimp-console-2.10 -i -b "(python-prepare-makeplayingcards-folder 1 \"Input\" \"Output\")"`
+`gimp-console-2.10 -i -b "(python-<lowercase script name with dashes>-folder 1 \"<path to input folder>\" \"path to output folder\")" -b "(gimp-quit 0)"`
 
-GIMP executable on your environment may be slightly different.
+For example:
+
+`gimp-console-2.10 -i -b "(python-prepare-makeplayingcards-folder 1 \"Input\" \"Output\")" -b "(gimp-quit 0)"`
+
+Please note that the name of GIMP console executable on your environment may be slightly different.

@@ -1,0 +1,452 @@
+useLibrary('imageutils');
+useLibrary('threads');
+importPackage(arkham.project);
+importClass(java.io.File);
+importClass(javax.xml.parsers.DocumentBuilder);
+importClass(javax.xml.parsers.DocumentBuilderFactory);
+importClass(org.w3c.dom.Document);
+importClass(org.w3c.dom.Element);
+importClass(org.w3c.dom.Node);
+importClass(org.w3c.dom.NodeList);
+
+var translate = {};
+translate['Ally'] = {'English': 'Ally', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado'};
+translate['Attachment'] = {'English': 'Attachment', 'German': 'Verst\u00e4rkung', 'Spanish': 'Vinculada'};
+translate['Contract'] = {'English': 'Contract', 'German': 'Abkommen', 'Spanish': 'Contrato'};
+translate['Encounter Side Quest'] = {'English': 'Side Quest', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria'};
+translate['Enemy'] = {'English': 'Enemy', 'German': 'Gegner', 'Spanish': 'Enemigo'};
+translate['Event'] = {'English': 'Event', 'German': 'Ereignis', 'Spanish': 'Evento'};
+translate['Hero'] = {'English': 'Hero', 'German': 'Held', 'Spanish': 'H\u00e9roe'};
+translate['Location'] = {'English': 'Location', 'German': 'Ort', 'Spanish': 'Lugar'};
+translate['Objective'] = {'English': 'Objective', 'German': 'Ziel', 'Spanish': 'Objetivo'};
+translate['Objective Ally'] = {'English': 'Objective-Ally', 'German': 'Ziel-Verb\u00fcndeter', 'Spanish': 'Objetivo-Aliado'};
+translate['Player Side Quest'] = {'English': 'Side Quest', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria'};
+translate['Quest'] = {'English': 'Quest', 'German': 'Abenteuer', 'Spanish': 'Misi\u00f3n'};
+translate['Rules'] = {'English': 'Rules', 'German': 'Reglement', 'Spanish': 'Reglas'};
+translate['Treachery'] = {'English': 'Treachery', 'German': 'Verrat', 'Spanish': 'Traici\u00f3n'};
+translate['Encounter Keyword'] = {'English': 'Encounter.', 'German': 'Begegnung.', 'Spanish': 'Encuentro.'};
+translate['Illustration'] = {'English': 'Illus.', 'German': 'Illus.', 'Spanish': 'Ilus.'};
+translate['Unknown Artist'] = {'English': 'Unknown Artist', 'German': 'Unbekannter K\u00fcnstler', 'Spanish': 'Artista Desconocido'};
+translate['Victory'] = {'English': 'Victory', 'German': 'Sieg', 'Spanish': 'Victoria'};
+
+Thread.busyWindow(main, 'Updating cards...', true);
+
+function main(progress, target) {
+	var xmlFiles = project.findChild('XML').iterator();
+	while (xmlFiles.hasNext()) {
+		run(progress, target, xmlFiles.next() + '');
+	}
+	return;
+}
+
+function run(progress, target, filename) {
+	var setID = filename.split('.')[0];
+	var lang = filename.split('.')[1];
+	var backTypes = ['Quest', 'Rules'];
+	var fXmlFile = new File(getProjectMember('XML/').file, filename + '.xml');
+	Console.err.println('\nReading ' + fXmlFile);
+	var dbFactory = DocumentBuilderFactory.newInstance();
+	var dBuilder = dbFactory.newDocumentBuilder();
+	var doc = dBuilder.parse(fXmlFile);
+	doc.getDocumentElement().normalize();
+	var cardSet = doc.getDocumentElement().getAttribute('name');
+
+	var jpg300NoBleed = false;
+	var png300NoBleed = false;
+	var png300Bleed = false;
+	var png800Bleed = false;
+	if (doc.getDocumentElement().getAttribute('jpg300NoBleed') + '' == '1') {
+		jpg300NoBleed = true;
+	}
+	if (doc.getDocumentElement().getAttribute('png300NoBleed') + '' == '1') {
+		png300NoBleed = true;
+	}
+	if (doc.getDocumentElement().getAttribute('png300Bleed') + '' == '1') {
+		png300Bleed = true;
+	}
+	if (doc.getDocumentElement().getAttribute('png800Bleed') + '' == '1') {
+		png800Bleed = true;
+	}
+
+	var nList = doc.getElementsByTagName('card');
+	for (let i = 0; i < nList.getLength(); i++) {
+		let nNode = nList.item(i);
+		if (nNode.getAttribute('skip') == '1') {
+			continue;
+		}
+
+		// Create a dictionary called card that contains all the card info in the xml file
+		let card = {};
+		card['Set'] = cardSet;
+		card['octgn'] = nNode.getAttribute('id');
+		card['Name'] = nNode.getAttribute('name');
+		var propList = nNode.getElementsByTagName('property');
+		for (let j = 0; j < propList.getLength(); j++) {
+			let nProp = propList.item(j);
+			if (!nProp.getParentNode().isSameNode(nNode)) {
+				continue;
+			}
+			if (nProp && nProp.getNodeType() == Node.ELEMENT_NODE) {
+				card[nProp.getAttribute('name')] = nProp.getAttribute('value');
+			}
+		}
+		let altList = nNode.getElementsByTagName('alternate');
+		for (let k = 0; k < altList.getLength(); k++) {
+			let nAlternate = altList.item(k);
+			if (nAlternate && nAlternate.getNodeType() == Node.ELEMENT_NODE) {
+				card['BName'] = nAlternate.getAttribute('name');
+				let altPropList = nAlternate.getElementsByTagName('property');
+				for (let l = 0; l < altPropList.getLength(); l++) {
+					let nAltProp = altPropList.item(l);
+					if (nAltProp && nAltProp.getNodeType() == Node.ELEMENT_NODE) {
+						card['B'+nAltProp.getAttribute('name')] = nAltProp.getAttribute('value');
+					}
+				}
+			}
+		}
+
+		if (!card['Type']) {
+			Console.err.println('\nNo card type for ' + card['Name']);
+			continue;
+		}
+		if (['Ally', 'Attachment', 'Enemy', 'Event', 'Hero', 'Location', 'Objective', 'Objective Ally',
+			'Quest', 'Rules', 'Side Quest', 'Treachery'].indexOf(card['Type'] + '') == -1) {
+			Console.err.println('\nUnknown card type for ' + card['Name'] + ': ' + card['Type']);
+			continue;
+		}
+		// Console.err.println('\nProcessing ' + card['Name']);
+		if (card['Type'] == 'Side Quest') {
+			if (card['Encounter Set']) {
+				card['Type'] = 'Encounter Side Quest';
+			}
+			else {
+				card['Type'] = 'Player Side Quest';
+			}
+		}
+		if (card['BType'] == 'Side Quest') {
+			if (card['Encounter Set']) {
+				card['BType'] = 'Encounter Side Quest';
+			}
+			else {
+				card['BType'] = 'Player Side Quest';
+			}
+		}
+
+		if (card['Type'] == 'Quest' && card['BQuest Points']) {
+			card['Quest Points'] = card['BQuest Points'];
+		}
+
+		let playerCopies = false;
+		if (['Ally', 'Attachment', 'Event', 'Player Side Quest'].indexOf(card['Type'] + '') > -1 && card['Quantity'] == 3) {
+			playerCopies = true;
+			card['Quantity'] = 1;
+		}
+
+		for (let j = 0; j < card['Quantity']; j++) {
+			let sides = ['front'];
+			if (backTypes.indexOf(card['Type'] + '') == -1 && card['BName']) {
+				sides.push('back');
+			}
+			for (let idx = 0; idx < sides.length; idx++) {
+				let side = sides[idx];
+				let cardName, cardType, keywords, traits, suffix, mapping;
+				if (side == 'front') {
+					cardName = card['Name'];
+					cardType = card['Type'] + '';
+					keywords = card['Keywords'];
+					traits = card['Traits'];
+					suffix = '';
+					mapping = [
+						// Convert from member name in xml file to member name in eon file
+						// [eon,xml]
+						['CollectionNumber', 'Card Number'],
+						['Name', 'Name'],
+						['Unique', 'Unique'],
+						['Template', 'Sphere'],
+						['Trait', 'Traits'],
+						['ResourceCost', 'Cost'],
+						['ThreatCost', 'Cost'],
+						['Stage', 'Cost'],
+						['Engagement', 'Engagement Cost'],
+						['Threat', 'Threat'],
+						['Willpower', 'Willpower'],
+						['Attack', 'Attack'],
+						['Defense', 'Defense'],
+						['HitPoints', 'Health'],
+						['Progress', 'Quest Points'],
+						['Victory', 'Victory Points'],
+						['OptionRight', 'Victory Points'],
+						['Rules', 'Text'],
+						['Shadow', 'Shadow'],
+						['Flavour', 'Flavour'],
+						['Story', 'Flavour'],
+						['Artist-external', 'Artist'],
+						['Adventure', 'Adventure']
+					];
+					if (backTypes.indexOf(cardType) > -1) {
+						mapping = mapping.concat([
+							['NameBack', 'BName'],
+							['RulesBack', 'BText'],
+							['FlavourBack', 'BFlavour'],
+							['StoryBack', 'BFlavour'],
+							['ArtistBack-external', 'BArtist']
+						]);
+					}
+				}
+				else {
+					cardName = card['BName'];
+					cardType = card['BType'] + '';
+					if (backTypes.indexOf(cardType) > -1) {
+						Console.err.println('\nIncorrect card type for back side for ' + card['Name'] + ': ' + cardType);
+						continue;
+					}
+					keywords = card['BKeywords'];
+					traits = card['BTraits'];
+					suffix = '-2';
+					mapping = [
+						// Convert from member name in xml file to member name in eon file
+						// [eon,xml]
+						['CollectionNumber', 'Card Number'],
+						['Name', 'BName'],
+						['Unique', 'BUnique'],
+						['Template', 'BSphere'],
+						['Trait', 'BTraits'],
+						['ResourceCost', 'BCost'],
+						['ThreatCost', 'BCost'],
+						['Stage', 'BCost'],
+						['Engagement', 'BEngagement Cost'],
+						['Threat', 'BThreat'],
+						['Willpower', 'BWillpower'],
+						['Attack', 'BAttack'],
+						['Defense', 'BDefense'],
+						['HitPoints', 'BHealth'],
+						['Progress', 'BQuest Points'],
+						['Victory', 'BVictory Points'],
+						['OptionRight', 'BVictory Points'],
+						['Rules', 'BText'],
+						['Shadow', 'BShadow'],
+						['Flavour', 'BFlavour'],
+						['Story', 'BFlavour'],
+						['Artist-external', 'BArtist'],
+						['Adventure', 'Adventure']
+					];
+				}
+
+				// Create a new .eon file, using the appropriate template in the template folder
+				progress.status = cardName;
+				var newCard = ResourceKit.getGameComponentFromFile(getProjectMember('Templates/' + cardType + '.eon').file, false);
+				var s = newCard.settings;
+
+				// change the details in the template card
+				for (let k = 0; k < mapping.length; k++) {
+					let nEon = mapping[k][0];
+					s.set(nEon, '');
+					let nXml = mapping[k][1];
+					let vXml = card[nXml];
+					if (!vXml) {
+						continue;
+					}
+					if (vXml == '-') {
+						vXml = 'minus';
+					}
+					if (vXml == '\u2030') {
+						vXml = '1';
+					}
+					if (nXml == 'Victory Points' || nXml == 'BVictory Points') {
+						vXml = translate['Victory'][lang].toUpperCase() + ' ' + vXml;
+					}
+					if (nXml == 'Artist' || nXml == 'BArtist') {
+						if (vXml == 'Unknown Artist') {
+							vXml = translate['Unknown Artist'][lang];
+						}
+						vXml = translate['Illustration'][lang] + ' ' + vXml;
+					}
+					if (nXml == 'Text' || nXml == 'BText') {
+						if (keywords) {
+							vXml = keywords + '\n\n' + vXml;
+						}
+						if (['Hero', 'Ally', 'Attachment', 'Event', 'Enemy', 'Location', 'Treachery', 'Objective', 'Objective Ally'
+							].indexOf(cardType) > -1 && !traits) {
+							vXml = '\n' + vXml;
+						}
+					}
+					vXml = markUp(vXml, lang);
+					s.set(nEon, vXml);
+				}
+
+				if (cardType == 'Rules') {
+					s.set('Flavour', '');
+					s.set('FlavourBack', '');
+				}
+				if (['Event', 'Treachery', 'Player Side Quest', 'Encounter Side Quest', 'Quest', 'Rules', 'Contract'].indexOf(cardType) > -1) {
+					s.set('Unique', '');
+				}
+				if (cardType == 'Quest') {
+					s.set('NameShare', 0);
+				}
+				if (side == 'front') {
+					if (card['Artwork']) {
+						s.set('Portrait-external-path', 'project:imagesRaw/' + card['Artwork']);
+					}
+					if (cardType == 'Quest') {
+						if (card['BArtwork']) {
+							s.set('PortraitBack-external-path', 'project:imagesRaw/' + card['BArtwork']);
+							s.set('PortraitShare', 0);
+						}
+						else {
+							s.set('PortraitBack-external-path', 'project:imagesRaw/' + card['Artwork']);
+						}
+					}
+				}
+				else {
+					if (card['BArtwork']) {
+						s.set('Portrait-external-path', 'project:imagesRaw/' + card['BArtwork']);
+					}
+				}
+				s.set('Type', translate[cardType][lang].toUpperCase());
+				s.set('Collection', 'CustomIcon');
+				s.set('Collection-external-path', ('project:imagesIcons/' + card['Set'] + '.png').replace(/ /g, '-'));
+				if (card['Encounter Set']) {
+					s.set('EncounterSet', 'CustomIcon');
+					s.set('EncounterSet-external-path', ('project:imagesIcons/' + card['Encounter Set'] + '.png').replace(/ /g, '-'));
+				}
+				if (card['Additional Encounter Sets']) {
+					let encounterSets = card['Additional Encounter Sets'].split(',');
+					for (let k = 0; k < encounterSets.length; k++) {
+						s.set('EncounterSet' + (k + 1) + '-external-path',
+							('project:imagesIcons/' + encounterSets[k].trim() + '.png').replace(/ /g, '-'));
+					}
+				}
+				if (card['Encounter Set Number']) {
+					s.set('EncounterSetNumber', parseInt(card['Encounter Set Number']) + j);
+				}
+				if (card['Encounter Set Total']) {
+					s.set('EncounterSetTotal', card['Encounter Set Total']);
+				}
+				if (card['Removed for Easy Mode'] && j >= parseInt(card['Quantity']) - parseInt(card['Removed for Easy Mode'])) {
+					s.set('Template', 'Gold');
+				}
+				s.set('CollectionInfo', ' ');
+				s.set('Copyright', '©Middle-earth Ent. ©FFG ©ALeP');
+
+				let copy;
+				if (playerCopies) {
+					copy = 'p';
+				}
+				else {
+					copy = j + 1;
+				}
+
+				let back;
+				if (side == 'back') {
+					back = '-';
+				}
+				else if (backTypes.indexOf(cardType) > -1 || card['BName']) {
+					back = '-';
+				}
+				else if (['Hero', 'Ally', 'Attachment', 'Event', 'Player Side Quest', 'Contract'].indexOf(cardType) > -1 &&
+					(keywords + '').search(translate['Encounter Keyword'][lang]) == -1) {
+					back = 'p';
+				}
+				else {
+					back = 'e';
+				}
+
+				let fname = (Array(4 - (card['Card Number'] + '').length).join('0') + card['Card Number'] + '-' + copy + '-' +
+					back + '-' + card['Name'] + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix;
+				progress.status = fname;
+				ResourceKit.writeGameComponentToFile(new File(getProjectMember('Cards/').file, fname + '.' + setID + '.' + lang + '.eon'), newCard);
+				exportCard(newCard, fname, setID, lang, jpg300NoBleed, png300NoBleed, png300Bleed, png800Bleed);
+			}
+		}
+	}
+	return;
+}
+
+function exportCard(card, fname, setID, lang, jpg300NoBleed, png300NoBleed, png300Bleed, png800Bleed) {
+	var sheets = card.createDefaultSheets();
+	var numSheets;
+	if (card.getFaceStyle() + '' == 'TWO_FACES') {
+		numSheets = 2;
+	}
+	else {
+		numSheets = 1;
+	}
+
+	for (let i = 0; i < numSheets; i++ ) {
+		let bi;
+		let file;
+
+		if (jpg300NoBleed) {
+			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 300);
+			file = new File(getProjectMember('Export/jpg300NoBleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_JPEG);
+			ImageUtils.write(bi, file, ImageUtils.FORMAT_JPEG, 0.9, false, 300);
+		}
+
+		if (png300NoBleed) {
+			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 300);
+			file = new File(getProjectMember('Export/png300NoBleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_PNG);
+			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 300);
+		}
+
+		if (png300Bleed) {
+			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 300, true);
+			file = new File(getProjectMember('Export/png300Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_PNG);
+			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 300);
+		}
+
+		if (png800Bleed) {
+			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 800, true);
+			file = new File(getProjectMember('Export/png800Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_PNG);
+			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 800);
+		}
+	}
+}
+
+function markUp(vXml, lang) {
+	vXml = vXml + '';
+	if (lang == 'English') {
+		vXml = vXml.replace(/\b(Quest Resolution)( \([^\)]+\))?:/g, '<b>$1</b>$2:');
+		vXml = vXml.replace(/\b(Valour )?(Resource |Planning |Quest |Travel |Encounter |Combat |Refresh )?(Action):/g, '<b>$1$2$3</b>:');
+		vXml = vXml.replace(/\b(When Revealed|Setup|Forced|Valour Response|Response|Travel|Shadow):/g, '<b>$1</b>:');
+		vXml = vXml.replace(/\b(Condition)\b/g, '<b><i>$1</i></b>');
+	}
+	else if (lang == 'German') {
+		vXml = vXml.replace(/\b(Abenteuer bestehen)( \([^\)]+\))?:/g, '<b>$1</b>$2:');
+		vXml = vXml.replace(/\b(Ehrenvolle )?(Ressourcenaktion|Planungsaktion|Abenteueraktion|Reiseaktion|Begegnungsaktion|Kampfaktion|Auffrischungsaktion|Aktion):/g, '<b>$1$2</b>:');
+		vXml = vXml.replace(/\b(Wenn aufgedeckt|Vorbereitung|Erzwungen|Ehrenvolle Reaktion|Reaktion|Reise|Schatten):/g, '<b>$1</b>:');
+		vXml = vXml.replace(/\b(Zustand)\b/g, '<b><i>$1</i></b>');
+	}
+	else if (lang == 'Spanish') {
+		vXml = vXml.replace(/\b(Resolución de la misión)( \([^\)]+\))?:/g, '<b>$1</b>$2:');
+		vXml = vXml.replace(/\b(Acción)( de Recursos| de Planificación| de Misión| de Viaje| de Encuentros| de Combate| de Recuperación)?( de Valor)?:/g, '<b>$1$2$3</b>:');
+		vXml = vXml.replace(/\b(Al ser revelada|Preparación|Obligado|Respuesta de Valor|Respuesta|Viaje|Sombra):/g, '<b>$1</b>:');
+		vXml = vXml.replace(/\b(Condición)\b/g, '<b><i>$1</i></b>');
+	}
+
+	vXml = vXml.replace(/\$|\[Threat\]/g, '<thr>');
+	vXml = vXml.replace(/\u00db|\[Attack\]/g, '<att>');
+	vXml = vXml.replace(/\u00da|\[Defense\]/g, '<def>');
+	vXml = vXml.replace(/\u00d2|\[Willpower\]/g, '<wil>');
+	vXml = vXml.replace(/\u00cc|\[Leadership\]/g, '<lea>');
+	vXml = vXml.replace(/\u00ce|\[Lore\]/g, '<lor>');
+	vXml = vXml.replace(/\u00ca|\[Spirit\]/g, '<spi>');
+	vXml = vXml.replace(/\u00cf|\[Tactics\]/g, '<tac>');
+	vXml = vXml.replace(/\u2030|\[Unique\]/g, '<uni>');
+	vXml = vXml.replace(/\^/g, '<b><i>');
+	vXml = vXml.replace(/\*/g, '</i></b>');
+	vXml = vXml.replace(/~/g, '<b>');
+	vXml = vXml.replace(/%/g, '</b>');
+	vXml = vXml.replace(/\n\n/g, '\n<vs>\n');
+	vXml = vXml.replace(/([^:;,.?!]) (<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<uni>)/g, '$1\u00a0$2');
+	vXml = vXml.replace(/([0-9]) /g, '$1\u00a0');
+	return vXml;
+}
+
+function getProjectMember(path) {
+	var member = project.findChild(path);
+	if (member == null) {
+		throw new Error('Missing required project file: ' + path);
+	}
+	return member;
+}
