@@ -22,21 +22,24 @@ close Strange Eons and replace `TheLordOfTheRingsLCG.seext` with the custom vers
 7. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `gimp` folder
 from this repo, click `OK` and then close GIMP.
 
-8. Make sure that macros are enabled in Microsoft Excel.
+8. Install ImageMagick (https://imagemagick.org/script/download.php).
 
-9. Go to the repo folder and follow these steps:
+9. Make sure that macros are enabled in Microsoft Excel.
+
+10. Go to the repo folder and follow these steps:
 
   - Install Python 3.7 (or other Python 3 version), Pip and VirtualEnv.
   - `virtualenv env --python=python3.7`
   - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
   - `pip install jupyter py7zr pylint pypng pyyaml reportlab requests xlwings`
 
-10. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
+11. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
   - `sheet_gdid`: Google Drive ID of the cards spreadsheet
   - `sheet_type`: spreadsheet type, either `xlsm` (default) or `xlsx`
   - `artwork_path`: local path to the folder with the cropped artwork (don't use for that any existing folder in this repo)
   - `gimp_console_path`: path to GIMP console executable
+  - `magick_path`: path to ImageMagick executable
   - `from_scratch`: whether to generate all cards from scratch (`true`) or to process only the cards, changed since the previous script run (`false`)
   - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`)
   - `set_ids`: list of set IDs to work on

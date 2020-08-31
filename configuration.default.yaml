@@ -10,6 +10,9 @@ artwork_path: C:\Google Drive\Artwork\
 # Path to GIMP console executable
 gimp_console_path: C:\Program Files\GIMP 2\bin\gimp-console-2.10.exe
 
+# Path to ImageMagick executable
+magick_path: C:\Program Files\ImageMagick-7.0.10-Q16-HDRI\magick.exe
+
 # Whether to generate all cards from scratch (true)
 # or update only the cards, changed since the previous script run (false)
 from_scratch: true

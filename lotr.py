@@ -23,6 +23,7 @@ from reportlab.lib.units import inch
 from reportlab.pdfgen.canvas import Canvas
 
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
+MAGICK_COMMAND = '"{}" mogrify -colorspace cmyk "{}\\*.jpg"'
 PROJECT_FOLDER = 'Frogmorton'
 SHEET_NAME = 'setExcel'
 TEXT_CHUNK_FLAG = b'tEXt'
@@ -977,6 +978,14 @@ def _make_unique_png(input_path):
         break
 
 
+def _make_cmyk(conf, input_path):
+    """ Convert RGB to CMYK for DriveThruCards.
+    """
+    cmd = MAGICK_COMMAND.format(conf['magick_path'], input_path)
+    res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+    logging.info(res)
+
+
 def _prepare_printing_images(input_path, output_path, service):
     """ Prepare images for MakePlayingCards/DriveThruCards.
     """
@@ -1173,6 +1182,7 @@ def generate_dtc(conf, set_id, set_name, lang):
     _create_folder(temp_path)
     _clear_folder(temp_path)
     _prepare_printing_images(input_path, temp_path, 'dtc')
+    _make_cmyk(conf, temp_path)
 
     if 'drivethrucards_zip' in conf['outputs']:
         with zipfile.ZipFile(
@@ -1193,5 +1203,3 @@ def generate_dtc(conf, set_id, set_name, lang):
     _delete_folder(temp_path)
     logging.info('[%s, %s] ...Generating DriveThruCards outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
-
-# magick.exe mogrify -colorspace cmyk c:\lotr\test\*.jpg
