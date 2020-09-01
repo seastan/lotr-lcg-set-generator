@@ -17,7 +17,7 @@ magick_path: C:\Program Files\ImageMagick-7.0.10-Q16-HDRI\magick.exe
 # or update only the cards, changed since the previous script run (false)
 from_scratch: true
 
-# Number of parallel processes
+# Number of parallel processes to use ("default" means "cpu_count() - 1")
 parallelism: default
 
 # List of set IDs to work on
