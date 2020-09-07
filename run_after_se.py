@@ -16,6 +16,7 @@ def generate_db_octgn(conf, set_id, set_name, lang, skip_ids):
     lotr.generate_jpg300_nobleed(set_id, set_name, lang, skip_ids)
     if 'db' in conf['outputs']:
         lotr.generate_db(set_id, set_name, lang)
+
     if 'octgn' in conf['outputs']:
         lotr.generate_octgn(set_id, set_name, lang)
 
@@ -100,6 +101,9 @@ def main():
                 logging.info('Program was terminated!')
                 pool.terminate()
                 return
+
+        if 'octgn' in conf['outputs']:
+            lotr.upload_octgn_archive(conf)
     else:
         logging.info('No tasks to run')
 

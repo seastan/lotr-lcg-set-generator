@@ -40,6 +40,7 @@ from this repo, click `OK` and then close GIMP.
   - `artwork_path`: local path to the folder with the cropped artwork (don't use for that any existing folder in this repo)
   - `gimp_console_path`: path to GIMP console executable
   - `magick_path`: path to ImageMagick executable
+  - `octgn_destination_path`: path to OCTGN destination archive (may be empty)
   - `from_scratch`: whether to generate all cards from scratch (`true`) or to process only the cards, changed since the previous script run (`false`)
   - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`)
   - `set_ids`: list of set IDs to work on
@@ -69,6 +70,8 @@ Now there should be the following outputs:
 - `Output/PDF/<set name>.<language>/`: PDF files in `A4` and `letter` format for home printing.
 - `Output/DriveThruCards/<set name>.<language>/`: `zip` and `7z` archives of 300 dpi PNG images to be printed on DriveThruCards.com.
 - `Output/MakePlayingCards/<set name>.<language>/`: `zip` and `7z` archives of 800 dpi PNG images to be printed on MakePlayingCards.com.
+
+Additionally, if you specified `octgn_destination_path`, all OCTGN outputs are packed into a destination archive.
 
 **GIMP Plugins**
 

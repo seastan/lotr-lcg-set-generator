@@ -1203,3 +1203,30 @@ def generate_dtc(conf, set_id, set_name, lang):
     _delete_folder(temp_path)
     logging.info('[%s, %s] ...Generating DriveThruCards outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
+
+
+def upload_octgn_archive(conf):
+    """ Pack OCTGN outputs into archive and move to destination folder.
+    """
+    logging.info('Packing OCTGN outputs into archive and moving to '
+                 'destination folder...')
+    timestamp = time.time()
+
+    temp_path = os.path.join(TEMP_ROOT_PATH, 'upload_octgn_archive')
+    _create_folder(temp_path)
+    _clear_folder(temp_path)
+
+    for _, folders, _ in os.walk(OUTPUT_OCTGN_PATH):
+        for folder in folders:
+            shutil.copytree(os.path.join(OUTPUT_OCTGN_PATH, folder),
+                            os.path.join(temp_path, folder))
+
+        break
+
+    archive_path = os.path.join(TEMP_ROOT_PATH, 'upload_octgn_archive')
+    shutil.make_archive(archive_path, 'zip', temp_path)
+    shutil.move('{}.{}'.format(archive_path, 'zip'),
+                conf['octgn_destination_path'])
+    _delete_folder(temp_path)
+    logging.info('...Packing OCTGN outputs into archive and moving to '
+                 'destination folder (%ss)', round(time.time() - timestamp, 3))

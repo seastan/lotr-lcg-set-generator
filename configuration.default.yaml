@@ -13,6 +13,9 @@ gimp_console_path: C:\Program Files\GIMP 2\bin\gimp-console-2.10.exe
 # Path to ImageMagick executable
 magick_path: C:\Program Files\ImageMagick-7.0.10-Q16-HDRI\magick.exe
 
+# Path to OCTGN destination archive (may be empty)
+octgn_destination_path: C:\Google Drive\OCTGN\unzip-me-into-sets-folder.zip
+
 # Whether to generate all cards from scratch (true)
 # or update only the cards, changed since the previous script run (false)
 from_scratch: true

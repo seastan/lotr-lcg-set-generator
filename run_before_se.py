@@ -12,9 +12,9 @@ def main():
     """
     timestamp = time.time()
     conf = lotr.read_conf()
+    sets = lotr.get_sets(conf)
     lotr.clear_project_folders()
     lotr.download_sheet(conf)
-    sets = lotr.get_sets(conf)
 
     changes = False
     for set_data in sets:
