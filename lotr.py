@@ -24,6 +24,7 @@ from reportlab.pdfgen.canvas import Canvas
 
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND = '"{}" mogrify -colorspace cmyk "{}\\*.jpg"'
+OCTGN_ARCHIVE = 'unzip-me-into-sets-folder.zip'
 PROJECT_FOLDER = 'Frogmorton'
 SHEET_NAME = 'setExcel'
 TEXT_CHUNK_FLAG = b'tEXt'
@@ -35,7 +36,7 @@ IMAGES_RAW_PATH = os.path.join(PROJECT_FOLDER, 'imagesRaw')
 IMAGES_ZIP_PATH = '{}/Export/'.format(os.path.split(PROJECT_FOLDER)[-1])
 MACROS_PATH = 'macros.xlsm'
 MACROS_COPY_PATH = 'macros_copy.xlsm'
-OCTGN_ZIP_PATH = 'imagesOCTGN/a21af4e8-be4b-4cda-a6b6-534f9717391f/Sets'
+OCTGN_ZIP_PATH = 'a21af4e8-be4b-4cda-a6b6-534f9717391f/Sets'
 OUTPUT_DB_PATH = os.path.join('Output', 'DB')
 OUTPUT_DTC_PATH = os.path.join('Output', 'DriveThruCards')
 OUTPUT_MPC_PATH = os.path.join('Output', 'MakePlayingCards')
@@ -43,6 +44,7 @@ OUTPUT_OCTGN_PATH = os.path.join('Output', 'OCTGN')
 OUTPUT_PDF_PATH = os.path.join('Output', 'PDF')
 PROJECT_PATH = 'setGenerator.seproject'
 SET_EONS_PATH = 'setEons'
+SET_OCTGN_PATH = 'setOCTGN'
 SHEET_ROOT_PATH = ''
 TEMP_ROOT_PATH = 'Temp'
 XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
@@ -210,13 +212,29 @@ def get_sets(conf):
     return sets
 
 
-def backup_previous_xml(conf, set_id, set_name, lang):
+def _backup_previous_octgn_xml(set_id):
+    """ Backup a previous OCTGN xml file.
+    """
+    new_path = os.path.join(SET_OCTGN_PATH, '{}.xml'.format(set_id))
+    old_path = os.path.join(SET_OCTGN_PATH, '{}.xml.old'.format(set_id))
+    if os.path.exists(new_path):
+        shutil.move(new_path, old_path)
+
+
+def _copy_octgn_xml(set_id, set_name):
+    """ Copy set.xml file to OCTGN output folder.
+    """
+    output_path = os.path.join(OUTPUT_OCTGN_PATH, set_name)
+    _create_folder(output_path)
+    output_path = os.path.join(output_path, set_id)
+    _create_folder(output_path)
+    shutil.copyfile(os.path.join(SET_OCTGN_PATH, '{}.xml'.format(set_id)),
+                    os.path.join(output_path, 'set.xml'))
+
+
+def _backup_previous_xml(conf, set_id, lang):
     """ Backup a previous Strange Eons xml file.
     """
-    logging.info('[%s, %s] Backing up a previous Strange Eons xml file...',
-                 set_name, lang)
-    timestamp = time.time()
-
     new_path = os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id, lang))
     old_path = os.path.join(SET_EONS_PATH, '{}.{}.xml.old'.format(set_id,
                                                                   lang))
@@ -225,9 +243,6 @@ def backup_previous_xml(conf, set_id, set_name, lang):
 
     if conf['from_scratch'] and os.path.exists(old_path):
         os.remove(old_path)
-
-    logging.info('[%s, %s] ...Backing up a previous Strange Eons xml file'
-                 ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
 def _run_macro(conf, set_row, callback):
@@ -266,7 +281,7 @@ def _run_macro(conf, set_row, callback):
         excel_app.quit()
 
 
-def generate_octgn_xml(conf, set_name, set_row):
+def generate_octgn_xml(conf, set_id, set_name, set_row):
     """ Generate set.xml file for OCTGN.
     """
     def _callback(_, xlwb_target):
@@ -275,7 +290,9 @@ def generate_octgn_xml(conf, set_name, set_row):
     logging.info('[%s] Generating set.xml file for OCTGN...', set_name)
     timestamp = time.time()
 
+    _backup_previous_octgn_xml(set_id)
     _run_macro(conf, set_row, _callback)
+    _copy_octgn_xml(set_id, set_name)
     logging.info('[%s] ...Generating set.xml file for OCTGN (%ss)',
                  set_name, round(time.time() - timestamp, 3))
 
@@ -314,6 +331,7 @@ def generate_xml(conf, set_id, set_name, set_row, lang):
                  set_name, lang)
     timestamp = time.time()
 
+    _backup_previous_xml(conf, set_id, lang)
     _run_macro(conf, set_row, _callback)
     logging.info('[%s, %s] ...Generating xml file for Strange Eons (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
@@ -1205,28 +1223,48 @@ def generate_dtc(conf, set_id, set_name, lang):
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
-def upload_octgn_archive(conf):
-    """ Pack OCTGN outputs into archive and move to destination folder.
+def copy_octgn_outputs(conf):
+    """ Copy OCTGN outputs to the destination folder.
     """
-    logging.info('Packing OCTGN outputs into archive and moving to '
-                 'destination folder...')
+    logging.info('Copying OCTGN outputs to the destination folder...')
     timestamp = time.time()
 
-    temp_path = os.path.join(TEMP_ROOT_PATH, 'upload_octgn_archive')
+    temp_path = os.path.join(TEMP_ROOT_PATH, 'copy_octgn_outputs')
     _create_folder(temp_path)
     _clear_folder(temp_path)
 
-    for _, folders, _ in os.walk(OUTPUT_OCTGN_PATH):
-        for folder in folders:
-            shutil.copytree(os.path.join(OUTPUT_OCTGN_PATH, folder),
-                            os.path.join(temp_path, folder))
+    sets = get_sets(conf)
+    archive_path = os.path.join(TEMP_ROOT_PATH, OCTGN_ARCHIVE)
+    with zipfile.ZipFile(archive_path, 'w') as obj:
+        for _, folders, _ in os.walk(OUTPUT_OCTGN_PATH):  # pylint: disable=R1702
+            for folder in folders:
+                for _, subfolders, filenames in os.walk(
+                        os.path.join(OUTPUT_OCTGN_PATH, folder)):
+                    for subfolder in subfolders:
+                        if subfolder in sets:
+                            obj.write(os.path.join(OUTPUT_OCTGN_PATH, folder,
+                                                   subfolder, 'set.xml'),
+                                      '{}/.set.xml'.format(subfolder))
 
-        break
+                            for filename in filenames:
+                                lang = filename.split('.')[-2]
+                                if lang in conf['languages']:
+                                    shutil.copyfile(
+                                        os.path.join(
+                                            OUTPUT_OCTGN_PATH, folder,
+                                            filename),
+                                        os.path.join(
+                                            conf['octgn_destination_path'],
+                                            filename))
 
-    archive_path = os.path.join(TEMP_ROOT_PATH, 'upload_octgn_archive')
-    shutil.make_archive(archive_path, 'zip', temp_path)
-    shutil.move('{}.{}'.format(archive_path, 'zip'),
-                conf['octgn_destination_path'])
+                        break
+
+                    break
+
+            break
+
+    shutil.move(archive_path,
+                os.path.join(conf['octgn_destination_path'], OCTGN_ARCHIVE))
     _delete_folder(temp_path)
-    logging.info('...Packing OCTGN outputs into archive and moving to '
-                 'destination folder (%ss)', round(time.time() - timestamp, 3))
+    logging.info('...Copying OCTGN outputs to the destination folder (%ss)',
+                 round(time.time() - timestamp, 3))

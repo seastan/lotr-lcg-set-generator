@@ -102,8 +102,8 @@ def main():
                 pool.terminate()
                 return
 
-        if 'octgn' in conf['outputs']:
-            lotr.upload_octgn_archive(conf)
+        if 'octgn' in conf['outputs'] and conf['octgn_destination_path']:
+            lotr.copy_octgn_outputs(conf)
     else:
         logging.info('No tasks to run')
 

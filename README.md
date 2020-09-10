@@ -40,7 +40,7 @@ from this repo, click `OK` and then close GIMP.
   - `artwork_path`: local path to the folder with the cropped artwork (don't use for that any existing folder in this repo)
   - `gimp_console_path`: path to GIMP console executable
   - `magick_path`: path to ImageMagick executable
-  - `octgn_destination_path`: path to OCTGN destination archive (may be empty)
+  - `octgn_destination_path`: path to OCTGN destination folder (may be empty)
   - `from_scratch`: whether to generate all cards from scratch (`true`) or to process only the cards, changed since the previous script run (`false`)
   - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`)
   - `set_ids`: list of set IDs to work on

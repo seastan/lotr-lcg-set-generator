@@ -20,10 +20,9 @@ def main():
     for set_data in sets:
         set_id, set_name, set_row = set_data
         if 'octgn' in conf['outputs']:
-            lotr.generate_octgn_xml(conf, set_name, set_row)
+            lotr.generate_octgn_xml(conf, set_id, set_name, set_row)
 
         for lang in conf['languages']:
-            lotr.backup_previous_xml(conf, set_id, set_name, lang)
             lotr.generate_xml(conf, set_id, set_name, set_row, lang)
             lotr.update_xml(conf, set_id, set_name, lang)
             new_hash, old_hash = lotr.calculate_hashes(set_id, set_name, lang)
