@@ -71,7 +71,7 @@ Now there should be the following outputs:
 - `Output/DriveThruCards/<set name>.<language>/`: `zip` and `7z` archives of 300 dpi PNG images to be printed on DriveThruCards.com.
 - `Output/MakePlayingCards/<set name>.<language>/`: `zip` and `7z` archives of 800 dpi PNG images to be printed on MakePlayingCards.com.
 
-Additionally, if you specified `octgn_destination_path`, all OCTGN outputs are packed into a destination archive.
+Additionally, if you specified `octgn_destination_path`, OCTGN outputs will be copied there.
 
 **GIMP Plugins**
 

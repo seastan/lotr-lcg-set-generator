@@ -1223,7 +1223,48 @@ def generate_dtc(conf, set_id, set_name, lang):
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
-def copy_octgn_outputs(conf):
+def _create_octgn_archive(temp_path):
+    """ Create OCTGN archive with all set.xml files.
+    """
+    archive_path = os.path.join(temp_path, OCTGN_ARCHIVE)
+    with zipfile.ZipFile(archive_path, 'w') as obj:
+        for _, folders, _ in os.walk(OUTPUT_OCTGN_PATH):
+            for folder in folders:
+                for _, subfolders, _ in os.walk(
+                        os.path.join(OUTPUT_OCTGN_PATH, folder)):
+                    for subfolder in subfolders:
+                        obj.write(os.path.join(OUTPUT_OCTGN_PATH, folder,
+                                               subfolder, 'set.xml'),
+                                  '{}/set.xml'.format(subfolder))
+
+                    break
+
+            break
+
+
+def _prepare_updated_o8c(temp_path, updates):
+    """ Copy all updated o8c files to the temporary folder.
+    """
+    for _, folders, _ in os.walk(OUTPUT_OCTGN_PATH):
+        for folder in folders:
+            for _, _, filenames in os.walk(
+                    os.path.join(OUTPUT_OCTGN_PATH, folder)):
+                for filename in filenames:
+                    parts = filename.split('.')
+                    if len(parts) != 3:
+                        continue
+
+                    if (parts[0], parts[1]) in updates:
+                        shutil.copyfile(os.path.join(OUTPUT_OCTGN_PATH,
+                                                     folder, filename),
+                                        os.path.join(temp_path, filename))
+
+                break
+
+        break
+
+
+def copy_octgn_outputs(conf, copy_o8c=False, updates=None):
     """ Copy OCTGN outputs to the destination folder.
     """
     logging.info('Copying OCTGN outputs to the destination folder...')
@@ -1232,39 +1273,18 @@ def copy_octgn_outputs(conf):
     temp_path = os.path.join(TEMP_ROOT_PATH, 'copy_octgn_outputs')
     _create_folder(temp_path)
     _clear_folder(temp_path)
+    _create_octgn_archive(temp_path)
 
-    sets = get_sets(conf)
-    archive_path = os.path.join(TEMP_ROOT_PATH, OCTGN_ARCHIVE)
-    with zipfile.ZipFile(archive_path, 'w') as obj:
-        for _, folders, _ in os.walk(OUTPUT_OCTGN_PATH):  # pylint: disable=R1702
-            for folder in folders:
-                for _, subfolders, filenames in os.walk(
-                        os.path.join(OUTPUT_OCTGN_PATH, folder)):
-                    for subfolder in subfolders:
-                        if subfolder in sets:
-                            obj.write(os.path.join(OUTPUT_OCTGN_PATH, folder,
-                                                   subfolder, 'set.xml'),
-                                      '{}/.set.xml'.format(subfolder))
+    if copy_o8c and updates:
+        _prepare_updated_o8c(temp_path, updates)
 
-                            for filename in filenames:
-                                lang = filename.split('.')[-2]
-                                if lang in conf['languages']:
-                                    shutil.copyfile(
-                                        os.path.join(
-                                            OUTPUT_OCTGN_PATH, folder,
-                                            filename),
-                                        os.path.join(
-                                            conf['octgn_destination_path'],
-                                            filename))
+    for _, _, filenames in os.walk(temp_path):
+        for filename in filenames:
+            shutil.move(os.path.join(temp_path, filename),
+                        os.path.join(conf['octgn_destination_path'], filename))
 
-                        break
+        break
 
-                    break
-
-            break
-
-    shutil.move(archive_path,
-                os.path.join(conf['octgn_destination_path'], OCTGN_ARCHIVE))
     _delete_folder(temp_path)
     logging.info('...Copying OCTGN outputs to the destination folder (%ss)',
                  round(time.time() - timestamp, 3))

@@ -33,6 +33,9 @@ def main():
             lotr.copy_xml(set_id, set_name, lang)
 
     if changes:
+        if 'octgn' in conf['outputs'] and conf['octgn_destination_path']:
+            lotr.copy_octgn_outputs(conf)
+
         lotr.create_project()
     else:
         logging.info('No changes since the last run, skipping creating the'

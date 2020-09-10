@@ -101,9 +101,6 @@ def main():
                 logging.info('Program was terminated!')
                 pool.terminate()
                 return
-
-        if 'octgn' in conf['outputs'] and conf['octgn_destination_path']:
-            lotr.copy_octgn_outputs(conf)
     else:
         logging.info('No tasks to run')
 
