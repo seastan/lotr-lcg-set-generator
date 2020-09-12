@@ -102,7 +102,7 @@ def main():
                 pool.terminate()
                 return
     else:
-        logging.info('No tasks to run')
+        logging.info('No tasks to run, skipping')
 
     logging.info('Done (%ss)', round(time.time() - timestamp, 3))
 

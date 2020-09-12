@@ -1233,9 +1233,10 @@ def _create_octgn_archive(temp_path):
                 for _, subfolders, _ in os.walk(
                         os.path.join(OUTPUT_OCTGN_PATH, folder)):
                     for subfolder in subfolders:
-                        obj.write(os.path.join(OUTPUT_OCTGN_PATH, folder,
-                                               subfolder, 'set.xml'),
-                                  '{}/set.xml'.format(subfolder))
+                        xml_path = os.path.join(OUTPUT_OCTGN_PATH, folder,
+                                                subfolder, 'set.xml')
+                        if os.path.exists(xml_path):
+                            obj.write(xml_path, '{}/set.xml'.format(subfolder))
 
                     break
 

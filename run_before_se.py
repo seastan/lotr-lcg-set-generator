@@ -38,8 +38,7 @@ def main():
 
         lotr.create_project()
     else:
-        logging.info('No changes since the last run, skipping creating the'
-                     ' project')
+        logging.info('No changes since the last run, skipping')
 
     logging.info('Done (%ss)', round(time.time() - timestamp, 3))
 
