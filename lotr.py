@@ -23,7 +23,7 @@ from reportlab.lib.units import inch
 from reportlab.pdfgen.canvas import Canvas
 
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
-MAGICK_COMMAND = '"{}" mogrify -colorspace cmyk "{}\\*.jpg"'
+MAGICK_COMMAND = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
 OCTGN_ARCHIVE = 'unzip-me-into-sets-folder.zip'
 PROJECT_FOLDER = 'Frogmorton'
 SHEET_NAME = 'setExcel'

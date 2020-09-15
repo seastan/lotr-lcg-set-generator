@@ -24,16 +24,20 @@ from this repo, click `OK` and then close GIMP.
 
 8. Install ImageMagick (https://imagemagick.org/script/download.php).
 
-9. Make sure that macros are enabled in Microsoft Excel.
+9. Download `USWebCoatedSWOP.icc` from
+https://github.com/cjw-network/cjwpublish1411/blob/master/vendor/imagine/imagine/lib/Imagine/resources/Adobe/CMYK/USWebCoatedSWOP.icc
+into the root folder of this repo.
 
-10. Go to the repo folder and follow these steps:
+10. Make sure that macros are enabled in Microsoft Excel.
+
+11. Go to the repo folder and follow these steps:
 
   - Install Python 3.7 (or other Python 3 version), Pip and VirtualEnv.
   - `virtualenv env --python=python3.7`
   - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
   - `pip install jupyter py7zr pylint pypng pyyaml reportlab requests xlwings`
 
-11. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
+12. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
   - `sheet_gdid`: Google Drive ID of the cards spreadsheet
   - `sheet_type`: spreadsheet type, either `xlsm` (default) or `xlsx`
