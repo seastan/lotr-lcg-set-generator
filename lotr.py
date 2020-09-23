@@ -846,7 +846,7 @@ def generate_octgn(set_id, set_name, lang):
             break
 
         _create_folder(output_path)
-        with zipfile.ZipFile(pack_path, 'w', zipfile.ZIP_DEFLATED) as zip_obj:
+        with zipfile.ZipFile(pack_path, 'w') as zip_obj:
             for filename in filenames:
                 if filename.split('.')[-1] != 'jpg':
                     continue
@@ -1227,7 +1227,7 @@ def _create_octgn_archive(temp_path):
     """ Create OCTGN archive with all set.xml files.
     """
     archive_path = os.path.join(temp_path, OCTGN_ARCHIVE)
-    with zipfile.ZipFile(archive_path, 'w') as obj:
+    with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as obj:
         for _, folders, _ in os.walk(OUTPUT_OCTGN_PATH):
             for folder in folders:
                 for _, subfolders, _ in os.walk(
