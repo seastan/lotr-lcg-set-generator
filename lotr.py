@@ -25,6 +25,7 @@ from reportlab.pdfgen.canvas import Canvas
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
 OCTGN_ARCHIVE = 'unzip-me-into-sets-folder.zip'
+PROCESSED_ARTWORK_FOLDER = 'processed'
 PROJECT_FOLDER = 'Frogmorton'
 SHEET_NAME = 'setExcel'
 TEXT_CHUNK_FLAG = b'tEXt'
@@ -48,6 +49,8 @@ SET_OCTGN_PATH = 'setOCTGN'
 SHEET_ROOT_PATH = ''
 TEMP_ROOT_PATH = 'Temp'
 XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
+
+ARTWORK_CACHE = {}
 
 
 def _clear_folder(folder):
@@ -340,15 +343,26 @@ def generate_xml(conf, set_id, set_name, set_row, lang):
 def _collect_artwork_images(artwork_path):
     """ Collect artwork filenames.
     """
+    if artwork_path in ARTWORK_CACHE:
+        return ARTWORK_CACHE[artwork_path]
+
     images = {}
     for _, _, filenames in os.walk(artwork_path):
         for filename in filenames:
+            if len(filename.split('.')) < 2 or len(filename.split('_')) < 3:
+                continue
+
             if filename.split('.')[-1] in ('jpg', 'png'):
                 card_id_side = '_'.join(filename.split('_')[:2])
-                images[card_id_side] = filename
+                if card_id_side in images:
+                    logging.warning('WARNING: Duplicate card ID detected: %s',
+                                    os.path.join(artwork_path, filename))
+
+                images[card_id_side] = os.path.join(artwork_path, filename)
 
         break
 
+    ARTWORK_CACHE[artwork_path] = images
     return images
 
 
@@ -390,6 +404,9 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0914,R0915
 
     artwork_path = _get_artwork_path(conf, set_id)
     images = _collect_artwork_images(artwork_path)
+    processed_images = _collect_artwork_images(
+        os.path.join(artwork_path, PROCESSED_ARTWORK_FOLDER))
+    images = {**images, **processed_images}
     xml_path = os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id, lang))
 
     tree = ET.parse(xml_path)
@@ -420,40 +437,38 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0914,R0915
         filename = images.get('{}_{}'.format(card.attrib['id'], 'A'))
         if filename:
             prop = _get_property(card, 'Artwork')
-            prop.set('value', filename)
+            prop.set('value', os.path.split(filename)[-1])
             prop = _get_property(card, 'Artwork Size')
-            prop.set('value', str(os.path.getsize(os.path.join(artwork_path,
-                                                               filename))))
+            prop.set('value', str(os.path.getsize(filename)))
             prop = _get_property(card, 'Artwork Modified')
-            prop.set('value', str(int(os.path.getmtime(
-                os.path.join(artwork_path, filename)))))
+            prop.set('value', str(int(os.path.getmtime(filename))))
 
             artist = _find_properties(card, 'Artist')
-            if not artist and '_Artist_' in filename:
+            if not artist and '_Artist_' in os.path.split(filename)[-1]:
                 prop = _get_property(card, 'Artist')
                 prop.set('value', '.'.join(
-                    '_Artist_'.join(filename.split('_Artist_')[1:]
-                                    ).split('.')[:-1]).replace('_', ' '))
+                    '_Artist_'.join(
+                        os.path.split(filename)[-1].split('_Artist_')[1:]
+                        ).split('.')[:-1]).replace('_', ' '))
 
         filename = images.get('{}_{}'.format(card.attrib['id'], 'B'))
         alternate = [a for a in card if a.attrib.get('type') == 'B']
         if filename and alternate:
             alternate = alternate[0]
             prop = _get_property(alternate, 'Artwork')
-            prop.set('value', filename)
+            prop.set('value', os.path.split(filename)[-1])
             prop = _get_property(alternate, 'Artwork Size')
-            prop.set('value', str(os.path.getsize(os.path.join(artwork_path,
-                                                               filename))))
+            prop.set('value', str(os.path.getsize(filename)))
             prop = _get_property(alternate, 'Artwork Modified')
-            prop.set('value', str(int(os.path.getmtime(
-                os.path.join(artwork_path, filename)))))
+            prop.set('value', str(int(os.path.getmtime(filename))))
 
             artist = _find_properties(alternate, 'Artist')
-            if not artist and '_Artist_' in filename:
+            if not artist and '_Artist_' in os.path.split(filename)[-1]:
                 prop = _get_property(alternate, 'Artist')
                 prop.set('value', '.'.join(
-                    '_Artist_'.join(filename.split('_Artist_')[1:]
-                                    ).split('.')[:-1]).replace('_', ' '))
+                    '_Artist_'.join(
+                        os.path.split(filename)[-1].split('_Artist_')[1:]
+                        ).split('.')[:-1]).replace('_', ' '))
 
     for card in root[0]:
         if card.attrib['id'] in encounter_cards:
@@ -526,6 +541,8 @@ def copy_raw_images(conf, set_id, set_name, lang):
     timestamp = time.time()
 
     artwork_path = _get_artwork_path(conf, set_id)
+    processed_artwork_path = os.path.join(artwork_path,
+                                          PROCESSED_ARTWORK_FOLDER)
     tree = ET.parse(os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id,
                                                                    lang)))
     root = tree.getroot()
@@ -534,9 +551,15 @@ def copy_raw_images(conf, set_id, set_name, lang):
             filename = _find_properties(card, 'Artwork')
             if filename:
                 filename = filename[0].attrib['value']
-                path = os.path.join(IMAGES_RAW_PATH, filename)
-                if not os.path.exists(path):
-                    shutil.copyfile(os.path.join(artwork_path, filename), path)
+                if os.path.exists(os.path.join(processed_artwork_path,
+                                               filename)):
+                    input_path = os.path.join(processed_artwork_path, filename)
+                else:
+                    input_path = os.path.join(artwork_path, filename)
+
+                output_path = os.path.join(IMAGES_RAW_PATH, filename)
+                if not os.path.exists(output_path):
+                    shutil.copyfile(input_path, output_path)
 
             alternate = [a for a in card if a.attrib.get('type') == 'B']
             if alternate:
@@ -544,10 +567,16 @@ def copy_raw_images(conf, set_id, set_name, lang):
                 filename = _find_properties(alternate, 'Artwork')
                 if filename:
                     filename = filename[0].attrib['value']
-                    path = os.path.join(IMAGES_RAW_PATH, filename)
-                    if not os.path.exists(path):
-                        shutil.copyfile(os.path.join(artwork_path, filename),
-                                        path)
+                    if os.path.exists(os.path.join(processed_artwork_path,
+                                                   filename)):
+                        input_path = os.path.join(processed_artwork_path,
+                                                  filename)
+                    else:
+                        input_path = os.path.join(artwork_path, filename)
+
+                    output_path = os.path.join(IMAGES_RAW_PATH, filename)
+                    if not os.path.exists(output_path):
+                        shutil.copyfile(input_path, output_path)
 
     logging.info('[%s, %s] ...Copying raw image files into the project folder'
                  ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
