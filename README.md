@@ -27,7 +27,7 @@ completely, you will need to download updates to that folder manually.
     8a3273ca-1ccd-4e07-913b-766fcc49fe6f/processed/53dcedb3-3640-4655-a150-9d0dd534a126_A_Reclaim_the_Beacon_Artist_Jan_Pospisil.jpg
     ```
 
-    Please note that the files in the `processed` folder take precedence over the files in the root folder.
+    Please note that the files in the `processed` subfolder take precedence over the files in the root folder.
 
 3. Install Backup and Sync from Google (if it's not installed yet) and make sure that the folder
 with the cropped artwork is being synced.
