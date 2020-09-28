@@ -7,27 +7,27 @@ This feature is currently hidden on the Google Drive UI, but may still be access
 (see https://support.google.com/drive/thread/35817359?hl=en).  If this feature is removed
 completely, you will need to download updates to that folder manually.
 
-  The folder should have the following structure:
+    The folder should have the following structure:
 
-  ```
-  <set ID>/
-  <set ID>/<card ID>_<"A" or "B">_<card name and artist, format is not strict>.<"jpg" or "png">
-  <set ID>/processed/
-  <set ID>/processed/<card ID>_<"A" or "B">_<card name and artist, format is not strict>.<"jpg" or "png">
-  ```
+    ```
+    <set ID>/
+    <set ID>/<card ID>_<"A" or "B">_<card name and artist, format is not strict>.<"jpg" or "png">
+    <set ID>/processed/
+    <set ID>/processed/<card ID>_<"A" or "B">_<card name and artist, format is not strict>.<"jpg" or "png">
+    ```
 
-  For example:
+    For example:
 
-  ```
-  8a3273ca-1ccd-4e07-913b-766fcc49fe6f/
-  8a3273ca-1ccd-4e07-913b-766fcc49fe6f/53dcedb3-3640-4655-a150-9d0dd534a126_A_Reclaim_the_Beacon_Artist_Jan_Pospisil.jpg
-  8a3273ca-1ccd-4e07-913b-766fcc49fe6f/53dcedb3-3640-4655-a150-9d0dd534a126_B_Defend_the_Beacon_Artist_Skvor.jpg
-  8a3273ca-1ccd-4e07-913b-766fcc49fe6f/9a677840-6c2d-4603-b2bd-c39464663913_A_Squire_of_the_Mark_Artist_Ekaterina_Burmak.png
-  8a3273ca-1ccd-4e07-913b-766fcc49fe6f/processed/
-  8a3273ca-1ccd-4e07-913b-766fcc49fe6f/processed/53dcedb3-3640-4655-a150-9d0dd534a126_A_Reclaim_the_Beacon_Artist_Jan_Pospisil.jpg
-  ```
+    ```
+    8a3273ca-1ccd-4e07-913b-766fcc49fe6f/
+    8a3273ca-1ccd-4e07-913b-766fcc49fe6f/53dcedb3-3640-4655-a150-9d0dd534a126_A_Reclaim_the_Beacon_Artist_Jan_Pospisil.jpg
+    8a3273ca-1ccd-4e07-913b-766fcc49fe6f/53dcedb3-3640-4655-a150-9d0dd534a126_B_Defend_the_Beacon_Artist_Skvor.jpg
+    8a3273ca-1ccd-4e07-913b-766fcc49fe6f/9a677840-6c2d-4603-b2bd-c39464663913_A_Squire_of_the_Mark_Artist_Ekaterina_Burmak.png
+    8a3273ca-1ccd-4e07-913b-766fcc49fe6f/processed/
+    8a3273ca-1ccd-4e07-913b-766fcc49fe6f/processed/53dcedb3-3640-4655-a150-9d0dd534a126_A_Reclaim_the_Beacon_Artist_Jan_Pospisil.jpg
+    ```
 
-  Please note that the files in the `processed` folder take precedence over the files in the root folder.
+    Please note that the files in the `processed` folder take precedence over the files in the root folder.
 
 3. Install Backup and Sync from Google (if it's not installed yet) and make sure that the folder
 with the cropped artwork is being synced.
