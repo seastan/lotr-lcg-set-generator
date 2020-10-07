@@ -1,7 +1,7 @@
 # Google Drive ID of the cards spreadsheet
 sheet_gdid: ***
 
-# Spreadsheet type, either "xlsm" (default) or "xlsx"
+# Spreadsheet type, either "xlsm" or "xlsx"
 sheet_type: xlsm
 
 # Local path to the folder with the cropped artwork

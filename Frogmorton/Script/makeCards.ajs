@@ -99,7 +99,7 @@ function run(progress, target, filename) {
 				for (let l = 0; l < altPropList.getLength(); l++) {
 					let nAltProp = altPropList.item(l);
 					if (nAltProp && nAltProp.getNodeType() == Node.ELEMENT_NODE) {
-						card['B'+nAltProp.getAttribute('name')] = nAltProp.getAttribute('value');
+						card['B' + nAltProp.getAttribute('name')] = nAltProp.getAttribute('value');
 					}
 				}
 			}
@@ -287,20 +287,40 @@ function run(progress, target, filename) {
 				if (side == 'front') {
 					if (card['Artwork']) {
 						s.set('Portrait-external-path', 'project:imagesRaw/' + card['Artwork']);
+						if (card['PanX'] && card['PanY'] && card['Scale']) {
+							s.set('Portrait-external-panx', card['PanX']);
+							s.set('Portrait-external-pany', card['PanY']);
+							s.set('Portrait-external-scale', card['Scale'] / 100);
+						}
 					}
 					if (cardType == 'Quest') {
 						if (card['BArtwork']) {
 							s.set('PortraitBack-external-path', 'project:imagesRaw/' + card['BArtwork']);
 							s.set('PortraitShare', 0);
+							if (card['BPanX'] && card['BPanY'] && card['BScale']) {
+								s.set('PortraitBack-external-panx', card['BPanX']);
+								s.set('PortraitBack-external-pany', card['BPanY']);
+								s.set('PortraitBack-external-scale', card['BScale'] / 100);
+							}
 						}
 						else {
 							s.set('PortraitBack-external-path', 'project:imagesRaw/' + card['Artwork']);
+							if (card['PanX'] && card['PanY'] && card['Scale']) {
+								s.set('PortraitBack-external-panx', card['PanX']);
+								s.set('PortraitBack-external-pany', card['PanY']);
+								s.set('PortraitBack-external-scale', card['Scale'] / 100);
+							}
 						}
 					}
 				}
 				else {
 					if (card['BArtwork']) {
 						s.set('Portrait-external-path', 'project:imagesRaw/' + card['BArtwork']);
+						if (card['BPanX'] && card['BPanY'] && card['BScale']) {
+							s.set('Portrait-external-panx', card['BPanX']);
+							s.set('Portrait-external-pany', card['BPanY']);
+							s.set('Portrait-external-scale', card['BScale'] / 100);
+						}
 					}
 				}
 				s.set('Type', translate[cardType][lang].toUpperCase());

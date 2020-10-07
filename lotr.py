@@ -22,6 +22,17 @@ from reportlab.lib.pagesizes import landscape, letter, A4
 from reportlab.lib.units import inch
 from reportlab.pdfgen.canvas import Canvas
 
+
+SET_GUID_COLUMN = 1
+SET_NAME_COLUMN = 2
+SET_LANGUAGE_COLUMN = 4
+CARD_MAX_COLUMN_LETTER = 'BA'
+
+# Name, Traits:Keywords, Text:Flavour, Side B,
+# Traits:Keywords, Text:Flavour, Adventure
+TRANSLATION_RANGES = ['G{}:G{}', 'K{}:L{}', 'V{}:X{}', 'AC{}:AC{}',
+                      'AG{}:AH{}', 'AR{}:AT{}', 'BA{}:BA{}']
+
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
 OCTGN_ARCHIVE = 'unzip-me-into-sets-folder.zip'
@@ -199,9 +210,11 @@ def get_sets(conf):
             sets = []
             sheet = xlwb.sheets['Sets']
             for row in range(3, 103):
-                set_id = sheet.range((row, 1)).value
+                set_id = sheet.range((row, SET_GUID_COLUMN)).value
                 if set_id and set_id in conf['set_ids']:
-                    sets.append((set_id, sheet.range((row, 2)).value, row))
+                    sets.append((set_id,
+                                 sheet.range((row, SET_NAME_COLUMN)).value,
+                                 row))
         finally:
             xlwb.close()
     finally:
@@ -266,13 +279,16 @@ def _run_macro(conf, set_row, callback):
                 xlwb_target.sheets['Sets'].range('A3:C3').value = data
 
                 card_sheet = xlwb_target.sheets['Card Data']
-                data = xlwb_source.sheets['Card Data'].range('A2:AU1001').value
-                card_sheet.range('A2:AU1001').value = data
-                card_sheet.range('A2:AU1001').api.Sort(
-                    Key1=card_sheet.range('Set').api,
-                    Order1=xw.constants.SortOrder.xlAscending,
-                    Key2=card_sheet.range('CardNumber').api,
-                    Order2=xw.constants.SortOrder.xlAscending)
+                data = xlwb_source.sheets['Card Data'].range(
+                    'A2:{}1001'.format(CARD_MAX_COLUMN_LETTER)).value
+                card_sheet.range(
+                    'A2:{}1001'.format(CARD_MAX_COLUMN_LETTER)).value = data
+                card_sheet.range(
+                    'A2:{}1001'.format(CARD_MAX_COLUMN_LETTER)).api.Sort(
+                        Key1=card_sheet.range('Set').api,
+                        Order1=xw.constants.SortOrder.xlAscending,
+                        Key2=card_sheet.range('CardNumber').api,
+                        Order2=xw.constants.SortOrder.xlAscending)
 
                 callback(xlwb_source, xlwb_target)
                 xlwb_target.save()
@@ -313,21 +329,19 @@ def generate_xml(conf, set_id, set_name, set_row, lang):
                     if card_id:
                         translated.append((card_id, source_row))
 
-            tr_ranges = ['G{}:G{}', 'K{}:L{}', 'V{}:X{}', 'Z{}:Z{}',
-                         'AD{}:AE{}', 'AO{}:AQ{}', 'AU{}:AU{}']
             api = xlwb_target.sheets['Card Data'].api
             card_sheet = xlwb_target.sheets['Card Data']
             for card_id, source_row in translated:
                 cell = api.UsedRange.Find(card_id)
                 if cell:
                     target_row = cell.row
-                    for tr_range in tr_ranges:
+                    for tr_range in TRANSLATION_RANGES:
                         source_range = tr_range.format(source_row, source_row)
                         target_range = tr_range.format(target_row, target_row)
                         data = tr_sheet.range(source_range).value
                         card_sheet.range(target_range).value = data
 
-        xlwb_target.sheets['Sets'].range('D3').value = lang
+        xlwb_target.sheets['Sets'].range((3, SET_LANGUAGE_COLUMN)).value = lang
         xlwb_target.macro('SaveXML')()
 
     logging.info('[%s, %s] Generating xml file for Strange Eons...',
