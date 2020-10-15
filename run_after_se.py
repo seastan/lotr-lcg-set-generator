@@ -92,6 +92,7 @@ def main():
         processes = (max(1, cpu_count() - 1)
                      if conf['parallelism'] == 'default'
                      else conf['parallelism'])
+        processes = min(processes, len(tasks))
         logging.info('Starting a pull of %s process(es) for %s task(s)',
                      processes, len(tasks))
         with Pool(processes=processes, initializer=initializer) as pool:

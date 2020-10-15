@@ -270,6 +270,10 @@ function run(progress, target, filename) {
 							vXml = '\n' + vXml;
 						}
 					}
+					if (nXml == 'Flavour' || nXml == 'BFlavour') {
+						vXml = '<left>' + vXml + '</left>';
+						vXml = vXml.replace(/\n—([^<]+)/g, '\n<right>—$1</right>');
+					}
 					vXml = markUp(vXml, lang);
 					s.set(nEon, vXml);
 				}
@@ -459,7 +463,8 @@ function markUp(vXml, lang) {
 	vXml = vXml.replace(/%/g, '</b>');
 	vXml = vXml.replace(/\n\n/g, '\n<vs>\n');
 	vXml = vXml.replace(/([^:;,.?!]) (<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<uni>)/g, '$1\u00a0$2');
-	vXml = vXml.replace(/([0-9]) /g, '$1\u00a0');
+	vXml = vXml.replace(/([0-9]+) /g, '$1\u00a0');
+	vXml = vXml.replace(/ ([0-9]+)([:;,.?!])/g, '\u00a0$1$2');
 	return vXml;
 }
 
