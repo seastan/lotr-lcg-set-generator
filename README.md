@@ -3,7 +3,7 @@
 1. Clone this repo to a local folder.
 
 2. Make sure you already have a cards spreadsheet on Google Drive.  If you don't, upload
-`Spreadsheet.xlsm` from this repo as a template and fill in all the required data.
+`spreadsheet.xlsm` from this repo as a template and fill in all the required data.
 
 3. Add the folder with the cropped artwork to your own Google Drive to be able to sync it locally.
 This feature is currently hidden on Google Drive UI, but may still be accessed by a shortcut
