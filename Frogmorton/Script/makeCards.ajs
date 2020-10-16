@@ -465,6 +465,7 @@ function markUp(vXml, lang) {
 	vXml = vXml.replace(/([^:;,.?!]) (<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<uni>)/g, '$1\u00a0$2');
 	vXml = vXml.replace(/([0-9]+) /g, '$1\u00a0');
 	vXml = vXml.replace(/ ([0-9]+)([:;,.?!])/g, '\u00a0$1$2');
+	vXml = vXml.replace(/\[ \]|\[Space\]/g, '<image "project:imagesIcons/space.png" 0.10cm 0.01cm>');
 	return vXml;
 }
 
