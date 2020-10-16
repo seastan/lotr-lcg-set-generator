@@ -2,12 +2,15 @@
 
 1. Clone this repo to a local folder.
 
-2. Add the folder with the cropped artwork to your own Google Drive to be able to sync it locally.
-This feature is currently hidden on the Google Drive UI, but may still be accessed by a shortcut
+2. Make sure you already have a cards spreadsheet on Google Drive.  If you don't, upload
+`Spreadsheet.xlsm` from this repo as a template and fill in all the required data.
+
+3. Add the folder with the cropped artwork to your own Google Drive to be able to sync it locally.
+This feature is currently hidden on Google Drive UI, but may still be accessed by a shortcut
 (see https://support.google.com/drive/thread/35817359?hl=en).  If this feature is removed
 completely, you will need to download updates to that folder manually.
 
-    The folder should have the following structure:
+    Create this folder if it doesn't exist yet.  It should have the following structure:
 
     ```
     <set ID>/
@@ -29,37 +32,37 @@ completely, you will need to download updates to that folder manually.
 
     Please note that the files in the `processed` subfolder take precedence over the files in the root folder.
 
-3. Install Backup and Sync from Google (if it's not installed yet) and make sure that the folder
+4. Install Backup and Sync from Google (if it's not installed yet) and make sure that the folder
 with the cropped artwork is being synced.
 
-4. Install the latest available version of Strange Eons (https://strangeeons.cgjennings.ca/download.html)
+5. Install the latest available version of Strange Eons (https://strangeeons.cgjennings.ca/download.html)
 and the `The Lord of the Rings LCG` plugin.  Then, install `The Lord of the Rings LCG, HD` plugin
 as well.
 
-5. Go to plugins folder (`Strange Eons` -> `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`),
+6. Go to plugins folder (`Strange Eons` -> `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`),
 close Strange Eons and replace `TheLordOfTheRingsLCG.seext` with the custom version from this repo.
 
-6. Install GIMP (https://www.gimp.org/downloads/).
+7. Install GIMP (https://www.gimp.org/downloads/).
 
-7. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `gimp` folder
+8. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `gimp` folder
 from this repo, click `OK` and then close GIMP.
 
-8. Install ImageMagick (https://imagemagick.org/script/download.php).
+9. Install ImageMagick (https://imagemagick.org/script/download.php).
 
-9. Download `USWebCoatedSWOP.icc` from
+10. Download `USWebCoatedSWOP.icc` from
 https://github.com/cjw-network/cjwpublish1411/blob/master/vendor/imagine/imagine/lib/Imagine/resources/Adobe/CMYK/USWebCoatedSWOP.icc
 into the root folder of this repo.
 
-10. Make sure that macros are enabled in Microsoft Excel.
+11. Make sure that macros are enabled in Microsoft Excel.
 
-11. Go to the repo folder and follow these steps:
+12. Go to the repo folder and follow these steps:
 
   - Install Python 3.7 (or other Python 3 version), Pip and VirtualEnv.
   - `virtualenv env --python=python3.7`
   - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
   - `pip install jupyter py7zr pylint pypng pyyaml reportlab requests xlwings`
 
-12. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
+13. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
   - `sheet_gdid`: Google Drive ID of the cards spreadsheet
   - `sheet_type`: spreadsheet type, either `xlsm` (default) or `xlsx`
@@ -101,7 +104,7 @@ Additionally, if you specified `octgn_destination_path`, OCTGN outputs will be c
 
 **GIMP Plugins**
 
-You may use GIMP plugins separately.  See description of each of them in `gimp/scripts.py`.
+You may use GIMP plugins separately.  See the description of each of them in `gimp/scripts.py`.
 
 Setup:
 
