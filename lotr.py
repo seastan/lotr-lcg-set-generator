@@ -34,6 +34,7 @@ TRANSLATION_RANGES = ['G{}:G{}', 'K{}:L{}', 'V{}:X{}', 'AC{}:AC{}',
                       'AG{}:AH{}', 'AR{}:AT{}', 'BA{}:BA{}']
 
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
+IMAGES_CUSTOM_FOLDER = 'custom'
 MAGICK_COMMAND = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
 OCTGN_ARCHIVE = 'unzip-me-into-sets-folder.zip'
 PROCESSED_ARTWORK_FOLDER = 'processed'
@@ -43,6 +44,7 @@ TEXT_CHUNK_FLAG = b'tEXt'
 
 CONFIGURATION_PATH = 'configuration.yaml'
 IMAGES_BACK_PATH = 'imagesBack'
+IMAGES_CUSTOM_PATH = os.path.join(PROJECT_FOLDER, 'imagesCustom')
 IMAGES_EONS_PATH = 'imagesEons'
 IMAGES_RAW_PATH = os.path.join(PROJECT_FOLDER, 'imagesRaw')
 IMAGES_ZIP_PATH = '{}/Export/'.format(os.path.split(PROJECT_FOLDER)[-1])
@@ -93,7 +95,7 @@ def _delete_folder(folder):
 
 
 def _get_artwork_path(conf, set_id):
-    """ Get path to the folder with the cropped artwork.
+    """ Get path to the artwork folder.
     """
     artwork_path = os.path.join(conf['artwork_path'], set_id)
     if not os.path.exists(artwork_path):
@@ -166,6 +168,7 @@ def clear_project_folders():
     logging.info('Clearing the project folders...')
     timestamp = time.time()
 
+    _clear_folder(IMAGES_CUSTOM_PATH)
     _clear_folder(IMAGES_RAW_PATH)
     _clear_folder(XML_PATH)
     logging.info('...Clearing the project folders (%ss)',
@@ -545,6 +548,32 @@ def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0914
                  ' and skip flags (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
     return (new_file_hash, old_file_hash)
+
+
+def copy_custom_images(conf, set_id, set_name):
+    """ Copy custom image files into the project folder.
+    """
+    logging.info('[%s] Copying custom image files into the project folder...',
+                 set_name)
+    timestamp = time.time()
+
+    images_path = os.path.join(_get_artwork_path(conf, set_id),
+                               IMAGES_CUSTOM_FOLDER)
+    if os.path.exists(images_path):
+        for _, _, filenames in os.walk(images_path):
+            for filename in filenames:
+                if filename.split('.')[-1] not in ('jpg', 'png'):
+                    continue
+
+                output_filename = '{}_{}'.format(set_id, filename)
+                shutil.copyfile(os.path.join(images_path, filename),
+                                os.path.join(IMAGES_CUSTOM_PATH,
+                                             output_filename))
+
+            break
+
+    logging.info('[%s] ...Copying custom image files into the project folder'
+                 ' (%ss)', set_name, round(time.time() - timestamp, 3))
 
 
 def copy_raw_images(conf, set_id, set_name, lang):

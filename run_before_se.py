@@ -22,6 +22,7 @@ def main():
         if 'octgn' in conf['outputs']:
             lotr.generate_octgn_xml(conf, set_id, set_name, set_row)
 
+        lotr.copy_custom_images(conf, set_id, set_name)
         for lang in conf['languages']:
             lotr.generate_xml(conf, set_id, set_name, set_row, lang)
             lotr.update_xml(conf, set_id, set_name, lang)

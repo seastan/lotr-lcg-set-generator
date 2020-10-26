@@ -273,11 +273,12 @@ function run(progress, target, filename) {
 					if (nXml == 'Flavour' || nXml == 'BFlavour') {
 						vXml = '<left>' + vXml + '</left>';
 					}
-					vXml = markUp(vXml, lang);
+					vXml = markUp(vXml, lang, setID);
 					s.set(nEon, vXml);
 				}
 
 				if (cardType == 'Rules') {
+					s.set('Name', '');
 					s.set('Flavour', '');
 					s.set('FlavourBack', '');
 				}
@@ -327,8 +328,18 @@ function run(progress, target, filename) {
 					}
 				}
 				s.set('Type', translate[cardType][lang].toUpperCase());
-				s.set('Collection', 'CustomIcon');
-				s.set('Collection-external-path', ('project:imagesIcons/' + card['Set'] + '.png').replace(/ /g, '-'));
+				s.set('CollectionInfo', ' ');
+
+				if (cardType == 'Rules') {
+					s.set('Copyright', '');
+					s.set('Collection', 'EmptyIcon');
+				}
+				else {
+					s.set('Copyright', '©Middle-earth Ent. ©FFG ©ALeP');
+					s.set('Collection', 'CustomIcon');
+					s.set('Collection-external-path', ('project:imagesIcons/' + card['Set'] + '.png').replace(/ /g, '-'));
+				}
+
 				if (card['Encounter Set']) {
 					s.set('EncounterSet', 'CustomIcon');
 					s.set('EncounterSet-external-path', ('project:imagesIcons/' + card['Encounter Set'] + '.png').replace(/ /g, '-'));
@@ -349,8 +360,6 @@ function run(progress, target, filename) {
 				if (card['Removed for Easy Mode'] && j >= parseInt(card['Quantity']) - parseInt(card['Removed for Easy Mode'])) {
 					s.set('Template', 'Gold');
 				}
-				s.set('CollectionInfo', ' ');
-				s.set('Copyright', '©Middle-earth Ent. ©FFG ©ALeP');
 
 				let copy;
 				if (playerCopies) {
@@ -426,7 +435,7 @@ function exportCard(card, fname, setID, lang, jpg300NoBleed, png300NoBleed, png3
 	}
 }
 
-function markUp(vXml, lang) {
+function markUp(vXml, lang, setID) {
 	vXml = vXml + '';
 	if (lang == 'English') {
 		vXml = vXml.replace(/\b(Quest Resolution)( \([^\)]+\))?:/g, '<b>$1</b>$2:');
@@ -441,32 +450,52 @@ function markUp(vXml, lang) {
 		vXml = vXml.replace(/\b(Zustand)\b/g, '<b><i>$1</i></b>');
 	}
 	else if (lang == 'Spanish') {
-		vXml = vXml.replace(/\b(Resolución de la misión)( \([^\)]+\))?:/g, '<b>$1</b>$2:');
-		vXml = vXml.replace(/\b(Acción)( de Recursos| de Planificación| de Misión| de Viaje| de Encuentros| de Combate| de Recuperación)?( de Valor)?:/g, '<b>$1$2$3</b>:');
-		vXml = vXml.replace(/\b(Al ser revelada|Preparación|Obligado|Respuesta de Valor|Respuesta|Viaje|Sombra):/g, '<b>$1</b>:');
-		vXml = vXml.replace(/\b(Condición)\b/g, '<b><i>$1</i></b>');
+		vXml = vXml.replace(/\b(Resoluci\u00f3n de la misi\u00f3n)( \([^\)]+\))?:/g, '<b>$1</b>$2:');
+		vXml = vXml.replace(/\b(Acci\u00f3n)( de Recursos| de Planificaci\u00f3n| de Misi\u00f3n| de Viaje| de Encuentros| de Combate| de Recuperaci\u00f3n)?( de Valor)?:/g, '<b>$1$2$3</b>:');
+		vXml = vXml.replace(/\b(Al ser revelada|Preparaci\u00f3n|Obligado|Respuesta de Valor|Respuesta|Viaje|Sombra):/g, '<b>$1</b>:');
+		vXml = vXml.replace(/\b(Condici\u00f3n)\b/g, '<b><i>$1</i></b>');
 	}
 
 	vXml = vXml.replace(/ +(\n|$)/g, '$1');
-	vXml = vXml.replace(/\$|\[Threat\]/g, '<thr>');
-	vXml = vXml.replace(/\u00db|\[Attack\]/g, '<att>');
-	vXml = vXml.replace(/\u00da|\[Defense\]/g, '<def>');
-	vXml = vXml.replace(/\u00d2|\[Willpower\]/g, '<wil>');
-	vXml = vXml.replace(/\u00cc|\[Leadership\]/g, '<lea>');
-	vXml = vXml.replace(/\u00ce|\[Lore\]/g, '<lor>');
-	vXml = vXml.replace(/\u00ca|\[Spirit\]/g, '<spi>');
-	vXml = vXml.replace(/\u00cf|\[Tactics\]/g, '<tac>');
-	vXml = vXml.replace(/\u2030|\[Unique\]/g, '<uni>');
-	vXml = vXml.replace(/\^/g, '<b><i>');
-	vXml = vXml.replace(/\*/g, '</i></b>');
-	vXml = vXml.replace(/~/g, '<b>');
-	vXml = vXml.replace(/%/g, '</b>');
+	vXml = vXml.replace(/\u2030|\[unique\]/ig, '<uni>');
+	vXml = vXml.replace(/\[threat\]/ig, '<thr>');
+	vXml = vXml.replace(/\[attack\]/ig, '<att>');
+	vXml = vXml.replace(/\[defense\]/ig, '<def>');
+	vXml = vXml.replace(/\[willpower\]/ig, '<wil>');
+	vXml = vXml.replace(/\[leadership\]/ig, '<lea>');
+	vXml = vXml.replace(/\[lore\]/ig, '<lor>');
+	vXml = vXml.replace(/\[spirit\]/ig, '<spi>');
+	vXml = vXml.replace(/\[tactics\]/ig, '<tac>');
+	vXml = vXml.replace(/\[baggins\]/ig, '<bag>');
+	vXml = vXml.replace(/\[fellowship\]/ig, '<fel>');
+	vXml = vXml.replace(/\[sailing\]/ig, '<sai>');
+	vXml = vXml.replace(/\[space\]/ig, '<hs>');
+	vXml = vXml.replace(/\[center\]/ig, '<center>');
+	vXml = vXml.replace(/\[\/center\]/ig, '</center>');
+	vXml = vXml.replace(/\[left\]/ig, '<left>');
+	vXml = vXml.replace(/\[\/left\]/ig, '</left>');
+	vXml = vXml.replace(/\[right\]/ig, '<right>');
+	vXml = vXml.replace(/\[\/right\]/ig, '</right>');
+	vXml = vXml.replace(/\[bi\]/ig, '<b><i>');
+	vXml = vXml.replace(/\[\/bi\]/ig, '</i></b>');
+	vXml = vXml.replace(/\[b\]/ig, '<b>');
+	vXml = vXml.replace(/\[\/b\]/ig, '</b>');
+	vXml = vXml.replace(/\[i\]/ig, '<i>');
+	vXml = vXml.replace(/\[\/i\]/ig, '</i>');
+	vXml = vXml.replace(/\[u\]/ig, '<u>');
+	vXml = vXml.replace(/\[\/u\]/ig, '</u>');
+	vXml = vXml.replace(/\[strike\]/ig, '<del>');
+	vXml = vXml.replace(/\[\/strike\]/ig, '</del>');
+	vXml = vXml.replace(/\[h\]/ig, '<h1>');
+	vXml = vXml.replace(/\[\/h\]/ig, '</h1>');
+	vXml = vXml.replace(/\[img ("?)([^\]]+)\]/ig, '<image $1project:$2>');
+	vXml = vXml.replace(/\<image ("?)project:icons\//ig, '<image $1project:imagesIcons/');
+	vXml = vXml.replace(/\<image ("?)project:custom\//ig, '<image $1project:imagesCustom/' + setID + '_');
 	vXml = vXml.replace(/\n\n/g, '\n<vs>\n');
 	vXml = vXml.replace(/([^:;,.?!]) (<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<uni>)/g, '$1\u00a0$2');
 	vXml = vXml.replace(/([0-9]+) /g, '$1\u00a0');
 	vXml = vXml.replace(/ ([0-9]+)([:;,.?!])/g, '\u00a0$1$2');
-	vXml = vXml.replace(/ ([\-A-Za-z'"()]+)([:;,.?!]"?)(\n|$)/g, '\u00a0$1$2$3');
-	vXml = vXml.replace(/\[ \]|\[Space\]/g, '<image "project:imagesIcons/space.png" 0.10cm 0.01cm>');
+	vXml = vXml.replace(/ ([\-'"\(\)A-Za-z\u00c0-\u00ff]+)([:;,.?!]"?)(\n|$)/g, '\u00a0$1$2$3');
 	return vXml;
 }
 

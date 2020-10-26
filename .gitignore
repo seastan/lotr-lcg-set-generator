@@ -1,5 +1,7 @@
 .ipynb_checkpoints/
 __pycache__/
+Frogmorton/imagesCustom/*.jpg
+Frogmorton/imagesCustom/*.png
 Frogmorton/imagesRaw/*.jpg
 Frogmorton/imagesRaw/*.png
 Frogmorton/XML/*.xml
