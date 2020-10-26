@@ -270,10 +270,10 @@ function run(progress, target, filename) {
 							vXml = '\n' + vXml;
 						}
 					}
-					if (nXml == 'Flavour' || nXml == 'BFlavour') {
-						vXml = '<left>' + vXml + '</left>';
-					}
 					vXml = markUp(vXml, lang, setID);
+					if (nXml == 'Flavour' || nXml == 'BFlavour') {
+						vXml = '<left>' + vXml;
+					}
 					s.set(nEon, vXml);
 				}
 
@@ -471,11 +471,14 @@ function markUp(vXml, lang, setID) {
 	vXml = vXml.replace(/\[sailing\]/ig, '<sai>');
 	vXml = vXml.replace(/\[space\]/ig, '<hs>');
 	vXml = vXml.replace(/\[center\]/ig, '<center>');
-	vXml = vXml.replace(/\[\/center\]/ig, '</center>');
-	vXml = vXml.replace(/\[left\]/ig, '<left>');
-	vXml = vXml.replace(/\[\/left\]/ig, '</left>');
+	vXml = vXml.replace(/([^\n])\<center\>/ig, '$1\n<center>');
+	vXml = vXml.replace(/\[\/center\]\n?/ig, '\n<left>');
 	vXml = vXml.replace(/\[right\]/ig, '<right>');
-	vXml = vXml.replace(/\[\/right\]/ig, '</right>');
+	vXml = vXml.replace(/([^\n])\<right\>/ig, '$1\n<right>');
+	vXml = vXml.replace(/\[\/right\]\n?/ig, '\n<left>');
+	vXml = vXml.replace(/\<left\>\<center\>/ig, '<center>');
+	vXml = vXml.replace(/\<left\>\<right\>/ig, '<right>');
+	vXml = vXml.replace(/\n*\<left\>$/ig, '');
 	vXml = vXml.replace(/\[bi\]/ig, '<b><i>');
 	vXml = vXml.replace(/\[\/bi\]/ig, '</i></b>');
 	vXml = vXml.replace(/\[b\]/ig, '<b>');
@@ -491,11 +494,12 @@ function markUp(vXml, lang, setID) {
 	vXml = vXml.replace(/\[img ("?)([^\]]+)\]/ig, '<image $1project:$2>');
 	vXml = vXml.replace(/\<image ("?)project:icons\//ig, '<image $1project:imagesIcons/');
 	vXml = vXml.replace(/\<image ("?)project:custom\//ig, '<image $1project:imagesCustom/' + setID + '_');
-	vXml = vXml.replace(/\n\n/g, '\n<vs>\n');
 	vXml = vXml.replace(/([^:;,.?!]) (<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<uni>)/g, '$1\u00a0$2');
 	vXml = vXml.replace(/([0-9]+) /g, '$1\u00a0');
 	vXml = vXml.replace(/ ([0-9]+)([:;,.?!])/g, '\u00a0$1$2');
 	vXml = vXml.replace(/ ([\-'"\(\)A-Za-z\u00c0-\u00ff]+)([:;,.?!]"?)(\n|$)/g, '\u00a0$1$2$3');
+	vXml = vXml.replace(/\n+$/g, '');
+	vXml = vXml.replace(/\n\n/g, '\n<vs>\n');
 	return vXml;
 }
 
