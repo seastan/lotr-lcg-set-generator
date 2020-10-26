@@ -5,7 +5,7 @@
 2. Make sure you already have a cards spreadsheet on Google Drive.  If you don't, upload
 `spreadsheet.xlsm` from this repo as a template and fill in all the required data.
 
-3. Add the folder with the cropped artwork to your own Google Drive to be able to sync it locally.
+3. Add the folder with the artwork to your own Google Drive to be able to sync it locally.
 This feature is currently hidden on Google Drive UI, but may still be accessed by a shortcut
 (see https://support.google.com/drive/thread/35817359?hl=en).  If this feature is removed
 completely, you will need to download updates to that folder manually.
@@ -15,6 +15,8 @@ completely, you will need to download updates to that folder manually.
     ```
     <set ID>/
     <set ID>/<card ID>_<"A" or "B">_<card name and artist, format is not strict>.<"jpg" or "png">
+    <set ID>/custom/
+    <set ID>/custom/<custom image>
     <set ID>/processed/
     <set ID>/processed/<card ID>_<"A" or "B">_<card name and artist, format is not strict>.<"jpg" or "png">
     ```
@@ -26,6 +28,8 @@ completely, you will need to download updates to that folder manually.
     8a3273ca-1ccd-4e07-913b-766fcc49fe6f/53dcedb3-3640-4655-a150-9d0dd534a126_A_Reclaim_the_Beacon_Artist_Jan_Pospisil.jpg
     8a3273ca-1ccd-4e07-913b-766fcc49fe6f/53dcedb3-3640-4655-a150-9d0dd534a126_B_Defend_the_Beacon_Artist_Skvor.jpg
     8a3273ca-1ccd-4e07-913b-766fcc49fe6f/9a677840-6c2d-4603-b2bd-c39464663913_A_Squire_of_the_Mark_Artist_Ekaterina_Burmak.png
+    8a3273ca-1ccd-4e07-913b-766fcc49fe6f/custom/
+    8a3273ca-1ccd-4e07-913b-766fcc49fe6f/custom/rules.png
     8a3273ca-1ccd-4e07-913b-766fcc49fe6f/processed/
     8a3273ca-1ccd-4e07-913b-766fcc49fe6f/processed/53dcedb3-3640-4655-a150-9d0dd534a126_A_Reclaim_the_Beacon_Artist_Jan_Pospisil.jpg
     ```
@@ -33,7 +37,7 @@ completely, you will need to download updates to that folder manually.
     Please note that the files in the `processed` subfolder take precedence over the files in the root folder.
 
 4. Install Backup and Sync from Google (if it's not installed yet) and make sure that the folder
-with the cropped artwork is being synced.
+with the artwork is being synced.
 
 5. Install the latest available version of Strange Eons (https://strangeeons.cgjennings.ca/download.html)
 and the `The Lord of the Rings LCG` plugin.  Then, install `The Lord of the Rings LCG, HD` plugin
@@ -66,7 +70,7 @@ into the root folder of this repo.
 
   - `sheet_gdid`: Google Drive ID of the cards spreadsheet
   - `sheet_type`: spreadsheet type, either `xlsm` (default) or `xlsx`
-  - `artwork_path`: local path to the folder with the cropped artwork (don't use for that any existing folder in this repo)
+  - `artwork_path`: local path to the artwork folder (don't use for that any existing folder in this repo)
   - `gimp_console_path`: path to GIMP console executable
   - `magick_path`: path to ImageMagick executable
   - `octgn_destination_path`: path to OCTGN destination folder (may be empty)

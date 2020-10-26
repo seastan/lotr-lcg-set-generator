@@ -4,7 +4,7 @@ sheet_gdid: ***
 # Spreadsheet type, either "xlsm" or "xlsx"
 sheet_type: xlsm
 
-# Local path to the folder with the cropped artwork
+# Local path to the artwork folder
 artwork_path: C:\Google Drive\Artwork\
 
 # Path to GIMP console executable
