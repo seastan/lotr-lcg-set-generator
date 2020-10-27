@@ -26,12 +26,12 @@ from reportlab.pdfgen.canvas import Canvas
 SET_GUID_COLUMN = 1
 SET_NAME_COLUMN = 2
 SET_LANGUAGE_COLUMN = 4
-CARD_MAX_COLUMN_LETTER = 'BA'
+CARD_MAX_COLUMN_LETTER = 'AZ'
 
 # Name, Traits:Keywords, Text:Flavour, Side B,
 # Traits:Keywords, Text:Flavour, Adventure
-TRANSLATION_RANGES = ['G{}:G{}', 'K{}:L{}', 'V{}:X{}', 'AC{}:AC{}',
-                      'AG{}:AH{}', 'AR{}:AT{}', 'BA{}:BA{}']
+TRANSLATION_RANGES = ['F{}:F{}', 'J{}:K{}', 'U{}:W{}', 'AB{}:AB{}',
+                      'AF{}:AG{}', 'AQ{}:AS{}', 'AZ{}:AZ{}']
 
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 IMAGES_CUSTOM_FOLDER = 'custom'
