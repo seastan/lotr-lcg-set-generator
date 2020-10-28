@@ -279,6 +279,8 @@ function run(progress, target, filename) {
 
 				if (cardType == 'Rules') {
 					s.set('Name', '');
+					s.set('Story', '');
+					s.set('StoryBack', '');
 					s.set('Flavour', '');
 					s.set('FlavourBack', '');
 				}
@@ -470,14 +472,18 @@ function markUp(vXml, lang, setID) {
 	vXml = vXml.replace(/\[fellowship\]/ig, '<fel>');
 	vXml = vXml.replace(/\[sailing\]/ig, '<sai>');
 	vXml = vXml.replace(/\[space\]/ig, '<hs>');
+	vXml = vXml.replace(/\[h1\]/ig, '[center][lrl]<size 11>');
+	vXml = vXml.replace(/\[\/h1\]/ig, '</size>[/lrl][/center]');
+	vXml = vXml.replace(/\[h2\]/ig, '[center][lrl]<size 9>');
+	vXml = vXml.replace(/\[\/h2\]/ig, '</size>[/lrl][/center]');
 	vXml = vXml.replace(/\[center\]/ig, '<center>');
 	vXml = vXml.replace(/([^\n])\<center\>/ig, '$1\n<center>');
 	vXml = vXml.replace(/\[\/center\]\n?/ig, '\n<left>');
 	vXml = vXml.replace(/\[right\]/ig, '<right>');
 	vXml = vXml.replace(/([^\n])\<right\>/ig, '$1\n<right>');
 	vXml = vXml.replace(/\[\/right\]\n?/ig, '\n<left>');
-	vXml = vXml.replace(/\<left\>\<center\>/ig, '<center>');
-	vXml = vXml.replace(/\<left\>\<right\>/ig, '<right>');
+	vXml = vXml.replace(/\<left\>(\n*)\<center\>/ig, '$1<center>');
+	vXml = vXml.replace(/\<left\>(\n*)\<right\>/ig, '$1<right>');
 	vXml = vXml.replace(/\n*\<left\>$/ig, '');
 	vXml = vXml.replace(/\[bi\]/ig, '<b><i>');
 	vXml = vXml.replace(/\[\/bi\]/ig, '</i></b>');
@@ -489,8 +495,10 @@ function markUp(vXml, lang, setID) {
 	vXml = vXml.replace(/\[\/u\]/ig, '</u>');
 	vXml = vXml.replace(/\[strike\]/ig, '<del>');
 	vXml = vXml.replace(/\[\/strike\]/ig, '</del>');
-	vXml = vXml.replace(/\[h\]/ig, '<h1>');
-	vXml = vXml.replace(/\[\/h\]/ig, '</h1>');
+	vXml = vXml.replace(/\[lrl\]/ig, '<family LRLfont>');
+	vXml = vXml.replace(/\[\/lrl\]/ig, '</family>');
+	vXml = vXml.replace(/\[red\]/ig, '<red>');
+	vXml = vXml.replace(/\[\/red\]/ig, '</red>');
 	vXml = vXml.replace(/\[img ("?)([^\]]+)\]/ig, '<image $1project:$2>');
 	vXml = vXml.replace(/\<image ("?)project:icons\//ig, '<image $1project:imagesIcons/');
 	vXml = vXml.replace(/\<image ("?)project:custom\//ig, '<image $1project:imagesCustom/' + setID + '_');
