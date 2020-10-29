@@ -472,10 +472,10 @@ function markUp(vXml, lang, setID) {
 	vXml = vXml.replace(/\[fellowship\]/ig, '<fel>');
 	vXml = vXml.replace(/\[sailing\]/ig, '<sai>');
 	vXml = vXml.replace(/\[space\]/ig, '<hs>');
-	vXml = vXml.replace(/\[h1\]/ig, '[center][lrl]<size 11>');
-	vXml = vXml.replace(/\[\/h1\]/ig, '</size>[/lrl][/center]');
-	vXml = vXml.replace(/\[h2\]/ig, '[center][lrl]<size 9>');
-	vXml = vXml.replace(/\[\/h2\]/ig, '</size>[/lrl][/center]');
+	vXml = vXml.replace(/\[h1\]/ig, '[center][lotr]<size 11>');
+	vXml = vXml.replace(/\[\/h1\]/ig, '</size>[/lotr][/center]');
+	vXml = vXml.replace(/\[h2\]/ig, '[center][lotr]<size 9>');
+	vXml = vXml.replace(/\[\/h2\]/ig, '</size>[/lotr][/center]');
 	vXml = vXml.replace(/\[center\]/ig, '<center>');
 	vXml = vXml.replace(/([^\n])\<center\>/ig, '$1\n<center>');
 	vXml = vXml.replace(/\[\/center\]\n?/ig, '\n<left>');
@@ -495,8 +495,8 @@ function markUp(vXml, lang, setID) {
 	vXml = vXml.replace(/\[\/u\]/ig, '</u>');
 	vXml = vXml.replace(/\[strike\]/ig, '<del>');
 	vXml = vXml.replace(/\[\/strike\]/ig, '</del>');
-	vXml = vXml.replace(/\[lrl\]/ig, '<family LRLfont>');
-	vXml = vXml.replace(/\[\/lrl\]/ig, '</family>');
+	vXml = vXml.replace(/\[lotr\]/ig, '<family LRLfont>');
+	vXml = vXml.replace(/\[\/lotr\]/ig, '</family>');
 	vXml = vXml.replace(/\[red\]/ig, '<red>');
 	vXml = vXml.replace(/\[\/red\]/ig, '</red>');
 	vXml = vXml.replace(/\[img ("?)([^\]]+)\]/ig, '<image $1project:$2>');
