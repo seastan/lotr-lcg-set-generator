@@ -181,17 +181,23 @@ def download_sheet(conf):
     logging.info('Downloading cards spreadsheet from Google Drive...')
     timestamp = time.time()
 
-    sheet_path = os.path.join(SHEET_ROOT_PATH,
-                              '{}.{}'.format(SHEET_NAME, conf['sheet_type']))
-    if conf['sheet_type'] == 'xlsm':
-        url = ('https://drive.google.com/uc?export=download&id={}'
-               .format(conf['sheet_gdid']))
-    else:
-        url = ('https://docs.google.com/spreadsheets/d/{}/export?format=xlsx'
-               .format(conf['sheet_gdid']))
+    if conf['sheet_gdid']:
+        sheet_path = os.path.join(SHEET_ROOT_PATH,
+                                  '{}.{}'.format(SHEET_NAME,
+                                                 conf['sheet_type']))
+        if conf['sheet_type'] == 'xlsm':
+            url = (
+                'https://drive.google.com/uc?export=download&id={}'
+                .format(conf['sheet_gdid']))
+        else:
+            url = (
+                'https://docs.google.com/spreadsheets/d/{}/export?format=xlsx'
+                .format(conf['sheet_gdid']))
 
-    with open(sheet_path, 'wb') as f_sheet:
-        f_sheet.write(requests.get(url).content)
+        with open(sheet_path, 'wb') as f_sheet:
+            f_sheet.write(requests.get(url).content)
+    else:
+        logging.info('No Google Drive ID found, using a local copy')
 
     logging.info('...Downloading cards spreadsheet from Google Drive (%ss)',
                  round(time.time() - timestamp, 3))

@@ -68,7 +68,7 @@ into the root folder of this repo.
 
 13. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
-  - `sheet_gdid`: Google Drive ID of the cards spreadsheet
+  - `sheet_gdid`: Google Drive ID of the cards spreadsheet (leave empty to use a local copy)
   - `sheet_type`: spreadsheet type, either `xlsm` (default) or `xlsx`
   - `artwork_path`: local path to the artwork folder (don't use for that any existing folder in this repo)
   - `gimp_console_path`: path to GIMP console executable

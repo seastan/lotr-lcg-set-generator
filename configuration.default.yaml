@@ -1,4 +1,4 @@
-# Google Drive ID of the cards spreadsheet
+# Google Drive ID of the cards spreadsheet (leave empty to use a local copy)
 sheet_gdid: ***
 
 # Spreadsheet type, either "xlsm" or "xlsx"
