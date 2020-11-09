@@ -249,9 +249,6 @@ function run(progress, target, filename) {
 					if (vXml == '-') {
 						vXml = 'minus';
 					}
-					if (vXml == '\u2030') {
-						vXml = '1';
-					}
 					if (nXml == 'Victory Points' || nXml == 'BVictory Points') {
 						vXml = translate['Victory'][lang].toUpperCase() + ' ' + vXml;
 					}
@@ -472,6 +469,7 @@ function markUp(vXml, lang, setID) {
 	vXml = vXml.replace(/\[fellowship\]/ig, '<fel>');
 	vXml = vXml.replace(/\[sailing\]/ig, '<sai>');
 	vXml = vXml.replace(/\[space\]/ig, '<hs>');
+	vXml = vXml.replace(/\[pp\]/ig, '<pp>');
 	vXml = vXml.replace(/\[h1\]/ig, '[center][lotr]<size 11>');
 	vXml = vXml.replace(/\[\/h1\]/ig, '</size>[/lotr][/center]');
 	vXml = vXml.replace(/\[h2\]/ig, '[center][lotr]<size 9>');
