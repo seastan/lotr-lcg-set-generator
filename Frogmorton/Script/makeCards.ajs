@@ -459,7 +459,7 @@ function markUp(vXml, lang, setID) {
 	}
 
 	vXml = vXml.replace(/ +(\n|$)/g, '$1');
-	vXml = vXml.replace(/\u2030|\[unique\]/ig, '<uni>');
+	vXml = vXml.replace(/\[unique\]/ig, '<uni>');
 	vXml = vXml.replace(/\[threat\]/ig, '<thr>');
 	vXml = vXml.replace(/\[attack\]/ig, '<att>');
 	vXml = vXml.replace(/\[defense\]/ig, '<def>');
