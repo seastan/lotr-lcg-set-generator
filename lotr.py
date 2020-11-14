@@ -30,8 +30,8 @@ CARD_MAX_COLUMN_LETTER = 'AZ'
 
 # Name, Traits:Keywords, Text:Flavour, Side B,
 # Traits:Keywords, Text:Flavour, Adventure
-TRANSLATION_RANGES = ['F{}:F{}', 'J{}:K{}', 'U{}:W{}', 'AB{}:AB{}',
-                      'AF{}:AG{}', 'AQ{}:AS{}', 'AZ{}:AZ{}']
+TRANSLATION_RANGES = ['F{}:F{}', 'J{}:K{}', 'T{}:W{}', 'AB{}:AB{}',
+                      'AF{}:AG{}', 'AP{}:AS{}', 'AZ{}:AZ{}']
 
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 IMAGES_CUSTOM_FOLDER = 'custom'

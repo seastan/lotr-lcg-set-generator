@@ -250,7 +250,9 @@ function run(progress, target, filename) {
 						vXml = 'minus';
 					}
 					if (nXml == 'Victory Points' || nXml == 'BVictory Points') {
-						vXml = translate['Victory'][lang].toUpperCase() + ' ' + vXml;
+						if (vXml.match(/^[0-9]+$/)) {
+							vXml = translate['Victory'][lang].toUpperCase() + ' ' + vXml;
+						}
 					}
 					if (nXml == 'Artist' || nXml == 'BArtist') {
 						if (vXml == 'Unknown Artist') {
