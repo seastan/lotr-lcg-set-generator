@@ -59,14 +59,15 @@ into the root folder of this repo.
 
 11. Make sure that macros are enabled in Microsoft Excel.
 
-12. Go to the repo folder and follow these steps:
+12. Install Python 3.8 (or other Python 3 version), Pip and VirtualEnv.
 
-  - Install Python 3.7 (or other Python 3 version), Pip and VirtualEnv.
-  - `virtualenv env --python=python3.7`
+13. Go to the repo folder and follow these steps:
+
+  - `virtualenv env --python=python3.8` (replace `3.8` with your actual Python version)
   - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
   - `pip install jupyter py7zr pylint pypng pyyaml reportlab requests xlwings`
 
-13. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
+14. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
   - `sheet_gdid`: Google Drive ID of the cards spreadsheet (leave empty to use a local copy)
   - `sheet_type`: spreadsheet type, either `xlsm` (default) or `xlsx`

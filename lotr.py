@@ -289,15 +289,14 @@ def _run_macro(conf, set_row, callback):
 
                 card_sheet = xlwb_target.sheets['Card Data']
                 data = xlwb_source.sheets['Card Data'].range(
-                    'A2:{}1001'.format(CARD_MAX_COLUMN_LETTER)).value
+                    'A2:{}10001'.format(CARD_MAX_COLUMN_LETTER)).value
                 card_sheet.range(
-                    'A2:{}1001'.format(CARD_MAX_COLUMN_LETTER)).value = data
-                card_sheet.range(
-                    'A2:{}1001'.format(CARD_MAX_COLUMN_LETTER)).api.Sort(
-                        Key1=card_sheet.range('Set').api,
-                        Order1=xw.constants.SortOrder.xlAscending,
-                        Key2=card_sheet.range('CardNumber').api,
-                        Order2=xw.constants.SortOrder.xlAscending)
+                    'A2:{}10001'.format(CARD_MAX_COLUMN_LETTER)).value = data
+                card_sheet.range('A:A').api.Sort(
+                    Key1=card_sheet.range('Set').api,
+                    Order1=xw.constants.SortOrder.xlAscending,
+                    Key2=card_sheet.range('CardNumber').api,
+                    Order2=xw.constants.SortOrder.xlAscending)
 
                 callback(xlwb_source, xlwb_target)
                 xlwb_target.save()
