@@ -445,25 +445,29 @@ function exportCard(card, fname, setID, lang, jpg300NoBleed, png300NoBleed, png3
 function markUp(vXml, nXml, lang, setID) {
 	vXml = vXml + '';
 	if (lang == 'English') {
-		vXml = vXml.replace(/\b(Quest Resolution)( \([^\)]+\))?:/g, '<b>$1</b>$2:');
-		vXml = vXml.replace(/\b(Valour )?(Resource |Planning |Quest |Travel |Encounter |Combat |Refresh )?(Action):/g, '<b>$1$2$3</b>:');
-		vXml = vXml.replace(/\b(When Revealed|Setup|Forced|Valour Response|Response|Travel|Shadow):/g, '<b>$1</b>:');
-		vXml = vXml.replace(/\b(Condition)\b/g, '<b><i>$1</i></b>');
+		vXml = vXml.replace(/\b(Quest Resolution)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+		vXml = vXml.replace(/\b(Valour )?(Resource |Planning |Quest |Travel |Encounter |Combat |Refresh )?(Action):/g, '[b]$1$2$3[/b]:');
+		vXml = vXml.replace(/\b(When Revealed|Setup|Forced|Valour Response|Response|Travel|Shadow):/g, '[b]$1[/b]:');
+		vXml = vXml.replace(/\b(Condition)\b/g, '[bi]$1[/bi]');
 	}
 	else if (lang == 'German') {
-		vXml = vXml.replace(/\b(Abenteuer bestehen)( \([^\)]+\))?:/g, '<b>$1</b>$2:');
-		vXml = vXml.replace(/\b(Ehrenvolle )?(Ressourcenaktion|Planungsaktion|Abenteueraktion|Reiseaktion|Begegnungsaktion|Kampfaktion|Auffrischungsaktion|Aktion):/g, '<b>$1$2</b>:');
-		vXml = vXml.replace(/\b(Wenn aufgedeckt|Vorbereitung|Erzwungen|Ehrenvolle Reaktion|Reaktion|Reise|Schatten):/g, '<b>$1</b>:');
-		vXml = vXml.replace(/\b(Zustand)\b/g, '<b><i>$1</i></b>');
+		vXml = vXml.replace(/\b(Abenteuer bestehen)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+		vXml = vXml.replace(/\b(Ehrenvolle )?(Ressourcenaktion|Planungsaktion|Abenteueraktion|Reiseaktion|Begegnungsaktion|Kampfaktion|Auffrischungsaktion|Aktion):/g, '[b]$1$2[/b]:');
+		vXml = vXml.replace(/\b(Wenn aufgedeckt|Vorbereitung|Erzwungen|Ehrenvolle Reaktion|Reaktion|Reise|Schatten):/g, '[b]$1[/b]:');
+		vXml = vXml.replace(/\b(Zustand)\b/g, '[bi]$1[/bi]');
 	}
 	else if (lang == 'Spanish') {
-		vXml = vXml.replace(/\b(Resoluci\u00f3n de la misi\u00f3n)( \([^\)]+\))?:/g, '<b>$1</b>$2:');
-		vXml = vXml.replace(/\b(Acci\u00f3n)( de Recursos| de Planificaci\u00f3n| de Misi\u00f3n| de Viaje| de Encuentros| de Combate| de Recuperaci\u00f3n)?( de Valor)?:/g, '<b>$1$2$3</b>:');
-		vXml = vXml.replace(/\b(Al ser revelada|Preparaci\u00f3n|Obligado|Respuesta de Valor|Respuesta|Viaje|Sombra):/g, '<b>$1</b>:');
-		vXml = vXml.replace(/\b(Condici\u00f3n)\b/g, '<b><i>$1</i></b>');
+		vXml = vXml.replace(/\b(Resoluci\u00f3n de la misi\u00f3n)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+		vXml = vXml.replace(/\b(Acci\u00f3n)( de Recursos| de Planificaci\u00f3n| de Misi\u00f3n| de Viaje| de Encuentros| de Combate| de Recuperaci\u00f3n)?( de Valor)?:/g, '[b]$1$2$3[/b]:');
+		vXml = vXml.replace(/\b(Al ser revelada|Preparaci\u00f3n|Obligado|Respuesta de Valor|Respuesta|Viaje|Sombra):/g, '[b]$1[/b]:');
+		vXml = vXml.replace(/\b(Condici\u00f3n)\b/g, '[bi]$1[/bi]');
 	}
 
 	vXml = vXml.replace(/ +(\n|$)/g, '$1');
+	vXml = vXml.replace(/</ig, '[lt]');
+	vXml = vXml.replace(/>/ig, '[gt]');
+	vXml = vXml.replace(/\[lt\]/ig, '<lt>');
+	vXml = vXml.replace(/\[gt\]/ig, '<gt>');
 	vXml = vXml.replace(/\[unique\]/ig, '<uni>');
 	vXml = vXml.replace(/\[threat\]/ig, '<thr>');
 	vXml = vXml.replace(/\[attack\]/ig, '<att>');
