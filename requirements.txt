@@ -1,0 +1,9 @@
+jupyter
+py7zr
+pylint
+pypng
+pyyaml
+pywin32==228
+reportlab
+requests
+xlwings

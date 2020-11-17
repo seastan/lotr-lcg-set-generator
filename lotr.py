@@ -23,10 +23,19 @@ from reportlab.lib.units import inch
 from reportlab.pdfgen.canvas import Canvas
 
 
-SET_GUID_COLUMN = 1
-SET_NAME_COLUMN = 2
-SET_LANGUAGE_COLUMN = 4
-CARD_MAX_COLUMN_LETTER = 'AZ'
+SET_FIRST_ROW = 3
+SET_MAX_ROW = 102
+SET_GUID_COLUMN = 'A'
+SET_NAME_COLUMN = 'B'
+SET_VERSION_COLUMN = 'C'
+SET_LANGUAGE_COLUMN = 'D'
+
+CARD_FIRST_ROW = 2
+CARD_MAX_ROW = 10001
+CARD_SET_COLUMN = 'A'
+CARD_GUID_COLUMN = 'B'
+CARD_NUMBER_COLUMN = 'C'
+CARD_MAX_COLUMN = 'AZ'
 
 # Name, Traits:Keywords, Text:Flavour, Side B,
 # Traits:Keywords, Text:Flavour, Adventure
@@ -64,6 +73,19 @@ TEMP_ROOT_PATH = 'Temp'
 XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
 
 ARTWORK_CACHE = {}
+
+
+def _c2n(column):
+    """ Convert column to number.
+    """
+    res = 0
+    multiplier = 1
+    column = column.upper()
+    for symbol in column[::-1]:
+        res += (ord(symbol) - 64) * multiplier
+        multiplier *= 26
+
+    return res
 
 
 def _clear_folder(folder):
@@ -218,11 +240,12 @@ def get_sets(conf):
         try:
             sets = []
             sheet = xlwb.sheets['Sets']
-            for row in range(3, 103):
-                set_id = sheet.range((row, SET_GUID_COLUMN)).value
+            for row in range(SET_FIRST_ROW, SET_MAX_ROW + 1):
+                set_id = sheet.range((row, _c2n(SET_GUID_COLUMN))).value
                 if set_id and set_id in conf['set_ids']:
                     sets.append((set_id,
-                                 sheet.range((row, SET_NAME_COLUMN)).value,
+                                 sheet.range((row,
+                                              _c2n(SET_NAME_COLUMN))).value,
                                  row))
         finally:
             xlwb.close()
@@ -284,18 +307,28 @@ def _run_macro(conf, set_row, callback):
             xlwb_target = excel_app.books.open(MACROS_COPY_PATH)
             try:
                 data = xlwb_source.sheets['Sets'].range(
-                    'A{}:C{}'.format(set_row, set_row)).value  # pylint: disable=W1308
-                xlwb_target.sheets['Sets'].range('A3:C3').value = data
+                    '{}{}:{}{}'.format(SET_GUID_COLUMN, set_row,  # pylint: disable=W1308
+                                       SET_VERSION_COLUMN, set_row)).value
+                xlwb_target.sheets['Sets'].range(
+                    '{}{}:{}{}'.format(SET_GUID_COLUMN, SET_FIRST_ROW,  # pylint: disable=W1308
+                                       SET_VERSION_COLUMN, SET_FIRST_ROW)
+                    ).value = data
 
                 card_sheet = xlwb_target.sheets['Card Data']
-                data = xlwb_source.sheets['Card Data'].range(
-                    'A2:{}10001'.format(CARD_MAX_COLUMN_LETTER)).value
-                card_sheet.range(
-                    'A2:{}10001'.format(CARD_MAX_COLUMN_LETTER)).value = data
-                card_sheet.range('A:A').api.Sort(
-                    Key1=card_sheet.range('Set').api,
+                card_range = '{}{}:{}{}'.format(CARD_SET_COLUMN,
+                                                CARD_FIRST_ROW,
+                                                CARD_MAX_COLUMN,
+                                                CARD_MAX_ROW)
+                data = xlwb_source.sheets['Card Data'].range(card_range).value
+                card_sheet.range(card_range).value = data
+                card_sheet.range(card_range).api.Sort(
+                    Key1=card_sheet.range(
+                        '{}:{}'.format(CARD_SET_COLUMN, CARD_SET_COLUMN)  # pylint: disable=W1308
+                    ).api,
                     Order1=xw.constants.SortOrder.xlAscending,
-                    Key2=card_sheet.range('CardNumber').api,
+                    Key2=card_sheet.range(
+                        '{}:{}'.format(CARD_NUMBER_COLUMN, CARD_NUMBER_COLUMN)  # pylint: disable=W1308
+                    ).api,
                     Order2=xw.constants.SortOrder.xlAscending)
 
                 callback(xlwb_source, xlwb_target)
@@ -331,9 +364,11 @@ def generate_xml(conf, set_id, set_name, set_row, lang):
         if lang != 'English':
             translated = []
             tr_sheet = xlwb_source.sheets[lang]
-            for source_row in range(2, 1002):
-                if tr_sheet.range((source_row, 1)).value == set_id:
-                    card_id = tr_sheet.range((source_row, 2)).value
+            for source_row in range(CARD_FIRST_ROW, CARD_MAX_ROW + 1):
+                if tr_sheet.range((source_row,
+                                   _c2n(CARD_SET_COLUMN))).value == set_id:
+                    card_id = tr_sheet.range((source_row,
+                                              _c2n(CARD_GUID_COLUMN))).value
                     if card_id:
                         translated.append((card_id, source_row))
 
@@ -349,7 +384,9 @@ def generate_xml(conf, set_id, set_name, set_row, lang):
                         data = tr_sheet.range(source_range).value
                         card_sheet.range(target_range).value = data
 
-        xlwb_target.sheets['Sets'].range((3, SET_LANGUAGE_COLUMN)).value = lang
+        xlwb_target.sheets['Sets'].range((SET_FIRST_ROW,
+                                          _c2n(SET_LANGUAGE_COLUMN))
+                                         ).value = lang
         xlwb_target.macro('SaveXML')()
 
     logging.info('[%s, %s] Generating xml file for Strange Eons...',

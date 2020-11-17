@@ -5,7 +5,7 @@ sheet_gdid: ***
 sheet_type: xlsm
 
 # Local path to the artwork folder
-artwork_path: C:\Google Drive\Artwork\
+artwork_path: C:\Google Drive\CardImages\
 
 # Path to GIMP console executable
 gimp_console_path: C:\Program Files\GIMP 2\bin\gimp-console-2.10.exe

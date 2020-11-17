@@ -65,7 +65,7 @@ into the root folder of this repo.
 
   - `virtualenv env --python=python3.8` (replace `3.8` with your actual Python version)
   - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
-  - `pip install jupyter py7zr pylint pypng pyyaml reportlab requests xlwings`
+  - `pip install -r requirements.txt`
 
 14. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
