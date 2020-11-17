@@ -9,6 +9,9 @@ importClass(org.w3c.dom.Element);
 importClass(org.w3c.dom.Node);
 importClass(org.w3c.dom.NodeList);
 
+var cardTypes = ['Ally', 'Attachment', 'Enemy', 'Event', 'Hero', 'Location', 'Objective', 'Objective Ally',
+		 'Quest', 'Rules', 'Side Quest', 'Treachery']
+
 var translate = {};
 translate['Ally'] = {'English': 'Ally', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado'};
 translate['Attachment'] = {'English': 'Attachment', 'German': 'Verst\u00e4rkung', 'Spanish': 'Vinculada'};
@@ -109,9 +112,12 @@ function run(progress, target, filename) {
 			Console.err.println('\nNo card type for ' + card['Name']);
 			continue;
 		}
-		if (['Ally', 'Attachment', 'Enemy', 'Event', 'Hero', 'Location', 'Objective', 'Objective Ally',
-			'Quest', 'Rules', 'Side Quest', 'Treachery'].indexOf(card['Type'] + '') == -1) {
+		if (cardTypes.indexOf(card['Type'] + '') == -1) {
 			Console.err.println('\nUnknown card type for ' + card['Name'] + ': ' + card['Type']);
+			continue;
+		}
+		if (card['BType'] && cardTypes.indexOf(card['BType'] + '') == -1) {
+			Console.err.println('\nUnknown card type for ' + card['Name'] + ': ' + card['BType']);
 			continue;
 		}
 		// Console.err.println('\nProcessing ' + card['Name']);
@@ -269,7 +275,7 @@ function run(progress, target, filename) {
 							vXml = '\n' + vXml;
 						}
 					}
-					vXml = markUp(vXml, lang, setID);
+					vXml = markUp(vXml, nXml, lang, setID);
 					if (nXml == 'Flavour' || nXml == 'BFlavour') {
 						vXml = '<left>' + vXml;
 					}
@@ -308,7 +314,7 @@ function run(progress, target, filename) {
 								s.set('PortraitBack-external-scale', card['BScale'] / 100);
 							}
 						}
-						else {
+						else if (card['Artwork']) {
 							s.set('PortraitBack-external-path', 'project:imagesRaw/' + card['Artwork']);
 							if (card['PanX'] && card['PanY'] && card['Scale']) {
 								s.set('PortraitBack-external-panx', card['PanX']);
@@ -436,7 +442,7 @@ function exportCard(card, fname, setID, lang, jpg300NoBleed, png300NoBleed, png3
 	}
 }
 
-function markUp(vXml, lang, setID) {
+function markUp(vXml, nXml, lang, setID) {
 	vXml = vXml + '';
 	if (lang == 'English') {
 		vXml = vXml.replace(/\b(Quest Resolution)( \([^\)]+\))?:/g, '<b>$1</b>$2:');
@@ -502,17 +508,21 @@ function markUp(vXml, lang, setID) {
 	vXml = vXml.replace(/\[img ("?)([^\]]+)\]/ig, '<image $1project:$2>');
 	vXml = vXml.replace(/\<image ("?)project:icons\//ig, '<image $1project:imagesIcons/');
 	vXml = vXml.replace(/\<image ("?)project:custom\//ig, '<image $1project:imagesCustom/' + setID + '_');
-	vXml = vXml.replace(/([^:;,.?!]) (<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<uni>)/g, '$1\u00a0$2');
-	vXml = vXml.replace(/([0-9]+) /g, '$1\u00a0');
-	vXml = vXml.replace(/ ([0-9]+)([:;,.?!])/g, '\u00a0$1$2');
-	vXml = vXml.replace(/ ([\-'"\(\)A-Za-z\u00c0-\u00ff]+)([:;,.?!]"?)(\n|$)/g, '\u00a0$1$2$3');
+
+	if (['Name', 'BName', 'Victory Points', 'BVictory Points', 'Artist', 'BArtist', 'Adventure'].indexOf(nXml + '') == -1) {
+		vXml = vXml.replace(/([^:;,.?!]) (<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<uni>)/g, '$1\u00a0$2');
+		vXml = vXml.replace(/([0-9]+) /g, '$1\u00a0');
+		vXml = vXml.replace(/ ([0-9]+)([:;,.?!])/g, '\u00a0$1$2');
+		vXml = vXml.replace(/ ([\-'"\(\)A-Za-z\u00c0-\u00ff]+)([:;,.?!]"?)(\n|$)/g, '\u00a0$1$2$3');
+
+		// fix no-break space inside tags
+		vXml = vXml.replace(/\u00a0([^<]+)>/g, ' $1>');
+		vXml = vXml.replace(/\u00a0([^<]+)>/g, ' $1>');
+		vXml = vXml.replace(/\u00a0([^<]+)>/g, ' $1>');
+	}
+
 	vXml = vXml.replace(/\n+$/g, '');
 	vXml = vXml.replace(/\n\n/g, '\n<vs>\n');
-
-	// fix no-break space inside tags
-	vXml = vXml.replace(/\u00a0([^<]+)>/g, ' $1>');
-	vXml = vXml.replace(/\u00a0([^<]+)>/g, ' $1>');
-	vXml = vXml.replace(/\u00a0([^<]+)>/g, ' $1>');
 
 	return vXml;
 }
