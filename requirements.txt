@@ -6,4 +6,4 @@ pyyaml
 pywin32==228
 reportlab
 requests
-xlwings
+xlwings==0.19.5
