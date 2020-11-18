@@ -392,7 +392,7 @@ function run(progress, target, filename) {
 				}
 
 				let fname = (Array(4 - (card['Card Number'] + '').length).join('0') + card['Card Number'] + '-' + copy + '-' +
-					back + '-' + card['Name'] + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix;
+					back + '-' + escapeFileName(card['Name']) + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix;
 				progress.status = fname;
 				ResourceKit.writeGameComponentToFile(new File(getProjectMember('Cards/').file, fname + '.' + setID + '.' + lang + '.eon'), newCard);
 				exportCard(newCard, fname, setID, lang, jpg300NoBleed, png300NoBleed, png300Bleed, png800Bleed);
@@ -442,8 +442,13 @@ function exportCard(card, fname, setID, lang, jpg300NoBleed, png300NoBleed, png3
 	}
 }
 
+function escapeFileName(value) {
+	value += '';
+	return value.replace(/[<>:"\/\\|?*]/g, ' ');
+}
+
 function markUp(vXml, nXml, lang, setID) {
-	vXml = vXml + '';
+	vXml += '';
 	if (lang == 'English') {
 		vXml = vXml.replace(/\b(Quest Resolution)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 		vXml = vXml.replace(/\b(Valour )?(Resource |Planning |Quest |Travel |Encounter |Combat |Refresh )?(Action):/g, '[b]$1$2$3[/b]:');
