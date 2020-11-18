@@ -522,7 +522,7 @@ function markUp(vXml, nXml, lang, setID) {
 		vXml = vXml.replace(/([^:;,.?!]) (<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<uni>)/g, '$1\u00a0$2');
 		vXml = vXml.replace(/([0-9]+) /g, '$1\u00a0');
 		vXml = vXml.replace(/ ([0-9]+)([:;,.?!])/g, '\u00a0$1$2');
-		vXml = vXml.replace(/ ([\-'"\(\)A-Za-z\u00c0-\u00ff]+)([:;,.?!]"?)(\n|$)/g, '\u00a0$1$2$3');
+		vXml = vXml.replace(/(^|[ \n"\(])([\-'A-Za-z\u00c0-\u00ff]{1,5})([:;,.?!"\)]*) (["\(]*)([\-'A-Za-z\u00c0-\u00ff]{1,5})([:;,.?!"\)]+)(\n|$)/g, '$1$2$3\u00a0$4$5$6$7');
 
 		// fix no-break space inside tags
 		vXml = vXml.replace(/\u00a0([^<]+)>/g, ' $1>');
