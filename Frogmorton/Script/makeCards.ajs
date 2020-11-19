@@ -35,14 +35,21 @@ translate['Victory'] = {'English': 'Victory', 'German': 'Sieg', 'Spanish': 'Vict
 Thread.busyWindow(main, 'Updating cards...', true);
 
 function main(progress, target) {
+	var icons = [];
+	var iconFiles = project.findChild('imagesIcons').iterator();
+	while (iconFiles.hasNext()) {
+		let icon = (iconFiles.next() + '').replace(/\.png$/g, '');
+		icons.push(icon);
+	}
+
 	var xmlFiles = project.findChild('XML').iterator();
 	while (xmlFiles.hasNext()) {
-		run(progress, target, xmlFiles.next() + '');
+		run(progress, target, xmlFiles.next() + '', icons);
 	}
 	return;
 }
 
-function run(progress, target, filename) {
+function run(progress, target, filename, icons) {
 	var setID = filename.split('.')[0];
 	var lang = filename.split('.')[1];
 	var backTypes = ['Quest', 'Rules'];
@@ -345,19 +352,38 @@ function run(progress, target, filename) {
 				}
 				else {
 					s.set('Copyright', copyrightText);
-					s.set('Collection', 'CustomIcon');
-					s.set('Collection-external-path', ('project:imagesIcons/' + card['Set'] + '.png').replace(/ /g, '-'));
+					let iconName = fixSpecialSymbols(card['Set']).replace(/ /g, '-');
+					if (icons.indexOf(iconName) > -1) {
+						s.set('Collection', 'CustomIcon');
+						s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
+					}
+					else {
+						s.set('Collection', convertIconName(card['Set']));
+					}
 				}
 
 				if (card['Encounter Set']) {
-					s.set('EncounterSet', 'CustomIcon');
-					s.set('EncounterSet-external-path', ('project:imagesIcons/' + card['Encounter Set'] + '.png').replace(/ /g, '-'));
+					let iconName = fixSpecialSymbols(card['Encounter Set']).replace(/ /g, '-');
+					if (icons.indexOf(iconName) > -1) {
+						s.set('EncounterSet', 'CustomIcon');
+						s.set('EncounterSet-external-path', 'project:imagesIcons/' + iconName + '.png');
+					}
+					else {
+						s.set('EncounterSet', convertIconName(card['Encounter Set']));
+					}
 				}
 				if (card['Additional Encounter Sets']) {
 					let encounterSets = card['Additional Encounter Sets'].split(',');
 					for (let k = 0; k < encounterSets.length; k++) {
-						s.set('EncounterSet' + (k + 1) + '-external-path',
-							('project:imagesIcons/' + encounterSets[k].trim() + '.png').replace(/ /g, '-'));
+						let iconName = fixSpecialSymbols(encounterSets[k].trim()).replace(/ /g, '-');
+						if (icons.indexOf(iconName) > -1) {
+							s.set('EncounterSet' + (k + 1), 'CustomIcon');
+							s.set('EncounterSet' + (k + 1) + '-external-path',
+								'project:imagesIcons/' + iconName + '.png');
+						}
+						else {
+							s.set('EncounterSet' + (k + 1), convertIconName(encounterSets[k].trim()));
+						}
 					}
 				}
 				if (card['Encounter Set Number']) {
@@ -441,6 +467,30 @@ function exportCard(card, fname, setID, lang, jpg300NoBleed, png300NoBleed, png3
 			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 800);
 		}
 	}
+}
+
+function fixSpecialSymbols(value) {
+	value = value + '';
+	return value.replace(/\u00c2/g, 'A').replace(/[\u00da\u00db]/g, 'U').replace(/\u00e2/g, 'a').replace(/[\u00fa\u00fb]/g, 'u');
+}
+
+function capitalizeWord(value) {
+	return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function capitalizeText(value) {
+	value = value + '';
+	value = value.split(' ').map(capitalizeWord).join(' ');
+	value = value.split('-').map(capitalizeWord).join('-');
+	value = value.split('(').map(capitalizeWord).join('(');
+	return value;
+}
+
+function convertIconName(value) {
+	value = fixSpecialSymbols(value);
+	value = capitalizeText(value);
+	value = value.replace(/[\-',\(\) ]/g, '');
+	return value;
 }
 
 function escapeFileName(value) {
