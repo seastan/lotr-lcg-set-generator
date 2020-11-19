@@ -28,7 +28,8 @@ SET_MAX_ROW = 102
 SET_GUID_COLUMN = 'A'
 SET_NAME_COLUMN = 'B'
 SET_VERSION_COLUMN = 'C'
-SET_LANGUAGE_COLUMN = 'D'
+SET_COPYRIGHT_COLUMN = 'D'
+SET_LANGUAGE_COLUMN = 'E'
 
 CARD_FIRST_ROW = 2
 CARD_MAX_ROW = 10001
@@ -308,10 +309,10 @@ def _run_macro(conf, set_row, callback):
             try:
                 data = xlwb_source.sheets['Sets'].range(
                     '{}{}:{}{}'.format(SET_GUID_COLUMN, set_row,  # pylint: disable=W1308
-                                       SET_VERSION_COLUMN, set_row)).value
+                                       SET_COPYRIGHT_COLUMN, set_row)).value
                 xlwb_target.sheets['Sets'].range(
                     '{}{}:{}{}'.format(SET_GUID_COLUMN, SET_FIRST_ROW,  # pylint: disable=W1308
-                                       SET_VERSION_COLUMN, SET_FIRST_ROW)
+                                       SET_COPYRIGHT_COLUMN, SET_FIRST_ROW)
                     ).value = data
 
                 card_sheet = xlwb_target.sheets['Card Data']

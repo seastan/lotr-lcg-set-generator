@@ -51,8 +51,10 @@ function run(progress, target, filename) {
 	var dbFactory = DocumentBuilderFactory.newInstance();
 	var dBuilder = dbFactory.newDocumentBuilder();
 	var doc = dBuilder.parse(fXmlFile);
-	doc.getDocumentElement().normalize();
-	var cardSet = doc.getDocumentElement().getAttribute('name');
+	var docElement = doc.getDocumentElement();
+	docElement.normalize();
+	var cardSet = docElement.getAttribute('name');
+	var copyrightText = docElement.getAttribute('copyright');
 
 	var jpg300NoBleed = false;
 	var png300NoBleed = false;
@@ -83,7 +85,7 @@ function run(progress, target, filename) {
 		card['Set'] = cardSet;
 		card['octgn'] = nNode.getAttribute('id');
 		card['Name'] = nNode.getAttribute('name');
-		var propList = nNode.getElementsByTagName('property');
+		let propList = nNode.getElementsByTagName('property');
 		for (let j = 0; j < propList.getLength(); j++) {
 			let nProp = propList.item(j);
 			if (!nProp.getParentNode().isSameNode(nNode)) {
@@ -240,8 +242,8 @@ function run(progress, target, filename) {
 
 				// Create a new .eon file, using the appropriate template in the template folder
 				progress.status = cardName;
-				var newCard = ResourceKit.getGameComponentFromFile(getProjectMember('Templates/' + cardType + '.eon').file, false);
-				var s = newCard.settings;
+				let newCard = ResourceKit.getGameComponentFromFile(getProjectMember('Templates/' + cardType + '.eon').file, false);
+				let s = newCard.settings;
 
 				// change the details in the template card
 				for (let k = 0; k < mapping.length; k++) {
@@ -342,7 +344,7 @@ function run(progress, target, filename) {
 					s.set('Collection', 'EmptyIcon');
 				}
 				else {
-					s.set('Copyright', '©Middle-earth Ent. ©FFG ©ALeP');
+					s.set('Copyright', copyrightText);
 					s.set('Collection', 'CustomIcon');
 					s.set('Collection-external-path', ('project:imagesIcons/' + card['Set'] + '.png').replace(/ /g, '-'));
 				}
@@ -413,8 +415,7 @@ function exportCard(card, fname, setID, lang, jpg300NoBleed, png300NoBleed, png3
 	}
 
 	for (let i = 0; i < numSheets; i++ ) {
-		let bi;
-		let file;
+		let bi, file;
 
 		if (jpg300NoBleed) {
 			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 300);
