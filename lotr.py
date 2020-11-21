@@ -169,8 +169,6 @@ def read_conf():
         conf = yaml.safe_load(f_conf)
 
     conf['outputs'] = set(conf['outputs'])
-    if 'db' in conf['outputs'] or 'octgn' in conf['outputs']:
-        conf['outputs'].add('db_octgn')
 
     if ('makeplayingcards_zip' in conf['outputs']
             or 'makeplayingcards_7z' in conf['outputs']):
@@ -429,10 +427,8 @@ def _collect_artwork_images(artwork_path):
 def _set_outputs(conf, root):
     """ Set required outputs for Strange Eons.
     """
-    if 'db_octgn' in conf['outputs']:
-        root.set('jpg300NoBleed', '1')
-
-    if 'pdf' in conf['outputs']:
+    if ('db' in conf['outputs'] or 'octgn' in conf['outputs']
+            or 'pdf' in conf['outputs']):
         root.set('png300NoBleed', '1')
 
     if 'pdf' in conf['outputs'] or 'drivethrucards' in conf['outputs']:
@@ -718,14 +714,57 @@ def get_skip_info(set_id, set_name, lang):
     return skip_set, skip_ids
 
 
-def generate_jpg300_nobleed(set_id, set_name, lang, skip_ids):
-    """ Generate images for DB and OCTGN outputs.
+def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
+    """ Generate images for DB outputs.
     """
-    logging.info('[%s, %s] Generating images for DB and OCTGN outputs...',
+    logging.info('[%s, %s] Generating images for DB outputs...',
                  set_name, lang)
     timestamp = time.time()
 
-    output_path = os.path.join(IMAGES_EONS_PATH, 'jpg300NoBleed',
+    output_path = os.path.join(IMAGES_EONS_PATH, 'png300DB',
+                               '{}.{}'.format(set_id, lang))
+    _create_folder(output_path)
+    _clear_modified_images(output_path, skip_ids)
+    temp_path = os.path.join(TEMP_ROOT_PATH,
+                             'generate_png300_db.{}.{}'.format(set_id, lang))
+    _create_folder(temp_path)
+    _clear_folder(temp_path)
+
+    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+        filelist = [f for f in zip_obj.namelist()
+                    if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
+                                                  'png300NoBleed'))
+                    and f.split('.')[-1] == 'png'
+                    and f.split('.')[-2] == lang
+                    and f.split('.')[-3] == set_id]
+        for filename in filelist:
+            output_filename = _update_zip_filename(filename)
+            with zip_obj.open(filename) as zip_file:
+                with open(os.path.join(temp_path, output_filename),
+                          'wb') as output_file:
+                    shutil.copyfileobj(zip_file, output_file)
+
+    cmd = GIMP_COMMAND.format(
+        conf['gimp_console_path'],
+        'python-prepare-db-output-folder',
+        temp_path.replace('\\', '\\\\'),
+        output_path.replace('\\', '\\\\'))
+    res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+    logging.info('[%s, %s] %s', set_name, lang, res)
+
+    _delete_folder(temp_path)
+    logging.info('[%s, %s] ...Generating images for DB outputs'
+                 ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
+
+
+def generate_png300_octgn(set_id, set_name, lang, skip_ids):
+    """ Generate images for OCTGN outputs.
+    """
+    logging.info('[%s, %s] Generating images for OCTGN outputs...',
+                 set_name, lang)
+    timestamp = time.time()
+
+    output_path = os.path.join(IMAGES_EONS_PATH, 'png300OCTGN',
                                '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
@@ -733,8 +772,8 @@ def generate_jpg300_nobleed(set_id, set_name, lang, skip_ids):
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
-                                                  'jpg300NoBleed'))
-                    and f.split('.')[-1] == 'jpg'
+                                                  'png300NoBleed'))
+                    and f.split('.')[-1] == 'png'
                     and f.split('.')[-2] == lang
                     and f.split('.')[-3] == set_id]
         for filename in filelist:
@@ -744,7 +783,7 @@ def generate_jpg300_nobleed(set_id, set_name, lang, skip_ids):
                           'wb') as output_file:
                     shutil.copyfileobj(zip_file, output_file)
 
-    logging.info('[%s, %s] ...Generating images for DB and OCTGN outputs'
+    logging.info('[%s, %s] ...Generating images for OCTGN outputs'
                  ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
@@ -911,7 +950,7 @@ def generate_db(set_id, set_name, lang):
     logging.info('[%s, %s] Generating DB outputs...', set_name, lang)
     timestamp = time.time()
 
-    input_path = os.path.join(IMAGES_EONS_PATH, 'jpg300NoBleed',
+    input_path = os.path.join(IMAGES_EONS_PATH, 'png300DB',
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_DB_PATH, '{}.{}'.format(set_name, lang))
 
@@ -924,7 +963,7 @@ def generate_db(set_id, set_name, lang):
         _create_folder(output_path)
         _clear_folder(output_path)
         for filename in filenames:
-            if filename.split('.')[-1] != 'jpg':
+            if filename.split('.')[-1] != 'png':
                 continue
 
             output_filename = '{}-{}{}{}'.format(
@@ -949,7 +988,7 @@ def generate_octgn(set_id, set_name, lang):
     logging.info('[%s, %s] Generating OCTGN outputs...', set_name, lang)
     timestamp = time.time()
 
-    input_path = os.path.join(IMAGES_EONS_PATH, 'jpg300NoBleed',
+    input_path = os.path.join(IMAGES_EONS_PATH, 'png300OCTGN',
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_OCTGN_PATH, set_name)
     pack_path = os.path.join(output_path, '{}.{}.o8c'.format(set_name, lang))
@@ -963,7 +1002,7 @@ def generate_octgn(set_id, set_name, lang):
         _create_folder(output_path)
         with zipfile.ZipFile(pack_path, 'w') as zip_obj:
             for filename in filenames:
-                if filename.split('.')[-1] != 'jpg':
+                if filename.split('.')[-1] != 'png':
                     continue
 
                 parts = filename.split('.')

@@ -134,6 +134,26 @@ def _iterate_folder(input_folder, output_folder, func):
         func(img, drawable, output_folder)
 
 
+def prepare_db_output(img, drawable, output_folder):
+    """ Prepare an image for DB output.
+    """
+    gimp.progress_init('Prepare an image for DB output...')
+    pdb.gimp_undo_push_group_start(img)
+
+    try:
+        file_name, _ = _get_filename_backside(img)
+    except Exception:  # pylint: disable=W0703
+        pdb.gimp_undo_push_group_end(img)
+        return
+
+    pdb.script_fu_round_corners(img, drawable, 40, 0, 0, 0, 0, 0, 0)
+
+    pdb.file_png_save(img, drawable,
+                      os.path.join(output_folder, file_name), file_name,
+                      0, 9, 1, 0, 0, 1, 1)
+    pdb.gimp_undo_push_group_end(img)
+
+
 def prepare_pdf_front(img, drawable, output_folder):
     """ Prepare a front image for PDF document.
     """
@@ -244,6 +264,14 @@ def prepare_drivethrucards(img, drawable, output_folder):
     pdb.gimp_undo_push_group_end(img)
 
 
+def prepare_db_output_folder(input_folder, output_folder):
+    """ Prepare a folder of images for DB output.
+    """
+    gimp.progress_init(
+        'Prepare a folder of images for DB output...')
+    _iterate_folder(input_folder, output_folder, prepare_db_output)
+
+
 def prepare_pdf_front_folder(input_folder, output_folder):
     """ Prepare a folder of front images for PDF document.
     """
@@ -275,6 +303,41 @@ def prepare_drivethrucards_folder(input_folder, output_folder):
         'Prepare a folder of images for DriveThruCards printing...')
     _iterate_folder(input_folder, output_folder, prepare_drivethrucards)
 
+
+register(
+    'python_prepare_db_output',
+    'Prepare an image for DB output',
+    '1. Make round corners. 2. Export PNG.',
+    'A.R.',
+    'A.R.',
+    '2020',
+    'Prepare DB Output',
+    '*',
+    [
+        (PF_IMAGE, 'image', 'Input image', None),
+        (PF_DRAWABLE, 'drawable', 'Input drawable', None),
+        (PF_DIRNAME, 'output_folder', 'Output folder', None)
+    ],
+    [],
+    prepare_db_output,
+    menu='<Image>/Filters')
+
+register(
+    'python_prepare_db_output_folder',
+    'Prepare a folder of images for DB output',
+    '1. Make round corners. 2. Export PNG.',
+    'A.R.',
+    'A.R.',
+    '2020',
+    'Prepare DB Output Folder',
+    '*',
+    [
+        (PF_DIRNAME, 'input_folder', 'Input folder', None),
+        (PF_DIRNAME, 'output_folder', 'Output folder', None)
+    ],
+    [],
+    prepare_db_output_folder,
+    menu='<Image>/Filters')
 
 register(
     'python_prepare_pdf_front',
@@ -384,7 +447,7 @@ register(
 register(
     'python_prepare_drivethrucards',
     'Prepare an image for DriveThruCards printing',
-    '1. Rotate a landscape image. 2. Clip bleed margins. 3. Export PNG.',
+    '1. Rotate a landscape image. 2. Clip bleed margins. 3. Export JPG.',
     'A.R.',
     'A.R.',
     '2020',
@@ -402,7 +465,7 @@ register(
 register(
     'python_prepare_drivethrucards_folder',
     'Prepare a folder of images for DriveThruCards printing',
-    '1. Rotate a landscape image. 2. Clip bleed margins. 3. Export PNG.',
+    '1. Rotate a landscape image. 2. Clip bleed margins. 3. Export JPG.',
     'A.R.',
     'A.R.',
     '2020',

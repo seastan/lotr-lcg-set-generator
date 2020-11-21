@@ -99,10 +99,10 @@ For debugging purposes you can also run these steps using the Jupyter notebook (
 
 Now there should be the following outputs:
 
-- `Output/OCTGN/<set name>/`: `<octgn id>/set.xml` and `<set name>.<language>.o8c` image packs for OCTGN (300 dpi JPG).
-- `Output/DB/<set name>.<language>/`: 300 dpi JPG images for general purposes.
+- `Output/OCTGN/<set name>/`: `<octgn id>/set.xml` and `<set name>.<language>.o8c` image packs for OCTGN (300 dpi PNG).
+- `Output/DB/<set name>.<language>/`: 300 dpi PNG images for general purposes.
 - `Output/PDF/<set name>.<language>/`: PDF files in `A4` and `letter` format for home printing.
-- `Output/DriveThruCards/<set name>.<language>/`: `zip` and `7z` archives of 300 dpi PNG images to be printed on DriveThruCards.com.
+- `Output/DriveThruCards/<set name>.<language>/`: `zip` and `7z` archives of 300 dpi JPG images to be printed on DriveThruCards.com.
 - `Output/MakePlayingCards/<set name>.<language>/`: `zip` and `7z` archives of 800 dpi PNG images to be printed on MakePlayingCards.com.
 
 Additionally, if you specified `octgn_destination_path`, OCTGN outputs will be copied there.

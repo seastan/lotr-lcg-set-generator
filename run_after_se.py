@@ -10,15 +10,18 @@ import lotr
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 
 
-def generate_db_octgn(conf, set_id, set_name, lang, skip_ids):
-    """ Generate DB and OCTGN outputs.
+def generate_db(conf, set_id, set_name, lang, skip_ids):
+    """ Generate DB outputs.
     """
-    lotr.generate_jpg300_nobleed(set_id, set_name, lang, skip_ids)
-    if 'db' in conf['outputs']:
-        lotr.generate_db(set_id, set_name, lang)
+    lotr.generate_png300_db(conf, set_id, set_name, lang, skip_ids)
+    lotr.generate_db(set_id, set_name, lang)
 
-    if 'octgn' in conf['outputs']:
-        lotr.generate_octgn(set_id, set_name, lang)
+
+def generate_octgn(set_id, set_name, lang, skip_ids):
+    """ Generate OCTGN outputs.
+    """
+    lotr.generate_png300_octgn(set_id, set_name, lang, skip_ids)
+    lotr.generate_octgn(set_id, set_name, lang)
 
 
 def generate_pdf(conf, set_id, set_name, lang, skip_ids):
@@ -72,8 +75,12 @@ def main():
                              ' skipping', set_name, lang)
                 continue
 
-            if 'db_octgn' in conf['outputs']:
-                tasks.append([generate_db_octgn, conf, set_id, set_name, lang,
+            if 'db' in conf['outputs']:
+                tasks.append([generate_db, conf, set_id, set_name, lang,
+                              skip_ids])
+
+            if 'octgn' in conf['outputs']:
+                tasks.append([generate_octgn, set_id, set_name, lang,
                               skip_ids])
 
             if 'pdf' in conf['outputs']:
