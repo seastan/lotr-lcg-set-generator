@@ -565,6 +565,7 @@ function markUp(vXml, nXml, lang, setID) {
 	vXml = vXml.replace(/\[\/lotr\]/ig, '</family>');
 	vXml = vXml.replace(/\[red\]/ig, '<red>');
 	vXml = vXml.replace(/\[\/red\]/ig, '</red>');
+	vXml = vXml.replace(/\[tab\]/ig, '\t');
 	vXml = vXml.replace(/\[img ("?)([^\]]+)\]/ig, '<image $1project:$2>');
 	vXml = vXml.replace(/\<image ("?)project:icons\//ig, '<image $1project:imagesIcons/');
 	vXml = vXml.replace(/\<image ("?)project:custom\//ig, '<image $1project:imagesCustom/' + setID + '_');
