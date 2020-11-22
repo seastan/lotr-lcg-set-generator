@@ -1005,9 +1005,9 @@ def generate_octgn(set_id, set_name, lang):
                 if filename.split('.')[-1] != 'png':
                     continue
 
-                parts = filename.split('.')
-                parts[0] = re.sub('-1$', '', re.sub('-2$', '.B', parts[0]))
-                octgn_filename = '.'.join(parts)[50:]
+                octgn_filename = re.sub(
+                    r'-1\.png$', '.png',
+                    re.sub(r'-2\.png$', '.B.png', filename))[50:]
                 if octgn_filename not in known_filenames:
                     known_filenames.add(octgn_filename)
                     zip_obj.write(os.path.join(input_path, filename),
