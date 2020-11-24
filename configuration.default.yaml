@@ -23,6 +23,9 @@ from_scratch: true
 # Number of parallel processes to use ("default" means "cpu_count() - 1")
 parallelism: default
 
+# Version of The Lord of the Rings LCG Strange Eons plugin, either "old" or "new"
+strange_eons_plugin_version: old
+
 # List of set IDs to work on
 set_ids:
   - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f

@@ -63,6 +63,12 @@ function run(progress, target, filename, icons) {
 	var cardSet = docElement.getAttribute('name');
 	var copyrightText = docElement.getAttribute('copyright');
 
+	var pluginVersion = doc.getDocumentElement().getAttribute('pluginVersion') + '';
+	var customIcon = 'CustomIcon';
+	if (pluginVersion == 'new') {
+		customIcon = 'Custom';
+	}
+
 	var jpg300NoBleed = false;
 	var png300NoBleed = false;
 	var png300Bleed = false;
@@ -354,7 +360,7 @@ function run(progress, target, filename, icons) {
 					s.set('Copyright', copyrightText);
 					let iconName = fixSpecialSymbols(card['Set']).replace(/ /g, '-');
 					if (icons.indexOf(iconName) > -1) {
-						s.set('Collection', 'CustomIcon');
+						s.set('Collection', customIcon);
 						s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
 					}
 					else {
@@ -365,7 +371,7 @@ function run(progress, target, filename, icons) {
 				if (card['Encounter Set']) {
 					let iconName = fixSpecialSymbols(card['Encounter Set']).replace(/ /g, '-');
 					if (icons.indexOf(iconName) > -1) {
-						s.set('EncounterSet', 'CustomIcon');
+						s.set('EncounterSet', customIcon);
 						s.set('EncounterSet-external-path', 'project:imagesIcons/' + iconName + '.png');
 					}
 					else {
@@ -377,7 +383,7 @@ function run(progress, target, filename, icons) {
 					for (let k = 0; k < encounterSets.length; k++) {
 						let iconName = fixSpecialSymbols(encounterSets[k].trim()).replace(/ /g, '-');
 						if (icons.indexOf(iconName) > -1) {
-							s.set('EncounterSet' + (k + 1), 'CustomIcon');
+							s.set('EncounterSet' + (k + 1), customIcon);
 							s.set('EncounterSet' + (k + 1) + '-external-path',
 								'project:imagesIcons/' + iconName + '.png');
 						}
@@ -566,6 +572,8 @@ function markUp(vXml, nXml, lang, setID) {
 	vXml = vXml.replace(/\[red\]/ig, '<red>');
 	vXml = vXml.replace(/\[\/red\]/ig, '</red>');
 	vXml = vXml.replace(/\[tab\]/ig, '\t');
+	vXml = vXml.replace(/\[size ([0-9]+)\]/ig, '<size $1>');
+	vXml = vXml.replace(/\[\/size\]/ig, '</size>');
 	vXml = vXml.replace(/\[img ("?)([^\]]+)\]/ig, '<image $1project:$2>');
 	vXml = vXml.replace(/\<image ("?)project:icons\//ig, '<image $1project:imagesIcons/');
 	vXml = vXml.replace(/\<image ("?)project:custom\//ig, '<image $1project:imagesCustom/' + setID + '_');

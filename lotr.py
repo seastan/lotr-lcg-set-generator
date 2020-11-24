@@ -467,6 +467,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0914,R0915
 
     tree = ET.parse(xml_path)
     root = tree.getroot()
+    root.set('pluginVersion', conf['strange_eons_plugin_version'])
     _set_outputs(conf, root)
     encounter_sets = {}
     encounter_cards = {}
