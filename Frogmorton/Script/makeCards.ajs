@@ -13,24 +13,24 @@ var cardTypes = ['Ally', 'Attachment', 'Enemy', 'Event', 'Hero', 'Location', 'Ob
 		 'Quest', 'Rules', 'Side Quest', 'Treachery']
 
 var translate = {};
-translate['Ally'] = {'English': 'Ally', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado'};
-translate['Attachment'] = {'English': 'Attachment', 'German': 'Verst\u00e4rkung', 'Spanish': 'Vinculada'};
-translate['Contract'] = {'English': 'Contract', 'German': 'Abkommen', 'Spanish': 'Contrato'};
-translate['Encounter Side Quest'] = {'English': 'Side Quest', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria'};
-translate['Enemy'] = {'English': 'Enemy', 'German': 'Gegner', 'Spanish': 'Enemigo'};
-translate['Event'] = {'English': 'Event', 'German': 'Ereignis', 'Spanish': 'Evento'};
-translate['Hero'] = {'English': 'Hero', 'German': 'Held', 'Spanish': 'H\u00e9roe'};
-translate['Location'] = {'English': 'Location', 'German': 'Ort', 'Spanish': 'Lugar'};
-translate['Objective'] = {'English': 'Objective', 'German': 'Ziel', 'Spanish': 'Objetivo'};
-translate['Objective Ally'] = {'English': 'Objective-Ally', 'German': 'Ziel-Verb\u00fcndeter', 'Spanish': 'Objetivo-Aliado'};
-translate['Player Side Quest'] = {'English': 'Side Quest', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria'};
-translate['Quest'] = {'English': 'Quest', 'German': 'Abenteuer', 'Spanish': 'Misi\u00f3n'};
-translate['Rules'] = {'English': 'Rules', 'German': 'Reglement', 'Spanish': 'Reglas'};
-translate['Treachery'] = {'English': 'Treachery', 'German': 'Verrat', 'Spanish': 'Traici\u00f3n'};
-translate['Encounter Keyword'] = {'English': 'Encounter.', 'German': 'Begegnung.', 'Spanish': 'Encuentro.'};
-translate['Illustration'] = {'English': 'Illus.', 'German': 'Illus.', 'Spanish': 'Ilus.'};
-translate['Unknown Artist'] = {'English': 'Unknown Artist', 'German': 'Unbekannter K\u00fcnstler', 'Spanish': 'Artista Desconocido'};
-translate['Victory'] = {'English': 'Victory', 'German': 'Sieg', 'Spanish': 'Victoria'};
+translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado'};
+translate['Attachment'] = {'English': 'Attachment', 'French': 'Attachement', 'German': 'Verst\u00e4rkung', 'Spanish': 'Vinculada'};
+translate['Contract'] = {'English': 'Contract', 'French': 'Contrat', 'German': 'Abkommen', 'Spanish': 'Contrato'};
+translate['Encounter Side Quest'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria'};
+translate['Enemy'] = {'English': 'Enemy', 'French': 'Ennemi', 'German': 'Gegner', 'Spanish': 'Enemigo'};
+translate['Event'] = {'English': 'Event', 'French': '\u00c9v\u00e9nement', 'German': 'Ereignis', 'Spanish': 'Evento'};
+translate['Hero'] = {'English': 'Hero', 'French': 'H\u00e9ros', 'German': 'Held', 'Spanish': 'H\u00e9roe'};
+translate['Location'] = {'English': 'Location', 'French': 'Lieu', 'German': 'Ort', 'Spanish': 'Lugar'};
+translate['Objective'] = {'English': 'Objective', 'French': 'Objectif', 'German': 'Ziel', 'Spanish': 'Objetivo'};
+translate['Objective Ally'] = {'English': 'Objective-Ally', 'French': 'Objectif-Alli\u00e9', 'German': 'Ziel-Verb\u00fcndeter', 'Spanish': 'Objetivo-Aliado'};
+translate['Player Side Quest'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria'};
+translate['Quest'] = {'English': 'Quest', 'French': 'Qu\u00eate', 'German': 'Abenteuer', 'Spanish': 'Misi\u00f3n'};
+translate['Rules'] = {'English': 'Rules', 'French': 'R\u00e8gles', 'German': 'Reglement', 'Spanish': 'Reglas'};
+translate['Treachery'] = {'English': 'Treachery', 'French': 'Tra\u00eetrise', 'German': 'Verrat', 'Spanish': 'Traici\u00f3n'};
+translate['Encounter Keyword'] = {'English': 'Encounter.', 'French': 'Rencontre.', 'German': 'Begegnung.', 'Spanish': 'Encuentro.'};
+translate['Illustration'] = {'English': 'Illus.', 'French': 'Illus.', 'German': 'Illus.', 'Spanish': 'Ilus.'};
+translate['Unknown Artist'] = {'English': 'Unknown Artist', 'French': 'Artiste Inconnu', 'German': 'Unbekannter K\u00fcnstler', 'Spanish': 'Artista Desconocido'};
+translate['Victory'] = {'English': 'Victory', 'French': 'Victoire', 'German': 'Sieg', 'Spanish': 'Victoria'};
 
 Thread.busyWindow(main, 'Updating cards...', true);
 
@@ -509,19 +509,25 @@ function markUp(vXml, nXml, lang, setID) {
 	if (lang == 'English') {
 		vXml = vXml.replace(/\b(Quest Resolution)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 		vXml = vXml.replace(/\b(Valour )?(Resource |Planning |Quest |Travel |Encounter |Combat |Refresh )?(Action):/g, '[b]$1$2$3[/b]:');
-		vXml = vXml.replace(/\b(When Revealed|Setup|Forced|Valour Response|Response|Travel|Shadow):/g, '[b]$1[/b]:');
+		vXml = vXml.replace(/\b(When Revealed|Setup|Forced|Valour Response|Response|Travel|Shadow|Resolution):/g, '[b]$1[/b]:');
+		vXml = vXml.replace(/\b(Condition)\b/g, '[bi]$1[/bi]');
+	}
+	else if (lang == 'French') {
+		vXml = vXml.replace(/\b(Résolution)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+		vXml = vXml.replace(/\b([Vaillance] )?([Ressource] |[Organisation] |[Quête] |[Voyage] |[Rencontre] |[Combat] |[Restauration] )?(Action):/g, '[b]$1$2$3[/b]:');
+		vXml = vXml.replace(/\b(Une fois révélée|Mise en place|Forcé|[Vaillance] Réponse|Réponse|Trajet|Ombre):/g, '[b]$1[/b]:');
 		vXml = vXml.replace(/\b(Condition)\b/g, '[bi]$1[/bi]');
 	}
 	else if (lang == 'German') {
 		vXml = vXml.replace(/\b(Abenteuer bestehen)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 		vXml = vXml.replace(/\b(Ehrenvolle )?(Ressourcenaktion|Planungsaktion|Abenteueraktion|Reiseaktion|Begegnungsaktion|Kampfaktion|Auffrischungsaktion|Aktion):/g, '[b]$1$2[/b]:');
-		vXml = vXml.replace(/\b(Wenn aufgedeckt|Vorbereitung|Erzwungen|Ehrenvolle Reaktion|Reaktion|Reise|Schatten):/g, '[b]$1[/b]:');
+		vXml = vXml.replace(/\b(Wenn aufgedeckt|Vorbereitung|Erzwungen|Ehrenvolle Reaktion|Reaktion|Reise|Schatten|Aufl\u00f6sung):/g, '[b]$1[/b]:');
 		vXml = vXml.replace(/\b(Zustand)\b/g, '[bi]$1[/bi]');
 	}
 	else if (lang == 'Spanish') {
 		vXml = vXml.replace(/\b(Resoluci\u00f3n de la misi\u00f3n)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 		vXml = vXml.replace(/\b(Acci\u00f3n)( de Recursos| de Planificaci\u00f3n| de Misi\u00f3n| de Viaje| de Encuentros| de Combate| de Recuperaci\u00f3n)?( de Valor)?:/g, '[b]$1$2$3[/b]:');
-		vXml = vXml.replace(/\b(Al ser revelada|Preparaci\u00f3n|Obligado|Respuesta de Valor|Respuesta|Viaje|Sombra):/g, '[b]$1[/b]:');
+		vXml = vXml.replace(/\b(Al ser revelada|Preparaci\u00f3n|Obligado|Respuesta de Valor|Respuesta|Viaje|Sombra|Resoluci\u00f3n):/g, '[b]$1[/b]:');
 		vXml = vXml.replace(/\b(Condici\u00f3n)\b/g, '[bi]$1[/bi]');
 	}
 
