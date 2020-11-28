@@ -9,9 +9,6 @@ importClass(org.w3c.dom.Element);
 importClass(org.w3c.dom.Node);
 importClass(org.w3c.dom.NodeList);
 
-var cardTypes = ['Ally', 'Attachment', 'Enemy', 'Event', 'Hero', 'Location', 'Objective', 'Objective Ally',
-		 'Quest', 'Rules', 'Side Quest', 'Treachery']
-
 var translate = {};
 translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado'};
 translate['Attachment'] = {'English': 'Attachment', 'French': 'Attachement', 'German': 'Verst\u00e4rkung', 'Spanish': 'Vinculada'};
@@ -63,10 +60,17 @@ function run(progress, target, filename, icons) {
 	var cardSet = docElement.getAttribute('name');
 	var copyrightText = docElement.getAttribute('copyright');
 
+	var customIcon;
+	var cardTypes = ['Ally', 'Attachment', 'Enemy', 'Event', 'Hero', 'Location', 'Objective', 'Objective Ally',
+			 'Presentation', 'Quest', 'Rules', 'Side Quest', 'Treachery'];
+
 	var pluginVersion = doc.getDocumentElement().getAttribute('pluginVersion') + '';
-	var customIcon = 'CustomIcon';
 	if (pluginVersion == 'new') {
 		customIcon = 'Custom';
+		cardTypes.push('Contract');
+	}
+	else {
+		customIcon = 'CustomIcon';
 	}
 
 	var jpg300NoBleed = false;
@@ -201,7 +205,8 @@ function run(progress, target, filename, icons) {
 						['Shadow', 'Shadow'],
 						['Flavour', 'Flavour'],
 						['Story', 'Flavour'],
-						['Artist-external', 'Artist'],
+						['Artist-external', 'Artist'],  // old plugin
+						['Artist', 'Artist'],  // new plugin
 						['Adventure', 'Adventure']
 					];
 					if (backTypes.indexOf(cardType) > -1) {
@@ -210,7 +215,8 @@ function run(progress, target, filename, icons) {
 							['RulesBack', 'BText'],
 							['FlavourBack', 'BFlavour'],
 							['StoryBack', 'BFlavour'],
-							['ArtistBack-external', 'BArtist']
+							['ArtistBack-external', 'BArtist'],  // old plugin
+							['ArtistBack', 'BArtist']  // new plugin
 						]);
 					}
 				}
@@ -248,7 +254,8 @@ function run(progress, target, filename, icons) {
 						['Shadow', 'BShadow'],
 						['Flavour', 'BFlavour'],
 						['Story', 'BFlavour'],
-						['Artist-external', 'BArtist'],
+						['Artist-external', 'BArtist'],  // old plugin
+						['Artist', 'BArtist'],  // new plugin
 						['Adventure', 'Adventure']
 					];
 				}
@@ -261,10 +268,12 @@ function run(progress, target, filename, icons) {
 				// change the details in the template card
 				for (let k = 0; k < mapping.length; k++) {
 					let nEon = mapping[k][0];
-					s.set(nEon, '');
 					let nXml = mapping[k][1];
 					let vXml = card[nXml];
 					if (!vXml) {
+						if (['Sphere', 'BSphere'].indexOf(nXml + '') == -1) {
+							s.set(nEon, '');
+						}
 						continue;
 					}
 					if (vXml == '-') {
@@ -279,7 +288,11 @@ function run(progress, target, filename, icons) {
 						if (vXml == 'Unknown Artist') {
 							vXml = translate['Unknown Artist'][lang];
 						}
-						vXml = translate['Illustration'][lang] + ' ' + vXml;
+
+						// old plugin
+						if (nEon == 'Artist-external' || nEon == 'ArtistBack-external') {
+							vXml = translate['Illustration'][lang] + ' ' + vXml;
+						}
 					}
 					if (nXml == 'Text' || nXml == 'BText') {
 						if (keywords) {
@@ -296,6 +309,9 @@ function run(progress, target, filename, icons) {
 					}
 					s.set(nEon, vXml);
 				}
+
+				// new plugin
+				s.set('LRL-IllustratorShort', translate['Illustration'][lang]);
 
 				if (cardType == 'Rules') {
 					s.set('Name', '');
@@ -400,6 +416,20 @@ function run(progress, target, filename, icons) {
 				}
 				if (card['Removed for Easy Mode'] && j >= parseInt(card['Quantity']) - parseInt(card['Removed for Easy Mode'])) {
 					s.set('Template', 'Gold');
+				}
+
+				// new plugin
+				if (['Player Side Quest', 'Encounter Side Quest', 'Quest'].indexOf(cardType) > -1) {
+					s.set('Artist-region', '302,754,170,24');
+					s.set('Copyright-region', '474,754,272,24');
+					s.set('Collection-portrait-clip-region', '860,754,24,24');
+					s.set('CollectionNumber-region', '886,754,30,24');
+				}
+				else {
+					s.set('Artist-region', '116,1054,170,24');
+					s.set('Copyright-region', '278,1054,272,24');
+					s.set('Collection-portrait-clip-region', '664,1054,24,24');
+					s.set('CollectionNumber-region', '690,1054,30,24');
 				}
 
 				let copy;
