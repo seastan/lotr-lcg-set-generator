@@ -289,9 +289,10 @@ function run(progress, target, filename, icons) {
 							vXml = translate['Unknown Artist'][lang];
 						}
 
-						// old plugin
-						if (nEon == 'Artist-external' || nEon == 'ArtistBack-external') {
-							vXml = translate['Illustration'][lang] + ' ' + vXml;
+						if (pluginVersion == 'old') {
+							if (nEon == 'Artist-external' || nEon == 'ArtistBack-external') {
+								vXml = translate['Illustration'][lang] + ' ' + vXml;
+							}
 						}
 					}
 					if (nXml == 'Text' || nXml == 'BText') {
@@ -310,8 +311,22 @@ function run(progress, target, filename, icons) {
 					s.set(nEon, vXml);
 				}
 
-				// new plugin
-				s.set('LRL-IllustratorShort', translate['Illustration'][lang]);
+				if (pluginVersion == 'new') {
+					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 16; FOREGROUND: #000000');
+					s.set('LRL-IllustratorShort', translate['Illustration'][lang]);
+					if (['Player Side Quest', 'Encounter Side Quest', 'Quest'].indexOf(cardType) > -1) {
+						s.set('Artist-region', '302,754,170,24');
+						s.set('Copyright-region', '474,754,272,24');
+						s.set('Collection-portrait-clip-region', '860,754,24,24');
+						s.set('CollectionNumber-region', '886,754,30,24');
+					}
+					else {
+						s.set('Artist-region', '116,1054,170,24');
+						s.set('Copyright-region', '278,1054,272,24');
+						s.set('Collection-portrait-clip-region', '664,1054,24,24');
+						s.set('CollectionNumber-region', '690,1054,30,24');
+					}
+				}
 
 				if (cardType == 'Rules') {
 					s.set('Name', '');
@@ -416,20 +431,6 @@ function run(progress, target, filename, icons) {
 				}
 				if (card['Removed for Easy Mode'] && j >= parseInt(card['Quantity']) - parseInt(card['Removed for Easy Mode'])) {
 					s.set('Template', 'Gold');
-				}
-
-				// new plugin
-				if (['Player Side Quest', 'Encounter Side Quest', 'Quest'].indexOf(cardType) > -1) {
-					s.set('Artist-region', '302,754,170,24');
-					s.set('Copyright-region', '474,754,272,24');
-					s.set('Collection-portrait-clip-region', '860,754,24,24');
-					s.set('CollectionNumber-region', '886,754,30,24');
-				}
-				else {
-					s.set('Artist-region', '116,1054,170,24');
-					s.set('Copyright-region', '278,1054,272,24');
-					s.set('Collection-portrait-clip-region', '664,1054,24,24');
-					s.set('CollectionNumber-region', '690,1054,30,24');
 				}
 
 				let copy;

@@ -4,6 +4,7 @@ Frogmorton/imagesCustom/*.jpg
 Frogmorton/imagesCustom/*.png
 Frogmorton/imagesRaw/*.jpg
 Frogmorton/imagesRaw/*.png
+Frogmorton/Templates/*.eon
 Frogmorton/XML/*.xml
 imagesEons/*/*/*
 Output/*/*/*
@@ -14,6 +15,7 @@ setOCTGN/*.xml.old
 Temp/*/*
 
 configuration.yaml
+log.txt
 macros_copy.xlsm
 setExcel.xlsm
 setExcel.xlsx

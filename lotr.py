@@ -71,6 +71,8 @@ SET_EONS_PATH = 'setEons'
 SET_OCTGN_PATH = 'setOCTGN'
 SHEET_ROOT_PATH = ''
 TEMP_ROOT_PATH = 'Temp'
+TEMPLATES_SOURCE_PATH = os.path.join('Templates')
+TEMPLATES_PATH = os.path.join(PROJECT_FOLDER, 'Templates')
 XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
 
 ARTWORK_CACHE = {}
@@ -183,16 +185,28 @@ def read_conf():
     return conf
 
 
-def clear_project_folders():
-    """ Clear raw image files and xml files in the project folders.
+def reset_project_folders(conf):
+    """ Reset the project folders.
     """
-    logging.info('Clearing the project folders...')
+    logging.info('Resetting the project folders...')
     timestamp = time.time()
 
     _clear_folder(IMAGES_CUSTOM_PATH)
     _clear_folder(IMAGES_RAW_PATH)
+    _clear_folder(TEMPLATES_PATH)
     _clear_folder(XML_PATH)
-    logging.info('...Clearing the project folders (%ss)',
+
+    source_path = os.path.join(TEMPLATES_SOURCE_PATH,
+                               conf['strange_eons_plugin_version'])
+    for _, _, filenames in os.walk(source_path):
+        for filename in filenames:
+            shutil.copyfile(os.path.join(source_path, filename),
+                            os.path.join(TEMPLATES_PATH, filename))
+
+        break
+
+
+    logging.info('...Resetting the project folders (%ss)',
                  round(time.time() - timestamp, 3))
 
 

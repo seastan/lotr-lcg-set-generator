@@ -12,7 +12,7 @@ def main():
     """
     timestamp = time.time()
     conf = lotr.read_conf()
-    lotr.clear_project_folders()
+    lotr.reset_project_folders(conf)
     lotr.download_sheet(conf)
     sets = lotr.get_sets(conf)
 
