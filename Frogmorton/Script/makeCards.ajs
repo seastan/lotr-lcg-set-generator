@@ -22,7 +22,8 @@ translate['Objective'] = {'English': 'Objective', 'French': 'Objectif', 'German'
 translate['Objective Ally'] = {'English': 'Objective-Ally', 'French': 'Objectif-Alli\u00e9', 'German': 'Ziel-Verb\u00fcndeter', 'Spanish': 'Objetivo-Aliado'};
 translate['Player Side Quest'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria'};
 translate['Quest'] = {'English': 'Quest', 'French': 'Qu\u00eate', 'German': 'Abenteuer', 'Spanish': 'Misi\u00f3n'};
-translate['Rules'] = {'English': 'Rules', 'French': 'R\u00e8gles', 'German': 'Reglement', 'Spanish': 'Reglas'};
+//translate['Presentation'] = {'English': 'Presentation', 'French': 'Pr\u00e9sentation', 'German': 'Pr\u00e4sentation', 'Spanish': 'Presentaci\u00f3n'};
+//translate['Rules'] = {'English': 'Rules', 'French': 'R\u00e8gles', 'German': 'Reglement', 'Spanish': 'Reglas'};
 translate['Treachery'] = {'English': 'Treachery', 'French': 'Tra\u00eetrise', 'German': 'Verrat', 'Spanish': 'Traici\u00f3n'};
 translate['Encounter Keyword'] = {'English': 'Encounter.', 'French': 'Rencontre.', 'German': 'Begegnung.', 'Spanish': 'Encuentro.'};
 translate['Illustration'] = {'English': 'Illus.', 'French': 'Illus.', 'German': 'Illus.', 'Spanish': 'Ilus.'};
@@ -49,7 +50,7 @@ function main(progress, target) {
 function run(progress, target, filename, icons) {
 	var setID = filename.split('.')[0];
 	var lang = filename.split('.')[1];
-	var backTypes = ['Quest', 'Rules'];
+	var backTypes = ['Presentation', 'Quest', 'Rules'];
 	var fXmlFile = new File(getProjectMember('XML/').file, filename + '.xml');
 	Console.err.println('\nReading ' + fXmlFile);
 	var dbFactory = DocumentBuilderFactory.newInstance();
@@ -313,7 +314,12 @@ function run(progress, target, filename, icons) {
 
 				if (pluginVersion == 'new') {
 					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 16; FOREGROUND: #000000');
-					s.set('LRL-IllustratorShort', translate['Illustration'][lang]);
+					if (cardType == 'Presentation') {
+						s.set('LRL-IllustratorShort', '');
+					}
+					else {
+						s.set('LRL-IllustratorShort', translate['Illustration'][lang]);
+					}
 					if (['Player Side Quest', 'Encounter Side Quest', 'Quest'].indexOf(cardType) > -1) {
 						s.set('Artist-region', '302,754,170,24');
 						s.set('Copyright-region', '474,754,272,24');
@@ -328,13 +334,22 @@ function run(progress, target, filename, icons) {
 					}
 				}
 
-				if (cardType == 'Rules') {
+				if (cardType == 'Presentation') {
+					s.set('Story', '');
+					s.set('Flavour', '');
+					s.set('Artist-external', ' ');
+					if ((s.get('Rules') == '') && (s.get('RulesBack') != '')) {
+						s.set('Rules', s.get('RulesBack'))
+					}
+				}
+				else if (cardType == 'Rules') {
 					s.set('Name', '');
 					s.set('Story', '');
 					s.set('StoryBack', '');
 					s.set('Flavour', '');
 					s.set('FlavourBack', '');
 				}
+
 				if (['Event', 'Treachery', 'Player Side Quest', 'Encounter Side Quest', 'Quest', 'Rules', 'Contract'].indexOf(cardType) > -1) {
 					s.set('Unique', '');
 				}
@@ -380,14 +395,16 @@ function run(progress, target, filename, icons) {
 						}
 					}
 				}
-				s.set('Type', translate[cardType][lang].toUpperCase());
+
 				s.set('CollectionInfo', ' ');
 
-				if (cardType == 'Rules') {
+				if ((cardType == 'Presentation') || (cardType == 'Rules')) {
 					s.set('Copyright', '');
 					s.set('Collection', 'EmptyIcon');
+					s.set('Type', ' ');
 				}
 				else {
+					s.set('Type', translate[cardType][lang].toUpperCase());
 					s.set('Copyright', copyrightText);
 					let iconName = fixSpecialSymbols(card['Set']).replace(/ /g, '-');
 					if (icons.indexOf(iconName) > -1) {
