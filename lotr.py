@@ -1434,7 +1434,7 @@ def _prepare_updated_o8c(temp_path, updates):
         break
 
 
-def copy_octgn_outputs(conf, copy_o8c=False, updates=None):
+def copy_octgn_outputs(conf, unzip=True, copy_o8c=False, updates=None):
     """ Copy OCTGN outputs to the destination folder.
     """
     logging.info('Copying OCTGN outputs to the destination folder...')
@@ -1457,16 +1457,16 @@ def copy_octgn_outputs(conf, copy_o8c=False, updates=None):
 
     _delete_folder(temp_path)
 
-    for _, _, filenames in os.walk(conf['octgn_destination_path']):
-        for filename in filenames:
-            if filename.endswith('.zip'):
-                with zipfile.ZipFile(
-                        os.path.join(conf['octgn_destination_path'],
-                                     filename)) as obj:
-                    obj.extractall(conf['octgn_destination_path'])
+    if unzip:
+        for _, _, filenames in os.walk(conf['octgn_destination_path']):
+            for filename in filenames:
+                if filename.endswith('.zip'):
+                    with zipfile.ZipFile(
+                            os.path.join(conf['octgn_destination_path'],
+                                         filename)) as obj:
+                        obj.extractall(conf['octgn_destination_path'])
 
-        break
-
+            break
 
     logging.info('...Copying OCTGN outputs to the destination folder (%ss)',
                  round(time.time() - timestamp, 3))

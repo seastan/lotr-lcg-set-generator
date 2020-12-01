@@ -314,6 +314,7 @@ function run(progress, target, filename, icons) {
 
 				if (pluginVersion == 'new') {
 					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 16; FOREGROUND: #000000');
+					s.set('Page-style', 'FAMILY: {Eons.namedObjects.LRL.LRLfont}; SIZE: 12; WIDTH: SEMICONDENSED; FOREGROUND: #000000');
 					if (cardType == 'Presentation') {
 						s.set('LRL-IllustratorShort', '');
 					}
@@ -338,9 +339,6 @@ function run(progress, target, filename, icons) {
 					s.set('Story', '');
 					s.set('Flavour', '');
 					s.set('Artist-external', ' ');
-					if ((s.get('Rules') == '') && (s.get('RulesBack') != '')) {
-						s.set('Rules', s.get('RulesBack'))
-					}
 				}
 				else if (cardType == 'Rules') {
 					s.set('Name', '');
@@ -399,9 +397,9 @@ function run(progress, target, filename, icons) {
 				s.set('CollectionInfo', ' ');
 
 				if ((cardType == 'Presentation') || (cardType == 'Rules')) {
+					s.set('Type', ' ');
 					s.set('Copyright', '');
 					s.set('Collection', 'EmptyIcon');
-					s.set('Type', ' ');
 				}
 				else {
 					s.set('Type', translate[cardType][lang].toUpperCase());
