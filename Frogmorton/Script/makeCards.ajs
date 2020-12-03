@@ -316,8 +316,15 @@ function run(progress, target, filename, icons) {
 					s.set('Story', '');
 					s.set('Flavour', '');
 					if (pluginVersion == 'new') {
+						s.set('Name', '');
+						s.set('GameName', '');
 						s.set('Template', 'Classic' + s.get('Template'));
-						s.set('BackgroundBack-portrait-template', 'project:Templates/Rules-Background.png');
+						s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
+						s.set('GameName-external-path', 'project:imagesRaw/' + card['ArtworkTop']);
+						s.set('Name-external-path', 'project:imagesRaw/' + card['ArtworkBottom']);
+						s.set('Classic-Body-region', '100,120,626,890');
+						s.set('PageIn-region', '600,980,126,30');
+						s.set('PageIn-format', '<right><b><size 13><bottom>');
 					}
 					else {
 						s.set('Artist-external', ' ');
@@ -330,8 +337,11 @@ function run(progress, target, filename, icons) {
 					s.set('Flavour', '');
 					s.set('FlavourBack', '');
 					if (pluginVersion == 'new') {
-						s.set('Background-portrait-template', 'project:Templates/Rules-Background.png');
-						s.set('BackgroundBack-portrait-template', 'project:Templates/Rules-Background.png');
+						s.set('Background-external-path', 'project:Templates/Rules-Background.png');
+						s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
+						s.set('Body-region', '100,120,626,890');
+						s.set('PageIn-region', '600,980,126,30');
+						s.set('PageIn-format', '<right><b><size 13><bottom>');
 					}
 				}
 

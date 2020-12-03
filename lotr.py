@@ -522,6 +522,26 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0914,R0915
                         os.path.split(filename)[-1].split('_Artist_')[1:]
                         ).split('.')[:-1]).replace('_', ' '))
 
+        if card_type == 'Presentation':
+            filename = images.get('{}_{}'.format(card.attrib['id'], 'Top'))
+            if filename:
+                prop = _get_property(card, 'ArtworkTop')
+                prop.set('value', os.path.split(filename)[-1])
+                prop = _get_property(card, 'ArtworkTop Size')
+                prop.set('value', str(os.path.getsize(filename)))
+                prop = _get_property(card, 'ArtworkTop Modified')
+                prop.set('value', str(int(os.path.getmtime(filename))))
+
+            filename = images.get('{}_{}'.format(card.attrib['id'], 'Bottom'))
+            if filename:
+                prop = _get_property(card, 'ArtworkBottom')
+                prop.set('value', os.path.split(filename)[-1])
+                prop = _get_property(card, 'ArtworkBottom Size')
+                prop.set('value', str(os.path.getsize(filename)))
+                prop = _get_property(card, 'ArtworkBottom Modified')
+                prop.set('value', str(int(os.path.getmtime(filename))))
+
+
         filename = images.get('{}_{}'.format(card.attrib['id'], 'B'))
         alternate = [a for a in card if a.attrib.get('type') == 'B']
         if filename and alternate:
@@ -645,18 +665,20 @@ def copy_raw_images(conf, set_id, set_name, lang):
     root = tree.getroot()
     for card in root[0]:
         if card.attrib.get('skip') != '1':
-            filename = _find_properties(card, 'Artwork')
-            if filename:
-                filename = filename[0].attrib['value']
-                if os.path.exists(os.path.join(processed_artwork_path,
-                                               filename)):
-                    input_path = os.path.join(processed_artwork_path, filename)
-                else:
-                    input_path = os.path.join(artwork_path, filename)
+            for prop in ('Artwork', 'ArtworkTop', 'ArtworkBottom'):
+                filename = _find_properties(card, prop)
+                if filename:
+                    filename = filename[0].attrib['value']
+                    if os.path.exists(os.path.join(processed_artwork_path,
+                                                   filename)):
+                        input_path = os.path.join(processed_artwork_path,
+                                                  filename)
+                    else:
+                        input_path = os.path.join(artwork_path, filename)
 
-                output_path = os.path.join(IMAGES_RAW_PATH, filename)
-                if not os.path.exists(output_path):
-                    shutil.copyfile(input_path, output_path)
+                    output_path = os.path.join(IMAGES_RAW_PATH, filename)
+                    if not os.path.exists(output_path):
+                        shutil.copyfile(input_path, output_path)
 
             alternate = [a for a in card if a.attrib.get('type') == 'B']
             if alternate:

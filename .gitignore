@@ -4,6 +4,8 @@ Frogmorton/imagesCustom/*.jpg
 Frogmorton/imagesCustom/*.png
 Frogmorton/imagesRaw/*.jpg
 Frogmorton/imagesRaw/*.png
+Frogmorton/Templates/*.jpg
+Frogmorton/Templates/*.png
 Frogmorton/Templates/*.eon
 Frogmorton/XML/*.xml
 imagesEons/*/*/*
