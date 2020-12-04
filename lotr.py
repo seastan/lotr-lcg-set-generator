@@ -443,7 +443,10 @@ def _set_outputs(conf, root):
     """
     if ('db' in conf['outputs'] or 'octgn' in conf['outputs']
             or 'pdf' in conf['outputs']):
-        root.set('png300NoBleed', '1')
+        if conf['strange_eons_plugin_version'] == 'new':
+            root.set('png300Bleed', '1')
+        else:
+            root.set('png300NoBleed', '1')
 
     if 'pdf' in conf['outputs'] or 'drivethrucards' in conf['outputs']:
         root.set('png300Bleed', '1')

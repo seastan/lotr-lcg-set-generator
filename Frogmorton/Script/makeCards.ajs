@@ -72,13 +72,9 @@ function run(progress, target, filename, icons) {
 		customIcon = 'CustomIcon';
 	}
 
-	var jpg300NoBleed = false;
 	var png300NoBleed = false;
 	var png300Bleed = false;
 	var png800Bleed = false;
-	if (doc.getDocumentElement().getAttribute('jpg300NoBleed') + '' == '1') {
-		jpg300NoBleed = true;
-	}
 	if (doc.getDocumentElement().getAttribute('png300NoBleed') + '' == '1') {
 		png300NoBleed = true;
 	}
@@ -505,14 +501,14 @@ function run(progress, target, filename, icons) {
 					back + '-' + escapeFileName(card['Name']) + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix;
 				progress.status = fname;
 				ResourceKit.writeGameComponentToFile(new File(getProjectMember('Cards/').file, fname + '.' + setID + '.' + lang + '.eon'), newCard);
-				exportCard(newCard, fname, setID, lang, jpg300NoBleed, png300NoBleed, png300Bleed, png800Bleed);
+				exportCard(newCard, fname, setID, lang, png300NoBleed, png300Bleed, png800Bleed, pluginVersion);
 			}
 		}
 	}
 	return;
 }
 
-function exportCard(card, fname, setID, lang, jpg300NoBleed, png300NoBleed, png300Bleed, png800Bleed) {
+function exportCard(card, fname, setID, lang, png300NoBleed, png300Bleed, png800Bleed, pluginVersion) {
 	var sheets = card.createDefaultSheets();
 	var numSheets;
 	if (card.getFaceStyle() + '' == 'TWO_FACES') {
@@ -522,31 +518,33 @@ function exportCard(card, fname, setID, lang, jpg300NoBleed, png300NoBleed, png3
 		numSheets = 1;
 	}
 
+	var ppi300 = 300;
+	var ppi800 = 800;
+	if (pluginVersion == 'new') {
+		ppi300 = ppi300 / 2;
+		ppi800 = ppi800 / 2;
+		png300NoBleed = false;
+	}
+
 	for (let i = 0; i < numSheets; i++ ) {
 		let bi, file;
 
-		if (jpg300NoBleed) {
-			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 300);
-			file = new File(getProjectMember('Export/jpg300NoBleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_JPEG);
-			ImageUtils.write(bi, file, ImageUtils.FORMAT_JPEG, 0.9, false, 300);
-		}
-
 		if (png300NoBleed) {
-			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 300);
+			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, ppi300);
 			file = new File(getProjectMember('Export/png300NoBleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_PNG);
-			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 300);
+			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, ppi300);
 		}
 
 		if (png300Bleed) {
-			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 300, true);
+			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, ppi300, true);
 			file = new File(getProjectMember('Export/png300Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_PNG);
-			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 300);
+			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, ppi300);
 		}
 
 		if (png800Bleed) {
-			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, 800, true);
+			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, ppi800, true);
 			file = new File(getProjectMember('Export/png800Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_PNG);
-			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, 800);
+			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, ppi800);
 		}
 	}
 }
