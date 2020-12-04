@@ -48,7 +48,7 @@ function main(progress, target) {
 function run(progress, target, filename, icons) {
 	var setID = filename.split('.')[0];
 	var lang = filename.split('.')[1];
-	var backTypes = ['Presentation', 'Quest', 'Rules'];
+	var backTypes = ['Contract', 'Presentation', 'Quest', 'Rules'];
 	var fXmlFile = new File(getProjectMember('XML/').file, filename + '.xml');
 	Console.err.println('\nReading ' + fXmlFile);
 	var dbFactory = DocumentBuilderFactory.newInstance();
@@ -362,8 +362,6 @@ function run(progress, target, filename, icons) {
 						s.set('CollectionNumber-region', '690,1054,30,24');
 					}
 				}
-				else {
-				}
 
 				if (['Event', 'Treachery', 'Player Side Quest', 'Encounter Side Quest', 'Quest', 'Rules', 'Contract'].indexOf(cardType) > -1) {
 					s.set('Unique', '');
@@ -440,6 +438,15 @@ function run(progress, target, filename, icons) {
 					}
 				}
 
+				if (cardType == 'Contract') {
+					if (card['BName']) {
+						s.set('Template', 'DoubleSided');					
+					}
+					else {
+						s.set('Template', 'Standard');
+					}
+				}
+
 				if (card['Encounter Set']) {
 					let iconName = fixSpecialSymbols(card['Encounter Set']).replace(/ /g, '-');
 					if (icons.indexOf(iconName) > -1) {
@@ -485,6 +492,9 @@ function run(progress, target, filename, icons) {
 				let back;
 				if (side == 'back') {
 					back = '-';
+				}
+				else if (cardType == 'Contract' && !card['BName']) {
+					back = 'p';
 				}
 				else if (backTypes.indexOf(cardType) > -1 || card['BName']) {
 					back = '-';
