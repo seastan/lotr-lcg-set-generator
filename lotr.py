@@ -180,6 +180,9 @@ def read_conf():
             or 'drivethrucards_7z' in conf['outputs']):
         conf['outputs'].add('drivethrucards')
 
+    conf['nobleed'] = ('db' in conf['outputs']
+                       or 'octgn' in conf['outputs']
+                       or 'pdf' in conf['outputs'])
     logging.info('...Reading project configuration (%ss)',
                  round(time.time() - timestamp, 3))
     return conf
@@ -204,7 +207,6 @@ def reset_project_folders(conf):
                             os.path.join(TEMPLATES_PATH, filename))
 
         break
-
 
     logging.info('...Resetting the project folders (%ss)',
                  round(time.time() - timestamp, 3))
@@ -441,8 +443,7 @@ def _collect_artwork_images(artwork_path):
 def _set_outputs(conf, root):
     """ Set required outputs for Strange Eons.
     """
-    if ('db' in conf['outputs'] or 'octgn' in conf['outputs']
-            or 'pdf' in conf['outputs']):
+    if conf['nobleed']:
         if conf['strange_eons_plugin_version'] == 'new':
             root.set('png300Bleed', '1')
         else:
@@ -754,7 +755,67 @@ def get_skip_info(set_id, set_name, lang):
     return skip_set, skip_ids
 
 
-def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
+def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
+    """ Generate images without bleed margins.
+    """
+    logging.info('[%s, %s] Generating images without bleed margins...',
+                 set_name, lang)
+    timestamp = time.time()
+
+    output_path = os.path.join(IMAGES_EONS_PATH, 'png300NoBleed',
+                               '{}.{}'.format(set_id, lang))
+    _create_folder(output_path)
+    _clear_modified_images(output_path, skip_ids)
+
+    if conf['strange_eons_plugin_version'] == 'new':
+        temp_path = os.path.join(
+            TEMP_ROOT_PATH, 'generate_png300_nobleed.{}.{}'.format(set_id,
+                                                                   lang))
+        _create_folder(temp_path)
+        _clear_folder(temp_path)
+
+        with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+            filelist = [f for f in zip_obj.namelist()
+                        if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
+                                                      'png300Bleed'))
+                        and f.split('.')[-1] == 'png'
+                        and f.split('.')[-2] == lang
+                        and f.split('.')[-3] == set_id]
+            for filename in filelist:
+                output_filename = _update_zip_filename(filename)
+                with zip_obj.open(filename) as zip_file:
+                    with open(os.path.join(temp_path, output_filename),
+                              'wb') as output_file:
+                        shutil.copyfileobj(zip_file, output_file)
+
+        cmd = GIMP_COMMAND.format(
+            conf['gimp_console_path'],
+            'python-cut-bleed-margins-folder',
+            temp_path.replace('\\', '\\\\'),
+            output_path.replace('\\', '\\\\'))
+        res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+        logging.info('[%s, %s] %s', set_name, lang, res)
+        _delete_folder(temp_path)
+    else:
+        with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+            filelist = [f for f in zip_obj.namelist()
+                        if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
+                                                      'png300NoBleed'))
+                        and f.split('.')[-1] == 'png'
+                        and f.split('.')[-2] == lang
+                        and f.split('.')[-3] == set_id]
+            for filename in filelist:
+                output_filename = _update_zip_filename(filename)
+                with zip_obj.open(filename) as zip_file:
+                    with open(os.path.join(output_path, output_filename),
+                              'wb') as output_file:
+                        shutil.copyfileobj(zip_file, output_file)
+
+    logging.info('[%s, %s] ...Generating images without bleed margins'
+                 ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
+
+
+def generate_png300_db(conf, set_id, set_name, lang, skip_ids):
     """ Generate images for DB outputs.
     """
     logging.info('[%s, %s] Generating images for DB outputs...',
@@ -770,19 +831,15 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disab
     _create_folder(temp_path)
     _clear_folder(temp_path)
 
-    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
-        filelist = [f for f in zip_obj.namelist()
-                    if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
-                                                  'png300NoBleed'))
-                    and f.split('.')[-1] == 'png'
-                    and f.split('.')[-2] == lang
-                    and f.split('.')[-3] == set_id]
-        for filename in filelist:
-            output_filename = _update_zip_filename(filename)
-            with zip_obj.open(filename) as zip_file:
-                with open(os.path.join(temp_path, output_filename),
-                          'wb') as output_file:
-                    shutil.copyfileobj(zip_file, output_file)
+    input_path = os.path.join(IMAGES_EONS_PATH, 'png300NoBleed',
+                              '{}.{}'.format(set_id, lang))
+    for _, _, filenames in os.walk(input_path):
+        for filename in filenames:
+            if filename.split('.')[-1] == 'png':
+                shutil.copyfile(os.path.join(input_path, filename),
+                                os.path.join(temp_path, filename))
+
+        break
 
     cmd = GIMP_COMMAND.format(
         conf['gimp_console_path'],
@@ -809,19 +866,15 @@ def generate_png300_octgn(set_id, set_name, lang, skip_ids):
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
 
-    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
-        filelist = [f for f in zip_obj.namelist()
-                    if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
-                                                  'png300NoBleed'))
-                    and f.split('.')[-1] == 'png'
-                    and f.split('.')[-2] == lang
-                    and f.split('.')[-3] == set_id]
-        for filename in filelist:
-            output_filename = _update_zip_filename(filename)
-            with zip_obj.open(filename) as zip_file:
-                with open(os.path.join(output_path, output_filename),
-                          'wb') as output_file:
-                    shutil.copyfileobj(zip_file, output_file)
+    input_path = os.path.join(IMAGES_EONS_PATH, 'png300NoBleed',
+                              '{}.{}'.format(set_id, lang))
+    for _, _, filenames in os.walk(input_path):
+        for filename in filenames:
+            if filename.split('.')[-1] == 'png':
+                shutil.copyfile(os.path.join(input_path, filename),
+                                os.path.join(output_path, filename))
+
+        break
 
     logging.info('[%s, %s] ...Generating images for OCTGN outputs'
                  ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
@@ -868,20 +921,15 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
 
     _clear_folder(temp_path)
 
-    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
-        filelist = [f for f in zip_obj.namelist()
-                    if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
-                                                  'png300NoBleed'))
-                    and f.split('.')[-1] == 'png'
-                    and f.split('.')[-2] == lang
-                    and f.split('.')[-3] == set_id]
-        for filename in filelist:
-            output_filename = _update_zip_filename(filename)
-            if output_filename.endswith('-1.png'):
-                with zip_obj.open(filename) as zip_file:
-                    with open(os.path.join(temp_path, output_filename),
-                              'wb') as output_file:
-                        shutil.copyfileobj(zip_file, output_file)
+    input_path = os.path.join(IMAGES_EONS_PATH, 'png300NoBleed',
+                              '{}.{}'.format(set_id, lang))
+    for _, _, filenames in os.walk(input_path):
+        for filename in filenames:
+            if filename.endswith('-1.png'):
+                shutil.copyfile(os.path.join(input_path, filename),
+                                os.path.join(temp_path, filename))
+
+        break
 
     cmd = GIMP_COMMAND.format(
         conf['gimp_console_path'],
@@ -1485,7 +1533,7 @@ def copy_octgn_outputs(conf, unzip=True, copy_o8c=False, updates=None):
     if unzip:
         for _, _, filenames in os.walk(conf['octgn_destination_path']):
             for filename in filenames:
-                if filename.endswith('.zip'):
+                if filename.split('.')[-1] == 'zip':
                     with zipfile.ZipFile(
                             os.path.join(conf['octgn_destination_path'],
                                          filename)) as obj:

@@ -10,6 +10,12 @@ import lotr
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 
 
+def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):
+    """ Generate images without bleed margins.
+    """
+    lotr.generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids)
+
+
 def generate_db(conf, set_id, set_name, lang, skip_ids):
     """ Generate DB outputs.
     """
@@ -58,13 +64,14 @@ def initializer():
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 
-def main():
+def main():  # pylint: disable=R0912
     """ Main function.
     """
     timestamp = time.time()
     conf = lotr.read_conf()
     sets = lotr.get_sets(conf)
 
+    pre_tasks = []
     tasks = []
     for set_data in sets:
         set_id, set_name, _ = set_data
@@ -74,6 +81,10 @@ def main():
                 logging.info('[%s, %s] No changes since the last run,'
                              ' skipping', set_name, lang)
                 continue
+
+            if conf['nobleed']:
+                pre_tasks.append([generate_png300_nobleed, conf, set_id,
+                                  set_name, lang, skip_ids])
 
             if 'db' in conf['outputs']:
                 tasks.append([generate_db, conf, set_id, set_name, lang,
@@ -94,6 +105,21 @@ def main():
             if 'drivethrucards' in conf['outputs']:
                 tasks.append([generate_dtc, conf, set_id, set_name, lang,
                               skip_ids])
+
+    if pre_tasks:
+        processes = (max(1, cpu_count() - 1)
+                     if conf['parallelism'] == 'default'
+                     else conf['parallelism'])
+        processes = min(processes, len(pre_tasks))
+        logging.info('Starting a pull of %s process(es) for %s pre-task(s)',
+                     processes, len(pre_tasks))
+        with Pool(processes=processes, initializer=initializer) as pool:
+            try:
+                pool.map(run, pre_tasks)
+            except KeyboardInterrupt:
+                logging.info('Program was terminated!')
+                pool.terminate()
+                return
 
     if tasks:
         processes = (max(1, cpu_count() - 1)

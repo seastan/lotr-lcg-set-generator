@@ -30,6 +30,24 @@ def _get_rotation(drawable):
     return rotation
 
 
+def _get_bleed_margin_size(drawable):
+    """ Determine the size of bleed margins.
+    """
+    if ((drawable.width == 826 and drawable.height == 1126)
+            or (drawable.width == 1126 and drawable.height == 826)):
+        size = 38
+    elif ((drawable.width == 1650 and drawable.height == 2250)
+          or (drawable.width == 2250 and drawable.height == 1650)):
+        size = 75
+    elif ((drawable.width == 2200 and drawable.height == 3000)
+          or (drawable.width == 3000 and drawable.height == 2200)):
+        size = 100
+    else:
+        size = 0
+
+    return size
+
+
 def _get_mpc_clip_size(drawable):
     """ Determine MakePlayingCards clip size.
     """
@@ -132,6 +150,33 @@ def _iterate_folder(input_folder, output_folder, func):
                                  file_name)
         drawable = img.layers[0]
         func(img, drawable, output_folder)
+
+
+def cut_bleed_margins(img, drawable, output_folder):
+    """ Cut bleed margins from an image.
+    """
+    gimp.progress_init('Cut bleed margins from an image...')
+    pdb.gimp_undo_push_group_start(img)
+
+    try:
+        file_name, back_side = _get_filename_backside(img)
+    except Exception:  # pylint: disable=W0703
+        pdb.gimp_undo_push_group_end(img)
+        return
+
+    rotation = _get_rotation(drawable)
+    clip_size = _get_bleed_margin_size(drawable)
+
+    if rotation:
+        _rotate(drawable, back_side)
+
+    if clip_size:
+        _clip(img, drawable, clip_size, rotation and back_side)
+
+    pdb.file_png_save(img, drawable,
+                      os.path.join(output_folder, file_name), file_name,
+                      0, 9, 1, 0, 0, 1, 1)
+    pdb.gimp_undo_push_group_end(img)
 
 
 def prepare_db_output(img, drawable, output_folder):
@@ -264,6 +309,14 @@ def prepare_drivethrucards(img, drawable, output_folder):
     pdb.gimp_undo_push_group_end(img)
 
 
+def cut_bleed_margins_folder(input_folder, output_folder):
+    """ Cut bleed margins from a folder of images.
+    """
+    gimp.progress_init(
+        'Cut bleed margins from a folder of images...')
+    _iterate_folder(input_folder, output_folder, cut_bleed_margins)
+
+
 def prepare_db_output_folder(input_folder, output_folder):
     """ Prepare a folder of images for DB output.
     """
@@ -303,6 +356,41 @@ def prepare_drivethrucards_folder(input_folder, output_folder):
         'Prepare a folder of images for DriveThruCards printing...')
     _iterate_folder(input_folder, output_folder, prepare_drivethrucards)
 
+
+register(
+    'python_cut_bleed_margins',
+    'Cut bleed margins from an image',
+    '1. Cut bleed margins. 2. Export PNG.',
+    'A.R.',
+    'A.R.',
+    '2020',
+    'Cut Bleed Margins',
+    '*',
+    [
+        (PF_IMAGE, 'image', 'Input image', None),
+        (PF_DRAWABLE, 'drawable', 'Input drawable', None),
+        (PF_DIRNAME, 'output_folder', 'Output folder', None)
+    ],
+    [],
+    cut_bleed_margins,
+    menu='<Image>/Filters')
+
+register(
+    'python_cut_bleed_margins_folder',
+    'Cut bleed margins from a folder of images',
+    '1. Cut bleed margins. 2. Export PNG.',
+    'A.R.',
+    'A.R.',
+    '2020',
+    'Cut Bleed Margins Folder',
+    '*',
+    [
+        (PF_DIRNAME, 'input_folder', 'Input folder', None),
+        (PF_DIRNAME, 'output_folder', 'Output folder', None)
+    ],
+    [],
+    cut_bleed_margins_folder,
+    menu='<Image>/Filters')
 
 register(
     'python_prepare_db_output',
