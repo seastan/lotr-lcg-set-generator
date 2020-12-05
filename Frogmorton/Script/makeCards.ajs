@@ -9,6 +9,10 @@ importClass(org.w3c.dom.Element);
 importClass(org.w3c.dom.Node);
 importClass(org.w3c.dom.NodeList);
 
+var cardTypes = ['Ally', 'Attachment', 'Contract', 'Enemy', 'Event', 'Hero', 'Location', 'Objective', 'Objective Ally',
+		 'Presentation', 'Quest', 'Rules', 'Side Quest', 'Treachery'];
+var backTypes = ['Presentation', 'Quest', 'Rules'];
+
 var translate = {};
 translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado'};
 translate['Attachment'] = {'English': 'Attachment', 'French': 'Attachement', 'German': 'Verst\u00e4rkung', 'Spanish': 'Vinculada'};
@@ -48,7 +52,6 @@ function main(progress, target) {
 function run(progress, target, filename, icons) {
 	var setID = filename.split('.')[0];
 	var lang = filename.split('.')[1];
-	var backTypes = ['Contract', 'Presentation', 'Quest', 'Rules'];
 	var fXmlFile = new File(getProjectMember('XML/').file, filename + '.xml');
 	Console.err.println('\nReading ' + fXmlFile);
 	var dbFactory = DocumentBuilderFactory.newInstance();
@@ -59,14 +62,11 @@ function run(progress, target, filename, icons) {
 	var cardSet = docElement.getAttribute('name');
 	var copyrightText = docElement.getAttribute('copyright');
 
-	var customIcon;
-	var cardTypes = ['Ally', 'Attachment', 'Enemy', 'Event', 'Hero', 'Location', 'Objective', 'Objective Ally',
-			 'Presentation', 'Quest', 'Rules', 'Side Quest', 'Treachery'];
-
 	var pluginVersion = doc.getDocumentElement().getAttribute('pluginVersion') + '';
+	var customIcon;
 	if (pluginVersion == 'new') {
 		customIcon = 'Custom';
-		cardTypes.push('Contract');
+		backTypes.push('Contract');
 	}
 	else {
 		customIcon = 'CustomIcon';
@@ -154,6 +154,16 @@ function run(progress, target, filename, icons) {
 
 		if (card['Type'] == 'Quest' && card['BQuest Points']) {
 			card['Quest Points'] = card['BQuest Points'];
+		}
+
+		if (card['BName'] && !card['BArtist']) {
+			card['BArtist'] = card['Artist'];
+		}
+		if (card['BName'] && !card['BArtwork']) {
+			card['BArtwork'] = card['Artwork'];
+			card['BPanX'] = card['PanX'];
+			card['BPanY'] = card['PanY'];
+			card['BScale'] = card['Scale'];
 		}
 
 		let playerCopies = false;
@@ -341,6 +351,12 @@ function run(progress, target, filename, icons) {
 					}
 				}
 
+				if (pluginVersion == 'old') {
+					if (cardType == 'Contract') {
+						s.set('Story', '');
+					}
+				}
+
 				if (pluginVersion == 'new') {
 					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 16; FOREGROUND: #000000');
 					if (cardType == 'Presentation') {
@@ -440,10 +456,25 @@ function run(progress, target, filename, icons) {
 
 				if (cardType == 'Contract') {
 					if (card['BName']) {
-						s.set('Template', 'DoubleSided');					
+						if (pluginVersion == 'new') {
+							s.set('Template', 'DoubleSided');
+						}
+						else {
+							if (side == 'front') {
+								s.set('Cycle', 'Side A');
+							}
+							else {
+								s.set('Cycle', 'Side B');
+							}
+						}
 					}
 					else {
-						s.set('Template', 'Standard');
+						if (pluginVersion == 'new') {
+							s.set('Template', 'Standard');
+						}
+						else {
+							s.set('Cycle', '');
+						}
 					}
 				}
 
@@ -490,42 +521,63 @@ function run(progress, target, filename, icons) {
 				}
 
 				let back;
+				let simple_back;
 				if (side == 'back') {
 					back = '-';
+					simple_back = true;
 				}
-				else if (cardType == 'Contract' && !card['BName']) {
-					back = 'p';
+				else if (cardType == 'Contract') {
+					if (card['BName']) {
+						back = '-';
+						if (pluginVersion == 'new') {
+							simple_back = false;
+						}
+						else {
+							simple_back = true;
+						}
+					}
+					else {
+						back = 'p';
+						simple_back = true;
+					}
 				}
-				else if (backTypes.indexOf(cardType) > -1 || card['BName']) {
+				else if (backTypes.indexOf(cardType) > -1) {
 					back = '-';
+					simple_back = false;
 				}
-				else if (['Hero', 'Ally', 'Attachment', 'Event', 'Player Side Quest', 'Contract'].indexOf(cardType) > -1 &&
+				else if (card['BName']) {
+					back = '-';
+					simple_back = true;
+				}
+				else if (['Hero', 'Ally', 'Attachment', 'Event', 'Player Side Quest'].indexOf(cardType) > -1 &&
 					(keywords + '').search(translate['Encounter Keyword'][lang]) == -1) {
 					back = 'p';
+					simple_back = true;
 				}
 				else {
 					back = 'e';
+					simple_back = true;
 				}
 
 				let fname = (Array(4 - (card['Card Number'] + '').length).join('0') + card['Card Number'] + '-' + copy + '-' +
 					back + '-' + escapeFileName(card['Name']) + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix;
 				progress.status = fname;
 				ResourceKit.writeGameComponentToFile(new File(getProjectMember('Cards/').file, fname + '.' + setID + '.' + lang + '.eon'), newCard);
-				exportCard(newCard, fname, setID, lang, png300NoBleed, png300Bleed, png800Bleed, pluginVersion);
+				exportCard(newCard, fname, setID, lang, simple_back, png300NoBleed, png300Bleed, png800Bleed, pluginVersion);
 			}
 		}
 	}
 	return;
 }
 
-function exportCard(card, fname, setID, lang, png300NoBleed, png300Bleed, png800Bleed, pluginVersion) {
+function exportCard(card, fname, setID, lang, simple_back, png300NoBleed, png300Bleed, png800Bleed, pluginVersion) {
 	var sheets = card.createDefaultSheets();
 	var numSheets;
-	if (card.getFaceStyle() + '' == 'TWO_FACES') {
-		numSheets = 2;
+	if (simple_back) {
+		numSheets = 1;
 	}
 	else {
-		numSheets = 1;
+		numSheets = 2;
 	}
 
 	var ppi300 = 300;
