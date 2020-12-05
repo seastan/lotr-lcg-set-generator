@@ -64,6 +64,28 @@ def initializer():
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 
+def execute_tasks(conf, tasks):
+    """ Execute the list of tasks.
+    """
+    if not tasks:
+        logging.info('No tasks to execute, skipping')
+        return
+
+    processes = (max(1, cpu_count() - 1)
+                 if conf['parallelism'] == 'default'
+                 else conf['parallelism'])
+    processes = min(processes, len(tasks))
+    logging.info('Starting a pull of %s process(es) for %s task(s)',
+                 processes, len(tasks))
+    with Pool(processes=processes, initializer=initializer) as pool:
+        try:
+            pool.map(run, tasks)
+        except KeyboardInterrupt:
+            logging.info('Program was terminated!')
+            pool.terminate()
+            raise KeyboardInterrupt
+
+
 def main():  # pylint: disable=R0912
     """ Main function.
     """
@@ -106,38 +128,8 @@ def main():  # pylint: disable=R0912
                 tasks.append([generate_dtc, conf, set_id, set_name, lang,
                               skip_ids])
 
-    if pre_tasks:
-        processes = (max(1, cpu_count() - 1)
-                     if conf['parallelism'] == 'default'
-                     else conf['parallelism'])
-        processes = min(processes, len(pre_tasks))
-        logging.info('Starting a pull of %s process(es) for %s pre-task(s)',
-                     processes, len(pre_tasks))
-        with Pool(processes=processes, initializer=initializer) as pool:
-            try:
-                pool.map(run, pre_tasks)
-            except KeyboardInterrupt:
-                logging.info('Program was terminated!')
-                pool.terminate()
-                return
-
-    if tasks:
-        processes = (max(1, cpu_count() - 1)
-                     if conf['parallelism'] == 'default'
-                     else conf['parallelism'])
-        processes = min(processes, len(tasks))
-        logging.info('Starting a pull of %s process(es) for %s task(s)',
-                     processes, len(tasks))
-        with Pool(processes=processes, initializer=initializer) as pool:
-            try:
-                pool.map(run, tasks)
-            except KeyboardInterrupt:
-                logging.info('Program was terminated!')
-                pool.terminate()
-                return
-    else:
-        logging.info('No tasks to run, skipping')
-
+    execute_tasks(conf, pre_tasks)
+    execute_tasks(conf, tasks)
     logging.info('Done (%ss)', round(time.time() - timestamp, 3))
 
 
