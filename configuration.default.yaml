@@ -28,7 +28,7 @@ strange_eons_plugin_version: old
 
 # List of set IDs to work on
 set_ids:
-  - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f  # ALeP - Children of Eorl (Deluxe)
+  - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f  # ALeP - Children of Eorl
   - 17b90ca1-7e3e-4891-99da-954a7833e88e  # ALeP - The Aldburg Plot
   - 4eff45c3-8435-438f-bbbf-633483645dc6  # ALeP - Fire on the Eastemnet
   - 535a1083-330f-4bc5-a1bb-64c364da9e0a  # ALeP - The Gap of Rohan

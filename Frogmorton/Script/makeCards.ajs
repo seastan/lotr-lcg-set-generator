@@ -315,7 +315,7 @@ function run(progress, target, filename, icons) {
 							vXml = '\n' + vXml;
 						}
 					}
-					vXml = markUp(vXml, nXml, lang, setID);
+					vXml = markUp(vXml, nXml, lang, setID, pluginVersion);
 					if (nXml == 'Flavour' || nXml == 'BFlavour') {
 						vXml = '<left>' + vXml;
 					}
@@ -654,7 +654,7 @@ function escapeFileName(value) {
 	return value.replace(/[<>:"\/\\|?*]/g, ' ');
 }
 
-function markUp(vXml, nXml, lang, setID) {
+function markUp(vXml, nXml, lang, setID, pluginVersion) {
 	vXml += '';
 	if (lang == 'English') {
 		vXml = vXml.replace(/\b(Quest Resolution)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
@@ -748,6 +748,12 @@ function markUp(vXml, nXml, lang, setID) {
 
 	vXml = vXml.replace(/\n+$/g, '');
 	vXml = vXml.replace(/\n\n/g, '\n<vs>\n');
+
+	if (pluginVersion == 'new') {
+		vXml = vXml.replace(/( )([0-9][0-9\.]*)((?:cm|in)?\>)/g, function (match, p1, p2, p3) {
+			return p1 + (p2 * 2) + p3;
+		});
+	}
 
 	return vXml;
 }
