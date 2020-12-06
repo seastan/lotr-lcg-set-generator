@@ -156,10 +156,10 @@ function run(progress, target, filename, icons) {
 			card['Quest Points'] = card['BQuest Points'];
 		}
 
-		if (card['BName'] && !card['BArtist']) {
+		if (card['BName'] && card['Artist'] && !card['BArtist']) {
 			card['BArtist'] = card['Artist'];
 		}
-		if (card['BName'] && !card['BArtwork']) {
+		if (card['BName'] && card['Artwork'] && !card['BArtwork']) {
 			card['BArtwork'] = card['Artwork'];
 			card['BPanX'] = card['PanX'];
 			card['BPanY'] = card['PanY'];
@@ -394,8 +394,8 @@ function run(progress, target, filename, icons) {
 							s.set('Portrait-external-scale', card['Scale'] / 100);
 						}
 					}
-					if (cardType == 'Quest') {
-						if (card['BArtwork']) {
+					if ((cardType == 'Quest') || ((cardType == 'Contract') && (pluginVersion == 'new'))) {
+						if (card['BArtwork'] && (card['BArtwork'] != card['Artwork'])) {
 							s.set('PortraitBack-external-path', 'project:imagesRaw/' + card['BArtwork']);
 							s.set('PortraitShare', 0);
 							if (card['BPanX'] && card['BPanY'] && card['BScale']) {
