@@ -26,12 +26,13 @@ def _get_rotation(drawable):
                 or (drawable.width == 2100 and drawable.height == 1500)
                 or (drawable.width == 2250 and drawable.height == 1650)
                 or (drawable.width == 2800 and drawable.height == 2000)
-                or (drawable.width == 3000 and drawable.height == 2200))
+                or (drawable.width == 3000 and drawable.height == 2200)
+                or (drawable.width == 3002 and drawable.height == 2202))
     return rotation
 
 
 def _get_bleed_margin_size(drawable):
-    """ Determine the size of bleed margins.
+    """ Determine bleed margin size.
     """
     if ((drawable.width == 826 and drawable.height == 1126)
             or (drawable.width == 1126 and drawable.height == 826)):
@@ -42,6 +43,9 @@ def _get_bleed_margin_size(drawable):
     elif ((drawable.width == 2200 and drawable.height == 3000)
           or (drawable.width == 3000 and drawable.height == 2200)):
         size = 100
+    elif ((drawable.width == 2202 and drawable.height == 3002)
+          or (drawable.width == 3002 and drawable.height == 2202)):
+        size = 101
     else:
         size = 0
 
@@ -60,6 +64,9 @@ def _get_mpc_clip_size(drawable):
     elif ((drawable.width == 2200 and drawable.height == 3000)
           or (drawable.width == 3000 and drawable.height == 2200)):
         size = 4
+    elif ((drawable.width == 2202 and drawable.height == 3002)
+          or (drawable.width == 3002 and drawable.height == 2202)):
+        size = 5
     else:
         size = 0
 
@@ -67,17 +74,11 @@ def _get_mpc_clip_size(drawable):
 
 
 def _get_dtc_clip_size(drawable):
-    """ Determine MakePlayingCards clip size.
+    """ Determine DriveThruCards clip size.
     """
     if ((drawable.width == 826 and drawable.height == 1126)
             or (drawable.width == 1126 and drawable.height == 826)):
         size = 0.5
-    elif ((drawable.width == 1650 and drawable.height == 2250)
-          or (drawable.width == 2250 and drawable.height == 1650)):
-        size = 0
-    elif ((drawable.width == 2200 and drawable.height == 3000)
-          or (drawable.width == 3000 and drawable.height == 2200)):
-        size = 0
     else:
         size = 0
 
