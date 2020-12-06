@@ -23,13 +23,18 @@ from_scratch: true
 # Number of parallel processes to use ("default" means "cpu_count() - 1")
 parallelism: default
 
-# Version of The Lord of the Rings LCG Strange Eons plugin, either "old" or "new"
+# Version of Strange Eons plugin, either "old" or "new"
 strange_eons_plugin_version: old
 
 # List of set IDs to work on
 set_ids:
-  - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f
-  - 17b90ca1-7e3e-4891-99da-954a7833e88e
+  - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f  # ALeP - Children of Eorl (Deluxe)
+  - 17b90ca1-7e3e-4891-99da-954a7833e88e  # ALeP - The Aldburg Plot
+  - 4eff45c3-8435-438f-bbbf-633483645dc6  # ALeP - Fire on the Eastemnet
+  - 535a1083-330f-4bc5-a1bb-64c364da9e0a  # ALeP - The Gap of Rohan
+  - 3e7002fc-f723-4f86-a625-548347b1eaa4  # ALeP - Mustering of the Rohirrim
+  - 3104cd2a-ccce-44a7-bc6e-e3433636c329  # ALeP - The Glittering Caves
+  - 6890e6e4-fffb-4765-9fe0-0e6bce22c9a4  # ALeP - Blood in the Isen
 
 # List of languages
 languages:

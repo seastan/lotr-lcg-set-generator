@@ -165,14 +165,9 @@ def cut_bleed_margins(img, drawable, output_folder):
         pdb.gimp_undo_push_group_end(img)
         return
 
-    rotation = _get_rotation(drawable)
     clip_size = _get_bleed_margin_size(drawable)
-
-    if rotation:
-        _rotate(drawable, back_side)
-
     if clip_size:
-        _clip(img, drawable, clip_size, rotation and back_side)
+        _clip(img, drawable, clip_size, False)
 
     pdb.file_png_save(img, drawable,
                       os.path.join(output_folder, file_name), file_name,

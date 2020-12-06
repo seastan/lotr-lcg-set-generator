@@ -28,7 +28,7 @@ translate['Player Side Quest'] = {'English': 'Side Quest', 'French': 'Qu\u00eate
 translate['Quest'] = {'English': 'Quest', 'French': 'Qu\u00eate', 'German': 'Abenteuer', 'Spanish': 'Misi\u00f3n'};
 translate['Treachery'] = {'English': 'Treachery', 'French': 'Tra\u00eetrise', 'German': 'Verrat', 'Spanish': 'Traici\u00f3n'};
 translate['Encounter Keyword'] = {'English': 'Encounter.', 'French': 'Rencontre.', 'German': 'Begegnung.', 'Spanish': 'Encuentro.'};
-translate['Illustration'] = {'English': 'Illus.', 'French': 'Illus.', 'German': 'Illus.', 'Spanish': 'Ilus.'};
+translate['Illustrator'] = {'English': 'Illus.', 'French': 'Illus.', 'German': 'Illus.', 'Spanish': 'Ilus.'};
 translate['Unknown Artist'] = {'English': 'Unknown Artist', 'French': 'Artiste Inconnu', 'German': 'Unbekannter K\u00fcnstler', 'Spanish': 'Artista Desconocido'};
 translate['Victory'] = {'English': 'Victory', 'French': 'Victoire', 'German': 'Sieg', 'Spanish': 'Victoria'};
 
@@ -59,7 +59,8 @@ function run(progress, target, filename, icons) {
 	var doc = dBuilder.parse(fXmlFile);
 	var docElement = doc.getDocumentElement();
 	docElement.normalize();
-	var cardSet = docElement.getAttribute('name');
+	var setName = docElement.getAttribute('name');
+	var cycle = docElement.getAttribute('cycle');
 	var copyrightText = docElement.getAttribute('copyright');
 
 	var pluginVersion = doc.getDocumentElement().getAttribute('pluginVersion') + '';
@@ -94,7 +95,7 @@ function run(progress, target, filename, icons) {
 
 		// Create a dictionary called card that contains all the card info in the xml file
 		let card = {};
-		card['Set'] = cardSet;
+		card['Set'] = setName;
 		card['octgn'] = nNode.getAttribute('id');
 		card['Name'] = nNode.getAttribute('name');
 		let propList = nNode.getElementsByTagName('property');
@@ -156,7 +157,10 @@ function run(progress, target, filename, icons) {
 			card['Quest Points'] = card['BQuest Points'];
 		}
 
-		if (card['BName'] && card['Artist'] && !card['BArtist']) {
+		if (!card['Artist']) {
+			card['Artist'] = 'Unknown Artist';
+		}
+		if (card['BName'] && !card['BArtist']) {
 			card['BArtist'] = card['Artist'];
 		}
 		if (card['BName'] && card['Artwork'] && !card['BArtwork']) {
@@ -298,7 +302,7 @@ function run(progress, target, filename, icons) {
 
 						if (pluginVersion == 'old') {
 							if (nEon == 'Artist-external' || nEon == 'ArtistBack-external') {
-								vXml = translate['Illustration'][lang] + ' ' + vXml;
+								vXml = translate['Illustrator'][lang] + ' ' + vXml;
 							}
 						}
 					}
@@ -332,9 +336,6 @@ function run(progress, target, filename, icons) {
 						s.set('PageIn-region', '600,980,126,30');
 						s.set('PageIn-format', '<right><b><size 13><bottom>');
 					}
-					else {
-						s.set('Artist-external', ' ');
-					}
 				}
 				else if (cardType == 'Rules') {
 					s.set('Name', '');
@@ -350,9 +351,8 @@ function run(progress, target, filename, icons) {
 						s.set('PageIn-format', '<right><b><size 13><bottom>');
 					}
 				}
-
-				if (pluginVersion == 'old') {
-					if (cardType == 'Contract') {
+				else if (cardType == 'Contract') {
+					if (pluginVersion == 'old') {
 						s.set('Story', '');
 					}
 				}
@@ -361,9 +361,11 @@ function run(progress, target, filename, icons) {
 					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 16; FOREGROUND: #000000');
 					if (cardType == 'Presentation') {
 						s.set('LRL-IllustratorShort', ' ');
+						s.set('Artist', ' ');
 					}
 					else {
-						s.set('LRL-IllustratorShort', translate['Illustration'][lang]);
+						s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
+						s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
 					}
 					if (['Player Side Quest', 'Encounter Side Quest', 'Quest'].indexOf(cardType) > -1) {
 						s.set('Artist-region', '302,754,170,24');
@@ -376,6 +378,11 @@ function run(progress, target, filename, icons) {
 						s.set('Copyright-region', '278,1054,272,24');
 						s.set('Collection-portrait-clip-region', '664,1054,24,24');
 						s.set('CollectionNumber-region', '690,1054,30,24');
+					}
+				}
+				else {
+					if (cardType == 'Presentation') {
+						s.set('Artist-external', ' ');
 					}
 				}
 
@@ -450,7 +457,14 @@ function run(progress, target, filename, icons) {
 						s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
 					}
 					else {
-						s.set('Collection', convertIconName(card['Set']));
+						iconName = fixSpecialSymbols(cycle).replace(/ /g, '-');
+						if (icons.indexOf(iconName) > -1) {
+							s.set('Collection', customIcon);
+							s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
+						}
+						else {
+							s.set('Collection', convertIconName(card['Set']));
+						}
 					}
 				}
 

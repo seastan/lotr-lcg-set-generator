@@ -14,11 +14,11 @@ completely, you will need to download updates to that folder manually.
 
     ```
     <set ID>/
-    <set ID>/<card ID>_<"A" or "B">_<card name and artist, format is not strict>.<"jpg" or "png">
+    <set ID>/<card ID>_<"A" or "B" or "Top" or "Bottom">_<card name and artist, format is not strict>.<"jpg" or "png">
     <set ID>/custom/
     <set ID>/custom/<custom image>
     <set ID>/processed/
-    <set ID>/processed/<card ID>_<"A" or "B">_<card name and artist, format is not strict>.<"jpg" or "png">
+    <set ID>/processed/<card ID>_<"A" or "B" or "Top" or "Bottom">_<card name and artist, format is not strict>.<"jpg" or "png">
     ```
 
     For example:
@@ -39,12 +39,17 @@ completely, you will need to download updates to that folder manually.
 4. Install Backup and Sync from Google (if it's not installed yet) and make sure that the folder
 with the artwork is being synced.
 
-5. Install the latest available version of Strange Eons (https://strangeeons.cgjennings.ca/download.html)
-and the `The Lord of the Rings LCG` plugin.  Then, install `The Lord of the Rings LCG, HD` plugin
-as well.
+5. Install the latest version of Strange Eons (https://strangeeons.cgjennings.ca/download.html),
+run it and install `The Lord of the Rings LCG` plugin.
 
-6. Go to plugins folder (`Strange Eons` -> `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`),
-close Strange Eons and replace `TheLordOfTheRingsLCG.seext` with the custom version from this repo.
+6. If you want to use the old version of plugin, additionally install `The Lord of the Rings LCG, HD`
+plugin.  Then, go to plugins folder (`Strange Eons` -> `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`),
+close Strange Eons and replace `TheLordOfTheRingsLCG.seext` with the file from this repo.
+
+   If you want to use the new version of plugin, then download its archive manually (we don't provide a link here).
+   Then, go to plugins folder (`Strange Eons` -> `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`),
+   close Strange Eons and delete or move all files, which names start with `TheLordOfTheRingsLCG`.  Instead of them,
+   copy all files from the new archive.
 
 7. Install GIMP (https://www.gimp.org/downloads/).
 
@@ -70,13 +75,14 @@ into the root folder of this repo.
 14. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
   - `sheet_gdid`: Google Drive ID of the cards spreadsheet (leave empty to use a local copy)
-  - `sheet_type`: spreadsheet type, either `xlsm` (default) or `xlsx`
+  - `sheet_type`: spreadsheet type, either `xlsm` or `xlsx`
   - `artwork_path`: local path to the artwork folder (don't use for that any existing folder in this repo)
   - `gimp_console_path`: path to GIMP console executable
   - `magick_path`: path to ImageMagick executable
   - `octgn_destination_path`: path to OCTGN destination folder (may be empty)
   - `from_scratch`: whether to generate all cards from scratch (`true`) or to process only the cards, changed since the previous script run (`false`)
   - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`)
+  - `strange_eons_plugin_version`: version of Strange Eons plugin, either `old` or `new`
   - `set_ids`: list of set IDs to work on
   - `languages`: list of languages
   - `outputs`: list of outputs (if you added new outputs, you also need to set `from_scratch` to `true`)
