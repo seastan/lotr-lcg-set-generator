@@ -9,9 +9,10 @@ importClass(org.w3c.dom.Element);
 importClass(org.w3c.dom.Node);
 importClass(org.w3c.dom.NodeList);
 
-var cardTypes = ['Ally', 'Attachment', 'Contract', 'Enemy', 'Event', 'Hero', 'Location', 'Objective', 'Objective Ally',
-		 'Presentation', 'Quest', 'Rules', 'Side Quest', 'Treachery'];
+var cardTypes = ['Ally', 'Attachment', 'Contract', 'Encounter Side Quest', 'Enemy', 'Event', 'Hero', 'Location', 'Objective', 'Objective Ally',
+		 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery'];
 var backTypes = ['Presentation', 'Quest', 'Rules'];
+var landscapeTypes = ['Player Side Quest', 'Encounter Side Quest', 'Quest'];
 
 var translate = {};
 translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado'};
@@ -50,20 +51,23 @@ function main(progress, target) {
 }
 
 function run(progress, target, filename, icons) {
-	var setID = filename.split('.')[0];
-	var lang = filename.split('.')[1];
 	var fXmlFile = new File(getProjectMember('XML/').file, filename + '.xml');
 	Console.err.println('\nReading ' + fXmlFile);
+
+	var setID = filename.split('.')[0];
+	var lang = filename.split('.')[1];
+
 	var dbFactory = DocumentBuilderFactory.newInstance();
 	var dBuilder = dbFactory.newDocumentBuilder();
 	var doc = dBuilder.parse(fXmlFile);
 	var docElement = doc.getDocumentElement();
 	docElement.normalize();
+
 	var setName = docElement.getAttribute('name');
 	var cycle = docElement.getAttribute('cycle');
 	var copyrightText = docElement.getAttribute('copyright');
+	var pluginVersion = docElement.getAttribute('pluginVersion') + '';
 
-	var pluginVersion = doc.getDocumentElement().getAttribute('pluginVersion') + '';
 	var customIcon;
 	if (pluginVersion == 'new') {
 		customIcon = 'Custom';
@@ -93,7 +97,6 @@ function run(progress, target, filename, icons) {
 			continue;
 		}
 
-		// Create a dictionary called card that contains all the card info in the xml file
 		let card = {};
 		card['Set'] = setName;
 		card['octgn'] = nNode.getAttribute('id');
@@ -123,18 +126,6 @@ function run(progress, target, filename, icons) {
 			}
 		}
 
-		if (!card['Type']) {
-			Console.err.println('\nNo card type for ' + card['Name']);
-			continue;
-		}
-		if (cardTypes.indexOf(card['Type'] + '') == -1) {
-			Console.err.println('\nUnknown card type for ' + card['Name'] + ': ' + card['Type']);
-			continue;
-		}
-		if (card['BType'] && cardTypes.indexOf(card['BType'] + '') == -1) {
-			Console.err.println('\nUnknown card type for ' + card['Name'] + ': ' + card['BType']);
-			continue;
-		}
 		// Console.err.println('\nProcessing ' + card['Name']);
 		if (card['Type'] == 'Side Quest') {
 			if (card['Encounter Set']) {
@@ -153,6 +144,15 @@ function run(progress, target, filename, icons) {
 			}
 		}
 
+		if (cardTypes.indexOf(card['Type'] + '') == -1) {
+			Console.err.println('\nSkipping unknown card type for ' + card['Name'] + ': ' + card['Type']);
+			continue;
+		}
+		if (card['BType'] && cardTypes.indexOf(card['BType'] + '') == -1) {
+			Console.err.println('\nIgnoring unknown back card type for ' + card['Name'] + ': ' + card['BType']);
+			card['BType'] = card['Type'];
+		}
+
 		if (card['Type'] == 'Quest' && card['BQuest Points']) {
 			card['Quest Points'] = card['BQuest Points'];
 		}
@@ -165,9 +165,15 @@ function run(progress, target, filename, icons) {
 		}
 		if (card['BName'] && card['Artwork'] && !card['BArtwork']) {
 			card['BArtwork'] = card['Artwork'];
-			card['BPanX'] = card['PanX'];
-			card['BPanY'] = card['PanY'];
-			card['BScale'] = card['Scale'];
+			if (card['PanX']) {
+				card['BPanX'] = card['PanX'];
+			}
+			if (card['PanY']) {
+				card['BPanY'] = card['PanY'];
+			}
+			if (card['Scale']) {
+				card['BScale'] = card['Scale'];
+			}
 		}
 
 		let playerCopies = false;
@@ -192,7 +198,7 @@ function run(progress, target, filename, icons) {
 					suffix = '';
 					mapping = [
 						// Convert from member name in xml file to member name in eon file
-						// [eon,xml]
+						// [eon, xml]
 						['CollectionNumber', 'Card Number'],
 						['Name', 'Name'],
 						['Unique', 'Unique'],
@@ -242,7 +248,7 @@ function run(progress, target, filename, icons) {
 					suffix = '-2';
 					mapping = [
 						// Convert from member name in xml file to member name in eon file
-						// [eon,xml]
+						// [eon, xml]
 						['CollectionNumber', 'Card Number'],
 						['Name', 'BName'],
 						['Unique', 'BUnique'],
@@ -271,22 +277,22 @@ function run(progress, target, filename, icons) {
 					];
 				}
 
-				// Create a new .eon file, using the appropriate template in the template folder
 				progress.status = cardName;
 				let newCard = ResourceKit.getGameComponentFromFile(getProjectMember('Templates/' + cardType + '.eon').file, false);
 				let s = newCard.settings;
 
-				// change the details in the template card
 				for (let k = 0; k < mapping.length; k++) {
 					let nEon = mapping[k][0];
 					let nXml = mapping[k][1];
 					let vXml = card[nXml];
+
 					if (!vXml) {
 						if (['Sphere', 'BSphere'].indexOf(nXml + '') == -1) {
 							s.set(nEon, '');
 						}
 						continue;
 					}
+
 					if (vXml == '-') {
 						vXml = 'minus';
 					}
@@ -322,52 +328,13 @@ function run(progress, target, filename, icons) {
 					s.set(nEon, vXml);
 				}
 
-				if (cardType == 'Presentation') {
-					s.set('Story', '');
-					s.set('Flavour', '');
-					if (pluginVersion == 'new') {
-						s.set('Name', '');
-						s.set('GameName', '');
-						s.set('Template', 'Classic' + s.get('Template'));
-						s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
-						s.set('GameName-external-path', 'project:imagesRaw/' + card['ArtworkTop']);
-						s.set('Name-external-path', 'project:imagesRaw/' + card['ArtworkBottom']);
-						s.set('Classic-Body-region', '100,120,626,890');
-						s.set('PageIn-region', '600,980,126,30');
-						s.set('PageIn-format', '<right><b><size 13><bottom>');
-					}
-				}
-				else if (cardType == 'Rules') {
-					s.set('Name', '');
-					s.set('Story', '');
-					s.set('StoryBack', '');
-					s.set('Flavour', '');
-					s.set('FlavourBack', '');
-					if (pluginVersion == 'new') {
-						s.set('Background-external-path', 'project:Templates/Rules-Background.png');
-						s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
-						s.set('Body-region', '100,120,626,890');
-						s.set('PageIn-region', '600,980,126,30');
-						s.set('PageIn-format', '<right><b><size 13><bottom>');
-					}
-				}
-				else if (cardType == 'Contract') {
-					if (pluginVersion == 'old') {
-						s.set('Story', '');
-					}
-				}
-
 				if (pluginVersion == 'new') {
+					// T.B.D. To be updated once the resolution issue is fixed.
 					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 16; FOREGROUND: #000000');
-					if (cardType == 'Presentation') {
-						s.set('LRL-IllustratorShort', ' ');
-						s.set('Artist', ' ');
-					}
-					else {
-						s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
-						s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
-					}
-					if (['Player Side Quest', 'Encounter Side Quest', 'Quest'].indexOf(cardType) > -1) {
+
+					s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
+					s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
+					if (landscapeTypes.indexOf(cardType) > -1) {
 						s.set('Artist-region', '302,754,170,24');
 						s.set('Copyright-region', '474,754,272,24');
 						s.set('Collection-portrait-clip-region', '860,754,24,24');
@@ -380,18 +347,114 @@ function run(progress, target, filename, icons) {
 						s.set('CollectionNumber-region', '690,1054,30,24');
 					}
 				}
-				else {
-					if (cardType == 'Presentation') {
+
+				if (cardType == 'Presentation') {
+					if (s.get('Victory').search('/') > -1) {
+						s.set('Page', s.get('Victory').split('/')[0]);
+						s.set('PageTotal', s.get('Victory').split('/')[1]);
+					}
+					s.set('Story', '');
+					s.set('Flavour', '');
+					if (pluginVersion == 'new') {
+						s.set('Name', '');
+						s.set('GameName', '');
+						s.set('Template', 'Classic' + s.get('Template'));
+						s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
+						s.set('GameName-external-path', 'project:imagesRaw/' + card['ArtworkTop']);
+						s.set('Name-external-path', 'project:imagesRaw/' + card['ArtworkBottom']);
+						s.set('Classic-Body-region', '100,120,626,890');
+						s.set('PageIn-region', '600,980,126,30');
+						s.set('PageIn-format', '<right><b><size 13><bottom>');  // T.B.D. To be updated once the resolution issue is fixed.
+						s.set('LRL-IllustratorShort', ' ');
+						s.set('Artist', ' ');
+					}
+					else {
 						s.set('Artist-external', ' ');
+					}
+				}
+				else if (cardType == 'Rules') {
+					if (s.get('Victory').search('/') > -1) {
+						s.set('Page', s.get('Victory').split('/')[0]);
+						s.set('PageTotal', s.get('Victory').split('/')[1]);
+					}
+					s.set('Name', '');
+					s.set('Story', '');
+					s.set('StoryBack', '');
+					s.set('Flavour', '');
+					s.set('FlavourBack', '');
+					if (pluginVersion == 'new') {
+						s.set('Background-external-path', 'project:Templates/Rules-Background.png');
+						s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
+						s.set('Body-region', '100,120,626,890');
+						s.set('PageIn-region', '600,980,126,30');
+						s.set('PageIn-format', '<right><b><size 13><bottom>');  // T.B.D. To be updated once the resolution issue is fixed.
+					}
+				}
+				else if (cardType == 'Contract') {
+					if (pluginVersion == 'old') {
+						s.set('Story', '');
+					}
+
+					if (card['BName']) {
+						if (pluginVersion == 'new') {
+							s.set('Template', 'DoubleSided');
+						}
+						else {
+							if (side == 'front') {
+								s.set('Cycle', 'Side A');
+							}
+							else {
+								s.set('Cycle', 'Side B');
+							}
+						}
+					}
+					else {
+						if (pluginVersion == 'new') {
+							s.set('Template', 'Standard');
+						}
+						else {
+							s.set('Cycle', '');
+						}
+					}
+				}
+				else if (cardType == 'Quest') {
+					s.set('NameShare', 0);
+				}
+
+				if ((cardType == 'Presentation') || (cardType == 'Rules')) {
+					s.set('Type', ' ');
+					s.set('Copyright', '');
+					if (pluginVersion == 'new') {
+						s.set('Collection', 'Empty');
+					}
+					else {
+						s.set('Collection', 'EmptyIcon');
+					}
+				}
+				else {
+					s.set('Type', translate[cardType][lang].toUpperCase());
+					s.set('Copyright', copyrightText);
+					let iconName = fixSpecialSymbols(card['Set']).replace(/ /g, '-');
+					if (icons.indexOf(iconName) > -1) {
+						s.set('Collection', customIcon);
+						s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
+					}
+					else {
+						iconName = fixSpecialSymbols(cycle).replace(/ /g, '-');
+						if (icons.indexOf(iconName) > -1) {
+							s.set('Collection', customIcon);
+							s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
+						}
+						else {
+							s.set('Collection', convertIconName(card['Set']));
+						}
 					}
 				}
 
 				if (['Event', 'Treachery', 'Player Side Quest', 'Encounter Side Quest', 'Quest', 'Rules', 'Contract'].indexOf(cardType) > -1) {
 					s.set('Unique', '');
 				}
-				if (cardType == 'Quest') {
-					s.set('NameShare', 0);
-				}
+
 				if (side == 'front') {
 					if (card['Artwork']) {
 						s.set('Portrait-external-path', 'project:imagesRaw/' + card['Artwork']);
@@ -433,64 +496,6 @@ function run(progress, target, filename, icons) {
 				}
 
 				s.set('CollectionInfo', ' ');
-
-				if ((cardType == 'Presentation') || (cardType == 'Rules')) {
-					if (s.get('Victory').search('/') > -1) {
-						s.set('Page', s.get('Victory').split('/')[0]);
-						s.set('PageTotal', s.get('Victory').split('/')[1]);
-					}
-					s.set('Type', ' ');
-					s.set('Copyright', '');
-					if (pluginVersion == 'new') {
-						s.set('Collection', 'Empty');
-					}
-					else {
-						s.set('Collection', 'EmptyIcon');
-					}
-				}
-				else {
-					s.set('Type', translate[cardType][lang].toUpperCase());
-					s.set('Copyright', copyrightText);
-					let iconName = fixSpecialSymbols(card['Set']).replace(/ /g, '-');
-					if (icons.indexOf(iconName) > -1) {
-						s.set('Collection', customIcon);
-						s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
-					}
-					else {
-						iconName = fixSpecialSymbols(cycle).replace(/ /g, '-');
-						if (icons.indexOf(iconName) > -1) {
-							s.set('Collection', customIcon);
-							s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
-						}
-						else {
-							s.set('Collection', convertIconName(card['Set']));
-						}
-					}
-				}
-
-				if (cardType == 'Contract') {
-					if (card['BName']) {
-						if (pluginVersion == 'new') {
-							s.set('Template', 'DoubleSided');
-						}
-						else {
-							if (side == 'front') {
-								s.set('Cycle', 'Side A');
-							}
-							else {
-								s.set('Cycle', 'Side B');
-							}
-						}
-					}
-					else {
-						if (pluginVersion == 'new') {
-							s.set('Template', 'Standard');
-						}
-						else {
-							s.set('Cycle', '');
-						}
-					}
-				}
 
 				if (card['Encounter Set']) {
 					let iconName = fixSpecialSymbols(card['Encounter Set']).replace(/ /g, '-');
@@ -596,10 +601,11 @@ function exportCard(card, fname, setID, lang, simple_back, png300NoBleed, png300
 
 	var ppi300 = 300;
 	var ppi800 = 800;
+
+	// T.B.D. To be removed once the resolution issue is fixed.
 	if (pluginVersion == 'new') {
 		ppi300 = ppi300 / 2;
 		ppi800 = ppi800 / 2;
-		png300NoBleed = false;
 	}
 
 	for (let i = 0; i < numSheets; i++ ) {
@@ -749,6 +755,7 @@ function markUp(vXml, nXml, lang, setID, pluginVersion) {
 	vXml = vXml.replace(/\n+$/g, '');
 	vXml = vXml.replace(/\n\n/g, '\n<vs>\n');
 
+	// T.B.D. To be removed once the resolution issue is fixed.
 	if (pluginVersion == 'new') {
 		vXml = vXml.replace(/( )([0-9][0-9\.]*)((?:cm|in)?\>)/g, function (match, p1, p2, p3) {
 			return p1 + (p2 * 2) + p3;
