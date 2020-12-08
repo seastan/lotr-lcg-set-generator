@@ -3,7 +3,7 @@
 1. Clone this repo to a local folder.
 
 2. Make sure you already have a cards spreadsheet on Google Drive.  If you don't, upload
-`spreadsheet.xlsm` from this repo as a template and fill in all the required data.
+`spreadsheet.xlsx` from this repo as a template and fill in all the required data.
 
 3. Add the folder with the artwork to your own Google Drive to be able to sync it locally.
 This feature is currently hidden on Google Drive UI, but may still be accessed by a shortcut
@@ -75,7 +75,6 @@ into the root folder of this repo.
 14. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
   - `sheet_gdid`: Google Drive ID of the cards spreadsheet (leave empty to use a local copy)
-  - `sheet_type`: spreadsheet type, either `xlsm` or `xlsx`
   - `artwork_path`: local path to the artwork folder (don't use for that any existing folder in this repo)
   - `gimp_console_path`: path to GIMP console executable
   - `magick_path`: path to ImageMagick executable

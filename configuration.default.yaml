@@ -1,9 +1,6 @@
 # Google Drive ID of the cards spreadsheet (leave empty to use a local copy)
 sheet_gdid: ***
 
-# Spreadsheet type, either "xlsm" or "xlsx"
-sheet_type: xlsm
-
 # Local path to the artwork folder
 artwork_path: C:\Google Drive\CardImages\
 

@@ -48,7 +48,7 @@ MAGICK_COMMAND = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
 OCTGN_ARCHIVE = 'unzip-me-into-sets-folder.zip'
 PROCESSED_ARTWORK_FOLDER = 'processed'
 PROJECT_FOLDER = 'Frogmorton'
-SHEET_NAME = 'setExcel'
+SHEET_NAME = 'setExcel.xlsx'
 TEXT_CHUNK_FLAG = b'tEXt'
 
 CONFIGURATION_PATH = 'configuration.yaml'
@@ -218,17 +218,10 @@ def download_sheet(conf):
     timestamp = time.time()
 
     if conf['sheet_gdid']:
-        sheet_path = os.path.join(SHEET_ROOT_PATH,
-                                  '{}.{}'.format(SHEET_NAME,
-                                                 conf['sheet_type']))
-        if conf['sheet_type'] == 'xlsm':
-            url = (
-                'https://drive.google.com/uc?export=download&id={}'
-                .format(conf['sheet_gdid']))
-        else:
-            url = (
-                'https://docs.google.com/spreadsheets/d/{}/export?format=xlsx'
-                .format(conf['sheet_gdid']))
+        sheet_path = os.path.join(SHEET_ROOT_PATH, SHEET_NAME)
+        url = (
+            'https://docs.google.com/spreadsheets/d/{}/export?format=xlsx'
+            .format(conf['sheet_gdid']))
 
         with open(sheet_path, 'wb') as f_sheet:
             f_sheet.write(requests.get(url).content)
@@ -245,8 +238,7 @@ def get_sets(conf):
     logging.info('Getting all sets to work on...')
     timestamp = time.time()
 
-    sheet_path = os.path.join(SHEET_ROOT_PATH,
-                              '{}.{}'.format(SHEET_NAME, conf['sheet_type']))
+    sheet_path = os.path.join(SHEET_ROOT_PATH, SHEET_NAME)
 
     excel_app = xw.App(visible=False, add_book=False)
     try:
@@ -307,12 +299,11 @@ def _backup_previous_xml(conf, set_id, lang):
         os.remove(old_path)
 
 
-def _run_macro(conf, set_row, callback):
+def _run_macro(set_row, callback):
     """ Prepare a context to run an Excel macro and execute the callback.
     """
     shutil.copyfile(MACROS_PATH, MACROS_COPY_PATH)
-    sheet_path = os.path.join(SHEET_ROOT_PATH,
-                              '{}.{}'.format(SHEET_NAME, conf['sheet_type']))
+    sheet_path = os.path.join(SHEET_ROOT_PATH, SHEET_NAME)
 
     excel_app = xw.App(visible=False, add_book=False)
     try:
@@ -355,7 +346,7 @@ def _run_macro(conf, set_row, callback):
         excel_app.quit()
 
 
-def generate_octgn_xml(conf, set_id, set_name, set_row):
+def generate_octgn_xml(set_id, set_name, set_row):
     """ Generate set.xml file for OCTGN.
     """
     def _callback(_, xlwb_target):
@@ -365,7 +356,7 @@ def generate_octgn_xml(conf, set_id, set_name, set_row):
     timestamp = time.time()
 
     _backup_previous_octgn_xml(set_id)
-    _run_macro(conf, set_row, _callback)
+    _run_macro(set_row, _callback)
     _copy_octgn_xml(set_id, set_name)
     logging.info('[%s] ...Generating set.xml file for OCTGN (%ss)',
                  set_name, round(time.time() - timestamp, 3))
@@ -408,7 +399,7 @@ def generate_xml(conf, set_id, set_name, set_row, lang):
     timestamp = time.time()
 
     _backup_previous_xml(conf, set_id, lang)
-    _run_macro(conf, set_row, _callback)
+    _run_macro(set_row, _callback)
     logging.info('[%s, %s] ...Generating xml file for Strange Eons (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 
