@@ -36,16 +36,16 @@ set_ids:
 # List of languages
 languages:
   - English
-  - German
-  - Spanish
-  - French
+#  - German
+#  - Spanish
+#  - French
 
 # List of outputs
 outputs:
   - db
   - octgn
-  - pdf
-  - makeplayingcards_zip
-  - makeplayingcards_7z
-  - drivethrucards_zip
-  - drivethrucards_7z
+#  - pdf
+#  - makeplayingcards_zip
+#  - makeplayingcards_7z
+#  - drivethrucards_zip
+#  - drivethrucards_7z

@@ -157,6 +157,10 @@ function run(progress, target, filename, icons) {
 			card['Quest Points'] = card['BQuest Points'];
 		}
 
+		if (!card['Text']) {
+			card['Text'] = ' ';
+		}
+
 		if (!card['Artist']) {
 			card['Artist'] = 'Unknown Artist';
 		}
