@@ -198,6 +198,13 @@ def reset_project_folders(conf):
     _clear_folder(TEMPLATES_PATH)
     _clear_folder(XML_PATH)
 
+    nobleed_folder = os.path.join(IMAGES_EONS_PATH, 'png300NoBleed')
+    for _, subfolders, _ in os.walk(nobleed_folder):
+        for subfolder in subfolders:
+            _delete_folder(os.path.join(nobleed_folder, subfolder))
+
+        break
+
     source_path = os.path.join(TEMPLATES_SOURCE_PATH,
                                conf['strange_eons_plugin_version'])
     for _, _, filenames in os.walk(source_path):

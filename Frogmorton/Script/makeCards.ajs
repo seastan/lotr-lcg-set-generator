@@ -30,7 +30,7 @@ translate['Quest'] = {'English': 'Quest', 'French': 'Qu\u00eate', 'German': 'Abe
 translate['Treachery'] = {'English': 'Treachery', 'French': 'Tra\u00eetrise', 'German': 'Verrat', 'Spanish': 'Traici\u00f3n'};
 translate['Encounter Keyword'] = {'English': 'Encounter.', 'French': 'Rencontre.', 'German': 'Begegnung.', 'Spanish': 'Encuentro.'};
 translate['Illustrator'] = {'English': 'Illus.', 'French': 'Illus.', 'German': 'Illus.', 'Spanish': 'Ilus.'};
-translate['Unknown Artist'] = {'English': 'Unknown Artist', 'French': 'Artiste Inconnu', 'German': 'Unbekannter K\u00fcnstler', 'Spanish': 'Artista Desconocido'};
+translate['Unknown Artist'] = {'English': 'Unknown Artist', 'French': 'Artiste inconnu', 'German': 'Unbekannter K\u00fcnstler', 'Spanish': 'Artista desconocido'};
 translate['Victory'] = {'English': 'Victory', 'French': 'Victoire', 'German': 'Sieg', 'Spanish': 'Victoria'};
 
 Thread.busyWindow(main, 'Updating cards...', true);
@@ -345,10 +345,10 @@ function run(progress, target, filename, icons) {
 						s.set('CollectionNumber-region', '886,754,30,24');
 					}
 					else {
-						s.set('Artist-region', '116,1054,170,24');
-						s.set('Copyright-region', '278,1054,272,24');
-						s.set('Collection-portrait-clip-region', '664,1054,24,24');
-						s.set('CollectionNumber-region', '690,1054,30,24');
+						s.set('Artist-region', '132,1054,170,24');
+						s.set('Copyright-region', '310,1054,272,24');
+						s.set('Collection-portrait-clip-region', '648,1054,24,24');
+						s.set('CollectionNumber-region', '672,1054,30,24');
 					}
 				}
 
