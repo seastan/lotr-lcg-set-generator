@@ -44,7 +44,8 @@ languages:
 outputs:
   - db
   - octgn
-#  - pdf
+#  - pdf_a4
+#  - pdf_letter
 #  - makeplayingcards_zip
 #  - makeplayingcards_7z
 #  - drivethrucards_zip

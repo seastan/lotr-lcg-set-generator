@@ -34,7 +34,7 @@ def generate_pdf(conf, set_id, set_name, lang, skip_ids):
     """ Generate PDF outputs.
     """
     lotr.generate_png300_pdf(conf, set_id, set_name, lang, skip_ids)
-    lotr.generate_pdf(set_id, set_name, lang)
+    lotr.generate_pdf(conf, set_id, set_name, lang)
 
 
 def generate_mpc(conf, set_id, set_name, lang, skip_ids):

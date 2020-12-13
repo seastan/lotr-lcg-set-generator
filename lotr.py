@@ -171,6 +171,9 @@ def read_conf():
 
     conf['outputs'] = set(conf['outputs'])
 
+    if 'pdf_a4' in conf['outputs'] or 'pdf_letter' in conf['outputs']:
+        conf['outputs'].add('pdf')
+
     if ('makeplayingcards_zip' in conf['outputs']
             or 'makeplayingcards_7z' in conf['outputs']):
         conf['outputs'].add('makeplayingcards')
@@ -1149,7 +1152,7 @@ def _collect_pdf_images(input_path):
     return images
 
 
-def generate_pdf(set_id, set_name, lang):  # pylint: disable=R0914
+def generate_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0914
     """ Generate PDF outputs.
     """
     logging.info('[%s, %s] Generating PDF outputs...', set_name, lang)
@@ -1180,7 +1183,13 @@ def generate_pdf(set_id, set_name, lang):  # pylint: disable=R0914
                      back_page[5], back_page[4], back_page[3]]
         pages.extend([front_page, back_page])
 
-    formats = {'A4': A4, 'Letter': letter}
+    formats = {}
+    if 'pdf_a4' in conf['outputs']:
+        formats['A4'] = A4
+
+    if 'pdf_letter' in conf['outputs']:
+        formats['Letter'] = letter
+
     card_width = 2.75 * inch
     card_height = 3.75 * inch
 
