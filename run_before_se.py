@@ -19,7 +19,7 @@ def main():
     changes = False
     for set_data in sets:
         set_id, set_name, set_row = set_data
-        if 'octgn' in conf['outputs']:
+        if conf['octgn']:
             lotr.generate_octgn_xml(set_id, set_name, set_row)
 
         lotr.copy_custom_images(conf, set_id, set_name)
@@ -34,7 +34,7 @@ def main():
             lotr.copy_xml(set_id, set_name, lang)
 
     if changes:
-        if conf['octgn_destination_path'] and 'octgn' in conf['outputs']:
+        if conf['octgn'] and conf['octgn_destination_path']:
             lotr.copy_octgn_outputs(conf)
 
         lotr.create_project()

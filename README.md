@@ -83,8 +83,7 @@ into the root folder of this repo.
   - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`)
   - `strange_eons_plugin_version`: version of Strange Eons plugin, either `old` or `new`
   - `set_ids`: list of set IDs to work on
-  - `languages`: list of languages
-  - `outputs`: list of outputs (if you added new outputs, you also need to set `from_scratch` to `true`)
+  - `outputs`: list of outputs for each language (if you added or uncommented new outputs, you also need to set `from_scratch` to `true`)
 
 **Usage**
 

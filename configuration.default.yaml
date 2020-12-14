@@ -33,20 +33,59 @@ set_ids:
   - 3104cd2a-ccce-44a7-bc6e-e3433636c329  # ALeP - The Glittering Caves
   - 6890e6e4-fffb-4765-9fe0-0e6bce22c9a4  # ALeP - Blood in the Isen
 
-# List of languages
-languages:
-  - English
-#  - German
-#  - Spanish
-#  - French
-
 # List of outputs
 outputs:
-  - db
-  - octgn
-#  - pdf_a4
-#  - pdf_letter
-#  - makeplayingcards_zip
-#  - makeplayingcards_7z
-#  - drivethrucards_zip
-#  - drivethrucards_7z
+  English:
+    - db
+    - octgn
+#    - pdf_a4
+#    - pdf_letter
+#    - makeplayingcards_zip
+#    - makeplayingcards_7z
+#    - drivethrucards_zip
+#    - drivethrucards_7z
+  German:
+#    - db
+#    - octgn
+#    - pdf_a4
+#    - pdf_letter
+#    - makeplayingcards_zip
+#    - makeplayingcards_7z
+#    - drivethrucards_zip
+#    - drivethrucards_7z
+  Spanish:
+#    - db
+#    - octgn
+#    - pdf_a4
+#    - pdf_letter
+#    - makeplayingcards_zip
+#    - makeplayingcards_7z
+#    - drivethrucards_zip
+#    - drivethrucards_7z
+  French:
+#    - db
+#    - octgn
+#    - pdf_a4
+#    - pdf_letter
+#    - makeplayingcards_zip
+#    - makeplayingcards_7z
+#    - drivethrucards_zip
+#    - drivethrucards_7z
+  Polish:
+#    - db
+#    - octgn
+#    - pdf_a4
+#    - pdf_letter
+#    - makeplayingcards_zip
+#    - makeplayingcards_7z
+#    - drivethrucards_zip
+#    - drivethrucards_7z
+  Italian:
+#    - db
+#    - octgn
+#    - pdf_a4
+#    - pdf_letter
+#    - makeplayingcards_zip
+#    - makeplayingcards_7z
+#    - drivethrucards_zip
+#    - drivethrucards_7z

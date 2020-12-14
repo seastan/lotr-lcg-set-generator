@@ -169,22 +169,31 @@ def read_conf():
     with open(CONFIGURATION_PATH, 'r') as f_conf:
         conf = yaml.safe_load(f_conf)
 
-    conf['outputs'] = set(conf['outputs'])
+    conf['languages'] = [lang for lang in conf['outputs']
+                         if conf['outputs'][lang]]
+    conf['nobleed'] = {}
+    conf['octgn'] = any([True for out in conf['outputs'].values()
+                         if out and 'octgn' in out])
 
-    if 'pdf_a4' in conf['outputs'] or 'pdf_letter' in conf['outputs']:
-        conf['outputs'].add('pdf')
+    for lang in conf['languages']:
+        conf['outputs'][lang] = set(conf['outputs'][lang])
 
-    if ('makeplayingcards_zip' in conf['outputs']
-            or 'makeplayingcards_7z' in conf['outputs']):
-        conf['outputs'].add('makeplayingcards')
+        if ('pdf_a4' in conf['outputs'][lang]
+                or 'pdf_letter' in conf['outputs'][lang]):
+            conf['outputs'][lang].add('pdf')
 
-    if ('drivethrucards_zip' in conf['outputs']
-            or 'drivethrucards_7z' in conf['outputs']):
-        conf['outputs'].add('drivethrucards')
+        if ('makeplayingcards_zip' in conf['outputs'][lang]
+                or 'makeplayingcards_7z' in conf['outputs'][lang]):
+            conf['outputs'][lang].add('makeplayingcards')
 
-    conf['nobleed'] = ('db' in conf['outputs']
-                       or 'octgn' in conf['outputs']
-                       or 'pdf' in conf['outputs'])
+        if ('drivethrucards_zip' in conf['outputs'][lang]
+                or 'drivethrucards_7z' in conf['outputs'][lang]):
+            conf['outputs'][lang].add('drivethrucards')
+
+        conf['nobleed'][lang] = ('db' in conf['outputs'][lang]
+                                 or 'octgn' in conf['outputs'][lang]
+                                 or 'pdf' in conf['outputs'][lang])
+
     logging.info('...Reading project configuration (%ss)',
                  round(time.time() - timestamp, 3))
     return conf
@@ -440,19 +449,20 @@ def _collect_artwork_images(artwork_path):
     return images
 
 
-def _set_outputs(conf, root):
+def _set_outputs(conf, lang, root):
     """ Set required outputs for Strange Eons.
     """
-    if conf['nobleed']:
+    if conf['nobleed'][lang]:
         if conf['strange_eons_plugin_version'] == 'new':
             root.set('png300Bleed', '1')
         else:
             root.set('png300NoBleed', '1')
 
-    if 'pdf' in conf['outputs'] or 'drivethrucards' in conf['outputs']:
+    if ('pdf' in conf['outputs'][lang]
+            or 'drivethrucards' in conf['outputs'][lang]):
         root.set('png300Bleed', '1')
 
-    if 'makeplayingcards' in conf['outputs']:
+    if 'makeplayingcards' in conf['outputs'][lang]:
         root.set('png800Bleed', '1')
 
 
@@ -486,7 +496,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0914,R0915
     tree = ET.parse(xml_path)
     root = tree.getroot()
     root.set('pluginVersion', conf['strange_eons_plugin_version'])
-    _set_outputs(conf, root)
+    _set_outputs(conf, lang, root)
     encounter_sets = {}
     encounter_cards = {}
 
@@ -1184,10 +1194,10 @@ def generate_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0914
         pages.extend([front_page, back_page])
 
     formats = {}
-    if 'pdf_a4' in conf['outputs']:
+    if 'pdf_a4' in conf['outputs'][lang]:
         formats['A4'] = A4
 
-    if 'pdf_letter' in conf['outputs']:
+    if 'pdf_letter' in conf['outputs'][lang]:
         formats['Letter'] = letter
 
     card_width = 2.75 * inch
@@ -1401,7 +1411,7 @@ def generate_mpc(conf, set_id, set_name, lang):
     _prepare_printing_images(input_path, temp_path, 'mpc')
     _make_unique_png(temp_path)
 
-    if 'makeplayingcards_zip' in conf['outputs']:
+    if 'makeplayingcards_zip' in conf['outputs'][lang]:
         with zipfile.ZipFile(
                 os.path.join(output_path,
                              'MPC.{}.{}.zip'.format(set_name, lang)),
@@ -1409,7 +1419,7 @@ def generate_mpc(conf, set_id, set_name, lang):
             _prepare_mpc_printing_archive(temp_path, obj)
             obj.write('MakePlayingCards.pdf', 'MakePlayingCards.pdf')
 
-    if 'makeplayingcards_7z' in conf['outputs']:
+    if 'makeplayingcards_7z' in conf['outputs'][lang]:
         with py7zr.SevenZipFile(
                 os.path.join(output_path,
                              'MPC.{}.{}.7z'.format(set_name, lang)),
@@ -1450,7 +1460,7 @@ def generate_dtc(conf, set_id, set_name, lang):
     _prepare_printing_images(input_path, temp_path, 'dtc')
     _make_cmyk(conf, temp_path)
 
-    if 'drivethrucards_zip' in conf['outputs']:
+    if 'drivethrucards_zip' in conf['outputs'][lang]:
         with zipfile.ZipFile(
                 os.path.join(output_path,
                              'DTC.{}.{}.zip'.format(set_name, lang)),
@@ -1458,7 +1468,7 @@ def generate_dtc(conf, set_id, set_name, lang):
             _prepare_dtc_printing_archive(temp_path, obj)
             obj.write('DriveThruCards.pdf', 'DriveThruCards.pdf')
 
-    if 'drivethrucards_7z' in conf['outputs']:
+    if 'drivethrucards_7z' in conf['outputs'][lang]:
         with py7zr.SevenZipFile(
                 os.path.join(output_path,
                              'DTC.{}.{}.7z'.format(set_name, lang)),
