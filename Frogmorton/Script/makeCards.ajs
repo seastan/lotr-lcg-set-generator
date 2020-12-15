@@ -13,23 +13,23 @@ var doubleSideTypes = ['Presentation', 'Quest', 'Rules'];
 var landscapeTypes = ['Player Side Quest', 'Encounter Side Quest', 'Quest'];
 
 var translate = {};
-translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado'};
-translate['Attachment'] = {'English': 'Attachment', 'French': 'Attachement', 'German': 'Verst\u00e4rkung', 'Spanish': 'Vinculada'};
-translate['Contract'] = {'English': 'Contract', 'French': 'Contrat', 'German': 'Abkommen', 'Spanish': 'Contrato'};
-translate['Encounter Side Quest'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria'};
-translate['Enemy'] = {'English': 'Enemy', 'French': 'Ennemi', 'German': 'Gegner', 'Spanish': 'Enemigo'};
-translate['Event'] = {'English': 'Event', 'French': '\u00c9v\u00e9nement', 'German': 'Ereignis', 'Spanish': 'Evento'};
-translate['Hero'] = {'English': 'Hero', 'French': 'H\u00e9ros', 'German': 'Held', 'Spanish': 'H\u00e9roe'};
-translate['Location'] = {'English': 'Location', 'French': 'Lieu', 'German': 'Ort', 'Spanish': 'Lugar'};
-translate['Objective'] = {'English': 'Objective', 'French': 'Objectif', 'German': 'Ziel', 'Spanish': 'Objetivo'};
-translate['Objective Ally'] = {'English': 'Objective-Ally', 'French': 'Objectif-Alli\u00e9', 'German': 'Ziel-Verb\u00fcndeter', 'Spanish': 'Objetivo-Aliado'};
-translate['Player Side Quest'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria'};
-translate['Quest'] = {'English': 'Quest', 'French': 'Qu\u00eate', 'German': 'Abenteuer', 'Spanish': 'Misi\u00f3n'};
-translate['Treachery'] = {'English': 'Treachery', 'French': 'Tra\u00eetrise', 'German': 'Verrat', 'Spanish': 'Traici\u00f3n'};
-translate['Encounter Keyword'] = {'English': 'Encounter.', 'French': 'Rencontre.', 'German': 'Begegnung.', 'Spanish': 'Encuentro.'};
-translate['Illustrator'] = {'English': 'Illus.', 'French': 'Illus.', 'German': 'Illus.', 'Spanish': 'Ilus.'};
-translate['Unknown Artist'] = {'English': 'Unknown Artist', 'French': 'Artiste inconnu', 'German': 'Unbekannter K\u00fcnstler', 'Spanish': 'Artista desconocido'};
-translate['Victory'] = {'English': 'Victory', 'French': 'Victoire', 'German': 'Sieg', 'Spanish': 'Victoria'};
+translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado', 'Polish': 'Sprzymierzeniec'};
+translate['Attachment'] = {'English': 'Attachment', 'French': 'Attachement', 'German': 'Verst\u00e4rkung', 'Spanish': 'Vinculada', 'Polish': 'Dodatek'};
+translate['Contract'] = {'English': 'Contract', 'French': 'Contrat', 'German': 'Abkommen', 'Spanish': 'Contrato', 'Polish': 'Kontrakt'};
+translate['Encounter Side Quest'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria', 'Polish': 'Poboczna wyprawa'};
+translate['Enemy'] = {'English': 'Enemy', 'French': 'Ennemi', 'German': 'Gegner', 'Spanish': 'Enemigo', 'Polish': 'Wr\u00f3g'};
+translate['Event'] = {'English': 'Event', 'French': '\u00c9v\u00e9nement', 'German': 'Ereignis', 'Spanish': 'Evento', 'Polish': 'Wydarzenie'};
+translate['Hero'] = {'English': 'Hero', 'French': 'H\u00e9ros', 'German': 'Held', 'Spanish': 'H\u00e9roe', 'Polish': 'Bohater'};
+translate['Location'] = {'English': 'Location', 'French': 'Lieu', 'German': 'Ort', 'Spanish': 'Lugar', 'Polish': 'Obszar'};
+translate['Objective'] = {'English': 'Objective', 'French': 'Objectif', 'German': 'Ziel', 'Spanish': 'Objetivo', 'Polish': 'Cel'};
+translate['Objective Ally'] = {'English': 'Objective-Ally', 'French': 'Objectif-Alli\u00e9', 'German': 'Ziel-Verb\u00fcndeter', 'Spanish': 'Objetivo-Aliado', 'Polish': 'Cel-Sprzymierzeniec'};
+translate['Player Side Quest'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria', 'Polish': 'Poboczna wyprawa'};
+translate['Quest'] = {'English': 'Quest', 'French': 'Qu\u00eate', 'German': 'Abenteuer', 'Spanish': 'Misi\u00f3n', 'Polish': 'Wyprawa'};
+translate['Treachery'] = {'English': 'Treachery', 'French': 'Tra\u00eetrise', 'German': 'Verrat', 'Spanish': 'Traici\u00f3n', 'Polish': 'Podst\u0119p'};
+translate['Encounter Keyword'] = {'English': 'Encounter.', 'French': 'Rencontre.', 'German': 'Begegnung.', 'Spanish': 'Encuentro.', 'Polish': 'Spotkanie.'};
+translate['Illustrator'] = {'English': 'Illus.', 'French': 'Illus.', 'German': 'Illus.', 'Spanish': 'Ilus.', 'Polish': 'Illus.'};
+translate['Unknown Artist'] = {'English': 'Unknown Artist', 'French': 'Artiste inconnu', 'German': 'Unbekannter K\u00fcnstler', 'Spanish': 'Artista desconocido', 'Polish': 'Artysta nieznany'};
+translate['Victory'] = {'English': 'Victory', 'French': 'Victoire', 'German': 'Sieg', 'Spanish': 'Victoria', 'Polish': 'Zwyci\u0119stwo'};
 
 Thread.busyWindow(main, 'Updating cards...', true);
 
@@ -675,6 +675,12 @@ function markUp(vXml, nXml, lang, setID, pluginVersion) {
 		vXml = vXml.replace(/\b(Al ser revelada|Preparaci\u00f3n|Obligado|Respuesta de Valor|Respuesta|Viaje|Sombra|Resoluci\u00f3n):/g, '[b]$1[/b]:');
 		vXml = vXml.replace(/\b(Condici\u00f3n)\b/g, '[bi]$1[/bi]');
 	}
+	else if (lang == 'Polish') {
+		vXml = vXml.replace(/\b(Rozpatrzenie wyprawy)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+		vXml = vXml.replace(/\b(Akcja)( Zasob\u00f3w| Planowania| Wyprawy| Podr\u00f3\u017cy| Spotka\u0144| Walki| Odpoczynku)?( M\u0119stwa)?:/g, '[b]$1$2$3[/b]:');
+		vXml = vXml.replace(/\b(Po odkryciu|Przygotowanie|Wymuszony|Odpowied\u017a M\u0119stwa|Odpowied\u017a|Podr\u00f3\u017c|Cie\u0144|Nast\u0119pstwa):/g, '[b]$1[/b]:');
+		vXml = vXml.replace(/\b(Stan)\b/g, '[bi]$1[/bi]');
+	}
 
 	vXml = vXml.replace(/ +(\n|$)/g, '$1');
 	vXml = vXml.replace(/</ig, '[lt]');
@@ -733,8 +739,8 @@ function markUp(vXml, nXml, lang, setID, pluginVersion) {
 		vXml = vXml.replace(/([^:;,.?!]) (<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<uni>)/g, '$1\u00a0$2');
 		vXml = vXml.replace(/([0-9]+) /g, '$1\u00a0');
 		vXml = vXml.replace(/ ([0-9]+)([:;,.?!])/g, '\u00a0$1$2');
-		vXml = vXml.replace(/(^|[ \n"\(])([\-'A-Za-z\u00c0-\u00ff]{1,5})([:;,.?!"\)]*) (["\(]*)([\-'A-Za-z\u00c0-\u00ff]{1,5})([:;,.?!"\)]+)(\n|$)/g, '$1$2$3\u00a0$4$5$6$7');
-		vXml = vXml.replace(/ (["\(]*)([\-'A-Za-z\u00c0-\u00ff]{1,2})([:;,.?!"\)]+)(\n|$)/g, '\u00a0$1$2$3$4');
+		vXml = vXml.replace(/(^|[ \n"\(])([\-'A-Za-z\u00c0-\u017e]{1,5})([:;,.?!"\)]*) (["\(]*)([\-'A-Za-z\u00c0-\u017e]{1,5})([:;,.?!"\)]+)(\n|$)/g, '$1$2$3\u00a0$4$5$6$7');
+		vXml = vXml.replace(/ (["\(]*)([\-'A-Za-z\u00c0-\u017e]{1,2})([:;,.?!"\)]+)(\n|$)/g, '\u00a0$1$2$3$4');
 
 		// fix no-break space inside tags
 		vXml = vXml.replace(/\u00a0([^<]+)>/g, ' $1>');
