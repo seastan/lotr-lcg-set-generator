@@ -9,9 +9,7 @@ importClass(org.w3c.dom.Element);
 importClass(org.w3c.dom.Node);
 importClass(org.w3c.dom.NodeList);
 
-var cardTypes = ['Ally', 'Attachment', 'Contract', 'Encounter Side Quest', 'Enemy', 'Event', 'Hero', 'Location', 'Objective', 'Objective Ally',
-		 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery'];
-var backTypes = ['Presentation', 'Quest', 'Rules'];
+var doubleSideTypes = ['Presentation', 'Quest', 'Rules'];
 var landscapeTypes = ['Player Side Quest', 'Encounter Side Quest', 'Quest'];
 
 var translate = {};
@@ -71,7 +69,7 @@ function run(progress, target, filename, icons) {
 	var customIcon;
 	if (pluginVersion == 'new') {
 		customIcon = 'Custom';
-		backTypes.push('Contract');
+		doubleSideTypes.push('Contract');
 	}
 	else {
 		customIcon = 'CustomIcon';
@@ -144,15 +142,6 @@ function run(progress, target, filename, icons) {
 			}
 		}
 
-		if (cardTypes.indexOf(card['Type'] + '') == -1) {
-			Console.err.println('\nSkipping unknown card type for ' + card['Name'] + ': ' + card['Type']);
-			continue;
-		}
-		if (card['BType'] && cardTypes.indexOf(card['BType'] + '') == -1) {
-			Console.err.println('\nIgnoring unknown back card type for ' + card['Name'] + ': ' + card['BType']);
-			card['BType'] = card['Type'];
-		}
-
 		if (card['Type'] == 'Quest' && card['BQuest Points']) {
 			card['Quest Points'] = card['BQuest Points'];
 		}
@@ -188,7 +177,7 @@ function run(progress, target, filename, icons) {
 
 		for (let j = 0; j < card['Quantity']; j++) {
 			let sides = ['front'];
-			if (backTypes.indexOf(card['Type'] + '') == -1 && card['BName']) {
+			if ((doubleSideTypes.indexOf(card['Type'] + '') == -1) && card['BName']) {
 				sides.push('back');
 			}
 			for (let idx = 0; idx < sides.length; idx++) {
@@ -229,7 +218,7 @@ function run(progress, target, filename, icons) {
 						['Artist', 'Artist'],  // new plugin
 						['Adventure', 'Adventure']
 					];
-					if (backTypes.indexOf(cardType) > -1) {
+					if (doubleSideTypes.indexOf(cardType) > -1) {
 						mapping = mapping.concat([
 							['NameBack', 'BName'],
 							['RulesBack', 'BText'],
@@ -243,10 +232,6 @@ function run(progress, target, filename, icons) {
 				else {
 					cardName = card['BName'];
 					cardType = card['BType'] + '';
-					if (backTypes.indexOf(cardType) > -1) {
-						Console.err.println('\nIncorrect card type for back side for ' + card['Name'] + ': ' + cardType);
-						continue;
-					}
 					keywords = card['BKeywords'];
 					traits = card['BTraits'];
 					suffix = '-2';
@@ -564,7 +549,7 @@ function run(progress, target, filename, icons) {
 						simple_back = true;
 					}
 				}
-				else if (backTypes.indexOf(cardType) > -1) {
+				else if (doubleSideTypes.indexOf(cardType) > -1) {
 					back = '-';
 					simple_back = false;
 				}

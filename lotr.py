@@ -25,7 +25,7 @@ from reportlab.pdfgen.canvas import Canvas
 
 SET_FIRST_ROW = 3
 SET_MAX_ROW = 102
-SET_GUID_COLUMN = 'A'
+SET_ID_COLUMN = 'A'
 SET_NAME_COLUMN = 'B'
 SET_COPYRIGHT_COLUMN = 'E'
 SET_LANGUAGE_COLUMN = 'F'
@@ -33,9 +33,21 @@ SET_LANGUAGE_COLUMN = 'F'
 CARD_FIRST_ROW = 2
 CARD_MAX_ROW = 10001
 CARD_SET_COLUMN = 'A'
-CARD_GUID_COLUMN = 'B'
+CARD_ID_COLUMN = 'B'
 CARD_NUMBER_COLUMN = 'C'
+CARD_QUANTITY_COLUMN = 'D'
+CARD_UNIQUE_COLUMN = 'G'
+CARD_UNIQUE_BACK_COLUMN = 'AC'
+CARD_TYPE_COLUMN = 'H'
+CARD_TYPE_BACK_COLUMN = 'AD'
+CARD_EASY_MODE_COLUMN = 'AX'
 CARD_MAX_COLUMN = 'AZ'
+
+CARD_TYPES = ['Ally', 'Attachment', 'Contract', 'Enemy', 'Event', 'Hero',
+              'Location', 'Objective', 'Objective Ally', 'Presentation',
+              'Quest', 'Rules', 'Side Quest', 'Treachery']
+CARD_TYPES_DOUBLESIDE = ['Presentation', 'Quest', 'Rules']
+CARD_TYPES_DOUBLESIDE_OPTIONAL = ['Contract']
 
 # Name, Traits:Keywords, Text:Flavour, Side B,
 # Traits:Keywords, Text:Flavour, Adventure
@@ -88,6 +100,18 @@ def _c2n(column):
         multiplier *= 26
 
     return res
+
+
+def _is_positive_int(value):
+    """ Check whether a value is a positive int or not.
+    """
+    try:
+        if int(value) == value and value > 0:
+            return True
+
+        return False
+    except ValueError:
+        return False
 
 
 def _clear_folder(folder):
@@ -251,6 +275,129 @@ def download_sheet(conf):
                  round(time.time() - timestamp, 3))
 
 
+def sanity_check():  # pylint: disable=R0912,R0914,R0915
+    """ Perform a sanity check of the spreadsheet.
+    """
+    logging.info('Performing a sanity check of the spreadsheet...')
+    timestamp = time.time()
+
+    sheet_path = os.path.join(SHEET_ROOT_PATH, SHEET_NAME)
+
+    excel_app = xw.App(visible=False, add_book=False)
+    try:
+        xlwb_source = excel_app.books.open(sheet_path)
+        try:
+            sets_range = '{}{}:{}{}'.format(SET_ID_COLUMN,  # pylint: disable=W1308
+                                            SET_FIRST_ROW,
+                                            SET_ID_COLUMN,
+                                            SET_MAX_ROW)
+            sets = xlwb_source.sheets['Sets'].range(sets_range).value
+            card_range = '{}{}:{}{}'.format(CARD_SET_COLUMN,
+                                            CARD_FIRST_ROW,
+                                            CARD_MAX_COLUMN,
+                                            CARD_MAX_ROW)
+            data = xlwb_source.sheets['Card Data'].range(card_range).value
+        finally:
+            xlwb_source.close()
+    finally:
+        excel_app.quit()
+
+    errors_found = False
+    card_ids = []
+    sets = [s for s in sets if s]
+    for i, row in enumerate(data):
+        if not any(row):
+            continue
+
+        i = i + CARD_FIRST_ROW
+        set_id = row[_c2n(CARD_SET_COLUMN) - 1]
+        card_id = row[_c2n(CARD_ID_COLUMN) - 1]
+        if set_id == '0' or card_id == '0':
+            continue
+
+        card_number = row[_c2n(CARD_NUMBER_COLUMN) - 1]
+        card_quantity = row[_c2n(CARD_QUANTITY_COLUMN) - 1]
+        card_unique = row[_c2n(CARD_UNIQUE_COLUMN) - 1]
+        card_type = row[_c2n(CARD_TYPE_COLUMN) - 1]
+        card_unique_back = row[_c2n(CARD_UNIQUE_BACK_COLUMN) - 1]
+        card_type_back = row[_c2n(CARD_TYPE_BACK_COLUMN) - 1]
+        card_easy_mode = row[_c2n(CARD_EASY_MODE_COLUMN) - 1]
+
+        if not set_id:
+            logging.error('ERROR: No set ID for row #%s', i)
+            errors_found = True
+        elif set_id not in sets:
+            logging.error('ERROR: Unknown set ID for row #%s', i)
+            errors_found = True
+
+        if not card_id:
+            logging.error('ERROR: No card ID for row #%s', i)
+            errors_found = True
+        elif card_id in card_ids:
+            logging.error('ERROR: Duplicate card ID for row #%s', i)
+            errors_found = True
+        else:
+            card_ids.append(card_id)
+
+        if not card_number:
+            logging.error('ERROR: No card number for row #%s', i)
+            errors_found = True
+
+        if not card_quantity:
+            logging.error('ERROR: No card quantity for row #%s', i)
+            errors_found = True
+        elif not _is_positive_int(card_quantity):
+            logging.error('ERROR: Incorrect format for card quantity'
+                          ' for row #%s', i)
+            errors_found = True
+
+        if card_unique and card_unique != 1:
+            logging.error('ERROR: Incorrect format for unique for row #%s', i)
+            errors_found = True
+
+        if card_unique_back and card_unique_back != 1:
+            logging.error('ERROR: Incorrect format for unique back'
+                          ' for row #%s', i)
+            errors_found = True
+
+        if not card_type:
+            logging.error('ERROR: No card type for row #%s', i)
+            errors_found = True
+        elif card_type not in CARD_TYPES:
+            logging.error('ERROR: Unknown card type for row #%s', i)
+            errors_found = True
+
+        if card_type_back and card_type_back not in CARD_TYPES:
+            logging.error('ERROR: Unknown card type back for row #%s', i)
+            errors_found = True
+        elif ((card_type in CARD_TYPES_DOUBLESIDE
+               or card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL)
+              and card_type_back and card_type_back != card_type):
+            logging.error('ERROR: Incorrect card type back for row #%s', i)
+            errors_found = True
+        elif (card_type not in CARD_TYPES_DOUBLESIDE
+              and card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL
+              and (card_type_back in CARD_TYPES_DOUBLESIDE or
+                   card_type_back in CARD_TYPES_DOUBLESIDE_OPTIONAL)):
+            logging.error('ERROR: Incorrect card type back for row #%s', i)
+            errors_found = True
+
+        if card_easy_mode and not _is_positive_int(card_easy_mode):
+            logging.error('ERROR: Incorrect format for removed for easy mode'
+                          ' for row #%s', i)
+            errors_found = True
+        elif card_easy_mode and card_easy_mode > card_quantity:
+            logging.error('ERROR: Removed for easy mode is greater than card'
+                          ' quantity for row #%s', i)
+            errors_found = True
+
+    logging.info('...Performing a sanity check of the spreadsheet (%ss)',
+                 round(time.time() - timestamp, 3))
+    if errors_found:
+        raise ValueError('Sanity check of the spreadsheet failed, '
+                         'see error(s) above')
+
+
 def get_sets(conf):
     """ Get all sets to work on and return (id, name, row) tuples.
     """
@@ -266,7 +413,7 @@ def get_sets(conf):
             sets = []
             sheet = xlwb.sheets['Sets']
             for row in range(SET_FIRST_ROW, SET_MAX_ROW + 1):
-                set_id = sheet.range((row, _c2n(SET_GUID_COLUMN))).value
+                set_id = sheet.range((row, _c2n(SET_ID_COLUMN))).value
                 if set_id and set_id in conf['set_ids']:
                     sets.append((set_id,
                                  sheet.range((row,
@@ -331,10 +478,10 @@ def _run_macro(set_row, callback):
             xlwb_target = excel_app.books.open(MACROS_COPY_PATH)
             try:
                 data = xlwb_source.sheets['Sets'].range(
-                    '{}{}:{}{}'.format(SET_GUID_COLUMN, set_row,  # pylint: disable=W1308
+                    '{}{}:{}{}'.format(SET_ID_COLUMN, set_row,  # pylint: disable=W1308
                                        SET_COPYRIGHT_COLUMN, set_row)).value
                 xlwb_target.sheets['Sets'].range(
-                    '{}{}:{}{}'.format(SET_GUID_COLUMN, SET_FIRST_ROW,  # pylint: disable=W1308
+                    '{}{}:{}{}'.format(SET_ID_COLUMN, SET_FIRST_ROW,  # pylint: disable=W1308
                                        SET_COPYRIGHT_COLUMN, SET_FIRST_ROW)
                     ).value = data
 
@@ -392,7 +539,7 @@ def generate_xml(conf, set_id, set_name, set_row, lang):
                 if tr_sheet.range((source_row,
                                    _c2n(CARD_SET_COLUMN))).value == set_id:
                     card_id = tr_sheet.range((source_row,
-                                              _c2n(CARD_GUID_COLUMN))).value
+                                              _c2n(CARD_ID_COLUMN))).value
                     if card_id:
                         translated.append((card_id, source_row))
 
