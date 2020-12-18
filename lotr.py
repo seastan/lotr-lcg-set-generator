@@ -25,13 +25,18 @@ from reportlab.pdfgen.canvas import Canvas
 
 SET_FIRST_ROW = 3
 SET_MAX_ROW = 102
+CARD_FIRST_ROW = 2
+CARD_MAX_ROW = 10001
+
+# Name, Traits:Keywords, Text:Flavour, Side B,
+# Traits:Keywords, Text:Flavour, Adventure
+TRANSLATION_RANGES = ['F{}:F{}', 'J{}:K{}', 'T{}:W{}', 'AB{}:AB{}',
+                      'AF{}:AG{}', 'AP{}:AS{}', 'AZ{}:AZ{}']
+
 SET_ID_COLUMN = 'A'
 SET_NAME_COLUMN = 'B'
 SET_COPYRIGHT_COLUMN = 'E'
 SET_LANGUAGE_COLUMN = 'F'
-
-CARD_FIRST_ROW = 2
-CARD_MAX_ROW = 10001
 CARD_SET_COLUMN = 'A'
 CARD_ID_COLUMN = 'B'
 CARD_NUMBER_COLUMN = 'C'
@@ -48,11 +53,6 @@ CARD_TYPES = ['Ally', 'Attachment', 'Contract', 'Enemy', 'Event', 'Hero',
               'Quest', 'Rules', 'Side Quest', 'Treachery']
 CARD_TYPES_DOUBLESIDE = ['Presentation', 'Quest', 'Rules']
 CARD_TYPES_DOUBLESIDE_OPTIONAL = ['Contract']
-
-# Name, Traits:Keywords, Text:Flavour, Side B,
-# Traits:Keywords, Text:Flavour, Adventure
-TRANSLATION_RANGES = ['F{}:F{}', 'J{}:K{}', 'T{}:W{}', 'AB{}:AB{}',
-                      'AF{}:AG{}', 'AP{}:AS{}', 'AZ{}:AZ{}']
 
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 IMAGES_CUSTOM_FOLDER = 'custom'

@@ -358,6 +358,7 @@ function run(progress, target, filename, icons) {
 						s.set('GameName-external-path', 'project:imagesRaw/' + card['ArtworkTop']);
 						s.set('Name-external-path', 'project:imagesRaw/' + card['ArtworkBottom']);
 						s.set('Classic-Body-region', '100,120,626,890');
+						s.set('Classic-Name-portrait-clip-region', '100,846,626,216');
 						s.set('PageIn-region', '600,980,126,30');
 						s.set('PageIn-format', '<right><b><size 13><bottom>');  // T.B.D. To be updated once the resolution issue is fixed.
 						s.set('LRL-IllustratorShort', ' ');
