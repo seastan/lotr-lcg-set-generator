@@ -12,6 +12,21 @@ importClass(org.w3c.dom.NodeList);
 var doubleSideTypes = ['Presentation', 'Quest', 'Rules'];
 var landscapeTypes = ['Player Side Quest', 'Encounter Side Quest', 'Quest'];
 
+var portraitRegion = {};
+portraitRegion['Ally'] = '174,0,652,660';
+portraitRegion['Attachment'] = '80,100,666,560';
+portraitRegion['Contract'] = '0,0,826,630';
+portraitRegion['Encounter Side Quest'] = '0,0,1126,826';
+portraitRegion['Enemy'] = '174,0,652,660';
+portraitRegion['Event'] = '120,0,706,660';
+portraitRegion['Hero'] = '174,0,652,660';
+portraitRegion['Location'] = '0,120,826,536';
+portraitRegion['Objective'] = '0,120,826,600';
+portraitRegion['Objective Ally'] = '156,144,670,536';
+portraitRegion['Player Side Quest'] = '0,0,1126,826';
+portraitRegion['Quest'] = '0,0,1126,826';
+portraitRegion['Treachery'] = '120,0,706,660';
+
 var translate = {};
 translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado', 'Polish': 'Sprzymierzeniec', 'Italian': 'Alleato'};
 translate['Attachment'] = {'English': 'Attachment', 'French': 'Attachement', 'German': 'Verst\u00e4rkung', 'Spanish': 'Vinculada', 'Polish': 'Dodatek',
@@ -445,6 +460,10 @@ function run(progress, target, filename, icons) {
 							s.set('Collection', convertIconName(card['Set']));
 						}
 					}
+				}
+
+				if (cardType in portraitRegion) {
+					s.set('Portrait-portrait-clip-region', portraitRegion[cardType]);
 				}
 
 				if (['Event', 'Treachery', 'Player Side Quest', 'Encounter Side Quest', 'Quest', 'Rules', 'Contract'].indexOf(cardType) > -1) {
