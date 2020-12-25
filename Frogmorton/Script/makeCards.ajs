@@ -13,19 +13,19 @@ var doubleSideTypes = ['Presentation', 'Quest', 'Rules'];
 var landscapeTypes = ['Player Side Quest', 'Encounter Side Quest', 'Quest'];
 
 var portraitRegion = {};
-portraitRegion['Ally'] = '174,0,652,660';
-portraitRegion['Attachment'] = '80,100,666,560';
-portraitRegion['Contract'] = '0,0,826,630';
-portraitRegion['Encounter Side Quest'] = '0,0,1126,826';
-portraitRegion['Enemy'] = '174,0,652,660';
-portraitRegion['Event'] = '120,0,706,660';
-portraitRegion['Hero'] = '174,0,652,660';
-portraitRegion['Location'] = '0,120,826,536';
-portraitRegion['Objective'] = '0,120,826,600';
-portraitRegion['Objective Ally'] = '156,144,670,536';
-portraitRegion['Player Side Quest'] = '0,0,1126,826';
-portraitRegion['Quest'] = '0,0,1126,826';
-portraitRegion['Treachery'] = '120,0,706,660';
+portraitRegion['Ally'] = '87,0,326,330';
+portraitRegion['Attachment'] = '40,50,333,280';
+portraitRegion['Contract'] = '0,0,413,315';
+portraitRegion['Encounter Side Quest'] = '0,0,563,413';
+portraitRegion['Enemy'] = '87,0,326,330';
+portraitRegion['Event'] = '60,0,353,330';
+portraitRegion['Hero'] = '87,0,326,330';
+portraitRegion['Location'] = '0,60,413,268';
+portraitRegion['Objective'] = '0,60,413,300';
+portraitRegion['Objective Ally'] = '78,72,335,268';
+portraitRegion['Player Side Quest'] = '0,0,563,413';
+portraitRegion['Quest'] = '0,0,563,413';
+portraitRegion['Treachery'] = '60,0,353,330';
 
 var translate = {};
 translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado', 'Polish': 'Sprzymierzeniec', 'Italian': 'Alleato'};
@@ -339,22 +339,21 @@ function run(progress, target, filename, icons) {
 				}
 
 				if (pluginVersion == 'new') {
-					// T.B.D. To be updated once the resolution issue is fixed.
-					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 16; FOREGROUND: #000000');
+					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 8; FOREGROUND: #000000');
 
 					s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
 					s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
 					if (landscapeTypes.indexOf(cardType) > -1) {
-						s.set('Artist-region', '302,754,170,24');
-						s.set('Copyright-region', '474,754,272,24');
-						s.set('Collection-portrait-clip-region', '860,754,24,24');
-						s.set('CollectionNumber-region', '886,754,30,24');
+						s.set('Artist-region', '151,377,85,12');
+						s.set('Copyright-region', '237,377,136,12');
+						s.set('Collection-portrait-clip-region', '430,377,12,12');
+						s.set('CollectionNumber-region', '443,377,15,12');
 					}
 					else {
-						s.set('Artist-region', '132,1054,170,24');
-						s.set('Copyright-region', '310,1054,272,24');
-						s.set('Collection-portrait-clip-region', '648,1054,24,24');
-						s.set('CollectionNumber-region', '672,1054,30,24');
+						s.set('Artist-region', '66,527,85,12');
+						s.set('Copyright-region', '155,527,136,12');
+						s.set('Collection-portrait-clip-region', '324,527,12,12');
+						s.set('CollectionNumber-region', '336,527,15,12');
 					}
 				}
 
@@ -368,14 +367,14 @@ function run(progress, target, filename, icons) {
 					if (pluginVersion == 'new') {
 						s.set('Name', '');
 						s.set('GameName', '');
-						s.set('Template', 'Classic' + s.get('Template'));
+						s.set('Template', s.get('Template'));
 						s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
 						s.set('GameName-external-path', 'project:imagesRaw/' + card['ArtworkTop']);
 						s.set('Name-external-path', 'project:imagesRaw/' + card['ArtworkBottom']);
-						s.set('Classic-Body-region', '100,120,626,890');
-						s.set('Classic-Name-portrait-clip-region', '100,846,626,216');
-						s.set('PageIn-region', '600,980,126,30');
-						s.set('PageIn-format', '<right><b><size 13><bottom>');  // T.B.D. To be updated once the resolution issue is fixed.
+						s.set('Body-region', '50,60,313,445');
+						s.set('Name-portrait-clip-region', '50,423,313,108');
+						s.set('PageIn-region', '300,490,63,15');
+						s.set('PageIn-format', '<right><b><size 7><bottom>');
 						s.set('LRL-IllustratorShort', ' ');
 						s.set('Artist', ' ');
 					}
@@ -396,9 +395,9 @@ function run(progress, target, filename, icons) {
 					if (pluginVersion == 'new') {
 						s.set('Background-external-path', 'project:Templates/Rules-Background.png');
 						s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
-						s.set('Body-region', '100,120,626,890');
-						s.set('PageIn-region', '600,980,126,30');
-						s.set('PageIn-format', '<right><b><size 13><bottom>');  // T.B.D. To be updated once the resolution issue is fixed.
+						s.set('Body-region', '50,60,313,445');
+						s.set('PageIn-region', '300,490,63,15');
+						s.set('PageIn-format', '<right><b><size 7><bottom>');
 					}
 				}
 				else if (cardType == 'Contract') {
@@ -421,7 +420,7 @@ function run(progress, target, filename, icons) {
 					}
 					else {
 						if (pluginVersion == 'new') {
-							s.set('Template', 'Standard');
+							s.set('Template', 'Neutral');
 						}
 						else {
 							s.set('Cycle', '');
@@ -464,6 +463,9 @@ function run(progress, target, filename, icons) {
 
 				if (cardType in portraitRegion) {
 					s.set('Portrait-portrait-clip-region', portraitRegion[cardType]);
+					if (doubleSideTypes.indexOf(cardType) > -1) {
+						s.set('PortraitBack-portrait-clip-region', portraitRegion[cardType]);
+					}
 				}
 
 				if (['Event', 'Treachery', 'Player Side Quest', 'Encounter Side Quest', 'Quest', 'Rules', 'Contract'].indexOf(cardType) > -1) {
@@ -543,7 +545,7 @@ function run(progress, target, filename, icons) {
 					s.set('EncounterSetTotal', card['Encounter Set Total']);
 				}
 				if (card['Removed for Easy Mode'] && j >= parseInt(card['Quantity']) - parseInt(card['Removed for Easy Mode'])) {
-					s.set('Template', 'Gold');
+					s.set('Difficulty', 'Gold');
 				}
 
 				let copy;
@@ -616,13 +618,6 @@ function exportCard(card, fname, setID, lang, simple_back, png300NoBleed, png300
 
 	var ppi300 = 300;
 	var ppi800 = 800;
-
-	// T.B.D. To be removed once the resolution issue is fixed.
-	if (pluginVersion == 'new') {
-		ppi300 = ppi300 / 2;
-		ppi800 = ppi800 / 2;
-	}
-
 	for (let i = 0; i < numSheets; i++ ) {
 		let bi, file;
 
@@ -782,13 +777,6 @@ function markUp(vXml, nXml, lang, setID, pluginVersion) {
 
 	vXml = vXml.replace(/\n+$/g, '');
 	vXml = vXml.replace(/\n\n/g, '\n<vs>\n');
-
-	// T.B.D. To be removed once the resolution issue is fixed.
-	if (pluginVersion == 'new') {
-		vXml = vXml.replace(/( )([0-9][0-9\.]*)((?:cm|in)?\>)/g, function (match, p1, p2, p3) {
-			return p1 + (p2 * 2) + p3;
-		});
-	}
 
 	return vXml;
 }

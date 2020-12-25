@@ -20,8 +20,8 @@ from_scratch: true
 # Number of parallel processes to use ("default" means "cpu_count() - 1")
 parallelism: default
 
-# Version of Strange Eons plugin, either "old" or "new"
-strange_eons_plugin_version: old
+# Version of Strange Eons plugin, either "new" or "old"
+strange_eons_plugin_version: new
 
 # List of set IDs to work on
 set_ids:

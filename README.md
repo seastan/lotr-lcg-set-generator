@@ -81,7 +81,7 @@ into the root folder of this repo.
   - `octgn_destination_path`: path to OCTGN destination folder (may be empty)
   - `from_scratch`: whether to generate all cards from scratch (`true`) or to process only the cards, changed since the previous script run (`false`)
   - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`)
-  - `strange_eons_plugin_version`: version of Strange Eons plugin, either `old` or `new`
+  - `strange_eons_plugin_version`: version of Strange Eons plugin, either `new` or `old`
   - `set_ids`: list of set IDs to work on
   - `outputs`: list of outputs for each language (if you added or uncommented new outputs, you also need to set `from_scratch` to `true`)
 
