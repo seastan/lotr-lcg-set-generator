@@ -91,6 +91,7 @@ def main():  # pylint: disable=R0912
     """
     timestamp = time.time()
     conf = lotr.read_conf()
+    lotr.get_columns()
     sets = lotr.get_sets(conf)
 
     pre_tasks = []

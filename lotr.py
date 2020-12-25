@@ -27,26 +27,22 @@ SET_TITLE_ROW = 2
 SET_MAX_NUMBER = 1000
 CARD_TITLE_ROW = 1
 CARD_MAX_NUMBER = 10000
+MAX_COLUMN = 100
 
 # Name, Traits:Keywords, Text:Flavour, Side B,
 # Traits:Keywords, Text:Flavour, Adventure
 TRANSLATION_RANGES = ['F{}:F{}', 'J{}:K{}', 'T{}:W{}', 'AB{}:AB{}',
                       'AF{}:AG{}', 'AP{}:AS{}', 'AZ{}:AZ{}']
 
-SET_ID_COLUMN = 'A'
-SET_NAME_COLUMN = 'B'
-SET_COPYRIGHT_COLUMN = 'E'
-SET_LANGUAGE_COLUMN = 'F'
-CARD_SET_COLUMN = 'A'
-CARD_ID_COLUMN = 'B'
-CARD_NUMBER_COLUMN = 'C'
-CARD_QUANTITY_COLUMN = 'D'
-CARD_UNIQUE_COLUMN = 'G'
-CARD_UNIQUE_BACK_COLUMN = 'AC'
-CARD_TYPE_COLUMN = 'H'
-CARD_TYPE_BACK_COLUMN = 'AD'
-CARD_EASY_MODE_COLUMN = 'AX'
-CARD_MAX_COLUMN = 'AZ'
+SET_ID = 'GUID'
+SET_NAME = 'Name'
+CARD_SET = 'Set'
+CARD_ID = 'Card GUID'
+CARD_NUMBER = 'Card Number'
+CARD_QUANTITY = 'Quantity'
+CARD_UNIQUE = 'Unique'
+CARD_TYPE = 'Type'
+CARD_EASY_MODE = 'Removed for Easy Mode'
 
 CARD_TYPES = ['Ally', 'Attachment', 'Contract', 'Enemy', 'Event', 'Hero',
               'Location', 'Objective', 'Objective Ally', 'Presentation',
@@ -87,8 +83,8 @@ TEMPLATES_PATH = os.path.join(PROJECT_FOLDER, 'Templates')
 XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
 
 SPREADSHEET = []
-SET_COLUMNS = []
-CARD_COLUMNS = []
+SET_COLUMNS = {}
+CARD_COLUMNS = {}
 ARTWORK_CACHE = {}
 
 
@@ -101,6 +97,17 @@ def _c2n(column):
     for symbol in column[::-1]:
         res += (ord(symbol) - 64) * multiplier
         multiplier *= 26
+
+    return res
+
+
+def _n2c(number):
+    """ Convert number to column.
+    """
+    res = ''
+    while number > 0:
+        res = '{}{}'.format(chr((number % 26 or 26) + 64), res)
+        number = int((number - (number % 26 or 26)) / 26)
 
     return res
 
@@ -257,6 +264,27 @@ def reset_project_folders(conf):
                  round(time.time() - timestamp, 3))
 
 
+def _extract_column_names(columns):
+    """ Extract column names.
+    """
+    try:
+        none_index = columns.index(None)
+        columns = columns[:none_index]
+    except ValueError:
+        pass
+
+    res = {}
+    for number, column in enumerate(columns):
+        if column in res:
+            column = 'Back ' + column
+
+        res[column] = _n2c(number + 1)
+
+    res['Max Column'] = _n2c(len(columns))
+    res['Next Column'] = _n2c(len(columns) + 1)
+    return res
+
+
 def download_sheet(conf):
     """ Download cards spreadsheet from Google Drive.
     """
@@ -264,7 +292,6 @@ def download_sheet(conf):
     timestamp = time.time()
 
     sheet_path = os.path.join(SHEET_ROOT_PATH, SHEET_NAME)
-
     if conf['sheet_gdid']:
         url = (
             'https://docs.google.com/spreadsheets/d/{}/export?format=xlsx'
@@ -275,28 +302,41 @@ def download_sheet(conf):
     else:
         logging.info('No Google Drive ID found, using a local copy')
 
-    # T.B.D.
+    logging.info('...Downloading cards spreadsheet from Google Drive (%ss)',
+                 round(time.time() - timestamp, 3))
+
+
+def get_columns():
+    """ Get columns from the spreadsheet.
+    """
+    logging.info('Getting columns from the spreadsheet...')
+    timestamp = time.time()
+
+    sheet_path = os.path.join(SHEET_ROOT_PATH, SHEET_NAME)
     excel_app = xw.App(visible=False, add_book=False)
     try:
         xlwb_source = excel_app.books.open(sheet_path)
         try:
-            sets_range = '{}{}:{}{}'.format(SET_ID_COLUMN,  # pylint: disable=W1308
-                                            SET_TITLE_ROW + 1,
-                                            SET_ID_COLUMN,
-                                            SET_MAX_NUMBER + SET_TITLE_ROW)
-            sets = xlwb_source.sheets['Sets'].range(sets_range).value
-            card_range = '{}{}:{}{}'.format('A',
-                                            CARD_TITLE_ROW + 1,
-                                            CARD_MAX_COLUMN,
-                                            CARD_MAX_NUMBER + CARD_TITLE_ROW)
-            data = xlwb_source.sheets['Card Data'].range(card_range).value
+            xlwb_range = '{}{}:{}{}'.format('A',  # pylint: disable=W1308
+                                            SET_TITLE_ROW,
+                                            _n2c(MAX_COLUMN),
+                                            SET_TITLE_ROW)
+            columns = xlwb_source.sheets['Sets'].range(xlwb_range).value
+            SET_COLUMNS.update(_extract_column_names(columns))
+
+            xlwb_range = '{}{}:{}{}'.format('A',  # pylint: disable=W1308
+                                            CARD_TITLE_ROW,
+                                            _n2c(MAX_COLUMN),
+                                            CARD_TITLE_ROW)
+            columns = xlwb_source.sheets['Card Data'].range(xlwb_range).value
+            CARD_COLUMNS.update(_extract_column_names(columns))
+
         finally:
             xlwb_source.close()
     finally:
         excel_app.quit()
-    # T.B.D.
 
-    logging.info('...Downloading cards spreadsheet from Google Drive (%ss)',
+    logging.info('...Getting columns from the spreadsheet (%ss)',
                  round(time.time() - timestamp, 3))
 
 
@@ -312,16 +352,16 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
     try:
         xlwb_source = excel_app.books.open(sheet_path)
         try:
-            sets_range = '{}{}:{}{}'.format(SET_ID_COLUMN,  # pylint: disable=W1308
+            xlwb_range = '{}{}:{}{}'.format(SET_COLUMNS[SET_ID],  # pylint: disable=W1308
                                             SET_TITLE_ROW + 1,
-                                            SET_ID_COLUMN,
+                                            SET_COLUMNS[SET_ID],
                                             SET_MAX_NUMBER + SET_TITLE_ROW)
-            sets = xlwb_source.sheets['Sets'].range(sets_range).value
-            card_range = '{}{}:{}{}'.format(CARD_SET_COLUMN,
+            sets = xlwb_source.sheets['Sets'].range(xlwb_range).value
+            xlwb_range = '{}{}:{}{}'.format('A',
                                             CARD_TITLE_ROW + 1,
-                                            CARD_MAX_COLUMN,
+                                            CARD_COLUMNS['Max Column'],
                                             CARD_MAX_NUMBER + CARD_TITLE_ROW)
-            data = xlwb_source.sheets['Card Data'].range(card_range).value
+            data = xlwb_source.sheets['Card Data'].range(xlwb_range).value
         finally:
             xlwb_source.close()
     finally:
@@ -335,18 +375,18 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
             continue
 
         i = i + CARD_TITLE_ROW + 1
-        set_id = row[_c2n(CARD_SET_COLUMN) - 1]
-        card_id = row[_c2n(CARD_ID_COLUMN) - 1]
+        set_id = row[_c2n(CARD_COLUMNS[CARD_SET]) - 1]
+        card_id = row[_c2n(CARD_COLUMNS[CARD_ID]) - 1]
         if set_id == '0' or card_id == '0':
             continue
 
-        card_number = row[_c2n(CARD_NUMBER_COLUMN) - 1]
-        card_quantity = row[_c2n(CARD_QUANTITY_COLUMN) - 1]
-        card_unique = row[_c2n(CARD_UNIQUE_COLUMN) - 1]
-        card_type = row[_c2n(CARD_TYPE_COLUMN) - 1]
-        card_unique_back = row[_c2n(CARD_UNIQUE_BACK_COLUMN) - 1]
-        card_type_back = row[_c2n(CARD_TYPE_BACK_COLUMN) - 1]
-        card_easy_mode = row[_c2n(CARD_EASY_MODE_COLUMN) - 1]
+        card_number = row[_c2n(CARD_COLUMNS[CARD_NUMBER]) - 1]
+        card_quantity = row[_c2n(CARD_COLUMNS[CARD_QUANTITY]) - 1]
+        card_unique = row[_c2n(CARD_COLUMNS[CARD_UNIQUE]) - 1]
+        card_type = row[_c2n(CARD_COLUMNS[CARD_TYPE]) - 1]
+        card_unique_back = row[_c2n(CARD_COLUMNS['Back ' + CARD_UNIQUE]) - 1]
+        card_type_back = row[_c2n(CARD_COLUMNS['Back ' + CARD_TYPE]) - 1]
+        card_easy_mode = row[_c2n(CARD_COLUMNS[CARD_EASY_MODE]) - 1]
 
         if not set_id:
             logging.error('ERROR: No set ID for row #%s', i)
@@ -439,12 +479,12 @@ def get_sets(conf):
             sheet = xlwb.sheets['Sets']
             for row in range(SET_TITLE_ROW + 1,
                              SET_MAX_NUMBER + SET_TITLE_ROW + 1):
-                set_id = sheet.range((row, _c2n(SET_ID_COLUMN))).value
+                set_id = sheet.range((row, _c2n(SET_COLUMNS[SET_ID]))).value
                 if set_id and set_id in conf['set_ids']:
-                    sets.append((set_id,
-                                 sheet.range((row,
-                                              _c2n(SET_NAME_COLUMN))).value,
-                                 row))
+                    sets.append(
+                        (set_id,
+                         sheet.range((row, _c2n(SET_COLUMNS[SET_NAME]))).value,
+                         row))
         finally:
             xlwb.close()
     finally:
@@ -504,28 +544,34 @@ def _run_macro(set_row, callback):
             xlwb_target = excel_app.books.open(MACROS_COPY_PATH)
             try:
                 data = xlwb_source.sheets['Sets'].range(
-                    '{}{}:{}{}'.format(SET_ID_COLUMN, set_row,  # pylint: disable=W1308
-                                       SET_COPYRIGHT_COLUMN, set_row)).value
+                    '{}{}:{}{}'.format('A',  # pylint: disable=W1308
+                                       set_row,
+                                       SET_COLUMNS['Max Column'],
+                                       set_row)).value
                 xlwb_target.sheets['Sets'].range(
-                    '{}{}:{}{}'.format(SET_ID_COLUMN, SET_TITLE_ROW + 1,  # pylint: disable=W1308
-                                       SET_COPYRIGHT_COLUMN, SET_TITLE_ROW + 1)
+                    '{}{}:{}{}'.format('A',  # pylint: disable=W1308
+                                       SET_TITLE_ROW + 1,
+                                       SET_COLUMNS['Max Column'],
+                                       SET_TITLE_ROW + 1)
                     ).value = data
 
                 card_sheet = xlwb_target.sheets['Card Data']
-                card_range = '{}{}:{}{}'.format(
-                    CARD_SET_COLUMN,
+                xlwb_range = '{}{}:{}{}'.format(
+                    'A',
                     CARD_TITLE_ROW + 1,
-                    CARD_MAX_COLUMN,
+                    CARD_COLUMNS['Max Column'],
                     CARD_MAX_NUMBER + CARD_TITLE_ROW)
-                data = xlwb_source.sheets['Card Data'].range(card_range).value
-                card_sheet.range(card_range).value = data
-                card_sheet.range(card_range).api.Sort(
+                data = xlwb_source.sheets['Card Data'].range(xlwb_range).value
+                card_sheet.range(xlwb_range).value = data
+                card_sheet.range(xlwb_range).api.Sort(
                     Key1=card_sheet.range(
-                        '{}:{}'.format(CARD_SET_COLUMN, CARD_SET_COLUMN)  # pylint: disable=W1308
+                        '{}:{}'.format(CARD_COLUMNS[CARD_SET],  # pylint: disable=W1308
+                                       CARD_COLUMNS[CARD_SET])
                     ).api,
                     Order1=xw.constants.SortOrder.xlAscending,
                     Key2=card_sheet.range(
-                        '{}:{}'.format(CARD_NUMBER_COLUMN, CARD_NUMBER_COLUMN)  # pylint: disable=W1308
+                        '{}:{}'.format(CARD_COLUMNS[CARD_NUMBER],  # pylint: disable=W1308
+                                       CARD_COLUMNS[CARD_NUMBER])
                     ).api,
                     Order2=xw.constants.SortOrder.xlAscending)
 
@@ -565,9 +611,11 @@ def generate_xml(conf, set_id, set_name, set_row, lang):
             for source_row in range(CARD_TITLE_ROW + 1,
                                     CARD_MAX_NUMBER + CARD_TITLE_ROW + 1):
                 if tr_sheet.range((source_row,
-                                   _c2n(CARD_SET_COLUMN))).value == set_id:
+                                   _c2n(CARD_COLUMNS[CARD_SET]))
+                                  ).value == set_id:
                     card_id = tr_sheet.range((source_row,
-                                              _c2n(CARD_ID_COLUMN))).value
+                                              _c2n(CARD_COLUMNS[CARD_ID]))
+                                             ).value
                     if card_id:
                         translated.append((card_id, source_row))
 
@@ -584,7 +632,7 @@ def generate_xml(conf, set_id, set_name, set_row, lang):
                         card_sheet.range(target_range).value = data
 
         xlwb_target.sheets['Sets'].range((SET_TITLE_ROW + 1,
-                                          _c2n(SET_LANGUAGE_COLUMN))
+                                          _c2n(SET_COLUMNS['Next Column']))
                                          ).value = lang
         xlwb_target.macro('SaveXML')()
 
@@ -1444,7 +1492,7 @@ def _prepare_printing_images(input_path, output_path, service):
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
             parts = filename.split('-')
-            if parts[-1] not in '1.{}'.format(file_type):
+            if parts[-1] != '1.{}'.format(file_type):
                 continue
 
             back_path = os.path.join(input_path, '{}-2.{}'.format(

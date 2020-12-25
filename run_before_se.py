@@ -14,6 +14,7 @@ def main():
     conf = lotr.read_conf()
     lotr.reset_project_folders(conf)
     lotr.download_sheet(conf)
+    lotr.get_columns()
     lotr.sanity_check()
     sets = lotr.get_sets(conf)
 
