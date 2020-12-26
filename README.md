@@ -83,7 +83,10 @@ into the root folder of this repo.
   - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`)
   - `strange_eons_plugin_version`: version of Strange Eons plugin, either `new` or `old`
   - `set_ids`: list of set IDs to work on
-  - `outputs`: list of outputs for each language (if you added or uncommented new outputs, you also need to set `from_scratch` to `true`)
+  - `octgn_set_xml`: creating set.xml files for OCTGN (true or false)
+  - `ringsdb_csv`: creating CSV files for RingsDB (true or false)
+  - `hallofbeorn_json`: creating JSON files for Hall of Beorn (true or false)
+  - `outputs`: list of image outputs for each language (if you added or uncommented new outputs, you also need to set `from_scratch` to `true`)
 
 **Usage**
 
@@ -103,15 +106,16 @@ For debugging purposes you can also run these steps using the Jupyter notebook (
 
 Now there should be the following outputs:
 
+- `Output/DB/<set name>.<language>/`: 300 dpi PNG images for general purposes.
+- `Output/DriveThruCards/<set name>.<language>/`: `zip` and `7z` archives of 300 dpi JPG images to be printed on DriveThruCards.com.
+- `Output/HallOfBeorn/<set name>.json`.
+- `Output/MakePlayingCards/<set name>.<language>/`: `zip` and `7z` archives of 800 dpi PNG images to be printed on MakePlayingCards.com.
 - `Output/OCTGN/<set name>/<octgn id>/set.xml`.
 - `Output/OCTGN/<set name>/<set name>.<language>.o8c`: image packs for OCTGN (300 dpi PNG).
-
-- `Output/DB/<set name>.<language>/`: 300 dpi PNG images for general purposes.
 - `Output/PDF/<set name>.<language>/`: PDF files in `A4` and `letter` format for home printing.
-- `Output/DriveThruCards/<set name>.<language>/`: `zip` and `7z` archives of 300 dpi JPG images to be printed on DriveThruCards.com.
-- `Output/MakePlayingCards/<set name>.<language>/`: `zip` and `7z` archives of 800 dpi PNG images to be printed on MakePlayingCards.com.
+- `Output/RingsDB/<set name>.csv`.
 
-Additionally, if you specified `octgn_destination_path`, OCTGN's `set.xml` files will be copied there.
+Additionally, if you specified `octgn_destination_path`, `set.xml` files for OCTGN will be copied there.
 
 **GIMP Plugins**
 

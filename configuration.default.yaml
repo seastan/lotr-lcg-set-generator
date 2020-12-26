@@ -33,7 +33,16 @@ set_ids:
   - 3104cd2a-ccce-44a7-bc6e-e3433636c329  # ALeP - The Glittering Caves
   - 6890e6e4-fffb-4765-9fe0-0e6bce22c9a4  # ALeP - Blood in the Isen
 
-# List of outputs
+# Creating set.xml files for OCTGN (true or false)
+octgn_set_xml: true
+
+# Creating CSV files for RingsDB (true or false)
+ringsdb_csv: true
+
+# Creating JSON files for Hall of Beorn (true or false)
+hallofbeorn_json: true
+
+# List of image outputs
 outputs:
   English:
     - db
