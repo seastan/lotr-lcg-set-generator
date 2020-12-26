@@ -23,11 +23,13 @@ from reportlab.lib.units import inch
 from reportlab.pdfgen.canvas import Canvas
 
 
+SET_SHEET = 'Sets'
+CARD_SHEET = 'Card Data'
 SET_TITLE_ROW = 2
 SET_MAX_NUMBER = 1000
 CARD_TITLE_ROW = 1
 CARD_MAX_NUMBER = 10000
-MAX_COLUMN = 100
+MAX_COLUMN_NUMBER = 100
 
 # Name, Traits:Keywords, Text:Flavour, Side B,
 # Traits:Keywords, Text:Flavour, Adventure
@@ -36,6 +38,7 @@ TRANSLATION_RANGES = ['F{}:F{}', 'J{}:K{}', 'T{}:W{}', 'AB{}:AB{}',
 
 SET_ID = 'GUID'
 SET_NAME = 'Name'
+SET_LANGUAGE = 'Language'
 CARD_SET = 'Set'
 CARD_ID = 'Card GUID'
 CARD_NUMBER = 'Card Number'
@@ -43,6 +46,8 @@ CARD_QUANTITY = 'Quantity'
 CARD_UNIQUE = 'Unique'
 CARD_TYPE = 'Type'
 CARD_EASY_MODE = 'Removed for Easy Mode'
+BACK_PREFIX = 'Back '
+MAX_COLUMN = '_Max Column'
 
 CARD_TYPES = ['Ally', 'Attachment', 'Contract', 'Enemy', 'Event', 'Hero',
               'Location', 'Objective', 'Objective Ally', 'Presentation',
@@ -54,10 +59,20 @@ GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 IMAGES_CUSTOM_FOLDER = 'custom'
 MAGICK_COMMAND = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
 OCTGN_ARCHIVE = 'unzip-me-into-sets-folder.zip'
+OCTGN_SET_XML = 'set.xml'
 PROCESSED_ARTWORK_FOLDER = 'processed'
 PROJECT_FOLDER = 'Frogmorton'
 SHEET_NAME = 'setExcel.xlsx'
 TEXT_CHUNK_FLAG = b'tEXt'
+
+JPG300BLEEDDTC = 'jpg300BleedDTC'
+PNG300BLEED = 'png300Bleed'
+PNG300DB = 'png300DB'
+PNG300NOBLEED = 'png300NoBleed'
+PNG300OCTGN = 'png300OCTGN'
+PNG300PDF = 'png300PDF'
+PNG800BLEED = 'png800Bleed'
+PNG800BLEEDMPC = 'png800BleedMPC'
 
 CONFIGURATION_PATH = 'configuration.yaml'
 IMAGES_BACK_PATH = 'imagesBack'
@@ -244,7 +259,7 @@ def reset_project_folders(conf):
     _clear_folder(TEMPLATES_PATH)
     _clear_folder(XML_PATH)
 
-    nobleed_folder = os.path.join(IMAGES_EONS_PATH, 'png300NoBleed')
+    nobleed_folder = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED)
     for _, subfolders, _ in os.walk(nobleed_folder):
         for subfolder in subfolders:
             _delete_folder(os.path.join(nobleed_folder, subfolder))
@@ -262,27 +277,6 @@ def reset_project_folders(conf):
 
     logging.info('...Resetting the project folders (%ss)',
                  round(time.time() - timestamp, 3))
-
-
-def _extract_column_names(columns):
-    """ Extract column names.
-    """
-    try:
-        none_index = columns.index(None)
-        columns = columns[:none_index]
-    except ValueError:
-        pass
-
-    res = {}
-    for number, column in enumerate(columns):
-        if column in res:
-            column = 'Back ' + column
-
-        res[column] = _n2c(number + 1)
-
-    res['Max Column'] = _n2c(len(columns))
-    res['Next Column'] = _n2c(len(columns) + 1)
-    return res
 
 
 def download_sheet(conf):
@@ -306,6 +300,26 @@ def download_sheet(conf):
                  round(time.time() - timestamp, 3))
 
 
+def _extract_column_names(columns):
+    """ Extract column names.
+    """
+    try:
+        none_index = columns.index(None)
+        columns = columns[:none_index]
+    except ValueError:
+        pass
+
+    res = {}
+    for number, column in enumerate(columns):
+        if column in res:
+            column = BACK_PREFIX + column
+
+        res[column] = _n2c(number + 1)
+
+    res[MAX_COLUMN] = _n2c(len(columns))
+    return res
+
+
 def get_columns():
     """ Get columns from the spreadsheet.
     """
@@ -319,16 +333,16 @@ def get_columns():
         try:
             xlwb_range = '{}{}:{}{}'.format('A',  # pylint: disable=W1308
                                             SET_TITLE_ROW,
-                                            _n2c(MAX_COLUMN),
+                                            _n2c(MAX_COLUMN_NUMBER),
                                             SET_TITLE_ROW)
-            columns = xlwb_source.sheets['Sets'].range(xlwb_range).value
+            columns = xlwb_source.sheets[SET_SHEET].range(xlwb_range).value
             SET_COLUMNS.update(_extract_column_names(columns))
 
             xlwb_range = '{}{}:{}{}'.format('A',  # pylint: disable=W1308
                                             CARD_TITLE_ROW,
-                                            _n2c(MAX_COLUMN),
+                                            _n2c(MAX_COLUMN_NUMBER),
                                             CARD_TITLE_ROW)
-            columns = xlwb_source.sheets['Card Data'].range(xlwb_range).value
+            columns = xlwb_source.sheets[CARD_SHEET].range(xlwb_range).value
             CARD_COLUMNS.update(_extract_column_names(columns))
 
         finally:
@@ -356,12 +370,12 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
                                             SET_TITLE_ROW + 1,
                                             SET_COLUMNS[SET_ID],
                                             SET_MAX_NUMBER + SET_TITLE_ROW)
-            sets = xlwb_source.sheets['Sets'].range(xlwb_range).value
+            sets = xlwb_source.sheets[SET_SHEET].range(xlwb_range).value
             xlwb_range = '{}{}:{}{}'.format('A',
                                             CARD_TITLE_ROW + 1,
-                                            CARD_COLUMNS['Max Column'],
+                                            CARD_COLUMNS[MAX_COLUMN],
                                             CARD_MAX_NUMBER + CARD_TITLE_ROW)
-            data = xlwb_source.sheets['Card Data'].range(xlwb_range).value
+            data = xlwb_source.sheets[CARD_SHEET].range(xlwb_range).value
         finally:
             xlwb_source.close()
     finally:
@@ -384,8 +398,9 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
         card_quantity = row[_c2n(CARD_COLUMNS[CARD_QUANTITY]) - 1]
         card_unique = row[_c2n(CARD_COLUMNS[CARD_UNIQUE]) - 1]
         card_type = row[_c2n(CARD_COLUMNS[CARD_TYPE]) - 1]
-        card_unique_back = row[_c2n(CARD_COLUMNS['Back ' + CARD_UNIQUE]) - 1]
-        card_type_back = row[_c2n(CARD_COLUMNS['Back ' + CARD_TYPE]) - 1]
+        card_unique_back = row[_c2n(
+            CARD_COLUMNS[BACK_PREFIX + CARD_UNIQUE]) - 1]
+        card_type_back = row[_c2n(CARD_COLUMNS[BACK_PREFIX + CARD_TYPE]) - 1]
         card_easy_mode = row[_c2n(CARD_COLUMNS[CARD_EASY_MODE]) - 1]
 
         if not set_id:
@@ -476,7 +491,7 @@ def get_sets(conf):
         xlwb = excel_app.books.open(sheet_path)
         try:
             sets = []
-            sheet = xlwb.sheets['Sets']
+            sheet = xlwb.sheets[SET_SHEET]
             for row in range(SET_TITLE_ROW + 1,
                              SET_MAX_NUMBER + SET_TITLE_ROW + 1):
                 set_id = sheet.range((row, _c2n(SET_COLUMNS[SET_ID]))).value
@@ -515,7 +530,7 @@ def _copy_octgn_xml(set_id, set_name):
     output_path = os.path.join(output_path, set_id)
     _create_folder(output_path)
     shutil.copyfile(os.path.join(SET_OCTGN_PATH, '{}.xml'.format(set_id)),
-                    os.path.join(output_path, 'set.xml'))
+                    os.path.join(output_path, OCTGN_SET_XML))
 
 
 def _backup_previous_xml(conf, set_id, lang):
@@ -543,25 +558,25 @@ def _run_macro(set_row, callback):
         try:
             xlwb_target = excel_app.books.open(MACROS_COPY_PATH)
             try:
-                data = xlwb_source.sheets['Sets'].range(
+                data = xlwb_source.sheets[SET_SHEET].range(
                     '{}{}:{}{}'.format('A',  # pylint: disable=W1308
                                        set_row,
-                                       SET_COLUMNS['Max Column'],
+                                       SET_COLUMNS[MAX_COLUMN],
                                        set_row)).value
-                xlwb_target.sheets['Sets'].range(
+                xlwb_target.sheets[SET_SHEET].range(
                     '{}{}:{}{}'.format('A',  # pylint: disable=W1308
                                        SET_TITLE_ROW + 1,
-                                       SET_COLUMNS['Max Column'],
+                                       SET_COLUMNS[MAX_COLUMN],
                                        SET_TITLE_ROW + 1)
                     ).value = data
 
-                card_sheet = xlwb_target.sheets['Card Data']
+                card_sheet = xlwb_target.sheets[CARD_SHEET]
                 xlwb_range = '{}{}:{}{}'.format(
                     'A',
                     CARD_TITLE_ROW + 1,
-                    CARD_COLUMNS['Max Column'],
+                    CARD_COLUMNS[MAX_COLUMN],
                     CARD_MAX_NUMBER + CARD_TITLE_ROW)
-                data = xlwb_source.sheets['Card Data'].range(xlwb_range).value
+                data = xlwb_source.sheets[CARD_SHEET].range(xlwb_range).value
                 card_sheet.range(xlwb_range).value = data
                 card_sheet.range(xlwb_range).api.Sort(
                     Key1=card_sheet.range(
@@ -619,8 +634,8 @@ def generate_xml(conf, set_id, set_name, set_row, lang):
                     if card_id:
                         translated.append((card_id, source_row))
 
-            api = xlwb_target.sheets['Card Data'].api
-            card_sheet = xlwb_target.sheets['Card Data']
+            api = xlwb_target.sheets[CARD_SHEET].api
+            card_sheet = xlwb_target.sheets[CARD_SHEET]
             for card_id, source_row in translated:
                 cell = api.UsedRange.Find(card_id)
                 if cell:
@@ -631,9 +646,9 @@ def generate_xml(conf, set_id, set_name, set_row, lang):
                         data = tr_sheet.range(source_range).value
                         card_sheet.range(target_range).value = data
 
-        xlwb_target.sheets['Sets'].range((SET_TITLE_ROW + 1,
-                                          _c2n(SET_COLUMNS['Next Column']))
-                                         ).value = lang
+        xlwb_target.sheets[SET_SHEET].range((SET_TITLE_ROW + 1,
+                                             _c2n(SET_COLUMNS[SET_LANGUAGE]))
+                                            ).value = lang
         xlwb_target.macro('SaveXML')()
 
     logging.info('[%s, %s] Generating xml file for Strange Eons...',
@@ -995,7 +1010,7 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
                  set_name, lang)
     timestamp = time.time()
 
-    output_path = os.path.join(IMAGES_EONS_PATH, 'png300NoBleed',
+    output_path = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED,
                                '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
@@ -1010,7 +1025,7 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
         with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
             filelist = [f for f in zip_obj.namelist()
                         if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
-                                                      'png300Bleed'))
+                                                      PNG300BLEED))
                         and f.split('.')[-1] == 'png'
                         and f.split('.')[-2] == lang
                         and f.split('.')[-3] == set_id]
@@ -1033,7 +1048,7 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
         with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
             filelist = [f for f in zip_obj.namelist()
                         if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
-                                                      'png300NoBleed'))
+                                                      PNG300NOBLEED))
                         and f.split('.')[-1] == 'png'
                         and f.split('.')[-2] == lang
                         and f.split('.')[-3] == set_id]
@@ -1055,7 +1070,7 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):
                  set_name, lang)
     timestamp = time.time()
 
-    output_path = os.path.join(IMAGES_EONS_PATH, 'png300DB',
+    output_path = os.path.join(IMAGES_EONS_PATH, PNG300DB,
                                '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
@@ -1064,7 +1079,7 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):
     _create_folder(temp_path)
     _clear_folder(temp_path)
 
-    input_path = os.path.join(IMAGES_EONS_PATH, 'png300NoBleed',
+    input_path = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED,
                               '{}.{}'.format(set_id, lang))
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
@@ -1094,12 +1109,12 @@ def generate_png300_octgn(set_id, set_name, lang, skip_ids):
                  set_name, lang)
     timestamp = time.time()
 
-    output_path = os.path.join(IMAGES_EONS_PATH, 'png300OCTGN',
+    output_path = os.path.join(IMAGES_EONS_PATH, PNG300OCTGN,
                                '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
 
-    input_path = os.path.join(IMAGES_EONS_PATH, 'png300NoBleed',
+    input_path = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED,
                               '{}.{}'.format(set_id, lang))
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
@@ -1120,7 +1135,7 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
                  set_name, lang)
     timestamp = time.time()
 
-    output_path = os.path.join(IMAGES_EONS_PATH, 'png300PDF',
+    output_path = os.path.join(IMAGES_EONS_PATH, PNG300PDF,
                                '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
@@ -1132,7 +1147,7 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
-                                                  'png300Bleed'))
+                                                  PNG300BLEED))
                     and f.split('.')[-1] == 'png'
                     and f.split('.')[-2] == lang
                     and f.split('.')[-3] == set_id]
@@ -1154,7 +1169,7 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
 
     _clear_folder(temp_path)
 
-    input_path = os.path.join(IMAGES_EONS_PATH, 'png300NoBleed',
+    input_path = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED,
                               '{}.{}'.format(set_id, lang))
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
@@ -1184,7 +1199,7 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
                  set_name, lang)
     timestamp = time.time()
 
-    output_path = os.path.join(IMAGES_EONS_PATH, 'png800BleedMPC',
+    output_path = os.path.join(IMAGES_EONS_PATH, PNG800BLEEDMPC,
                                '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
@@ -1197,7 +1212,7 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
-                                                  'png800Bleed'))
+                                                  PNG800BLEED))
                     and f.split('.')[-1] == 'png'
                     and f.split('.')[-2] == lang
                     and f.split('.')[-3] == set_id]
@@ -1228,7 +1243,7 @@ def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint:
                  set_name, lang)
     timestamp = time.time()
 
-    output_path = os.path.join(IMAGES_EONS_PATH, 'jpg300BleedDTC',
+    output_path = os.path.join(IMAGES_EONS_PATH, JPG300BLEEDDTC,
                                '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
@@ -1241,7 +1256,7 @@ def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint:
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
-                                                  'png300Bleed'))
+                                                  PNG300BLEED))
                     and f.split('.')[-1] == 'png'
                     and f.split('.')[-2] == lang
                     and f.split('.')[-3] == set_id]
@@ -1271,7 +1286,7 @@ def generate_db(set_id, set_name, lang):
     logging.info('[%s, %s] Generating DB outputs...', set_name, lang)
     timestamp = time.time()
 
-    input_path = os.path.join(IMAGES_EONS_PATH, 'png300DB',
+    input_path = os.path.join(IMAGES_EONS_PATH, PNG300DB,
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_DB_PATH, '{}.{}'.format(set_name, lang))
 
@@ -1309,7 +1324,7 @@ def generate_octgn(set_id, set_name, lang):
     logging.info('[%s, %s] Generating OCTGN outputs...', set_name, lang)
     timestamp = time.time()
 
-    input_path = os.path.join(IMAGES_EONS_PATH, 'png300OCTGN',
+    input_path = os.path.join(IMAGES_EONS_PATH, PNG300OCTGN,
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_OCTGN_PATH, set_name)
     pack_path = os.path.join(output_path, '{}.{}.o8c'.format(set_name, lang))
@@ -1391,7 +1406,7 @@ def generate_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0914
     logging.info('[%s, %s] Generating PDF outputs...', set_name, lang)
     timestamp = time.time()
 
-    input_path = os.path.join(IMAGES_EONS_PATH, 'png300PDF',
+    input_path = os.path.join(IMAGES_EONS_PATH, PNG300PDF,
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_PDF_PATH, '{}.{}'.format(set_name, lang))
 
@@ -1612,7 +1627,7 @@ def generate_mpc(conf, set_id, set_name, lang):
                  set_name, lang)
     timestamp = time.time()
 
-    input_path = os.path.join(IMAGES_EONS_PATH, 'png800BleedMPC',
+    input_path = os.path.join(IMAGES_EONS_PATH, PNG800BLEEDMPC,
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_MPC_PATH, '{}.{}'.format(set_name, lang))
     temp_path = os.path.join(TEMP_ROOT_PATH,
@@ -1662,7 +1677,7 @@ def generate_dtc(conf, set_id, set_name, lang):
                  set_name, lang)
     timestamp = time.time()
 
-    input_path = os.path.join(IMAGES_EONS_PATH, 'jpg300BleedDTC',
+    input_path = os.path.join(IMAGES_EONS_PATH, JPG300BLEEDDTC,
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_DTC_PATH, '{}.{}'.format(set_name, lang))
     temp_path = os.path.join(TEMP_ROOT_PATH,
@@ -1715,9 +1730,10 @@ def _create_octgn_archive(temp_path):
                         os.path.join(OUTPUT_OCTGN_PATH, folder)):
                     for subfolder in subfolders:
                         xml_path = os.path.join(OUTPUT_OCTGN_PATH, folder,
-                                                subfolder, 'set.xml')
+                                                subfolder, OCTGN_SET_XML)
                         if os.path.exists(xml_path):
-                            obj.write(xml_path, '{}/set.xml'.format(subfolder))
+                            obj.write(xml_path, '{}/{}'.format(subfolder,
+                                                               OCTGN_SET_XML))
 
                     break
 
