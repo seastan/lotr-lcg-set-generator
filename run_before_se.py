@@ -21,8 +21,14 @@ def main():
     changes = False
     for set_data in sets:
         set_id, set_name, set_row = set_data
-        if conf['octgn']:
-            lotr.generate_octgn_xml(set_id, set_name, set_row)
+        if conf['octgn_set_xml']:
+            lotr.generate_octgn_set_xml(set_id, set_name, set_row)
+
+        if conf['ringsdb_csv']:
+            lotr.generate_ringsdb_csv(set_id, set_name, set_row)
+
+        if conf['hallofbeorn_json']:
+            lotr.generate_hallofbeorn_json(set_id, set_name, set_row)
 
         lotr.copy_custom_images(conf, set_id, set_name)
         for lang in conf['languages']:
@@ -36,7 +42,7 @@ def main():
             lotr.copy_xml(set_id, set_name, lang)
 
     if changes:
-        if conf['octgn'] and conf['octgn_destination_path']:
+        if conf['octgn_set_xml'] and conf['octgn_destination_path']:
             lotr.copy_octgn_outputs(conf)
 
         lotr.create_project()

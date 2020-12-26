@@ -223,8 +223,6 @@ def read_conf():
     conf['languages'] = [lang for lang in conf['outputs']
                          if conf['outputs'][lang]]
     conf['nobleed'] = {}
-    conf['octgn'] = any([True for out in conf['outputs'].values()
-                         if out and 'octgn' in out])
 
     for lang in conf['languages']:
         conf['outputs'][lang] = set(conf['outputs'][lang])
@@ -602,7 +600,7 @@ def _run_macro(set_row, callback):
         excel_app.quit()
 
 
-def generate_octgn_xml(set_id, set_name, set_row):
+def generate_octgn_set_xml(set_id, set_name, set_row):
     """ Generate set.xml file for OCTGN.
     """
     def _callback(_, xlwb_target):
@@ -615,6 +613,26 @@ def generate_octgn_xml(set_id, set_name, set_row):
     _run_macro(set_row, _callback)
     _copy_octgn_xml(set_id, set_name)
     logging.info('[%s] ...Generating set.xml file for OCTGN (%ss)',
+                 set_name, round(time.time() - timestamp, 3))
+
+
+def generate_ringsdb_csv(set_id, set_name, set_row):
+    """ Generate CSV file for RingsDB.
+    """
+    logging.info('[%s] Generating CSV file for RingsDB...', set_name)
+    timestamp = time.time()
+
+    logging.info('[%s] ...Generating CSV file for RingsDB (%ss)',
+                 set_name, round(time.time() - timestamp, 3))
+
+
+def generate_hallofbeorn_json(set_id, set_name, set_row):
+    """ Generate JSON file for Hall of Beorn.
+    """
+    logging.info('[%s] Generating JSON file for Hall of Beorn...', set_name)
+    timestamp = time.time()
+
+    logging.info('[%s] ...Generating JSON file for Hall of Beorn (%ss)',
                  set_name, round(time.time() - timestamp, 3))
 
 
