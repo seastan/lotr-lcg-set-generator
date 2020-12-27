@@ -55,9 +55,12 @@ CARD_TYPES = ['Ally', 'Attachment', 'Contract', 'Enemy', 'Event', 'Hero',
 CARD_TYPES_DOUBLESIDE = ['Presentation', 'Quest', 'Rules']
 CARD_TYPES_DOUBLESIDE_OPTIONAL = ['Contract']
 
+CMYK_COMMAND_JPG = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
+CMYK_COMMAND_TIF = '"{}" mogrify -profile USWebCoatedSWOP.icc -compress lzw ' \
+                   '"{}\\*.tif"'
+DTC_FILE_TYPE = 'jpg'
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 IMAGES_CUSTOM_FOLDER = 'custom'
-MAGICK_COMMAND = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
 OCTGN_ARCHIVE = 'unzip-me-into-sets-folder.zip'
 OCTGN_SET_XML = 'set.xml'
 PROCESSED_ARTWORK_FOLDER = 'processed'
@@ -73,6 +76,7 @@ PNG300OCTGN = 'png300OCTGN'
 PNG300PDF = 'png300PDF'
 PNG800BLEED = 'png800Bleed'
 PNG800BLEEDMPC = 'png800BleedMPC'
+TIF300BLEEDDTC = 'tif300BleedDTC'
 
 CONFIGURATION_PATH = 'configuration.yaml'
 IMAGES_BACK_PATH = 'imagesBack'
@@ -191,7 +195,7 @@ def _clear_modified_images(folder, skip_ids):
     """
     for _, _, filenames in os.walk(folder):
         for filename in filenames:
-            if filename.split('.')[-1] in ('jpg', 'png'):
+            if filename.split('.')[-1] in ('jpg', 'png', 'tif'):
                 card_id = filename[50:86]
                 if card_id not in skip_ids:
                     os.remove(os.path.join(folder, filename))
@@ -1256,20 +1260,23 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
                  ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
-def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
-    """ Generate images for DriveThruCards outputs.
+def generate_300_bleeddtc(conf, set_id, set_name, lang, skip_ids,  # pylint: disable=R0913,R0914
+                          file_type=DTC_FILE_TYPE):
+    """ Generate images for DriveThruCards outputs (either JPG or TIF).
     """
     logging.info('[%s, %s] Generating images for DriveThruCards outputs...',
                  set_name, lang)
     timestamp = time.time()
 
-    output_path = os.path.join(IMAGES_EONS_PATH, JPG300BLEEDDTC,
+    output_path = os.path.join(IMAGES_EONS_PATH,
+                               TIF300BLEEDDTC if file_type == 'tif'
+                               else JPG300BLEEDDTC,
                                '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
     temp_path = os.path.join(TEMP_ROOT_PATH,
-                             'generate_jpg300_bleeddtc.{}.{}'.format(set_id,
-                                                                     lang))
+                             'generate_300_bleeddtc.{}.{}'.format(set_id,
+                                                                  lang))
     _create_folder(temp_path)
     _clear_folder(temp_path)
 
@@ -1289,7 +1296,8 @@ def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint:
 
     cmd = GIMP_COMMAND.format(
         conf['gimp_console_path'],
-        'python-prepare-drivethrucards-folder',
+        'python-prepare-drivethrucards-tif-folder' if file_type == 'tif'
+        else 'python-prepare-drivethrucards-jpg-folder',
         temp_path.replace('\\', '\\\\'),
         output_path.replace('\\', '\\\\'))
     res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
@@ -1512,18 +1520,19 @@ def _make_unique_png(input_path):
         break
 
 
-def _make_cmyk(conf, input_path):
-    """ Convert RGB to CMYK for DriveThruCards.
+def _make_cmyk(conf, input_path, file_type=DTC_FILE_TYPE):
+    """ Convert RGB to CMYK.
     """
-    cmd = MAGICK_COMMAND.format(conf['magick_path'], input_path)
+    cmd = (CMYK_COMMAND_TIF if file_type == 'tif' else CMYK_COMMAND_JPG
+           ).format(conf['magick_path'], input_path)
     res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
     logging.info(res)
 
 
-def _prepare_printing_images(input_path, output_path, service):
+def _prepare_printing_images(input_path, output_path, service='dtc',
+                             file_type=DTC_FILE_TYPE):
     """ Prepare images for MakePlayingCards/DriveThruCards.
     """
-    file_type = 'png' if service == 'mpc' else 'jpg'
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
             parts = filename.split('-')
@@ -1537,12 +1546,12 @@ def _prepare_printing_images(input_path, output_path, service):
                     back_path = os.path.join(
                         IMAGES_BACK_PATH,
                         service == 'mpc' and 'playerBackUnofficialMPC.png'
-                        or 'playerBackOfficialDTC.jpg')
+                        or 'playerBackOfficialDTC.{}'.format(file_type))
                 elif parts[2] == 'e':
                     back_path = os.path.join(
                         IMAGES_BACK_PATH,
                         service == 'mpc' and 'encounterBackUnofficialMPC.png'
-                        or 'encounterBackOfficialDTC.jpg')
+                        or 'encounterBackOfficialDTC.{}'.format(file_type))
                 else:
                     logging.error('ERROR: Missing card back for %s, removing'
                                   ' the file', filename)
@@ -1555,13 +1564,13 @@ def _prepare_printing_images(input_path, output_path, service):
                         output_path, re.sub(
                             r'-(?:e|p)-', '-',
                             re.sub('-+', '-',
-                                   re.sub(r'.{36}(?=-1\.(?:png|jpg))', '',
+                                   re.sub(r'.{36}(?=-1\.(?:png|jpg|tif))', '',
                                           '-'.join(parts)))))
                     back_output_path = os.path.join(
                         output_path, re.sub(
                             r'-(?:e|p)-', '-',
                             re.sub('-+', '-',
-                                   re.sub(r'.{36}(?=-2\.(?:png|jpg))', '',
+                                   re.sub(r'.{36}(?=-2\.(?:png|jpg|tif))', '',
                                           '{}-2.{}'.format(
                                               '-'.join(parts[:-1]),
                                               file_type)))))
@@ -1574,13 +1583,13 @@ def _prepare_printing_images(input_path, output_path, service):
                     output_path, re.sub(
                         r'-(?:e|p)-', '-',
                         re.sub('-+', '-',
-                               re.sub(r'.{36}(?=-1\.(?:png|jpg))', '',
+                               re.sub(r'.{36}(?=-1\.(?:png|jpg|tif))', '',
                                       '-'.join(parts)))))
                 back_output_path = os.path.join(
                     output_path, re.sub(
                         r'-(?:e|p)-', '-',
                         re.sub('-+', '-',
-                               re.sub(r'.{36}(?=-2\.(?:png|jpg))', '',
+                               re.sub(r'.{36}(?=-2\.(?:png|jpg|tif))', '',
                                       '{}-2.{}'.format(
                                           '-'.join(parts[:-1]),
                                           file_type)))))
@@ -1616,22 +1625,23 @@ def _deck_name(current_cnt, total_cnt):
     return ''
 
 
-def _prepare_dtc_printing_archive(input_path, obj):
+def _prepare_dtc_printing_archive(input_path, obj, file_type=DTC_FILE_TYPE):
     """ Prepare archive for DriveThruCards.
     """
     for _, _, filenames in os.walk(input_path):
         front_cnt = 0
         back_cnt = 0
-        filenames = sorted(f for f in filenames if f.endswith('-1.jpg')
-                           or f.endswith('-2.jpg'))
+        filenames = sorted(f for f in filenames
+                           if f.endswith('-1.{}'.format(file_type))
+                           or f.endswith('-2.{}'.format(file_type)))
         total_cnt = len(filenames) / 2
         for filename in filenames:
-            if filename.endswith('-1.jpg'):
+            if filename.endswith('-1.{}'.format(file_type)):
                 front_cnt += 1
                 obj.write(os.path.join(input_path, filename),
                           '{}front/{}'.format(_deck_name(front_cnt, total_cnt),
                                               filename))
-            elif filename.endswith('-2.jpg'):
+            elif filename.endswith('-2.{}'.format(file_type)):
                 back_cnt += 1
                 obj.write(os.path.join(input_path, filename),
                           '{}back/{}'.format(_deck_name(back_cnt, total_cnt),
@@ -1666,7 +1676,7 @@ def generate_mpc(conf, set_id, set_name, lang):
     _create_folder(output_path)
     _create_folder(temp_path)
     _clear_folder(temp_path)
-    _prepare_printing_images(input_path, temp_path, 'mpc')
+    _prepare_printing_images(input_path, temp_path, 'mpc', 'png')
     _make_unique_png(temp_path)
 
     if 'makeplayingcards_zip' in conf['outputs'][lang]:
@@ -1690,14 +1700,16 @@ def generate_mpc(conf, set_id, set_name, lang):
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
-def generate_dtc(conf, set_id, set_name, lang):
+def generate_dtc(conf, set_id, set_name, lang, file_type=DTC_FILE_TYPE):
     """ Generate DriveThruCards outputs.
     """
     logging.info('[%s, %s] Generating DriveThruCards outputs...',
                  set_name, lang)
     timestamp = time.time()
 
-    input_path = os.path.join(IMAGES_EONS_PATH, JPG300BLEEDDTC,
+    input_path = os.path.join(IMAGES_EONS_PATH,
+                              TIF300BLEEDDTC if file_type == 'tif'
+                              else JPG300BLEEDDTC,
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_DTC_PATH, '{}.{}'.format(set_name, lang))
     temp_path = os.path.join(TEMP_ROOT_PATH,
@@ -1715,15 +1727,15 @@ def generate_dtc(conf, set_id, set_name, lang):
     _create_folder(output_path)
     _create_folder(temp_path)
     _clear_folder(temp_path)
-    _prepare_printing_images(input_path, temp_path, 'dtc')
-    _make_cmyk(conf, temp_path)
+    _prepare_printing_images(input_path, temp_path, 'dtc', file_type)
+    _make_cmyk(conf, temp_path, file_type)
 
     if 'drivethrucards_zip' in conf['outputs'][lang]:
         with zipfile.ZipFile(
                 os.path.join(output_path,
                              'DTC.{}.{}.zip'.format(set_name, lang)),
                 'w') as obj:
-            _prepare_dtc_printing_archive(temp_path, obj)
+            _prepare_dtc_printing_archive(temp_path, obj, file_type)
             obj.write('DriveThruCards.pdf', 'DriveThruCards.pdf')
 
     if 'drivethrucards_7z' in conf['outputs'][lang]:
@@ -1731,7 +1743,7 @@ def generate_dtc(conf, set_id, set_name, lang):
                 os.path.join(output_path,
                              'DTC.{}.{}.7z'.format(set_name, lang)),
                 'w') as obj:
-            _prepare_dtc_printing_archive(temp_path, obj)
+            _prepare_dtc_printing_archive(temp_path, obj, file_type)
             obj.write('DriveThruCards.pdf', 'DriveThruCards.pdf')
 
     _delete_folder(temp_path)

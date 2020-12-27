@@ -47,7 +47,7 @@ def generate_mpc(conf, set_id, set_name, lang, skip_ids):
 def generate_dtc(conf, set_id, set_name, lang, skip_ids):
     """ Generate DriveThruCards outputs.
     """
-    lotr.generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids)
+    lotr.generate_300_bleeddtc(conf, set_id, set_name, lang, skip_ids)
     lotr.generate_dtc(conf, set_id, set_name, lang)
 
 

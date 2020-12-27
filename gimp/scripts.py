@@ -25,9 +25,13 @@ def _get_rotation(drawable):
                 or (drawable.width == 1126 and drawable.height == 826)
                 or (drawable.width == 2100 and drawable.height == 1500)
                 or (drawable.width == 2250 and drawable.height == 1650)
+                or (drawable.width == 2252 and drawable.height == 1652)
                 or (drawable.width == 2800 and drawable.height == 2000)
                 or (drawable.width == 3000 and drawable.height == 2200)
-                or (drawable.width == 3002 and drawable.height == 2202))
+                or (drawable.width == 3002 and drawable.height == 2202)
+                or (drawable.width == 4200 and drawable.height == 3000)
+                or (drawable.width == 4500 and drawable.height == 3300)
+                or (drawable.width == 4504 and drawable.height == 3304))
     return rotation
 
 
@@ -40,45 +44,51 @@ def _get_bleed_margin_size(drawable):
     elif ((drawable.width == 1650 and drawable.height == 2250)
           or (drawable.width == 2250 and drawable.height == 1650)):
         size = 75
+    elif ((drawable.width == 1652 and drawable.height == 2252)
+          or (drawable.width == 2252 and drawable.height == 1652)):
+        size = 76
     elif ((drawable.width == 2200 and drawable.height == 3000)
           or (drawable.width == 3000 and drawable.height == 2200)):
         size = 100
     elif ((drawable.width == 2202 and drawable.height == 3002)
           or (drawable.width == 3002 and drawable.height == 2202)):
         size = 101
+    elif ((drawable.width == 3300 and drawable.height == 4500)
+          or (drawable.width == 4500 and drawable.height == 3300)):
+        size = 150
+    elif ((drawable.width == 3304 and drawable.height == 4504)
+          or (drawable.width == 4504 and drawable.height == 3304)):
+        size = 152
     else:
         size = 0
 
     return size
 
 
-def _get_mpc_clip_size(drawable):
-    """ Determine MakePlayingCards clip size.
+def _get_pdf_clip_size(drawable):
+    """ Determine PDF clip size.
     """
     if ((drawable.width == 826 and drawable.height == 1126)
             or (drawable.width == 1126 and drawable.height == 826)):
-        size = 2
+        size = 0
     elif ((drawable.width == 1650 and drawable.height == 2250)
           or (drawable.width == 2250 and drawable.height == 1650)):
-        size = 3
+        size = 0
+    elif ((drawable.width == 1652 and drawable.height == 2252)
+          or (drawable.width == 2252 and drawable.height == 1652)):
+        size = 1
     elif ((drawable.width == 2200 and drawable.height == 3000)
           or (drawable.width == 3000 and drawable.height == 2200)):
-        size = 4
+        size = 0
     elif ((drawable.width == 2202 and drawable.height == 3002)
           or (drawable.width == 3002 and drawable.height == 2202)):
-        size = 5
-    else:
+        size = 1
+    elif ((drawable.width == 3300 and drawable.height == 4500)
+          or (drawable.width == 4500 and drawable.height == 3300)):
         size = 0
-
-    return size
-
-
-def _get_dtc_clip_size(drawable):
-    """ Determine DriveThruCards clip size.
-    """
-    if ((drawable.width == 826 and drawable.height == 1126)
-            or (drawable.width == 1126 and drawable.height == 826)):
-        size = 0.5
+    elif ((drawable.width == 3304 and drawable.height == 4504)
+          or (drawable.width == 4504 and drawable.height == 3304)):
+        size = 2
     else:
         size = 0
 
@@ -97,6 +107,69 @@ def _get_pdf_margin_size(drawable):
     elif ((drawable.width == 2000 and drawable.height == 2800)
           or (drawable.width == 2800 and drawable.height == 2000)):
         size = 100
+    elif ((drawable.width == 3000 and drawable.height == 4200)
+          or (drawable.width == 4200 and drawable.height == 3000)):
+        size = 150
+    else:
+        size = 0
+
+    return size
+
+
+def _get_mpc_clip_size(drawable):
+    """ Determine MakePlayingCards clip size.
+    """
+    if ((drawable.width == 826 and drawable.height == 1126)
+            or (drawable.width == 1126 and drawable.height == 826)):
+        size = 2
+    elif ((drawable.width == 1650 and drawable.height == 2250)
+          or (drawable.width == 2250 and drawable.height == 1650)):
+        size = 3
+    elif ((drawable.width == 1652 and drawable.height == 2252)
+          or (drawable.width == 2252 and drawable.height == 1652)):
+        size = 4
+    elif ((drawable.width == 2200 and drawable.height == 3000)
+          or (drawable.width == 3000 and drawable.height == 2200)):
+        size = 4
+    elif ((drawable.width == 2202 and drawable.height == 3002)
+          or (drawable.width == 3002 and drawable.height == 2202)):
+        size = 5
+    elif ((drawable.width == 3300 and drawable.height == 4500)
+          or (drawable.width == 4500 and drawable.height == 3300)):
+        size = 6
+    elif ((drawable.width == 3304 and drawable.height == 4504)
+          or (drawable.width == 4504 and drawable.height == 3304)):
+        size = 8
+    else:
+        size = 0
+
+    return size
+
+
+def _get_dtc_clip_size(drawable):
+    """ Determine DriveThruCards clip size.
+    """
+    if ((drawable.width == 826 and drawable.height == 1126)
+            or (drawable.width == 1126 and drawable.height == 826)):
+        size = 0.5
+    elif ((drawable.width == 1650 and drawable.height == 2250)
+          or (drawable.width == 2250 and drawable.height == 1650)):
+        size = 0
+    elif ((drawable.width == 1652 and drawable.height == 2252)
+          or (drawable.width == 2252 and drawable.height == 1652)):
+        size = 1
+    elif ((drawable.width == 2200 and drawable.height == 3000)
+          or (drawable.width == 3000 and drawable.height == 2200)):
+        size = 0
+    elif ((drawable.width == 2202 and drawable.height == 3002)
+          or (drawable.width == 3002 and drawable.height == 2202)):
+        size = 1
+    elif ((drawable.width == 3300 and drawable.height == 4500)
+          or (drawable.width == 4500 and drawable.height == 3300)):
+        size = 0
+    elif ((drawable.width == 3304 and drawable.height == 4504)
+          or (drawable.width == 4504 and drawable.height == 3304)):
+        size = 2
     else:
         size = 0
 
@@ -144,7 +217,8 @@ def _iterate_folder(input_folder, output_folder, func):
     """ Apply a given function to a folder of images.
     """
     for file_name in os.listdir(input_folder):
-        if not (file_name.endswith('.png') or file_name.endswith('.jpg')):
+        if not (file_name.endswith('.png') or file_name.endswith('.jpg')
+                or file_name.endswith('.tif')):
             continue
 
         img = pdb.gimp_file_load(os.path.join(input_folder, file_name),
@@ -160,7 +234,7 @@ def cut_bleed_margins(img, drawable, output_folder):
     pdb.gimp_undo_push_group_start(img)
 
     try:
-        file_name, back_side = _get_filename_backside(img)
+        file_name, _ = _get_filename_backside(img)
     except Exception:  # pylint: disable=W0703
         pdb.gimp_undo_push_group_end(img)
         return
@@ -217,7 +291,9 @@ def prepare_pdf_front(img, drawable, output_folder):
     if rotation:
         _rotate(drawable, back_side)
 
-    _add_margin(img, drawable, margin_size)
+    if margin_size:
+        _add_margin(img, drawable, margin_size)
+
     pdb.file_png_save(img, drawable,
                       os.path.join(output_folder, file_name), file_name,
                       0, 9, 1, 0, 0, 1, 1)
@@ -241,9 +317,13 @@ def prepare_pdf_back(img, drawable, output_folder):
         return
 
     rotation = _get_rotation(drawable)
+    clip_size = _get_pdf_clip_size(drawable)
 
     if rotation:
         _rotate(drawable, back_side)
+
+    if clip_size:
+        _clip(img, drawable, clip_size, rotation and back_side)
 
     pdb.file_png_save(img, drawable,
                       os.path.join(output_folder, file_name), file_name,
@@ -278,10 +358,10 @@ def prepare_makeplayingcards(img, drawable, output_folder):
     pdb.gimp_undo_push_group_end(img)
 
 
-def prepare_drivethrucards(img, drawable, output_folder):
-    """ Prepare an image for DriveThruCards printing.
+def prepare_drivethrucards_jpg(img, drawable, output_folder):
+    """ Prepare a JPG image for DriveThruCards printing.
     """
-    gimp.progress_init('Prepare an image for DriveThruCards printing...')
+    gimp.progress_init('Prepare a JPG image for DriveThruCards printing...')
     pdb.gimp_undo_push_group_start(img)
 
     try:
@@ -302,6 +382,32 @@ def prepare_drivethrucards(img, drawable, output_folder):
     pdb.file_jpeg_save(img, drawable,
                        os.path.join(output_folder, file_name), file_name,
                        1, 0, 1, 0, '', 2, 1, 0, 0)
+    pdb.gimp_undo_push_group_end(img)
+
+
+def prepare_drivethrucards_tif(img, drawable, output_folder):
+    """ Prepare a TIF image for DriveThruCards printing.
+    """
+    gimp.progress_init('Prepare a TIF image for DriveThruCards printing...')
+    pdb.gimp_undo_push_group_start(img)
+
+    try:
+        file_name, back_side = _get_filename_backside(img, 'tif')
+    except Exception:  # pylint: disable=W0703
+        pdb.gimp_undo_push_group_end(img)
+        return
+
+    rotation = _get_rotation(drawable)
+    clip_size = _get_dtc_clip_size(drawable)
+
+    if rotation:
+        _rotate(drawable, back_side)
+
+    if clip_size:
+        _clip(img, drawable, clip_size, rotation and back_side)
+
+    pdb.file_tiff_save(img, drawable,
+                       os.path.join(output_folder, file_name), file_name, 1)
     pdb.gimp_undo_push_group_end(img)
 
 
@@ -345,12 +451,20 @@ def prepare_makeplayingcards_folder(input_folder, output_folder):
     _iterate_folder(input_folder, output_folder, prepare_makeplayingcards)
 
 
-def prepare_drivethrucards_folder(input_folder, output_folder):
-    """ Prepare a folder of images for DriveThruCards printing.
+def prepare_drivethrucards_jpg_folder(input_folder, output_folder):
+    """ Prepare a folder of images for DriveThruCards printing (JPG).
     """
     gimp.progress_init(
-        'Prepare a folder of images for DriveThruCards printing...')
-    _iterate_folder(input_folder, output_folder, prepare_drivethrucards)
+        'Prepare a folder of images for DriveThruCards printing (JPG)...')
+    _iterate_folder(input_folder, output_folder, prepare_drivethrucards_jpg)
+
+
+def prepare_drivethrucards_tif_folder(input_folder, output_folder):
+    """ Prepare a folder of images for DriveThruCards printing (TIF).
+    """
+    gimp.progress_init(
+        'Prepare a folder of images for DriveThruCards printing (TIF)...')
+    _iterate_folder(input_folder, output_folder, prepare_drivethrucards_tif)
 
 
 register(
@@ -461,7 +575,7 @@ register(
 register(
     'python_prepare_pdf_back',
     'Prepare a back image for PDF document',
-    '1. Rotate a landscape image. 2. Export PNG.',
+    '1. Rotate a landscape image. 2. Remove redundant bleed margins. 3. Export PNG.',
     'A.R.',
     'A.R.',
     '2020',
@@ -479,7 +593,7 @@ register(
 register(
     'python_prepare_pdf_back_folder',
     'Prepare a folder of back images for PDF document',
-    '1. Rotate a landscape image. 2. Export PNG.',
+    '1. Rotate a landscape image. 2. Remove redundant bleed margins. 3. Export PNG.',
     'A.R.',
     'A.R.',
     '2020',
@@ -529,8 +643,8 @@ register(
     menu='<Image>/Filters')
 
 register(
-    'python_prepare_drivethrucards',
-    'Prepare an image for DriveThruCards printing',
+    'python_prepare_drivethrucards_jpg',
+    'Prepare a JPG image for DriveThruCards printing',
     '1. Rotate a landscape image. 2. Clip bleed margins. 3. Export JPG.',
     'A.R.',
     'A.R.',
@@ -543,12 +657,12 @@ register(
         (PF_DIRNAME, 'output_folder', 'Output folder', None)
     ],
     [],
-    prepare_drivethrucards,
+    prepare_drivethrucards_jpg,
     menu='<Image>/Filters')
 
 register(
-    'python_prepare_drivethrucards_folder',
-    'Prepare a folder of images for DriveThruCards printing',
+    'python_prepare_drivethrucards_jpg_folder',
+    'Prepare a folder of images for DriveThruCards printing (JPG)',
     '1. Rotate a landscape image. 2. Clip bleed margins. 3. Export JPG.',
     'A.R.',
     'A.R.',
@@ -560,7 +674,42 @@ register(
         (PF_DIRNAME, 'output_folder', 'Output folder', None)
     ],
     [],
-    prepare_drivethrucards_folder,
+    prepare_drivethrucards_jpg_folder,
+    menu='<Image>/Filters')
+
+register(
+    'python_prepare_drivethrucards_tif',
+    'Prepare a TIF image for DriveThruCards printing',
+    '1. Rotate a landscape image. 2. Clip bleed margins. 3. Export TIF.',
+    'A.R.',
+    'A.R.',
+    '2020',
+    'Prepare DriveThruCards TIF',
+    '*',
+    [
+        (PF_IMAGE, 'image', 'Input image', None),
+        (PF_DRAWABLE, 'drawable', 'Input drawable', None),
+        (PF_DIRNAME, 'output_folder', 'Output folder', None)
+    ],
+    [],
+    prepare_drivethrucards_tif,
+    menu='<Image>/Filters')
+
+register(
+    'python_prepare_drivethrucards_tif_folder',
+    'Prepare a folder of images for DriveThruCards printing (TIF)',
+    '1. Rotate a landscape image. 2. Clip bleed margins. 3. Export TIF.',
+    'A.R.',
+    'A.R.',
+    '2020',
+    'Prepare DriveThruCards TIF Folder',
+    '*',
+    [
+        (PF_DIRNAME, 'input_folder', 'Input folder', None),
+        (PF_DIRNAME, 'output_folder', 'Output folder', None)
+    ],
+    [],
+    prepare_drivethrucards_tif_folder,
     menu='<Image>/Filters')
 
 main()
