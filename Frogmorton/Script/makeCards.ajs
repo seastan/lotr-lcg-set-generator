@@ -344,10 +344,10 @@ function run(progress, target, filename, icons) {
 					s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
 					s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
 					if (landscapeTypes.indexOf(cardType) > -1) {
-						s.set('Artist-region', '151,377,120,15');
-						s.set('Copyright-region', '237,377,136,15');
-						s.set('Collection-portrait-clip-region', '430,378,12,12');
-						s.set('CollectionNumber-region', '443,377,30,15');
+						s.set('Artist-region', '130,377,120,15');
+						s.set('Copyright-region', '218,377,136,15');
+						s.set('Collection-portrait-clip-region', '391,378,12,12');
+						s.set('CollectionNumber-region', '403,377,30,15');
 					}
 					else {
 						s.set('Artist-region', '66,527,120,15');
