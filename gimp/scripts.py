@@ -386,9 +386,9 @@ def prepare_drivethrucards_jpg(img, drawable, output_folder):
 
 
 def prepare_drivethrucards_tif(img, drawable, output_folder):
-    """ Prepare a TIF image for DriveThruCards printing.
+    """ Prepare a TIFF image for DriveThruCards printing.
     """
-    gimp.progress_init('Prepare a TIF image for DriveThruCards printing...')
+    gimp.progress_init('Prepare a TIFF image for DriveThruCards printing...')
     pdb.gimp_undo_push_group_start(img)
 
     try:
@@ -405,6 +405,27 @@ def prepare_drivethrucards_tif(img, drawable, output_folder):
 
     if clip_size:
         _clip(img, drawable, clip_size, rotation and back_side)
+
+    pdb.file_tiff_save(img, drawable,
+                       os.path.join(output_folder, file_name), file_name, 1)
+    pdb.gimp_undo_push_group_end(img)
+
+
+def prepare_mbprint(img, drawable, output_folder):
+    """ Prepare an image for MBPrint printing.
+    """
+    gimp.progress_init('Prepare an image for MBPrint printing...')
+    pdb.gimp_undo_push_group_start(img)
+
+    try:
+        file_name, back_side = _get_filename_backside(img, 'tif')
+    except Exception:  # pylint: disable=W0703
+        pdb.gimp_undo_push_group_end(img)
+        return
+
+#    rotation = _get_rotation(drawable)
+#    if rotation:
+#        _rotate(drawable, back_side)
 
     pdb.file_tiff_save(img, drawable,
                        os.path.join(output_folder, file_name), file_name, 1)
@@ -460,11 +481,19 @@ def prepare_drivethrucards_jpg_folder(input_folder, output_folder):
 
 
 def prepare_drivethrucards_tif_folder(input_folder, output_folder):
-    """ Prepare a folder of images for DriveThruCards printing (TIF).
+    """ Prepare a folder of images for DriveThruCards printing (TIFF).
     """
     gimp.progress_init(
-        'Prepare a folder of images for DriveThruCards printing (TIF)...')
+        'Prepare a folder of images for DriveThruCards printing (TIFF)...')
     _iterate_folder(input_folder, output_folder, prepare_drivethrucards_tif)
+
+
+def prepare_mbprint_folder(input_folder, output_folder):
+    """ Prepare a folder of images for MBPrint printing.
+    """
+    gimp.progress_init(
+        'Prepare a folder of images for MBPrint printing...')
+    _iterate_folder(input_folder, output_folder, prepare_mbprint)
 
 
 register(
@@ -679,12 +708,12 @@ register(
 
 register(
     'python_prepare_drivethrucards_tif',
-    'Prepare a TIF image for DriveThruCards printing',
-    '1. Rotate a landscape image. 2. Clip bleed margins. 3. Export TIF.',
+    'Prepare a TIFF image for DriveThruCards printing',
+    '1. Rotate a landscape image. 2. Clip bleed margins. 3. Export TIFF.',
     'A.R.',
     'A.R.',
     '2020',
-    'Prepare DriveThruCards TIF',
+    'Prepare DriveThruCards TIFF',
     '*',
     [
         (PF_IMAGE, 'image', 'Input image', None),
@@ -697,12 +726,12 @@ register(
 
 register(
     'python_prepare_drivethrucards_tif_folder',
-    'Prepare a folder of images for DriveThruCards printing (TIF)',
-    '1. Rotate a landscape image. 2. Clip bleed margins. 3. Export TIF.',
+    'Prepare a folder of images for DriveThruCards printing (TIFF)',
+    '1. Rotate a landscape image. 2. Clip bleed margins. 3. Export TIFF.',
     'A.R.',
     'A.R.',
     '2020',
-    'Prepare DriveThruCards TIF Folder',
+    'Prepare DriveThruCards TIFF Folder',
     '*',
     [
         (PF_DIRNAME, 'input_folder', 'Input folder', None),
@@ -711,5 +740,41 @@ register(
     [],
     prepare_drivethrucards_tif_folder,
     menu='<Image>/Filters')
+
+register(
+    'python_prepare_mbprint',
+    'Prepare an image for MBPrint printing',
+    '1. Rotate a landscape image. 2. Export TIFF.',
+    'A.R.',
+    'A.R.',
+    '2020',
+    'Prepare MBPrint',
+    '*',
+    [
+        (PF_IMAGE, 'image', 'Input image', None),
+        (PF_DRAWABLE, 'drawable', 'Input drawable', None),
+        (PF_DIRNAME, 'output_folder', 'Output folder', None)
+    ],
+    [],
+    prepare_mbprint,
+    menu='<Image>/Filters')
+
+register(
+    'python_prepare_mbprint_folder',
+    'Prepare a folder of images for MBPrint printing',
+    '1. Rotate a landscape image. 2. Export TIFF.',
+    'A.R.',
+    'A.R.',
+    '2020',
+    'Prepare MBPrint Folder',
+    '*',
+    [
+        (PF_DIRNAME, 'input_folder', 'Input folder', None),
+        (PF_DIRNAME, 'output_folder', 'Output folder', None)
+    ],
+    [],
+    prepare_mbprint_folder,
+    menu='<Image>/Filters')
+
 
 main()
