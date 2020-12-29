@@ -60,6 +60,7 @@ CMYK_COMMAND_TIF = '"{}" mogrify -profile USWebCoatedSWOP.icc -compress lzw ' \
                    '"{}\\*.tif"'
 DTC_FILE_TYPE = 'jpg'
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
+IMAGE_MIN_SIZE = 100000
 IMAGES_CUSTOM_FOLDER = 'custom'
 OCTGN_ARCHIVE = 'unzip-me-into-sets-folder.zip'
 OCTGN_SET_XML = 'set.xml'
@@ -103,9 +104,10 @@ TEMPLATES_SOURCE_PATH = os.path.join('Templates')
 TEMPLATES_PATH = os.path.join(PROJECT_FOLDER, 'Templates')
 XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
 
-SPREADSHEET = []
 SET_COLUMNS = {}
 CARD_COLUMNS = {}
+SETS = []
+DATA = []
 ARTWORK_CACHE = {}
 
 
@@ -313,21 +315,41 @@ def _extract_column_names(columns):
     except ValueError:
         pass
 
-    res = {}
+    names = {}
     for number, column in enumerate(columns):
-        if column in res:
+        if column in names:
             column = BACK_PREFIX + column
 
-        res[column] = _n2c(number + 1)
+        names[column] = _n2c(number + 1)
 
-    res[MAX_COLUMN] = _n2c(len(columns))
+    names[MAX_COLUMN] = _n2c(len(columns))
+    return names
+
+
+def _transform_to_dict(data, columns):
+    """ Transform rows to dictionary.
+    """
+    res = []
+    for row in data:
+        if not any(row):
+            break
+
+        row_dict = {}
+        for name, column in columns.items():
+            if name == MAX_COLUMN:
+                continue
+
+            row_dict[name] = row[_c2n(column) - 1]
+
+        res.append(row_dict)
+
     return res
 
 
-def get_columns():
-    """ Get columns from the spreadsheet.
+def extract_data():
+    """ Extract data from the spreadsheet.
     """
-    logging.info('Getting columns from the spreadsheet...')
+    logging.info('Extracting data from the spreadsheet...')
     timestamp = time.time()
 
     sheet_path = os.path.join(SHEET_ROOT_PATH, SHEET_NAME)
@@ -339,23 +361,42 @@ def get_columns():
                                             SET_TITLE_ROW,
                                             _n2c(MAX_COLUMN_NUMBER),
                                             SET_TITLE_ROW)
-            columns = xlwb_source.sheets[SET_SHEET].range(xlwb_range).value
-            SET_COLUMNS.update(_extract_column_names(columns))
+            data = xlwb_source.sheets[SET_SHEET].range(xlwb_range).value
+            SET_COLUMNS.update(_extract_column_names(data))
+
+            xlwb_range = '{}{}:{}{}'.format('A',
+                                            SET_TITLE_ROW + 1,
+                                            SET_COLUMNS[MAX_COLUMN],
+                                            SET_MAX_NUMBER + SET_TITLE_ROW)
+            data = xlwb_source.sheets[SET_SHEET].range(xlwb_range).value
+            SETS.extend(_transform_to_dict(data, SET_COLUMNS))
 
             xlwb_range = '{}{}:{}{}'.format('A',  # pylint: disable=W1308
                                             CARD_TITLE_ROW,
                                             _n2c(MAX_COLUMN_NUMBER),
                                             CARD_TITLE_ROW)
-            columns = xlwb_source.sheets[CARD_SHEET].range(xlwb_range).value
-            CARD_COLUMNS.update(_extract_column_names(columns))
+            data = xlwb_source.sheets[CARD_SHEET].range(xlwb_range).value
+            CARD_COLUMNS.update(_extract_column_names(data))
 
+            xlwb_range = '{}{}:{}{}'.format('A',
+                                            CARD_TITLE_ROW + 1,
+                                            CARD_COLUMNS[MAX_COLUMN],
+                                            CARD_MAX_NUMBER + CARD_TITLE_ROW)
+            data = xlwb_source.sheets[CARD_SHEET].range(xlwb_range).value
+            DATA.extend(_transform_to_dict(data, CARD_COLUMNS))
         finally:
             xlwb_source.close()
     finally:
         excel_app.quit()
 
-    logging.info('...Getting columns from the spreadsheet (%ss)',
+    logging.info('...Extracting data from the spreadsheet (%ss)',
                  round(time.time() - timestamp, 3))
+
+
+def _skip_row(row):
+    """ Check whether a row should be skipped or not.
+    """
+    return row[CARD_SET] in ('0', 0) or row[CARD_ID] in ('0', 0)
 
 
 def sanity_check():  # pylint: disable=R0912,R0914,R0915
@@ -364,53 +405,28 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
     logging.info('Performing a sanity check of the spreadsheet...')
     timestamp = time.time()
 
-    sheet_path = os.path.join(SHEET_ROOT_PATH, SHEET_NAME)
-
-    excel_app = xw.App(visible=False, add_book=False)
-    try:
-        xlwb_source = excel_app.books.open(sheet_path)
-        try:
-            xlwb_range = '{}{}:{}{}'.format(SET_COLUMNS[SET_ID],  # pylint: disable=W1308
-                                            SET_TITLE_ROW + 1,
-                                            SET_COLUMNS[SET_ID],
-                                            SET_MAX_NUMBER + SET_TITLE_ROW)
-            sets = xlwb_source.sheets[SET_SHEET].range(xlwb_range).value
-            xlwb_range = '{}{}:{}{}'.format('A',
-                                            CARD_TITLE_ROW + 1,
-                                            CARD_COLUMNS[MAX_COLUMN],
-                                            CARD_MAX_NUMBER + CARD_TITLE_ROW)
-            data = xlwb_source.sheets[CARD_SHEET].range(xlwb_range).value
-        finally:
-            xlwb_source.close()
-    finally:
-        excel_app.quit()
-
     errors_found = False
     card_ids = []
-    sets = [s for s in sets if s]
-    for i, row in enumerate(data):
-        if not any(row):
-            continue
-
+    set_ids = [s[SET_ID] for s in SETS]
+    for i, row in enumerate(DATA):
         i = i + CARD_TITLE_ROW + 1
-        set_id = row[_c2n(CARD_COLUMNS[CARD_SET]) - 1]
-        card_id = row[_c2n(CARD_COLUMNS[CARD_ID]) - 1]
-        if set_id == '0' or card_id == '0':
+        if _skip_row(row):
             continue
 
-        card_number = row[_c2n(CARD_COLUMNS[CARD_NUMBER]) - 1]
-        card_quantity = row[_c2n(CARD_COLUMNS[CARD_QUANTITY]) - 1]
-        card_unique = row[_c2n(CARD_COLUMNS[CARD_UNIQUE]) - 1]
-        card_type = row[_c2n(CARD_COLUMNS[CARD_TYPE]) - 1]
-        card_unique_back = row[_c2n(
-            CARD_COLUMNS[BACK_PREFIX + CARD_UNIQUE]) - 1]
-        card_type_back = row[_c2n(CARD_COLUMNS[BACK_PREFIX + CARD_TYPE]) - 1]
-        card_easy_mode = row[_c2n(CARD_COLUMNS[CARD_EASY_MODE]) - 1]
+        set_id = row[CARD_SET]
+        card_id = row[CARD_ID]
+        card_number = row[CARD_NUMBER]
+        card_quantity = row[CARD_QUANTITY]
+        card_unique = row[CARD_UNIQUE]
+        card_type = row[CARD_TYPE]
+        card_unique_back = row[BACK_PREFIX + CARD_UNIQUE]
+        card_type_back = row[BACK_PREFIX + CARD_TYPE]
+        card_easy_mode = row[CARD_EASY_MODE]
 
         if not set_id:
             logging.error('ERROR: No set ID for row #%s', i)
             errors_found = True
-        elif set_id not in sets:
+        elif set_id not in set_ids:
             logging.error('ERROR: Unknown set ID for row #%s', i)
             errors_found = True
 
@@ -488,33 +504,18 @@ def get_sets(conf):
     logging.info('Getting all sets to work on...')
     timestamp = time.time()
 
-    sheet_path = os.path.join(SHEET_ROOT_PATH, SHEET_NAME)
+    chosen_sets = []
+    for i, row in enumerate(SETS):
+        i = i + SET_TITLE_ROW + 1
+        if row[SET_ID] in conf['set_ids']:
+            chosen_sets.append((row[SET_ID], row[SET_NAME], i))
 
-    excel_app = xw.App(visible=False, add_book=False)
-    try:
-        xlwb = excel_app.books.open(sheet_path)
-        try:
-            sets = []
-            sheet = xlwb.sheets[SET_SHEET]
-            for row in range(SET_TITLE_ROW + 1,
-                             SET_MAX_NUMBER + SET_TITLE_ROW + 1):
-                set_id = sheet.range((row, _c2n(SET_COLUMNS[SET_ID]))).value
-                if set_id and set_id in conf['set_ids']:
-                    sets.append(
-                        (set_id,
-                         sheet.range((row, _c2n(SET_COLUMNS[SET_NAME]))).value,
-                         row))
-        finally:
-            xlwb.close()
-    finally:
-        excel_app.quit()
-
-    if not sets:
-        logging.error('ERROR: No sets found')
+    if not chosen_sets:
+        logging.error('ERROR: No sets to work on')
 
     logging.info('...Getting all sets to work on (%ss)',
                  round(time.time() - timestamp, 3))
-    return sets
+    return chosen_sets
 
 
 def _backup_previous_octgn_xml(set_id):
@@ -620,7 +621,7 @@ def generate_octgn_set_xml(set_id, set_name, set_row):
                  set_name, round(time.time() - timestamp, 3))
 
 
-def generate_ringsdb_csv(set_id, set_name, set_row):
+def generate_ringsdb_csv(set_id, set_name):
     """ Generate CSV file for RingsDB.
     """
     logging.info('[%s] Generating CSV file for RingsDB...', set_name)
@@ -630,7 +631,7 @@ def generate_ringsdb_csv(set_id, set_name, set_row):
                  set_name, round(time.time() - timestamp, 3))
 
 
-def generate_hallofbeorn_json(set_id, set_name, set_row):
+def generate_hallofbeorn_json(set_id, set_name):
     """ Generate JSON file for Hall of Beorn.
     """
     logging.info('[%s] Generating JSON file for Hall of Beorn...', set_name)
@@ -1527,6 +1528,16 @@ def _make_cmyk(conf, input_path, file_type=DTC_FILE_TYPE):
            ).format(conf['magick_path'], input_path)
     res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
     logging.info(res)
+
+    for _, _, filenames in os.walk(input_path):
+        for filename in filenames:
+            if (filename.endswith('.' + file_type)
+                    and os.path.getsize(os.path.join(input_path, filename)
+                                        ) < IMAGE_MIN_SIZE):
+                raise ValueError('ImageMagick conversion failed for {}'.format(
+                    os.path.join(input_path, filename)))
+
+        break
 
 
 def _prepare_printing_images(input_path, output_path, service='dtc',

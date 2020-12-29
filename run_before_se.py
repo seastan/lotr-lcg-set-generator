@@ -14,7 +14,7 @@ def main():
     conf = lotr.read_conf()
     lotr.reset_project_folders(conf)
     lotr.download_sheet(conf)
-    lotr.get_columns()
+    lotr.extract_data()
     lotr.sanity_check()
     sets = lotr.get_sets(conf)
 
@@ -25,10 +25,10 @@ def main():
             lotr.generate_octgn_set_xml(set_id, set_name, set_row)
 
         if conf['ringsdb_csv']:
-            lotr.generate_ringsdb_csv(set_id, set_name, set_row)
+            lotr.generate_ringsdb_csv(set_id, set_name)
 
         if conf['hallofbeorn_json']:
-            lotr.generate_hallofbeorn_json(set_id, set_name, set_row)
+            lotr.generate_hallofbeorn_json(set_id, set_name)
 
         lotr.copy_custom_images(conf, set_id, set_name)
         for lang in conf['languages']:
