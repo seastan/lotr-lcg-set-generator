@@ -758,7 +758,7 @@ def generate_ringsdb_csv(set_id, set_name, set_code):
                 'sphere': row[CARD_SPHERE],
                 'position': int(row[CARD_NUMBER]),
                 'code': '{}{}'.format(int(set_code),
-                                      str(int(row[CARD_NUMBER])).zfill(2)),
+                                      str(int(row[CARD_NUMBER])).zfill(3)),
                 'name': row[CARD_NAME],
                 'traits': row[CARD_TRAITS] and row[CARD_TRAITS],
                 'text': '{}\n{}'.format(
