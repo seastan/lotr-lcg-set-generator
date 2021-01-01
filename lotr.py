@@ -1,6 +1,8 @@
 # pylint: disable=C0302
 """ Helper functions for LotR ALeP workflow.
 """
+import codecs
+import csv
 import hashlib
 import logging
 import math
@@ -38,13 +40,33 @@ TRANSLATION_RANGES = ['F{}:F{}', 'J{}:K{}', 'T{}:W{}', 'AB{}:AB{}',
 
 SET_ID = 'GUID'
 SET_NAME = 'Name'
+SET_RINGSDB_CODE = 'RingsDB Code'
+SET_HOB_CODE = 'HoB Code'
 SET_LANGUAGE = 'Language'
+SET_ROW = '_Row'
+
 CARD_SET = 'Set'
 CARD_ID = 'Card GUID'
 CARD_NUMBER = 'Card Number'
 CARD_QUANTITY = 'Quantity'
+CARD_ENCOUNTER_SET = 'Encounter Set'
+CARD_NAME = 'Name'
 CARD_UNIQUE = 'Unique'
 CARD_TYPE = 'Type'
+CARD_SPHERE = 'Sphere'
+CARD_TRAITS = 'Traits'
+CARD_KEYWORDS = 'Keywords'
+CARD_COST = 'Cost'
+CARD_THREAT = 'Threat'
+CARD_WILLPOWER = 'Willpower'
+CARD_ATTACK = 'Attack'
+CARD_DEFENSE = 'Defense'
+CARD_HEALTH = 'Health'
+CARD_QUEST = 'Quest Points'
+CARD_VICTORY = 'Victory Points'
+CARD_TEXT = 'Text'
+CARD_FLAVOUR = 'Flavour'
+CARD_ARTIST = 'Artist'
 CARD_EASY_MODE = 'Removed for Easy Mode'
 BACK_PREFIX = 'Back '
 MAX_COLUMN = '_Max Column'
@@ -54,6 +76,8 @@ CARD_TYPES = ['Ally', 'Attachment', 'Contract', 'Enemy', 'Event', 'Hero',
               'Quest', 'Rules', 'Side Quest', 'Treachery']
 CARD_TYPES_DOUBLESIDE = ['Presentation', 'Quest', 'Rules']
 CARD_TYPES_DOUBLESIDE_OPTIONAL = ['Contract']
+CARD_TYPES_PLAYER = ['Ally', 'Attachment', 'Contract', 'Event', 'Hero',
+                     'Side Quest']
 
 CMYK_COMMAND_JPG = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
 CMYK_COMMAND_TIF = '"{}" mogrify -profile USWebCoatedSWOP.icc -compress lzw ' \
@@ -145,6 +169,12 @@ def _is_positive_int(value):
         return False
     except ValueError:
         return False
+
+
+def _escape_filename(value):
+    """ Escape forbidden symbols in a file name.
+    """
+    return re.sub(r'[<>:"\/\\|?*]', '', value)
 
 
 def _clear_folder(folder):
@@ -499,7 +529,7 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
 
 
 def get_sets(conf):
-    """ Get all sets to work on and return (id, name, row) tuples.
+    """ Get all sets to work on.
     """
     logging.info('Getting all sets to work on...')
     timestamp = time.time()
@@ -508,7 +538,9 @@ def get_sets(conf):
     for i, row in enumerate(SETS):
         i = i + SET_TITLE_ROW + 1
         if row[SET_ID] in conf['set_ids']:
-            chosen_sets.append((row[SET_ID], row[SET_NAME], i))
+            set_data = {SET_ROW: i}
+            set_data.update(row)
+            chosen_sets.append(set_data)
 
     if not chosen_sets:
         logging.error('ERROR: No sets to work on')
@@ -530,7 +562,7 @@ def _backup_previous_octgn_xml(set_id):
 def _copy_octgn_xml(set_id, set_name):
     """ Copy set.xml file to OCTGN output folder.
     """
-    output_path = os.path.join(OUTPUT_OCTGN_PATH, set_name)
+    output_path = os.path.join(OUTPUT_OCTGN_PATH, _escape_filename(set_name))
     _create_folder(output_path)
     output_path = os.path.join(output_path, set_id)
     _create_folder(output_path)
@@ -621,17 +653,141 @@ def generate_octgn_set_xml(set_id, set_name, set_row):
                  set_name, round(time.time() - timestamp, 3))
 
 
-def generate_ringsdb_csv(set_id, set_name):
+def _update_card_text(text):
+    """ Update card text for RingsDB.
+    """
+    text = re.sub(r'\b(Quest Resolution)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', text)
+    text = re.sub(r'\b(Valour )?(Resource |Planning |Quest |Travel |Encounter '
+                  r'|Combat |Refresh )?(Action):', '[b]\\1\\2\\3[/b]:', text)
+    text = re.sub(r'\b(When Revealed|Setup|Forced|Valour Response|Response'
+                  r'|Travel|Shadow|Resolution):', '[b]\\1[/b]:', text)
+    text = re.sub(r'\b(Condition)\b', '[bi]\\1[/bi]', text)
+    text = re.sub(r' +(?=\n|$)', '', text)
+    text = re.sub(r'\[bi\]', '<b><i>', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/bi\]', '</i></b>', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[b\]', '<b>', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/b\]', '</b>', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[i\]', '<i>', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/i\]', '</i>', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[u\]', '<u>', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/u\]', '</u>', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[space\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[h1\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/h1\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[h2\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/h2\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[center\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/center\]\n?', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[right\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/right\]\n?', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[strike\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/strike\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[lotr\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/lotr\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[red\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/red\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[tab\]', '    ', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[size ([0-9]+)\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/size\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[img ("?)([^\]]+)\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\n+$', '', text)
+
+    text = text.replace('[Unique]', '[unique]')
+    text = text.replace('[Threat]', '[threat]')
+    text = text.replace('[Attack]', '[attack]')
+    text = text.replace('[Defense]', '[defense]')
+    text = text.replace('[Willpower]', '[willpower]')
+    text = text.replace('[Leadership]', '[leadership]')
+    text = text.replace('[Lore]', '[lore]')
+    text = text.replace('[Spirit]', '[spirit]')
+    text = text.replace('[Tactics]', '[tactics]')
+    text = text.replace('[Baggins]', '[baggins]')
+    text = text.replace('[Fellowship]', '[fellowship]')
+    text = text.replace('[Sailing]', '[sailing]')
+
+    return text
+
+
+def _handle_int(value):
+    """ Correctly handle (not always) integer values.
+    """
+    value = value and (_is_positive_int(value) and int(value) or value)
+    return value
+
+
+def generate_ringsdb_csv(set_id, set_name, set_code):
     """ Generate CSV file for RingsDB.
     """
     logging.info('[%s] Generating CSV file for RingsDB...', set_name)
     timestamp = time.time()
 
+    output_path = os.path.join(OUTPUT_RINGSDB_PATH, _escape_filename(set_name))
+    _create_folder(output_path)
+
+    output_path = os.path.join(output_path,
+                               '{}.csv'.format(_escape_filename(set_name)))
+    with open(output_path, 'w', newline='', encoding='utf-8') as obj:
+        obj.write(codecs.BOM_UTF8.decode('utf8'))
+        fieldnames = ['pack', 'type', 'sphere', 'position', 'code', 'name',
+                      'traits', 'text', 'flavor', 'isUnique', 'cost', 'threat',
+                      'willpower', 'attack', 'defense', 'health', 'victory',
+                      'quest', 'quantity', 'deckLimit', 'illustrator',
+                      'octgnid', 'hasErrata']
+        writer = csv.DictWriter(obj, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in DATA:
+            if (_skip_row(row) or row[CARD_SET] != set_id
+                    or row[CARD_TYPE] not in CARD_TYPES_PLAYER):
+                continue
+
+            card_type = row[CARD_TYPE]
+            if card_type == 'Side Quest':
+                if row[CARD_ENCOUNTER_SET]:
+                    continue
+
+                card_type = 'Player Side Quest'
+
+            limit = re.search(r'limit .*([0-9]+) per deck', row[CARD_TEXT],
+                              re.I)
+            if limit:
+                limit = int(limit.groups()[0])
+
+            csv_row = {
+                'pack': set_name,
+                'type': card_type,
+                'sphere': row[CARD_SPHERE],
+                'position': int(row[CARD_NUMBER]),
+                'code': '{}{}'.format(int(set_code),
+                                      str(int(row[CARD_NUMBER])).zfill(2)),
+                'name': row[CARD_NAME],
+                'traits': row[CARD_TRAITS] and row[CARD_TRAITS],
+                'text': '{}\n{}'.format(
+                    row[CARD_KEYWORDS] or '',
+                    _update_card_text(row[CARD_TEXT])).strip(),
+                'flavor': (row[CARD_FLAVOUR] and
+                           row[CARD_FLAVOUR]),
+                'isUnique': row[CARD_UNIQUE] and int(row[CARD_UNIQUE]),
+                'cost': _handle_int(row[CARD_COST]),
+                'threat': _handle_int(row[CARD_THREAT]),
+                'willpower': _handle_int(row[CARD_WILLPOWER]),
+                'attack': _handle_int(row[CARD_ATTACK]),
+                'defense': _handle_int(row[CARD_DEFENSE]),
+                'health': _handle_int(row[CARD_HEALTH]),
+                'victory': _handle_int(row[CARD_VICTORY]),
+                'quest': _handle_int(row[CARD_QUEST]),
+                'quantity': int(row[CARD_QUANTITY]),
+                'deckLimit': limit or int(row[CARD_QUANTITY]),
+                'illustrator': row[CARD_ARTIST],
+                'octgnid': row[CARD_ID],
+                'hasErrata': None
+                }
+            writer.writerow(csv_row)
+
     logging.info('[%s] ...Generating CSV file for RingsDB (%ss)',
                  set_name, round(time.time() - timestamp, 3))
 
 
-def generate_hallofbeorn_json(set_id, set_name):
+def generate_hallofbeorn_json(set_id, set_name, set_code):
     """ Generate JSON file for Hall of Beorn.
     """
     logging.info('[%s] Generating JSON file for Hall of Beorn...', set_name)
@@ -1317,7 +1473,8 @@ def generate_db(set_id, set_name, lang):
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300DB,
                               '{}.{}'.format(set_id, lang))
-    output_path = os.path.join(OUTPUT_DB_PATH, '{}.{}'.format(set_name, lang))
+    output_path = os.path.join(OUTPUT_DB_PATH, '{}.{}'.format(
+        _escape_filename(set_name), lang))
 
     known_filenames = set()
     for _, _, filenames in os.walk(input_path):
@@ -1355,8 +1512,9 @@ def generate_octgn(set_id, set_name, lang):
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300OCTGN,
                               '{}.{}'.format(set_id, lang))
-    output_path = os.path.join(OUTPUT_OCTGN_PATH, set_name)
-    pack_path = os.path.join(output_path, '{}.{}.o8c'.format(set_name, lang))
+    output_path = os.path.join(OUTPUT_OCTGN_PATH, _escape_filename(set_name))
+    pack_path = os.path.join(output_path, '{}.{}.o8c'.format(
+        _escape_filename(set_name), lang))
 
     known_filenames = set()
     for _, _, filenames in os.walk(input_path):
@@ -1437,7 +1595,8 @@ def generate_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0914
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300PDF,
                               '{}.{}'.format(set_id, lang))
-    output_path = os.path.join(OUTPUT_PDF_PATH, '{}.{}'.format(set_name, lang))
+    output_path = os.path.join(OUTPUT_PDF_PATH, '{}.{}'.format(
+        _escape_filename(set_name), lang))
 
     images = _collect_pdf_images(input_path)
     if not images:
@@ -1472,8 +1631,8 @@ def generate_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0914
 
     for page_format in formats:
         canvas = Canvas(
-            os.path.join(output_path, '{}.{}.{}.pdf'.format(page_format,
-                                                            set_name, lang)),
+            os.path.join(output_path, '{}.{}.{}.pdf'.format(
+                page_format, _escape_filename(set_name), lang)),
             pagesize=landscape(formats[page_format]))
         width, height = landscape(formats[page_format])
         width_margin = (width - 3 * card_width) / 2
@@ -1670,7 +1829,8 @@ def generate_mpc(conf, set_id, set_name, lang):
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG800BLEEDMPC,
                               '{}.{}'.format(set_id, lang))
-    output_path = os.path.join(OUTPUT_MPC_PATH, '{}.{}'.format(set_name, lang))
+    output_path = os.path.join(OUTPUT_MPC_PATH, '{}.{}'.format(
+        _escape_filename(set_name), lang))
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_mpc.{}.{}'.format(set_id, lang))
 
@@ -1693,7 +1853,8 @@ def generate_mpc(conf, set_id, set_name, lang):
     if 'makeplayingcards_zip' in conf['outputs'][lang]:
         with zipfile.ZipFile(
                 os.path.join(output_path,
-                             'MPC.{}.{}.zip'.format(set_name, lang)),
+                             'MPC.{}.{}.zip'.format(
+                                 _escape_filename(set_name), lang)),
                 'w') as obj:
             _prepare_mpc_printing_archive(temp_path, obj)
             obj.write('MakePlayingCards.pdf', 'MakePlayingCards.pdf')
@@ -1701,7 +1862,8 @@ def generate_mpc(conf, set_id, set_name, lang):
     if 'makeplayingcards_7z' in conf['outputs'][lang]:
         with py7zr.SevenZipFile(
                 os.path.join(output_path,
-                             'MPC.{}.{}.7z'.format(set_name, lang)),
+                             'MPC.{}.{}.7z'.format(
+                                 _escape_filename(set_name), lang)),
                 'w') as obj:
             _prepare_mpc_printing_archive(temp_path, obj)
             obj.write('MakePlayingCards.pdf', 'MakePlayingCards.pdf')
@@ -1722,7 +1884,8 @@ def generate_dtc(conf, set_id, set_name, lang, file_type=DTC_FILE_TYPE):
                               TIF300BLEEDDTC if file_type == 'tif'
                               else JPG300BLEEDDTC,
                               '{}.{}'.format(set_id, lang))
-    output_path = os.path.join(OUTPUT_DTC_PATH, '{}.{}'.format(set_name, lang))
+    output_path = os.path.join(OUTPUT_DTC_PATH, '{}.{}'.format(
+        _escape_filename(set_name), lang))
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_dtc.{}.{}'.format(set_id, lang))
 
@@ -1744,7 +1907,8 @@ def generate_dtc(conf, set_id, set_name, lang, file_type=DTC_FILE_TYPE):
     if 'drivethrucards_zip' in conf['outputs'][lang]:
         with zipfile.ZipFile(
                 os.path.join(output_path,
-                             'DTC.{}.{}.zip'.format(set_name, lang)),
+                             'DTC.{}.{}.zip'.format(
+                                 _escape_filename(set_name), lang)),
                 'w') as obj:
             _prepare_dtc_printing_archive(temp_path, obj, file_type)
             obj.write('DriveThruCards.pdf', 'DriveThruCards.pdf')
@@ -1752,7 +1916,8 @@ def generate_dtc(conf, set_id, set_name, lang, file_type=DTC_FILE_TYPE):
     if 'drivethrucards_7z' in conf['outputs'][lang]:
         with py7zr.SevenZipFile(
                 os.path.join(output_path,
-                             'DTC.{}.{}.7z'.format(set_name, lang)),
+                             'DTC.{}.{}.7z'.format(
+                                 _escape_filename(set_name), lang)),
                 'w') as obj:
             _prepare_dtc_printing_archive(temp_path, obj, file_type)
             obj.write('DriveThruCards.pdf', 'DriveThruCards.pdf')

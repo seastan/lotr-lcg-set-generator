@@ -713,11 +713,9 @@ function markUp(vXml, nXml, lang, setID, pluginVersion) {
 		vXml = vXml.replace(/\b(Condizione)\b/g, '[bi]$1[/bi]');
 	}
 
-	vXml = vXml.replace(/ +(\n|$)/g, '$1');
-	vXml = vXml.replace(/</g, '[lt]');
-	vXml = vXml.replace(/>/g, '[gt]');
-	vXml = vXml.replace(/\[lt\]/ig, '<lt>');
-	vXml = vXml.replace(/\[gt\]/ig, '<gt>');
+	vXml = vXml.replace(/ +(?=\n|$)/g, '');
+	vXml = vXml.replace(/</g, '<lt>');
+	vXml = vXml.replace(/>/g, '<gt>');
 	vXml = vXml.replace(/\[unique\]/ig, '<uni>');
 	vXml = vXml.replace(/\[threat\]/ig, '<thr>');
 	vXml = vXml.replace(/\[attack\]/ig, '<att>');
@@ -730,8 +728,8 @@ function markUp(vXml, nXml, lang, setID, pluginVersion) {
 	vXml = vXml.replace(/\[baggins\]/ig, '<bag>');
 	vXml = vXml.replace(/\[fellowship\]/ig, '<fel>');
 	vXml = vXml.replace(/\[sailing\]/ig, '<sai>');
-	vXml = vXml.replace(/\[space\]/ig, '<hs>');
 	vXml = vXml.replace(/\[pp\]/ig, '<pp>');
+	vXml = vXml.replace(/\[space\]/ig, '<hs>');
 	vXml = vXml.replace(/\[h1\]/ig, '[center][lotr]<size 11>');
 	vXml = vXml.replace(/\[\/h1\]/ig, '</size>[/lotr][/center]');
 	vXml = vXml.replace(/\[h2\]/ig, '[center][lotr]<size 9>');
