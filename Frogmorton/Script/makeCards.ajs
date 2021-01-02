@@ -326,9 +326,11 @@ function run(progress, target, filename, icons) {
 						if (keywords) {
 							vXml = keywords + '\n\n' + vXml;
 						}
-						if (['Hero', 'Ally', 'Attachment', 'Event', 'Enemy', 'Location', 'Treachery', 'Objective', 'Objective Ally'
-							].indexOf(cardType) > -1 && !traits) {
-							vXml = '\n' + vXml;
+						if (pluginVersion == 'old') {
+							if (['Hero', 'Ally', 'Attachment', 'Event', 'Enemy', 'Location', 'Treachery', 'Objective', 'Objective Ally'
+								].indexOf(cardType) > -1 && !traits) {
+								vXml = '\n' + vXml;
+							}
 						}
 					}
 					vXml = markUp(vXml, nXml, lang, setID, pluginVersion);
@@ -340,11 +342,9 @@ function run(progress, target, filename, icons) {
 
 				if (pluginVersion == 'new') {
 					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 8; FOREGROUND: #000000');
-
 					s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
 					s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
 					if (landscapeTypes.indexOf(cardType) > -1) {
-						s.set('Body-region', '48,246,467,121');
 						s.set('Artist-region', '130,377,120,15');
 						s.set('Copyright-region', '218,377,136,15');
 						s.set('Collection-portrait-clip-region', '391,378,12,12');
@@ -431,7 +431,23 @@ function run(progress, target, filename, icons) {
 						}
 					}
 				}
-				else if (cardType == 'Quest') {
+				else if (landscapeTypes.indexOf(cardType) > -1) {
+					if (pluginVersion == 'new') {
+						s.set('Body-region', '48,246,467,121');
+					}
+				}
+				else {
+					if (pluginVersion == 'new') {
+						s.set('TraitOut', 'true')
+						s.set('TraitOut-Trait-region', s.get('Body-region'));
+						let bodyRegion = s.get('Body-region').split(',');
+						bodyRegion[1] = parseInt(bodyRegion[1]) + 20;
+						bodyRegion[3] = parseInt(bodyRegion[3]) - 20;
+						s.set('TraitOut-Body-region', bodyRegion.join(','));
+					}
+				}
+
+				if (cardType == 'Quest') {
 					s.set('NameShare', 0);
 				}
 
