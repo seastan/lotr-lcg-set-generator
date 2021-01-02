@@ -4,6 +4,7 @@
 import codecs
 import csv
 import hashlib
+import json
 import logging
 import math
 import os
@@ -71,13 +72,18 @@ CARD_EASY_MODE = 'Removed for Easy Mode'
 BACK_PREFIX = 'Back '
 MAX_COLUMN = '_Max Column'
 
-CARD_TYPES = ['Ally', 'Attachment', 'Contract', 'Enemy', 'Event', 'Hero',
-              'Location', 'Objective', 'Objective Ally', 'Presentation',
-              'Quest', 'Rules', 'Side Quest', 'Treachery']
+CARD_TYPES = ['Ally', 'Attachment', 'Contract', 'Enemy',
+              'Encounter Side Quest', 'Event', 'Hero', 'Location', 'Objective',
+              'Objective Ally', 'Player Side Quest', 'Presentation', 'Quest',
+              'Rules', 'Treachery']
 CARD_TYPES_DOUBLESIDE = ['Presentation', 'Quest', 'Rules']
 CARD_TYPES_DOUBLESIDE_OPTIONAL = ['Contract']
 CARD_TYPES_PLAYER = ['Ally', 'Attachment', 'Contract', 'Event', 'Hero',
-                     'Side Quest']
+                     'Player Side Quest']
+CARD_TYPES_HALLOFBEORN_ENCOUNTER_SET = ['Enemy', 'Encounter Side Quest',
+                                        'Location', 'Objective',
+                                        'Objective Ally', 'Quest',
+                                        'Treachery']
 
 CMYK_COMMAND_JPG = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
 CMYK_COMMAND_TIF = '"{}" mogrify -profile USWebCoatedSWOP.icc -compress lzw ' \
@@ -130,7 +136,7 @@ XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
 
 SET_COLUMNS = {}
 CARD_COLUMNS = {}
-SETS = []
+SETS = {}
 DATA = []
 ARTWORK_CACHE = {}
 
@@ -163,11 +169,23 @@ def _is_positive_int(value):
     """ Check whether a value is a positive int or not.
     """
     try:
-        if int(value) == value and value > 0:
+        if (str(value).isdigit() or int(value) == value) and int(value) > 0:
             return True
 
         return False
-    except ValueError:
+    except (TypeError, ValueError):
+        return False
+
+
+def _is_positive_or_zero_int(value):
+    """ Check whether a value is a positive int or zero or not.
+    """
+    try:
+        if (str(value).isdigit() or int(value) == value) and int(value) >= 0:
+            return True
+
+        return False
+    except (TypeError, ValueError):
         return False
 
 
@@ -399,7 +417,10 @@ def extract_data():
                                             SET_COLUMNS[MAX_COLUMN],
                                             SET_MAX_NUMBER + SET_TITLE_ROW)
             data = xlwb_source.sheets[SET_SHEET].range(xlwb_range).value
-            SETS.extend(_transform_to_dict(data, SET_COLUMNS))
+            SETS.update({s[SET_ID]: dict(**s,
+                                         **{SET_ROW: i + SET_TITLE_ROW + 1})
+                         for i, s in
+                         enumerate(_transform_to_dict(data, SET_COLUMNS))})
 
             xlwb_range = '{}{}:{}{}'.format('A',  # pylint: disable=W1308
                                             CARD_TITLE_ROW,
@@ -437,7 +458,7 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
 
     errors_found = False
     card_ids = []
-    set_ids = [s[SET_ID] for s in SETS]
+    set_ids = list(SETS.keys())
     for i, row in enumerate(DATA):
         i = i + CARD_TITLE_ROW + 1
         if _skip_row(row):
@@ -453,14 +474,26 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
         card_type_back = row[BACK_PREFIX + CARD_TYPE]
         card_easy_mode = row[CARD_EASY_MODE]
 
-        if not set_id:
+        if card_type == 'Side Quest':
+            if row[CARD_ENCOUNTER_SET] is not None:
+                card_type = 'Encounter Side Quest'
+            else:
+                card_type = 'Player Side Quest'
+
+        if card_type_back == 'Side Quest':
+            if row[CARD_ENCOUNTER_SET] is not None:
+                card_type_back = 'Encounter Side Quest'
+            else:
+                card_type_back = 'Player Side Quest'
+
+        if set_id is None:
             logging.error('ERROR: No set ID for row #%s', i)
             errors_found = True
         elif set_id not in set_ids:
             logging.error('ERROR: Unknown set ID for row #%s', i)
             errors_found = True
 
-        if not card_id:
+        if card_id is None:
             logging.error('ERROR: No card ID for row #%s', i)
             errors_found = True
         elif card_id in card_ids:
@@ -469,11 +502,11 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
         else:
             card_ids.append(card_id)
 
-        if not card_number:
+        if card_number is None:
             logging.error('ERROR: No card number for row #%s', i)
             errors_found = True
 
-        if not card_quantity:
+        if card_quantity is None:
             logging.error('ERROR: No card quantity for row #%s', i)
             errors_found = True
         elif not _is_positive_int(card_quantity):
@@ -481,28 +514,28 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
                           ' for row #%s', i)
             errors_found = True
 
-        if card_unique and card_unique != 1:
+        if card_unique is not None and card_unique not in ('1', 1):
             logging.error('ERROR: Incorrect format for unique for row #%s', i)
             errors_found = True
 
-        if card_unique_back and card_unique_back != 1:
+        if card_unique_back is not None and card_unique_back not in ('1', 1):
             logging.error('ERROR: Incorrect format for unique back'
                           ' for row #%s', i)
             errors_found = True
 
-        if not card_type:
+        if card_type is None:
             logging.error('ERROR: No card type for row #%s', i)
             errors_found = True
         elif card_type not in CARD_TYPES:
             logging.error('ERROR: Unknown card type for row #%s', i)
             errors_found = True
 
-        if card_type_back and card_type_back not in CARD_TYPES:
+        if card_type_back is not None and card_type_back not in CARD_TYPES:
             logging.error('ERROR: Unknown card type back for row #%s', i)
             errors_found = True
         elif ((card_type in CARD_TYPES_DOUBLESIDE
                or card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL)
-              and card_type_back and card_type_back != card_type):
+              and card_type_back is not None and card_type_back != card_type):
             logging.error('ERROR: Incorrect card type back for row #%s', i)
             errors_found = True
         elif (card_type not in CARD_TYPES_DOUBLESIDE
@@ -512,11 +545,11 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
             logging.error('ERROR: Incorrect card type back for row #%s', i)
             errors_found = True
 
-        if card_easy_mode and not _is_positive_int(card_easy_mode):
+        if card_easy_mode is not None and not _is_positive_int(card_easy_mode):
             logging.error('ERROR: Incorrect format for removed for easy mode'
                           ' for row #%s', i)
             errors_found = True
-        elif card_easy_mode and card_easy_mode > card_quantity:
+        elif card_easy_mode is not None and card_easy_mode > card_quantity:
             logging.error('ERROR: Removed for easy mode is greater than card'
                           ' quantity for row #%s', i)
             errors_found = True
@@ -529,18 +562,15 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
 
 
 def get_sets(conf):
-    """ Get all sets to work on.
+    """ Get all sets to work on and return list of (set id, set name) tuples.
     """
     logging.info('Getting all sets to work on...')
     timestamp = time.time()
 
     chosen_sets = []
-    for i, row in enumerate(SETS):
-        i = i + SET_TITLE_ROW + 1
+    for row in SETS.values():
         if row[SET_ID] in conf['set_ids']:
-            set_data = {SET_ROW: i}
-            set_data.update(row)
-            chosen_sets.append(set_data)
+            chosen_sets.append([row[SET_ID], row[SET_NAME]])
 
     if not chosen_sets:
         logging.error('ERROR: No sets to work on')
@@ -637,7 +667,7 @@ def _run_macro(set_row, callback):
         excel_app.quit()
 
 
-def generate_octgn_set_xml(set_id, set_name, set_row):
+def generate_octgn_set_xml(set_id, set_name):
     """ Generate set.xml file for OCTGN.
     """
     def _callback(_, xlwb_target):
@@ -647,7 +677,7 @@ def generate_octgn_set_xml(set_id, set_name, set_row):
     timestamp = time.time()
 
     _backup_previous_octgn_xml(set_id)
-    _run_macro(set_row, _callback)
+    _run_macro(SETS[set_id][SET_ROW], _callback)
     _copy_octgn_xml(set_id, set_name)
     logging.info('[%s] ...Generating set.xml file for OCTGN (%ss)',
                  set_name, round(time.time() - timestamp, 3))
@@ -711,11 +741,13 @@ def _update_card_text(text):
 def _handle_int(value):
     """ Correctly handle (not always) integer values.
     """
-    value = value and (_is_positive_int(value) and int(value) or value)
+    if _is_positive_or_zero_int(value):
+        return int(value)
+
     return value
 
 
-def generate_ringsdb_csv(set_id, set_name, set_code):
+def generate_ringsdb_csv(set_id, set_name):
     """ Generate CSV file for RingsDB.
     """
     logging.info('[%s] Generating CSV file for RingsDB...', set_name)
@@ -727,7 +759,7 @@ def generate_ringsdb_csv(set_id, set_name, set_code):
     output_path = os.path.join(output_path,
                                '{}.csv'.format(_escape_filename(set_name)))
     with open(output_path, 'w', newline='', encoding='utf-8') as obj:
-        obj.write(codecs.BOM_UTF8.decode('utf8'))
+        obj.write(codecs.BOM_UTF8.decode('utf-8'))
         fieldnames = ['pack', 'type', 'sphere', 'position', 'code', 'name',
                       'traits', 'text', 'flavor', 'isUnique', 'cost', 'threat',
                       'willpower', 'attack', 'defense', 'health', 'victory',
@@ -736,36 +768,46 @@ def generate_ringsdb_csv(set_id, set_name, set_code):
         writer = csv.DictWriter(obj, fieldnames=fieldnames)
         writer.writeheader()
         for row in DATA:
-            if (_skip_row(row) or row[CARD_SET] != set_id
-                    or row[CARD_TYPE] not in CARD_TYPES_PLAYER):
+            if _skip_row(row) or row[CARD_SET] != set_id:
                 continue
 
             card_type = row[CARD_TYPE]
             if card_type == 'Side Quest':
-                if row[CARD_ENCOUNTER_SET]:
-                    continue
+                if row[CARD_ENCOUNTER_SET] is not None:
+                    card_type = 'Encounter Side Quest'
+                else:
+                    card_type = 'Player Side Quest'
 
-                card_type = 'Player Side Quest'
+            if card_type not in CARD_TYPES_PLAYER:
+                continue
 
-            limit = re.search(r'limit .*([0-9]+) per deck', row[CARD_TEXT],
+            limit = re.search(r'limit .*([0-9]+) per deck',
+                              row[CARD_TEXT] is not None and
+                              str(row[CARD_TEXT]) or '',
                               re.I)
             if limit:
                 limit = int(limit.groups()[0])
+
+            if _is_positive_or_zero_int(row[CARD_NUMBER]):
+                code = '{}{}'.format(int(SETS[set_id][SET_RINGSDB_CODE]),
+                                     str(int(row[CARD_NUMBER])).zfill(3))
+            else:
+                code = ''
 
             csv_row = {
                 'pack': set_name,
                 'type': card_type,
                 'sphere': row[CARD_SPHERE],
-                'position': int(row[CARD_NUMBER]),
-                'code': '{}{}'.format(int(set_code),
-                                      str(int(row[CARD_NUMBER])).zfill(3)),
+                'position': _handle_int(row[CARD_NUMBER]),
+                'code': code,
                 'name': row[CARD_NAME],
-                'traits': row[CARD_TRAITS] and row[CARD_TRAITS],
+                'traits': row[CARD_TRAITS],
                 'text': '{}\n{}'.format(
-                    row[CARD_KEYWORDS] or '',
-                    _update_card_text(row[CARD_TEXT])).strip(),
-                'flavor': (row[CARD_FLAVOUR] and
-                           row[CARD_FLAVOUR]),
+                    row[CARD_KEYWORDS] is not None and
+                    str(row[CARD_KEYWORDS]) or '',
+                    _update_card_text(row[CARD_TEXT] is not None and
+                                      str(row[CARD_TEXT]) or '')).strip(),
+                'flavor': row[CARD_FLAVOUR],
                 'isUnique': row[CARD_UNIQUE] and int(row[CARD_UNIQUE]),
                 'cost': _handle_int(row[CARD_COST]),
                 'threat': _handle_int(row[CARD_THREAT]),
@@ -787,17 +829,88 @@ def generate_ringsdb_csv(set_id, set_name, set_code):
                  set_name, round(time.time() - timestamp, 3))
 
 
-def generate_hallofbeorn_json(set_id, set_name, set_code):
+# T.B.D. illustrator = 'None' (all)
+# T.B.D. sphere_code = 'none' (all)
+# T.B.D. sphere_name = 'None' (all)
+# T.B.D. octgnid = '' (all)
+# T.B.D. traits = '' (all)
+# T.B.D. flavor = '' (all)
+# T.B.D. encounter_set = '' (CARD_TYPES_HALLOFBEORN_ENCOUNTER_SET)
+# T.B.D. check double sided cards (each known type/any type)
+def generate_hallofbeorn_json(set_id, set_name):
     """ Generate JSON file for Hall of Beorn.
     """
     logging.info('[%s] Generating JSON file for Hall of Beorn...', set_name)
     timestamp = time.time()
 
+    output_path = os.path.join(OUTPUT_HALLOFBEORN_PATH,
+                               _escape_filename(set_name))
+    _create_folder(output_path)
+
+    output_path = os.path.join(output_path,
+                               '{}.json'.format(_escape_filename(set_name)))
+    json_data = []
+    for row in DATA:
+        if _skip_row(row) or row[CARD_SET] != set_id:
+            continue
+
+        card_type = row[CARD_TYPE]
+        if card_type == 'Side Quest':
+            if row[CARD_ENCOUNTER_SET] is not None:
+                card_type = 'Encounter Side Quest'
+            else:
+                card_type = 'Player Side Quest'
+
+        limit = re.search(r'limit .*([0-9]+) per deck',
+                          row[CARD_TEXT] is not None and
+                          str(row[CARD_TEXT]) or '',
+                          re.I)
+        if limit:
+            limit = int(limit.groups()[0])
+
+        json_row = {
+            'pack': set_name,
+            'type': card_type,
+            'sphere': row[CARD_SPHERE],
+            'position': _handle_int(row[CARD_NUMBER]),
+            'pack_code': SETS[set_id][SET_HOB_CODE],
+            'name': row[CARD_NAME],
+            'traits': row[CARD_TRAITS],
+            'text': '{}\n{}'.format(
+                row[CARD_KEYWORDS] is not None and
+                str(row[CARD_KEYWORDS]) or '',
+                _update_card_text(
+                    row[CARD_TEXT] is not None and
+                    str(row[CARD_TEXT]) or '')).replace('\n', '\r\n').strip(),
+            'flavor': row[CARD_FLAVOUR] is not None and
+                      str(row[CARD_FLAVOUR]).replace('\n', '\r\n') or None,
+            'isUnique': row[CARD_UNIQUE] and int(row[CARD_UNIQUE]),
+            'cost': _handle_int(row[CARD_COST]),
+            'threat': _handle_int(row[CARD_THREAT]),
+            'willpower': _handle_int(row[CARD_WILLPOWER]),
+            'attack': _handle_int(row[CARD_ATTACK]),
+            'defense': _handle_int(row[CARD_DEFENSE]),
+            'health': _handle_int(row[CARD_HEALTH]),
+            'victory': _handle_int(row[CARD_VICTORY]),
+            'quest': _handle_int(row[CARD_QUEST]),
+            'quantity': int(row[CARD_QUANTITY]),
+            'deckLimit': limit or int(row[CARD_QUANTITY]),
+            'illustrator': row[CARD_ARTIST],
+            'octgnid': row[CARD_ID],
+            'hasErrata': None
+            }
+        json_row = {k:v for k, v in json_row.items() if v is not None}
+        json_data.append(json_row)
+
+    with open(output_path, 'w', encoding='utf-8') as obj:
+        res = json.dumps(json_data, ensure_ascii=False)
+        obj.write(res)
+
     logging.info('[%s] ...Generating JSON file for Hall of Beorn (%ss)',
                  set_name, round(time.time() - timestamp, 3))
 
 
-def generate_xml(conf, set_id, set_name, set_row, lang):
+def generate_xml(conf, set_id, set_name, lang):
     """ Generate xml file for Strange Eons.
     """
     def _callback(xlwb_source, xlwb_target):
@@ -837,7 +950,7 @@ def generate_xml(conf, set_id, set_name, set_row, lang):
     timestamp = time.time()
 
     _backup_previous_xml(conf, set_id, lang)
-    _run_macro(set_row, _callback)
+    _run_macro(SETS[set_id][SET_ROW], _callback)
     logging.info('[%s, %s] ...Generating xml file for Strange Eons (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 

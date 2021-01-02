@@ -19,25 +19,19 @@ def main():
     sets = lotr.get_sets(conf)
 
     changes = False
-    for set_data in sets:
-        set_id = set_data[lotr.SET_ID]
-        set_name = set_data[lotr.SET_NAME]
-        set_row = set_data[lotr.SET_ROW]
-
+    for set_id, set_name in sets:
         if conf['octgn_set_xml']:
-            lotr.generate_octgn_set_xml(set_id, set_name, set_row)
+            lotr.generate_octgn_set_xml(set_id, set_name)
 
         if conf['ringsdb_csv']:
-            lotr.generate_ringsdb_csv(set_id, set_name,
-                                      set_data[lotr.SET_RINGSDB_CODE])
+            lotr.generate_ringsdb_csv(set_id, set_name)
 
         if conf['hallofbeorn_json']:
-            lotr.generate_hallofbeorn_json(set_id, set_name,
-                                           set_data[lotr.SET_HOB_CODE])
+            lotr.generate_hallofbeorn_json(set_id, set_name)
 
         lotr.copy_custom_images(conf, set_id, set_name)
         for lang in conf['languages']:
-            lotr.generate_xml(conf, set_id, set_name, set_row, lang)
+            lotr.generate_xml(conf, set_id, set_name, lang)
             lotr.update_xml(conf, set_id, set_name, lang)
             new_hash, old_hash = lotr.calculate_hashes(set_id, set_name, lang)
             if new_hash != old_hash:
