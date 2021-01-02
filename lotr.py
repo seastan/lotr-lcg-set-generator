@@ -837,10 +837,13 @@ def generate_ringsdb_csv(set_id, set_name):
                  set_name, round(time.time() - timestamp, 3))
 
 
-# T.B.D. fix type_code
-# T.B.D. check '-' instead of int
-# T.B.D. check missing columns
-# T.B.D. check double sided cards (each known type/any type)
+# T.B.D. check double sided cards
+# T.B.D. add page number to text
+# T.B.D. add quest stage letter to text
+# T.B.D. add non-standard side b cards
+# T.B.D. ask about rules vs gencone setup
+# T.B.D. ask about changing * to 253/X to 254/- to 255
+# T.B.D. ask about missing columns
 def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914
     """ Generate JSON file for Hall of Beorn.
     """
@@ -864,6 +867,8 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914
                 card_type = 'Encounter Side Quest'
             else:
                 card_type = 'Player Side Quest'
+        elif card_type == 'Presentation':
+            card_type = 'Rules'
 
         limit = re.search(r'limit .*([0-9]+) per deck',
                           row[CARD_TEXT] is not None and
@@ -892,8 +897,14 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914
             cost = None
             threat = None
         else:
-            cost = _handle_int(row[CARD_COST])
+            cost = str(_handle_int(row[CARD_COST]))
             threat = None
+
+        if card_type == 'Presentation':
+            sphere = 'None'
+        else:
+            sphere = (str(row[CARD_SPHERE])
+                      if row[CARD_SPHERE] is not None else 'None')
 
         json_row = {
             'code': '{}{}'.format(int(SETS[set_id][SET_RINGSDB_CODE]),
@@ -918,10 +929,8 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914
             'pack_name': set_name,
             'position': position,
             'quantity': int(row[CARD_QUANTITY]),
-            'sphere_code': row[CARD_SPHERE] is not None and
-                           str(row[CARD_SPHERE]).lower() or 'none',
-            'sphere_name': row[CARD_SPHERE] is not None and
-                           str(row[CARD_SPHERE]) or 'None',
+            'sphere_code': sphere.lower(),
+            'sphere_name': sphere,
             'text': '{}\n{}'.format(
                 row[CARD_KEYWORDS] is not None and
                 str(row[CARD_KEYWORDS]) or '',
@@ -930,8 +939,8 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914
                     str(row[CARD_TEXT]) or '')).replace('\n', '\r\n').strip(),
             'traits': row[CARD_TRAITS] is not None and
                       str(row[CARD_TRAITS]) or '',
-            'type_code': str(row[CARD_SPHERE]).lower(),
-            'type_name': row[CARD_SPHERE],
+            'type_code': card_type.lower().replace(' ', '-'),
+            'type_name': card_type,
             'url': '',
             'encounter_set': encounter_set,
             'threat_strength': _handle_int(row[CARD_THREAT]),
@@ -943,13 +952,12 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914
             'engagement_cost': _handle_int(row[CARD_ENGAGEMENT]),
             'willpower': _handle_int(row[CARD_WILLPOWER]),
             'threat': threat
-#           + victory
-#           ? shadow
+#           + victory points
+#           + shadow
 #           + easy mode
 #           + additional encounter sets
-#           + quest stage
-#           ? adventure
-#           ? encounter set numbers
+#           + quest stage number
+#           + side B quest points
             }
         json_row = {k:v for k, v in json_row.items() if v is not None}
         json_data.append(json_row)
