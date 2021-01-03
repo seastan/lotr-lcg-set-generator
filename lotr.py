@@ -1896,6 +1896,33 @@ def _make_cmyk(conf, input_path, file_type=DTC_FILE_TYPE):
         break
 
 
+def _flip_first_card(input_path):
+    """ Flip first card of the deck.
+    """
+    for _, _, filenames in os.walk(input_path):
+        filenames = sorted(filenames)
+        if len(filenames) < 2:
+            break
+
+        file_type = filenames[0].split('.')[-1]
+        if not (filenames[0].endswith('-1.{}'.format(file_type)) and
+                filenames[1].endswith('-2.{}'.format(file_type))):
+            break
+
+        if (filenames[0].split('-1.{}'.format(file_type))[0] !=
+                filenames[1].split('-2.{}'.format(file_type))[0]):
+            break
+
+        temp_name = 'temp_file'
+        shutil.move(os.path.join(input_path, filenames[0]),
+                    os.path.join(input_path, temp_name))
+        shutil.move(os.path.join(input_path, filenames[1]),
+                    os.path.join(input_path, filenames[0]))
+        shutil.move(os.path.join(input_path, temp_name),
+                    os.path.join(input_path, filenames[1]))
+        break
+
+
 def _prepare_printing_images(input_path, output_path, service='dtc',
                              file_type=DTC_FILE_TYPE):
     """ Prepare images for MakePlayingCards/DriveThruCards.
@@ -2046,6 +2073,7 @@ def generate_mpc(conf, set_id, set_name, lang):
     _clear_folder(temp_path)
     _prepare_printing_images(input_path, temp_path, 'mpc', 'png')
     _make_unique_png(temp_path)
+    _flip_first_card(temp_path)
 
     if 'makeplayingcards_zip' in conf['outputs'][lang]:
         with zipfile.ZipFile(
@@ -2100,6 +2128,7 @@ def generate_dtc(conf, set_id, set_name, lang, file_type=DTC_FILE_TYPE):
     _clear_folder(temp_path)
     _prepare_printing_images(input_path, temp_path, 'dtc', file_type)
     _make_cmyk(conf, temp_path, file_type)
+    _flip_first_card(temp_path)
 
     if 'drivethrucards_zip' in conf['outputs'][lang]:
         with zipfile.ZipFile(
