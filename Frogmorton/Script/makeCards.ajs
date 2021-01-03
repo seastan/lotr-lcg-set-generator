@@ -10,7 +10,10 @@ importClass(org.w3c.dom.Node);
 importClass(org.w3c.dom.NodeList);
 
 var doubleSideTypes = ['Presentation', 'Quest', 'Rules'];
-var landscapeTypes = ['Player Side Quest', 'Encounter Side Quest', 'Quest'];
+var landscapeTypes = ['Encounter Side Quest', 'Player Side Quest', 'Quest'];
+var playerTypes = ['Ally', 'Attachment', 'Event', 'Hero', 'Player Side Quest'];
+var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Side Quest'];
+var nonUniqueTypes = ['Encounter Side Quest', 'Event', 'Contract', 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery'];
 
 var portraitRegion = {};
 portraitRegion['Ally'] = '87,0,326,330';
@@ -191,7 +194,7 @@ function run(progress, target, filename, icons) {
 		}
 
 		let playerCopies = false;
-		if (['Ally', 'Attachment', 'Event', 'Player Side Quest'].indexOf(card['Type'] + '') > -1 && card['Quantity'] == 3) {
+		if (playerCopyTypes.indexOf(card['Type'] + '') > -1 && card['Quantity'] == 3) {
 			playerCopies = true;
 			card['Quantity'] = 1;
 		}
@@ -245,6 +248,7 @@ function run(progress, target, filename, icons) {
 							['RulesBack', 'BText'],
 							['FlavourBack', 'BFlavour'],
 							['StoryBack', 'BFlavour'],
+							['OptionRightBack', 'BVictory Points'],
 							['ArtistBack-external', 'BArtist'],  // old plugin
 							['ArtistBack', 'BArtist']  // new plugin
 						]);
@@ -368,7 +372,6 @@ function run(progress, target, filename, icons) {
 					if (pluginVersion == 'new') {
 						s.set('Name', '');
 						s.set('GameName', '');
-						s.set('Template', s.get('Template'));
 						s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
 						s.set('GameName-external-path', 'project:imagesRaw/' + card['ArtworkTop']);
 						s.set('Name-external-path', 'project:imagesRaw/' + card['ArtworkBottom']);
@@ -488,7 +491,7 @@ function run(progress, target, filename, icons) {
 					}
 				}
 
-				if (['Event', 'Treachery', 'Player Side Quest', 'Encounter Side Quest', 'Quest', 'Rules', 'Contract'].indexOf(cardType) > -1) {
+				if (nonUniqueTypes.indexOf(cardType) > -1) {
 					s.set('Unique', '');
 				}
 
@@ -605,7 +608,7 @@ function run(progress, target, filename, icons) {
 					back = '-';
 					simple_back = true;
 				}
-				else if (['Hero', 'Ally', 'Attachment', 'Event', 'Player Side Quest'].indexOf(cardType) > -1 &&
+				else if (playerTypes.indexOf(cardType) > -1 &&
 					(keywords + '').search(translate['Encounter Keyword'][lang]) == -1) {
 					back = 'p';
 					simple_back = true;

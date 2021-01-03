@@ -46,6 +46,7 @@ SET_HOB_CODE = 'HoB Code'
 SET_LANGUAGE = 'Language'
 SET_ROW = '_Row'
 
+BACK_PREFIX = 'Back_'
 CARD_SET = 'Set'
 CARD_ID = 'Card GUID'
 CARD_NUMBER = 'Card Number'
@@ -70,15 +71,16 @@ CARD_TEXT = 'Text'
 CARD_FLAVOUR = 'Flavour'
 CARD_ARTIST = 'Artist'
 CARD_EASY_MODE = 'Removed for Easy Mode'
-BACK_PREFIX = 'Back '
+CARD_SIDE_B = 'Side B'
+CARD_FILENAME = '_Filename'
+
 MAX_COLUMN = '_Max Column'
 
 CARD_TYPES = ['Ally', 'Attachment', 'Contract', 'Enemy',
               'Encounter Side Quest', 'Event', 'Hero', 'Location', 'Objective',
               'Objective Ally', 'Player Side Quest', 'Presentation', 'Quest',
               'Rules', 'Treachery']
-CARD_TYPES_DOUBLESIDE = ['Presentation', 'Quest', 'Rules']
-CARD_TYPES_DOUBLESIDE_OPTIONAL = ['Contract']
+CARD_TYPES_DOUBLESIDE = ['Contract', 'Presentation', 'Quest', 'Rules']
 CARD_TYPES_PLAYER = ['Ally', 'Attachment', 'Contract', 'Event', 'Hero',
                      'Player Side Quest']
 CARD_TYPES_ENCOUNTER_SET = ['Enemy', 'Encounter Side Quest', 'Location',
@@ -534,15 +536,12 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
         if card_type_back is not None and card_type_back not in CARD_TYPES:
             logging.error('ERROR: Unknown card type back for row #%s', i)
             errors_found = True
-        elif ((card_type in CARD_TYPES_DOUBLESIDE
-               or card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL)
+        elif (card_type in CARD_TYPES_DOUBLESIDE
               and card_type_back is not None and card_type_back != card_type):
             logging.error('ERROR: Incorrect card type back for row #%s', i)
             errors_found = True
         elif (card_type not in CARD_TYPES_DOUBLESIDE
-              and card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL
-              and (card_type_back in CARD_TYPES_DOUBLESIDE or
-                   card_type_back in CARD_TYPES_DOUBLESIDE_OPTIONAL)):
+              and card_type_back in CARD_TYPES_DOUBLESIDE):
             logging.error('ERROR: Incorrect card type back for row #%s', i)
             errors_found = True
 
@@ -748,7 +747,7 @@ def _handle_int(value):
     return value
 
 
-def generate_ringsdb_csv(set_id, set_name):
+def generate_ringsdb_csv(set_id, set_name):  # pylint: disable=R0912
     """ Generate CSV file for RingsDB.
     """
     logging.info('[%s] Generating CSV file for RingsDB...', set_name)
@@ -801,10 +800,15 @@ def generate_ringsdb_csv(set_id, set_name):
                 cost = _handle_int(row[CARD_COST])
                 threat = None
 
+            if card_type == 'Contract':
+                sphere = 'Neutral'
+            else:
+                sphere = row[CARD_SPHERE]
+
             csv_row = {
                 'pack': set_name,
                 'type': card_type,
-                'sphere': row[CARD_SPHERE],
+                'sphere': sphere,
                 'position': _handle_int(row[CARD_NUMBER]),
                 'code': '{}{}'.format(int(SETS[set_id][SET_RINGSDB_CODE]),
                                       code_card_number),
@@ -837,14 +841,14 @@ def generate_ringsdb_csv(set_id, set_name):
                  set_name, round(time.time() - timestamp, 3))
 
 
-# T.B.D. check double sided cards
-# T.B.D. add page number to text
-# T.B.D. add quest stage letter to text
-# T.B.D. add non-standard side b cards
-# T.B.D. ask about rules vs gencone setup
-# T.B.D. ask about changing * to 253/X to 254/- to 255
-# T.B.D. ask about missing columns
-def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914
+# T.B.D. clarify rules card type
+# T.B.D. clarify changing X to 254/- to 255
+# T.B.D. clarify keywords as a separate field
+# T.B.D. clarify joining side a and side b text
+# T.B.D. clarify missing fields (victory points/shadow/easy mode/additional encounter sets/
+#                                quest stage/side b flavor/side b quest name)
+# T.B.D. clarify image format and filename convention
+def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,R0915
     """ Generate JSON file for Hall of Beorn.
     """
     logging.info('[%s] Generating JSON file for Hall of Beorn...', set_name)
@@ -857,7 +861,20 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914
     output_path = os.path.join(output_path,
                                '{}.json'.format(_escape_filename(set_name)))
     json_data = []
+    input_data = DATA[:]
     for row in DATA:
+        if (row[CARD_SIDE_B] is not None and
+                row[CARD_TYPE] not in CARD_TYPES_DOUBLESIDE):
+            new_row = row.copy()
+            new_row[CARD_FILENAME] = '{}-2'.format(new_row[CARD_NAME])
+            new_row[CARD_NAME] = new_row[CARD_SIDE_B]
+            for key in new_row.keys():
+                if key.startswith(BACK_PREFIX):
+                    new_row[key.replace(BACK_PREFIX, '')] = new_row[key]
+
+            input_data.append(new_row)
+
+    for row in input_data:
         if _skip_row(row) or row[CARD_SET] != set_id:
             continue
 
@@ -892,16 +909,24 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914
 
         if card_type == 'Hero':
             cost = None
+            engagement_cost = None
             threat = _handle_int(row[CARD_COST])
+            quest_points = None
         elif card_type == 'Quest':
             cost = None
+            engagement_cost = None
             threat = None
+            quest_points = _handle_int(row[BACK_PREFIX + CARD_QUEST])
         else:
-            cost = str(_handle_int(row[CARD_COST]))
+            cost = _handle_int(row[CARD_COST])
+            engagement_cost = _handle_int(row[CARD_ENGAGEMENT])
             threat = None
+            quest_points = _handle_int(row[CARD_QUEST])
 
-        if card_type == 'Presentation':
+        if card_type == 'Rules':
             sphere = 'None'
+        elif card_type == 'Contract':
+            sphere = 'Neutral'
         else:
             sphere = (str(row[CARD_SPHERE])
                       if row[CARD_SPHERE] is not None else 'None')
@@ -917,10 +942,10 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914
                            str(row[CARD_ARTIST]) or 'None',
             'imagesrc': HALLOFBEORN_IMAGESRC_TEMPLATE.format(
                 set_name.replace(' ', '-'),
-                '{}-{}.png'.format(isinstance(row[CARD_NUMBER], str) and
-                                   row[CARD_NUMBER].zfill(3) or
-                                   str(int(row[CARD_NUMBER])).zfill(3),
-                                   row[CARD_NAME])),
+                '{}-{}.png'.format(_is_positive_or_zero_int(row[CARD_NUMBER]) and
+                                   str(int(row[CARD_NUMBER])).zfill(3) or
+                                   str(row[CARD_NUMBER]).zfill(3),
+                                   row.get(CARD_FILENAME, row[CARD_NAME]))),
             'is_official': False,
             'is_unique': bool(row[CARD_UNIQUE]),
             'name': row[CARD_NAME],
@@ -929,7 +954,7 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914
             'pack_name': set_name,
             'position': position,
             'quantity': int(row[CARD_QUANTITY]),
-            'sphere_code': sphere.lower(),
+            'sphere_code': sphere.lower().replace(' ', '-'),
             'sphere_name': sphere,
             'text': '{}\n{}'.format(
                 row[CARD_KEYWORDS] is not None and
@@ -944,21 +969,20 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914
             'url': '',
             'encounter_set': encounter_set,
             'threat_strength': _handle_int(row[CARD_THREAT]),
-            'quest_points': _handle_int(row[CARD_QUEST]),
+            'quest_points': quest_points,
             'attack': _handle_int(row[CARD_ATTACK]),
             'defense': _handle_int(row[CARD_DEFENSE]),
             'health': _handle_int(row[CARD_HEALTH]),
             'cost': cost,
-            'engagement_cost': _handle_int(row[CARD_ENGAGEMENT]),
+            'engagement_cost': engagement_cost,
             'willpower': _handle_int(row[CARD_WILLPOWER]),
             'threat': threat
-#           + victory points
-#           + shadow
-#           + easy mode
-#           + additional encounter sets
-#           + quest stage number
-#           + side B quest points
             }
+
+        if card_type == 'Rules' and row[CARD_VICTORY] is not None:
+            json_row['text'] = '{}\r\n\r\nPage {}'.format(json_row['text'],
+                                                          row[CARD_VICTORY])
+
         json_row = {k:v for k, v in json_row.items() if v is not None}
         json_data.append(json_row)
 
