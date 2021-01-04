@@ -67,32 +67,33 @@ CARD_DEFENSE = 'Defense'
 CARD_HEALTH = 'Health'
 CARD_QUEST = 'Quest Points'
 CARD_VICTORY = 'Victory Points'
+CARD_SHADOW = 'Shadow'
 CARD_TEXT = 'Text'
 CARD_FLAVOUR = 'Flavour'
 CARD_ARTIST = 'Artist'
 CARD_EASY_MODE = 'Removed for Easy Mode'
+CARD_ADDITIONAL_ENCOUNTER_SETS = 'Additional Encounter Sets'
 CARD_SIDE_B = 'Side B'
-CARD_FILENAME = '_Filename'
 
 MAX_COLUMN = '_Max Column'
 
-CARD_TYPES = ['Ally', 'Attachment', 'Contract', 'Enemy',
+CARD_TYPES = ('Ally', 'Attachment', 'Contract', 'Enemy',
               'Encounter Side Quest', 'Event', 'Hero', 'Location', 'Objective',
               'Objective Ally', 'Player Side Quest', 'Presentation', 'Quest',
-              'Rules', 'Treachery']
-CARD_TYPES_DOUBLESIDE = ['Contract', 'Presentation', 'Quest', 'Rules']
-CARD_TYPES_PLAYER = ['Ally', 'Attachment', 'Contract', 'Event', 'Hero',
-                     'Player Side Quest']
-CARD_TYPES_ENCOUNTER_SET = ['Enemy', 'Encounter Side Quest', 'Location',
+              'Rules', 'Treachery')
+CARD_TYPES_DOUBLESIDE = ('Contract', 'Presentation', 'Quest', 'Rules')
+CARD_TYPES_PLAYER = ('Ally', 'Attachment', 'Contract', 'Event', 'Hero',
+                     'Player Side Quest')
+CARD_TYPES_PLAYER_DECK = ('Ally', 'Attachment', 'Event', 'Player Side Quest')
+CARD_TYPES_ENCOUNTER_SET = ('Enemy', 'Encounter Side Quest', 'Location',
                             'Objective', 'Objective Ally', 'Quest',
-                            'Treachery']
+                            'Treachery')
 
 CMYK_COMMAND_JPG = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
 CMYK_COMMAND_TIF = '"{}" mogrify -profile USWebCoatedSWOP.icc -compress lzw ' \
                    '"{}\\*.tif"'
 DTC_FILE_TYPE = 'jpg'
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
-HALLOFBEORN_IMAGESRC_TEMPLATE = 'https://s3.amazonaws.com/hallofbeorn-resources/Images/Cards/{}/{}'
 IMAGE_MIN_SIZE = 100000
 IMAGES_CUSTOM_FOLDER = 'custom'
 OCTGN_ARCHIVE = 'unzip-me-into-sets-folder.zip'
@@ -683,7 +684,7 @@ def generate_octgn_set_xml(set_id, set_name):
                  set_name, round(time.time() - timestamp, 3))
 
 
-def _update_card_text(text):
+def _update_card_text(text):  # pylint: disable=R0915
     """ Update card text for RingsDB.
     """
     text = re.sub(r'\b(Quest Resolution)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', text)
@@ -701,7 +702,7 @@ def _update_card_text(text):
     text = re.sub(r'\[\/i\]', '</i>', text, flags=re.IGNORECASE)
     text = re.sub(r'\[u\]', '<u>', text, flags=re.IGNORECASE)
     text = re.sub(r'\[\/u\]', '</u>', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[space\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[space\]', ' ', text, flags=re.IGNORECASE)
     text = re.sub(r'\[h1\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[\/h1\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[h2\]', '', text, flags=re.IGNORECASE)
@@ -733,7 +734,13 @@ def _update_card_text(text):
     text = text.replace('[Tactics]', '[tactics]')
     text = text.replace('[Baggins]', '[baggins]')
     text = text.replace('[Fellowship]', '[fellowship]')
+    text = text.replace('[Mastery]', '[mastery]')
+    text = text.replace('[Sunny]', '[sunny]')
+    text = text.replace('[Cloudy]', '[cloudy]')
+    text = text.replace('[Rainy]', '[rainy]')
+    text = text.replace('[Stormy]', '[stormy]')
     text = text.replace('[Sailing]', '[sailing]')
+    text = text.replace('[PP]', '[pp]')
 
     return text
 
@@ -781,17 +788,20 @@ def generate_ringsdb_csv(set_id, set_name):  # pylint: disable=R0912
             if card_type not in CARD_TYPES_PLAYER:
                 continue
 
-            limit = re.search(r'limit .*([0-9]+) per deck',
-                              row[CARD_TEXT] is not None and
-                              str(row[CARD_TEXT]) or '',
-                              re.I)
-            if limit:
-                limit = int(limit.groups()[0])
-
-            if _is_positive_or_zero_int(row[CARD_NUMBER]):
-                code_card_number = str(int(row[CARD_NUMBER])).zfill(3)
+            if card_type in CARD_TYPES_PLAYER_DECK:
+                limit = re.search(r'limit .*([0-9]+) per deck',
+                                  row[CARD_TEXT] is not None and
+                                  str(row[CARD_TEXT]) or '',
+                                  re.I)
+                if limit:
+                    limit = int(limit.groups()[0])
             else:
-                code_card_number = '000'
+                limit = None
+
+            code_card_number = (str(int(row[CARD_NUMBER])).zfill(3)
+                                if _is_positive_or_zero_int(row[CARD_NUMBER])
+                                else '000')
+            sphere = 'Neutral' if card_type == 'Contract' else row[CARD_SPHERE]
 
             if card_type == 'Hero':
                 cost = None
@@ -799,11 +809,6 @@ def generate_ringsdb_csv(set_id, set_name):  # pylint: disable=R0912
             else:
                 cost = _handle_int(row[CARD_COST])
                 threat = None
-
-            if card_type == 'Contract':
-                sphere = 'Neutral'
-            else:
-                sphere = row[CARD_SPHERE]
 
             csv_row = {
                 'pack': set_name,
@@ -841,13 +846,6 @@ def generate_ringsdb_csv(set_id, set_name):  # pylint: disable=R0912
                  set_name, round(time.time() - timestamp, 3))
 
 
-# T.B.D. clarify rules card type
-# T.B.D. clarify changing X to 254/- to 255
-# T.B.D. clarify keywords as a separate field
-# T.B.D. clarify joining side a and side b text
-# T.B.D. clarify missing fields (victory points/shadow/easy mode/additional encounter sets/
-#                                quest stage/side b flavor/side b quest name)
-# T.B.D. clarify image format and filename convention
 def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,R0915
     """ Generate JSON file for Hall of Beorn.
     """
@@ -863,10 +861,16 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
     json_data = []
     input_data = DATA[:]
     for row in DATA:
+        card_type = row[CARD_TYPE]
+        if card_type == 'Side Quest':
+            if row[CARD_ENCOUNTER_SET] is not None:
+                card_type = 'Encounter Side Quest'
+            else:
+                card_type = 'Player Side Quest'
+
         if (row[CARD_SIDE_B] is not None and
-                row[CARD_TYPE] not in CARD_TYPES_DOUBLESIDE):
+                card_type not in CARD_TYPES_DOUBLESIDE):
             new_row = row.copy()
-            new_row[CARD_FILENAME] = '{}-2'.format(new_row[CARD_NAME])
             new_row[CARD_NAME] = new_row[CARD_SIDE_B]
             for key in new_row.keys():
                 if key.startswith(BACK_PREFIX):
@@ -884,70 +888,105 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
                 card_type = 'Encounter Side Quest'
             else:
                 card_type = 'Player Side Quest'
-        elif card_type == 'Presentation':
-            card_type = 'Rules'
 
-        limit = re.search(r'limit .*([0-9]+) per deck',
-                          row[CARD_TEXT] is not None and
-                          str(row[CARD_TEXT]) or '',
-                          re.I)
-        if limit:
-            limit = int(limit.groups()[0])
-
-        if _is_positive_or_zero_int(row[CARD_NUMBER]):
-            code_card_number = str(int(row[CARD_NUMBER])).zfill(3)
-            position = int(row[CARD_NUMBER])
+        if card_type in CARD_TYPES_PLAYER_DECK:
+            limit = re.search(r'limit .*([0-9]+) per deck',
+                              row[CARD_TEXT] is not None and
+                              str(row[CARD_TEXT]) or '',
+                              re.I)
+            if limit:
+                limit = int(limit.groups()[0])
         else:
-            code_card_number = '000'
-            position = 0
-
-        if card_type in CARD_TYPES_ENCOUNTER_SET:
-            encounter_set = (str(row[CARD_ENCOUNTER_SET])
-                             if row[CARD_ENCOUNTER_SET] is not None else '')
-        else:
-            encounter_set = row[CARD_ENCOUNTER_SET]
+            limit = None
 
         if card_type == 'Hero':
             cost = None
-            engagement_cost = None
             threat = _handle_int(row[CARD_COST])
+            quest_stage = None
+            engagement_cost = None
             quest_points = None
         elif card_type == 'Quest':
             cost = None
-            engagement_cost = None
             threat = None
+            quest_stage = _handle_int(row[CARD_COST])
+            engagement_cost = None
             quest_points = _handle_int(row[BACK_PREFIX + CARD_QUEST])
         else:
             cost = _handle_int(row[CARD_COST])
-            engagement_cost = _handle_int(row[CARD_ENGAGEMENT])
             threat = None
+            quest_stage = None
+            engagement_cost = _handle_int(row[CARD_ENGAGEMENT])
             quest_points = _handle_int(row[CARD_QUEST])
 
-        if card_type == 'Rules':
+        if card_type in ('Presentation', 'Rules'):
             sphere = 'None'
         elif card_type == 'Contract':
             sphere = 'Neutral'
+        elif row[CARD_SPHERE] is not None:
+            sphere = str(row[CARD_SPHERE])
         else:
-            sphere = (str(row[CARD_SPHERE])
-                      if row[CARD_SPHERE] is not None else 'None')
+            sphere = 'None'
+
+        keywords = [k.strip() for k in
+                    (row[CARD_KEYWORDS] is not None and
+                     str(row[CARD_KEYWORDS]) or '').split('.') if k != '']
+        position = (int(row[CARD_NUMBER])
+                    if _is_positive_or_zero_int(row[CARD_NUMBER]) else 0)
+        encounter_set = ((str(row[CARD_ENCOUNTER_SET])
+                          if row[CARD_ENCOUNTER_SET] is not None else '')
+                         if card_type in CARD_TYPES_ENCOUNTER_SET
+                         else row[CARD_ENCOUNTER_SET])
+        type_name = ('Setup' if card_type in ('Presentation', 'Rules')
+                     else card_type)
+        victory_points = (None if card_type in ('Presentation', 'Rules')
+                          else _handle_int(row[CARD_VICTORY]))
+        additional_encounter_sets = [
+            s.strip() for s in (
+                row[CARD_ADDITIONAL_ENCOUNTER_SETS] is not None and
+                str(row[CARD_ADDITIONAL_ENCOUNTER_SETS]) or '').split(',')
+            if s != ''] or None
+
+        text = '{}\n{}'.format(
+            row[CARD_KEYWORDS] is not None and
+            str(row[CARD_KEYWORDS]) or '',
+            _update_card_text(
+                row[CARD_TEXT] is not None and
+                str(row[CARD_TEXT]) or '')).replace('\n', '\r\n').strip()
+        if (card_type in ('Presentation', 'Rules') and
+                row[CARD_VICTORY] is not None):
+            text = '{}\r\n\r\nPage {}'.format(text, row[CARD_VICTORY])
+
+        if (row[CARD_SIDE_B] is not None and
+                row[BACK_PREFIX + CARD_TEXT] is not None and
+                card_type in CARD_TYPES_DOUBLESIDE):
+            text_back = _update_card_text(str(row[BACK_PREFIX + CARD_TEXT])
+                                          ).replace('\n', '\r\n').strip()
+            if (card_type in ('Presentation', 'Rules') and
+                    row[BACK_PREFIX + CARD_VICTORY] is not None):
+                text_back = '{}\r\n\r\nPage {}'.format(
+                    text_back, row[BACK_PREFIX + CARD_VICTORY])
+            text = '<b>Side A</b> {} <b>Side B</b> {}'.format(text, text_back)
+
+        flavor = (str(row[CARD_FLAVOUR]).replace('\n', '\r\n').strip()
+                  if row[CARD_FLAVOUR] is not None else '')
+        if (row[CARD_SIDE_B] is not None and
+                row[BACK_PREFIX + CARD_FLAVOUR] is not None and
+                card_type in CARD_TYPES_DOUBLESIDE):
+            flavor_back = str(row[CARD_FLAVOUR]).replace('\n', '\r\n').strip()
+            flavor = 'Side A: {} Side B: {}'.format(flavor, flavor_back)
 
         json_row = {
             'code': '{}{}'.format(int(SETS[set_id][SET_RINGSDB_CODE]),
-                                  code_card_number),
-            'deckLimit': limit or int(row[CARD_QUANTITY]),
-            'flavor': row[CARD_FLAVOUR] is not None and
-                      str(row[CARD_FLAVOUR]).replace('\n', '\r\n') or '',
+                                  str(position).zfill(3)),
+            'deck_limit': limit or int(row[CARD_QUANTITY]),
+            'flavor': flavor,
             'has_errata': False,
             'illustrator': row[CARD_ARTIST] is not None and
                            str(row[CARD_ARTIST]) or 'None',
-            'imagesrc': HALLOFBEORN_IMAGESRC_TEMPLATE.format(
-                set_name.replace(' ', '-'),
-                '{}-{}.png'.format(_is_positive_or_zero_int(row[CARD_NUMBER]) and
-                                   str(int(row[CARD_NUMBER])).zfill(3) or
-                                   str(row[CARD_NUMBER]).zfill(3),
-                                   row.get(CARD_FILENAME, row[CARD_NAME]))),
+            'imagesrc': '',
             'is_official': False,
             'is_unique': bool(row[CARD_UNIQUE]),
+            'keywords': keywords,
             'name': row[CARD_NAME],
             'octgnid': row[CARD_ID],
             'pack_code': SETS[set_id][SET_HOB_CODE],
@@ -956,33 +995,31 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
             'quantity': int(row[CARD_QUANTITY]),
             'sphere_code': sphere.lower().replace(' ', '-'),
             'sphere_name': sphere,
-            'text': '{}\n{}'.format(
-                row[CARD_KEYWORDS] is not None and
-                str(row[CARD_KEYWORDS]) or '',
-                _update_card_text(
-                    row[CARD_TEXT] is not None and
-                    str(row[CARD_TEXT]) or '')).replace('\n', '\r\n').strip(),
+            'text': text,
             'traits': row[CARD_TRAITS] is not None and
                       str(row[CARD_TRAITS]) or '',
-            'type_code': card_type.lower().replace(' ', '-'),
-            'type_name': card_type,
+            'type_code': type_name.lower().replace(' ', '-'),
+            'type_name': type_name,
             'url': '',
-            'encounter_set': encounter_set,
-            'threat_strength': _handle_int(row[CARD_THREAT]),
-            'quest_points': quest_points,
+            'additional_encounter_sets': additional_encounter_sets,
             'attack': _handle_int(row[CARD_ATTACK]),
-            'defense': _handle_int(row[CARD_DEFENSE]),
-            'health': _handle_int(row[CARD_HEALTH]),
             'cost': cost,
+            'defense': _handle_int(row[CARD_DEFENSE]),
+            'easy_mode_quantity': _handle_int(row[CARD_EASY_MODE]),
+            'encounter_set': encounter_set,
             'engagement_cost': engagement_cost,
-            'willpower': _handle_int(row[CARD_WILLPOWER]),
-            'threat': threat
+            'health': _handle_int(row[CARD_HEALTH]),
+            'quest_points': quest_points,
+            'quest_stage': quest_stage,
+            'shadow_text': row[CARD_SHADOW] is not None and
+                           _update_card_text(str(row[CARD_SHADOW])
+                                             ).replace('\n', '\r\n').strip()
+                           or None,
+            'threat': threat,
+            'threat_strength': _handle_int(row[CARD_THREAT]),
+            'victory_points': victory_points,
+            'willpower': _handle_int(row[CARD_WILLPOWER])
             }
-
-        if card_type == 'Rules' and row[CARD_VICTORY] is not None:
-            json_row['text'] = '{}\r\n\r\nPage {}'.format(json_row['text'],
-                                                          row[CARD_VICTORY])
-
         json_row = {k:v for k, v in json_row.items() if v is not None}
         json_data.append(json_row)
 
