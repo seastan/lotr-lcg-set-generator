@@ -30,6 +30,28 @@ portraitRegion['Player Side Quest'] = '0,0,563,413';
 portraitRegion['Quest'] = '0,0,563,413';
 portraitRegion['Treachery'] = '60,0,353,330';
 
+var bodyRegion = {};
+bodyRegion['Ally'] = '57,379,295,116';
+bodyRegion['Attachment'] = '57,348,295,146';
+bodyRegion['Enemy'] = '57,379,295,116';
+bodyRegion['Event'] = '62,353,285,140';
+bodyRegion['Hero'] = '57,379,295,116';
+bodyRegion['Location'] = '56,351,300,140';
+bodyRegion['Objective'] = '64,346,285,150';
+bodyRegion['Objective Ally'] = '64,346,285,150';
+bodyRegion['Treachery'] = '62,353,285,140';
+
+var traitRegion = {};
+traitRegion['Ally'] = '0,359,413,20';
+traitRegion['Attachment'] = '0,326,413,20';
+traitRegion['Enemy'] = '0,359,413,20';
+traitRegion['Event'] = '0,330,413,20';
+traitRegion['Hero'] = '0,359,413,20';
+traitRegion['Location'] = '0,328,413,20';
+traitRegion['Objective'] = '0,324,413,20';
+traitRegion['Objective Ally'] = '0,324,413,20';
+traitRegion['Treachery'] = '0,330,413,20';
+
 var translate = {};
 translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado', 'Polish': 'Sprzymierzeniec', 'Italian': 'Alleato'};
 translate['Attachment'] = {'English': 'Attachment', 'French': 'Attachement', 'German': 'Verst\u00e4rkung', 'Spanish': 'Vinculada', 'Polish': 'Dodatek',
@@ -442,11 +464,13 @@ function run(progress, target, filename, icons) {
 				else {
 					if (pluginVersion == 'new') {
 						s.set('TraitOut', 'true')
-						s.set('TraitOut-Trait-region', s.get('Body-region'));
-						let bodyRegion = s.get('Body-region').split(',');
-						bodyRegion[1] = parseInt(bodyRegion[1]) + 20;
-						bodyRegion[3] = parseInt(bodyRegion[3]) - 20;
-						s.set('TraitOut-Body-region', bodyRegion.join(','));
+						if (cardType in bodyRegion) {
+							s.set('TraitOut-Body-region', bodyRegion[cardType]);
+						}
+
+						if (cardType in traitRegion) {
+							s.set('TraitOut-Trait-region', traitRegion[cardType]);
+						}
 					}
 				}
 
