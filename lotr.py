@@ -830,9 +830,9 @@ def generate_ringsdb_csv(set_id, set_name):  # pylint: disable=R0912
                                       code_card_number),
                 'name': row[CARD_NAME],
                 'traits': row[CARD_TRAITS],
-                'text': '{}\n{}'.format(
+                'text': _update_card_text('{}\n{}'.format(
                     row[CARD_KEYWORDS] or '',
-                    _update_card_text(row[CARD_TEXT] or '')).strip(),
+                    row[CARD_TEXT] or '')).strip(),
                 'flavor': _update_card_text(row[CARD_FLAVOUR] or ''),
                 'isUnique': row[CARD_UNIQUE] and int(row[CARD_UNIQUE]),
                 'cost': cost,
@@ -959,6 +959,13 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
 
         keywords = [k.strip() for k in
                     (row[CARD_KEYWORDS] or '').split('.') if k != '']
+        keywords = [re.sub(r' ([0-9]+)\[pp\]$', ' \\1 Per Player', k, re.I)
+                    for k in keywords]
+        keywords = [
+            k for k in keywords if re.match(
+                r'^[a-z]+(?: -?[0-9X]+(?: Per Player)?)?(?: \([^\)]+\))?$',
+                k, re.I)]
+
         traits = [t.strip() for t in
                   (row[CARD_TRAITS] or '').split('.') if t != '']
         position = (int(row[CARD_NUMBER])
@@ -978,10 +985,10 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
                                 ).split(',')
             if s != ''] or None
 
-        text = '{}\n{}'.format(
+        text = _update_card_text('{}\n{}'.format(
             row[CARD_KEYWORDS] or '',
-            _update_card_text(row[CARD_TEXT] or '')
-            ).replace('\n', '\r\n').strip()
+            row[CARD_TEXT] or ''
+            )).replace('\n', '\r\n').strip()
         if (card_type in ('Presentation', 'Rules') and
                 row[CARD_VICTORY] is not None):
             text = '{}\r\n\r\nPage {}'.format(text, row[CARD_VICTORY])
