@@ -73,7 +73,9 @@ CARD_FLAVOUR = 'Flavour'
 CARD_ARTIST = 'Artist'
 CARD_EASY_MODE = 'Removed for Easy Mode'
 CARD_ADDITIONAL_ENCOUNTER_SETS = 'Additional Encounter Sets'
+CARD_ADVENTURE = 'Adventure'
 CARD_SIDE_B = 'Side B'
+CARD_DOUBLESIDE = '_Card Side'
 
 MAX_COLUMN = '_Max Column'
 
@@ -88,6 +90,7 @@ CARD_TYPES_PLAYER_DECK = ('Ally', 'Attachment', 'Event', 'Player Side Quest')
 CARD_TYPES_ENCOUNTER_SET = ('Enemy', 'Encounter Side Quest', 'Location',
                             'Objective', 'Objective Ally', 'Quest',
                             'Treachery')
+CARD_TYPES_ADVENTURE = ('Objective', 'Objective Ally', 'Quest')
 
 CMYK_COMMAND_JPG = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
 CMYK_COMMAND_TIF = '"{}" mogrify -profile USWebCoatedSWOP.icc -compress lzw ' \
@@ -685,7 +688,7 @@ def generate_octgn_set_xml(set_id, set_name):
 
 
 def _update_card_text(text):  # pylint: disable=R0915
-    """ Update card text for RingsDB.
+    """ Update card text for RingsDB and Hall of Beorn.
     """
     text = re.sub(r'\b(Quest Resolution)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', text)
     text = re.sub(r'\b(Valour )?(Resource |Planning |Quest |Travel |Encounter '
@@ -746,10 +749,19 @@ def _update_card_text(text):  # pylint: disable=R0915
 
 
 def _handle_int(value):
-    """ Correctly handle (not always) integer values.
+    """ Handle (not always) integer values.
     """
     if _is_positive_or_zero_int(value):
         return int(value)
+
+    return value
+
+
+def _handle_int_str(value):
+    """ Handle (not always) integer values and convert them to string.
+    """
+    if _is_positive_or_zero_int(value):
+        return str(int(value))
 
     return value
 
@@ -790,8 +802,7 @@ def generate_ringsdb_csv(set_id, set_name):  # pylint: disable=R0912
 
             if card_type in CARD_TYPES_PLAYER_DECK:
                 limit = re.search(r'limit .*([0-9]+) per deck',
-                                  row[CARD_TEXT] is not None and
-                                  str(row[CARD_TEXT]) or '',
+                                  row[CARD_TEXT] or '',
                                   re.I)
                 if limit:
                     limit = int(limit.groups()[0])
@@ -820,11 +831,9 @@ def generate_ringsdb_csv(set_id, set_name):  # pylint: disable=R0912
                 'name': row[CARD_NAME],
                 'traits': row[CARD_TRAITS],
                 'text': '{}\n{}'.format(
-                    row[CARD_KEYWORDS] is not None and
-                    str(row[CARD_KEYWORDS]) or '',
-                    _update_card_text(row[CARD_TEXT] is not None and
-                                      str(row[CARD_TEXT]) or '')).strip(),
-                'flavor': row[CARD_FLAVOUR],
+                    row[CARD_KEYWORDS] or '',
+                    _update_card_text(row[CARD_TEXT] or '')).strip(),
+                'flavor': _update_card_text(row[CARD_FLAVOUR] or ''),
                 'isUnique': row[CARD_UNIQUE] and int(row[CARD_UNIQUE]),
                 'cost': cost,
                 'threat': threat,
@@ -872,6 +881,7 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
                 card_type not in CARD_TYPES_DOUBLESIDE):
             new_row = row.copy()
             new_row[CARD_NAME] = new_row[CARD_SIDE_B]
+            new_row[CARD_DOUBLESIDE] = 'B'
             for key in new_row.keys():
                 if key.startswith(BACK_PREFIX):
                     new_row[key.replace(BACK_PREFIX, '')] = new_row[key]
@@ -891,8 +901,7 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
 
         if card_type in CARD_TYPES_PLAYER_DECK:
             limit = re.search(r'limit .*([0-9]+) per deck',
-                              row[CARD_TEXT] is not None and
-                              str(row[CARD_TEXT]) or '',
+                              row[CARD_TEXT] or '',
                               re.I)
             if limit:
                 limit = int(limit.groups()[0])
@@ -901,57 +910,78 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
 
         if card_type == 'Hero':
             cost = None
-            threat = _handle_int(row[CARD_COST])
+            threat = _handle_int_str(row[CARD_COST])
             quest_stage = None
             engagement_cost = None
             quest_points = None
+            stage_letter = None
+            opposite_stage_letter = None
         elif card_type == 'Quest':
             cost = None
             threat = None
             quest_stage = _handle_int(row[CARD_COST])
             engagement_cost = None
-            quest_points = _handle_int(row[BACK_PREFIX + CARD_QUEST])
+            quest_points = _handle_int_str(row[BACK_PREFIX + CARD_QUEST])
+            stage_letter = row[CARD_ENGAGEMENT]
+            opposite_stage_letter = row[BACK_PREFIX + CARD_ENGAGEMENT]
         else:
-            cost = _handle_int(row[CARD_COST])
+            cost = _handle_int_str(row[CARD_COST])
             threat = None
             quest_stage = None
-            engagement_cost = _handle_int(row[CARD_ENGAGEMENT])
-            quest_points = _handle_int(row[CARD_QUEST])
+            engagement_cost = _handle_int_str(row[CARD_ENGAGEMENT])
+            quest_points = _handle_int_str(row[CARD_QUEST])
+            stage_letter = None
+            opposite_stage_letter = None
 
         if card_type in ('Presentation', 'Rules'):
             sphere = 'None'
         elif card_type == 'Contract':
             sphere = 'Neutral'
         elif row[CARD_SPHERE] is not None:
-            sphere = str(row[CARD_SPHERE])
+            sphere = row[CARD_SPHERE]
         else:
             sphere = 'None'
 
+        if row.get(CARD_DOUBLESIDE) is not None:
+            card_side = row[CARD_DOUBLESIDE]
+        elif (row[CARD_SIDE_B] is not None and
+              card_type not in CARD_TYPES_DOUBLESIDE):
+            card_side = 'A'
+        else:
+            card_side = None
+
+        if (row[CARD_SIDE_B] is not None and
+                row[CARD_SIDE_B] != row[CARD_NAME] and
+                card_type in CARD_TYPES_DOUBLESIDE):
+            opposite_title = row[CARD_SIDE_B]
+        else:
+            opposite_title = None
+
         keywords = [k.strip() for k in
-                    (row[CARD_KEYWORDS] is not None and
-                     str(row[CARD_KEYWORDS]) or '').split('.') if k != '']
+                    (row[CARD_KEYWORDS] or '').split('.') if k != '']
+        traits = [t.strip() for t in
+                  (row[CARD_TRAITS] or '').split('.') if t != '']
         position = (int(row[CARD_NUMBER])
                     if _is_positive_or_zero_int(row[CARD_NUMBER]) else 0)
-        encounter_set = ((str(row[CARD_ENCOUNTER_SET])
-                          if row[CARD_ENCOUNTER_SET] is not None else '')
+        encounter_set = ((row[CARD_ENCOUNTER_SET] or '')
                          if card_type in CARD_TYPES_ENCOUNTER_SET
                          else row[CARD_ENCOUNTER_SET])
+        subtitle = ((row[CARD_ADVENTURE] or '')
+                    if card_type in CARD_TYPES_ADVENTURE
+                    else row[CARD_ADVENTURE])
         type_name = ('Setup' if card_type in ('Presentation', 'Rules')
                      else card_type)
         victory_points = (None if card_type in ('Presentation', 'Rules')
-                          else _handle_int(row[CARD_VICTORY]))
+                          else _handle_int_str(row[CARD_VICTORY]))
         additional_encounter_sets = [
-            s.strip() for s in (
-                row[CARD_ADDITIONAL_ENCOUNTER_SETS] is not None and
-                str(row[CARD_ADDITIONAL_ENCOUNTER_SETS]) or '').split(',')
+            s.strip() for s in (row[CARD_ADDITIONAL_ENCOUNTER_SETS] or ''
+                                ).split(',')
             if s != ''] or None
 
         text = '{}\n{}'.format(
-            row[CARD_KEYWORDS] is not None and
-            str(row[CARD_KEYWORDS]) or '',
-            _update_card_text(
-                row[CARD_TEXT] is not None and
-                str(row[CARD_TEXT]) or '')).replace('\n', '\r\n').strip()
+            row[CARD_KEYWORDS] or '',
+            _update_card_text(row[CARD_TEXT] or '')
+            ).replace('\n', '\r\n').strip()
         if (card_type in ('Presentation', 'Rules') and
                 row[CARD_VICTORY] is not None):
             text = '{}\r\n\r\nPage {}'.format(text, row[CARD_VICTORY])
@@ -959,7 +989,7 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
         if (row[CARD_SIDE_B] is not None and
                 row[BACK_PREFIX + CARD_TEXT] is not None and
                 card_type in CARD_TYPES_DOUBLESIDE):
-            text_back = _update_card_text(str(row[BACK_PREFIX + CARD_TEXT])
+            text_back = _update_card_text(row[BACK_PREFIX + CARD_TEXT]
                                           ).replace('\n', '\r\n').strip()
             if (card_type in ('Presentation', 'Rules') and
                     row[BACK_PREFIX + CARD_VICTORY] is not None):
@@ -967,12 +997,13 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
                     text_back, row[BACK_PREFIX + CARD_VICTORY])
             text = '<b>Side A</b> {} <b>Side B</b> {}'.format(text, text_back)
 
-        flavor = (str(row[CARD_FLAVOUR]).replace('\n', '\r\n').strip()
-                  if row[CARD_FLAVOUR] is not None else '')
+        flavor = (_update_card_text(row[CARD_FLAVOUR] or ''
+                                    ).replace('\n', '\r\n').strip())
         if (row[CARD_SIDE_B] is not None and
                 row[BACK_PREFIX + CARD_FLAVOUR] is not None and
                 card_type in CARD_TYPES_DOUBLESIDE):
-            flavor_back = str(row[CARD_FLAVOUR]).replace('\n', '\r\n').strip()
+            flavor_back = _update_card_text(row[CARD_FLAVOUR]
+                                            ).replace('\n', '\r\n').strip()
             flavor = 'Side A: {} Side B: {}'.format(flavor, flavor_back)
 
         json_row = {
@@ -981,8 +1012,7 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
             'deck_limit': limit or int(row[CARD_QUANTITY]),
             'flavor': flavor,
             'has_errata': False,
-            'illustrator': row[CARD_ARTIST] is not None and
-                           str(row[CARD_ARTIST]) or 'None',
+            'illustrator': row[CARD_ARTIST] or 'None',
             'imagesrc': '',
             'is_official': False,
             'is_unique': bool(row[CARD_UNIQUE]),
@@ -996,29 +1026,33 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
             'sphere_code': sphere.lower().replace(' ', '-'),
             'sphere_name': sphere,
             'text': text,
-            'traits': row[CARD_TRAITS] is not None and
-                      str(row[CARD_TRAITS]) or '',
+            'traits': traits,
             'type_code': type_name.lower().replace(' ', '-'),
             'type_name': type_name,
             'url': '',
             'additional_encounter_sets': additional_encounter_sets,
-            'attack': _handle_int(row[CARD_ATTACK]),
+            'attack': _handle_int_str(row[CARD_ATTACK]),
+            'card_side': card_side,
             'cost': cost,
-            'defense': _handle_int(row[CARD_DEFENSE]),
+            'defense': _handle_int_str(row[CARD_DEFENSE]),
             'easy_mode_quantity': _handle_int(row[CARD_EASY_MODE]),
             'encounter_set': encounter_set,
             'engagement_cost': engagement_cost,
-            'health': _handle_int(row[CARD_HEALTH]),
+            'health': _handle_int_str(row[CARD_HEALTH]),
+            'opposite_stage_letter': opposite_stage_letter,
+            'opposite_title': opposite_title,
             'quest_points': quest_points,
             'quest_stage': quest_stage,
             'shadow_text': row[CARD_SHADOW] is not None and
-                           _update_card_text(str(row[CARD_SHADOW])
+                           _update_card_text(row[CARD_SHADOW]
                                              ).replace('\n', '\r\n').strip()
                            or None,
+            'stage_letter': stage_letter,
+            'subtitle': subtitle,
             'threat': threat,
-            'threat_strength': _handle_int(row[CARD_THREAT]),
+            'threat_strength': _handle_int_str(row[CARD_THREAT]),
             'victory_points': victory_points,
-            'willpower': _handle_int(row[CARD_WILLPOWER])
+            'willpower': _handle_int_str(row[CARD_WILLPOWER])
             }
         json_row = {k:v for k, v in json_row.items() if v is not None}
         json_data.append(json_row)
