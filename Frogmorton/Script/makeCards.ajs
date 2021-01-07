@@ -37,8 +37,8 @@ bodyRegion['Enemy'] = '57,379,295,116';
 bodyRegion['Event'] = '62,353,285,140';
 bodyRegion['Hero'] = '57,379,295,116';
 bodyRegion['Location'] = '56,351,300,140';
-bodyRegion['Objective'] = '64,346,285,150';
-bodyRegion['Objective Ally'] = '64,346,285,150';
+bodyRegion['Objective'] = '64,346,285,146';
+bodyRegion['Objective Ally'] = '64,346,285,146';
 bodyRegion['Treachery'] = '62,353,285,140';
 
 var traitRegion = {};
