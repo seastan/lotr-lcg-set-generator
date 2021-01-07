@@ -401,6 +401,43 @@ def _transform_to_dict(data, columns):
     return res
 
 
+def _clean_data():
+    """ Clean data from the spreadsheet.
+    """
+    for row in DATA:
+        for key, value in row.items():
+            if isinstance(value, str):
+                value = value.replace("'", '’')
+                value = value.replace('“', '"')
+                value = value.replace('”', '"')
+                value = re.sub(r'"([^"]*)"', '“\\1”', value)
+                value = value.replace('"', '[unmatched quot]')
+                value = value.replace('[quot]', '"')
+
+                value = value.replace('[Unique]', '[unique]')
+                value = value.replace('[Threat]', '[threat]')
+                value = value.replace('[Attack]', '[attack]')
+                value = value.replace('[Defense]', '[defense]')
+                value = value.replace('[Willpower]', '[willpower]')
+                value = value.replace('[Leadership]', '[leadership]')
+                value = value.replace('[Lore]', '[lore]')
+                value = value.replace('[Spirit]', '[spirit]')
+                value = value.replace('[Tactics]', '[tactics]')
+                value = value.replace('[Baggins]', '[baggins]')
+                value = value.replace('[Fellowship]', '[fellowship]')
+                value = value.replace('[Mastery]', '[mastery]')
+                value = value.replace('[Sunny]', '[sunny]')
+                value = value.replace('[Cloudy]', '[cloudy]')
+                value = value.replace('[Rainy]', '[rainy]')
+                value = value.replace('[Stormy]', '[stormy]')
+                value = value.replace('[Sailing]', '[sailing]')
+                value = value.replace('[PP]', '[pp]')
+
+                value = re.sub(r' +(?=\n|$)', '', value)
+                value = value.strip()
+                row[key] = value
+
+
 def extract_data():
     """ Extract data from the spreadsheet.
     """
@@ -447,6 +484,8 @@ def extract_data():
     finally:
         excel_app.quit()
 
+    _clean_data()
+
     logging.info('...Extracting data from the spreadsheet (%ss)',
                  round(time.time() - timestamp, 3))
 
@@ -470,6 +509,12 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
         i = i + CARD_TITLE_ROW + 1
         if _skip_row(row):
             continue
+
+        for key, value in row.items():
+            if isinstance(value, str) and '[unmatched quot]' in value:
+                logging.error('ERROR: Unmatched quote symbol in %s column '
+                              'for row #%s', key, i)
+                errors_found = True
 
         set_id = row[CARD_SET]
         card_id = row[CARD_ID]
@@ -558,11 +603,12 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
                           ' quantity for row #%s', i)
             errors_found = True
 
-    logging.info('...Performing a sanity check of the spreadsheet (%ss)',
-                 round(time.time() - timestamp, 3))
     if errors_found:
         raise ValueError('Sanity check of the spreadsheet failed, '
                          'see error(s) above')
+
+    logging.info('...Performing a sanity check of the spreadsheet (%ss)',
+                 round(time.time() - timestamp, 3))
 
 
 def get_sets(conf):
@@ -696,7 +742,6 @@ def _update_card_text(text):  # pylint: disable=R0915
     text = re.sub(r'\b(When Revealed|Setup|Forced|Valour Response|Response'
                   r'|Travel|Shadow|Resolution):', '[b]\\1[/b]:', text)
     text = re.sub(r'\b(Condition)\b', '[bi]\\1[/bi]', text)
-    text = re.sub(r' +(?=\n|$)', '', text)
     text = re.sub(r'\[bi\]', '<b><i>', text, flags=re.IGNORECASE)
     text = re.sub(r'\[\/bi\]', '</i></b>', text, flags=re.IGNORECASE)
     text = re.sub(r'\[b\]', '<b>', text, flags=re.IGNORECASE)
@@ -724,27 +769,8 @@ def _update_card_text(text):  # pylint: disable=R0915
     text = re.sub(r'\[size ([0-9]+)\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[\/size\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[img ("?)([^\]]+)\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\n+$', '', text)
-
-    text = text.replace('[Unique]', '[unique]')
-    text = text.replace('[Threat]', '[threat]')
-    text = text.replace('[Attack]', '[attack]')
-    text = text.replace('[Defense]', '[defense]')
-    text = text.replace('[Willpower]', '[willpower]')
-    text = text.replace('[Leadership]', '[leadership]')
-    text = text.replace('[Lore]', '[lore]')
-    text = text.replace('[Spirit]', '[spirit]')
-    text = text.replace('[Tactics]', '[tactics]')
-    text = text.replace('[Baggins]', '[baggins]')
-    text = text.replace('[Fellowship]', '[fellowship]')
-    text = text.replace('[Mastery]', '[mastery]')
-    text = text.replace('[Sunny]', '[sunny]')
-    text = text.replace('[Cloudy]', '[cloudy]')
-    text = text.replace('[Rainy]', '[rainy]')
-    text = text.replace('[Stormy]', '[stormy]')
-    text = text.replace('[Sailing]', '[sailing]')
-    text = text.replace('[PP]', '[pp]')
-
+    text = re.sub(r' +(?=\n|$)', '', text)
+    text = text.strip()
     return text
 
 
