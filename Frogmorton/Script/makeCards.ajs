@@ -563,9 +563,7 @@ function run(progress, target, filename, icons) {
 				s.set('CollectionInfo', ' ');
 
 				if (card['Encounter Set']) {
-					Console.err.println('\nEncounter Set: ' + card['Encounter Set']);
 					let iconName = fixSpecialSymbols(card['Encounter Set']).replace(/["'\u2019]/g, '').replace(/ /g, '-');
-					Console.err.println('\niconName: ' + iconName);
 					if (icons.indexOf(iconName) > -1) {
 						s.set('EncounterSet', customIcon);
 						s.set('EncounterSet-external-path', 'project:imagesIcons/' + iconName + '.png');
