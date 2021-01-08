@@ -360,7 +360,7 @@ function run(progress, target, filename, icons) {
 						}
 					}
 					vXml = markUp(vXml, nXml, lang, setID, pluginVersion);
-					if (nXml == 'Flavour' || nXml == 'BFlavour') {
+					if (['Flavour', 'BFlavour', 'Shadow', 'BShadow'].indexOf(nXml) > -1) {
 						vXml = '<left>' + vXml;
 					}
 					s.set(nEon, vXml);
