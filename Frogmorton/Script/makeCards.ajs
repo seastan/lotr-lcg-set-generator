@@ -492,13 +492,13 @@ function run(progress, target, filename, icons) {
 				else {
 					s.set('Type', translate[cardType][lang].toUpperCase());
 					s.set('Copyright', copyrightText);
-					let iconName = fixSpecialSymbols(card['Set']).replace(/ /g, '-');
+					let iconName = fixSpecialSymbols(card['Set']).replace(/["'\u2019]/g, '').replace(/ /g, '-');
 					if (icons.indexOf(iconName) > -1) {
 						s.set('Collection', customIcon);
 						s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
 					}
 					else {
-						iconName = fixSpecialSymbols(cycle).replace(/ /g, '-');
+						iconName = fixSpecialSymbols(cycle).replace(/["'\u2019]/g, '').replace(/ /g, '-');
 						if (icons.indexOf(iconName) > -1) {
 							s.set('Collection', customIcon);
 							s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
@@ -563,7 +563,9 @@ function run(progress, target, filename, icons) {
 				s.set('CollectionInfo', ' ');
 
 				if (card['Encounter Set']) {
-					let iconName = fixSpecialSymbols(card['Encounter Set']).replace(/ /g, '-');
+					Console.err.println('\nEncounter Set: ' + card['Encounter Set']);
+					let iconName = fixSpecialSymbols(card['Encounter Set']).replace(/["'\u2019]/g, '').replace(/ /g, '-');
+					Console.err.println('\niconName: ' + iconName);
 					if (icons.indexOf(iconName) > -1) {
 						s.set('EncounterSet', customIcon);
 						s.set('EncounterSet-external-path', 'project:imagesIcons/' + iconName + '.png');
@@ -575,7 +577,7 @@ function run(progress, target, filename, icons) {
 				if (card['Additional Encounter Sets']) {
 					let encounterSets = card['Additional Encounter Sets'].split(',');
 					for (let k = 0; k < encounterSets.length; k++) {
-						let iconName = fixSpecialSymbols(encounterSets[k].trim()).replace(/ /g, '-');
+						let iconName = fixSpecialSymbols(encounterSets[k].trim()).replace(/["'\u2019]/g, '').replace(/ /g, '-');
 						if (icons.indexOf(iconName) > -1) {
 							s.set('EncounterSet' + (k + 1), customIcon);
 							s.set('EncounterSet' + (k + 1) + '-external-path',
