@@ -32,25 +32,25 @@ portraitRegion['Treachery'] = '60,0,353,330';
 
 var bodyRegion = {};
 bodyRegion['Ally'] = '57,379,295,116';
-bodyRegion['Attachment'] = '57,348,295,146';
-bodyRegion['Enemy'] = '57,379,295,116';
+bodyRegion['Attachment'] = '56,349,295,146';
+bodyRegion['Enemy'] = '57,377,295,116';
 bodyRegion['Event'] = '62,353,285,140';
 bodyRegion['Hero'] = '57,379,295,116';
 bodyRegion['Location'] = '56,351,300,140';
 bodyRegion['Objective'] = '64,346,285,146';
 bodyRegion['Objective Ally'] = '64,346,285,146';
-bodyRegion['Treachery'] = '62,353,285,140';
+bodyRegion['Treachery'] = '62,356,285,140';
 
 var traitRegion = {};
 traitRegion['Ally'] = '0,359,413,20';
-traitRegion['Attachment'] = '0,326,413,20';
-traitRegion['Enemy'] = '0,359,413,20';
-traitRegion['Event'] = '0,330,413,20';
+traitRegion['Attachment'] = '0,328,413,20';
+traitRegion['Enemy'] = '0,357,413,20';
+traitRegion['Event'] = '0,332,413,20';
 traitRegion['Hero'] = '0,359,413,20';
-traitRegion['Location'] = '0,328,413,20';
-traitRegion['Objective'] = '0,324,413,20';
-traitRegion['Objective Ally'] = '0,324,413,20';
-traitRegion['Treachery'] = '0,330,413,20';
+traitRegion['Location'] = '0,330,413,20';
+traitRegion['Objective'] = '0,326,413,20';
+traitRegion['Objective Ally'] = '0,326,413,20';
+traitRegion['Treachery'] = '0,336,413,20';
 
 var translate = {};
 translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado', 'Polish': 'Sprzymierzeniec', 'Italian': 'Alleato'};
@@ -368,6 +368,7 @@ function run(progress, target, filename, icons) {
 
 				if (pluginVersion == 'new') {
 					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 8; FOREGROUND: #000000');
+					s.set('Trait-format', '<center><size 8><i><b>')
 					s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
 					s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
 					if (landscapeTypes.indexOf(cardType) > -1) {
