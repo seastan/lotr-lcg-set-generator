@@ -412,6 +412,8 @@ def _clean_data():
                 value = value.replace('”', '"')
                 value = re.sub(r'"([^"]*)"', '“\\1”', value)
                 value = value.replace('"', '[unmatched quot]')
+                value = value.replace('[lquot]', '“')
+                value = value.replace('[rquot]', '”')
                 value = value.replace('[quot]', '"')
 
                 value = value.replace('[Unique]', '[unique]')
