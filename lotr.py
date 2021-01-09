@@ -1,4 +1,5 @@
 # pylint: disable=C0302
+# -*- coding: utf8 -*-
 """ Helper functions for LotR ALeP workflow.
 """
 import codecs
@@ -199,7 +200,7 @@ def _is_positive_or_zero_int(value):
 def _escape_filename(value):
     """ Escape forbidden symbols in a file name.
     """
-    return re.sub(r'[<>:"\/\\|?*]', '', value)
+    return re.sub(r'[<>:"\'’“”\/\\|?*]', '', value)
 
 
 def _clear_folder(folder):
@@ -401,10 +402,10 @@ def _transform_to_dict(data, columns):
     return res
 
 
-def _clean_data():
+def _clean_data(data):
     """ Clean data from the spreadsheet.
     """
-    for row in DATA:
+    for row in data:
         for key, value in row.items():
             if isinstance(value, str):
                 value = value.replace("'", '’')
@@ -415,6 +416,13 @@ def _clean_data():
                 value = value.replace('[lquot]', '“')
                 value = value.replace('[rquot]', '”')
                 value = value.replace('[quot]', '"')
+                value = value.replace('[apos]', "'")
+                while True:
+                    value_old = value
+                    value = re.sub(r'[“”]([^\[]*)\]', '"\\1]', value)
+                    value = re.sub(r'\'([^\[]*)\]', "'\\1]", value)
+                    if value == value_old:
+                        break
 
                 value = value.replace('[Unique]', '[unique]')
                 value = value.replace('[Threat]', '[threat]')
@@ -463,10 +471,12 @@ def extract_data():
                                             SET_COLUMNS[MAX_COLUMN],
                                             SET_MAX_NUMBER + SET_TITLE_ROW)
             data = xlwb_source.sheets[SET_SHEET].range(xlwb_range).value
+            data = _transform_to_dict(data, SET_COLUMNS)
+            _clean_data(SETS)
             SETS.update({s[SET_ID]: dict(**s,
                                          **{SET_ROW: i + SET_TITLE_ROW + 1})
                          for i, s in
-                         enumerate(_transform_to_dict(data, SET_COLUMNS))})
+                         enumerate(data)})
 
             xlwb_range = '{}{}:{}{}'.format('A',  # pylint: disable=W1308
                                             CARD_TITLE_ROW,
@@ -481,12 +491,11 @@ def extract_data():
                                             CARD_MAX_NUMBER + CARD_TITLE_ROW)
             data = xlwb_source.sheets[CARD_SHEET].range(xlwb_range).value
             DATA.extend(_transform_to_dict(data, CARD_COLUMNS))
+            _clean_data(DATA)
         finally:
             xlwb_source.close()
     finally:
         excel_app.quit()
-
-    _clean_data()
 
     logging.info('...Extracting data from the spreadsheet (%ss)',
                  round(time.time() - timestamp, 3))
@@ -768,9 +777,9 @@ def _update_card_text(text):  # pylint: disable=R0915
     text = re.sub(r'\[red\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[\/red\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[tab\]', '    ', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[size ([0-9]+)\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[size [^\]]+\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[\/size\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[img ("?)([^\]]+)\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[img [^\]]+\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r' +(?=\n|$)', '', text)
     text = text.strip()
     return text

@@ -492,13 +492,13 @@ function run(progress, target, filename, icons) {
 				else {
 					s.set('Type', translate[cardType][lang].toUpperCase());
 					s.set('Copyright', copyrightText);
-					let iconName = fixSpecialSymbols(card['Set']).replace(/["'\u2019]/g, '').replace(/ /g, '-');
+					let iconName = fixSpecialSymbols(card['Set']).replace(/["'\u2019\u201c\u201d]/g, '').replace(/ /g, '-');
 					if (icons.indexOf(iconName) > -1) {
 						s.set('Collection', customIcon);
 						s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
 					}
 					else {
-						iconName = fixSpecialSymbols(cycle).replace(/["'\u2019]/g, '').replace(/ /g, '-');
+						iconName = fixSpecialSymbols(cycle).replace(/["'\u2019\u201c\u201d]/g, '').replace(/ /g, '-');
 						if (icons.indexOf(iconName) > -1) {
 							s.set('Collection', customIcon);
 							s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
@@ -563,7 +563,7 @@ function run(progress, target, filename, icons) {
 				s.set('CollectionInfo', ' ');
 
 				if (card['Encounter Set']) {
-					let iconName = fixSpecialSymbols(card['Encounter Set']).replace(/["'\u2019]/g, '').replace(/ /g, '-');
+					let iconName = fixSpecialSymbols(card['Encounter Set']).replace(/["'\u2019\u201c\u201d]/g, '').replace(/ /g, '-');
 					if (icons.indexOf(iconName) > -1) {
 						s.set('EncounterSet', customIcon);
 						s.set('EncounterSet-external-path', 'project:imagesIcons/' + iconName + '.png');
@@ -575,7 +575,7 @@ function run(progress, target, filename, icons) {
 				if (card['Additional Encounter Sets']) {
 					let encounterSets = card['Additional Encounter Sets'].split(',');
 					for (let k = 0; k < encounterSets.length; k++) {
-						let iconName = fixSpecialSymbols(encounterSets[k].trim()).replace(/["'\u2019]/g, '').replace(/ /g, '-');
+						let iconName = fixSpecialSymbols(encounterSets[k].trim()).replace(/["'\u2019\u201c\u201d]/g, '').replace(/ /g, '-');
 						if (icons.indexOf(iconName) > -1) {
 							s.set('EncounterSet' + (k + 1), customIcon);
 							s.set('EncounterSet' + (k + 1) + '-external-path',
@@ -821,9 +821,12 @@ function markUp(vXml, nXml, lang, setID, pluginVersion) {
 		vXml = vXml.replace(/ (["\(]*)([\-'A-Za-z\u00c0-\u017e]{1,2})([:;,.?!"\)]+)(\n|$)/g, '\u00a0$1$2$3$4');
 
 		// fix no-break space inside tags
-		vXml = vXml.replace(/\u00a0([^<]+)>/g, ' $1>');
-		vXml = vXml.replace(/\u00a0([^<]+)>/g, ' $1>');
-		vXml = vXml.replace(/\u00a0([^<]+)>/g, ' $1>');
+		var vXmlOld;
+		do {
+			vXmlOld = vXml;
+			vXml = vXml.replace(/\u00a0([^<]+)>/g, ' $1>');
+		}
+		while (vXml != vXmlOld);
 	}
 
 	vXml = vXml.replace(/\n+$/g, '');
