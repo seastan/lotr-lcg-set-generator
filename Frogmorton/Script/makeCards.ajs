@@ -492,13 +492,13 @@ function run(progress, target, filename, icons) {
 				else {
 					s.set('Type', translate[cardType][lang].toUpperCase());
 					s.set('Copyright', copyrightText);
-					let iconName = fixSpecialSymbols(card['Set']).replace(/["'\u2019\u201c\u201d]/g, '').replace(/ /g, '-');
+					let iconName = fixSpecialSymbols(card['Set']).replace(/ /g, '-');
 					if (icons.indexOf(iconName) > -1) {
 						s.set('Collection', customIcon);
 						s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
 					}
 					else {
-						iconName = fixSpecialSymbols(cycle).replace(/["'\u2019\u201c\u201d]/g, '').replace(/ /g, '-');
+						iconName = fixSpecialSymbols(cycle).replace(/ /g, '-');
 						if (icons.indexOf(iconName) > -1) {
 							s.set('Collection', customIcon);
 							s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
@@ -563,7 +563,7 @@ function run(progress, target, filename, icons) {
 				s.set('CollectionInfo', ' ');
 
 				if (card['Encounter Set']) {
-					let iconName = fixSpecialSymbols(card['Encounter Set']).replace(/["'\u2019\u201c\u201d]/g, '').replace(/ /g, '-');
+					let iconName = fixSpecialSymbols(card['Encounter Set']).replace(/ /g, '-');
 					if (icons.indexOf(iconName) > -1) {
 						s.set('EncounterSet', customIcon);
 						s.set('EncounterSet-external-path', 'project:imagesIcons/' + iconName + '.png');
@@ -575,7 +575,7 @@ function run(progress, target, filename, icons) {
 				if (card['Additional Encounter Sets']) {
 					let encounterSets = card['Additional Encounter Sets'].split(',');
 					for (let k = 0; k < encounterSets.length; k++) {
-						let iconName = fixSpecialSymbols(encounterSets[k].trim()).replace(/["'\u2019\u201c\u201d]/g, '').replace(/ /g, '-');
+						let iconName = fixSpecialSymbols(encounterSets[k].trim()).replace(/ /g, '-');
 						if (icons.indexOf(iconName) > -1) {
 							s.set('EncounterSet' + (k + 1), customIcon);
 							s.set('EncounterSet' + (k + 1) + '-external-path',
@@ -691,7 +691,12 @@ function exportCard(card, fname, setID, lang, simple_back, png300NoBleed, png300
 
 function fixSpecialSymbols(value) {
 	value = value + '';
-	return value.replace(/\u00c2/g, 'A').replace(/[\u00da\u00db]/g, 'U').replace(/\u00e2/g, 'a').replace(/[\u00fa\u00fb]/g, 'u');
+	value = value.replace(/\u00c2/g, 'A');
+	value = value.replace(/\u00e2/g, 'a');
+	value = value.replace(/[\u00da\u00db]/g, 'U');
+	value = value.replace(/[\u00fa\u00fb]/g, 'u');
+	value = value.replace(/[,\(\)'"\u2019\u201c\u201d]/g, '');
+	return value;
 }
 
 function capitalizeWord(value) {
@@ -702,20 +707,19 @@ function capitalizeText(value) {
 	value = value + '';
 	value = value.split(' ').map(capitalizeWord).join(' ');
 	value = value.split('-').map(capitalizeWord).join('-');
-	value = value.split('(').map(capitalizeWord).join('(');
 	return value;
 }
 
 function convertIconName(value) {
 	value = fixSpecialSymbols(value);
 	value = capitalizeText(value);
-	value = value.replace(/[\-',\(\) ]/g, '');
+	value = value.replace(/[\- ]/g, '');
 	return value;
 }
 
 function escapeFileName(value) {
 	value += '';
-	return value.replace(/[<>:"\/\\|?*]/g, ' ');
+	return value.replace(/[<>:\/\\|?*'"\u2019\u201c\u201d]/g, ' ');
 }
 
 function markUp(vXml, nXml, lang, setID, pluginVersion) {
@@ -817,8 +821,8 @@ function markUp(vXml, nXml, lang, setID, pluginVersion) {
 		vXml = vXml.replace(/([^:;,.?!]) (<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<uni>)/g, '$1\u00a0$2');
 		vXml = vXml.replace(/([0-9]+) /g, '$1\u00a0');
 		vXml = vXml.replace(/ ([0-9]+)([:;,.?!])/g, '\u00a0$1$2');
-		vXml = vXml.replace(/(^|[ \n"\(])([\-'A-Za-z\u00c0-\u017e]{1,5})([:;,.?!"\)]*) (["\(]*)([\-'A-Za-z\u00c0-\u017e]{1,5})([:;,.?!"\)]+)(\n|$)/g, '$1$2$3\u00a0$4$5$6$7');
-		vXml = vXml.replace(/ (["\(]*)([\-'A-Za-z\u00c0-\u017e]{1,2})([:;,.?!"\)]+)(\n|$)/g, '\u00a0$1$2$3$4');
+		vXml = vXml.replace(/(^|[ \n"\u201c\u201d\(])([\-'\u2019A-Za-z\u00c0-\u017e]{1,5})([:;,.?!"\u201c\u201d\)]*) (["\u201c\u201d\(]*)([\-'\u2019A-Za-z\u00c0-\u017e]{1,5})([:;,.?!"\u201c\u201d\)]+)(\n|$)/g, '$1$2$3\u00a0$4$5$6$7');
+		vXml = vXml.replace(/ (["\u201c\u201d\(]*)([\-'\u2019A-Za-z\u00c0-\u017e]{1,2})([:;,.?!"\u201c\u201d\)]+)(\n|$)/g, '\u00a0$1$2$3$4');
 
 		// fix no-break space inside tags
 		var vXmlOld;
