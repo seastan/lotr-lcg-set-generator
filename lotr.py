@@ -448,6 +448,33 @@ def _clean_data(data):
                 row[key] = value
 
 
+def _update_data(data):
+    """ Update card data from the spreadsheet.
+    """
+    for row in data:
+        if ((row[CARD_QUANTITY] is None or row[CARD_QUANTITY] in ('0', 0)) and
+                row[CARD_TYPE] == 'Rules'):
+            row[CARD_QUANTITY] = 1
+
+        if row[CARD_TYPE] == 'Rules' and row[BACK_PREFIX + CARD_TYPE] is None:
+            row[BACK_PREFIX + CARD_TYPE] = 'Rules'
+
+        if row[CARD_TYPE] == 'Rules' and row[CARD_SIDE_B] is None:
+            row[CARD_SIDE_B] = row[CARD_NAME]
+
+        if row[CARD_TYPE] == 'Side Quest':
+            if row[CARD_ENCOUNTER_SET] is not None:
+                row[CARD_TYPE] = 'Encounter Side Quest'
+            else:
+                row[CARD_TYPE] = 'Player Side Quest'
+
+        if row[BACK_PREFIX + CARD_TYPE] == 'Side Quest':
+            if row[CARD_ENCOUNTER_SET] is not None:
+                row[BACK_PREFIX + CARD_TYPE] = 'Encounter Side Quest'
+            else:
+                row[BACK_PREFIX + CARD_TYPE] = 'Player Side Quest'
+
+
 def extract_data():
     """ Extract data from the spreadsheet.
     """
@@ -472,7 +499,7 @@ def extract_data():
                                             SET_MAX_NUMBER + SET_TITLE_ROW)
             data = xlwb_source.sheets[SET_SHEET].range(xlwb_range).value
             data = _transform_to_dict(data, SET_COLUMNS)
-            _clean_data(SETS)
+            _clean_data(data)
             SETS.update({s[SET_ID]: dict(**s,
                                          **{SET_ROW: i + SET_TITLE_ROW + 1})
                          for i, s in
@@ -492,6 +519,7 @@ def extract_data():
             data = xlwb_source.sheets[CARD_SHEET].range(xlwb_range).value
             DATA.extend(_transform_to_dict(data, CARD_COLUMNS))
             _clean_data(DATA)
+            _update_data(DATA)
         finally:
             xlwb_source.close()
     finally:
@@ -536,18 +564,6 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
         card_unique_back = row[BACK_PREFIX + CARD_UNIQUE]
         card_type_back = row[BACK_PREFIX + CARD_TYPE]
         card_easy_mode = row[CARD_EASY_MODE]
-
-        if card_type == 'Side Quest':
-            if row[CARD_ENCOUNTER_SET] is not None:
-                card_type = 'Encounter Side Quest'
-            else:
-                card_type = 'Player Side Quest'
-
-        if card_type_back == 'Side Quest':
-            if row[CARD_ENCOUNTER_SET] is not None:
-                card_type_back = 'Encounter Side Quest'
-            else:
-                card_type_back = 'Player Side Quest'
 
         if set_id is None:
             logging.error('ERROR: No set ID for row #%s', i)
@@ -828,12 +844,6 @@ def generate_ringsdb_csv(set_id, set_name):  # pylint: disable=R0912
                 continue
 
             card_type = row[CARD_TYPE]
-            if card_type == 'Side Quest':
-                if row[CARD_ENCOUNTER_SET] is not None:
-                    card_type = 'Encounter Side Quest'
-                else:
-                    card_type = 'Player Side Quest'
-
             if card_type not in CARD_TYPES_PLAYER:
                 continue
 
@@ -908,12 +918,6 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
     input_data = DATA[:]
     for row in DATA:
         card_type = row[CARD_TYPE]
-        if card_type == 'Side Quest':
-            if row[CARD_ENCOUNTER_SET] is not None:
-                card_type = 'Encounter Side Quest'
-            else:
-                card_type = 'Player Side Quest'
-
         if (row[CARD_SIDE_B] is not None and
                 card_type not in CARD_TYPES_DOUBLESIDE):
             new_row = row.copy()
@@ -930,12 +934,6 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
             continue
 
         card_type = row[CARD_TYPE]
-        if card_type == 'Side Quest':
-            if row[CARD_ENCOUNTER_SET] is not None:
-                card_type = 'Encounter Side Quest'
-            else:
-                card_type = 'Player Side Quest'
-
         if card_type in CARD_TYPES_PLAYER_DECK:
             limit = re.search(r'limit .*([0-9]+) per deck',
                               row[CARD_TEXT] or '',

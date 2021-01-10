@@ -171,23 +171,6 @@ function run(progress, target, filename, icons) {
 		}
 
 		// Console.err.println('\nProcessing ' + card['Name']);
-		if (card['Type'] == 'Side Quest') {
-			if (card['Encounter Set']) {
-				card['Type'] = 'Encounter Side Quest';
-			}
-			else {
-				card['Type'] = 'Player Side Quest';
-			}
-		}
-		if (card['BType'] == 'Side Quest') {
-			if (card['Encounter Set']) {
-				card['BType'] = 'Encounter Side Quest';
-			}
-			else {
-				card['BType'] = 'Player Side Quest';
-			}
-		}
-
 		if (card['Type'] == 'Quest' && card['BQuest Points']) {
 			card['Quest Points'] = card['BQuest Points'];
 		}
@@ -425,6 +408,9 @@ function run(progress, target, filename, icons) {
 						s.set('Body-region', '58,73,297,418');
 						s.set('PageIn-region', '58,484,297,15');
 						s.set('PageIn-format', '<right><b><size 7><bottom>');
+						if (s.get('RulesBack') == '') {
+							s.set('PageBackShow', 'false');
+						}
 					}
 				}
 				else if (cardType == 'Contract') {
