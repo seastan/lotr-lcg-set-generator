@@ -546,6 +546,7 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
 
     errors_found = False
     card_ids = []
+    card_number_names = []
     set_ids = list(SETS.keys())
     for i, row in enumerate(DATA):
         i = i + CARD_TITLE_ROW + 1
@@ -562,6 +563,7 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
         card_id = row[CARD_ID]
         card_number = row[CARD_NUMBER]
         card_quantity = row[CARD_QUANTITY]
+        card_name = row[CARD_NAME]
         card_unique = row[CARD_UNIQUE]
         card_type = row[CARD_TYPE]
         card_unique_back = row[BACK_PREFIX + CARD_UNIQUE]
@@ -595,6 +597,18 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
             logging.error('ERROR: Incorrect format for card quantity'
                           ' for row #%s', i)
             errors_found = True
+
+        if card_name is None:
+            logging.error('ERROR: No card name for row #%s', i)
+            errors_found = True
+        elif card_number is not None:
+            if (card_number, card_name) in card_number_names:
+                logging.error(
+                    'ERROR: Duplicate card number and card name for row #%s',
+                    i)
+                errors_found = True
+            else:
+                card_number_names.append((card_number, card_name))
 
         if card_unique is not None and card_unique not in ('1', 1):
             logging.error('ERROR: Incorrect format for unique for row #%s', i)
