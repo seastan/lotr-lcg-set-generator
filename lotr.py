@@ -84,7 +84,8 @@ CARD_TYPES = ('Ally', 'Attachment', 'Contract', 'Enemy',
               'Encounter Side Quest', 'Event', 'Hero', 'Location', 'Objective',
               'Objective Ally', 'Player Side Quest', 'Presentation', 'Quest',
               'Rules', 'Treachery')
-CARD_TYPES_DOUBLESIDE = ('Contract', 'Presentation', 'Quest', 'Rules')
+CARD_TYPES_DOUBLESIDE_MANDATORY = ('Presentation', 'Quest', 'Rules')
+CARD_TYPES_DOUBLESIDE_OPTIONAL = ('Contract', 'Presentation', 'Quest', 'Rules')
 CARD_TYPES_PLAYER = ('Ally', 'Attachment', 'Contract', 'Event', 'Hero',
                      'Player Side Quest')
 CARD_TYPES_PLAYER_DECK = ('Ally', 'Attachment', 'Event', 'Player Side Quest')
@@ -456,10 +457,12 @@ def _update_data(data):
                 row[CARD_TYPE] == 'Rules'):
             row[CARD_QUANTITY] = 1
 
-        if row[CARD_TYPE] == 'Rules' and row[BACK_PREFIX + CARD_TYPE] is None:
-            row[BACK_PREFIX + CARD_TYPE] = 'Rules'
+        if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_MANDATORY and
+                row[BACK_PREFIX + CARD_TYPE] is None):
+            row[BACK_PREFIX + CARD_TYPE] = row[CARD_TYPE]
 
-        if row[CARD_TYPE] == 'Rules' and row[CARD_SIDE_B] is None:
+        if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_MANDATORY and
+                row[CARD_SIDE_B] is None):
             row[CARD_SIDE_B] = row[CARD_NAME]
 
         if row[CARD_TYPE] == 'Side Quest':
@@ -612,12 +615,12 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
         if card_type_back is not None and card_type_back not in CARD_TYPES:
             logging.error('ERROR: Unknown card type back for row #%s', i)
             errors_found = True
-        elif (card_type in CARD_TYPES_DOUBLESIDE
+        elif (card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL
               and card_type_back is not None and card_type_back != card_type):
             logging.error('ERROR: Incorrect card type back for row #%s', i)
             errors_found = True
-        elif (card_type not in CARD_TYPES_DOUBLESIDE
-              and card_type_back in CARD_TYPES_DOUBLESIDE):
+        elif (card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL
+              and card_type_back in CARD_TYPES_DOUBLESIDE_OPTIONAL):
             logging.error('ERROR: Incorrect card type back for row #%s', i)
             errors_found = True
 
@@ -919,7 +922,7 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
     for row in DATA:
         card_type = row[CARD_TYPE]
         if (row[CARD_SIDE_B] is not None and
-                card_type not in CARD_TYPES_DOUBLESIDE):
+                card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL):
             new_row = row.copy()
             new_row[CARD_NAME] = new_row[CARD_SIDE_B]
             new_row[CARD_DOUBLESIDE] = 'B'
@@ -980,14 +983,14 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
         if row.get(CARD_DOUBLESIDE) is not None:
             card_side = row[CARD_DOUBLESIDE]
         elif (row[CARD_SIDE_B] is not None and
-              card_type not in CARD_TYPES_DOUBLESIDE):
+              card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL):
             card_side = 'A'
         else:
             card_side = None
 
         if (row[CARD_SIDE_B] is not None and
                 row[CARD_SIDE_B] != row[CARD_NAME] and
-                card_type in CARD_TYPES_DOUBLESIDE):
+                card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL):
             opposite_title = row[CARD_SIDE_B]
         else:
             opposite_title = None
@@ -1029,9 +1032,11 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
             text = '{}\r\n\r\nPage {}'.format(text, row[CARD_VICTORY])
 
         if (row[CARD_SIDE_B] is not None and
-                row[BACK_PREFIX + CARD_TEXT] is not None and
-                card_type in CARD_TYPES_DOUBLESIDE):
-            text_back = _update_card_text(row[BACK_PREFIX + CARD_TEXT]
+                (row[BACK_PREFIX + CARD_TEXT] is not None or
+                 (card_type in ('Presentation', 'Rules')
+                  and row[BACK_PREFIX + CARD_VICTORY] is not None)) and
+                card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL):
+            text_back = _update_card_text(row[BACK_PREFIX + CARD_TEXT] or ''
                                           ).replace('\n', '\r\n').strip()
             if (card_type in ('Presentation', 'Rules') and
                     row[BACK_PREFIX + CARD_VICTORY] is not None):
@@ -1043,7 +1048,7 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
                                     ).replace('\n', '\r\n').strip())
         if (row[CARD_SIDE_B] is not None and
                 row[BACK_PREFIX + CARD_FLAVOUR] is not None and
-                card_type in CARD_TYPES_DOUBLESIDE):
+                card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL):
             flavor_back = _update_card_text(row[CARD_FLAVOUR]
                                             ).replace('\n', '\r\n').strip()
             flavor = 'Side A: {} Side B: {}'.format(flavor, flavor_back)

@@ -253,6 +253,7 @@ function run(progress, target, filename, icons) {
 							['RulesBack', 'BText'],
 							['FlavourBack', 'BFlavour'],
 							['StoryBack', 'BFlavour'],
+							['VictoryBack', 'BVictory Points'],
 							['OptionRightBack', 'BVictory Points'],
 							['ArtistBack-external', 'BArtist'],  // old plugin
 							['ArtistBack', 'BArtist']  // new plugin
@@ -316,7 +317,7 @@ function run(progress, target, filename, icons) {
 						vXml = 'minus';
 					}
 					if (nXml == 'Victory Points' || nXml == 'BVictory Points') {
-						if (vXml.match(/^[0-9]+$/)) {
+						if ((cardType != 'Presentation') && (cardType != 'Rules') && vXml.match(/^[0-9]+$/)) {
 							vXml = translate['Victory'][lang].toUpperCase() + ' ' + vXml;
 						}
 					}
@@ -373,6 +374,9 @@ function run(progress, target, filename, icons) {
 						s.set('Page', s.get('Victory').split('/')[0]);
 						s.set('PageTotal', s.get('Victory').split('/')[1]);
 					}
+					else if (s.get('Victory') != '') {
+						s.set('Page', s.get('Victory'));
+					}
 					s.set('Story', '');
 					s.set('Flavour', '');
 					if (pluginVersion == 'new') {
@@ -397,6 +401,9 @@ function run(progress, target, filename, icons) {
 						s.set('Page', s.get('Victory').split('/')[0]);
 						s.set('PageTotal', s.get('Victory').split('/')[1]);
 					}
+					else if (s.get('Victory') != '') {
+						s.set('Page', s.get('Victory'));
+					}
 					s.set('Name', '');
 					s.set('Story', '');
 					s.set('StoryBack', '');
@@ -408,7 +415,7 @@ function run(progress, target, filename, icons) {
 						s.set('Body-region', '58,73,297,418');
 						s.set('PageIn-region', '58,484,297,15');
 						s.set('PageIn-format', '<right><b><size 7><bottom>');
-						if (s.get('RulesBack') == '') {
+						if (s.get('VictoryBack') == '') {
 							s.set('PageBackShow', 'false');
 						}
 					}
