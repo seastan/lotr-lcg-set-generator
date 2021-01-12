@@ -201,7 +201,7 @@ def _is_positive_or_zero_int(value):
 def _escape_filename(value):
     """ Escape forbidden symbols in a file name.
     """
-    return re.sub(r'[<>:"\'’“”\/\\|?*]', '', value)
+    return re.sub(r'[<>:\/\\|?*\'"’“”]', ' ', value)
 
 
 def _clear_folder(folder):
@@ -546,7 +546,7 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
 
     errors_found = False
     card_ids = []
-    card_number_names = []
+    card_set_number_names = []
     set_ids = list(SETS.keys())
     for i, row in enumerate(DATA):
         i = i + CARD_TITLE_ROW + 1
@@ -601,14 +601,14 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
         if card_name is None:
             logging.error('ERROR: No card name for row #%s', i)
             errors_found = True
-        elif card_number is not None:
-            if (card_number, card_name) in card_number_names:
+        elif set_id is not None and card_number is not None:
+            if (set_id, card_number, card_name) in card_set_number_names:
                 logging.error(
-                    'ERROR: Duplicate card number and card name for row #%s',
+                    'ERROR: Duplicate card set, number and name for row #%s',
                     i)
                 errors_found = True
             else:
-                card_number_names.append((card_number, card_name))
+                card_set_number_names.append((set_id, card_number, card_name))
 
         if card_unique is not None and card_unique not in ('1', 1):
             logging.error('ERROR: Incorrect format for unique for row #%s', i)
@@ -2028,6 +2028,73 @@ def _make_cmyk(conf, input_path, file_type=DTC_FILE_TYPE):
         break
 
 
+def _combine_doublesided_rules_cards(input_path):
+    """ Combine double-sided rules cards.
+    """
+    card_data = sorted(DATA[:], key=lambda r: (
+        (str(int(r[CARD_NUMBER])).zfill(3)
+         if _is_positive_or_zero_int(r[CARD_NUMBER])
+         else str(r[CARD_NUMBER])),
+        _escape_filename(r[CARD_NAME])))
+
+    selected = []
+    for i, row in enumerate(card_data):
+        if (row[CARD_TYPE] == 'Rules' and
+                row[CARD_QUANTITY] == 1 and
+                row[BACK_PREFIX + CARD_TEXT] is None and
+                row[BACK_PREFIX + CARD_VICTORY] is None):
+            card_number = (str(int(row[CARD_NUMBER])).zfill(3)
+                           if _is_positive_or_zero_int(row[CARD_NUMBER])
+                           else str(row[CARD_NUMBER]))
+            card_name = _escape_filename(row[CARD_NAME])
+            selected.append((i, '{}-1-{}'.format(card_number, card_name)))
+
+    logging.error(selected)
+    if not selected:
+        return
+
+    pairs = []
+    while len(selected) > 1:
+        if selected[1][0] == selected[0][0] + 1:
+            pairs.append((selected[0][1], selected[1][1]))
+            selected = selected[2:]
+        else:
+            selected = selected[1:]
+
+    logging.error(pairs)
+    if not pairs:
+        return
+
+    for _, _, filenames in os.walk(input_path):
+        if not filenames:
+            return
+
+        file_type = filenames[0].split('.')[-1]
+        break
+    else:
+        return
+
+    logging.error(file_type)
+    for pair in pairs:
+        first_back = os.path.join(input_path,
+                                  '{}-2.{}'.format(pair[0], file_type))
+        second_front = os.path.join(input_path,
+                                    '{}-1.{}'.format(pair[1], file_type))
+        second_back = os.path.join(input_path,
+                                   '{}-2.{}'.format(pair[1], file_type))
+        logging.error(first_back)
+        logging.error(second_front)
+        logging.error(second_back)
+        if not (os.path.exists(first_back) and
+                os.path.exists(second_front) and
+                os.path.exists(second_back)):
+            logging.error(':(')
+            continue
+
+        shutil.move(second_front, first_back)
+        os.remove(second_back)
+
+
 def _flip_first_card(input_path):
     """ Flip first card of the deck.
     """
@@ -2205,6 +2272,7 @@ def generate_mpc(conf, set_id, set_name, lang):
     _clear_folder(temp_path)
     _prepare_printing_images(input_path, temp_path, 'mpc', 'png')
     _make_unique_png(temp_path)
+    _combine_doublesided_rules_cards(temp_path)
     _flip_first_card(temp_path)
 
     if 'makeplayingcards_zip' in conf['outputs'][lang]:
@@ -2260,6 +2328,7 @@ def generate_dtc(conf, set_id, set_name, lang, file_type=DTC_FILE_TYPE):
     _clear_folder(temp_path)
     _prepare_printing_images(input_path, temp_path, 'dtc', file_type)
     _make_cmyk(conf, temp_path, file_type)
+    _combine_doublesided_rules_cards(temp_path)
     _flip_first_card(temp_path)
 
     if 'drivethrucards_zip' in conf['outputs'][lang]:
