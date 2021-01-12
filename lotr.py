@@ -484,6 +484,11 @@ def extract_data():
     logging.info('Extracting data from the spreadsheet...')
     timestamp = time.time()
 
+    SET_COLUMNS.clear()
+    CARD_COLUMNS.clear()
+    SETS.clear()
+    DATA[:] = []
+
     sheet_path = os.path.join(SHEET_ROOT_PATH, SHEET_NAME)
     excel_app = xw.App(visible=False, add_book=False)
     try:
@@ -2027,14 +2032,16 @@ def _make_cmyk(conf, input_path):
         break
 
 
-def _combine_doublesided_rules_cards(input_path, card_data):
+def _combine_doublesided_rules_cards(set_id, input_path, card_data):  # pylint: disable=R0912,R0914
     """ Combine double-sided rules cards.
     """
-    card_data = sorted(card_data[:], key=lambda r: (
-        (str(int(r[CARD_NUMBER])).zfill(3)
-         if _is_positive_or_zero_int(r[CARD_NUMBER])
-         else str(r[CARD_NUMBER])),
-        _escape_filename(r[CARD_NAME])))
+    card_data = sorted(
+        [r for r in card_data if r[CARD_SET] == set_id],
+        key=lambda r: (
+            (str(int(r[CARD_NUMBER])).zfill(3)
+             if _is_positive_or_zero_int(r[CARD_NUMBER])
+             else str(r[CARD_NUMBER])),
+            _escape_filename(r[CARD_NAME])))
 
     selected = []
     for i, row in enumerate(card_data):
@@ -2078,9 +2085,16 @@ def _combine_doublesided_rules_cards(input_path, card_data):
                                     '{}-1.{}'.format(pair[1], file_type))
         second_back = os.path.join(input_path,
                                    '{}-2.{}'.format(pair[1], file_type))
-        if not (os.path.exists(first_back) and
-                os.path.exists(second_front) and
-                os.path.exists(second_back)):
+        if not os.path.exists(first_back):
+            logging.error('ERROR: Path %s does not exist', first_back)
+            continue
+
+        if not os.path.exists(second_front):
+            logging.error('ERROR: Path %s does not exist', second_front)
+            continue
+
+        if not os.path.exists(second_back):
+            logging.error('ERROR: Path %s does not exist', second_back)
             continue
 
         shutil.move(second_front, first_back)
@@ -2263,7 +2277,7 @@ def generate_mpc(conf, set_id, set_name, lang, card_data):
     _clear_folder(temp_path)
     _prepare_printing_images(input_path, temp_path, 'mpc', 'png')
     _make_unique_png(temp_path)
-    _combine_doublesided_rules_cards(temp_path, card_data)
+    _combine_doublesided_rules_cards(set_id, temp_path, card_data)
     _flip_first_card(temp_path)
 
     if 'makeplayingcards_zip' in conf['outputs'][lang]:
@@ -2319,7 +2333,7 @@ def generate_dtc(conf, set_id, set_name, lang, card_data):
     _clear_folder(temp_path)
     _prepare_printing_images(input_path, temp_path, 'dtc', DTC_FILE_TYPE)
     _make_cmyk(conf, temp_path)
-    _combine_doublesided_rules_cards(temp_path, card_data)
+    _combine_doublesided_rules_cards(set_id, temp_path, card_data)
     _flip_first_card(temp_path)
 
     if 'drivethrucards_zip' in conf['outputs'][lang]:
