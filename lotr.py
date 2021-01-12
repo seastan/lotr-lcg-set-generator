@@ -932,7 +932,7 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
     output_path = os.path.join(output_path,
                                '{}.json'.format(_escape_filename(set_name)))
     json_data = []
-    input_data = DATA[:]
+    card_data = DATA[:]
     for row in DATA:
         card_type = row[CARD_TYPE]
         if (row[CARD_SIDE_B] is not None and
@@ -944,9 +944,9 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
                 if key.startswith(BACK_PREFIX):
                     new_row[key.replace(BACK_PREFIX, '')] = new_row[key]
 
-            input_data.append(new_row)
+            card_data.append(new_row)
 
-    for row in input_data:
+    for row in card_data:
         if _skip_row(row) or row[CARD_SET] != set_id:
             continue
 
@@ -1746,8 +1746,7 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
                  ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
-def generate_300_bleeddtc(conf, set_id, set_name, lang, skip_ids,  # pylint: disable=R0913,R0914
-                          file_type=DTC_FILE_TYPE):
+def generate_300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
     """ Generate images for DriveThruCards outputs (either JPG or TIF).
     """
     logging.info('[%s, %s] Generating images for DriveThruCards outputs...',
@@ -1755,7 +1754,7 @@ def generate_300_bleeddtc(conf, set_id, set_name, lang, skip_ids,  # pylint: dis
     timestamp = time.time()
 
     output_path = os.path.join(IMAGES_EONS_PATH,
-                               TIF300BLEEDDTC if file_type == 'tif'
+                               TIF300BLEEDDTC if DTC_FILE_TYPE == 'tif'
                                else JPG300BLEEDDTC,
                                '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
@@ -1782,7 +1781,7 @@ def generate_300_bleeddtc(conf, set_id, set_name, lang, skip_ids,  # pylint: dis
 
     cmd = GIMP_COMMAND.format(
         conf['gimp_console_path'],
-        'python-prepare-drivethrucards-tif-folder' if file_type == 'tif'
+        'python-prepare-drivethrucards-tif-folder' if DTC_FILE_TYPE == 'tif'
         else 'python-prepare-drivethrucards-jpg-folder',
         temp_path.replace('\\', '\\\\'),
         output_path.replace('\\', '\\\\'))
@@ -2009,17 +2008,17 @@ def _make_unique_png(input_path):
         break
 
 
-def _make_cmyk(conf, input_path, file_type=DTC_FILE_TYPE):
+def _make_cmyk(conf, input_path):
     """ Convert RGB to CMYK.
     """
-    cmd = (CMYK_COMMAND_TIF if file_type == 'tif' else CMYK_COMMAND_JPG
+    cmd = (CMYK_COMMAND_TIF if DTC_FILE_TYPE == 'tif' else CMYK_COMMAND_JPG
            ).format(conf['magick_path'], input_path)
     res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
     logging.info(res)
 
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
-            if (filename.endswith('.' + file_type)
+            if (filename.endswith('.' + DTC_FILE_TYPE)
                     and os.path.getsize(os.path.join(input_path, filename)
                                         ) < IMAGE_MIN_SIZE):
                 raise ValueError('ImageMagick conversion failed for {}'.format(
@@ -2028,10 +2027,10 @@ def _make_cmyk(conf, input_path, file_type=DTC_FILE_TYPE):
         break
 
 
-def _combine_doublesided_rules_cards(input_path):
+def _combine_doublesided_rules_cards(input_path, card_data):
     """ Combine double-sided rules cards.
     """
-    card_data = sorted(DATA[:], key=lambda r: (
+    card_data = sorted(card_data[:], key=lambda r: (
         (str(int(r[CARD_NUMBER])).zfill(3)
          if _is_positive_or_zero_int(r[CARD_NUMBER])
          else str(r[CARD_NUMBER])),
@@ -2049,7 +2048,6 @@ def _combine_doublesided_rules_cards(input_path):
             card_name = _escape_filename(row[CARD_NAME])
             selected.append((i, '{}-1-{}'.format(card_number, card_name)))
 
-    logging.error(selected)
     if not selected:
         return
 
@@ -2061,7 +2059,6 @@ def _combine_doublesided_rules_cards(input_path):
         else:
             selected = selected[1:]
 
-    logging.error(pairs)
     if not pairs:
         return
 
@@ -2074,7 +2071,6 @@ def _combine_doublesided_rules_cards(input_path):
     else:
         return
 
-    logging.error(file_type)
     for pair in pairs:
         first_back = os.path.join(input_path,
                                   '{}-2.{}'.format(pair[0], file_type))
@@ -2082,13 +2078,9 @@ def _combine_doublesided_rules_cards(input_path):
                                     '{}-1.{}'.format(pair[1], file_type))
         second_back = os.path.join(input_path,
                                    '{}-2.{}'.format(pair[1], file_type))
-        logging.error(first_back)
-        logging.error(second_front)
-        logging.error(second_back)
         if not (os.path.exists(first_back) and
                 os.path.exists(second_front) and
                 os.path.exists(second_back)):
-            logging.error(':(')
             continue
 
         shutil.move(second_front, first_back)
@@ -2122,8 +2114,7 @@ def _flip_first_card(input_path):
         break
 
 
-def _prepare_printing_images(input_path, output_path, service='dtc',
-                             file_type=DTC_FILE_TYPE):
+def _prepare_printing_images(input_path, output_path, service, file_type):
     """ Prepare images for MakePlayingCards/DriveThruCards.
     """
     for _, _, filenames in os.walk(input_path):
@@ -2218,23 +2209,23 @@ def _deck_name(current_cnt, total_cnt):
     return ''
 
 
-def _prepare_dtc_printing_archive(input_path, obj, file_type=DTC_FILE_TYPE):
+def _prepare_dtc_printing_archive(input_path, obj):
     """ Prepare archive for DriveThruCards.
     """
     for _, _, filenames in os.walk(input_path):
         front_cnt = 0
         back_cnt = 0
         filenames = sorted(f for f in filenames
-                           if f.endswith('-1.{}'.format(file_type))
-                           or f.endswith('-2.{}'.format(file_type)))
+                           if f.endswith('-1.{}'.format(DTC_FILE_TYPE))
+                           or f.endswith('-2.{}'.format(DTC_FILE_TYPE)))
         total_cnt = len(filenames) / 2
         for filename in filenames:
-            if filename.endswith('-1.{}'.format(file_type)):
+            if filename.endswith('-1.{}'.format(DTC_FILE_TYPE)):
                 front_cnt += 1
                 obj.write(os.path.join(input_path, filename),
                           '{}front/{}'.format(_deck_name(front_cnt, total_cnt),
                                               filename))
-            elif filename.endswith('-2.{}'.format(file_type)):
+            elif filename.endswith('-2.{}'.format(DTC_FILE_TYPE)):
                 back_cnt += 1
                 obj.write(os.path.join(input_path, filename),
                           '{}back/{}'.format(_deck_name(back_cnt, total_cnt),
@@ -2243,7 +2234,7 @@ def _prepare_dtc_printing_archive(input_path, obj, file_type=DTC_FILE_TYPE):
         break
 
 
-def generate_mpc(conf, set_id, set_name, lang):
+def generate_mpc(conf, set_id, set_name, lang, card_data):
     """ Generate MakePlayingCards outputs.
     """
     logging.info('[%s, %s] Generating MakePlayingCards outputs...',
@@ -2272,7 +2263,7 @@ def generate_mpc(conf, set_id, set_name, lang):
     _clear_folder(temp_path)
     _prepare_printing_images(input_path, temp_path, 'mpc', 'png')
     _make_unique_png(temp_path)
-    _combine_doublesided_rules_cards(temp_path)
+    _combine_doublesided_rules_cards(temp_path, card_data)
     _flip_first_card(temp_path)
 
     if 'makeplayingcards_zip' in conf['outputs'][lang]:
@@ -2298,7 +2289,7 @@ def generate_mpc(conf, set_id, set_name, lang):
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
-def generate_dtc(conf, set_id, set_name, lang, file_type=DTC_FILE_TYPE):
+def generate_dtc(conf, set_id, set_name, lang, card_data):
     """ Generate DriveThruCards outputs.
     """
     logging.info('[%s, %s] Generating DriveThruCards outputs...',
@@ -2306,7 +2297,7 @@ def generate_dtc(conf, set_id, set_name, lang, file_type=DTC_FILE_TYPE):
     timestamp = time.time()
 
     input_path = os.path.join(IMAGES_EONS_PATH,
-                              TIF300BLEEDDTC if file_type == 'tif'
+                              TIF300BLEEDDTC if DTC_FILE_TYPE == 'tif'
                               else JPG300BLEEDDTC,
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_DTC_PATH, '{}.{}'.format(
@@ -2326,9 +2317,9 @@ def generate_dtc(conf, set_id, set_name, lang, file_type=DTC_FILE_TYPE):
     _create_folder(output_path)
     _create_folder(temp_path)
     _clear_folder(temp_path)
-    _prepare_printing_images(input_path, temp_path, 'dtc', file_type)
-    _make_cmyk(conf, temp_path, file_type)
-    _combine_doublesided_rules_cards(temp_path)
+    _prepare_printing_images(input_path, temp_path, 'dtc', DTC_FILE_TYPE)
+    _make_cmyk(conf, temp_path)
+    _combine_doublesided_rules_cards(temp_path, card_data)
     _flip_first_card(temp_path)
 
     if 'drivethrucards_zip' in conf['outputs'][lang]:
@@ -2337,7 +2328,7 @@ def generate_dtc(conf, set_id, set_name, lang, file_type=DTC_FILE_TYPE):
                              'DTC.{}.{}.zip'.format(
                                  _escape_filename(set_name), lang)),
                 'w') as obj:
-            _prepare_dtc_printing_archive(temp_path, obj, file_type)
+            _prepare_dtc_printing_archive(temp_path, obj)
             obj.write('DriveThruCards.pdf', 'DriveThruCards.pdf')
 
     if 'drivethrucards_7z' in conf['outputs'][lang]:
@@ -2346,7 +2337,7 @@ def generate_dtc(conf, set_id, set_name, lang, file_type=DTC_FILE_TYPE):
                              'DTC.{}.{}.7z'.format(
                                  _escape_filename(set_name), lang)),
                 'w') as obj:
-            _prepare_dtc_printing_archive(temp_path, obj, file_type)
+            _prepare_dtc_printing_archive(temp_path, obj)
             obj.write('DriveThruCards.pdf', 'DriveThruCards.pdf')
 
     _delete_folder(temp_path)

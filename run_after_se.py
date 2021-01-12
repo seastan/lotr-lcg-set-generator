@@ -37,18 +37,18 @@ def generate_pdf(conf, set_id, set_name, lang, skip_ids):
     lotr.generate_pdf(conf, set_id, set_name, lang)
 
 
-def generate_mpc(conf, set_id, set_name, lang, skip_ids):
+def generate_mpc(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: disable=R0913
     """ Generate MakePlayingCards outputs.
     """
     lotr.generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids)
-    lotr.generate_mpc(conf, set_id, set_name, lang)
+    lotr.generate_mpc(conf, set_id, set_name, lang, card_data)
 
 
-def generate_dtc(conf, set_id, set_name, lang, skip_ids):
+def generate_dtc(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: disable=R0913
     """ Generate DriveThruCards outputs.
     """
     lotr.generate_300_bleeddtc(conf, set_id, set_name, lang, skip_ids)
-    lotr.generate_dtc(conf, set_id, set_name, lang)
+    lotr.generate_dtc(conf, set_id, set_name, lang, card_data)
 
 
 def run(args):
@@ -122,11 +122,11 @@ def main():  # pylint: disable=R0912
 
             if 'makeplayingcards' in conf['outputs'][lang]:
                 tasks.append([generate_mpc, conf, set_id, set_name, lang,
-                              skip_ids])
+                              skip_ids, lotr.DATA])
 
             if 'drivethrucards' in conf['outputs'][lang]:
                 tasks.append([generate_dtc, conf, set_id, set_name, lang,
-                              skip_ids])
+                              skip_ids, lotr.DATA])
 
     execute_tasks(conf, pre_tasks)
     execute_tasks(conf, tasks)
