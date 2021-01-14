@@ -804,7 +804,7 @@ function markUp(vXml, nXml, lang, setID, pluginVersion) {
 	vXml = vXml.replace(/\[red\]/ig, '<red>');
 	vXml = vXml.replace(/\[\/red\]/ig, '</red>');
 	vXml = vXml.replace(/\[tab\]/ig, '\t');
-	vXml = vXml.replace(/\[size ([0-9]+)\]/ig, '<size $1>');
+	vXml = vXml.replace(/\[size ([0-9\.]+)\]/ig, '<size $1>');
 	vXml = vXml.replace(/\[\/size\]/ig, '</size>');
 	vXml = vXml.replace(/\[img ("?)([^\]]+)\]/ig, '<image $1project:$2>');
 	vXml = vXml.replace(/\<image ("?)project:icons\//ig, '<image $1project:imagesIcons/');
@@ -827,7 +827,7 @@ function markUp(vXml, nXml, lang, setID, pluginVersion) {
 	}
 
 	vXml = vXml.replace(/\n+$/g, '');
-	vXml = vXml.replace(/\n\n/g, '\n<vs>\n');
+	vXml = vXml.replace(/\n(?=\n)/g, '\n<vs>');
 
 	return vXml;
 }
