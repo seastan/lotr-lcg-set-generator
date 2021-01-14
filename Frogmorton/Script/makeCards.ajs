@@ -385,9 +385,9 @@ function run(progress, target, filename, icons) {
 						s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
 						s.set('GameName-external-path', 'project:imagesRaw/' + card['ArtworkTop']);
 						s.set('Name-external-path', 'project:imagesRaw/' + card['ArtworkBottom']);
-						s.set('Body-region', '58,73,297,418');
+						s.set('Body-region', '48,73,317,418');
 						s.set('Name-portrait-clip-region', '50,423,313,108');
-						s.set('PageIn-region', '58,484,297,15');
+						s.set('PageIn-region', '48,488,317,15');
 						s.set('PageIn-format', '<right><b><size 7><bottom>');
 						s.set('LRL-IllustratorShort', ' ');
 						s.set('Artist', ' ');
@@ -412,8 +412,8 @@ function run(progress, target, filename, icons) {
 					if (pluginVersion == 'new') {
 						s.set('Background-external-path', 'project:Templates/Rules-Background.png');
 						s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
-						s.set('Body-region', '58,73,297,418');
-						s.set('PageIn-region', '58,484,297,15');
+						s.set('Body-region', '48,73,317,418');
+						s.set('PageIn-region', '48,488,317,15');
 						s.set('PageIn-format', '<right><b><size 7><bottom>');
 						if (s.get('VictoryBack') == '') {
 							s.set('PageBackShow', 'false');

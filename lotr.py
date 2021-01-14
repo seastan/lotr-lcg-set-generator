@@ -97,7 +97,7 @@ CARD_TYPES_ADVENTURE = ('Objective', 'Objective Ally', 'Quest')
 CMYK_COMMAND_JPG = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
 CMYK_COMMAND_TIF = '"{}" mogrify -profile USWebCoatedSWOP.icc -compress lzw ' \
                    '"{}\\*.tif"'
-DTC_FILE_TYPE = 'jpg'
+DTC_FILE_TYPE = 'jpg'  # 'jpg' or 'tif'
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 IMAGE_MIN_SIZE = 100000
 IMAGES_CUSTOM_FOLDER = 'custom'
