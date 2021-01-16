@@ -52,6 +52,12 @@ traitRegion['Objective'] = '0,326,413,20';
 traitRegion['Objective Ally'] = '0,326,413,20';
 traitRegion['Treachery'] = '0,336,413,20';
 
+var hitPointsRegion = {};
+hitPointsRegion['Ally'] = '66,269,58,40';
+hitPointsRegion['Enemy'] = '64,269,58,40';
+hitPointsRegion['Hero'] = '64,269,58,40';
+hitPointsRegion['Objective Ally'] = '63,263,55,37';
+
 var translate = {};
 translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado', 'Polish': 'Sprzymierzeniec', 'Italian': 'Alleato'};
 translate['Attachment'] = {'English': 'Attachment', 'French': 'Attachement', 'German': 'Verst\u00e4rkung', 'Spanish': 'Vinculada', 'Polish': 'Dodatek',
@@ -464,6 +470,10 @@ function run(progress, target, filename, icons) {
 
 						if (cardType in traitRegion) {
 							s.set('TraitOut-Trait-region', traitRegion[cardType]);
+						}
+
+						if (cardType in hitPointsRegion) {
+							s.set('HitPoints-region', hitPointsRegion[cardType]);
 						}
 					}
 				}
