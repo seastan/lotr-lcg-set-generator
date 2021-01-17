@@ -52,11 +52,49 @@ traitRegion['Objective'] = '0,326,413,20';
 traitRegion['Objective Ally'] = '0,326,413,20';
 traitRegion['Treachery'] = '0,336,413,20';
 
+var nameRegion = {};
+// nameRegion['Ally'] = '0,326,413,20';
+// nameRegion['Hero'] = '0,325,413,20';
+
+var namePointsize = {};
+// namePointsize['Ally'] = 9;
+// namePointsize['Hero'] = 9;
+
 var hitPointsRegion = {};
 hitPointsRegion['Ally'] = '66,269,58,40';
 hitPointsRegion['Enemy'] = '64,269,58,40';
 hitPointsRegion['Hero'] = '64,269,58,40';
-hitPointsRegion['Objective Ally'] = '63,263,55,37';
+hitPointsRegion['Objective Ally'] = '61,263,58,40';
+
+var attackRegion = {};
+attackRegion['Ally'] = '75,157,16,16';
+attackRegion['Enemy'] = '73,156,16,16';
+attackRegion['Hero'] = '73,157,16,16';
+attackRegion['Objective Ally'] = '70,150,16,16';
+
+var defenseRegion = {};
+defenseRegion['Ally'] = '75,200,16,16';
+defenseRegion['Enemy'] = '73,199,16,16';
+defenseRegion['Hero'] = '73,200,16,16';
+defenseRegion['Objective Ally'] = '70,194,16,16';
+
+var willpowerRegion = {};
+willpowerRegion['Ally'] = '75,117,16,16';
+willpowerRegion['Hero'] = '73,117,16,16';
+willpowerRegion['Objective Ally'] = '70,104,16,16';
+
+var threatRegion = {};
+threatRegion['Enemy'] = '73,115,16,16';
+// threatRegion['Location'] = 'T.B.D.';
+
+var engagementRegion = {};
+engagementRegion['Enemy'] = '76,48,36,24';
+
+var engagementTint = {};
+engagementTint['Enemy'] = '28.0,1.0,0.9';
+
+var sphereBodyShape = {};
+sphereBodyShape['Hero'] = '0,0,472,40,0';
 
 var translate = {};
 translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado', 'Polish': 'Sprzymierzeniec', 'Italian': 'Alleato'};
@@ -358,6 +396,7 @@ function run(progress, target, filename, icons) {
 
 				if (pluginVersion == 'new') {
 					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 8; FOREGROUND: #000000');
+					s.set('Body-pointsize', 8);
 					s.set('Trait-format', '<center><size 8><i><b>')
 					s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
 					s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
@@ -392,6 +431,7 @@ function run(progress, target, filename, icons) {
 						s.set('GameName-external-path', 'project:imagesRaw/' + card['ArtworkTop']);
 						s.set('Name-external-path', 'project:imagesRaw/' + card['ArtworkBottom']);
 						s.set('Body-region', '48,73,317,418');
+						s.set('Body-lineTightness', 1.0);
 						s.set('Name-portrait-clip-region', '50,423,313,108');
 						s.set('PageIn-region', '48,488,317,15');
 						s.set('PageIn-format', '<right><b><size 7><bottom>');
@@ -419,6 +459,7 @@ function run(progress, target, filename, icons) {
 						s.set('Background-external-path', 'project:Templates/Rules-Background.png');
 						s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
 						s.set('Body-region', '48,73,317,418');
+						s.set('Body-lineTightness', 1.0);
 						s.set('PageIn-region', '48,488,317,15');
 						s.set('PageIn-format', '<right><b><size 7><bottom>');
 						if (s.get('VictoryBack') == '') {
@@ -429,6 +470,7 @@ function run(progress, target, filename, icons) {
 				else if (cardType == 'Contract') {
 					if (pluginVersion == 'new') {
 						s.set('Body-region', '55,313,298,180');
+						s.set('Body-lineTightness', 0.6);
 					}
 					else {
 						s.set('Story', '');
@@ -459,11 +501,13 @@ function run(progress, target, filename, icons) {
 				else if (landscapeTypes.indexOf(cardType) > -1) {
 					if (pluginVersion == 'new') {
 						s.set('Body-region', '48,246,467,121');
+						s.set('Body-lineTightness', 0.6);
 					}
 				}
 				else {
 					if (pluginVersion == 'new') {
 						s.set('TraitOut', 'true')
+						s.set('Body-lineTightness', 0.6);
 						if (cardType in bodyRegion) {
 							s.set('TraitOut-Body-region', bodyRegion[cardType]);
 						}
@@ -472,8 +516,44 @@ function run(progress, target, filename, icons) {
 							s.set('TraitOut-Trait-region', traitRegion[cardType]);
 						}
 
+						if (cardType in nameRegion) {
+							s.set('Name-region', nameRegion[cardType]);
+						}
+
+						if (cardType in namePointsize) {
+							s.set('Name-pointsize', namePointsize[cardType]);
+						}
+
 						if (cardType in hitPointsRegion) {
 							s.set('HitPoints-region', hitPointsRegion[cardType]);
+						}
+
+						if (cardType in attackRegion) {
+							s.set('Attack-region', attackRegion[cardType]);
+						}
+
+						if (cardType in defenseRegion) {
+							s.set('Defense-region', defenseRegion[cardType]);
+						}
+
+						if (cardType in willpowerRegion) {
+							s.set('Willpower-region', willpowerRegion[cardType]);
+						}
+
+						if (cardType in threatRegion) {
+							s.set('Threat-region', threatRegion[cardType]);
+						}
+
+						if (cardType in engagementRegion) {
+							s.set('Engagement-region', engagementRegion[cardType]);
+						}
+
+						if (cardType in engagementTint) {
+							s.set('Engagement-tint', engagementTint[cardType]);
+						}
+
+						if (cardType in sphereBodyShape) {
+							s.set('Sphere-Body-shape', sphereBodyShape[cardType]);
 						}
 					}
 				}
