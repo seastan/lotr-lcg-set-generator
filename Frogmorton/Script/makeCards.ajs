@@ -56,10 +56,6 @@ var nameRegion = {};
 // nameRegion['Ally'] = '0,326,413,20';
 // nameRegion['Hero'] = '0,325,413,20';
 
-var namePointsize = {};
-// namePointsize['Ally'] = 9;
-// namePointsize['Hero'] = 9;
-
 var hitPointsRegion = {};
 hitPointsRegion['Ally'] = '66,269,58,40';
 hitPointsRegion['Enemy'] = '64,269,58,40';
@@ -397,6 +393,7 @@ function run(progress, target, filename, icons) {
 				if (pluginVersion == 'new') {
 					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 8; FOREGROUND: #000000');
 					s.set('Body-pointsize', 8);
+					s.set('Name-pointsize', 9);
 					s.set('Trait-format', '<center><size 8><i><b>')
 					s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
 					s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
@@ -518,10 +515,6 @@ function run(progress, target, filename, icons) {
 
 						if (cardType in nameRegion) {
 							s.set('Name-region', nameRegion[cardType]);
-						}
-
-						if (cardType in namePointsize) {
-							s.set('Name-pointsize', namePointsize[cardType]);
 						}
 
 						if (cardType in hitPointsRegion) {
