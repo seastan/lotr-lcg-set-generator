@@ -45,6 +45,7 @@ SET_NAME = 'Name'
 SET_RINGSDB_CODE = 'RingsDB Code'
 SET_HOB_CODE = 'HoB Code'
 SET_LANGUAGE = 'Language'
+SET_SELECTED = 'Selected'
 SET_ROW = '_Row'
 
 BACK_PREFIX = 'Back_'
@@ -75,6 +76,7 @@ CARD_ARTIST = 'Artist'
 CARD_EASY_MODE = 'Removed for Easy Mode'
 CARD_ADDITIONAL_ENCOUNTER_SETS = 'Additional Encounter Sets'
 CARD_ADVENTURE = 'Adventure'
+CARD_SELECTED = 'Selected'
 CARD_SIDE_B = 'Side B'
 CARD_DOUBLESIDE = '_Card Side'
 
@@ -478,7 +480,7 @@ def _update_data(data):
                 row[BACK_PREFIX + CARD_TYPE] = 'Player Side Quest'
 
 
-def extract_data():
+def extract_data(conf):
     """ Extract data from the spreadsheet.
     """
     logging.info('Extracting data from the spreadsheet...')
@@ -487,7 +489,6 @@ def extract_data():
     SET_COLUMNS.clear()
     CARD_COLUMNS.clear()
     SETS.clear()
-    DATA[:] = []
 
     sheet_path = os.path.join(SHEET_ROOT_PATH, SHEET_NAME)
     excel_app = xw.App(visible=False, add_book=False)
@@ -525,7 +526,11 @@ def extract_data():
                                             CARD_COLUMNS[MAX_COLUMN],
                                             CARD_MAX_NUMBER + CARD_TITLE_ROW)
             data = xlwb_source.sheets[CARD_SHEET].range(xlwb_range).value
-            DATA.extend(_transform_to_dict(data, CARD_COLUMNS))
+            data = _transform_to_dict(data, CARD_COLUMNS)
+            if conf['selected_only']:
+                data = [row for row in data if row[CARD_SELECTED]]
+
+            DATA[:] = data
             _clean_data(DATA)
             _update_data(DATA)
         finally:
@@ -766,10 +771,14 @@ def _run_macro(set_row, callback):
         excel_app.quit()
 
 
-def generate_octgn_set_xml(set_id, set_name):
+def generate_octgn_set_xml(conf, set_id, set_name):
     """ Generate set.xml file for OCTGN.
     """
     def _callback(_, xlwb_target):
+        if conf['selected_only']:
+            xlwb_target.sheets[SET_SHEET].range(
+                (SET_TITLE_ROW + 1, _c2n(SET_COLUMNS[SET_SELECTED]))).value = 1
+
         xlwb_target.macro('SaveOCTGN')()
 
     logging.info('[%s] Generating set.xml file for OCTGN...', set_name)
@@ -1164,6 +1173,10 @@ def generate_xml(conf, set_id, set_name, lang):
         xlwb_target.sheets[SET_SHEET].range((SET_TITLE_ROW + 1,
                                              _c2n(SET_COLUMNS[SET_LANGUAGE]))
                                             ).value = lang
+        if conf['selected_only']:
+            xlwb_target.sheets[SET_SHEET].range(
+                (SET_TITLE_ROW + 1, _c2n(SET_COLUMNS[SET_SELECTED]))).value = 1
+
         xlwb_target.macro('SaveXML')()
 
     logging.info('[%s, %s] Generating xml file for Strange Eons...',

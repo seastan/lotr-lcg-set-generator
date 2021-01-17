@@ -14,14 +14,14 @@ def main():
     conf = lotr.read_conf()
     lotr.reset_project_folders(conf)
     lotr.download_sheet(conf)
-    lotr.extract_data()
+    lotr.extract_data(conf)
     lotr.sanity_check()
     sets = lotr.get_sets(conf)
 
     changes = False
     for set_id, set_name in sets:
         if conf['octgn_set_xml']:
-            lotr.generate_octgn_set_xml(set_id, set_name)
+            lotr.generate_octgn_set_xml(conf, set_id, set_name)
 
         if conf['ringsdb_csv']:
             lotr.generate_ringsdb_csv(set_id, set_name)
