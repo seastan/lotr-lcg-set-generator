@@ -73,11 +73,12 @@ CARD_SHADOW = 'Shadow'
 CARD_TEXT = 'Text'
 CARD_FLAVOUR = 'Flavour'
 CARD_ARTIST = 'Artist'
+CARD_SIDE_B = 'Side B'
 CARD_EASY_MODE = 'Removed for Easy Mode'
 CARD_ADDITIONAL_ENCOUNTER_SETS = 'Additional Encounter Sets'
 CARD_ADVENTURE = 'Adventure'
 CARD_SELECTED = 'Selected'
-CARD_SIDE_B = 'Side B'
+CARD_CHANGED = 'Changed'
 CARD_DOUBLESIDE = '_Card Side'
 
 MAX_COLUMN = '_Max Column'
@@ -1385,14 +1386,26 @@ def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0914
         tree_old = ET.parse(old_path)
         root_old = tree_old.getroot()
         old_file_hash = root_old.attrib['hash']
-        if old_file_hash == new_file_hash:
-            root.set('skip', '1')
-
         for card in root_old[0]:
             old_hashes[card.attrib['id']] = card.attrib['hash']
 
+        changed_cards = set()
+        for row in DATA:
+            if _skip_row(row) or row[CARD_SET] != set_id:
+                continue
+
+            if row[CARD_CHANGED]:
+                changed_cards.add(row[CARD_ID])
+
+        if changed_cards:
+            old_file_hash = ''
+
+        if old_file_hash == new_file_hash:
+            root.set('skip', '1')
+
         for card in root[0]:
-            if old_hashes.get(card.attrib['id']) == card.attrib['hash']:
+            if (old_hashes.get(card.attrib['id']) == card.attrib['hash'] and
+                    card.attrib['id'] not in changed_cards):
                 skip_ids.add(card.attrib['id'])
                 card.set('skip', '1')
 
