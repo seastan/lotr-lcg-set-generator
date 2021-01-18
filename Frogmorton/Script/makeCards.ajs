@@ -53,8 +53,8 @@ traitRegion['Objective Ally'] = '0,326,413,20';
 traitRegion['Treachery'] = '0,336,413,20';
 
 var nameRegion = {};
-// nameRegion['Ally'] = '0,326,413,20';
-// nameRegion['Hero'] = '0,325,413,20';
+nameRegion['Ally'] = '0,326,413,20';
+nameRegion['Hero'] = '0,325,413,20';
 
 var hitPointsRegion = {};
 hitPointsRegion['Ally'] = '66,269,58,40';
@@ -81,7 +81,7 @@ willpowerRegion['Objective Ally'] = '70,104,16,16';
 
 var threatRegion = {};
 threatRegion['Enemy'] = '73,115,16,16';
-// threatRegion['Location'] = 'T.B.D.';
+threatRegion['Location'] = '59,92,16,16';
 
 var engagementRegion = {};
 engagementRegion['Enemy'] = '76,48,36,24';
@@ -384,9 +384,6 @@ function run(progress, target, filename, icons) {
 						}
 					}
 					vXml = markUp(vXml, nXml, lang, setID, pluginVersion);
-					if (['Flavour', 'BFlavour', 'Shadow', 'BShadow'].indexOf(nXml) > -1) {
-						vXml = '<left>' + vXml;
-					}
 					s.set(nEon, vXml);
 				}
 
@@ -394,7 +391,10 @@ function run(progress, target, filename, icons) {
 					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 8; FOREGROUND: #000000');
 					s.set('Body-pointsize', 8);
 					s.set('Name-pointsize', 9);
-					s.set('Trait-format', '<center><size 8><i><b>')
+					s.set('Trait-format', '<width regular><center><tracking -0.02><size 8><i><b>')
+					s.set('Flavour-format', '<left><size 6.5><i>')
+					s.set('FlavourBack-format', '<left><size 6.5><i>')
+					s.set('Shadow-format', '<center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.6in><br><left><size 8><i>')
 					s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
 					s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
 					if (landscapeTypes.indexOf(cardType) > -1) {
@@ -467,7 +467,7 @@ function run(progress, target, filename, icons) {
 				else if (cardType == 'Contract') {
 					if (pluginVersion == 'new') {
 						s.set('Body-region', '55,313,298,180');
-						s.set('Body-lineTightness', 0.6);
+						s.set('Body-lineTightness', 0.2);
 					}
 					else {
 						s.set('Story', '');
@@ -498,13 +498,13 @@ function run(progress, target, filename, icons) {
 				else if (landscapeTypes.indexOf(cardType) > -1) {
 					if (pluginVersion == 'new') {
 						s.set('Body-region', '48,246,467,121');
-						s.set('Body-lineTightness', 0.6);
+						s.set('Body-lineTightness', 0.2);
 					}
 				}
 				else {
 					if (pluginVersion == 'new') {
 						s.set('TraitOut', 'true')
-						s.set('Body-lineTightness', 0.6);
+						s.set('Body-lineTightness', 0.2);
 						if (cardType in bodyRegion) {
 							s.set('TraitOut-Body-region', bodyRegion[cardType]);
 						}
