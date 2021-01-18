@@ -17,7 +17,7 @@ octgn_destination_path: C:\Google Drive\OCTGN\
 # or update only the cards, changed since the previous script run (false)
 from_scratch: true
 
-# Process only "selected" rows
+# Process only "selected" rows (true or false)
 selected_only: false
 
 # Number of parallel processes to use ("default" means "cpu_count() - 1")

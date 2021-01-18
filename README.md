@@ -80,6 +80,7 @@ into the root folder of this repo.
   - `magick_path`: path to ImageMagick executable
   - `octgn_destination_path`: path to OCTGN destination folder (may be empty)
   - `from_scratch`: whether to generate all cards from scratch (`true`) or to process only the cards, changed since the previous script run (`false`)
+  - `selected_only`: process only "selected" rows (true or false)
   - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`)
   - `strange_eons_plugin_version`: version of Strange Eons plugin, either `new` or `old`
   - `set_ids`: list of set IDs to work on
