@@ -31,30 +31,32 @@ portraitRegion['Quest'] = '0,0,563,413';
 portraitRegion['Treachery'] = '60,0,353,330';
 
 var bodyRegion = {};
-bodyRegion['Ally'] = '57,379,295,116';
-bodyRegion['Attachment'] = '56,349,295,146';
-bodyRegion['Enemy'] = '57,377,295,116';
+bodyRegion['Ally'] = '57,378,302,116';
+bodyRegion['Attachment'] = '57,347,302,146';
+bodyRegion['Enemy'] = '57,377,302,116';
 bodyRegion['Event'] = '62,353,285,140';
-bodyRegion['Hero'] = '57,379,295,116';
+bodyRegion['Hero'] = '57,377,302,116';
 bodyRegion['Location'] = '56,351,300,140';
 bodyRegion['Objective'] = '64,346,285,146';
 bodyRegion['Objective Ally'] = '64,346,285,146';
 bodyRegion['Treachery'] = '62,356,285,140';
 
 var traitRegion = {};
-traitRegion['Ally'] = '0,359,413,20';
-traitRegion['Attachment'] = '0,328,413,20';
+traitRegion['Ally'] = '0,358,413,20';
+traitRegion['Attachment'] = '0,327,413,20';
 traitRegion['Enemy'] = '0,357,413,20';
 traitRegion['Event'] = '0,332,413,20';
-traitRegion['Hero'] = '0,359,413,20';
+traitRegion['Hero'] = '0,357,413,20';
 traitRegion['Location'] = '0,330,413,20';
 traitRegion['Objective'] = '0,326,413,20';
 traitRegion['Objective Ally'] = '0,326,413,20';
 traitRegion['Treachery'] = '0,336,413,20';
 
 var nameRegion = {};
-nameRegion['Ally'] = '0,326,413,20';
-nameRegion['Hero'] = '0,325,413,20';
+nameRegion['Ally'] = '0,327,413,20';
+nameRegion['Attachment'] = '124,35,200,24';
+nameRegion['Enemy'] = '0,326,413,20';
+nameRegion['Hero'] = '0,326,413,20';
 
 var hitPointsRegion = {};
 hitPointsRegion['Ally'] = '66,269,58,40';
@@ -388,13 +390,16 @@ function run(progress, target, filename, icons) {
 				}
 
 				if (pluginVersion == 'new') {
-					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 8; FOREGROUND: #000000');
-					s.set('Body-pointsize', 8);
-					s.set('Name-pointsize', 9);
-					s.set('Trait-format', '<width regular><center><tracking -0.02><size 8><i><b>')
-					s.set('Flavour-format', '<left><size 6.5><i>')
-					s.set('FlavourBack-format', '<left><size 6.5><i>')
-					s.set('Shadow-format', '<center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.6in><br><left><size 8><i>')
+					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5; WIDTH: REGULAR; FOREGROUND: #000000');
+					s.set('Body-pointsize', 7.5);
+					s.set('Name-pointsize', 8.5);
+					s.set('Type-pointsize', 7.75);
+					s.set('Trait-format', '<width regular><center><tracking -0.02><size 8.25><i><b>')
+					s.set('Rules-format', '<left><tracking -0.02>')
+					s.set('RulesBack-format', '<left><tracking -0.02>')
+					s.set('Flavour-format', '<left><size 6.25><i>')
+					s.set('FlavourBack-format', '<left><size 6.25><i>')
+					s.set('Shadow-format', '<center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.6in><br><left><size 7.5><i>')
 					s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
 					s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
 					if (landscapeTypes.indexOf(cardType) > -1) {
