@@ -34,20 +34,20 @@ var bodyRegion = {};
 bodyRegion['Ally'] = '57,378,302,116';
 bodyRegion['Attachment'] = '57,347,302,146';
 bodyRegion['Enemy'] = '57,377,302,116';
-bodyRegion['Event'] = '62,353,285,140';
+bodyRegion['Event'] = '65,351,287,140';
 bodyRegion['Hero'] = '57,377,302,116';
-bodyRegion['Location'] = '56,351,300,140';
+bodyRegion['Location'] = '56,346,303,140';
 bodyRegion['Objective'] = '64,346,285,146';
 bodyRegion['Objective Ally'] = '64,346,285,146';
-bodyRegion['Treachery'] = '62,356,285,140';
+bodyRegion['Treachery'] = '65,356,287,140';
 
 var traitRegion = {};
 traitRegion['Ally'] = '0,358,413,20';
 traitRegion['Attachment'] = '0,327,413,20';
 traitRegion['Enemy'] = '0,357,413,20';
-traitRegion['Event'] = '0,332,413,20';
+traitRegion['Event'] = '0,331,413,20';
 traitRegion['Hero'] = '0,357,413,20';
-traitRegion['Location'] = '0,330,413,20';
+traitRegion['Location'] = '0,326,413,20';
 traitRegion['Objective'] = '0,326,413,20';
 traitRegion['Objective Ally'] = '0,326,413,20';
 traitRegion['Treachery'] = '0,336,413,20';
@@ -56,7 +56,11 @@ var nameRegion = {};
 nameRegion['Ally'] = '0,327,413,20';
 nameRegion['Attachment'] = '124,35,200,24';
 nameRegion['Enemy'] = '0,326,413,20';
+nameRegion['Event'] = '53,88,25,174';
 nameRegion['Hero'] = '0,326,413,20';
+nameRegion['Location'] = '0,41,413,20';
+nameRegion['Quest'] = '124,39,410,29';
+nameRegion['Treachery'] = '51,108,26,164';
 
 var hitPointsRegion = {};
 hitPointsRegion['Ally'] = '66,269,58,40';
@@ -385,35 +389,35 @@ function run(progress, target, filename, icons) {
 							}
 						}
 					}
+					if (nXml == 'Adventure') {
+						vXml = vXml.toUpperCase();
+					}
 					vXml = markUp(vXml, nXml, lang, setID, pluginVersion);
 					s.set(nEon, vXml);
 				}
 
-				if (pluginVersion == 'new') {
-					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5; WIDTH: REGULAR; FOREGROUND: #000000');
-					s.set('Body-pointsize', 7.5);
-					s.set('Name-pointsize', 8.5);
-					s.set('Type-pointsize', 7.75);
-					s.set('Trait-format', '<width regular><center><tracking -0.02><size 8.25><i><b>')
-					s.set('Rules-format', '<left><tracking -0.02>')
-					s.set('RulesBack-format', '<left><tracking -0.02>')
-					s.set('Flavour-format', '<left><size 6.25><i>')
-					s.set('FlavourBack-format', '<left><size 6.25><i>')
-					s.set('Shadow-format', '<center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.6in><br><left><size 7.5><i>')
-					s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
-					s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
-					if (landscapeTypes.indexOf(cardType) > -1) {
-						s.set('Artist-region', '130,375,120,15');
-						s.set('Copyright-region', '218,375,136,15');
-						s.set('Collection-portrait-clip-region', '391,376,12,12');
-						s.set('CollectionNumber-region', '403,375,30,15');
-					}
-					else {
-						s.set('Artist-region', '63,527,120,15');
-						s.set('Copyright-region', '152,527,136,15');
-						s.set('Collection-portrait-clip-region', '322,528,12,12');
-						s.set('CollectionNumber-region', '334,527,30,15');
-					}
+				s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5; WIDTH: REGULAR; FOREGROUND: #000000');
+				s.set('Body-pointsize', 7.5);
+				s.set('Type-pointsize', 7.75);
+				s.set('Trait-format', '<width regular><center><tracking -0.02><size 8.25><i><b>')
+				s.set('Rules-format', '<left><tracking -0.02>')
+				s.set('RulesBack-format', '<left><tracking -0.02>')
+				s.set('Flavour-format', '<left><size 6.25><i>')
+				s.set('FlavourBack-format', '<left><size 6.25><i>')
+				s.set('Shadow-format', '<center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.6in><br><left><size 7.5><i>')
+				s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
+				s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
+				if (landscapeTypes.indexOf(cardType) > -1) {
+					s.set('Artist-region', '130,375,120,15');
+					s.set('Copyright-region', '218,375,136,15');
+					s.set('Collection-portrait-clip-region', '391,376,12,12');
+					s.set('CollectionNumber-region', '403,375,30,15');
+				}
+				else {
+					s.set('Artist-region', '63,527,120,15');
+					s.set('Copyright-region', '152,527,136,15');
+					s.set('Collection-portrait-clip-region', '322,528,12,12');
+					s.set('CollectionNumber-region', '334,527,30,15');
 				}
 
 				if (cardType == 'Presentation') {
@@ -424,20 +428,22 @@ function run(progress, target, filename, icons) {
 					else if (s.get('Victory') != '') {
 						s.set('Page', s.get('Victory'));
 					}
+
 					s.set('Story', '');
 					s.set('Flavour', '');
+					s.set('Name', '');
+					s.set('GameName', '');
+					s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
+					s.set('GameName-external-path', 'project:imagesRaw/' + card['ArtworkTop']);
+					s.set('Name-external-path', 'project:imagesRaw/' + card['ArtworkBottom']);
+					s.set('Body-region', '48,73,317,418');
+					s.set('Body-lineTightness', 1.0);
+					s.set('Name-portrait-clip-region', '50,423,313,108');
+					s.set('PageIn-region', '48,488,317,15');
+					s.set('PageIn-format', '<right><b><size 7><bottom>');
+					s.set('LRL-IllustratorShort', ' ');
+
 					if (pluginVersion == 'new') {
-						s.set('Name', '');
-						s.set('GameName', '');
-						s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
-						s.set('GameName-external-path', 'project:imagesRaw/' + card['ArtworkTop']);
-						s.set('Name-external-path', 'project:imagesRaw/' + card['ArtworkBottom']);
-						s.set('Body-region', '48,73,317,418');
-						s.set('Body-lineTightness', 1.0);
-						s.set('Name-portrait-clip-region', '50,423,313,108');
-						s.set('PageIn-region', '48,488,317,15');
-						s.set('PageIn-format', '<right><b><size 7><bottom>');
-						s.set('LRL-IllustratorShort', ' ');
 						s.set('Artist', ' ');
 					}
 					else {
@@ -452,29 +458,29 @@ function run(progress, target, filename, icons) {
 					else if (s.get('Victory') != '') {
 						s.set('Page', s.get('Victory'));
 					}
+
+					if (s.get('VictoryBack') == '') {
+						s.set('PageBackShow', 'false');
+					}
+
 					s.set('Name', '');
 					s.set('Story', '');
 					s.set('StoryBack', '');
 					s.set('Flavour', '');
 					s.set('FlavourBack', '');
-					if (pluginVersion == 'new') {
-						s.set('Background-external-path', 'project:Templates/Rules-Background.png');
-						s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
-						s.set('Body-region', '48,73,317,418');
-						s.set('Body-lineTightness', 1.0);
-						s.set('PageIn-region', '48,488,317,15');
-						s.set('PageIn-format', '<right><b><size 7><bottom>');
-						if (s.get('VictoryBack') == '') {
-							s.set('PageBackShow', 'false');
-						}
-					}
+					s.set('Background-external-path', 'project:Templates/Rules-Background.png');
+					s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
+					s.set('Body-region', '48,73,317,418');
+					s.set('Body-lineTightness', 1.0);
+					s.set('PageIn-region', '48,488,317,15');
+					s.set('PageIn-format', '<right><b><size 7><bottom>');
 				}
 				else if (cardType == 'Contract') {
-					if (pluginVersion == 'new') {
-						s.set('Body-region', '55,313,298,180');
-						s.set('Body-lineTightness', 0.2);
-					}
-					else {
+					s.set('Body-region', '55,313,298,180');
+					s.set('Body-lineTightness', 0.2);
+					s.set('Name-pointsize', 8.5);
+
+					if (pluginVersion == 'old') {
 						s.set('Story', '');
 					}
 
@@ -501,58 +507,21 @@ function run(progress, target, filename, icons) {
 					}
 				}
 				else if (landscapeTypes.indexOf(cardType) > -1) {
-					if (pluginVersion == 'new') {
-						s.set('Body-region', '48,246,467,121');
-						s.set('Body-lineTightness', 0.2);
-					}
+					s.set('Body-region', '48,246,467,121');
+					s.set('Body-lineTightness', 0.2);
+					s.set('Name-pointsize', 10);
 				}
 				else {
-					if (pluginVersion == 'new') {
-						s.set('TraitOut', 'true')
-						s.set('Body-lineTightness', 0.2);
-						if (cardType in bodyRegion) {
-							s.set('TraitOut-Body-region', bodyRegion[cardType]);
-						}
+					s.set('TraitOut', 'true')
+					s.set('Body-lineTightness', 0.2);
+					s.set('Name-pointsize', 8.5);
 
-						if (cardType in traitRegion) {
-							s.set('TraitOut-Trait-region', traitRegion[cardType]);
-						}
+					if (cardType in bodyRegion) {
+						s.set('TraitOut-Body-region', bodyRegion[cardType]);
+					}
 
-						if (cardType in nameRegion) {
-							s.set('Name-region', nameRegion[cardType]);
-						}
-
-						if (cardType in hitPointsRegion) {
-							s.set('HitPoints-region', hitPointsRegion[cardType]);
-						}
-
-						if (cardType in attackRegion) {
-							s.set('Attack-region', attackRegion[cardType]);
-						}
-
-						if (cardType in defenseRegion) {
-							s.set('Defense-region', defenseRegion[cardType]);
-						}
-
-						if (cardType in willpowerRegion) {
-							s.set('Willpower-region', willpowerRegion[cardType]);
-						}
-
-						if (cardType in threatRegion) {
-							s.set('Threat-region', threatRegion[cardType]);
-						}
-
-						if (cardType in engagementRegion) {
-							s.set('Engagement-region', engagementRegion[cardType]);
-						}
-
-						if (cardType in engagementTint) {
-							s.set('Engagement-tint', engagementTint[cardType]);
-						}
-
-						if (cardType in sphereBodyShape) {
-							s.set('Sphere-Body-shape', sphereBodyShape[cardType]);
-						}
+					if (cardType in traitRegion) {
+						s.set('TraitOut-Trait-region', traitRegion[cardType]);
 					}
 				}
 
@@ -595,6 +564,42 @@ function run(progress, target, filename, icons) {
 					if (doubleSideTypes.indexOf(cardType) > -1) {
 						s.set('PortraitBack-portrait-clip-region', portraitRegion[cardType]);
 					}
+				}
+
+				if (cardType in nameRegion) {
+					s.set('Name-region', nameRegion[cardType]);
+				}
+
+				if (cardType in hitPointsRegion) {
+					s.set('HitPoints-region', hitPointsRegion[cardType]);
+				}
+
+				if (cardType in attackRegion) {
+					s.set('Attack-region', attackRegion[cardType]);
+				}
+
+				if (cardType in defenseRegion) {
+					s.set('Defense-region', defenseRegion[cardType]);
+				}
+
+				if (cardType in willpowerRegion) {
+					s.set('Willpower-region', willpowerRegion[cardType]);
+				}
+
+				if (cardType in threatRegion) {
+					s.set('Threat-region', threatRegion[cardType]);
+				}
+
+				if (cardType in engagementRegion) {
+					s.set('Engagement-region', engagementRegion[cardType]);
+				}
+
+				if (cardType in engagementTint) {
+					s.set('Engagement-tint', engagementTint[cardType]);
+				}
+
+				if (cardType in sphereBodyShape) {
+					s.set('Sphere-Body-shape', sphereBodyShape[cardType]);
 				}
 
 				if (nonUniqueTypes.indexOf(cardType) > -1) {
