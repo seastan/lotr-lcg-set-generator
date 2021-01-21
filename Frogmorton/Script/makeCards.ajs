@@ -55,12 +55,14 @@ traitRegion['Treachery'] = '0,336,413,20';
 var nameRegion = {};
 nameRegion['Ally'] = '0,327,413,20';
 nameRegion['Attachment'] = '124,35,200,24';
+nameRegion['Encounter Side Quest'] = '0,36,563,29';
 nameRegion['Enemy'] = '0,326,413,20';
 nameRegion['Event'] = '53,88,25,174';
 nameRegion['Hero'] = '0,326,413,20';
 nameRegion['Location'] = '0,41,413,20';
 nameRegion['Quest'] = '124,39,410,29';
 nameRegion['Treachery'] = '51,108,26,164';
+// T.B.D.
 
 var hitPointsRegion = {};
 hitPointsRegion['Ally'] = '66,269,58,40';
@@ -89,14 +91,11 @@ var threatRegion = {};
 threatRegion['Enemy'] = '73,115,16,16';
 threatRegion['Location'] = '59,92,16,16';
 
-var engagementRegion = {};
-engagementRegion['Enemy'] = '76,48,36,24';
-
-var engagementTint = {};
-engagementTint['Enemy'] = '28.0,1.0,0.9';
-
-var sphereBodyShape = {};
-sphereBodyShape['Hero'] = '0,0,472,40,0';
+var progressRegion = {};
+progressRegion['Encounter Side Quest'] = '52,202,35,24';
+progressRegion['Location'] = '56,283,35,24';
+progressRegion['Quest'] = '55,202,35,24';
+// T.B.D.
 
 var translate = {};
 translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado', 'Polish': 'Sprzymierzeniec', 'Italian': 'Alleato'};
@@ -405,6 +404,10 @@ function run(progress, target, filename, icons) {
 				s.set('Flavour-format', '<left><size 6.25><i>')
 				s.set('FlavourBack-format', '<left><size 6.25><i>')
 				s.set('Shadow-format', '<center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.6in><br><left><size 7.5><i>')
+				s.set('Engagement-region', '76,48,36,24');
+				s.set('Engagement-tint', '28.0,1.0,0.9');
+				s.set('Progress-tint', '28.0,1.0,0.9');
+				s.set('Sphere-Body-shape', '0,0,472,40,0');
 				s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
 				s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
 				if (landscapeTypes.indexOf(cardType) > -1) {
@@ -590,16 +593,8 @@ function run(progress, target, filename, icons) {
 					s.set('Threat-region', threatRegion[cardType]);
 				}
 
-				if (cardType in engagementRegion) {
-					s.set('Engagement-region', engagementRegion[cardType]);
-				}
-
-				if (cardType in engagementTint) {
-					s.set('Engagement-tint', engagementTint[cardType]);
-				}
-
-				if (cardType in sphereBodyShape) {
-					s.set('Sphere-Body-shape', sphereBodyShape[cardType]);
+				if (cardType in progressRegion) {
+					s.set('Progress-region', progressRegion[cardType]);
 				}
 
 				if (nonUniqueTypes.indexOf(cardType) > -1) {
