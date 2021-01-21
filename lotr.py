@@ -277,13 +277,14 @@ def _update_zip_filename(filename):
     return output_filename
 
 
-def read_conf():
+def read_conf(path=CONFIGURATION_PATH):
     """ Read project configuration.
     """
-    logging.info('Reading project configuration...')
+    logging.info('Reading project configuration (%s)...', path)
     timestamp = time.time()
 
-    with open(CONFIGURATION_PATH, 'r') as f_conf:
+    logging.info('Reading project configuration...')
+    with open(path, 'r') as f_conf:
         conf = yaml.safe_load(f_conf)
 
     conf['languages'] = [lang for lang in conf['outputs']

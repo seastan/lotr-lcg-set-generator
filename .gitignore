@@ -16,7 +16,7 @@ setOCTGN/*.xml
 setOCTGN/*.xml.old
 Temp/*/*
 
-configuration.yaml
+configuration*.yaml
 log.txt
 macros_copy.xlsm
 setExcel.xlsm

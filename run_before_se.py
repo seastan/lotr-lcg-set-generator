@@ -1,6 +1,7 @@
 """ LotR ALeP workflow (Part 1, before Strange Eons).
 """
 import logging
+import sys
 import time
 import lotr
 
@@ -11,7 +12,11 @@ def main():
     """ Main function.
     """
     timestamp = time.time()
-    conf = lotr.read_conf()
+    if len(sys.argv) > 1:
+        conf = lotr.read_conf(sys.argv[1])
+    else:
+        conf = lotr.read_conf()
+
     lotr.reset_project_folders(conf)
     lotr.download_sheet(conf)
     lotr.extract_data(conf)

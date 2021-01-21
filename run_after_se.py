@@ -2,6 +2,7 @@
 """
 import logging
 import signal
+import sys
 import time
 from multiprocessing import Pool, cpu_count
 
@@ -90,7 +91,11 @@ def main():  # pylint: disable=R0912
     """ Main function.
     """
     timestamp = time.time()
-    conf = lotr.read_conf()
+    if len(sys.argv) > 1:
+        conf = lotr.read_conf(sys.argv[1])
+    else:
+        conf = lotr.read_conf()
+
     lotr.extract_data(conf)
     sets = lotr.get_sets(conf)
 
