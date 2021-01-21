@@ -18,6 +18,7 @@ def main():
     lotr.sanity_check()
     sets = lotr.get_sets(conf)
 
+    strange_eons = False
     changes = False
     for set_id, set_name in sets:
         if conf['octgn_set_xml']:
@@ -31,6 +32,7 @@ def main():
 
         lotr.copy_custom_images(conf, set_id, set_name)
         for lang in conf['languages']:
+            strange_eons = True
             lotr.generate_xml(conf, set_id, set_name, lang)
             lotr.update_xml(conf, set_id, set_name, lang)
             new_hash, old_hash = lotr.calculate_hashes(set_id, set_name, lang)
@@ -45,8 +47,12 @@ def main():
             lotr.copy_octgn_outputs(conf)
 
         lotr.create_project()
+    elif strange_eons:
+        logging.info('No changes since the last run, skipping creating '
+                     'Strange Eons project')
     else:
-        logging.info('No changes since the last run, skipping')
+        logging.info('No Strange Eons outputs, skipping creating Strange Eons '
+                     'project')
 
     logging.info('Done (%ss)', round(time.time() - timestamp, 3))
 
