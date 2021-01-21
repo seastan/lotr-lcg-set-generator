@@ -1604,7 +1604,7 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
                  ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
-def generate_png300_db(conf, set_id, set_name, lang, skip_ids):
+def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
     """ Generate images for DB outputs.
     """
     logging.info('[%s, %s] Generating images for DB outputs...',
@@ -1622,9 +1622,16 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED,
                               '{}.{}'.format(set_id, lang))
+    known_keys = set()
     for _, _, filenames in os.walk(input_path):
+        filenames = sorted(filenames)
         for filename in filenames:
-            if filename.split('.')[-1] == 'png':
+            if filename.split('.')[-1] != 'png':
+                continue
+
+            key = filename[50:88]
+            if key not in known_keys:
+                known_keys.add(key)
                 shutil.copyfile(os.path.join(input_path, filename),
                                 os.path.join(temp_path, filename))
 
@@ -1657,9 +1664,16 @@ def generate_png300_octgn(set_id, set_name, lang, skip_ids):
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED,
                               '{}.{}'.format(set_id, lang))
+    known_keys = set()
     for _, _, filenames in os.walk(input_path):
+        filenames = sorted(filenames)
         for filename in filenames:
-            if filename.split('.')[-1] == 'png':
+            if filename.split('.')[-1] != 'png':
+                continue
+
+            key = filename[50:88]
+            if key not in known_keys:
+                known_keys.add(key)
                 shutil.copyfile(os.path.join(input_path, filename),
                                 os.path.join(output_path, filename))
 
@@ -1843,6 +1857,7 @@ def generate_db(set_id, set_name, lang):
 
         _create_folder(output_path)
         _clear_folder(output_path)
+        filenames = sorted(filenames)
         for filename in filenames:
             if filename.split('.')[-1] != 'png':
                 continue
@@ -1882,6 +1897,7 @@ def generate_octgn(set_id, set_name, lang):
             break
 
         _create_folder(output_path)
+        filenames = sorted(filenames)
         with zipfile.ZipFile(pack_path, 'w') as zip_obj:
             for filename in filenames:
                 if filename.split('.')[-1] != 'png':
