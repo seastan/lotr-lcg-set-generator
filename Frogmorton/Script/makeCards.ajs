@@ -31,38 +31,60 @@ portraitRegion['Quest'] = '0,0,563,413';
 portraitRegion['Treachery'] = '60,0,353,330';
 
 var bodyRegion = {};
-bodyRegion['Ally'] = '57,378,302,116';
-bodyRegion['Attachment'] = '57,347,302,146';
-bodyRegion['Enemy'] = '57,377,302,116';
-bodyRegion['Event'] = '65,351,287,140';
-bodyRegion['Hero'] = '57,377,302,116';
-bodyRegion['Location'] = '56,346,303,140';
-bodyRegion['Objective'] = '64,346,285,146';
-bodyRegion['Objective Ally'] = '64,346,285,146';
-bodyRegion['Treachery'] = '65,356,287,140';
+bodyRegion['Ally'] = '57,378,299,114';
+bodyRegion['Attachment'] = '57,347,299,144';
+bodyRegion['Enemy'] = '57,377,299,114';
+bodyRegion['Event'] = '65,351,283,140';
+bodyRegion['Hero'] = '57,377,299,114';
+bodyRegion['Location'] = '56,346,301,142';
+bodyRegion['Objective'] = '65,346,283,146';
+bodyRegion['Objective Ally'] = '65,346,283,146';
+bodyRegion['Treachery'] = '65,356,283,135';
+
+bodyRegion['Encounter Side Quest'] = '48,248,467,114';
+bodyRegion['Player Side Quest'] = '52,250,459,114';
+bodyRegion['Quest'] = '51,249,461,114';
 
 var traitRegion = {};
-traitRegion['Ally'] = '0,358,413,20';
-traitRegion['Attachment'] = '0,327,413,20';
-traitRegion['Enemy'] = '0,357,413,20';
-traitRegion['Event'] = '0,331,413,20';
-traitRegion['Hero'] = '0,357,413,20';
-traitRegion['Location'] = '0,326,413,20';
-traitRegion['Objective'] = '0,326,413,20';
-traitRegion['Objective Ally'] = '0,326,413,20';
-traitRegion['Treachery'] = '0,336,413,20';
+traitRegion['Ally'] = '57,358,299,20';
+traitRegion['Attachment'] = '57,327,299,20';
+traitRegion['Enemy'] = '57,357,299,20';
+traitRegion['Event'] = '65,331,283,20';
+traitRegion['Hero'] = '57,357,299,20';
+traitRegion['Location'] = '56,326,301,20';
+traitRegion['Objective'] = '65,326,283,20';
+traitRegion['Objective Ally'] = '65,326,283,20';
+traitRegion['Treachery'] = '65,336,283,20';
 
 var nameRegion = {};
-nameRegion['Ally'] = '0,327,413,20';
-nameRegion['Attachment'] = '124,35,200,24';
-nameRegion['Encounter Side Quest'] = '0,36,563,29';
-nameRegion['Enemy'] = '0,326,413,20';
+nameRegion['Ally'] = '100,327,213,20';
+nameRegion['Attachment'] = '132,35,183,24';
+nameRegion['Contract'] = '84,241,245,28';
+nameRegion['Encounter Side Quest'] = '100,36,363,29';
+nameRegion['Enemy'] = '94,326,225,20';
 nameRegion['Event'] = '53,88,25,174';
-nameRegion['Hero'] = '0,326,413,20';
-nameRegion['Location'] = '0,41,413,20';
-nameRegion['Quest'] = '124,39,410,29';
+nameRegion['Hero'] = '100,326,213,20';
+nameRegion['Location'] = '108,41,197,20';
+nameRegion['Objective'] = '75,36,263,25';
+nameRegion['Objective Ally'] = '75,36,263,25';
+nameRegion['Player Side Quest'] = '144,39,368,29';
+nameRegion['Quest'] = '144,39,368,29';
 nameRegion['Treachery'] = '51,108,26,164';
-// T.B.D.
+
+var namePointSize = {};
+namePointSize['Ally'] = 8.5;
+namePointSize['Attachment'] = 8.5;
+namePointSize['Contract'] = 10;
+namePointSize['Encounter Side Quest'] = 10;
+namePointSize['Enemy'] = 8.5;
+namePointSize['Event'] = 8.5;
+namePointSize['Hero'] = 8.5;
+namePointSize['Location'] = 8.5;
+namePointSize['Objective'] = 10;
+namePointSize['Objective Ally'] = 10;
+namePointSize['Player Side Quest'] = 10;
+namePointSize['Quest'] = 10;
+namePointSize['Treachery'] = 8.5;
 
 var hitPointsRegion = {};
 hitPointsRegion['Ally'] = '66,269,58,40';
@@ -95,7 +117,15 @@ var progressRegion = {};
 progressRegion['Encounter Side Quest'] = '52,202,35,24';
 progressRegion['Location'] = '56,283,35,24';
 progressRegion['Quest'] = '55,202,35,24';
-// T.B.D.
+progressRegion['Player Side Quest'] = '55,202,35,24';
+
+var adventureRegion = {};
+adventureRegion['Objective'] = '75,69,263,17';
+adventureRegion['Objective Ally'] = '75,69,263,17';
+adventureRegion['Quest'] = '196,74,264,16';
+
+var resourceCostRegion = {};
+resourceCostRegion['Player Side Quest'] = '43,44,57,39';
 
 var translate = {};
 translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado', 'Polish': 'Sprzymierzeniec', 'Italian': 'Alleato'};
@@ -395,9 +425,8 @@ function run(progress, target, filename, icons) {
 					s.set(nEon, vXml);
 				}
 
-				s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5; WIDTH: REGULAR; FOREGROUND: #000000');
-				s.set('Body-pointsize', 7.5);
 				s.set('Type-pointsize', 7.75);
+				s.set('Adventure-pointsize', 5.25);
 				s.set('Trait-format', '<width regular><center><tracking -0.02><size 8.25><i><b>')
 				s.set('Rules-format', '<left><tracking -0.02>')
 				s.set('RulesBack-format', '<left><tracking -0.02>')
@@ -408,6 +437,7 @@ function run(progress, target, filename, icons) {
 				s.set('Engagement-tint', '28.0,1.0,0.9');
 				s.set('Progress-tint', '28.0,1.0,0.9');
 				s.set('Sphere-Body-shape', '0,0,472,40,0');
+				s.set('Type-region', '0,500,413,20');
 				s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
 				s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
 				if (landscapeTypes.indexOf(cardType) > -1) {
@@ -436,6 +466,9 @@ function run(progress, target, filename, icons) {
 					s.set('Flavour', '');
 					s.set('Name', '');
 					s.set('GameName', '');
+
+					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5; WIDTH: REGULAR; FOREGROUND: #000000');
+					s.set('Body-pointsize', 7.5);
 					s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
 					s.set('GameName-external-path', 'project:imagesRaw/' + card['ArtworkTop']);
 					s.set('Name-external-path', 'project:imagesRaw/' + card['ArtworkBottom']);
@@ -471,6 +504,9 @@ function run(progress, target, filename, icons) {
 					s.set('StoryBack', '');
 					s.set('Flavour', '');
 					s.set('FlavourBack', '');
+
+					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5; WIDTH: REGULAR; FOREGROUND: #000000');
+					s.set('Body-pointsize', 7.5);
 					s.set('Background-external-path', 'project:Templates/Rules-Background.png');
 					s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
 					s.set('Body-region', '48,73,317,418');
@@ -479,9 +515,12 @@ function run(progress, target, filename, icons) {
 					s.set('PageIn-format', '<right><b><size 7><bottom>');
 				}
 				else if (cardType == 'Contract') {
-					s.set('Body-region', '55,313,298,180');
+					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5; WIDTH: REGULAR; FOREGROUND: #000000');
+					s.set('Body-pointsize', 7.5);
+					s.set('Body-region', '65,313,283,176');
 					s.set('Body-lineTightness', 0.2);
-					s.set('Name-pointsize', 8.5);
+					s.set('Side-region', '0,277,413,17');
+					s.set('Side-pointsize', 5);
 
 					if (pluginVersion == 'old') {
 						s.set('Story', '');
@@ -510,14 +549,20 @@ function run(progress, target, filename, icons) {
 					}
 				}
 				else if (landscapeTypes.indexOf(cardType) > -1) {
+					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7; WIDTH: REGULAR; FOREGROUND: #000000');
+					s.set('Body-pointsize', 7);
 					s.set('Body-region', '48,246,467,121');
 					s.set('Body-lineTightness', 0.2);
-					s.set('Name-pointsize', 10);
+
+					if (cardType in bodyRegion) {
+						s.set('Body-region', bodyRegion[cardType]);
+					}
 				}
 				else {
+					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5; WIDTH: REGULAR; FOREGROUND: #000000');
+					s.set('Body-pointsize', 7.5);
 					s.set('TraitOut', 'true')
 					s.set('Body-lineTightness', 0.2);
-					s.set('Name-pointsize', 8.5);
 
 					if (cardType in bodyRegion) {
 						s.set('TraitOut-Body-region', bodyRegion[cardType]);
@@ -573,6 +618,10 @@ function run(progress, target, filename, icons) {
 					s.set('Name-region', nameRegion[cardType]);
 				}
 
+				if (cardType in namePointSize) {
+					s.set('Name-pointsize', namePointSize[cardType]);
+				}
+
 				if (cardType in hitPointsRegion) {
 					s.set('HitPoints-region', hitPointsRegion[cardType]);
 				}
@@ -595,6 +644,10 @@ function run(progress, target, filename, icons) {
 
 				if (cardType in progressRegion) {
 					s.set('Progress-region', progressRegion[cardType]);
+				}
+
+				if (cardType in resourceCostRegion) {
+					s.set('ResourceCost-region', resourceCostRegion[cardType]);
 				}
 
 				if (nonUniqueTypes.indexOf(cardType) > -1) {
