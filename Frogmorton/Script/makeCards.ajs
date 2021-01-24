@@ -148,9 +148,9 @@ encounterNumberRegion['Objective Ally'] = '323,307,26,10';
 encounterNumberRegion['Treachery'] = '329,317,26,10';
 
 var optionBodyShape = {};
-optionBodyShape['Encounter Side Quest'] = '0,0,344,0,66';
-optionBodyShape['Player Side Quest'] = '0,0,346,0,64';
-optionBodyShape['Quest'] = '0,0,346,0,66';
+optionBodyShape['Encounter Side Quest'] = '0,0,348,0,64';
+optionBodyShape['Player Side Quest'] = '0,0,348,0,62';
+optionBodyShape['Quest'] = '0,0,350,0,64';
 
 var optionRightDecorationRegion = {};
 optionRightDecorationRegion['Ally'] = '298,503,72,18';
