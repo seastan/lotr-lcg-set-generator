@@ -29,6 +29,7 @@ from reportlab.pdfgen.canvas import Canvas
 
 SET_SHEET = 'Sets'
 CARD_SHEET = 'Card Data'
+SCRATCH_SHEET = 'Scratch Data'
 SET_TITLE_ROW = 2
 SET_MAX_NUMBER = 1000
 CARD_TITLE_ROW = 1
@@ -80,8 +81,10 @@ CARD_ADVENTURE = 'Adventure'
 CARD_SELECTED = 'Selected'
 CARD_CHANGED = 'Changed'
 CARD_DOUBLESIDE = '_Card Side'
+CARD_SCRATCH = '_Scratch'
 
 MAX_COLUMN = '_Max Column'
+ROW_COLUMN = '_Row'
 
 CARD_TYPES = ('Ally', 'Attachment', 'Contract', 'Enemy',
               'Encounter Side Quest', 'Event', 'Hero', 'Location', 'Objective',
@@ -150,6 +153,7 @@ SET_COLUMNS = {}
 CARD_COLUMNS = {}
 SETS = {}
 DATA = []
+INTERSECTED_SETS = []
 ARTWORK_CACHE = {}
 
 
@@ -387,15 +391,18 @@ def _extract_column_names(columns):
     return names
 
 
-def _transform_to_dict(data, columns):
+def _transform_to_dict(data, columns, title_row=None):
     """ Transform rows to dictionary.
     """
     res = []
-    for row in data:
+    for i, row in enumerate(data):
         if not any(row):
-            break
+            continue
 
         row_dict = {}
+        if title_row is not None:
+            row_dict[ROW_COLUMN] = i + title_row + 1
+
         for name, column in columns.items():
             if name == MAX_COLUMN:
                 continue
@@ -449,14 +456,18 @@ def _clean_data(data):
                 value = value.replace('[PP]', '[pp]')
 
                 value = re.sub(r' +(?=\n|$)', '', value)
+                value = re.sub(r' +', ' ', value)
                 value = value.strip()
                 row[key] = value
 
 
-def _update_data(data):
+def _update_data():
     """ Update card data from the spreadsheet.
     """
-    for row in data:
+    for row in DATA:
+        if row[CARD_SCRATCH] and row[CARD_SET] in INTERSECTED_SETS:
+            row[CARD_SET] = '[filtered set]'
+
         if ((row[CARD_QUANTITY] is None or row[CARD_QUANTITY] in ('0', 0)) and
                 row[CARD_TYPE] == 'Rules'):
             row[CARD_QUANTITY] = 1
@@ -482,6 +493,12 @@ def _update_data(data):
                 row[BACK_PREFIX + CARD_TYPE] = 'Player Side Quest'
 
 
+def _skip_row(row):
+    """ Check whether a row should be skipped or not.
+    """
+    return row[CARD_SET] in ('0', 0) or row[CARD_ID] in ('0', 0)
+
+
 def extract_data(conf):
     """ Extract data from the spreadsheet.
     """
@@ -491,6 +508,8 @@ def extract_data(conf):
     SET_COLUMNS.clear()
     CARD_COLUMNS.clear()
     SETS.clear()
+    DATA[:] = []
+    INTERSECTED_SETS[:] = []
 
     sheet_path = os.path.join(SHEET_ROOT_PATH, SHEET_NAME)
     excel_app = xw.App(visible=False, add_book=False)
@@ -526,15 +545,31 @@ def extract_data(conf):
             xlwb_range = '{}{}:{}{}'.format('A',
                                             CARD_TITLE_ROW + 1,
                                             CARD_COLUMNS[MAX_COLUMN],
-                                            CARD_MAX_NUMBER + CARD_TITLE_ROW)
+                                            CARD_TITLE_ROW + CARD_MAX_NUMBER)
             data = xlwb_source.sheets[CARD_SHEET].range(xlwb_range).value
-            data = _transform_to_dict(data, CARD_COLUMNS)
-            if conf['selected_only']:
-                data = [row for row in data if row[CARD_SELECTED]]
+            data = _transform_to_dict(data, CARD_COLUMNS, CARD_TITLE_ROW)
+            for row in data:
+                row[CARD_SCRATCH] = None
 
-            DATA[:] = data
+            DATA.extend(data)
+
+            data = xlwb_source.sheets[SCRATCH_SHEET].range(xlwb_range).value
+            data = _transform_to_dict(data, CARD_COLUMNS, CARD_TITLE_ROW)
+            for row in data:
+                row[CARD_SCRATCH] = 1
+
+            DATA.extend(data)
+
+            DATA[:] = [row for row in DATA if not _skip_row(row)]
+            if conf['selected_only']:
+                DATA[:] = [row for row in DATA if row[CARD_SELECTED]]
+
+            main_sets = {row[CARD_SET] for row in DATA if not row[CARD_SCRATCH]}
+            scratch_sets = {row[CARD_SET] for row in DATA if row[CARD_SCRATCH]}
+            INTERSECTED_SETS.extend(main_sets.intersection(scratch_sets))
+
             _clean_data(DATA)
-            _update_data(DATA)
+            _update_data()
         finally:
             xlwb_source.close()
     finally:
@@ -544,13 +579,27 @@ def extract_data(conf):
                  round(time.time() - timestamp, 3))
 
 
-def _skip_row(row):
-    """ Check whether a row should be skipped or not.
+def get_sets(conf):
+    """ Get all sets to work on and return list of (set id, set name) tuples.
     """
-    return row[CARD_SET] in ('0', 0) or row[CARD_ID] in ('0', 0)
+    logging.info('Getting all sets to work on...')
+    timestamp = time.time()
+
+    data_sets = {row[CARD_SET] for row in DATA}
+    chosen_sets = []
+    for row in SETS.values():
+        if row[SET_ID] in conf['set_ids'] and row[SET_ID] in data_sets:
+            chosen_sets.append([row[SET_ID], row[SET_NAME]])
+
+    if not chosen_sets:
+        logging.error('ERROR: No sets to work on')
+
+    logging.info('...Getting all sets to work on (%ss)',
+                 round(time.time() - timestamp, 3))
+    return chosen_sets
 
 
-def sanity_check():  # pylint: disable=R0912,R0914,R0915
+def sanity_check(sets):  # pylint: disable=R0912,R0914,R0915
     """ Perform a sanity check of the spreadsheet.
     """
     logging.info('Performing a sanity check of the spreadsheet...')
@@ -559,18 +608,10 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
     errors_found = False
     card_ids = []
     card_set_number_names = []
-    set_ids = list(SETS.keys())
-    for i, row in enumerate(DATA):
-        i = i + CARD_TITLE_ROW + 1
-        if _skip_row(row):
-            continue
-
-        for key, value in row.items():
-            if isinstance(value, str) and '[unmatched quot]' in value:
-                logging.error('ERROR: Unmatched quote symbol in %s column '
-                              'for row #%s', key, i)
-                errors_found = True
-
+    set_ids = [s[0] for s in sets]
+    all_set_ids = list(SETS.keys())
+    for row in DATA:
+        i = row[ROW_COLUMN]
         set_id = row[CARD_SET]
         card_id = row[CARD_ID]
         card_number = row[CARD_NUMBER]
@@ -581,83 +622,105 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
         card_unique_back = row[BACK_PREFIX + CARD_UNIQUE]
         card_type_back = row[BACK_PREFIX + CARD_TYPE]
         card_easy_mode = row[CARD_EASY_MODE]
+        card_scratch = row[CARD_SCRATCH]
+        scratch = ' (Scratch)' if card_scratch else ''
 
         if set_id is None:
-            logging.error('ERROR: No set ID for row #%s', i)
-            errors_found = True
-        elif set_id not in set_ids:
-            logging.error('ERROR: Unknown set ID for row #%s', i)
-            errors_found = True
+            logging.error('ERROR: No set ID for row #%s%s', i, scratch)
+            if not card_scratch:
+                errors_found = True
+        elif set_id == '[filtered set]':
+            logging.error('ERROR: Reusing non-scratch set ID for row #%s%s', i,
+                          scratch)
+        elif set_id not in all_set_ids:
+            logging.error('ERROR: Unknown set ID for row #%s%s', i, scratch)
+            if not card_scratch:
+                errors_found = True
 
         if card_id is None:
-            logging.error('ERROR: No card ID for row #%s', i)
-            errors_found = True
+            logging.error('ERROR: No card ID for row #%s%s', i, scratch)
+            if not card_scratch or set_id in set_ids:
+                errors_found = True
         elif card_id in card_ids:
-            logging.error('ERROR: Duplicate card ID for row #%s', i)
-            errors_found = True
-        else:
+            logging.error('ERROR: Duplicate card ID for row #%s%s', i, scratch)
+            if not card_scratch or set_id in set_ids:
+                errors_found = True
+        elif not card_scratch or set_id in set_ids:
             card_ids.append(card_id)
 
+        if set_id not in set_ids:
+            continue
+
         if card_number is None:
-            logging.error('ERROR: No card number for row #%s', i)
+            logging.error('ERROR: No card number for row #%s%s', i, scratch)
             errors_found = True
 
         if card_quantity is None:
-            logging.error('ERROR: No card quantity for row #%s', i)
+            logging.error('ERROR: No card quantity for row #%s%s', i, scratch)
             errors_found = True
         elif not _is_positive_int(card_quantity):
             logging.error('ERROR: Incorrect format for card quantity'
-                          ' for row #%s', i)
+                          ' for row #%s%s', i, scratch)
             errors_found = True
 
         if card_name is None:
-            logging.error('ERROR: No card name for row #%s', i)
+            logging.error('ERROR: No card name for row #%s%s', i, scratch)
             errors_found = True
         elif set_id is not None and card_number is not None:
             if (set_id, card_number, card_name) in card_set_number_names:
                 logging.error(
-                    'ERROR: Duplicate card set, number and name for row #%s',
-                    i)
+                    'ERROR: Duplicate card set, number and name for row #%s%s',
+                    i, scratch)
                 errors_found = True
             else:
                 card_set_number_names.append((set_id, card_number, card_name))
 
         if card_unique is not None and card_unique not in ('1', 1):
-            logging.error('ERROR: Incorrect format for unique for row #%s', i)
+            logging.error('ERROR: Incorrect format for unique for row #%s%s',
+                          i, scratch)
             errors_found = True
 
         if card_unique_back is not None and card_unique_back not in ('1', 1):
             logging.error('ERROR: Incorrect format for unique back'
-                          ' for row #%s', i)
+                          ' for row #%s%s', i, scratch)
             errors_found = True
 
         if card_type is None:
-            logging.error('ERROR: No card type for row #%s', i)
+            logging.error('ERROR: No card type for row #%s%s', i, scratch)
             errors_found = True
         elif card_type not in CARD_TYPES:
-            logging.error('ERROR: Unknown card type for row #%s', i)
+            logging.error('ERROR: Unknown card type for row #%s%s', i, scratch)
             errors_found = True
 
         if card_type_back is not None and card_type_back not in CARD_TYPES:
-            logging.error('ERROR: Unknown card type back for row #%s', i)
+            logging.error('ERROR: Unknown card type back for row #%s%s', i,
+                          scratch)
             errors_found = True
         elif (card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL
               and card_type_back is not None and card_type_back != card_type):
-            logging.error('ERROR: Incorrect card type back for row #%s', i)
+            logging.error('ERROR: Incorrect card type back for row #%s%s', i,
+                          scratch)
             errors_found = True
         elif (card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL
               and card_type_back in CARD_TYPES_DOUBLESIDE_OPTIONAL):
-            logging.error('ERROR: Incorrect card type back for row #%s', i)
+            logging.error('ERROR: Incorrect card type back for row #%s%s', i,
+                          scratch)
             errors_found = True
 
         if card_easy_mode is not None and not _is_positive_int(card_easy_mode):
             logging.error('ERROR: Incorrect format for removed for easy mode'
-                          ' for row #%s', i)
+                          ' for row #%s%s', i, scratch)
             errors_found = True
         elif card_easy_mode is not None and card_easy_mode > card_quantity:
             logging.error('ERROR: Removed for easy mode is greater than card'
-                          ' quantity for row #%s', i)
+                          ' quantity for row #%s%s', i, scratch)
             errors_found = True
+
+        for key, value in row.items():
+            if isinstance(value, str) and '[unmatched quot]' in value:
+                logging.error('ERROR: Unmatched quote symbol in %s column '
+                              'for row #%s%s', key, i, scratch)
+                errors_found = True
 
     if errors_found:
         raise ValueError('Sanity check of the spreadsheet failed, '
@@ -665,25 +728,6 @@ def sanity_check():  # pylint: disable=R0912,R0914,R0915
 
     logging.info('...Performing a sanity check of the spreadsheet (%ss)',
                  round(time.time() - timestamp, 3))
-
-
-def get_sets(conf):
-    """ Get all sets to work on and return list of (set id, set name) tuples.
-    """
-    logging.info('Getting all sets to work on...')
-    timestamp = time.time()
-
-    chosen_sets = []
-    for row in SETS.values():
-        if row[SET_ID] in conf['set_ids']:
-            chosen_sets.append([row[SET_ID], row[SET_NAME]])
-
-    if not chosen_sets:
-        logging.error('ERROR: No sets to work on')
-
-    logging.info('...Getting all sets to work on (%ss)',
-                 round(time.time() - timestamp, 3))
-    return chosen_sets
 
 
 def _backup_previous_octgn_xml(set_id):
@@ -715,7 +759,7 @@ def _backup_previous_xml(conf, set_id, lang):
     if os.path.exists(new_path):
         shutil.move(new_path, old_path)
 
-    if conf['from_scratch'] and os.path.exists(old_path):
+    if conf['reprocess_all'] and os.path.exists(old_path):
         os.remove(old_path)
 
 
@@ -748,10 +792,29 @@ def _run_macro(set_row, callback):
                     'A',
                     CARD_TITLE_ROW + 1,
                     CARD_COLUMNS[MAX_COLUMN],
-                    CARD_MAX_NUMBER + CARD_TITLE_ROW)
+                    CARD_TITLE_ROW + CARD_MAX_NUMBER)
                 data = xlwb_source.sheets[CARD_SHEET].range(xlwb_range).value
                 card_sheet.range(xlwb_range).value = data
-                card_sheet.range(xlwb_range).api.Sort(
+
+                data = xlwb_source.sheets[SCRATCH_SHEET].range(xlwb_range).value
+                set_column = _c2n(CARD_COLUMNS[CARD_SET]) - 1
+                for row in data:
+                    if row[set_column] in INTERSECTED_SETS:
+                        row[set_column] = None
+
+                xlwb_next_range = '{}{}:{}{}'.format(
+                    'A',
+                    CARD_TITLE_ROW + 1 + CARD_MAX_NUMBER,
+                    CARD_COLUMNS[MAX_COLUMN],
+                    CARD_TITLE_ROW + CARD_MAX_NUMBER + CARD_MAX_NUMBER)
+                card_sheet.range(xlwb_next_range).value = data
+
+                xlwb_full_range = '{}{}:{}{}'.format(
+                    'A',
+                    CARD_TITLE_ROW + 1,
+                    CARD_COLUMNS[MAX_COLUMN],
+                    CARD_TITLE_ROW + CARD_MAX_NUMBER + CARD_MAX_NUMBER)
+                card_sheet.range(xlwb_full_range).api.Sort(
                     Key1=card_sheet.range(
                         '{}:{}'.format(CARD_COLUMNS[CARD_SET],  # pylint: disable=W1308
                                        CARD_COLUMNS[CARD_SET])
@@ -826,7 +889,9 @@ def _update_card_text(text):  # pylint: disable=R0915
     text = re.sub(r'\[red\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[\/red\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[tab\]', '    ', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[nobr\]', ' ', text, flags=re.IGNORECASE)
     text = re.sub(r'\[size [^\]]+\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[defaultsize [^\]]+\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[\/size\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[img [^\]]+\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r' +(?=\n|$)', '', text)
@@ -873,7 +938,7 @@ def generate_ringsdb_csv(set_id, set_name):  # pylint: disable=R0912
         writer = csv.DictWriter(obj, fieldnames=fieldnames)
         writer.writeheader()
         for row in DATA:
-            if _skip_row(row) or row[CARD_SET] != set_id:
+            if row[CARD_SET] != set_id:
                 continue
 
             card_type = row[CARD_TYPE]
@@ -963,7 +1028,7 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
             card_data.append(new_row)
 
     for row in card_data:
-        if _skip_row(row) or row[CARD_SET] != set_id:
+        if row[CARD_SET] != set_id:
             continue
 
         card_type = row[CARD_TYPE]
@@ -1150,7 +1215,7 @@ def generate_xml(conf, set_id, set_name, lang):
             translated = []
             tr_sheet = xlwb_source.sheets[lang]
             for source_row in range(CARD_TITLE_ROW + 1,
-                                    CARD_MAX_NUMBER + CARD_TITLE_ROW + 1):
+                                    CARD_TITLE_ROW + CARD_MAX_NUMBER + 1):
                 if tr_sheet.range((source_row,
                                    _c2n(CARD_COLUMNS[CARD_SET]))
                                   ).value == set_id:
@@ -1392,7 +1457,7 @@ def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0914
 
         changed_cards = set()
         for row in DATA:
-            if _skip_row(row) or row[CARD_SET] != set_id:
+            if row[CARD_SET] != set_id:
                 continue
 
             if row[CARD_CHANGED]:

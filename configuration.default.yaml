@@ -13,9 +13,9 @@ magick_path: C:\Program Files\ImageMagick-7.0.10-Q16-HDRI\magick.exe
 # Path to OCTGN destination folder (may be empty)
 octgn_destination_path: C:\Google Drive\OCTGN\
 
-# Whether to generate all cards from scratch (true)
+# Whether to reprocess all cards (true)
 # or update only the cards, changed since the previous script run (false)
-from_scratch: true
+reprocess_all: true
 
 # Process only "selected" rows (true or false)
 selected_only: false
@@ -35,6 +35,8 @@ set_ids:
   - 3e7002fc-f723-4f86-a625-548347b1eaa4  # ALeP - Mustering of the Rohirrim
   - 3104cd2a-ccce-44a7-bc6e-e3433636c329  # ALeP - The Glittering Caves
   - 6890e6e4-fffb-4765-9fe0-0e6bce22c9a4  # ALeP - Blood in the Isen
+#  - [all]  # all non-scratch sets
+#  - [all scratch]  # all scratch sets
 
 # Creating set.xml files for OCTGN (true or false)
 octgn_set_xml: true

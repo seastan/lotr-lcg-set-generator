@@ -79,25 +79,25 @@ into the root folder of this repo.
   - `gimp_console_path`: path to GIMP console executable
   - `magick_path`: path to ImageMagick executable
   - `octgn_destination_path`: path to OCTGN destination folder (may be empty)
-  - `from_scratch`: whether to generate all cards from scratch (`true`) or to process only the cards, changed since the previous script run (`false`)
+  - `reprocess_all`: whether to reprocess all cards (`true`) or update only the cards, changed since the previous script run (`false`)
   - `selected_only`: process only "selected" rows (true or false)
   - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`)
   - `strange_eons_plugin_version`: version of Strange Eons plugin, either `new` or `old`
-  - `set_ids`: list of set IDs to work on
+  - `set_ids`: list of set IDs to work on (you can use `[all]` and `[all scratch]` aliases to select all non-scratch and all scratch sets sutomatically)
   - `octgn_set_xml`: creating set.xml files for OCTGN (true or false)
   - `ringsdb_csv`: creating CSV files for RingsDB (true or false)
   - `hallofbeorn_json`: creating JSON files for Hall of Beorn (true or false)
-  - `outputs`: list of image outputs for each language (if you added or uncommented new outputs, you also need to set `from_scratch` to `true`)
+  - `outputs`: list of image outputs for each language (if you added or uncommented new outputs, you also need to set `reprocess_all` to `true`)
 
 **Usage**
 
 To run the workflow, go to the repo folder and follow these steps:
 
 - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
-- `python run_before_se.py`
+- `python run_before_se.py` (or `python run_before_se.py <path to a different configuration yaml>` if you want to pass a different configuration file)
 - Open `setGenerator.seproject` in Strange Eons and run `Script/makeCards` script by double clicking it.
   Once completed, close Strange Eons (wait until it finished packing the project).
-- `python run_after_se.py`
+- `python run_after_se.py` (or `python run_after_se.py <path to a different configuration yaml>` if you want to pass a different configuration file)
 
 For debugging purposes you can also run these steps using the Jupyter notebook (it doesn't use parallelism):
 

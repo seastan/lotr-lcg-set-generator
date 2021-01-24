@@ -20,8 +20,8 @@ def main():
     lotr.reset_project_folders(conf)
     lotr.download_sheet(conf)
     lotr.extract_data(conf)
-    lotr.sanity_check()
     sets = lotr.get_sets(conf)
+    lotr.sanity_check(sets)
 
     strange_eons = False
     changes = False

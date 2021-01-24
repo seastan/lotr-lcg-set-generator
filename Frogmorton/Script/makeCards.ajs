@@ -41,8 +41,8 @@ bodyRegion['Objective'] = '65,346,283,146';
 bodyRegion['Objective Ally'] = '65,346,283,146';
 bodyRegion['Treachery'] = '65,356,283,135';
 
-bodyRegion['Encounter Side Quest'] = '48,248,467,114';
-bodyRegion['Player Side Quest'] = '52,250,459,114';
+bodyRegion['Encounter Side Quest'] = '51,249,461,114';
+bodyRegion['Player Side Quest'] = '51,251,461,114';
 bodyRegion['Quest'] = '51,249,461,114';
 
 var traitRegion = {};
@@ -125,7 +125,58 @@ adventureRegion['Objective Ally'] = '75,69,263,17';
 adventureRegion['Quest'] = '196,74,264,16';
 
 var resourceCostRegion = {};
+resourceCostRegion['Ally'] = '66,41,56,40';
+resourceCostRegion['Attachment'] = '38,43,55,39';
+resourceCostRegion['Event'] = '37,38,55,39';
 resourceCostRegion['Player Side Quest'] = '43,44,57,39';
+
+var encounterPortraitRegion = {};
+encounterPortraitRegion['Enemy'] = '321,266,43,43';
+encounterPortraitRegion['Encounter Side Quest'] = '478,187,43,43';
+encounterPortraitRegion['Location'] = '319,266,43,43';
+encounterPortraitRegion['Objective'] = '315,260,43,43';
+encounterPortraitRegion['Objective Ally'] = '315,260,43,43';
+encounterPortraitRegion['Quest'] = '474,185,43,43';
+encounterPortraitRegion['Treachery'] = '320,269,43,43';
+
+var encounterNumberRegion = {};
+encounterNumberRegion['Enemy'] = '329,313,26,10';
+encounterNumberRegion['Encounter Side Quest'] = '486,229,26,10';
+encounterNumberRegion['Location'] = '328,314,26,10';
+encounterNumberRegion['Objective'] = '323,307,26,10';
+encounterNumberRegion['Objective Ally'] = '323,307,26,10';
+encounterNumberRegion['Treachery'] = '329,317,26,10';
+
+var optionBodyShape = {};
+optionBodyShape['Encounter Side Quest'] = '0,0,344,0,66';
+optionBodyShape['Player Side Quest'] = '0,0,346,0,64';
+optionBodyShape['Quest'] = '0,0,346,0,66';
+
+var optionRightDecorationRegion = {};
+optionRightDecorationRegion['Ally'] = '298,503,72,18';
+optionRightDecorationRegion['Attachment'] = '300,503,72,18';
+optionRightDecorationRegion['Encounter Side Quest'] = '452,347,72,18';
+optionRightDecorationRegion['Enemy'] = '301,503,72,18';
+optionRightDecorationRegion['Event'] = '298,503,72,18';
+optionRightDecorationRegion['Location'] = '301,503,72,18';
+optionRightDecorationRegion['Objective'] = '290,502,72,18';
+optionRightDecorationRegion['Objective Ally'] = '290,502,72,18';
+optionRightDecorationRegion['Player Side Quest'] = '451,349,72,18';
+optionRightDecorationRegion['Quest'] = '450,350,72,18';
+optionRightDecorationRegion['Treachery'] = '301,503,72,18';
+
+var optionRightRegion = {};
+optionRightRegion['Ally'] = '305,501,59,20';
+optionRightRegion['Attachment'] = '307,501,59,20';
+optionRightRegion['Encounter Side Quest'] = '459,345,59,20';
+optionRightRegion['Enemy'] = '308,501,59,20';
+optionRightRegion['Event'] = '305,501,59,20';
+optionRightRegion['Location'] = '308,501,59,20';
+optionRightRegion['Objective'] = '297,501,59,20';
+optionRightRegion['Objective Ally'] = '297,501,59,20';
+optionRightRegion['Player Side Quest'] = '458,347,59,20';
+optionRightRegion['Quest'] = '457,348,59,20';
+optionRightRegion['Treachery'] = '308,501,59,20';
 
 var translate = {};
 translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado', 'Polish': 'Sprzymierzeniec', 'Italian': 'Alleato'};
@@ -421,23 +472,28 @@ function run(progress, target, filename, icons) {
 					if (nXml == 'Adventure') {
 						vXml = vXml.toUpperCase();
 					}
-					vXml = markUp(vXml, nXml, lang, setID, pluginVersion);
+					vXml = markUp(vXml, nXml, lang, setID, cardType, pluginVersion);
 					s.set(nEon, vXml);
 				}
 
 				s.set('Type-pointsize', 7.75);
 				s.set('Adventure-pointsize', 5.25);
-				s.set('Trait-format', '<width regular><center><tracking -0.02><size 8.25><i><b>')
-				s.set('Rules-format', '<left><tracking -0.02>')
-				s.set('RulesBack-format', '<left><tracking -0.02>')
-				s.set('Flavour-format', '<left><size 6.25><i>')
-				s.set('FlavourBack-format', '<left><size 6.25><i>')
-				s.set('Shadow-format', '<center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.6in><br><left><size 7.5><i>')
-				s.set('Engagement-region', '76,48,36,24');
+				s.set('Option-pointsize', 5.5);
+				s.set('Trait-format', '<center><width regular><tracking -0.005><family "Times New Roman"><size 8.25><i><b>');
+				s.set('Flavour-format', '<left></size><size 6.25><i>');
+				s.set('FlavourBack-format', '<left></size><size 6.25><i>');
+				s.set('Shadow-format', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
+					'<br><center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.625in>' +
+					'<br><left><image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005></size><size 7.5><i><br>');
+				s.set('Engagement-region', '76,48,36,25');
 				s.set('Engagement-tint', '28.0,1.0,0.9');
+				s.set('EncounterSetNumber-pointsize', 4);
+				s.set('EncounterSetNumber-style', 'WEIGHT: BOLD; FAMILY: {"Times New Roman"}');
 				s.set('Progress-tint', '28.0,1.0,0.9');
+				s.set('ThreatCost-region', '75,50,36,25');
 				s.set('Sphere-Body-shape', '0,0,472,40,0');
 				s.set('Type-region', '0,500,413,20');
+				s.set('Bottom-style', 'WEIGHT: BOLD; WIDTH: SEMICONDENSED; FAMILY: {"Times New Roman"}');
 				s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
 				s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
 				if (landscapeTypes.indexOf(cardType) > -1) {
@@ -456,6 +512,7 @@ function run(progress, target, filename, icons) {
 				if (cardType == 'Presentation') {
 					if (s.get('Victory').search('/') > -1) {
 						s.set('Page', s.get('Victory').split('/')[0]);
+						s.set('PageOf', '<bs>/</tracking><bs>');
 						s.set('PageTotal', s.get('Victory').split('/')[1]);
 					}
 					else if (s.get('Victory') != '') {
@@ -467,16 +524,19 @@ function run(progress, target, filename, icons) {
 					s.set('Name', '');
 					s.set('GameName', '');
 
-					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5; WIDTH: REGULAR; FOREGROUND: #000000');
+					s.set('Body-style', 'FOREGROUND: #000000; WIDTH: REGULAR; TRACKING: -0.005; FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5');
 					s.set('Body-pointsize', 7.5);
+					s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
+					s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
+					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.1>');
+					s.set('Body-lineTightness', 0.8);
+					s.set('Body-region', '48,73,317,418');
 					s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
 					s.set('GameName-external-path', 'project:imagesRaw/' + card['ArtworkTop']);
 					s.set('Name-external-path', 'project:imagesRaw/' + card['ArtworkBottom']);
-					s.set('Body-region', '48,73,317,418');
-					s.set('Body-lineTightness', 1.0);
 					s.set('Name-portrait-clip-region', '50,423,313,108');
 					s.set('PageIn-region', '48,488,317,15');
-					s.set('PageIn-format', '<right><b><size 7><bottom>');
+					s.set('PageIn-format', '<right><bottom><family "Times New Roman"><size 7><b>');
 					s.set('LRL-IllustratorShort', ' ');
 
 					if (pluginVersion == 'new') {
@@ -489,6 +549,7 @@ function run(progress, target, filename, icons) {
 				else if (cardType == 'Rules') {
 					if (s.get('Victory').search('/') > -1) {
 						s.set('Page', s.get('Victory').split('/')[0]);
+						s.set('PageOf', '<bs>/</tracking><bs>');
 						s.set('PageTotal', s.get('Victory').split('/')[1]);
 					}
 					else if (s.get('Victory') != '') {
@@ -505,20 +566,26 @@ function run(progress, target, filename, icons) {
 					s.set('Flavour', '');
 					s.set('FlavourBack', '');
 
-					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5; WIDTH: REGULAR; FOREGROUND: #000000');
+					s.set('Body-style', 'FOREGROUND: #000000; WIDTH: REGULAR; TRACKING: -0.005; FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5');
 					s.set('Body-pointsize', 7.5);
+					s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
+					s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
+					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.1>');
+					s.set('Body-lineTightness', 0.8);
+					s.set('Body-region', '48,73,317,418');
 					s.set('Background-external-path', 'project:Templates/Rules-Background.png');
 					s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
-					s.set('Body-region', '48,73,317,418');
-					s.set('Body-lineTightness', 1.0);
 					s.set('PageIn-region', '48,488,317,15');
-					s.set('PageIn-format', '<right><b><size 7><bottom>');
+					s.set('PageIn-format', '<right><bottom><family "Times New Roman"><size 7><b>');
 				}
 				else if (cardType == 'Contract') {
-					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5; WIDTH: REGULAR; FOREGROUND: #000000');
+					s.set('Body-style', 'FOREGROUND: #000000; WIDTH: REGULAR; TRACKING: -0.005; FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5');
 					s.set('Body-pointsize', 7.5);
-					s.set('Body-region', '65,313,283,176');
+					s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
+					s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
+					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.075 0.075>');
 					s.set('Body-lineTightness', 0.2);
+					s.set('Body-region', '65,313,283,176');
 					s.set('Side-region', '0,277,413,17');
 					s.set('Side-pointsize', 5);
 
@@ -549,20 +616,30 @@ function run(progress, target, filename, icons) {
 					}
 				}
 				else if (landscapeTypes.indexOf(cardType) > -1) {
-					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7; WIDTH: REGULAR; FOREGROUND: #000000');
+					s.set('Body-style', 'FOREGROUND: #000000; WIDTH: REGULAR; TRACKING: -0.005; FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7');
 					s.set('Body-pointsize', 7);
-					s.set('Body-region', '48,246,467,121');
+					s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size 7>');
+					s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size 7>');
+					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.075 0.075>');
 					s.set('Body-lineTightness', 0.2);
+					s.set('Story-format', '<left><size 7><i>');
+					s.set('StoryBack-format', '<left><size 7><i>');
+					s.set('Story-formatEnd', '</i></size>');
+					s.set('StoryBack-formatEnd', '</i></size>');
+					s.set('Stage-region', '45,44,60,42');
 
 					if (cardType in bodyRegion) {
 						s.set('Body-region', bodyRegion[cardType]);
 					}
 				}
 				else {
-					s.set('Body-style', 'FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5; WIDTH: REGULAR; FOREGROUND: #000000');
+					s.set('Body-style', 'FOREGROUND: #000000; WIDTH: REGULAR; TRACKING: -0.005; FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5');
 					s.set('Body-pointsize', 7.5);
-					s.set('TraitOut', 'true')
+					s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
+					s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
+					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.075 0.075>');
 					s.set('Body-lineTightness', 0.2);
+					s.set('TraitOut', 'true');
 
 					if (cardType in bodyRegion) {
 						s.set('TraitOut-Body-region', bodyRegion[cardType]);
@@ -648,6 +725,26 @@ function run(progress, target, filename, icons) {
 
 				if (cardType in resourceCostRegion) {
 					s.set('ResourceCost-region', resourceCostRegion[cardType]);
+				}
+
+				if (cardType in encounterPortraitRegion) {
+					s.set('EncounterSet-portrait-clip-region', encounterPortraitRegion[cardType]);
+				}
+
+				if (cardType in encounterNumberRegion) {
+					s.set('EncounterSetNumber-region', encounterNumberRegion[cardType]);
+				}
+
+				if (cardType in optionBodyShape) {
+					s.set('Option-Body-shape', optionBodyShape[cardType]);
+				}
+
+				if (cardType in optionRightDecorationRegion) {
+					s.set('OptionRightDecoration-region', optionRightDecorationRegion[cardType]);
+				}
+
+				if (cardType in optionRightRegion) {
+					s.set('OptionRight-region', optionRightRegion[cardType]);
 				}
 
 				if (nonUniqueTypes.indexOf(cardType) > -1) {
@@ -856,7 +953,7 @@ function escapeFileName(value) {
 	return value.replace(/[<>:\/\\|?*'"\u2019\u201c\u201d]/g, ' ');
 }
 
-function markUp(vXml, nXml, lang, setID, pluginVersion) {
+function markUp(vXml, nXml, lang, setID, cardType, pluginVersion) {
 	vXml += '';
 	if (lang == 'English') {
 		vXml = vXml.replace(/\b(Quest Resolution)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
@@ -895,32 +992,75 @@ function markUp(vXml, nXml, lang, setID, pluginVersion) {
 		vXml = vXml.replace(/\b(Condizione)\b/g, '[bi]$1[/bi]');
 	}
 
+	var defaultFontSize;
+	if (landscapeTypes.indexOf(cardType) > -1) {
+		defaultFontSize = 7;
+	}
+	else if (['Flavour', 'BFlavour'].indexOf(nXml + '') > -1) {
+		defaultFontSize = 6.25;
+	}
+	else if (['Traits', 'BTraits'].indexOf(nXml + '') > -1) {
+		defaultFontSize = 8.25;
+	}
+	else if (['Victory Points', 'BVictory Points'].indexOf(nXml + '') > -1) {
+		defaultFontSize = 5.5;
+	}
+	else {
+		defaultFontSize = 7.5;
+	}
+	var matchRegExp = /^\[defaultsize ([0-9\.]+)\]/ig;
+	var match = matchRegExp.exec(vXml);
+	if (match) {
+		defaultFontSize = match[1];
+	}
+	var iconFontSize = defaultFontSize * 1.2;
+
+	var tagPrefix;
+	var tagSuffix;
+	if (['Traits', 'BTraits'].indexOf(nXml + '') > -1) {
+		vXml = vXml.replace(/\[bi\](.*?)\[\/bi\]/ig, '$1');
+		vXml = vXml.replace(/\[b\](.*?)\[\/b\]/ig, '$1');
+		vXml = vXml.replace(/\[i\](.*?)\[\/i\]/ig, '$1');
+		tagPrefix = '</b></i></size></family><size ' + iconFontSize + '>';
+		tagSuffix = '</size><family "Times New Roman"><size ' + defaultFontSize + '><i><b>';
+	}
+	else if (['Shadow', 'BShadow', 'Flavour', 'BFlavour'].indexOf(nXml + '') > -1) {
+		vXml = vXml.replace(/\[bi\](.*?)\[\/bi\]/ig, '[b]$1[/b]');
+		vXml = vXml.replace(/\[i\](.*?)\[\/i\]/ig, '$1');
+		tagPrefix = '</i></size></family><size ' + iconFontSize + '>';
+		tagSuffix = '</size><family "Times New Roman"><size ' + defaultFontSize + '><i>';
+	}
+	else {
+		tagPrefix = '</size></family><size ' + iconFontSize + '>';
+		tagSuffix = '</size><family "Times New Roman"><size ' + defaultFontSize + '>';
+	}
+
 	vXml = vXml.replace(/ +(?=\n|$)/g, '');
 	vXml = vXml.replace(/</g, '<lt>');
 	vXml = vXml.replace(/>/g, '<gt>');
-	vXml = vXml.replace(/\[unique\]/ig, '<uni>');
-	vXml = vXml.replace(/\[threat\]/ig, '<thr>');
-	vXml = vXml.replace(/\[attack\]/ig, '<att>');
-	vXml = vXml.replace(/\[defense\]/ig, '<def>');
-	vXml = vXml.replace(/\[willpower\]/ig, '<wil>');
-	vXml = vXml.replace(/\[leadership\]/ig, '<lea>');
-	vXml = vXml.replace(/\[lore\]/ig, '<lor>');
-	vXml = vXml.replace(/\[spirit\]/ig, '<spi>');
-	vXml = vXml.replace(/\[tactics\]/ig, '<tac>');
-	vXml = vXml.replace(/\[baggins\]/ig, '<bag>');
-	vXml = vXml.replace(/\[fellowship\]/ig, '<fel>');
-	vXml = vXml.replace(/\[mastery\]/ig, '<mas>');
-	vXml = vXml.replace(/\[sunny\]/ig, '<hon>');
-	vXml = vXml.replace(/\[cloudy\]/ig, '<hof>');
-	vXml = vXml.replace(/\[rainy\]/ig, '<hb>');
-	vXml = vXml.replace(/\[stormy\]/ig, '<hw>');
-	vXml = vXml.replace(/\[sailing\]/ig, '<sai>');
-	vXml = vXml.replace(/\[pp\]/ig, '<pp>');
 	vXml = vXml.replace(/\[space\]/ig, '<hs>');
-	vXml = vXml.replace(/\[h1\]/ig, '[center][lotr]<size 11>');
-	vXml = vXml.replace(/\[\/h1\]/ig, '</size>[/lotr][/center]');
-	vXml = vXml.replace(/\[h2\]/ig, '[center][lotr]<size 9>');
-	vXml = vXml.replace(/\[\/h2\]/ig, '</size>[/lotr][/center]');
+	vXml = vXml.replace(/\[unique\]/ig, tagPrefix + '<uni>' + tagSuffix);
+	vXml = vXml.replace(/\[threat\]/ig, tagPrefix + '<thr>' + tagSuffix);
+	vXml = vXml.replace(/\[attack\]/ig, tagPrefix + '<att>' + tagSuffix);
+	vXml = vXml.replace(/\[defense\]/ig, tagPrefix + '<def>' + tagSuffix);
+	vXml = vXml.replace(/\[willpower\]/ig, tagPrefix + '<wil>' + tagSuffix);
+	vXml = vXml.replace(/\[leadership\]/ig, tagPrefix + '<lea>' + tagSuffix);
+	vXml = vXml.replace(/\[lore\]/ig, tagPrefix + '<lor>' + tagSuffix);
+	vXml = vXml.replace(/\[spirit\]/ig, tagPrefix + '<spi>' + tagSuffix);
+	vXml = vXml.replace(/\[tactics\]/ig, tagPrefix + '<tac>' + tagSuffix);
+	vXml = vXml.replace(/\[baggins\]/ig, tagPrefix + '<bag>' + tagSuffix);
+	vXml = vXml.replace(/\[fellowship\]/ig, tagPrefix + '<fel>' + tagSuffix);
+	vXml = vXml.replace(/\[mastery\]/ig, tagPrefix + '<mas>' + tagSuffix);
+	vXml = vXml.replace(/\[sunny\]/ig, tagPrefix + '<hon>' + tagSuffix);
+	vXml = vXml.replace(/\[cloudy\]/ig, tagPrefix + '<hof>' + tagSuffix);
+	vXml = vXml.replace(/\[rainy\]/ig, tagPrefix + '<hb>' + tagSuffix);
+	vXml = vXml.replace(/\[stormy\]/ig, tagPrefix + '<hw>' + tagSuffix);
+	vXml = vXml.replace(/\[sailing\]/ig, tagPrefix + '<sai>' + tagSuffix);
+	vXml = vXml.replace(/\[pp\]/ig, tagPrefix + '<pp>' + tagSuffix);
+	vXml = vXml.replace(/\[h1\]/ig, '[center]</size>[lotr]<size 11>');
+	vXml = vXml.replace(/\[\/h1\]/ig, '</size>[/lotr]<size ' + defaultFontSize + '>[/center]');
+	vXml = vXml.replace(/\[h2\]/ig, '[center]</size>[lotr]<size 9>');
+	vXml = vXml.replace(/\[\/h2\]/ig, '</size>[/lotr]<size ' + defaultFontSize + '>[/center]');
 	vXml = vXml.replace(/\[center\]/ig, '<center>');
 	vXml = vXml.replace(/([^\n])\<center\>/ig, '$1\n<center>');
 	vXml = vXml.replace(/\[\/center\]\n?/ig, '\n<left>');
@@ -930,8 +1070,8 @@ function markUp(vXml, nXml, lang, setID, pluginVersion) {
 	vXml = vXml.replace(/\<left\>(\n*)\<center\>/ig, '$1<center>');
 	vXml = vXml.replace(/\<left\>(\n*)\<right\>/ig, '$1<right>');
 	vXml = vXml.replace(/\n*\<left\>$/ig, '');
-	vXml = vXml.replace(/\[bi\]/ig, '<b><i>');
-	vXml = vXml.replace(/\[\/bi\]/ig, '</i></b>');
+	vXml = vXml.replace(/\[bi\]/ig, '<i><b>');
+	vXml = vXml.replace(/\[\/bi\]/ig, '</b></i>');
 	vXml = vXml.replace(/\[b\]/ig, '<b>');
 	vXml = vXml.replace(/\[\/b\]/ig, '</b>');
 	vXml = vXml.replace(/\[i\]/ig, '<i>');
@@ -940,13 +1080,15 @@ function markUp(vXml, nXml, lang, setID, pluginVersion) {
 	vXml = vXml.replace(/\[\/u\]/ig, '</u>');
 	vXml = vXml.replace(/\[strike\]/ig, '<del>');
 	vXml = vXml.replace(/\[\/strike\]/ig, '</del>');
-	vXml = vXml.replace(/\[lotr\]/ig, '<family LRLfont>');
-	vXml = vXml.replace(/\[\/lotr\]/ig, '</family>');
+	vXml = vXml.replace(/\[lotr\]/ig, '</family><family LRLfont>');
+	vXml = vXml.replace(/\[\/lotr\]/ig, '</family><family "Times New Roman">');
 	vXml = vXml.replace(/\[red\]/ig, '<red>');
 	vXml = vXml.replace(/\[\/red\]/ig, '</red>');
 	vXml = vXml.replace(/\[tab\]/ig, '\t');
-	vXml = vXml.replace(/\[size ([0-9\.]+)\]/ig, '<size $1>');
-	vXml = vXml.replace(/\[\/size\]/ig, '</size>');
+	vXml = vXml.replace(/\[nobr\]/ig, '\u00a0');
+	vXml = vXml.replace(/\[size ([0-9\.]+)\]/ig, '</size><size $1>');
+	vXml = vXml.replace(/\[\/size\]/ig, '</size><size ' + defaultFontSize + '>');
+	vXml = vXml.replace(/^\[defaultsize ([0-9\.]+)\]\n*/ig, '</size><size $1>');
 	vXml = vXml.replace(/\[img ("?)([^\]]+)\]/ig, '<image $1project:$2>');
 	vXml = vXml.replace(/\<image ("?)project:icons\//ig, '<image $1project:imagesIcons/');
 	vXml = vXml.replace(/\<image ("?)project:custom\//ig, '<image $1project:imagesCustom/' + setID + '_');
@@ -967,6 +1109,8 @@ function markUp(vXml, nXml, lang, setID, pluginVersion) {
 		while (vXml != vXmlOld);
 	}
 
+	vXml = vXml.replace(/<\/i>(?! )/g, '</size><size 0.01></i>\u00a0</size><size ' + defaultFontSize + '>');
+	vXml = vXml.replace(/<\/i>(?= )/g, '</size><size 0.01></i> </size><size ' + defaultFontSize + '>');
 	vXml = vXml.replace(/\n+$/g, '');
 	vXml = vXml.replace(/\n(<left>|<right>|<center>)?(?=\n)/g, '\n$1<vs>');
 	return vXml;
