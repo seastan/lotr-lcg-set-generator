@@ -153,7 +153,9 @@ SET_COLUMNS = {}
 CARD_COLUMNS = {}
 SETS = {}
 DATA = []
-INTERSECTED_SETS = []
+FOUND_SETS = set()
+FOUND_SCRATCH_SETS = set()
+FOUND_INTERSECTED_SETS = set()
 ARTWORK_CACHE = {}
 
 
@@ -465,7 +467,7 @@ def _update_data():
     """ Update card data from the spreadsheet.
     """
     for row in DATA:
-        if row[CARD_SCRATCH] and row[CARD_SET] in INTERSECTED_SETS:
+        if row[CARD_SCRATCH] and row[CARD_SET] in FOUND_INTERSECTED_SETS:
             row[CARD_SET] = '[filtered set]'
 
         if ((row[CARD_QUANTITY] is None or row[CARD_QUANTITY] in ('0', 0)) and
@@ -508,8 +510,10 @@ def extract_data(conf):
     SET_COLUMNS.clear()
     CARD_COLUMNS.clear()
     SETS.clear()
+    FOUND_SETS.clear()
+    FOUND_SCRATCH_SETS.clear()
+    FOUND_INTERSECTED_SETS.clear()
     DATA[:] = []
-    INTERSECTED_SETS[:] = []
 
     sheet_path = os.path.join(SHEET_ROOT_PATH, SHEET_NAME)
     excel_app = xw.App(visible=False, add_book=False)
@@ -564,9 +568,16 @@ def extract_data(conf):
             if conf['selected_only']:
                 DATA[:] = [row for row in DATA if row[CARD_SELECTED]]
 
-            main_sets = {row[CARD_SET] for row in DATA if not row[CARD_SCRATCH]}
+            FOUND_SETS.update({row[CARD_SET] for row in DATA
+                               if not row[CARD_SCRATCH]})
             scratch_sets = {row[CARD_SET] for row in DATA if row[CARD_SCRATCH]}
-            INTERSECTED_SETS.extend(main_sets.intersection(scratch_sets))
+            FOUND_INTERSECTED_SETS.update(FOUND_SETS.intersection(
+                scratch_sets))
+            FOUND_SCRATCH_SETS.update(scratch_sets.difference(
+                FOUND_INTERSECTED_SETS))
+            print(FOUND_SETS)
+            print(FOUND_SCRATCH_SETS)
+            print(FOUND_INTERSECTED_SETS)
 
             _clean_data(DATA)
             _update_data()
@@ -799,7 +810,7 @@ def _run_macro(set_row, callback):
                 data = xlwb_source.sheets[SCRATCH_SHEET].range(xlwb_range).value
                 set_column = _c2n(CARD_COLUMNS[CARD_SET]) - 1
                 for row in data:
-                    if row[set_column] in INTERSECTED_SETS:
+                    if row[set_column] in FOUND_INTERSECTED_SETS:
                         row[set_column] = None
 
                 xlwb_next_range = '{}{}:{}{}'.format(
