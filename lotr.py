@@ -575,9 +575,6 @@ def extract_data(conf):
                 scratch_sets))
             FOUND_SCRATCH_SETS.update(scratch_sets.difference(
                 FOUND_INTERSECTED_SETS))
-            print(FOUND_SETS)
-            print(FOUND_SCRATCH_SETS)
-            print(FOUND_INTERSECTED_SETS)
 
             _clean_data(DATA)
             _update_data()
