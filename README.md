@@ -60,7 +60,7 @@ from this repo, click `OK` and then close GIMP.
 
 10. Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir.  Install it together with `Vafthaurdir`
 font from the root folder of this repo.  Additionally, manually copy both `.ttf` files into your system fonts folder
-(`C:\Windows\Fonts` in Windows), if they are not there.  Otherwise Strange Eons won't detect them.
+(`C:\Windows\Fonts` in Windows), if they are not there.  Otherwise, Strange Eons won't detect them.
 
 11. Download `USWebCoatedSWOP.icc` from
 https://github.com/cjw-network/cjwpublish1411/blob/master/vendor/imagine/imagine/lib/Imagine/resources/Adobe/CMYK/USWebCoatedSWOP.icc
@@ -87,7 +87,7 @@ into the root folder of this repo.
   - `selected_only`: process only "selected" rows (true or false)
   - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`)
   - `strange_eons_plugin_version`: version of Strange Eons plugin, either `new` or `old`
-  - `set_ids`: list of set IDs to work on (you can use `[all]` and `[all scratch]` aliases to select all non-scratch and all scratch sets sutomatically)
+  - `set_ids`: list of set IDs to work on (you can use `all` and `all_scratch` aliases to select all non-scratch and all scratch sets sutomatically)
   - `octgn_set_xml`: creating set.xml files for OCTGN (true or false)
   - `ringsdb_csv`: creating CSV files for RingsDB (true or false)
   - `hallofbeorn_json`: creating JSON files for Hall of Beorn (true or false)

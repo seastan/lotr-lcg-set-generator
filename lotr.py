@@ -593,12 +593,21 @@ def get_sets(conf):
     logging.info('Getting all sets to work on...')
     timestamp = time.time()
 
-    data_sets = {row[CARD_SET] for row in DATA}
-    chosen_sets = []
+    chosen_sets = set()
     for row in SETS.values():
-        if row[SET_ID] in conf['set_ids'] and row[SET_ID] in data_sets:
-            chosen_sets.append([row[SET_ID], row[SET_NAME]])
+        if (row[SET_ID] in conf['set_ids'] and
+                (row[SET_ID] in FOUND_SETS or
+                 row[SET_ID] in FOUND_SCRATCH_SETS)):
+            chosen_sets.add(row[SET_ID])
 
+    if 'all' in conf['set_ids']:
+        chosen_sets.update(FOUND_SETS)
+
+    if 'all_scratch' in conf['set_ids']:
+        chosen_sets.update(FOUND_SCRATCH_SETS)
+
+    chosen_sets = list(chosen_sets)
+    chosen_sets = [[SETS[s][SET_ID], SETS[s][SET_NAME]] for s in chosen_sets]
     if not chosen_sets:
         logging.error('ERROR: No sets to work on')
 
@@ -615,6 +624,7 @@ def sanity_check(sets):  # pylint: disable=R0912,R0914,R0915
 
     errors_found = False
     card_ids = []
+    card_scratch_ids = []
     card_set_number_names = []
     set_ids = [s[0] for s in sets]
     all_set_ids = list(SETS.keys())
@@ -635,25 +645,25 @@ def sanity_check(sets):  # pylint: disable=R0912,R0914,R0915
 
         if set_id is None:
             logging.error('ERROR: No set ID for row #%s%s', i, scratch)
-            if not card_scratch:
-                errors_found = True
+            errors_found = errors_found if card_scratch else True
         elif set_id == '[filtered set]':
             logging.error('ERROR: Reusing non-scratch set ID for row #%s%s', i,
                           scratch)
         elif set_id not in all_set_ids:
             logging.error('ERROR: Unknown set ID for row #%s%s', i, scratch)
-            if not card_scratch:
-                errors_found = True
+            errors_found = errors_found if card_scratch else True
 
         if card_id is None:
             logging.error('ERROR: No card ID for row #%s%s', i, scratch)
-            if not card_scratch or set_id in set_ids:
-                errors_found = True
+            errors_found = errors_found if card_scratch else True
         elif card_id in card_ids:
             logging.error('ERROR: Duplicate card ID for row #%s%s', i, scratch)
-            if not card_scratch or set_id in set_ids:
-                errors_found = True
-        elif not card_scratch or set_id in set_ids:
+            errors_found = errors_found if card_scratch else True
+        elif card_id in card_scratch_ids:
+            logging.error('ERROR: Duplicate card ID for row #%s%s', i, scratch)
+        elif card_scratch:
+            card_scratch_ids.append(card_id)
+        else:
             card_ids.append(card_id)
 
         if set_id not in set_ids:
