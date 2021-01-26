@@ -58,21 +58,25 @@ from this repo, click `OK` and then close GIMP.
 
 9. Install ImageMagick (https://imagemagick.org/script/download.php).
 
-10. Download `USWebCoatedSWOP.icc` from
+10. Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir.  Install it together with `Vafthaurdir`
+font from the root folder of this repo.  Additionally, manually copy both `.ttf` files into your system fonts folder
+(`C:\Windows\Fonts` in Windows), if they are not there.  Otherwise Strange Eons won't detect them.
+
+11. Download `USWebCoatedSWOP.icc` from
 https://github.com/cjw-network/cjwpublish1411/blob/master/vendor/imagine/imagine/lib/Imagine/resources/Adobe/CMYK/USWebCoatedSWOP.icc
 into the root folder of this repo.
 
-11. Make sure that macros are enabled in Microsoft Excel.
+12. Make sure that macros are enabled in Microsoft Excel.
 
-12. Install Python 3.8 (or other Python 3 version), Pip and VirtualEnv.
+13. Install Python 3.8 (or other Python 3 version), Pip and VirtualEnv.
 
-13. Go to the repo folder and follow these steps:
+14. Go to the repo folder and follow these steps:
 
   - `virtualenv env --python=python3.8` (replace `3.8` with your actual Python version)
   - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
   - `pip install -r requirements.txt`
 
-14. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
+15. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
   - `sheet_gdid`: Google Drive ID of the cards spreadsheet (leave empty to use a local copy)
   - `artwork_path`: local path to the artwork folder (don't use for that any existing folder in this repo)
