@@ -393,7 +393,7 @@ def _extract_column_names(columns):
     return names
 
 
-def _transform_to_dict(data, columns, title_row=None):
+def _transform_to_dict(data, columns, title_row):
     """ Transform rows to dictionary.
     """
     res = []
@@ -402,9 +402,7 @@ def _transform_to_dict(data, columns, title_row=None):
             continue
 
         row_dict = {}
-        if title_row is not None:
-            row_dict[ROW_COLUMN] = i + title_row + 1
-
+        row_dict[ROW_COLUMN] = i + title_row + 1
         for name, column in columns.items():
             if name == MAX_COLUMN:
                 continue
@@ -532,12 +530,9 @@ def extract_data(conf):
                                             SET_COLUMNS[MAX_COLUMN],
                                             SET_MAX_NUMBER + SET_TITLE_ROW)
             data = xlwb_source.sheets[SET_SHEET].range(xlwb_range).value
-            data = _transform_to_dict(data, SET_COLUMNS)
+            data = _transform_to_dict(data, SET_COLUMNS, SET_TITLE_ROW)
             _clean_data(data)
-            SETS.update({s[SET_ID]: dict(**s,
-                                         **{SET_ROW: i + SET_TITLE_ROW + 1})
-                         for i, s in
-                         enumerate(data)})
+            SETS.update({s[SET_ID]: s for s in data})
 
             xlwb_range = '{}{}:{}{}'.format('A',  # pylint: disable=W1308
                                             CARD_TITLE_ROW,
@@ -620,12 +615,13 @@ def sanity_check(sets):  # pylint: disable=R0912,R0914,R0915
     """ Perform a sanity check of the spreadsheet.
     """
     logging.info('Performing a sanity check of the spreadsheet...')
+    logging.info('')
     timestamp = time.time()
 
     errors_found = False
-    card_ids = []
-    card_scratch_ids = []
-    card_set_number_names = []
+    card_ids = set()
+    card_scratch_ids = set()
+    card_set_number_names = set()
     set_ids = [s[0] for s in sets]
     all_set_ids = list(SETS.keys())
     for row in DATA:
@@ -661,85 +657,87 @@ def sanity_check(sets):  # pylint: disable=R0912,R0914,R0915
             errors_found = errors_found if card_scratch else True
         elif card_id in card_scratch_ids:
             logging.error('ERROR: Duplicate card ID for row #%s%s', i, scratch)
-        elif card_scratch:
-            card_scratch_ids.append(card_id)
+
+        if card_scratch:
+            card_scratch_ids.add(card_id)
         else:
-            card_ids.append(card_id)
+            card_ids.add(card_id)
 
         if set_id not in set_ids:
             continue
 
         if card_number is None:
             logging.error('ERROR: No card number for row #%s%s', i, scratch)
-            errors_found = True
+            errors_found = errors_found if card_scratch else True
 
         if card_quantity is None:
             logging.error('ERROR: No card quantity for row #%s%s', i, scratch)
-            errors_found = True
+            errors_found = errors_found if card_scratch else True
         elif not _is_positive_int(card_quantity):
             logging.error('ERROR: Incorrect format for card quantity'
                           ' for row #%s%s', i, scratch)
-            errors_found = True
+            errors_found = errors_found if card_scratch else True
 
         if card_name is None:
             logging.error('ERROR: No card name for row #%s%s', i, scratch)
-            errors_found = True
+            errors_found = errors_found if card_scratch else True
         elif set_id is not None and card_number is not None:
             if (set_id, card_number, card_name) in card_set_number_names:
                 logging.error(
-                    'ERROR: Duplicate card set, number and name for row #%s%s',
-                    i, scratch)
-                errors_found = True
+                    'ERROR: Duplicate card set, number and name combination '
+                    'for row #%s%s', i, scratch)
+                errors_found = errors_found if card_scratch else True
             else:
-                card_set_number_names.append((set_id, card_number, card_name))
+                card_set_number_names.add((set_id, card_number, card_name))
 
         if card_unique is not None and card_unique not in ('1', 1):
             logging.error('ERROR: Incorrect format for unique for row #%s%s',
                           i, scratch)
-            errors_found = True
+            errors_found = errors_found if card_scratch else True
 
         if card_unique_back is not None and card_unique_back not in ('1', 1):
             logging.error('ERROR: Incorrect format for unique back'
                           ' for row #%s%s', i, scratch)
-            errors_found = True
+            errors_found = errors_found if card_scratch else True
 
         if card_type is None:
             logging.error('ERROR: No card type for row #%s%s', i, scratch)
-            errors_found = True
+            errors_found = errors_found if card_scratch else True
         elif card_type not in CARD_TYPES:
             logging.error('ERROR: Unknown card type for row #%s%s', i, scratch)
-            errors_found = True
+            errors_found = errors_found if card_scratch else True
 
         if card_type_back is not None and card_type_back not in CARD_TYPES:
             logging.error('ERROR: Unknown card type back for row #%s%s', i,
                           scratch)
-            errors_found = True
+            errors_found = errors_found if card_scratch else True
         elif (card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL
               and card_type_back is not None and card_type_back != card_type):
             logging.error('ERROR: Incorrect card type back for row #%s%s', i,
                           scratch)
-            errors_found = True
+            errors_found = errors_found if card_scratch else True
         elif (card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL
               and card_type_back in CARD_TYPES_DOUBLESIDE_OPTIONAL):
             logging.error('ERROR: Incorrect card type back for row #%s%s', i,
                           scratch)
-            errors_found = True
+            errors_found = errors_found if card_scratch else True
 
         if card_easy_mode is not None and not _is_positive_int(card_easy_mode):
             logging.error('ERROR: Incorrect format for removed for easy mode'
                           ' for row #%s%s', i, scratch)
-            errors_found = True
+            errors_found = errors_found if card_scratch else True
         elif card_easy_mode is not None and card_easy_mode > card_quantity:
             logging.error('ERROR: Removed for easy mode is greater than card'
                           ' quantity for row #%s%s', i, scratch)
-            errors_found = True
+            errors_found = errors_found if card_scratch else True
 
         for key, value in row.items():
             if isinstance(value, str) and '[unmatched quot]' in value:
                 logging.error('ERROR: Unmatched quote symbol in %s column '
                               'for row #%s%s', key, i, scratch)
-                errors_found = True
+                errors_found = errors_found if card_scratch else True
 
+    logging.info('')
     if errors_found:
         raise ValueError('Sanity check of the spreadsheet failed, '
                          'see error(s) above')
