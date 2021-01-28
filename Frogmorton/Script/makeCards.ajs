@@ -203,7 +203,7 @@ translate['Unknown Artist'] = {'English': 'Unknown Artist', 'French': 'Artiste i
 	'Polish': 'Artysta nieznany', 'Italian': 'Artista sconosciuto'};
 translate['Victory'] = {'English': 'Victory', 'French': 'Victoire', 'German': 'Sieg', 'Spanish': 'Victoria', 'Polish': 'Zwyci\u0119stwo', 'Italian': 'Vittoria'};
 translate['Page'] = {'English': 'Page', 'French': 'Page', 'German': 'Seite', 'Spanish': 'P\u00e1gina', 'Polish': 'Strona', 'Italian': 'Pagina'};
-translate['Side'] = {'English': 'Side', 'French': '', 'German': '', 'Spanish': '', 'Polish': '', 'Italian': 'Lato'};
+translate['Side'] = {'English': 'Side', 'French': '', 'German': 'Seite', 'Spanish': 'Lado', 'Polish': 'Strona', 'Italian': 'Lato'};
 
 Thread.busyWindow(main, 'Updating cards...', true);
 
@@ -595,8 +595,6 @@ function run(progress, target, filename, icons) {
 					s.set('Side-region', '0,279,413,17');
 					s.set('Side-style', 'FAMILY: {"Vafthrudnir"}');
 					s.set('Side-pointsize', 5);
-					s.set('Side', 'Test');
-					s.set('SideA', 'Frog');
 
 					if (pluginVersion == 'old') {
 						s.set('Story', '');
@@ -960,6 +958,14 @@ function convertIconName(value) {
 function escapeFileName(value) {
 	value += '';
 	return value.replace(/[<>:\/\\|?*'"\u2019\u201c\u201d]/g, ' ');
+}
+
+function updateVafthrudnir(value, lowerSize) {
+	var upperSize = lowerSize * 1.423;
+	var res = '';
+	for (let i in value) {
+		let ch = value[i];
+	}
 }
 
 function markUp(vXml, nXml, lang, setID, cardType, pluginVersion) {
