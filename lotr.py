@@ -36,8 +36,8 @@ CARD_TITLE_ROW = 1
 CARD_MAX_NUMBER = 10000
 MAX_COLUMN_NUMBER = 100
 
-# Name, Traits:Keywords, Text:Flavour, Side B,
-# Traits:Keywords, Text:Flavour, Adventure
+# Name, Traits:Keywords, Victory Points:Flavour, Side B,
+# Traits:Keywords, Victory Points:Flavour, Adventure
 TRANSLATION_RANGES = ['F{}:F{}', 'J{}:K{}', 'T{}:W{}', 'AB{}:AB{}',
                       'AF{}:AG{}', 'AP{}:AS{}', 'AZ{}:AZ{}']
 
