@@ -3,7 +3,7 @@
 1. Clone this repo to a local folder.
 
 2. Make sure you already have a cards spreadsheet on Google Drive.  If you don't, upload
-`spreadsheet.xlsx` from this repo as a template and fill in all the required data.
+`Spreadsheet/spreadsheet.xlsx` from this repo as a template and fill in all the required data.
 
 3. Add the folder with the artwork to your own Google Drive to be able to sync it locally.
 This feature is currently hidden on Google Drive UI, but may still be accessed by a shortcut
@@ -44,7 +44,7 @@ run it and install `The Lord of the Rings LCG` plugin.
 
 6. If you want to use the old version of plugin, additionally install `The Lord of the Rings LCG, HD`
 plugin.  Then, go to plugins folder (`Strange Eons` -> `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`),
-close Strange Eons and replace `TheLordOfTheRingsLCG.seext` with the file from this repo.
+close Strange Eons and replace `TheLordOfTheRingsLCG.seext` with the file from this repo (see `strangeEons` folder).
 
    If you want to use the new version of plugin, then download its archive manually (we don't provide a link here).
    Then, go to plugins folder (`Strange Eons` -> `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`),
@@ -53,7 +53,7 @@ close Strange Eons and replace `TheLordOfTheRingsLCG.seext` with the file from t
 
 7. Install GIMP (https://www.gimp.org/downloads/).
 
-8. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `gimp` folder
+8. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `GIMP` folder
 from this repo, click `OK` and then close GIMP.
 
 9. Install ImageMagick (https://imagemagick.org/script/download.php).
@@ -124,12 +124,12 @@ Additionally, if you specified `octgn_destination_path`, `set.xml` files for OCT
 
 **GIMP Plugins**
 
-You may use GIMP plugins separately.  See the description of each of them in `gimp/scripts.py`.
+You may use GIMP plugins separately.  See the description of each of them in `GIMP/scripts.py`.
 
 Setup:
 
 1. Install GIMP (https://www.gimp.org/downloads/).
-2. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `gimp` folder
+2. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `GIMP` folder
 from this repo, click `OK` and then restart GIMP.
 
 Usage:
