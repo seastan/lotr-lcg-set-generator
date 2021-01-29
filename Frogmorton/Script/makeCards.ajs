@@ -968,7 +968,7 @@ function updateVafthrudnir(value, lowerSize) {
 	var res = '';
 	for (let i = 0; i < value.length; i++) {
 		let ch = value[i];
-		if (ch == ch.toLowerCase()) {
+		if ((ch == ch.toLowerCase()) && (ch != '!') && (ch != '?')) {
 			if (ch.match(/[a-z0-9!?&;:,.]/i)) {
 				res += ch.toUpperCase();
 			}
