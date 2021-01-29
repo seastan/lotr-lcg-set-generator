@@ -1003,7 +1003,7 @@ function markUp(vXml, nXml, lang, setID, cardType, pluginVersion) {
 		}
 		return updateVafthrudnir(vXml, lowerSize);
 	}
-	else if (['Victory Points', 'BVictory Points'].indexOf(nXml + '') > -1) {
+	else if ((['Victory Points', 'BVictory Points'].indexOf(nXml + '') > -1) && (['Presentation', 'Rules'].indexOf(cardType) == -1)) {
 		return updateVafthrudnir(vXml, 5.25);
 	}
 	else if (nXml == 'Adventure') {
@@ -1108,10 +1108,6 @@ function markUp(vXml, nXml, lang, setID, cardType, pluginVersion) {
 	vXml = vXml.replace(/\[stormy\]/ig, tagPrefix + '<hw>' + tagSuffix);
 	vXml = vXml.replace(/\[sailing\]/ig, tagPrefix + '<sai>' + tagSuffix);
 	vXml = vXml.replace(/\[pp\]/ig, tagPrefix + '<pp>' + tagSuffix);
-	vXml = vXml.replace(/\[h1\]/ig, '[center]</size>[lotr]<size 11>');
-	vXml = vXml.replace(/\[\/h1\]/ig, '</size>[/lotr]<size ' + defaultFontSize + '>[/center]');
-	vXml = vXml.replace(/\[h2\]/ig, '[center]</size>[lotr]<size 9>');
-	vXml = vXml.replace(/\[\/h2\]/ig, '</size>[/lotr]<size ' + defaultFontSize + '>[/center]');
 	vXml = vXml.replace(/\[center\]/ig, '<center>');
 	vXml = vXml.replace(/([^\n])\<center\>/ig, '$1\n<center>');
 	vXml = vXml.replace(/\[\/center\]\n?/ig, '\n<left>');
@@ -1131,7 +1127,7 @@ function markUp(vXml, nXml, lang, setID, cardType, pluginVersion) {
 	vXml = vXml.replace(/\[\/u\]/ig, '</u>');
 	vXml = vXml.replace(/\[strike\]/ig, '<del>');
 	vXml = vXml.replace(/\[\/strike\]/ig, '</del>');
-	vXml = vXml.replace(/\[lotr\]/ig, '</family><family LRLfont>');
+	vXml = vXml.replace(/\[lotr\]/ig, '</family><family "Vafthrudnir">');
 	vXml = vXml.replace(/\[\/lotr\]/ig, '</family><family "Times New Roman">');
 	vXml = vXml.replace(/\[red\]/ig, '<red>');
 	vXml = vXml.replace(/\[\/red\]/ig, '</red>');
