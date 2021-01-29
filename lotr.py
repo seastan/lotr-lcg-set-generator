@@ -564,8 +564,9 @@ def extract_data(conf):
                 DATA[:] = [row for row in DATA if row[CARD_SELECTED]]
 
             FOUND_SETS.update({row[CARD_SET] for row in DATA
-                               if not row[CARD_SCRATCH]})
-            scratch_sets = {row[CARD_SET] for row in DATA if row[CARD_SCRATCH]}
+                               if row[CARD_SET] and not row[CARD_SCRATCH]})
+            scratch_sets = {row[CARD_SET] for row in DATA if row[CARD_SET]
+                            and row[CARD_SCRATCH]}
             FOUND_INTERSECTED_SETS.update(FOUND_SETS.intersection(
                 scratch_sets))
             FOUND_SCRATCH_SETS.update(scratch_sets.difference(
@@ -596,10 +597,10 @@ def get_sets(conf):
             chosen_sets.add(row[SET_ID])
 
     if 'all' in conf['set_ids']:
-        chosen_sets.update(FOUND_SETS)
+        chosen_sets.update(s for s in FOUND_SETS if s in SETS)
 
     if 'all_scratch' in conf['set_ids']:
-        chosen_sets.update(FOUND_SCRATCH_SETS)
+        chosen_sets.update(s for s in FOUND_SCRATCH_SETS if s in SETS)
 
     chosen_sets = list(chosen_sets)
     chosen_sets = [[SETS[s][SET_ID], SETS[s][SET_NAME]] for s in chosen_sets]
