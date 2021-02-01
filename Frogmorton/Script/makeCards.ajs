@@ -521,12 +521,10 @@ function run(progress, target, filename, icons) {
 
 				if (cardType == 'Presentation') {
 					if (s.get('Victory').search('/') > -1) {
-						s.set('Page', s.get('Victory').split('/')[0]);
-						s.set('PageOf', '<bs>/</tracking><bs>');
+						s.set('LRL-Page', translate['Page'][lang]);
+						s.set('LRL-PageOf', '<bs></size><size 3> </size><size 7>/</size><size 3> </size><size 7><bs>');
+						s.set('PageNumber', s.get('Victory').split('/')[0]);
 						s.set('PageTotal', s.get('Victory').split('/')[1]);
-					}
-					else if (s.get('Victory') != '') {
-						s.set('Page', s.get('Victory'));
 					}
 
 					s.set('Story', '');
@@ -559,14 +557,11 @@ function run(progress, target, filename, icons) {
 				}
 				else if (cardType == 'Rules') {
 					if (s.get('Victory').search('/') > -1) {
-						s.set('Page', s.get('Victory').split('/')[0]);
-						s.set('PageOf', '<bs>/</tracking><bs>');
+						s.set('LRL-Page', translate['Page'][lang]);
+						s.set('LRL-PageOf', '<bs></size><size 3> </size><size 7>/</size><size 3> </size><size 7><bs>');
+						s.set('PageNumber', s.get('Victory').split('/')[0]);
 						s.set('PageTotal', s.get('Victory').split('/')[1]);
 					}
-					else if (s.get('Victory') != '') {
-						s.set('Page', s.get('Victory'));
-					}
-
 					if (s.get('VictoryBack') == '') {
 						s.set('PageBackShow', 'false');
 					}
