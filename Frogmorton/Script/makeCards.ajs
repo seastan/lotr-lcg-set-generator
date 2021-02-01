@@ -727,7 +727,7 @@ function run(progress, target, filename, icons) {
 				}
 
 				if (cardType in namePointSize) {
-					s.set('Name-pointsize', namePointSize[cardType]);
+					s.set('Name-pointsize', Math.round(namePointSize[cardType] * 1.423 * 100) / 100);
 				}
 
 				if (cardType in hitPointsRegion) {
@@ -1010,7 +1010,7 @@ function updateVafthrudnir(value, lowerSize) {
 			}
 		}
 	}
-	return res;
+	return '<size ' + lowerSize + '>' + res + '</size>';
 }
 
 function markUp(vXml, nXml, lang, setID, cardType, pluginVersion) {
