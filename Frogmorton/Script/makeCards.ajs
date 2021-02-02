@@ -375,7 +375,8 @@ function run(progress, target, filename, icons) {
 						['Story', 'Flavour'],
 						['Artist-external', 'Artist'],  // old plugin
 						['Artist', 'Artist'],  // new plugin
-						['Adventure', 'Adventure']
+						['Adventure', 'Adventure'],
+						['CollectionInfo', 'Version']
 					];
 					if (doubleSideTypes.indexOf(cardType) > -1) {
 						mapping = mapping.concat([
@@ -423,7 +424,8 @@ function run(progress, target, filename, icons) {
 						['Story', 'BFlavour'],
 						['Artist-external', 'BArtist'],  // old plugin
 						['Artist', 'BArtist'],  // new plugin
-						['Adventure', 'Adventure']
+						['Adventure', 'Adventure'],
+						['CollectionInfo', 'Version']
 					];
 				}
 
@@ -821,8 +823,6 @@ function run(progress, target, filename, icons) {
 					}
 				}
 
-				s.set('CollectionInfo', ' ');
-
 				if (card['Encounter Set']) {
 					let iconName = fixSpecialSymbols(card['Encounter Set']).replace(/ /g, '-');
 					if (icons.indexOf(iconName) > -1) {
@@ -1163,7 +1163,7 @@ function markUp(vXml, nXml, lang, setID, cardType, pluginVersion) {
 	vXml = vXml.replace(/([^:;,.?!]) (<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<uni>)/g, '$1\u00a0$2');
 	vXml = vXml.replace(/([0-9]+) /g, '$1\u00a0');
 	vXml = vXml.replace(/ ([0-9]+)([:;,.?!])/g, '\u00a0$1$2');
-	vXml = vXml.replace(/(^|[ \n"\u201c\u201d\(])([\-'\u2019A-Za-z\u00c0-\u017e]{1,5})([:;,.?!"\u201c\u201d\)]*) (["\u201c\u201d\(]*)([\-'\u2019A-Za-z\u00c0-\u017e]{1,5})([:;,.?!"\u201c\u201d\)]+)(\n|$)/g, '$1$2$3\u00a0$4$5$6$7');
+	vXml = vXml.replace(/(^|[ \n"\u201c\u201d\(])([\-'\u2019A-Za-z\u00c0-\u017e]{1,4})([:;,.?!"\u201c\u201d\)]*) (["\u201c\u201d\(]*)([\-'\u2019A-Za-z\u00c0-\u017e]{1,4})([:;,.?!"\u201c\u201d\)]+)(\n|$)/g, '$1$2$3\u00a0$4$5$6$7');
 	vXml = vXml.replace(/ (["\u201c\u201d\(]*)([\-'\u2019A-Za-z\u00c0-\u017e]{1,2})([:;,.?!"\u201c\u201d\)]+)(\n|$)/g, '\u00a0$1$2$3$4');
 
 	// fix no-break space inside tags
