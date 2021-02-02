@@ -605,6 +605,8 @@ function run(progress, target, filename, icons) {
 					s.set('Side-region', '0,279,413,17');
 					s.set('Side-style', 'FAMILY: {"Vafthrudnir"}');
 					s.set('Side-pointsize', 5);
+					s.set('SideA', updateVafthrudnir(translate['Side'][lang].toLowerCase() + ' a', 5));
+					s.set('SideB', updateVafthrudnir(translate['Side'][lang].toLowerCase() + ' b', 5));
 
 					if (pluginVersion == 'old') {
 						s.set('Story', '');
