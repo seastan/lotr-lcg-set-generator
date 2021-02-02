@@ -528,6 +528,10 @@ function run(progress, target, filename, icons) {
 						s.set('PageNumber', s.get('Victory').split('/')[0]);
 						s.set('PageTotal', s.get('Victory').split('/')[1]);
 					}
+					else {
+						s.set('PageNumber', 0);
+						s.set('PageTotal', 0);
+					}
 
 					s.set('Story', '');
 					s.set('Flavour', '');
@@ -563,6 +567,10 @@ function run(progress, target, filename, icons) {
 						s.set('LRL-PageOf', '<bs></size><size 3> </size><size 7>/</size><size 3> </size><size 7><bs>');
 						s.set('PageNumber', s.get('Victory').split('/')[0]);
 						s.set('PageTotal', s.get('Victory').split('/')[1]);
+					}
+					else {
+						s.set('PageNumber', 0);
+						s.set('PageTotal', 0);
 					}
 					if (s.get('VictoryBack') == '') {
 						s.set('PageBackShow', 'false');
@@ -986,14 +994,26 @@ function escapeFileName(value) {
 function updateVafthrudnir(value, lowerSize) {
 	var upperSize = Math.round(lowerSize * 1.423 * 100) / 100;
 	var res = '';
+	var tag = false;
 	for (let i = 0; i < value.length; i++) {
 		let ch = value[i];
-		if ((ch == ch.toLowerCase()) && (ch != '!') && (ch != '?')) {
+		if (ch == '<') {
+			res += ch;
+			tag = true;
+		}
+		else if (ch == '>') {
+			res += ch;
+			tag = false;
+		}
+		else if (tag) {
+			res += ch;
+		}
+		else if ((ch == ch.toLowerCase()) && (ch != '!') && (ch != '?')) {
 			if (ch.match(/[a-z0-9!?&;:,. ]/i)) {
 				res += ch.toUpperCase();
 			}
 			else {
-				res += '<family "Vafthaurdir">' + ch.toUpperCase() + '</family>';
+				res += '</family><family "Vafthaurdir">' + ch.toUpperCase() + '</family><family "Vafthrudnir">';
 			}
 		}
 		else {
@@ -1001,11 +1021,11 @@ function updateVafthrudnir(value, lowerSize) {
 				res += '</size><size ' + upperSize + '>' + ch + '</size><size ' + lowerSize + '>';
 			}
 			else {
-				res += '</size><family "Vafthaurdir"><size ' + upperSize + '>' + ch + '</size></family><size ' + lowerSize + '>';
+				res += '</size></family><family "Vafthaurdir"><size ' + upperSize + '>' + ch + '</size></family><family "Vafthrudnir"><size ' + lowerSize + '>';
 			}
 		}
 	}
-	return '<size ' + lowerSize + '>' + res + '</size>';
+	return '<family "Vafthrudnir"><size ' + lowerSize + '>' + res + '</size></family>';
 }
 
 function markUp(vXml, nXml, lang, setID, cardType, pluginVersion) {
@@ -1107,8 +1127,10 @@ function markUp(vXml, nXml, lang, setID, cardType, pluginVersion) {
 		tagSuffix = '</size><family "Times New Roman"><size ' + defaultFontSize + '>';
 	}
 
-	vXml = vXml.replace(/</g, '<lt>');
-	vXml = vXml.replace(/>/g, '<gt>');
+	vXml = vXml.replace(/</g, '[lt]');
+	vXml = vXml.replace(/>/g, '[gt]');
+	vXml = vXml.replace(/\[lt\]/g, '<lt>');
+	vXml = vXml.replace(/\[gt\]/g, '<gt>');
 	vXml = vXml.replace(/\[space\]/ig, '<hs>');
 	vXml = vXml.replace(/\[unique\]/ig, tagPrefix + '<uni>' + tagSuffix);
 	vXml = vXml.replace(/\[threat\]/ig, tagPrefix + '<thr>' + tagSuffix);
@@ -1147,18 +1169,22 @@ function markUp(vXml, nXml, lang, setID, cardType, pluginVersion) {
 	vXml = vXml.replace(/\[\/u\]/ig, '</u>');
 	vXml = vXml.replace(/\[strike\]/ig, '<del>');
 	vXml = vXml.replace(/\[\/strike\]/ig, '</del>');
-	vXml = vXml.replace(/\[lotr\]/ig, '</family><family "Vafthrudnir">');
-	vXml = vXml.replace(/\[\/lotr\]/ig, '</family><family "Times New Roman">');
 	vXml = vXml.replace(/\[red\]/ig, '<red>');
 	vXml = vXml.replace(/\[\/red\]/ig, '</red>');
 	vXml = vXml.replace(/\[tab\]/ig, '\t');
 	vXml = vXml.replace(/\[nobr\]/ig, '\u00a0');
+	vXml = vXml.replace(/\[lotr ([0-9\.]+)\]/ig, '<lotr $1>');
+	vXml = vXml.replace(/\[\/lotr\]/ig, '</lotr>');
 	vXml = vXml.replace(/\[size ([0-9\.]+)\]/ig, '</size><size $1>');
 	vXml = vXml.replace(/\[\/size\]/ig, '</size><size ' + defaultFontSize + '>');
 	vXml = vXml.replace(/^\[defaultsize ([0-9\.]+)\]\n*/ig, '</size><size $1>');
 	vXml = vXml.replace(/\[img ("?)([^\]]+)\]/ig, '<image $1project:$2>');
 	vXml = vXml.replace(/\<image ("?)project:icons\//ig, '<image $1project:imagesIcons/');
 	vXml = vXml.replace(/\<image ("?)project:custom\//ig, '<image $1project:imagesCustom/' + setID + '_');
+	vXml = vXml.replace(/\[lsb\]/ig, '<lsb>');
+	vXml = vXml.replace(/\[rsb\]/ig, '<rsb>');
+	vXml = vXml.replace(/<lsb>/ig, '[');
+	vXml = vXml.replace(/<rsb>/ig, ']');
 
 	vXml = vXml.replace(/([^:;,.?!]) (<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<uni>)/g, '$1\u00a0$2');
 	vXml = vXml.replace(/([0-9]+) /g, '$1\u00a0');
@@ -1178,6 +1204,13 @@ function markUp(vXml, nXml, lang, setID, cardType, pluginVersion) {
 	vXml = vXml.replace(/<\/i>(?= )/g, '</size><size 0.01></i> </size><size ' + defaultFontSize + '>');
 	vXml = vXml.replace(/\n+$/g, '');
 	vXml = vXml.replace(/\n(<left>|<right>|<center>)?(?=\n)/g, '\n$1<vs>');
+
+	function updateVafthrudnirReplacer(match, p1, p2, offset, string) {
+		var res = '</size></family>' + updateVafthrudnir(p2, p1) + '<family "Times New Roman"><size ' + defaultFontSize + '>';
+		return res;
+	}
+
+	vXml = vXml.replace(/<lotr ([0-9\.]+)>(.*?)<\/lotr>/ig, updateVafthrudnirReplacer);
 	return vXml;
 }
 
