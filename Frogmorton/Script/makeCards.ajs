@@ -573,8 +573,8 @@ function run(progress, target, filename, icons) {
 					s.set('Side-region', '0,279,413,17');
 					s.set('Side-style', 'FAMILY: {"Vafthrudnir"}');
 					s.set('Side-pointsize', 3.52);
-					s.set('SideA', updateVafthrudnir(translate['Side'][lang].toUpperCase() + ' A', 3.52));
-					s.set('SideB', updateVafthrudnir(translate['Side'][lang].toUpperCase() + ' B', 3.52));
+					s.set('SideA', updateVafthrudnir(translate['Side'][lang].toUpperCase() + ' A', 3.515));
+					s.set('SideB', updateVafthrudnir(translate['Side'][lang].toUpperCase() + ' B', 3.515));
 
 					if (card['BName']) {
 						s.set('Template', 'DoubleSided');
