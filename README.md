@@ -39,44 +39,34 @@ completely, you will need to download updates to that folder manually.
 4. Install Backup and Sync from Google (if it's not installed yet) and make sure that the folder
 with the artwork is being synced.
 
-5. Install the latest version of Strange Eons (https://strangeeons.cgjennings.ca/download.html),
-run it and install `The Lord of the Rings LCG` plugin.
+5. Install Strange Eons and the custom plugin, see https://github.com/seastan/lotr-lcg-se-plugin for details.
 
-6. If you want to use the old version of plugin, additionally install `The Lord of the Rings LCG, HD`
-plugin.  Then, go to plugins folder (`Strange Eons` -> `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`),
-close Strange Eons and replace `TheLordOfTheRingsLCG.seext` with the file from this repo (see `strangeEons` folder).
+6. Install GIMP (https://www.gimp.org/downloads/).
 
-   If you want to use the new version of plugin, then download its archive manually (we don't provide a link here).
-   Then, go to plugins folder (`Strange Eons` -> `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`),
-   close Strange Eons and delete or move all files, which names start with `TheLordOfTheRingsLCG`.  Instead of them,
-   copy all files from the new archive.
-
-7. Install GIMP (https://www.gimp.org/downloads/).
-
-8. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `GIMP` folder
+7. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `GIMP` folder
 from this repo, click `OK` and then close GIMP.
 
-9. Install ImageMagick (https://imagemagick.org/script/download.php).
+8. Install ImageMagick (https://imagemagick.org/script/download.php).
 
-10. Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir.  Install it together with `Vafthaurdir`
+9. Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir.  Install it together with `Vafthaurdir`
 font from the root folder of this repo.  Additionally, manually copy both `.ttf` files into your system fonts folder
 (`C:\Windows\Fonts` in Windows), if they are not there.  Otherwise, Strange Eons won't detect them.
 
-11. Download `USWebCoatedSWOP.icc` from
+10. Download `USWebCoatedSWOP.icc` from
 https://github.com/cjw-network/cjwpublish1411/blob/master/vendor/imagine/imagine/lib/Imagine/resources/Adobe/CMYK/USWebCoatedSWOP.icc
 into the root folder of this repo.
 
-12. Make sure that macros are enabled in Microsoft Excel.
+11. Make sure that macros are enabled in Microsoft Excel.
 
-13. Install Python 3.8 (or other Python 3 version), Pip and VirtualEnv.
+12. Install Python 3.8 (or other Python 3 version), Pip and VirtualEnv.
 
-14. Go to the repo folder and follow these steps:
+13. Go to the root folder of this repo and follow these steps:
 
-  - `virtualenv env --python=python3.8` (replace `3.8` with your actual Python version)
+  - `virtualenv env --python=python3.8` (if needed, replace `3.8` with your actual Python version)
   - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
   - `pip install -r requirements.txt`
 
-15. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
+14. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
   - `sheet_gdid`: Google Drive ID of the cards spreadsheet (leave empty to use a local copy)
   - `artwork_path`: local path to the artwork folder (don't use for that any existing folder in this repo)
@@ -86,7 +76,6 @@ into the root folder of this repo.
   - `reprocess_all`: whether to reprocess all cards (`true`) or update only the cards, changed since the previous script run (`false`)
   - `selected_only`: process only "selected" rows (true or false)
   - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`)
-  - `strange_eons_plugin_version`: version of Strange Eons plugin, either `new` or `old`
   - `set_ids`: list of set IDs to work on (you can use `all` and `all_scratch` aliases to select all non-scratch and all scratch sets sutomatically)
   - `octgn_set_xml`: creating set.xml files for OCTGN (true or false)
   - `ringsdb_csv`: creating CSV files for RingsDB (true or false)
@@ -95,12 +84,12 @@ into the root folder of this repo.
 
 **Usage**
 
-To run the workflow, go to the repo folder and follow these steps:
+To run the workflow, go to the root folder of this repo and follow these steps:
 
 - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
 - `python run_before_se.py` (or `python run_before_se.py <path to a different configuration yaml>` if you want to pass a different configuration file)
 - Open `setGenerator.seproject` in Strange Eons and run `Script/makeCards` script by double clicking it.
-  Once completed, close Strange Eons (wait until it finished packing the project).
+  Once completed, close Strange Eons and wait until it finished packing the project.
 - `python run_after_se.py` (or `python run_after_se.py <path to a different configuration yaml>` if you want to pass a different configuration file)
 
 For debugging purposes you can also run these steps using the Jupyter notebook (it doesn't use parallelism):
@@ -109,7 +98,7 @@ For debugging purposes you can also run these steps using the Jupyter notebook (
 - `jupyter notebook`
 - Open `setGenerator.ipynb` in the browser.
 
-Now there should be the following outputs:
+The scripts will generate the following outputs:
 
 - `Output/DB/<set name>.<language>/`: 300 dpi PNG images for general purposes.
 - `Output/DriveThruCards/<set name>.<language>/`: `zip` and `7z` archives of 300 dpi JPG images to be printed on DriveThruCards.com.
@@ -117,10 +106,10 @@ Now there should be the following outputs:
 - `Output/MakePlayingCards/<set name>.<language>/`: `zip` and `7z` archives of 800 dpi PNG images to be printed on MakePlayingCards.com.
 - `Output/OCTGN/<set name>/<octgn id>/set.xml`.
 - `Output/OCTGN/<set name>/<set name>.<language>.o8c`: image packs for OCTGN (300 dpi PNG).
-- `Output/PDF/<set name>.<language>/`: PDF files in `A4` and `letter` format for home printing.
+- `Output/PDF/<set name>.<language>/`: PDF files in `A4` and `letter` format for home printing (300 dpi PNG).
 - `Output/RingsDB/<set name>.csv`.
 
-Additionally, if you specified `octgn_destination_path`, `set.xml` files for OCTGN will be copied there.
+Additionally, if you specified `octgn_destination_path`, all `set.xml` files for OCTGN will be copied there.
 
 **GIMP Plugins**
 
