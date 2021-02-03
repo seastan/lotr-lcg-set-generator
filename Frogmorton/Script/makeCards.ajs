@@ -9,7 +9,7 @@ importClass(org.w3c.dom.Element);
 importClass(org.w3c.dom.Node);
 importClass(org.w3c.dom.NodeList);
 
-var doubleSideTypes = ['Presentation', 'Quest', 'Rules'];
+var doubleSideTypes = ['Presentation', 'Quest', 'Rules', 'Contract'];
 var landscapeTypes = ['Encounter Side Quest', 'Player Side Quest', 'Quest'];
 var playerTypes = ['Ally', 'Attachment', 'Event', 'Hero', 'Player Side Quest'];
 var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Side Quest'];
@@ -240,23 +240,9 @@ function run(progress, target, filename, icons) {
 	var setName = docElement.getAttribute('name');
 	var cycle = docElement.getAttribute('cycle');
 	var copyrightText = docElement.getAttribute('copyright');
-	var pluginVersion = 'new';
 
-	var customIcon;
-	if (pluginVersion == 'new') {
-		customIcon = 'Custom';
-		doubleSideTypes.push('Contract');
-	}
-	else {
-		customIcon = 'CustomIcon';
-	}
-
-	var png300NoBleed = false;
 	var png300Bleed = false;
 	var png800Bleed = false;
-	if (doc.getDocumentElement().getAttribute('png300NoBleed') + '' == '1') {
-		png300NoBleed = true;
-	}
 	if (doc.getDocumentElement().getAttribute('png300Bleed') + '' == '1') {
 		png300Bleed = true;
 	}
@@ -458,29 +444,17 @@ function run(progress, target, filename, icons) {
 						if (vXml == 'Unknown Artist') {
 							vXml = translate['Unknown Artist'][lang];
 						}
-
-						if (pluginVersion == 'old') {
-							if (nEon == 'Artist-external' || nEon == 'ArtistBack-external') {
-								vXml = translate['Illustrator'][lang] + ' ' + vXml;
-							}
-						}
 					}
 					else if (['Text', 'BText'].indexOf(nXml + '') > -1) {
 						if (keywords) {
 							vXml = keywords + '\n\n' + vXml;
-						}
-						if (pluginVersion == 'old') {
-							if (['Hero', 'Ally', 'Attachment', 'Event', 'Enemy', 'Location', 'Treachery', 'Objective', 'Objective Ally'
-								].indexOf(cardType) > -1 && !traits) {
-								vXml = '\n' + vXml;
-							}
 						}
 					}
 					else if (nXml == 'Adventure') {
 						vXml = vXml.toUpperCase();
 					}
 
-					vXml = markUp(vXml, nXml, lang, setID, cardType, pluginVersion);
+					vXml = markUp(vXml, nXml, lang, setID, cardType);
 					s.set(nEon, vXml);
 				}
 
@@ -553,13 +527,7 @@ function run(progress, target, filename, icons) {
 					s.set('PageIn-region', '48,488,317,15');
 					s.set('PageIn-format', '<right><bottom><family "Times New Roman"><size 7><b>');
 					s.set('LRL-IllustratorShort', ' ');
-
-					if (pluginVersion == 'new') {
-						s.set('Artist', ' ');
-					}
-					else {
-						s.set('Artist-external', ' ');
-					}
+					s.set('Artist', ' ');
 				}
 				else if (cardType == 'Rules') {
 					if (s.get('Victory').search('/') > -1) {
@@ -605,33 +573,14 @@ function run(progress, target, filename, icons) {
 					s.set('Side-region', '0,279,413,17');
 					s.set('Side-style', 'FAMILY: {"Vafthrudnir"}');
 					s.set('Side-pointsize', 3.52);
-					s.set('SideA', updateVafthrudnir(translate['Side'][lang].toUpperCase() + ' A', 3.51));
-					s.set('SideB', updateVafthrudnir(translate['Side'][lang].toUpperCase() + ' B', 3.51));
-
-					if (pluginVersion == 'old') {
-						s.set('Story', '');
-					}
+					s.set('SideA', updateVafthrudnir(translate['Side'][lang].toUpperCase() + ' A', 3.52));
+					s.set('SideB', updateVafthrudnir(translate['Side'][lang].toUpperCase() + ' B', 3.52));
 
 					if (card['BName']) {
-						if (pluginVersion == 'new') {
-							s.set('Template', 'DoubleSided');
-						}
-						else {
-							if (side == 'front') {
-								s.set('Cycle', 'Side A');
-							}
-							else {
-								s.set('Cycle', 'Side B');
-							}
-						}
+						s.set('Template', 'DoubleSided');
 					}
 					else {
-						if (pluginVersion == 'new') {
-							s.set('Template', 'Neutral');
-						}
-						else {
-							s.set('Cycle', '');
-						}
+						s.set('Template', 'Neutral');
 					}
 				}
 				else if (landscapeTypes.indexOf(cardType) > -1) {
@@ -681,37 +630,32 @@ function run(progress, target, filename, icons) {
 				if ((cardType == 'Presentation') || (cardType == 'Rules')) {
 					s.set('Type', ' ');
 					s.set('Copyright', '');
-					if (pluginVersion == 'new') {
-						s.set('Collection', 'Empty');
-					}
-					else {
-						s.set('Collection', 'EmptyIcon');
-					}
+					s.set('Collection', 'Empty');
 				}
 				else {
-					s.set('Type', updateVafthrudnir(translate[cardType][lang].toUpperCase(), 5.1));
+					s.set('Type', updateVafthrudnir(translate[cardType][lang].toUpperCase(), 5.095));
 					s.set('Copyright', copyrightText);
 					let iconName = fixSpecialSymbols(card['Set']).replace(/ /g, '-') + '_stroke';
 					if (icons.indexOf(iconName) > -1) {
-						s.set('Collection', customIcon);
+						s.set('Collection', 'Custom');
 						s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
 					}
 					else {
 						let iconName = fixSpecialSymbols(card['Set']).replace(/ /g, '-');
 						if (icons.indexOf(iconName) > -1) {
-							s.set('Collection', customIcon);
+							s.set('Collection', 'Custom');
 							s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
 						}
 						else {
 							iconName = fixSpecialSymbols(cycle).replace(/ /g, '-') + '_stroke';
 							if (icons.indexOf(iconName) > -1) {
-								s.set('Collection', customIcon);
+								s.set('Collection', 'Custom');
 								s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
 							}
 							else {
 								iconName = fixSpecialSymbols(cycle).replace(/ /g, '-');
 								if (icons.indexOf(iconName) > -1) {
-									s.set('Collection', customIcon);
+									s.set('Collection', 'Custom');
 									s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
 								}
 								else {
@@ -802,7 +746,7 @@ function run(progress, target, filename, icons) {
 							s.set('Portrait-external-scale', card['Scale'] / 100);
 						}
 					}
-					if ((cardType == 'Quest') || ((cardType == 'Contract') && (pluginVersion == 'new'))) {
+					if ((cardType == 'Quest') || (cardType == 'Contract')) {
 						if (card['BArtwork'] && (card['BArtwork'] != card['Artwork'])) {
 							s.set('PortraitBack-external-path', 'project:imagesRaw/' + card['BArtwork']);
 							s.set('PortraitShare', 0);
@@ -836,7 +780,7 @@ function run(progress, target, filename, icons) {
 				if (card['Encounter Set']) {
 					let iconName = fixSpecialSymbols(card['Encounter Set']).replace(/ /g, '-');
 					if (icons.indexOf(iconName) > -1) {
-						s.set('EncounterSet', customIcon);
+						s.set('EncounterSet', 'Custom');
 						s.set('EncounterSet-external-path', 'project:imagesIcons/' + iconName + '.png');
 					}
 					else {
@@ -848,7 +792,7 @@ function run(progress, target, filename, icons) {
 					for (let k = 0; k < encounterSets.length; k++) {
 						let iconName = fixSpecialSymbols(encounterSets[k].trim()).replace(/ /g, '-');
 						if (icons.indexOf(iconName) > -1) {
-							s.set('EncounterSet' + (k + 1), customIcon);
+							s.set('EncounterSet' + (k + 1), 'Custom');
 							s.set('EncounterSet' + (k + 1) + '-external-path',
 								'project:imagesIcons/' + iconName + '.png');
 						}
@@ -884,12 +828,7 @@ function run(progress, target, filename, icons) {
 				else if (cardType == 'Contract') {
 					if (card['BName']) {
 						back = '-';
-						if (pluginVersion == 'new') {
-							simple_back = false;
-						}
-						else {
-							simple_back = true;
-						}
+						simple_back = false;
 					}
 					else {
 						back = 'p';
@@ -918,14 +857,14 @@ function run(progress, target, filename, icons) {
 					back + '-' + escapeFileName(card['Name']) + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix;
 				progress.status = fname;
 				ResourceKit.writeGameComponentToFile(new File(getProjectMember('Cards/').file, fname + '.' + setID + '.' + lang + '.eon'), newCard);
-				exportCard(newCard, fname, setID, lang, simple_back, png300NoBleed, png300Bleed, png800Bleed, pluginVersion);
+				exportCard(newCard, fname, setID, lang, simple_back, png300Bleed, png800Bleed);
 			}
 		}
 	}
 	return;
 }
 
-function exportCard(card, fname, setID, lang, simple_back, png300NoBleed, png300Bleed, png800Bleed, pluginVersion) {
+function exportCard(card, fname, setID, lang, simple_back, png300Bleed, png800Bleed) {
 	var sheets = card.createDefaultSheets();
 	var numSheets;
 	if (simple_back) {
@@ -939,12 +878,6 @@ function exportCard(card, fname, setID, lang, simple_back, png300NoBleed, png300
 	var ppi800 = 800;
 	for (let i = 0; i < numSheets; i++ ) {
 		let bi, file;
-
-		if (png300NoBleed) {
-			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, ppi300);
-			file = new File(getProjectMember('Export/png300NoBleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_PNG);
-			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, ppi300);
-		}
 
 		if (png300Bleed) {
 			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, ppi300, true);
@@ -1033,7 +966,7 @@ function updateVafthrudnir(value, lowerSize) {
 	return res;
 }
 
-function markUp(vXml, nXml, lang, setID, cardType, pluginVersion) {
+function markUp(vXml, nXml, lang, setID, cardType) {
 	vXml += '';
 	vXml = vXml.replace(/ +(?=\n|$)/g, '');
 	vXml = vXml.replace(/\n+$/g, '');

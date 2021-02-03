@@ -321,7 +321,7 @@ def read_conf(path=CONFIGURATION_PATH):
     return conf
 
 
-def reset_project_folders(conf):
+def reset_project_folders():
     """ Reset the project folders.
     """
     logging.info('Resetting the project folders...')
@@ -339,11 +339,9 @@ def reset_project_folders(conf):
 
         break
 
-    source_path = os.path.join(TEMPLATES_SOURCE_PATH,
-                               conf['strange_eons_plugin_version'])
-    for _, _, filenames in os.walk(source_path):
+    for _, _, filenames in os.walk(TEMPLATES_SOURCE_PATH):
         for filename in filenames:
-            shutil.copyfile(os.path.join(source_path, filename),
+            shutil.copyfile(os.path.join(TEMPLATES_SOURCE_PATH, filename),
                             os.path.join(TEMPLATES_PATH, filename))
 
         break
@@ -1302,14 +1300,7 @@ def _collect_artwork_images(artwork_path):
 def _set_outputs(conf, lang, root):
     """ Set required outputs for Strange Eons.
     """
-    if conf['nobleed'][lang]:
-        if conf['strange_eons_plugin_version'] == 'new':
-            root.set('png300Bleed', '1')
-        else:
-            root.set('png300NoBleed', '1')
-
-    if ('pdf' in conf['outputs'][lang]
-            or 'drivethrucards' in conf['outputs'][lang]):
+    if (conf['nobleed'][lang] or 'drivethrucards' in conf['outputs'][lang]):
         root.set('png300Bleed', '1')
 
     if 'makeplayingcards' in conf['outputs'][lang]:
@@ -1345,7 +1336,6 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0914,R0915
 
     tree = ET.parse(xml_path)
     root = tree.getroot()
-    root.set('pluginVersion', conf['strange_eons_plugin_version'])
     _set_outputs(conf, lang, root)
     encounter_sets = {}
     encounter_cards = {}
@@ -1639,49 +1629,34 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
 
-    if conf['strange_eons_plugin_version'] == 'new':
-        temp_path = os.path.join(
-            TEMP_ROOT_PATH, 'generate_png300_nobleed.{}.{}'.format(set_id,
-                                                                   lang))
-        _create_folder(temp_path)
-        _clear_folder(temp_path)
+    temp_path = os.path.join(
+        TEMP_ROOT_PATH, 'generate_png300_nobleed.{}.{}'.format(set_id,
+                                                               lang))
+    _create_folder(temp_path)
+    _clear_folder(temp_path)
 
-        with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
-            filelist = [f for f in zip_obj.namelist()
-                        if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
-                                                      PNG300BLEED))
-                        and f.split('.')[-1] == 'png'
-                        and f.split('.')[-2] == lang
-                        and f.split('.')[-3] == set_id]
-            for filename in filelist:
-                output_filename = _update_zip_filename(filename)
-                with zip_obj.open(filename) as zip_file:
-                    with open(os.path.join(temp_path, output_filename),
-                              'wb') as output_file:
-                        shutil.copyfileobj(zip_file, output_file)
+    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+        filelist = [f for f in zip_obj.namelist()
+                    if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
+                                                  PNG300BLEED))
+                    and f.split('.')[-1] == 'png'
+                    and f.split('.')[-2] == lang
+                    and f.split('.')[-3] == set_id]
+        for filename in filelist:
+            output_filename = _update_zip_filename(filename)
+            with zip_obj.open(filename) as zip_file:
+                with open(os.path.join(temp_path, output_filename),
+                          'wb') as output_file:
+                    shutil.copyfileobj(zip_file, output_file)
 
-        cmd = GIMP_COMMAND.format(
-            conf['gimp_console_path'],
-            'python-cut-bleed-margins-folder',
-            temp_path.replace('\\', '\\\\'),
-            output_path.replace('\\', '\\\\'))
-        res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
-        logging.info('[%s, %s] %s', set_name, lang, res)
-        _delete_folder(temp_path)
-    else:
-        with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
-            filelist = [f for f in zip_obj.namelist()
-                        if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
-                                                      PNG300NOBLEED))
-                        and f.split('.')[-1] == 'png'
-                        and f.split('.')[-2] == lang
-                        and f.split('.')[-3] == set_id]
-            for filename in filelist:
-                output_filename = _update_zip_filename(filename)
-                with zip_obj.open(filename) as zip_file:
-                    with open(os.path.join(output_path, output_filename),
-                              'wb') as output_file:
-                        shutil.copyfileobj(zip_file, output_file)
+    cmd = GIMP_COMMAND.format(
+        conf['gimp_console_path'],
+        'python-cut-bleed-margins-folder',
+        temp_path.replace('\\', '\\\\'),
+        output_path.replace('\\', '\\\\'))
+    res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+    logging.info('[%s, %s] %s', set_name, lang, res)
+    _delete_folder(temp_path)
 
     logging.info('[%s, %s] ...Generating images without bleed margins'
                  ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))

@@ -17,7 +17,7 @@ def main():
     else:
         conf = lotr.read_conf()
 
-    lotr.reset_project_folders(conf)
+    lotr.reset_project_folders()
     lotr.download_sheet(conf)
     lotr.extract_data(conf)
     sets = lotr.get_sets(conf)
