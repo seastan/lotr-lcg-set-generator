@@ -240,7 +240,7 @@ function run(progress, target, filename, icons) {
 	var setName = docElement.getAttribute('name');
 	var cycle = docElement.getAttribute('cycle');
 	var copyrightText = docElement.getAttribute('copyright');
-	var pluginVersion = docElement.getAttribute('pluginVersion') + '';
+	var pluginVersion = 'new';
 
 	var customIcon;
 	if (pluginVersion == 'new') {
@@ -604,7 +604,7 @@ function run(progress, target, filename, icons) {
 					s.set('Body-region', '65,313,283,176');
 					s.set('Side-region', '0,279,413,17');
 					s.set('Side-style', 'FAMILY: {"Vafthrudnir"}');
-					s.set('Side-pointsize', 3.51);
+					s.set('Side-pointsize', 3.52);
 					s.set('SideA', updateVafthrudnir(translate['Side'][lang].toUpperCase() + ' A', 3.51));
 					s.set('SideB', updateVafthrudnir(translate['Side'][lang].toUpperCase() + ' B', 3.51));
 
@@ -689,7 +689,7 @@ function run(progress, target, filename, icons) {
 					}
 				}
 				else {
-					s.set('Type', updateVafthrudnir(translate[cardType][lang].toUpperCase(), 5.09));
+					s.set('Type', updateVafthrudnir(translate[cardType][lang].toUpperCase(), 5.1));
 					s.set('Copyright', copyrightText);
 					let iconName = fixSpecialSymbols(card['Set']).replace(/ /g, '-') + '_stroke';
 					if (icons.indexOf(iconName) > -1) {
@@ -1010,7 +1010,7 @@ function updateVafthrudnir(value, lowerSize) {
 		else if (tag) {
 			res += ch;
 		}
-		else if ((ch == ch.toLowerCase()) && !ch.match(/[0-9;:,.!? \-\(\)'"\u2019\u201c\u201d\u00a0]/)) {
+		else if ((ch == ch.toLowerCase()) && !ch.match(/[&0-9;:,.!? \-\(\)\u00a0]/)) {
 			if (ch.match(/[a-z&0-9;:,.!? ]/i)) {
 				res += ch.toUpperCase();
 			}
@@ -1027,7 +1027,10 @@ function updateVafthrudnir(value, lowerSize) {
 			}
 		}
 	}
-	return '<family "Vafthrudnir"><size ' + lowerSize + '>' + res + '</size></family>';
+	res = '<family "Vafthrudnir"><size ' + lowerSize + '>' + res + '</size></family>';
+	res = res.replace(/<size [^>]+><\/size>/g, '');
+	res = res.replace(/<family [^>]+><\/family>/g, '');
+	return res;
 }
 
 function markUp(vXml, nXml, lang, setID, cardType, pluginVersion) {
@@ -1213,6 +1216,8 @@ function markUp(vXml, nXml, lang, setID, cardType, pluginVersion) {
 	}
 
 	vXml = vXml.replace(/<lotr ([0-9\.]+)>(.*?)<\/lotr>/ig, updateVafthrudnirReplacer);
+	vXml = vXml.replace(/<size [^>]+><\/size>/g, '');
+	vXml = vXml.replace(/<family [^>]+><\/family>/g, '');
 	return vXml;
 }
 
