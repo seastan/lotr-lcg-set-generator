@@ -101,9 +101,6 @@ CARD_TYPES_ENCOUNTER_SET = ('Enemy', 'Encounter Side Quest', 'Location',
 CARD_TYPES_ADVENTURE = ('Objective', 'Objective Ally', 'Quest')
 
 CMYK_COMMAND_JPG = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
-CMYK_COMMAND_TIF = '"{}" mogrify -profile USWebCoatedSWOP.icc -compress lzw ' \
-                   '"{}\\*.tif"'
-DTC_FILE_TYPE = 'jpg'  # 'jpg' or 'tif'
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 IMAGE_MIN_SIZE = 100000
 IMAGES_CUSTOM_FOLDER = 'custom'
@@ -122,7 +119,6 @@ PNG300OCTGN = 'png300OCTGN'
 PNG300PDF = 'png300PDF'
 PNG800BLEED = 'png800Bleed'
 PNG800BLEEDMPC = 'png800BleedMPC'
-TIF300BLEEDDTC = 'tif300BleedDTC'
 
 CONFIGURATION_PATH = 'configuration.yaml'
 IMAGES_BACK_PATH = 'imagesBack'
@@ -263,7 +259,7 @@ def _clear_modified_images(folder, skip_ids):
     """
     for _, _, filenames in os.walk(folder):
         for filename in filenames:
-            if filename.split('.')[-1] in ('jpg', 'png', 'tif'):
+            if filename.split('.')[-1] in ('jpg', 'png'):
                 card_id = filename[50:86]
                 if card_id not in skip_ids:
                     os.remove(os.path.join(folder, filename))
@@ -1853,15 +1849,14 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
 
 
 def generate_300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
-    """ Generate images for DriveThruCards outputs (either JPG or TIF).
+    """ Generate images for DriveThruCards outputs.
     """
     logging.info('[%s, %s] Generating images for DriveThruCards outputs...',
                  set_name, lang)
     timestamp = time.time()
 
     output_path = os.path.join(IMAGES_EONS_PATH,
-                               TIF300BLEEDDTC if DTC_FILE_TYPE == 'tif'
-                               else JPG300BLEEDDTC,
+                               JPG300BLEEDDTC,
                                '{}.{}'.format(set_id, lang))
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
@@ -1887,8 +1882,7 @@ def generate_300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint: di
 
     cmd = GIMP_COMMAND.format(
         conf['gimp_console_path'],
-        'python-prepare-drivethrucards-tif-folder' if DTC_FILE_TYPE == 'tif'
-        else 'python-prepare-drivethrucards-jpg-folder',
+        'python-prepare-drivethrucards-jpg-folder',
         temp_path.replace('\\', '\\\\'),
         output_path.replace('\\', '\\\\'))
     res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
@@ -2119,14 +2113,13 @@ def _make_unique_png(input_path):
 def _make_cmyk(conf, input_path):
     """ Convert RGB to CMYK.
     """
-    cmd = (CMYK_COMMAND_TIF if DTC_FILE_TYPE == 'tif' else CMYK_COMMAND_JPG
-           ).format(conf['magick_path'], input_path)
+    cmd = CMYK_COMMAND_JPG.format(conf['magick_path'], input_path)
     res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
     logging.info(res)
 
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
-            if (filename.endswith('.' + DTC_FILE_TYPE)
+            if (filename.endswith('.jpg')
                     and os.path.getsize(os.path.join(input_path, filename)
                                         ) < IMAGE_MIN_SIZE):
                 raise ValueError('ImageMagick conversion failed for {}'.format(
@@ -2265,13 +2258,13 @@ def _prepare_printing_images(input_path, output_path, service, file_type):
                         output_path, re.sub(
                             r'-(?:e|p)-', '-',
                             re.sub('-+', '-',
-                                   re.sub(r'.{36}(?=-1\.(?:png|jpg|tif))', '',
+                                   re.sub(r'.{36}(?=-1\.(?:png|jpg))', '',
                                           '-'.join(parts)))))
                     back_output_path = os.path.join(
                         output_path, re.sub(
                             r'-(?:e|p)-', '-',
                             re.sub('-+', '-',
-                                   re.sub(r'.{36}(?=-2\.(?:png|jpg|tif))', '',
+                                   re.sub(r'.{36}(?=-2\.(?:png|jpg))', '',
                                           '{}-2.{}'.format(
                                               '-'.join(parts[:-1]),
                                               file_type)))))
@@ -2284,13 +2277,13 @@ def _prepare_printing_images(input_path, output_path, service, file_type):
                     output_path, re.sub(
                         r'-(?:e|p)-', '-',
                         re.sub('-+', '-',
-                               re.sub(r'.{36}(?=-1\.(?:png|jpg|tif))', '',
+                               re.sub(r'.{36}(?=-1\.(?:png|jpg))', '',
                                       '-'.join(parts)))))
                 back_output_path = os.path.join(
                     output_path, re.sub(
                         r'-(?:e|p)-', '-',
                         re.sub('-+', '-',
-                               re.sub(r'.{36}(?=-2\.(?:png|jpg|tif))', '',
+                               re.sub(r'.{36}(?=-2\.(?:png|jpg))', '',
                                       '{}-2.{}'.format(
                                           '-'.join(parts[:-1]),
                                           file_type)))))
@@ -2333,16 +2326,16 @@ def _prepare_dtc_printing_archive(input_path, obj):
         front_cnt = 0
         back_cnt = 0
         filenames = sorted(f for f in filenames
-                           if f.endswith('-1.{}'.format(DTC_FILE_TYPE))
-                           or f.endswith('-2.{}'.format(DTC_FILE_TYPE)))
+                           if f.endswith('-1.jpg')
+                           or f.endswith('-2.jpg'))
         total_cnt = len(filenames) / 2
         for filename in filenames:
-            if filename.endswith('-1.{}'.format(DTC_FILE_TYPE)):
+            if filename.endswith('-1.jpg'):
                 front_cnt += 1
                 obj.write(os.path.join(input_path, filename),
                           '{}front/{}'.format(_deck_name(front_cnt, total_cnt),
                                               filename))
-            elif filename.endswith('-2.{}'.format(DTC_FILE_TYPE)):
+            elif filename.endswith('-2.jpg'):
                 back_cnt += 1
                 obj.write(os.path.join(input_path, filename),
                           '{}back/{}'.format(_deck_name(back_cnt, total_cnt),
@@ -2414,8 +2407,7 @@ def generate_dtc(conf, set_id, set_name, lang, card_data):
     timestamp = time.time()
 
     input_path = os.path.join(IMAGES_EONS_PATH,
-                              TIF300BLEEDDTC if DTC_FILE_TYPE == 'tif'
-                              else JPG300BLEEDDTC,
+                              JPG300BLEEDDTC,
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_DTC_PATH, '{}.{}'.format(
         _escape_filename(set_name), lang))
@@ -2434,7 +2426,7 @@ def generate_dtc(conf, set_id, set_name, lang, card_data):
     _create_folder(output_path)
     _create_folder(temp_path)
     _clear_folder(temp_path)
-    _prepare_printing_images(input_path, temp_path, 'dtc', DTC_FILE_TYPE)
+    _prepare_printing_images(input_path, temp_path, 'dtc', 'jpg')
     _make_cmyk(conf, temp_path)
     _combine_doublesided_rules_cards(set_id, temp_path, card_data)
     _flip_first_card(temp_path)
