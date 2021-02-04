@@ -1073,7 +1073,6 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 	vXml = vXml.replace(/>/g, '[gt]');
 	vXml = vXml.replace(/\[lt\]/g, '<lt>');
 	vXml = vXml.replace(/\[gt\]/g, '<gt>');
-	vXml = vXml.replace(/\[space\]/ig, '<hs>');
 	vXml = vXml.replace(/\[unique\]/ig, tagPrefix + '<uni>' + tagSuffix);
 	vXml = vXml.replace(/\[threat\]/ig, tagPrefix + '<thr>' + tagSuffix);
 	vXml = vXml.replace(/\[attack\]/ig, tagPrefix + '<att>' + tagSuffix);
@@ -1113,6 +1112,7 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 	vXml = vXml.replace(/\[\/strike\]/ig, '</del>');
 	vXml = vXml.replace(/\[red\]/ig, '<red>');
 	vXml = vXml.replace(/\[\/red\]/ig, '</red>');
+	vXml = vXml.replace(/\[space\]/ig, '<hs>');
 	vXml = vXml.replace(/\[tab\]/ig, '\t');
 	vXml = vXml.replace(/\[nobr\]/ig, '\u00a0');
 	vXml = vXml.replace(/\[lotr ([0-9\.]+)\]/ig, '<lotr $1>');
