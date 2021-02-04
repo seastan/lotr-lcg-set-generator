@@ -874,6 +874,8 @@ def generate_octgn_set_xml(conf, set_id, set_name):
 def _update_card_text(text):  # pylint: disable=R0915
     """ Update card text for RingsDB and Hall of Beorn.
     """
+    text = re.sub(r'\[inline\]\n', ' ', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[inline\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\b(Quest Resolution)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', text)
     text = re.sub(r'\b(Valour )?(Resource |Planning |Quest |Travel |Encounter '
                   r'|Combat |Refresh )?(Action):', '[b]\\1\\2\\3[/b]:', text)
@@ -1106,7 +1108,8 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
             opposite_title = None
 
         keywords = [k.strip() for k in
-                    (row[CARD_KEYWORDS] or '').split('.') if k != '']
+                    (row[CARD_KEYWORDS] or '').replace('[inline]', ''
+                                                       ).split('.') if k != '']
         keywords = [re.sub(r' ([0-9]+)\[pp\]$', ' \\1 Per Player', k, re.I)
                     for k in keywords]
         keywords = [
