@@ -111,7 +111,7 @@ The scripts will generate the following outputs:
 
 Additionally, if you specified `octgn_destination_path`, all `set.xml` files for OCTGN will be copied there.
 
-**Supported tags**
+**Supported Tags**
 
 - `[center]` ... `[/center]`: center alignment
 - `[right]` ... `[/right]`: right alignment
@@ -132,7 +132,7 @@ Additionally, if you specified `octgn_destination_path`, all `set.xml` files for
 - `[nobr]`: non-breakable space
 - `[lsb]`: "["
 - `[rsb]`: "]"
-- `[inline]`: put it at the end of the `Keywords` field, to place them on the same line as the first line of text
+- `[inline]`: put it at the end of the `Keywords` field, to place the keywords on the same line as the first line of text
 
 Icons:
 
