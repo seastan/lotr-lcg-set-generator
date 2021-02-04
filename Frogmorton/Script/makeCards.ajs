@@ -448,8 +448,6 @@ function run(progress, target, filename, icons) {
 					else if (['Text', 'BText'].indexOf(nXml + '') > -1) {
 						if (keywords) {
 							vXml = keywords + '\n\n' + vXml;
-							vXml = vXml.replace(/\[inline\]\n\n/ig, ' ');
-							vXml = vXml.replace(/\[inline\]/ig, '');
 						}
 					}
 					else if (nXml == 'Adventure') {
@@ -485,15 +483,15 @@ function run(progress, target, filename, icons) {
 				s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
 				s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
 				if (landscapeTypes.indexOf(cardType) > -1) {
-					s.set('Artist-region', '130,375,90,15');
-					s.set('Copyright-region', '218,375,136,15');
+					s.set('Artist-region', '130,375,100,15');
+					s.set('Copyright-region', '225,375,124,15');
 					s.set('Collection-portrait-clip-region', '391,376,12,12');
 					s.set('CollectionNumber-region', '403,375,18,15');
 					s.set('CollectionInfo-region', '419,375,20,15');
 				}
 				else {
-					s.set('Artist-region', '63,527,92,15');
-					s.set('Copyright-region', '152,527,136,15');
+					s.set('Artist-region', '63,527,100,15');
+					s.set('Copyright-region', '158,527,124,15');
 					s.set('Collection-portrait-clip-region', '322,528,12,12');
 					s.set('CollectionNumber-region', '334,527,18,15');
 					s.set('CollectionInfo-region', '350,527,20,15');
@@ -974,6 +972,8 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 	vXml += '';
 	vXml = vXml.replace(/ +(?=\n|$)/g, '');
 	vXml = vXml.replace(/\n+$/g, '');
+	vXml = vXml.replace(/\[inline\]\n\n/ig, ' ');
+	vXml = vXml.replace(/\[inline\]/ig, '');
 
 	if (['Name', 'BName'].indexOf(nXml + '') > -1) {
 		let lowerSize;
