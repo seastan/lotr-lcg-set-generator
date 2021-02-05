@@ -414,6 +414,7 @@ def _clean_data(data):
     for row in data:
         for key, value in row.items():
             if isinstance(value, str):
+                value = value.strip()
                 value = value.replace("'", '’')
                 value = value.replace('“', '"')
                 value = value.replace('”', '"')
@@ -426,7 +427,7 @@ def _clean_data(data):
                 while True:
                     value_old = value
                     value = re.sub(r'[“”]([^\[]*)\]', '"\\1]', value)
-                    value = re.sub(r'\'([^\[]*)\]', "'\\1]", value)
+                    value = re.sub(r'’([^\[]*)\]', "'\\1]", value)
                     if value == value_old:
                         break
 
@@ -449,9 +450,8 @@ def _clean_data(data):
                 value = value.replace('[Sailing]', '[sailing]')
                 value = value.replace('[PP]', '[pp]')
 
-                value = re.sub(r' +(?=\n|$)', '', value)
+                value = re.sub(r' +(?=\n)', '', value)
                 value = re.sub(r' +', ' ', value)
-                value = value.strip()
                 row[key] = value
 
 
@@ -870,14 +870,17 @@ def generate_octgn_set_xml(conf, set_id, set_name):
 def _update_card_text(text):  # pylint: disable=R0915
     """ Update card text for RingsDB and Hall of Beorn.
     """
-    text = re.sub(r'\[inline\]\n', ' ', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[inline\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\b(Quest Resolution)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', text)
     text = re.sub(r'\b(Valour )?(Resource |Planning |Quest |Travel |Encounter '
                   r'|Combat |Refresh )?(Action):', '[b]\\1\\2\\3[/b]:', text)
     text = re.sub(r'\b(When Revealed|Setup|Forced|Valour Response|Response'
                   r'|Travel|Shadow|Resolution):', '[b]\\1[/b]:', text)
     text = re.sub(r'\b(Condition)\b', '[bi]\\1[/bi]', text)
+
+    text = re.sub(r'\[center\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/center\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[right\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/right\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[bi\]', '<b><i>', text, flags=re.IGNORECASE)
     text = re.sub(r'\[\/bi\]', '</i></b>', text, flags=re.IGNORECASE)
     text = re.sub(r'\[b\]', '<b>', text, flags=re.IGNORECASE)
@@ -886,29 +889,27 @@ def _update_card_text(text):  # pylint: disable=R0915
     text = re.sub(r'\[\/i\]', '</i>', text, flags=re.IGNORECASE)
     text = re.sub(r'\[u\]', '<u>', text, flags=re.IGNORECASE)
     text = re.sub(r'\[\/u\]', '</u>', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[space\]', ' ', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[h1\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/h1\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[h2\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/h2\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[center\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/center\]\n?', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[right\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/right\]\n?', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[strike\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[\/strike\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[lotr\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/lotr\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[red\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[\/red\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[lotr [^\]]+\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/lotr\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[size [^\]]+\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/size\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[defaultsize [^\]]+\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[img [^\]]+\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[space\]', ' ', text, flags=re.IGNORECASE)
     text = re.sub(r'\[tab\]', '    ', text, flags=re.IGNORECASE)
     text = re.sub(r'\[nobr\]', ' ', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[size [^\]]+\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[defaultsize [^\]]+\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/size\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[img [^\]]+\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r' +(?=\n|$)', '', text)
+    text = re.sub(r'\[inline\]\n', ' ', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[inline\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[lsb\]', '[', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[rsb\]', ']', text, flags=re.IGNORECASE)
+
     text = text.strip()
+    text = re.sub(r' +(?=\n)', '', text)
+    text = re.sub(r' +', ' ', text)
     return text
 
 

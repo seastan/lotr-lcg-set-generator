@@ -121,8 +121,8 @@ Additionally, if you specified `octgn_destination_path`, all `set.xml` files for
 - `[u]` ... `[/u]`: underlined text
 - `[strike]` ... `[/strike]`: strikethrough text
 - `[red]` ... `[/red]`: red text
-- `[size X]` ... `[/size]`: text size X (X may be float)
 - `[lotr X]` ... `[/lotr]`: Vafthrundir font + text size X (X may be float)
+- `[size X]` ... `[/size]`: text size X (X may be float)
 - `[defaultsize X]`: put it at the beginning of a field, to set default text size X (X may be float)
 - `[img PATH]`: insert image from PATH (PATH may start either with "custom/" or "icons/")
 - `[img PATH Xin]`: insert image from PATH and set its width to X inches
@@ -130,9 +130,13 @@ Additionally, if you specified `octgn_destination_path`, all `set.xml` files for
 - `[space]`: horizontal spacing
 - `[tab]`: tab symbol
 - `[nobr]`: non-breakable space
-- `[lsb]`: "["
-- `[rsb]`: "]"
 - `[inline]`: put it at the end of the `Keywords` field, to place the keywords on the same line as the first line of text
+- `[lsb]`: [
+- `[rsb]`: ]
+- `[lquot]`: unmatched “
+- `[rquot]`: unmatched ”
+- `[quot]`: "
+- `[apos]`: '
 
 Icons:
 
