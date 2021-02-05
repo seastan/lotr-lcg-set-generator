@@ -152,7 +152,7 @@ DATA = []
 FOUND_SETS = set()
 FOUND_SCRATCH_SETS = set()
 FOUND_INTERSECTED_SETS = set()
-ARTWORK_CACHE = {}
+IMAGE_CACHE = {}
 
 
 def _c2n(column):
@@ -1271,14 +1271,14 @@ def generate_xml(conf, set_id, set_name, lang):
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
-def _collect_artwork_images(artwork_path):
-    """ Collect artwork filenames.
+def _collect_artwork_images(image_path):
+    """ Collect filenames of artwork images.
     """
-    if artwork_path in ARTWORK_CACHE:
-        return ARTWORK_CACHE[artwork_path]
+    if image_path in IMAGE_CACHE:
+        return IMAGE_CACHE[image_path]
 
     images = {}
-    for _, _, filenames in os.walk(artwork_path):
+    for _, _, filenames in os.walk(image_path):
         for filename in filenames:
             if len(filename.split('.')) < 2 or len(filename.split('_')) < 3:
                 continue
@@ -1287,13 +1287,34 @@ def _collect_artwork_images(artwork_path):
                 card_id_side = '_'.join(filename.split('_')[:2])
                 if card_id_side in images:
                     logging.warning('WARNING: Duplicate card ID detected: %s',
-                                    os.path.join(artwork_path, filename))
+                                    os.path.join(image_path, filename))
 
-                images[card_id_side] = os.path.join(artwork_path, filename)
+                images[card_id_side] = os.path.join(image_path, filename)
 
         break
 
-    ARTWORK_CACHE[artwork_path] = images
+    IMAGE_CACHE[image_path] = images
+    return images
+
+
+def _collect_custom_images(image_path):
+    """ Collect filenames of custom images.
+    """
+    if image_path in IMAGE_CACHE:
+        return IMAGE_CACHE[image_path]
+
+    images = {}
+    for _, _, filenames in os.walk(image_path):
+        for filename in filenames:
+            if len(filename.split('.')) < 2:
+                continue
+
+            if filename.split('.')[-1] in ('jpg', 'png'):
+                images[filename] = os.path.join(image_path, filename)
+
+        break
+
+    IMAGE_CACHE[image_path] = images
     return images
 
 
@@ -1320,7 +1341,7 @@ def _get_property(parent, name):
     return prop
 
 
-def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0914,R0915
+def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R0915
     """ Update the Strange Eons xml file with additional data.
     """
     logging.info('[%s, %s] Updating the Strange Eons xml file with additional'
@@ -1332,6 +1353,8 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0914,R0915
     processed_images = _collect_artwork_images(
         os.path.join(artwork_path, PROCESSED_ARTWORK_FOLDER))
     images = {**images, **processed_images}
+    custom_images = _collect_custom_images(
+        os.path.join(artwork_path, IMAGES_CUSTOM_FOLDER))
     xml_path = os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id, lang))
 
     tree = ET.parse(xml_path)
@@ -1396,10 +1419,12 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0914,R0915
                 prop.set('value', str(int(os.path.getmtime(filename))))
 
 
-        filename = images.get('{}_{}'.format(card.attrib['id'], 'B'))
         alternate = [a for a in card if a.attrib.get('type') == 'B']
-        if filename and alternate:
+        if alternate:
             alternate = alternate[0]
+
+        filename = images.get('{}_{}'.format(card.attrib['id'], 'B'))
+        if alternate and filename:
             prop = _get_property(alternate, 'Artwork')
             prop.set('value', os.path.split(filename)[-1])
             prop = _get_property(alternate, 'Artwork Size')
@@ -1414,6 +1439,33 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0914,R0915
                     '_Artist_'.join(
                         os.path.split(filename)[-1].split('_Artist_')[1:]
                         ).split('.')[:-1]).replace('_', ' '))
+
+        try:
+            text = _find_properties(card, 'Text')[0].attrib['value']
+        except IndexError:
+            text = ''
+
+        try:
+            alternate_text = _find_properties(alternate, 'Text')[0].attrib['value']
+        except IndexError:
+            alternate_text = ''
+
+        referred_custom_images = []
+        res = re.search(r'\[img custom\/([^ ]+)', text + alternate_text, re.I)
+        if res:
+            referred_custom_images.extend(res.groups())
+
+        res = re.search(r'\[img "custom\/([^"]+)', text + alternate_text, re.I)
+        if res:
+            referred_custom_images.extend(res.groups())
+
+        for image in referred_custom_images:
+            if image in custom_images:
+                prop = _get_property(card, 'Custom Image')
+                prop.set('value', '{}|{}|{}'.format(
+                    image,
+                    os.path.getsize(custom_images[image]),
+                    int(os.path.getmtime(custom_images[image]))))
 
     for card in root[0]:
         if card.attrib['id'] in encounter_cards:
