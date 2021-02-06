@@ -58,7 +58,7 @@ traitRegion['Treachery'] = '65,336,283,20';
 
 var nameRegion = {};
 nameRegion['Ally'] = '100,329,213,20';
-nameRegion['Attachment'] = '132,39,183,24';
+nameRegion['Attachment'] = '132,38,183,24';
 nameRegion['Contract'] = '84,245,245,28';
 nameRegion['Encounter Side Quest'] = '100,42,363,29';
 nameRegion['Enemy'] = '94,328,225,20';
@@ -70,6 +70,21 @@ nameRegion['Objective Ally'] = '75,39,263,25';
 nameRegion['Player Side Quest'] = '144,44,368,29';
 nameRegion['Quest'] = '144,44,368,29';
 nameRegion['Treachery'] = '55,108,26,164';
+
+var nameRegionUnique = {};
+nameRegionUnique['Ally'] = '100,327,213,20';
+nameRegionUnique['Attachment'] = '132,36,183,24';
+nameRegionUnique['Contract'] = '84,242,245,28';
+nameRegionUnique['Encounter Side Quest'] = '100,42,363,29';
+nameRegionUnique['Enemy'] = '94,326,225,20';
+nameRegionUnique['Event'] = '54,88,25,174';
+nameRegionUnique['Hero'] = '100,326,213,20';
+nameRegionUnique['Location'] = '108,40,197,20';
+nameRegionUnique['Objective'] = '75,36,263,25';
+nameRegionUnique['Objective Ally'] = '75,36,263,25';
+nameRegionUnique['Player Side Quest'] = '144,44,368,29';
+nameRegionUnique['Quest'] = '144,44,368,29';
+nameRegionUnique['Treachery'] = '53,108,26,164';
 
 var namePointSize = {};
 namePointSize['Ally'] = 6.5;
@@ -675,12 +690,19 @@ function run(progress, target, filename, icons) {
 					}
 				}
 
-				if (cardType in nameRegion) {
-					s.set('Name-region', nameRegion[cardType]);
+				if (s.get('Unique') + '') {
+					if (cardType in nameRegionUnique) {
+						s.set('Name-region', nameRegionUnique[cardType]);
+					}
+				}
+				else {
+					if (cardType in nameRegion) {
+						s.set('Name-region', nameRegion[cardType]);
+					}
 				}
 
 				if (cardType in namePointSize) {
-					s.set('Name-pointsize', Math.round(namePointSize[cardType] * 1.423 * 100) / 100);
+					s.set('Name-pointsize', Math.round(namePointSize[cardType] * 1.734 * 100) / 100);
 				}
 
 				if (cardType in hitPointsRegion) {
