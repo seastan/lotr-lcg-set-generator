@@ -1271,7 +1271,7 @@ def generate_xml(conf, set_id, set_name, lang):
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
-def _collect_artwork_images(image_path):
+def _collect_artwork_images(conf, image_path):
     """ Collect filenames of artwork images.
     """
     if image_path in IMAGE_CACHE:
@@ -1284,12 +1284,16 @@ def _collect_artwork_images(image_path):
                 continue
 
             if filename.split('.')[-1] in ('jpg', 'png'):
-                card_id_side = '_'.join(filename.split('_')[:2])
-                if card_id_side in images:
-                    logging.warning('WARNING: Duplicate card ID detected: %s',
+                image_id = '_'.join(filename.split('_')[:2])
+                lang = filename.split('.')[-2]
+                if lang in conf['languages']:
+                    image_id = '{}_{}'.format(image_id, lang)
+
+                if image_id in images:
+                    logging.warning('WARNING: Duplicate image detected: %s',
                                     os.path.join(image_path, filename))
 
-                images[card_id_side] = os.path.join(image_path, filename)
+                images[image_id] = os.path.join(image_path, filename)
 
         break
 
@@ -1349,9 +1353,9 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
     timestamp = time.time()
 
     artwork_path = _get_artwork_path(conf, set_id)
-    images = _collect_artwork_images(artwork_path)
+    images = _collect_artwork_images(conf, artwork_path)
     processed_images = _collect_artwork_images(
-        os.path.join(artwork_path, PROCESSED_ARTWORK_FOLDER))
+        conf, os.path.join(artwork_path, PROCESSED_ARTWORK_FOLDER))
     images = {**images, **processed_images}
     custom_images = _collect_custom_images(
         os.path.join(artwork_path, IMAGES_CUSTOM_FOLDER))
@@ -1400,7 +1404,11 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                         ).split('.')[:-1]).replace('_', ' '))
 
         if card_type == 'Presentation':
-            filename = images.get('{}_{}'.format(card.attrib['id'], 'Top'))
+            filename = images.get('{}_{}_{}'.format(
+                card.attrib['id'], 'Top', lang))
+            if not filename:
+                filename = images.get('{}_{}'.format(card.attrib['id'], 'Top'))
+
             if filename:
                 prop = _get_property(card, 'ArtworkTop')
                 prop.set('value', os.path.split(filename)[-1])
@@ -1409,7 +1417,11 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                 prop = _get_property(card, 'ArtworkTop Modified')
                 prop.set('value', str(int(os.path.getmtime(filename))))
 
-            filename = images.get('{}_{}'.format(card.attrib['id'], 'Bottom'))
+            filename = images.get('{}_{}_{}'.format(
+                card.attrib['id'], 'Bottom', lang))
+            if not filename:
+                filename = images.get('{}_{}'.format(card.attrib['id'], 'Bottom'))
+
             if filename:
                 prop = _get_property(card, 'ArtworkBottom')
                 prop.set('value', os.path.split(filename)[-1])
