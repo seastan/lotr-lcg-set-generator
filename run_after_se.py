@@ -48,8 +48,15 @@ def generate_mpc(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: 
 def generate_dtc(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: disable=R0913
     """ Generate DriveThruCards outputs.
     """
-    lotr.generate_300_bleeddtc(conf, set_id, set_name, lang, skip_ids)
+    lotr.generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids)
     lotr.generate_dtc(conf, set_id, set_name, lang, card_data)
+
+
+def generate_mbprint(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: disable=R0913
+    """ Generate MBPrint outputs.
+    """
+    lotr.generate_jpg800_bleedmbprint(conf, set_id, set_name, lang, skip_ids)
+    lotr.generate_mbprint(conf, set_id, set_name, lang, card_data)
 
 
 def run(args):
@@ -131,6 +138,10 @@ def main():  # pylint: disable=R0912
 
             if 'drivethrucards' in conf['outputs'][lang]:
                 tasks.append([generate_dtc, conf, set_id, set_name, lang,
+                              skip_ids, lotr.DATA])
+
+            if 'mbprint' in conf['outputs'][lang]:
+                tasks.append([generate_mbprint, conf, set_id, set_name, lang,
                               skip_ids, lotr.DATA])
 
     execute_tasks(conf, pre_tasks)

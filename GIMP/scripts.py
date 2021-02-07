@@ -411,24 +411,25 @@ def prepare_drivethrucards_tif(img, drawable, output_folder):
     pdb.gimp_undo_push_group_end(img)
 
 
-def prepare_mbprint(img, drawable, output_folder):
-    """ Prepare an image for MBPrint printing.
+def prepare_mbprint_jpg(img, drawable, output_folder):
+    """ Prepare a JPG image for MBPrint printing.
     """
-    gimp.progress_init('Prepare an image for MBPrint printing...')
+    gimp.progress_init('Prepare a JPG image for MBPrint printing...')
     pdb.gimp_undo_push_group_start(img)
 
     try:
-        file_name, back_side = _get_filename_backside(img, 'tif')
+        file_name, back_side = _get_filename_backside(img, 'jpg')
     except Exception:  # pylint: disable=W0703
         pdb.gimp_undo_push_group_end(img)
         return
 
-#    rotation = _get_rotation(drawable)
-#    if rotation:
-#        _rotate(drawable, back_side)
+    rotation = _get_rotation(drawable)
+    if rotation:
+        _rotate(drawable, back_side)
 
-    pdb.file_tiff_save(img, drawable,
-                       os.path.join(output_folder, file_name), file_name, 1)
+    pdb.file_jpeg_save(img, drawable,
+                       os.path.join(output_folder, file_name), file_name,
+                       1, 0, 1, 0, '', 2, 1, 0, 0)
     pdb.gimp_undo_push_group_end(img)
 
 
@@ -488,12 +489,12 @@ def prepare_drivethrucards_tif_folder(input_folder, output_folder):
     _iterate_folder(input_folder, output_folder, prepare_drivethrucards_tif)
 
 
-def prepare_mbprint_folder(input_folder, output_folder):
-    """ Prepare a folder of images for MBPrint printing.
+def prepare_mbprint_jpg_folder(input_folder, output_folder):
+    """ Prepare a folder of images for MBPrint printing (JPG).
     """
     gimp.progress_init(
-        'Prepare a folder of images for MBPrint printing...')
-    _iterate_folder(input_folder, output_folder, prepare_mbprint)
+        'Prepare a folder of images for MBPrint printing (JPG)...')
+    _iterate_folder(input_folder, output_folder, prepare_mbprint_jpg)
 
 
 register(
@@ -678,7 +679,7 @@ register(
     'A.R.',
     'A.R.',
     '2020',
-    'Prepare DriveThruCards',
+    'Prepare DriveThruCards JPG',
     '*',
     [
         (PF_IMAGE, 'image', 'Input image', None),
@@ -696,7 +697,7 @@ register(
     'A.R.',
     'A.R.',
     '2020',
-    'Prepare DriveThruCards Folder',
+    'Prepare DriveThruCards JPG Folder',
     '*',
     [
         (PF_DIRNAME, 'input_folder', 'Input folder', None),
@@ -742,13 +743,13 @@ register(
     menu='<Image>/Filters')
 
 register(
-    'python_prepare_mbprint',
-    'Prepare an image for MBPrint printing',
-    '1. Rotate a landscape image. 2. Export TIFF.',
+    'python_prepare_mbprint_jpg',
+    'Prepare a JPG image for MBPrint printing',
+    '1. Rotate a landscape image. 2. Export JPG.',
     'A.R.',
     'A.R.',
     '2020',
-    'Prepare MBPrint',
+    'Prepare MBPrint JPG',
     '*',
     [
         (PF_IMAGE, 'image', 'Input image', None),
@@ -756,24 +757,24 @@ register(
         (PF_DIRNAME, 'output_folder', 'Output folder', None)
     ],
     [],
-    prepare_mbprint,
+    prepare_mbprint_jpg,
     menu='<Image>/Filters')
 
 register(
-    'python_prepare_mbprint_folder',
-    'Prepare a folder of images for MBPrint printing',
-    '1. Rotate a landscape image. 2. Export TIFF.',
+    'python_prepare_mbprint_jpg_folder',
+    'Prepare a folder of images for MBPrint printing (JPG)',
+    '1. Rotate a landscape image. 2. Export JPG.',
     'A.R.',
     'A.R.',
     '2020',
-    'Prepare MBPrint Folder',
+    'Prepare MBPrint JPG Folder',
     '*',
     [
         (PF_DIRNAME, 'input_folder', 'Input folder', None),
         (PF_DIRNAME, 'output_folder', 'Output folder', None)
     ],
     [],
-    prepare_mbprint_folder,
+    prepare_mbprint_jpg_folder,
     menu='<Image>/Filters')
 
 

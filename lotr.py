@@ -100,7 +100,8 @@ CARD_TYPES_ENCOUNTER_SET = ('Enemy', 'Encounter Side Quest', 'Location',
                             'Treachery')
 CARD_TYPES_ADVENTURE = ('Objective', 'Objective Ally', 'Quest')
 
-CMYK_COMMAND_JPG = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
+MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
+MAGICK_COMMAND_PDF = '"{}" convert "{}\\*.jpg" "{}"'
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 IMAGE_MIN_SIZE = 100000
 IMAGES_CUSTOM_FOLDER = 'custom'
@@ -112,6 +113,7 @@ SHEET_NAME = 'setExcel.xlsx'
 TEXT_CHUNK_FLAG = b'tEXt'
 
 JPG300BLEEDDTC = 'jpg300BleedDTC'
+JPG800BLEEDMBPRINT = 'jpg800BleedMBPrint'
 PNG300BLEED = 'png300Bleed'
 PNG300DB = 'png300DB'
 PNG300NOBLEED = 'png300NoBleed'
@@ -119,6 +121,13 @@ PNG300OCTGN = 'png300OCTGN'
 PNG300PDF = 'png300PDF'
 PNG800BLEED = 'png800Bleed'
 PNG800BLEEDMPC = 'png800BleedMPC'
+
+CARD_BACKS = {'player': {'mpc': 'playerBackUnofficialMPC.png',
+                         'dtc': 'playerBackOfficialDTC.jpg',
+                         'mbprint': 'playerBackOfficialMBPRINT.jpg'},
+              'encounter': {'mpc': 'encounterBackUnofficialMPC.png',
+                            'dtc': 'encounterBackOfficialDTC.jpg',
+                            'mbprint': 'encounterBackOfficialMBPRINT.jpg'}}
 
 CONFIGURATION_PATH = 'configuration.yaml'
 IMAGES_BACK_PATH = 'imagesBack'
@@ -132,6 +141,7 @@ OCTGN_ZIP_PATH = 'a21af4e8-be4b-4cda-a6b6-534f9717391f/Sets'
 OUTPUT_DB_PATH = os.path.join('Output', 'DB')
 OUTPUT_DTC_PATH = os.path.join('Output', 'DriveThruCards')
 OUTPUT_HALLOFBEORN_PATH = os.path.join('Output', 'HallOfBeorn')
+OUTPUT_MBPRINT_PATH = os.path.join('Output', 'MBPrint')
 OUTPUT_MPC_PATH = os.path.join('Output', 'MakePlayingCards')
 OUTPUT_OCTGN_PATH = os.path.join('Output', 'OCTGN')
 OUTPUT_PDF_PATH = os.path.join('Output', 'PDF')
@@ -307,6 +317,11 @@ def read_conf(path=CONFIGURATION_PATH):
         if ('drivethrucards_zip' in conf['outputs'][lang]
                 or 'drivethrucards_7z' in conf['outputs'][lang]):
             conf['outputs'][lang].add('drivethrucards')
+
+        if ('mbprint_zip' in conf['outputs'][lang]
+                or 'mbprint_7z' in conf['outputs'][lang]
+                or 'mbprint_pdf' in conf['outputs'][lang]):
+            conf['outputs'][lang].add('mbprint')
 
         conf['nobleed'][lang] = ('db' in conf['outputs'][lang]
                                  or 'octgn' in conf['outputs'][lang]
@@ -1325,10 +1340,11 @@ def _collect_custom_images(image_path):
 def _set_outputs(conf, lang, root):
     """ Set required outputs for Strange Eons.
     """
-    if (conf['nobleed'][lang] or 'drivethrucards' in conf['outputs'][lang]):
+    if conf['nobleed'][lang] or 'drivethrucards' in conf['outputs'][lang]:
         root.set('png300Bleed', '1')
 
-    if 'makeplayingcards' in conf['outputs'][lang]:
+    if ('makeplayingcards' in conf['outputs'][lang]
+            or 'mbprint' in conf['outputs'][lang]):
         root.set('png800Bleed', '1')
 
 
@@ -1913,7 +1929,7 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
                  ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
-def generate_300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
+def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
     """ Generate images for DriveThruCards outputs.
     """
     logging.info('[%s, %s] Generating images for DriveThruCards outputs...',
@@ -1926,8 +1942,8 @@ def generate_300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint: di
     _create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
     temp_path = os.path.join(TEMP_ROOT_PATH,
-                             'generate_300_bleeddtc.{}.{}'.format(set_id,
-                                                                  lang))
+                             'generate_jpg300_bleeddtc.{}.{}'.format(set_id,
+                                                                     lang))
     _create_folder(temp_path)
     _clear_folder(temp_path)
 
@@ -1953,8 +1969,55 @@ def generate_300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint: di
     res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
+    _make_cmyk(conf, output_path)
     _delete_folder(temp_path)
     logging.info('[%s, %s] ...Generating images for DriveThruCards outputs'
+                 ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
+
+
+def generate_jpg800_bleedmbprint(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
+    """ Generate images for MBPrint outputs.
+    """
+    logging.info('[%s, %s] Generating images for MBPrint outputs...',
+                 set_name, lang)
+    timestamp = time.time()
+
+    output_path = os.path.join(IMAGES_EONS_PATH,
+                               JPG800BLEEDMBPRINT,
+                               '{}.{}'.format(set_id, lang))
+    _create_folder(output_path)
+    _clear_modified_images(output_path, skip_ids)
+    temp_path = os.path.join(
+        TEMP_ROOT_PATH, 'generate_jpg800_bleedmbprint.{}.{}'.format(set_id,
+                                                                    lang))
+    _create_folder(temp_path)
+    _clear_folder(temp_path)
+
+    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+        filelist = [f for f in zip_obj.namelist()
+                    if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
+                                                  PNG800BLEED))
+                    and f.split('.')[-1] == 'png'
+                    and f.split('.')[-2] == lang
+                    and f.split('.')[-3] == set_id]
+        for filename in filelist:
+            output_filename = _update_zip_filename(filename)
+            with zip_obj.open(filename) as zip_file:
+                with open(os.path.join(temp_path, output_filename),
+                          'wb') as output_file:
+                    shutil.copyfileobj(zip_file, output_file)
+
+    cmd = GIMP_COMMAND.format(
+        conf['gimp_console_path'],
+        'python-prepare-mbprint-jpg-folder',
+        temp_path.replace('\\', '\\\\'),
+        output_path.replace('\\', '\\\\'))
+    res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+    logging.info('[%s, %s] %s', set_name, lang, res)
+
+    _make_cmyk(conf, output_path)
+    _delete_folder(temp_path)
+    logging.info('[%s, %s] ...Generating images for MBPrint outputs'
                  ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
@@ -2178,7 +2241,7 @@ def _make_unique_png(input_path):
 def _make_cmyk(conf, input_path):
     """ Convert RGB to CMYK.
     """
-    cmd = CMYK_COMMAND_JPG.format(conf['magick_path'], input_path)
+    cmd = MAGICK_COMMAND_CMYK.format(conf['magick_path'], input_path)
     res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
     logging.info(res)
 
@@ -2264,6 +2327,13 @@ def _combine_doublesided_rules_cards(set_id, input_path, card_data):  # pylint: 
 
 def _flip_first_card(input_path):
     """ Flip first card of the deck.
+
+    NOT USED:
+    1. I got no proof yet that the front side of the front card has additional
+       risks to be damaged.
+    2. I did get a proof that the back sides of all cards have more risks to be
+       damaged.
+    3. That may create an additional ground for confusion.
     """
     for _, _, filenames in os.walk(input_path):
         filenames = sorted(filenames)
@@ -2290,7 +2360,7 @@ def _flip_first_card(input_path):
 
 
 def _prepare_printing_images(input_path, output_path, service, file_type):
-    """ Prepare images for MakePlayingCards/DriveThruCards.
+    """ Prepare images for MakePlayingCards, DriveThruCards or MBPrint.
     """
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
@@ -2302,15 +2372,11 @@ def _prepare_printing_images(input_path, output_path, service, file_type):
                 '-'.join(parts[:-1]), file_type))
             if not os.path.exists(back_path):
                 if parts[2] == 'p':
-                    back_path = os.path.join(
-                        IMAGES_BACK_PATH,
-                        service == 'mpc' and 'playerBackUnofficialMPC.png'
-                        or 'playerBackOfficialDTC.{}'.format(file_type))
+                    back_path = os.path.join(IMAGES_BACK_PATH,
+                                             CARD_BACKS['player'][service])
                 elif parts[2] == 'e':
-                    back_path = os.path.join(
-                        IMAGES_BACK_PATH,
-                        service == 'mpc' and 'encounterBackUnofficialMPC.png'
-                        or 'encounterBackOfficialDTC.{}'.format(file_type))
+                    back_path = os.path.join(IMAGES_BACK_PATH,
+                                             CARD_BACKS['encounter'][service])
                 else:
                     logging.error('ERROR: Missing card back for %s, removing'
                                   ' the file', filename)
@@ -2409,6 +2475,18 @@ def _prepare_dtc_printing_archive(input_path, obj):
         break
 
 
+def _prepare_mbprint_printing_archive(input_path, obj):
+    """ Prepare archive for MBPrint.
+    """
+    for _, _, filenames in os.walk(input_path):
+        for filename in filenames:
+            if filename.endswith('-1.jpg') or filename.endswith('-0.jpg'):
+                obj.write(os.path.join(input_path, filename),
+                          filename)
+
+        break
+
+
 def generate_mpc(conf, set_id, set_name, lang, card_data):
     """ Generate MakePlayingCards outputs.
     """
@@ -2439,7 +2517,6 @@ def generate_mpc(conf, set_id, set_name, lang, card_data):
     _prepare_printing_images(input_path, temp_path, 'mpc', 'png')
     _make_unique_png(temp_path)
     _combine_doublesided_rules_cards(set_id, temp_path, card_data)
-    _flip_first_card(temp_path)
 
     if 'makeplayingcards_zip' in conf['outputs'][lang]:
         with zipfile.ZipFile(
@@ -2492,9 +2569,7 @@ def generate_dtc(conf, set_id, set_name, lang, card_data):
     _create_folder(temp_path)
     _clear_folder(temp_path)
     _prepare_printing_images(input_path, temp_path, 'dtc', 'jpg')
-    _make_cmyk(conf, temp_path)
     _combine_doublesided_rules_cards(set_id, temp_path, card_data)
-    _flip_first_card(temp_path)
 
     if 'drivethrucards_zip' in conf['outputs'][lang]:
         with zipfile.ZipFile(
@@ -2516,6 +2591,77 @@ def generate_dtc(conf, set_id, set_name, lang, card_data):
 
     _delete_folder(temp_path)
     logging.info('[%s, %s] ...Generating DriveThruCards outputs (%ss)',
+                 set_name, lang, round(time.time() - timestamp, 3))
+
+
+def generate_mbprint(conf, set_id, set_name, lang, card_data):
+    """ Generate MBPrint outputs.
+    """
+    logging.info('[%s, %s] Generating MBPrint outputs...',
+                 set_name, lang)
+    timestamp = time.time()
+
+    input_path = os.path.join(IMAGES_EONS_PATH,
+                              JPG800BLEEDMBPRINT,
+                              '{}.{}'.format(set_id, lang))
+    output_path = os.path.join(OUTPUT_MBPRINT_PATH, '{}.{}'.format(
+        _escape_filename(set_name), lang))
+    temp_path = os.path.join(TEMP_ROOT_PATH,
+                             'generate_mbprint.{}.{}'.format(set_id, lang))
+
+    for _, _, filenames in os.walk(input_path):
+        if not filenames:
+            logging.error('[%s, %s] ERROR: No cards found', set_name, lang)
+            logging.info('[%s, %s] ...Generating MBPrint outputs (%ss)',
+                         set_name, lang, round(time.time() - timestamp, 3))
+            return
+
+        break
+
+    _create_folder(output_path)
+    _create_folder(temp_path)
+    _clear_folder(temp_path)
+    _prepare_printing_images(input_path, temp_path, 'mbprint', 'jpg')
+    _combine_doublesided_rules_cards(set_id, temp_path, card_data)
+
+    for _, _, filenames in os.walk(temp_path):
+        for filename in filenames:
+            if filename.endswith('-2.jpg'):
+                os.rename(
+                    os.path.join(temp_path, filename),
+                    os.path.join(temp_path,
+                                 re.sub(r'-2\.jpg$', '-0.jpg', filename)))
+
+        break
+
+    if 'mbprint_zip' in conf['outputs'][lang]:
+        with zipfile.ZipFile(
+                os.path.join(output_path,
+                             'MBPRINT.{}.{}.zip'.format(
+                                 _escape_filename(set_name), lang)),
+                'w') as obj:
+            _prepare_mbprint_printing_archive(temp_path, obj)
+            obj.write('MBPrint.pdf', 'MBPrint.pdf')
+
+    if 'mbprint_7z' in conf['outputs'][lang]:
+        with py7zr.SevenZipFile(
+                os.path.join(output_path,
+                             'MBPRINT.{}.{}.7z'.format(
+                                 _escape_filename(set_name), lang)),
+                'w') as obj:
+            _prepare_mbprint_printing_archive(temp_path, obj)
+            obj.write('MBPrint.pdf', 'MBPrint.pdf')
+
+    if 'mbprint_pdf' in conf['outputs'][lang]:
+        cmd = MAGICK_COMMAND_PDF.format(
+            conf['magick_path'], temp_path,
+            os.path.join(output_path, 'MBPRINT.{}.{}.pdf'.format(
+                _escape_filename(set_name), lang)))
+        res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+        logging.info(res)
+
+    _delete_folder(temp_path)
+    logging.info('[%s, %s] ...Generating MBPrint outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 
 

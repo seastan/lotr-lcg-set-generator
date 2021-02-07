@@ -55,6 +55,9 @@ outputs:
 #    - makeplayingcards_7z
 #    - drivethrucards_zip
 #    - drivethrucards_7z
+#    - mbprint_zip
+#    - mbprint_7z
+#    - mbprint_pdf
   German:
 #    - db
 #    - octgn
@@ -64,6 +67,9 @@ outputs:
 #    - makeplayingcards_7z
 #    - drivethrucards_zip
 #    - drivethrucards_7z
+#    - mbprint_zip
+#    - mbprint_7z
+#    - mbprint_pdf
   Spanish:
 #    - db
 #    - octgn
@@ -73,6 +79,9 @@ outputs:
 #    - makeplayingcards_7z
 #    - drivethrucards_zip
 #    - drivethrucards_7z
+#    - mbprint_zip
+#    - mbprint_7z
+#    - mbprint_pdf
   French:
 #    - db
 #    - octgn
@@ -82,6 +91,9 @@ outputs:
 #    - makeplayingcards_7z
 #    - drivethrucards_zip
 #    - drivethrucards_7z
+#    - mbprint_zip
+#    - mbprint_7z
+#    - mbprint_pdf
   Polish:
 #    - db
 #    - octgn
@@ -91,6 +103,9 @@ outputs:
 #    - makeplayingcards_7z
 #    - drivethrucards_zip
 #    - drivethrucards_7z
+#    - mbprint_zip
+#    - mbprint_7z
+#    - mbprint_pdf
   Italian:
 #    - db
 #    - octgn
@@ -100,3 +115,6 @@ outputs:
 #    - makeplayingcards_7z
 #    - drivethrucards_zip
 #    - drivethrucards_7z
+#    - mbprint_zip
+#    - mbprint_7z
+#    - mbprint_pdf
