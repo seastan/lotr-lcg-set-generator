@@ -463,6 +463,8 @@ def _clean_data(data):
                 value = value.replace('[Rainy]', '[rainy]')
                 value = value.replace('[Stormy]', '[stormy]')
                 value = value.replace('[Sailing]', '[sailing]')
+                value = value.replace('[EOS]', '[eos]')
+                value = value.replace('[Person]', '[person]')
                 value = value.replace('[PP]', '[pp]')
 
                 value = re.sub(r' +(?=\n)', '', value)

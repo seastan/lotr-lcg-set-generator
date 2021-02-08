@@ -1112,6 +1112,8 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 	vXml = vXml.replace(/\[rainy\]/ig, tagPrefix + '<hb>' + tagSuffix);
 	vXml = vXml.replace(/\[stormy\]/ig, tagPrefix + '<hw>' + tagSuffix);
 	vXml = vXml.replace(/\[sailing\]/ig, tagPrefix + '<sai>' + tagSuffix);
+	vXml = vXml.replace(/\[eos\]/ig, tagPrefix + '<eos>' + tagSuffix);
+	vXml = vXml.replace(/\[person\]/ig, tagPrefix + '<per>' + tagSuffix);
 	vXml = vXml.replace(/\[pp\]/ig, tagPrefix + '<pp>' + tagSuffix);
 	vXml = vXml.replace(/\[center\]/ig, '<center>');
 	vXml = vXml.replace(/([^\n])\<center\>/ig, '$1\n<center>');

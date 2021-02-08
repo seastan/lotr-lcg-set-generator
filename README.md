@@ -157,6 +157,7 @@ Icons:
 - `[rainy]`
 - `[stormy]`
 - `[sailing]`
+- `[eos]`: Eye of Sauron
 - `[pp]`: per player
 
 **GIMP Plugins**
