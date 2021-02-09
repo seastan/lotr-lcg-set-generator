@@ -216,7 +216,7 @@ def _is_positive_or_zero_int(value):
 def _escape_filename(value):
     """ Escape forbidden symbols in a file name.
     """
-    return re.sub(r'[<>:\/\\|?*\'"’“”]', ' ', value)
+    return re.sub(r'[<>:\/\\|?*\'"’“”…]', ' ', value)
 
 
 def _clear_folder(folder):
@@ -430,6 +430,7 @@ def _clean_data(data):
         for key, value in row.items():
             if isinstance(value, str):
                 value = value.strip()
+                value = value.replace("...", '…')
                 value = value.replace("'", '’')
                 value = value.replace('“', '"')
                 value = value.replace('”', '"')
