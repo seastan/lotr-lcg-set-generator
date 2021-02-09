@@ -655,33 +655,27 @@ function run(progress, target, filename, icons) {
 				else {
 					s.set('Type', updateVafthrudnir(translate[cardType][lang].toUpperCase(), 5.095));
 					s.set('Copyright', copyrightText);
-					let iconName = fixSpecialSymbols(card['Set']).replace(/ /g, '-') + '_stroke';
+
+					let iconSet;
+					if (cycle + '') {
+						iconSet = cycle;
+					}
+					else {
+						iconSet = card['Set'];
+					}
+					let iconName = fixSpecialSymbols(iconSet).replace(/ /g, '-') + '_stroke';
 					if (icons.indexOf(iconName) > -1) {
 						s.set('Collection', 'Custom');
 						s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
 					}
 					else {
-						let iconName = fixSpecialSymbols(card['Set']).replace(/ /g, '-');
+						let iconName = fixSpecialSymbols(iconSet).replace(/ /g, '-');
 						if (icons.indexOf(iconName) > -1) {
 							s.set('Collection', 'Custom');
 							s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
 						}
 						else {
-							iconName = fixSpecialSymbols(cycle).replace(/ /g, '-') + '_stroke';
-							if (icons.indexOf(iconName) > -1) {
-								s.set('Collection', 'Custom');
-								s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
-							}
-							else {
-								iconName = fixSpecialSymbols(cycle).replace(/ /g, '-');
-								if (icons.indexOf(iconName) > -1) {
-									s.set('Collection', 'Custom');
-									s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
-								}
-								else {
-									s.set('Collection', convertIconName(card['Set']));
-								}
-							}
+							s.set('Collection', convertIconName(iconSet));
 						}
 					}
 				}
