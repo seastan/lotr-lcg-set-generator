@@ -36,10 +36,10 @@ CARD_TITLE_ROW = 1
 CARD_MAX_NUMBER = 10000
 MAX_COLUMN_NUMBER = 100
 
-# Name, Traits:Keywords, Victory Points:Flavour, Side B,
-# Traits:Keywords, Victory Points:Flavour, Adventure
-TRANSLATION_RANGES = ['G{}:G{}', 'K{}:L{}', 'U{}:X{}', 'AC{}:AC{}',
-                      'AG{}:AH{}', 'AQ{}:AT{}', 'BA{}:BA{}']
+# Name, Traits:Keywords, Victory Points, Text:Flavour, Side B,
+# Traits:Keywords, Victory Points, Text:Flavour, Adventure
+TRANSLATION_RANGES = ['G{}:G{}', 'K{}:L{}', 'U{}:U{}', 'W{}:Y{}', 'AD{}:AD{}',
+                      'AH{}:AI{}', 'AR{}:AR{}', 'AT{}:AV{}', 'BC{}:BC{}']
 
 SET_ID = 'GUID'
 SET_NAME = 'Name'

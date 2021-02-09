@@ -253,7 +253,7 @@ function run(progress, target, filename, icons) {
 	docElement.normalize();
 
 	var setName = docElement.getAttribute('name');
-	var cycle = docElement.getAttribute('cycle');
+	var setIcon = docElement.getAttribute('icon');
 	var copyrightText = docElement.getAttribute('copyright');
 
 	var png300Bleed = false;
@@ -369,6 +369,7 @@ function run(progress, target, filename, icons) {
 						['Progress', 'Quest Points'],
 						['Victory', 'Victory Points'],
 						['OptionRight', 'Victory Points'],
+						['OptionSpecial', 'Special Icon'],
 						['Rules', 'Text'],
 						['Description', 'Text'],
 						['Shadow', 'Shadow'],
@@ -418,6 +419,7 @@ function run(progress, target, filename, icons) {
 						['Progress', 'BQuest Points'],
 						['Victory', 'BVictory Points'],
 						['OptionRight', 'BVictory Points'],
+						['OptionSpecial', 'BSpecial Icon'],
 						['Rules', 'BText'],
 						['Description', 'BText'],
 						['Shadow', 'BShadow'],
@@ -440,7 +442,7 @@ function run(progress, target, filename, icons) {
 					let vXml = card[nXml];
 
 					if (!vXml) {
-						if (['Sphere', 'BSphere'].indexOf(nXml + '') == -1) {
+						if (['Sphere', 'BSphere', 'Special Icon', 'BSpecial Icon'].indexOf(nXml + '') == -1) {
 							s.set(nEon, '');
 						}
 						continue;
@@ -457,6 +459,9 @@ function run(progress, target, filename, icons) {
 						if ((cardType != 'Presentation') && (cardType != 'Rules') && vXml.match(/^[0-9]+$/)) {
 							vXml = translate['Victory'][lang].toUpperCase() + ' ' + vXml;
 						}
+					}
+					else if (['Special Icon', 'BSpecial Icon'].indexOf(nXml + '') > -1) {
+						vXml = convertIconName(vXml);
 					}
 					else if (['Artist', 'BArtist'].indexOf(nXml + '') > -1) {
 						if (vXml == 'Unknown Artist') {
@@ -656,26 +661,29 @@ function run(progress, target, filename, icons) {
 					s.set('Type', updateVafthrudnir(translate[cardType][lang].toUpperCase(), 5.095));
 					s.set('Copyright', copyrightText);
 
-					let iconSet;
-					if (cycle + '') {
-						iconSet = cycle;
+					let selectedIcon;
+					if (card['Collection Icon']) {
+						selectedIcon = card['Collection Icon'];
+					}
+					else if (setIcon + '') {
+						selectedIcon = setIcon;
 					}
 					else {
-						iconSet = card['Set'];
+						selectedIcon = card['Set'];
 					}
-					let iconName = fixSpecialSymbols(iconSet).replace(/ /g, '-') + '_stroke';
+					let iconName = fixSpecialSymbols(selectedIcon).replace(/ /g, '-') + '_stroke';
 					if (icons.indexOf(iconName) > -1) {
 						s.set('Collection', 'Custom');
 						s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
 					}
 					else {
-						let iconName = fixSpecialSymbols(iconSet).replace(/ /g, '-');
+						let iconName = fixSpecialSymbols(selectedIcon).replace(/ /g, '-');
 						if (icons.indexOf(iconName) > -1) {
 							s.set('Collection', 'Custom');
 							s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
 						}
 						else {
-							s.set('Collection', convertIconName(iconSet));
+							s.set('Collection', convertIconName(selectedIcon));
 						}
 					}
 				}
