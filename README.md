@@ -138,6 +138,9 @@ Additionally, if you specified `octgn_destination_path`, all `set.xml` files for
 - `[rquot]`: unmatched ”
 - `[quot]`: "
 - `[apos]`: '
+- `[hyphen]`: -
+- `--`: – (en dash)
+- `---`: — (em dash)
 
 Icons:
 
