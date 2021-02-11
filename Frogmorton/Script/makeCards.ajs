@@ -342,17 +342,15 @@ function run(progress, target, filename, icons) {
 			}
 			for (let idx = 0; idx < sides.length; idx++) {
 				let side = sides[idx];
-				let cardName, cardType, keywords, traits, suffix, mapping;
+				let cardName, cardType, keywords, suffix, mapping;
 				if (side == 'front') {
 					cardName = card['Name'];
 					cardType = card['Type'] + '';
 					keywords = card['Keywords'];
-					traits = card['Traits'];
 					suffix = '';
 					mapping = [
 						// Convert from member name in xml file to member name in eon file
 						// [eon, xml]
-						['CollectionNumber', 'Card Number'],
 						['Name', 'Name'],
 						['Unique', 'Unique'],
 						['Template', 'Sphere'],
@@ -375,9 +373,9 @@ function run(progress, target, filename, icons) {
 						['Shadow', 'Shadow'],
 						['Flavour', 'Flavour'],
 						['Story', 'Flavour'],
-						['Artist-external', 'Artist'],  // old plugin
-						['Artist', 'Artist'],  // new plugin
+						['Artist', 'Artist'],
 						['Adventure', 'Adventure'],
+						['CollectionNumberCustom', 'Card Number'],
 						['CollectionInfo', 'Version']
 					];
 					if (doubleSideTypes.indexOf(cardType) > -1) {
@@ -388,8 +386,7 @@ function run(progress, target, filename, icons) {
 							['StoryBack', 'BFlavour'],
 							['VictoryBack', 'BVictory Points'],
 							['OptionRightBack', 'BVictory Points'],
-							['ArtistBack-external', 'BArtist'],  // old plugin
-							['ArtistBack', 'BArtist']  // new plugin
+							['ArtistBack', 'BArtist']
 						]);
 					}
 				}
@@ -397,12 +394,10 @@ function run(progress, target, filename, icons) {
 					cardName = card['BName'];
 					cardType = card['BType'] + '';
 					keywords = card['BKeywords'];
-					traits = card['BTraits'];
 					suffix = '-2';
 					mapping = [
 						// Convert from member name in xml file to member name in eon file
 						// [eon, xml]
-						['CollectionNumber', 'Card Number'],
 						['Name', 'BName'],
 						['Unique', 'BUnique'],
 						['Template', 'BSphere'],
@@ -425,9 +420,9 @@ function run(progress, target, filename, icons) {
 						['Shadow', 'BShadow'],
 						['Flavour', 'BFlavour'],
 						['Story', 'BFlavour'],
-						['Artist-external', 'BArtist'],  // old plugin
-						['Artist', 'BArtist'],  // new plugin
+						['Artist', 'BArtist'],
 						['Adventure', 'Adventure'],
+						['CollectionNumberCustom', 'Card Number'],
 						['CollectionInfo', 'Version']
 					];
 				}
@@ -471,6 +466,14 @@ function run(progress, target, filename, icons) {
 					else if (['Text', 'BText'].indexOf(nXml + '') > -1) {
 						if (keywords) {
 							vXml = keywords + '\n\n' + vXml;
+						}
+					}
+					else if (nXml == 'Card Number') {
+						if ((sides.length > 1) && (side == 'front')) {
+							vXml = vXml + 'a';
+						}
+						else if ((sides.length > 1) && (side == 'back')) {
+							vXml = vXml + 'b';
 						}
 					}
 					else if (nXml == 'Adventure') {
@@ -882,7 +885,7 @@ function run(progress, target, filename, icons) {
 					simple_back = true;
 				}
 
-				let fname = (Array(4 - (card['Card Number'] + '').length).join('0') + card['Card Number'] + '-' + copy + '-' +
+				let fname = (Array(Math.max(0, 4 - (card['Card Number'] + '').length)).join('0') + card['Card Number'] + '-' + copy + '-' +
 					back + '-' + escapeFileName(card['Name']) + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix;
 				progress.status = fname;
 				ResourceKit.writeGameComponentToFile(new File(getProjectMember('Cards/').file, fname + '.' + setID + '.' + lang + '.eon'), newCard);
@@ -999,6 +1002,7 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 	vXml += '';
 	vXml = vXml.replace(/ +(?=\n|$)/g, '');
 	vXml = vXml.replace(/\n+$/g, '');
+	vXml = vXml.replace(/\[nobr\]/ig, '\u00a0');
 	vXml = vXml.replace(/\[inline\]\n\n/ig, ' ');
 	vXml = vXml.replace(/\[inline\]/ig, '');
 
@@ -1143,7 +1147,6 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 	vXml = vXml.replace(/\[\/red\]/ig, '</red>');
 	vXml = vXml.replace(/\[space\]/ig, '<hs>');
 	vXml = vXml.replace(/\[tab\]/ig, '\t');
-	vXml = vXml.replace(/\[nobr\]/ig, '\u00a0');
 	vXml = vXml.replace(/\[lotr ([0-9\.]+)\]/ig, '<lotr $1>');
 	vXml = vXml.replace(/\[\/lotr\]/ig, '</lotr>');
 	vXml = vXml.replace(/\[size ([0-9\.]+)\]/ig, '</size><size $1>');
