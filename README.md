@@ -132,6 +132,7 @@ Additionally, if you specified `octgn_destination_path`, all `set.xml` files for
 - `[tab]`: tab symbol
 - `[nobr]`: non-breakable space
 - `[inline]`: put it at the end of the `Keywords` field, to place the keywords on the same line as the first line of text
+- `[name]`: actual card name
 - `[lsb]`: [
 - `[rsb]`: ]
 - `[lquot]`: unmatched “

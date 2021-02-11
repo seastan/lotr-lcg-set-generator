@@ -427,8 +427,15 @@ def _clean_data(data):
     """ Clean data from the spreadsheet.
     """
     for row in data:
+        card_name = (row.get(CARD_NAME) or '').strip()
+        card_name_back = (row.get(CARD_SIDE_B) or '').strip()
         for key, value in row.items():
             if isinstance(value, str):
+                if key.startswith(BACK_PREFIX):
+                    value = value.replace('[name]', card_name_back)
+                else:
+                    value = value.replace('[name]', card_name)
+
                 value = value.strip()
                 value = value.replace("...", '…')
                 value = value.replace("---", '—')
