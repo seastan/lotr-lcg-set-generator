@@ -38,8 +38,8 @@ MAX_COLUMN_NUMBER = 100
 
 # Name, Traits:Keywords, Victory Points, Text:Flavour, Side B,
 # Traits:Keywords, Victory Points, Text:Flavour, Adventure
-TRANSLATION_RANGES = ['G{}:G{}', 'K{}:L{}', 'U{}:U{}', 'W{}:Y{}', 'AD{}:AD{}',
-                      'AH{}:AI{}', 'AR{}:AR{}', 'AT{}:AV{}', 'BC{}:BC{}']
+TRANSLATION_RANGES = ['H{}:H{}', 'L{}:M{}', 'V{}:V{}', 'X{}:Z{}', 'AE{}:AE{}',
+                      'AI{}:AJ{}', 'AS{}:AS{}', 'AU{}:AW{}', 'BD{}:BD{}']
 
 SET_ID = 'GUID'
 SET_NAME = 'Name'
