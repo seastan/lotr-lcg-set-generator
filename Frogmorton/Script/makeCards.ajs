@@ -9,11 +9,11 @@ importClass(org.w3c.dom.Element);
 importClass(org.w3c.dom.Node);
 importClass(org.w3c.dom.NodeList);
 
-var doubleSideTypes = ['Presentation', 'Quest', 'Rules', 'Contract'];
+var doubleSideTypes = ['Campaign', 'Presentation', 'Quest', 'Rules', 'Contract'];
 var landscapeTypes = ['Encounter Side Quest', 'Player Side Quest', 'Quest'];
 var playerTypes = ['Ally', 'Attachment', 'Event', 'Hero', 'Player Side Quest'];
 var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Side Quest'];
-var nonUniqueTypes = ['Encounter Side Quest', 'Event', 'Contract', 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery'];
+var nonUniqueTypes = ['Campaign', 'Encounter Side Quest', 'Event', 'Contract', 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery'];
 
 var portraitRegion = {};
 portraitRegion['Ally'] = '87,0,326,330';
@@ -199,6 +199,9 @@ var translate = {};
 translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado', 'Polish': 'Sprzymierzeniec', 'Italian': 'Alleato'};
 translate['Attachment'] = {'English': 'Attachment', 'French': 'Attachement', 'German': 'Verst\u00e4rkung', 'Spanish': 'Vinculada', 'Polish': 'Dodatek',
 	'Italian': 'Aggregato'};
+translate['Boon'] = {'English': 'Boon', 'French': 'Avantage', 'German': 'Gunst', 'Spanish': 'Ayuda', 'Polish': '\u0141aska', 'Italian': 'Vantaggio'};
+translate['Burden'] = {'English': 'Burden', 'French': 'Fardeau', 'German': 'B\u00fcrde', 'Spanish': 'Carga', 'Polish': 'Brzemi\u0119', 'Italian': 'Svantaggio'};
+translate['Campaign'] = {'English': 'Campaign', 'French': 'Campagne', 'German': 'Kampagne', 'Spanish': 'Campa\u00f1a', 'Polish': 'Kampania', 'Italian': 'Campagna'};
 translate['Contract'] = {'English': 'Contract', 'French': 'Contrat', 'German': 'Abkommen', 'Spanish': 'Contrato', 'Polish': 'Kontrakt', 'Italian': 'Contratto'};
 translate['Encounter Side Quest'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria',
 	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria'};
@@ -342,10 +345,11 @@ function run(progress, target, filename, icons) {
 			}
 			for (let idx = 0; idx < sides.length; idx++) {
 				let side = sides[idx];
-				let cardName, cardType, keywords, suffix, mapping;
+				let cardName, cardType, cardSphere, keywords, suffix, mapping;
 				if (side == 'front') {
 					cardName = card['Name'];
 					cardType = card['Type'] + '';
+					cardSphere = card['Sphere'] + '';
 					keywords = card['Keywords'];
 					suffix = '';
 					mapping = [
@@ -375,6 +379,7 @@ function run(progress, target, filename, icons) {
 						['Story', 'Flavour'],
 						['Artist', 'Artist'],
 						['Adventure', 'Adventure'],
+						['Cycle', 'Adventure'],
 						['CollectionNumberCustom', 'Card Number'],
 						['CollectionInfo', 'Version']
 					];
@@ -393,6 +398,7 @@ function run(progress, target, filename, icons) {
 				else {
 					cardName = card['BName'];
 					cardType = card['BType'] + '';
+					cardSphere = card['BSphere'] + '';
 					keywords = card['BKeywords'];
 					suffix = '-2';
 					mapping = [
@@ -422,6 +428,7 @@ function run(progress, target, filename, icons) {
 						['Story', 'BFlavour'],
 						['Artist', 'BArtist'],
 						['Adventure', 'Adventure'],
+						['Cycle', 'Adventure'],
 						['CollectionNumberCustom', 'Card Number'],
 						['CollectionInfo', 'Version']
 					];
@@ -689,6 +696,10 @@ function run(progress, target, filename, icons) {
 							s.set('Collection', convertIconName(selectedIcon));
 						}
 					}
+				}
+
+				if (['Boon', 'Burden'].indexOf(cardSphere) > -1) {
+					s.set('Subtype', updateVafthrudnir(translate[cardSphere][lang].toUpperCase(), 3.515));
 				}
 
 				if (cardType in portraitRegion) {

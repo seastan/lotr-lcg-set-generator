@@ -86,19 +86,21 @@ CARD_SCRATCH = '_Scratch'
 MAX_COLUMN = '_Max Column'
 ROW_COLUMN = '_Row'
 
-CARD_TYPES = ('Ally', 'Attachment', 'Contract', 'Enemy',
+CARD_TYPES = ('Ally', 'Attachment', 'Campaign', 'Contract', 'Enemy',
               'Encounter Side Quest', 'Event', 'Hero', 'Location', 'Objective',
               'Objective Ally', 'Player Side Quest', 'Presentation', 'Quest',
               'Rules', 'Treachery')
-CARD_TYPES_DOUBLESIDE_MANDATORY = ('Presentation', 'Quest', 'Rules')
-CARD_TYPES_DOUBLESIDE_OPTIONAL = ('Contract', 'Presentation', 'Quest', 'Rules')
+CARD_TYPES_DOUBLESIDE_MANDATORY = ('Campaign', 'Presentation', 'Quest',
+                                   'Rules')
+CARD_TYPES_DOUBLESIDE_OPTIONAL = ('Campaign', 'Contract', 'Presentation',
+                                  'Quest', 'Rules')
 CARD_TYPES_PLAYER = ('Ally', 'Attachment', 'Contract', 'Event', 'Hero',
                      'Player Side Quest')
 CARD_TYPES_PLAYER_DECK = ('Ally', 'Attachment', 'Event', 'Player Side Quest')
-CARD_TYPES_ENCOUNTER_SET = ('Enemy', 'Encounter Side Quest', 'Location',
-                            'Objective', 'Objective Ally', 'Quest',
+CARD_TYPES_ENCOUNTER_SET = ('Campaign', 'Enemy', 'Encounter Side Quest',
+                            'Location', 'Objective', 'Objective Ally', 'Quest',
                             'Treachery')
-CARD_TYPES_ADVENTURE = ('Objective', 'Objective Ally', 'Quest')
+CARD_TYPES_ADVENTURE = ('Campaign', 'Objective', 'Objective Ally', 'Quest')
 
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
 MAGICK_COMMAND_PDF = '"{}" convert "{}\\*.jpg" "{}"'
@@ -1154,8 +1156,16 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
                     else row[CARD_ADVENTURE])
         type_name = ('Setup' if card_type in ('Presentation', 'Rules')
                      else card_type)
-        victory_points = (None if card_type in ('Presentation', 'Rules')
-                          else _handle_int_str(row[CARD_VICTORY]))
+
+        if card_type in ('Presentation', 'Rules'):
+            victory_points = None
+        elif card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL:
+            victory_points = (
+                _handle_int_str(row[CARD_VICTORY])
+                or _handle_int_str(row[BACK_PREFIX + CARD_VICTORY]))
+        else:
+            victory_points = _handle_int_str(row[CARD_VICTORY])
+
         additional_encounter_sets = [
             s.strip() for s in (row[CARD_ADDITIONAL_ENCOUNTER_SETS] or ''
                                 ).split(',')
