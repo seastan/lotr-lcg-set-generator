@@ -1408,14 +1408,13 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
 
     for card in root[0]:
         card_type = _find_properties(card, 'Type')
-        if not card_type:
-            logging.error('[%s, %s] ERROR: Skipping a card without card type',
-                          set_name, lang)
-            continue
-
-        card_type = card_type[0].attrib['value']
+        card_type = card_type and card_type[0].attrib['value']
+        card_sphere = _find_properties(card, 'Sphere')
+        card_sphere = card_sphere and card_sphere[0].attrib['value']
         encounter_set = _find_properties(card, 'Encounter Set')
-        if card_type != 'Quest' and encounter_set:
+
+        if (card_type not in ('Campaign', 'Quest')
+                and card_sphere not in ('Boon', 'Burden') and encounter_set):
             encounter_set = encounter_set[0].attrib['value']
             encounter_cards[card.attrib['id']] = encounter_set
             prop = _get_property(card, 'Encounter Set Number')

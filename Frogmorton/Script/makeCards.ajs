@@ -225,6 +225,13 @@ translate['Victory'] = {'English': 'Victory', 'French': 'Victoire', 'German': 'S
 translate['Page'] = {'English': 'Page', 'French': 'Page', 'German': 'Seite', 'Spanish': 'P\u00e1gina', 'Polish': 'Strona', 'Italian': 'Pagina'};
 translate['Side'] = {'English': 'Side', 'French': 'Face', 'German': 'Seite', 'Spanish': 'Lado', 'Polish': 'Strona', 'Italian': 'Lato'};
 
+translate['Objective Hero'] = {'English': 'Objective-Hero', 'French': '', 'German': '', 'Spanish': '', 'Polish': '', 'Italian': ''};
+translate['Objective Location'] = {'English': 'Objective-Location', 'French': '', 'German': '', 'Spanish': '', 'Polish': '', 'Italian': ''};
+translate['Ship Enemy'] = {'English': 'Ship-Enemy', 'French': '', 'German': '', 'Spanish': '', 'Polish': '', 'Italian': ''};
+translate['Ship Objective'] = {'English': 'Ship-Objective', 'French': '', 'German': '', 'Spanish': '', 'Polish': '', 'Italian': ''};
+translate['Setup'] = {'English': 'Setup', 'French': '', 'German': '', 'Spanish': '', 'Polish': '', 'Italian': ''};
+translate['Treasure'] = {'English': 'Treasure', 'French': '', 'German': '', 'Spanish': '', 'Polish': '', 'Italian': ''};
+
 Thread.busyWindow(main, 'Updating cards...', true);
 
 function main(progress, target) {
@@ -698,10 +705,6 @@ function run(progress, target, filename, icons) {
 					}
 				}
 
-				if (['Boon', 'Burden'].indexOf(cardSphere) > -1) {
-					s.set('Subtype', updateVafthrudnir(translate[cardSphere][lang].toUpperCase(), 3.515));
-				}
-
 				if (cardType in portraitRegion) {
 					s.set('Portrait-portrait-clip-region', portraitRegion[cardType]);
 					if (doubleSideTypes.indexOf(cardType) > -1) {
@@ -844,12 +847,21 @@ function run(progress, target, filename, icons) {
 						}
 					}
 				}
-				if (card['Encounter Set Number']) {
-					s.set('EncounterSetNumber', parseInt(card['Encounter Set Number']) + j);
+
+				if (['Boon', 'Burden'].indexOf(cardSphere) > -1) {
+					s.set('Subtype', updateVafthrudnir(translate[cardSphere][lang].toUpperCase(), 3.515));
+					s.set('EncounterSetNumber', 0);
+					s.set('EncounterSetTotal', 0);
 				}
-				if (card['Encounter Set Total']) {
-					s.set('EncounterSetTotal', card['Encounter Set Total']);
+				else {
+					if (card['Encounter Set Number']) {
+						s.set('EncounterSetNumber', parseInt(card['Encounter Set Number']) + j);
+					}
+					if (card['Encounter Set Total']) {
+						s.set('EncounterSetTotal', card['Encounter Set Total']);
+					}
 				}
+
 				if (card['Removed for Easy Mode'] && j >= parseInt(card['Quantity']) - parseInt(card['Removed for Easy Mode'])) {
 					s.set('Difficulty', 'Gold');
 				}
@@ -1171,7 +1183,7 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 	vXml = vXml.replace(/<lsb>/ig, '[');
 	vXml = vXml.replace(/<rsb>/ig, ']');
 
-	vXml = vXml.replace(/([^:;,.?!\u2026]) (<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<uni>)/g, '$1\u00a0$2');
+	vXml = vXml.replace(/([^:;,.?!\u2026]) (<uni>|<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<bag>|<fel>|<mas>|<hon>|<hof>|<hb>|<hw>|<sai>|<eos>|<per>|<pp>)/g, '$1\u00a0$2');
 	vXml = vXml.replace(/([0-9]+) /g, '$1\u00a0');
 	vXml = vXml.replace(/ ([0-9]+)([:;,.?!\u2026])/g, '\u00a0$1$2');
 	vXml = vXml.replace(/(^|[ \n"\u201c\u201d\(])([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,4})([:;,.?!"\u2026\u201c\u201d\)]*) (["\u201c\u201d\(]*)([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,4})([:;,.?!"\u2026\u201c\u201d\)]+)(\n|$)/g, '$1$2$3\u00a0$4$5$6$7');
