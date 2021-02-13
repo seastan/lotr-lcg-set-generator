@@ -1413,7 +1413,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
         card_sphere = card_sphere and card_sphere[0].attrib['value']
         encounter_set = _find_properties(card, 'Encounter Set')
 
-        if (card_type not in ('Campaign', 'Quest')
+        if (card_type not in ('Campaign', 'Quest', 'Rules')
                 and card_sphere not in ('Boon', 'Burden') and encounter_set):
             encounter_set = encounter_set[0].attrib['value']
             encounter_cards[card.attrib['id']] = encounter_set
