@@ -1125,6 +1125,15 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
         else:
             sphere = 'None'
 
+        if sphere == 'Boon':
+            sphere = 'Neutral'
+            subtype_name = 'Boon'
+        elif sphere == 'Burden':
+            sphere = 'None'
+            subtype_name = 'Burden'
+        else:
+            subtype_name = None
+
         if row.get(CARD_DOUBLESIDE) is not None:
             card_side = row[CARD_DOUBLESIDE]
         elif (row[CARD_SIDE_B] is not None and
@@ -1250,6 +1259,9 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
                            or None,
             'stage_letter': stage_letter,
             'subtitle': subtitle,
+            'subtype_code': (subtype_name and subtype_name.lower().replace(' ', '-')
+                             or None),
+            'subtype_name': subtype_name,
             'threat': threat,
             'threat_strength': _handle_int_str(row[CARD_THREAT]),
             'victory_points': victory_points,
