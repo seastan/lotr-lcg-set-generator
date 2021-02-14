@@ -89,17 +89,17 @@ ROW_COLUMN = '_Row'
 CARD_TYPES = ('Ally', 'Attachment', 'Campaign', 'Contract', 'Enemy',
               'Encounter Side Quest', 'Event', 'Hero', 'Location', 'Objective',
               'Objective Ally', 'Player Side Quest', 'Presentation', 'Quest',
-              'Rules', 'Treachery')
+              'Rules', 'Treachery', 'Treasure')
 CARD_TYPES_DOUBLESIDE_MANDATORY = ('Campaign', 'Presentation', 'Quest',
                                    'Rules')
 CARD_TYPES_DOUBLESIDE_OPTIONAL = ('Campaign', 'Contract', 'Presentation',
                                   'Quest', 'Rules')
 CARD_TYPES_PLAYER = ('Ally', 'Attachment', 'Contract', 'Event', 'Hero',
-                     'Player Side Quest')
+                     'Player Side Quest', 'Treasure')
 CARD_TYPES_PLAYER_DECK = ('Ally', 'Attachment', 'Event', 'Player Side Quest')
 CARD_TYPES_ENCOUNTER_SET = ('Campaign', 'Enemy', 'Encounter Side Quest',
                             'Location', 'Objective', 'Objective Ally', 'Quest',
-                            'Treachery')
+                            'Treachery', 'Treasure')
 CARD_TYPES_ADVENTURE = ('Campaign', 'Objective', 'Objective Ally', 'Quest')
 
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
@@ -986,6 +986,9 @@ def generate_ringsdb_csv(set_id, set_name):  # pylint: disable=R0912
                 continue
 
             card_type = row[CARD_TYPE]
+            if row[CARD_SPHERE] == 'Boon':
+                card_type = 'Treasure'
+
             if card_type not in CARD_TYPES_PLAYER:
                 continue
 
@@ -1001,7 +1004,10 @@ def generate_ringsdb_csv(set_id, set_name):  # pylint: disable=R0912
             code_card_number = (str(int(row[CARD_NUMBER])).zfill(3)
                                 if _is_positive_or_zero_int(row[CARD_NUMBER])
                                 else '000')
-            sphere = 'Neutral' if card_type == 'Contract' else row[CARD_SPHERE]
+            if card_type in ('Contract', 'Treasure'):
+                sphere = 'Neutral'
+            else:
+                sphere = row[CARD_SPHERE]
 
             if card_type == 'Hero':
                 cost = None
@@ -1112,7 +1118,7 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
 
         if card_type in ('Presentation', 'Rules'):
             sphere = 'None'
-        elif card_type == 'Contract':
+        elif card_type in ('Contract', 'Treasure'):
             sphere = 'Neutral'
         elif row[CARD_SPHERE] is not None:
             sphere = row[CARD_SPHERE]
@@ -1413,7 +1419,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
         card_sphere = card_sphere and card_sphere[0].attrib['value']
         encounter_set = _find_properties(card, 'Encounter Set')
 
-        if (card_type not in ('Campaign', 'Quest', 'Rules')
+        if (card_type not in ('Campaign', 'Quest', 'Rules', 'Treasure')
                 and card_sphere not in ('Boon', 'Burden') and encounter_set):
             encounter_set = encounter_set[0].attrib['value']
             encounter_cards[card.attrib['id']] = encounter_set

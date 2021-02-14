@@ -11,7 +11,7 @@ importClass(org.w3c.dom.NodeList);
 
 var doubleSideTypes = ['Campaign', 'Presentation', 'Quest', 'Rules', 'Contract'];
 var landscapeTypes = ['Encounter Side Quest', 'Player Side Quest', 'Quest'];
-var playerTypes = ['Ally', 'Attachment', 'Event', 'Hero', 'Player Side Quest'];
+var playerTypes = ['Ally', 'Attachment', 'Event', 'Hero', 'Player Side Quest', 'Treasure'];
 var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Side Quest'];
 var nonUniqueTypes = ['Campaign', 'Encounter Side Quest', 'Event', 'Contract', 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery'];
 
@@ -40,6 +40,7 @@ bodyRegion['Location'] = '56,346,301,142';
 bodyRegion['Objective'] = '65,346,283,146';
 bodyRegion['Objective Ally'] = '65,346,283,146';
 bodyRegion['Treachery'] = '65,356,283,135';
+bodyRegion['Treasure'] = '57,347,299,144';  // T.B.D.
 
 bodyRegion['Encounter Side Quest'] = '51,249,461,114';
 bodyRegion['Player Side Quest'] = '51,251,461,114';
@@ -55,6 +56,7 @@ traitRegion['Location'] = '56,326,301,20';
 traitRegion['Objective'] = '65,326,283,20';
 traitRegion['Objective Ally'] = '65,326,283,20';
 traitRegion['Treachery'] = '65,336,283,20';
+traitRegion['Treasure'] = '85,327,243,20';  // T.B.D.
 
 var nameRegion = {};
 nameRegion['Ally'] = '100,329,213,20';
@@ -212,10 +214,16 @@ translate['Location'] = {'English': 'Location', 'French': 'Lieu', 'German': 'Ort
 translate['Objective'] = {'English': 'Objective', 'French': 'Objectif', 'German': 'Ziel', 'Spanish': 'Objetivo', 'Polish': 'Cel', 'Italian': 'Obiettivo'};
 translate['Objective Ally'] = {'English': 'Objective-Ally', 'French': 'Objectif-Alli\u00e9', 'German': 'Ziel-Verb\u00fcndeter', 'Spanish': 'Objetivo-Aliado',
 	'Polish': 'Cel-Sprzymierzeniec', 'Italian': 'Obiettivo-Alleato'};
+translate['Objective Hero'] = {'English': 'Objective-Hero', 'French': 'Objectif-H\u00e9ros', 'German': 'Ziel-Held', 'Spanish': 'H\u00e9roe-Objetivo', 'Polish': 'Cel-Bohater', 'Italian': 'Eroe-Obiettivo'};
+translate['Objective Location'] = {'English': 'Objective-Location', 'French': 'Objectif-Lieu', 'German': 'Ziel-Ort', 'Spanish': 'Lugar-Objetivo', 'Polish': 'Cel-Obszar', 'Italian': 'Luogo-Obiettivo'};
 translate['Player Side Quest'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria',
 	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria'};
 translate['Quest'] = {'English': 'Quest', 'French': 'Qu\u00eate', 'German': 'Abenteuer', 'Spanish': 'Misi\u00f3n', 'Polish': 'Wyprawa', 'Italian': 'Ricerca'};
+translate['Setup'] = {'English': 'Setup', 'French': 'Pr\u00e9paration', 'German': 'Vorbereitung', 'Spanish': 'Preparaci\u00f3n', 'Polish': 'Przygotowanie', 'Italian': 'Preparazione'};
+translate['Ship Enemy'] = {'English': 'Ship-Enemy', 'French': 'Navire-Ennemi', 'German': 'Schiff-Gegner', 'Spanish': 'Barco-Enemigo', 'Polish': 'Statek-Wr\u00f3g', 'Italian': 'Nave-Nemico'};
+translate['Ship Objective'] = {'English': 'Ship-Objective', 'French': 'Navire-Objectif', 'German': 'Schiff-Ziel', 'Spanish': 'Barco-Objetivo', 'Polish': 'Statek-Cel', 'Italian': 'Nave-Obiettivo'};
 translate['Treachery'] = {'English': 'Treachery', 'French': 'Tra\u00eetrise', 'German': 'Verrat', 'Spanish': 'Traici\u00f3n', 'Polish': 'Podst\u0119p', 'Italian': 'Perfidia'};
+translate['Treasure'] = {'English': 'Treasure', 'French': 'Tr\u00e9sor', 'German': 'Schatz', 'Spanish': 'Tesoro', 'Polish': 'Skarb', 'Italian': 'Tesoro'};
 translate['Encounter Keyword'] = {'English': 'Encounter.', 'French': 'Rencontre.', 'German': 'Begegnung.', 'Spanish': 'Encuentro.', 'Polish': 'Spotkanie.',
 	'Italian': 'Incontro.'};
 translate['Illustrator'] = {'English': 'Illus.', 'French': 'Illus.', 'German': 'Illus.', 'Spanish': 'Ilus.', 'Polish': 'Illus.', 'Italian': 'Illus.'};
@@ -224,13 +232,6 @@ translate['Unknown Artist'] = {'English': 'Unknown Artist', 'French': 'Artiste i
 translate['Victory'] = {'English': 'Victory', 'French': 'Victoire', 'German': 'Sieg', 'Spanish': 'Victoria', 'Polish': 'Zwyci\u0119stwo', 'Italian': 'Vittoria'};
 translate['Page'] = {'English': 'Page', 'French': 'Page', 'German': 'Seite', 'Spanish': 'P\u00e1gina', 'Polish': 'Strona', 'Italian': 'Pagina'};
 translate['Side'] = {'English': 'Side', 'French': 'Face', 'German': 'Seite', 'Spanish': 'Lado', 'Polish': 'Strona', 'Italian': 'Lato'};
-
-translate['Objective Hero'] = {'English': 'Objective-Hero', 'French': '', 'German': '', 'Spanish': '', 'Polish': '', 'Italian': ''};
-translate['Objective Location'] = {'English': 'Objective-Location', 'French': '', 'German': '', 'Spanish': '', 'Polish': '', 'Italian': ''};
-translate['Ship Enemy'] = {'English': 'Ship-Enemy', 'French': '', 'German': '', 'Spanish': '', 'Polish': '', 'Italian': ''};
-translate['Ship Objective'] = {'English': 'Ship-Objective', 'French': '', 'German': '', 'Spanish': '', 'Polish': '', 'Italian': ''};
-translate['Setup'] = {'English': 'Setup', 'French': '', 'German': '', 'Spanish': '', 'Polish': '', 'Italian': ''};
-translate['Treasure'] = {'English': 'Treasure', 'French': '', 'German': '', 'Spanish': '', 'Polish': '', 'Italian': ''};
 
 Thread.busyWindow(main, 'Updating cards...', true);
 
@@ -376,7 +377,6 @@ function run(progress, target, filename, icons) {
 						['Defense', 'Defense'],
 						['HitPoints', 'Health'],
 						['Progress', 'Quest Points'],
-						['Victory', 'Victory Points'],
 						['OptionRight', 'Victory Points'],
 						['OptionSpecial', 'Special Icon'],
 						['Rules', 'Text'],
@@ -396,7 +396,6 @@ function run(progress, target, filename, icons) {
 							['RulesBack', 'BText'],
 							['FlavourBack', 'BFlavour'],
 							['StoryBack', 'BFlavour'],
-							['VictoryBack', 'BVictory Points'],
 							['OptionRightBack', 'BVictory Points'],
 							['ArtistBack', 'BArtist']
 						]);
@@ -425,7 +424,6 @@ function run(progress, target, filename, icons) {
 						['Defense', 'BDefense'],
 						['HitPoints', 'BHealth'],
 						['Progress', 'BQuest Points'],
-						['Victory', 'BVictory Points'],
 						['OptionRight', 'BVictory Points'],
 						['OptionSpecial', 'BSpecial Icon'],
 						['Rules', 'BText'],
@@ -490,7 +488,7 @@ function run(progress, target, filename, icons) {
 							vXml = vXml + 'b';
 						}
 					}
-					else if (nXml == 'Adventure') {
+					else if ((nXml == 'Adventure') && (cardType != 'Campaign')) {
 						vXml = vXml.toUpperCase();
 					}
 
@@ -538,11 +536,11 @@ function run(progress, target, filename, icons) {
 				}
 
 				if (cardType == 'Presentation') {
-					if (s.get('Victory').search('/') > -1) {
+					if (s.get('OptionRight').search('/') > -1) {
 						s.set('LRL-Page', translate['Page'][lang]);
 						s.set('LRL-PageOf', '<bs></size><size 3> </size><size 7>/</size><size 3> </size><size 7><bs>');
-						s.set('PageNumber', s.get('Victory').split('/')[0]);
-						s.set('PageTotal', s.get('Victory').split('/')[1]);
+						s.set('PageNumber', s.get('OptionRight').split('/')[0]);
+						s.set('PageTotal', s.get('OptionRight').split('/')[1]);
 					}
 					else {
 						s.set('PageNumber', 0);
@@ -572,17 +570,17 @@ function run(progress, target, filename, icons) {
 					s.set('Artist', ' ');
 				}
 				else if (cardType == 'Rules') {
-					if (s.get('Victory').search('/') > -1) {
+					if (s.get('OptionRight').search('/') > -1) {
 						s.set('LRL-Page', translate['Page'][lang]);
 						s.set('LRL-PageOf', '<bs></size><size 3> </size><size 7>/</size><size 3> </size><size 7><bs>');
-						s.set('PageNumber', s.get('Victory').split('/')[0]);
-						s.set('PageTotal', s.get('Victory').split('/')[1]);
+						s.set('PageNumber', s.get('OptionRight').split('/')[0]);
+						s.set('PageTotal', s.get('OptionRight').split('/')[1]);
 					}
 					else {
 						s.set('PageNumber', 0);
 						s.set('PageTotal', 0);
 					}
-					if (s.get('VictoryBack') == '') {
+					if (s.get('OptionRightBack') == '') {
 						s.set('PageBackShow', 'false');
 					}
 
@@ -850,16 +848,13 @@ function run(progress, target, filename, icons) {
 
 				if (['Boon', 'Burden'].indexOf(cardSphere) > -1) {
 					s.set('Subtype', updateVafthrudnir(translate[cardSphere][lang].toUpperCase(), 3.515));
-					s.set('EncounterSetNumber', 0);
-					s.set('EncounterSetTotal', 0);
 				}
-				else {
-					if (card['Encounter Set Number']) {
-						s.set('EncounterSetNumber', parseInt(card['Encounter Set Number']) + j);
-					}
-					if (card['Encounter Set Total']) {
-						s.set('EncounterSetTotal', card['Encounter Set Total']);
-					}
+
+				if (card['Encounter Set Number']) {
+					s.set('EncounterSetNumber', parseInt(card['Encounter Set Number']) + j);
+				}
+				if (card['Encounter Set Total']) {
+					s.set('EncounterSetTotal', card['Encounter Set Total']);
 				}
 
 				if (card['Removed for Easy Mode'] && j >= parseInt(card['Quantity']) - parseInt(card['Removed for Easy Mode'])) {
@@ -998,7 +993,7 @@ function updateVafthrudnir(value, lowerSize) {
 		else if (tag) {
 			res += ch;
 		}
-		else if ((ch == ch.toLowerCase()) && !ch.match(/[&0-9;:,.!? \-\u2013\(\)\u00a0]/)) {
+		else if ((ch == ch.toLowerCase()) && !ch.match(/[&0-9;:,.!?\-\u2013\(\)'\u2019"\u201c\u201d \u00a0]/)) {
 			if (ch.match(/[a-z&0-9;:,.!? ]/i)) {
 				res += ch.toUpperCase();
 			}
@@ -1043,7 +1038,12 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 		return updateVafthrudnir(vXml, 3.69);
 	}
 	else if (nXml == 'Adventure') {
-		return updateVafthrudnir(vXml, 3.69);
+		if (cardType == 'Campaign') {
+			return updateVafthrudnir(vXml, 6.5);
+		}
+		else {
+			return updateVafthrudnir(vXml, 3.69);
+		}
 	}
 
 	if (lang == 'English') {
