@@ -439,6 +439,13 @@ function run(progress, target, filename, icons) {
 					];
 				}
 
+				if ((cardSphere == 'Boon') && (['Ally', 'Hero', 'Player Side Quest'].indexOf(cardType) > -1)) {
+					continue;
+				}
+				else if ((cardSphere == 'Burden') && (['Enemy', 'Location', 'Encounter Side Quest'].indexOf(cardType) > -1)) {
+					continue;
+				}
+
 				progress.status = cardName;
 				let newCard = ResourceKit.getGameComponentFromFile(getProjectMember('Templates/' + cardType + '.eon').file, false);
 				let s = newCard.settings;
