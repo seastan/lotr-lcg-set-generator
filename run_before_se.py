@@ -8,7 +8,7 @@ import lotr
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 
 
-def main():
+def main():  # pylint: disable=R0912
     """ Main function.
     """
     timestamp = time.time()
@@ -28,6 +28,9 @@ def main():
     for set_id, set_name in sets:
         if conf['octgn_set_xml']:
             lotr.generate_octgn_set_xml(conf, set_id, set_name)
+
+        if conf['octgn_o8d']:
+            lotr.generate_octgn_o8d(conf, set_id, set_name)
 
         if conf['ringsdb_csv']:
             lotr.generate_ringsdb_csv(set_id, set_name)

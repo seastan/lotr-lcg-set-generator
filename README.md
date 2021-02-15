@@ -78,6 +78,7 @@ into the root folder of this repo.
   - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`)
   - `set_ids`: list of set IDs to work on (you can use `all` and `all_scratch` aliases to select all non-scratch and all scratch sets sutomatically)
   - `octgn_set_xml`: creating set.xml files for OCTGN (true or false)
+  - `octgn_o8d`: creating .o8d files for OCTGN (true or false)
   - `ringsdb_csv`: creating CSV files for RingsDB (true or false)
   - `hallofbeorn_json`: creating JSON files for Hall of Beorn (true or false)
   - `outputs`: list of image outputs for each language (if you added or uncommented new outputs, you also need to set `reprocess_all` to `true`)

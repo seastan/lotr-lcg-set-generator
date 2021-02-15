@@ -897,6 +897,16 @@ def generate_octgn_set_xml(conf, set_id, set_name):
                  set_name, round(time.time() - timestamp, 3))
 
 
+def generate_octgn_o8d(conf, set_id, set_name):
+    """ Generate .o8d files for OCTGN.
+    """
+    logging.info('[%s] Generating .o8d files for OCTGN...', set_name)
+    timestamp = time.time()
+
+    logging.info('[%s] ...Generating .o8d files for OCTGN (%ss)',
+                 set_name, round(time.time() - timestamp, 3))
+
+
 def _update_card_text(text):  # pylint: disable=R0915
     """ Update card text for RingsDB and Hall of Beorn.
     """
@@ -2726,8 +2736,10 @@ def _create_octgn_archive(temp_path):
             break
 
 
-def _prepare_updated_o8c(temp_path, updates):
+def _prepare_updated_o8c(temp_path, updates=None):
     """ Copy all updated o8c files to the temporary folder.
+
+    NOT USED.
     """
     for _, folders, _ in os.walk(OUTPUT_OCTGN_PATH):
         for folder in folders:
@@ -2735,10 +2747,10 @@ def _prepare_updated_o8c(temp_path, updates):
                     os.path.join(OUTPUT_OCTGN_PATH, folder)):
                 for filename in filenames:
                     parts = filename.split('.')
-                    if len(parts) != 3:
+                    if len(parts) != 3 or parts[-1] != 'o8c':
                         continue
 
-                    if (parts[0], parts[1]) in updates:
+                    if not updates or (parts[0], parts[1]) in updates:
                         shutil.copyfile(os.path.join(OUTPUT_OCTGN_PATH,
                                                      folder, filename),
                                         os.path.join(temp_path, filename))
@@ -2748,7 +2760,7 @@ def _prepare_updated_o8c(temp_path, updates):
         break
 
 
-def copy_octgn_outputs(conf, unzip=True, copy_o8c=False, updates=None):
+def copy_octgn_outputs(conf, unzip=True):
     """ Copy OCTGN outputs to the destination folder.
     """
     logging.info('Copying OCTGN outputs to the destination folder...')
@@ -2758,9 +2770,6 @@ def copy_octgn_outputs(conf, unzip=True, copy_o8c=False, updates=None):
     _create_folder(temp_path)
     _clear_folder(temp_path)
     _create_octgn_archive(temp_path)
-
-    if copy_o8c and updates:
-        _prepare_updated_o8c(temp_path, updates)
 
     for _, _, filenames in os.walk(temp_path):
         for filename in filenames:
