@@ -78,8 +78,10 @@ CARD_SIDE_B = 'Side B'
 CARD_EASY_MODE = 'Removed for Easy Mode'
 CARD_ADDITIONAL_ENCOUNTER_SETS = 'Additional Encounter Sets'
 CARD_ADVENTURE = 'Adventure'
+CARD_DECK_RULES = 'Deck Rules'
 CARD_SELECTED = 'Selected'
 CARD_CHANGED = 'Changed'
+CARD_SET_NAME = '_Set Name'
 CARD_DOUBLESIDE = '_Card Side'
 CARD_SCRATCH = '_Scratch'
 
@@ -146,6 +148,7 @@ OUTPUT_HALLOFBEORN_PATH = os.path.join('Output', 'HallOfBeorn')
 OUTPUT_MBPRINT_PATH = os.path.join('Output', 'MBPrint')
 OUTPUT_MPC_PATH = os.path.join('Output', 'MakePlayingCards')
 OUTPUT_OCTGN_PATH = os.path.join('Output', 'OCTGN')
+OUTPUT_OCTGNDECKS_PATH = os.path.join('Output', 'OCTGNDecks')
 OUTPUT_PDF_PATH = os.path.join('Output', 'PDF')
 OUTPUT_RINGSDB_PATH = os.path.join('Output', 'RingsDB')
 PROJECT_PATH = 'setGenerator.seproject'
@@ -156,6 +159,26 @@ TEMP_ROOT_PATH = 'Temp'
 TEMPLATES_SOURCE_PATH = os.path.join('Templates')
 TEMPLATES_PATH = os.path.join(PROJECT_FOLDER, 'Templates')
 XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
+
+O8D_TEMPLATE = """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<deck game="a21af4e8-be4b-4cda-a6b6-534f9717391f" sleeveid="0">
+  <section name="Hero" shared="False" />
+  <section name="Ally" shared="False" />
+  <section name="Attachment" shared="False" />
+  <section name="Event" shared="False" />
+  <section name="Side Quest" shared="False" />
+  <section name="Sideboard" shared="False" />
+  <section name="Quest" shared="True" />
+  <section name="Second Quest Deck" shared="True" />
+  <section name="Encounter" shared="True" />
+  <section name="Special" shared="True" />
+  <section name="Second Special" shared="True" />
+  <section name="Setup" shared="True" />
+  <section name="Staging Setup" shared="True" />
+  <section name="Active Setup" shared="True" />
+  <notes><![CDATA[]]></notes>
+</deck>
+"""
 
 SET_COLUMNS = {}
 CARD_COLUMNS = {}
@@ -489,6 +512,8 @@ def _update_data():
     """ Update card data from the spreadsheet.
     """
     for row in DATA:
+        row[CARD_SET_NAME] = SETS.get(row[CARD_SET], {}).get(SET_NAME)
+
         if row[CARD_SCRATCH] and row[CARD_SET] in FOUND_INTERSECTED_SETS:
             row[CARD_SET] = '[filtered set]'
 
@@ -897,11 +922,142 @@ def generate_octgn_set_xml(conf, set_id, set_name):
                  set_name, round(time.time() - timestamp, 3))
 
 
-def generate_octgn_o8d(conf, set_id, set_name):
+def _load_external_xml(url, sets, encounter_sets):
+    """ Load cards from an external XML file.
+    """
+    res = []
+    content = requests.get(url).content
+    root = ET.fromstring(content)
+    set_name = root.attrib['name']
+    if set_name not in sets:
+        return res
+
+    for card in root[0]:
+        row = {}
+        encounter_set = _find_properties(card, 'Encounter Set')
+        if not encounter_set:
+            continue
+
+        encounter_set = encounter_set[0].attrib['value']
+        if encounter_set not in encounter_sets:
+            continue
+
+        card_type = _find_properties(card, 'Type')
+        if not card_type:
+            continue
+
+        quantity = _find_properties(card, 'Quantity')
+        if not quantity:
+            continue
+
+        card_number = _find_properties(card, 'Card Number')
+        card_number = int(card_number[0].attrib['value']) if card_number else 0
+
+        row[CARD_ENCOUNTER_SET] = encounter_set
+        row[CARD_SET_NAME] = set_name
+        row[CARD_ID] = card.attrib['id']
+        row[CARD_NUMBER] = card_number
+        row[CARD_NAME] = card.attrib['name']
+        row[CARD_TYPE] = card_type[0].attrib['value']
+        row[CARD_QUANTITY] = quantity[0].attrib['value']
+        res.append(row)
+
+    return res
+
+
+def _append_cards(parent, cards):
+    """ Append card elements to the section element.
+    """
+    for i, card in enumerate(cards):
+        parent.text = '\n    '
+        element = ET.SubElement(parent, 'card')
+        element.text = card[CARD_NAME]
+        element.set('qty', str(int(card[CARD_QUANTITY])))
+        element.set('id', card[CARD_ID])
+        if i == len(cards) - 1:
+            element.tail = '\n  '
+        else:
+            element.tail = '\n    '
+
+
+def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914
     """ Generate .o8d files for OCTGN.
     """
     logging.info('[%s] Generating .o8d files for OCTGN...', set_name)
     timestamp = time.time()
+
+    rows = [row for row in DATA if row[CARD_SET] == set_id
+            and row[CARD_TYPE] == 'Quest'
+            and row[CARD_ADVENTURE] and row[CARD_ADVENTURE][0] != '[']
+    quests = {}
+    for row in rows:
+        quest = quests.setdefault(row[CARD_ADVENTURE],
+                                  {'name': row[CARD_ADVENTURE],
+                                   'sets': set([row[CARD_SET_NAME]]),
+                                   'encounter sets': set()})
+        if row[CARD_ENCOUNTER_SET]:
+            quest['encounter sets'].add(row[CARD_ENCOUNTER_SET])
+
+        if row[CARD_ADDITIONAL_ENCOUNTER_SETS]:
+            for encounter_set in [
+                    r.strip()
+                    for r in row[CARD_ADDITIONAL_ENCOUNTER_SETS].split(';')]:
+                quest['encounter sets'].add(encounter_set)
+
+        if row[CARD_DECK_RULES]:
+            if quest.get('rules'):
+                logging.warning(
+                    'WARNING: Duplicate deck rules for quest %s detected in '
+                    'row #%s%s, ignoring',
+                    row[CARD_ADVENTURE], row[ROW_COLUMN],
+                    ' (Scratch)' if row[CARD_SCRATCH] else '')
+            else:
+                quest['rules'] = row[CARD_DECK_RULES]
+
+    for quest in quests.values():
+        rules = [r.strip().split(':', 1)
+                 for r in quest.get('rules', '').split('\n')]
+        rules = {r[0].strip().lower():
+                 [i.strip() for i in r[1].strip().split(';')]
+                 for r in rules if len(r) == 2}
+        if rules.get('sets'):
+            quest['sets'].update(rules['sets'])
+
+        if rules.get('encounter sets'):
+            quest['encounter sets'].update(rules['encounter sets'])
+
+        cards = [r for r in DATA if r[CARD_SET_NAME] in quest['sets']
+                 and r[CARD_ENCOUNTER_SET] in quest['encounter sets']]
+        for url in rules.get('external xml', []):
+            cards.extend(_load_external_xml(url, quest['sets'],
+                                            quest['encounter sets']))
+
+        cards.sort(key=lambda row: (row[CARD_SET_NAME],
+                                    _is_positive_or_zero_int(row[CARD_NUMBER])
+                                    and row[CARD_NUMBER] or 0))
+        quest_cards = []
+        encounter_cards = []
+        for card in cards:
+            if card[CARD_TYPE] == 'Quest':
+                quest_cards.append(card)
+            else:
+                encounter_cards.append(card)
+
+        root = ET.fromstring(O8D_TEMPLATE)
+        _append_cards(root.findall("./section[@name='Quest']")[0], quest_cards)
+        _append_cards(root.findall("./section[@name='Encounter']")[0],
+                      encounter_cards)
+        output_path = os.path.join(OUTPUT_OCTGNDECKS_PATH,
+                                   _escape_filename(set_name))
+        _create_folder(output_path)
+
+        with open(
+            os.path.join(output_path,
+                         _escape_filename('{}.o8d'.format(quest['name']))),
+            'w', encoding='utf-8') as obj:
+            obj.write(
+                '<?xml version="1.0" encoding="utf-8" standalone="yes"?>\n')
+            obj.write(ET.tostring(root, encoding='utf-8').decode('utf-8'))
 
     logging.info('[%s] ...Generating .o8d files for OCTGN (%ss)',
                  set_name, round(time.time() - timestamp, 3))
