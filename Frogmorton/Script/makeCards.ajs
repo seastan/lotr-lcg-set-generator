@@ -514,7 +514,7 @@ function run(progress, target, filename, icons) {
 					'<br><left><image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005></size><size 7.5><i><br>');
 				s.set('Engagement-region', '76,48,36,25');
 				s.set('ThreatCost-region', '75,50,36,25');
-				s.set('Type-region', '0,504,413,20');
+				s.set('Type-region', '136,504,141,20');
 				s.set('Engagement-tint', '28.0,1.0,0.9');
 				s.set('Progress-tint', '28.0,1.0,0.9');
 				s.set('Sphere-Body-shape', '0,0,472,40,0');
@@ -832,7 +832,7 @@ function run(progress, target, filename, icons) {
 					}
 				}
 				if (card['Additional Encounter Sets']) {
-					let encounterSets = card['Additional Encounter Sets'].split(',');
+					let encounterSets = card['Additional Encounter Sets'].split(';');
 					for (let k = 0; k < encounterSets.length; k++) {
 						let iconName = fixSpecialSymbols(encounterSets[k].trim()).replace(/ /g, '-');
 						if (icons.indexOf(iconName) > -1) {

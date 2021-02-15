@@ -1183,7 +1183,7 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
 
         additional_encounter_sets = [
             s.strip() for s in (row[CARD_ADDITIONAL_ENCOUNTER_SETS] or ''
-                                ).split(',')
+                                ).split(';')
             if s != ''] or None
 
         text = _update_card_text('{}\n{}'.format(
