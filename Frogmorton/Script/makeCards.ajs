@@ -680,7 +680,14 @@ function run(progress, target, filename, icons) {
 					s.set('Collection', 'Empty');
 				}
 				else {
-					s.set('Type', updateVafthrudnir(translate[cardType][lang].toUpperCase(), 5.095));
+					if ((cardType == 'Campaign') && (cardSphere == 'Setup')) {
+						s.set('Type', updateVafthrudnir(translate['Setup'][lang].toUpperCase(), 5.095));
+						s.set('Template', 'Standard');
+					}
+					else {
+						s.set('Type', updateVafthrudnir(translate[cardType][lang].toUpperCase(), 5.095));
+					}
+
 					s.set('Copyright', copyrightText);
 
 					let selectedIcon;

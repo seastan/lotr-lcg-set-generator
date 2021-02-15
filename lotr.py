@@ -1116,7 +1116,7 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
             stage_letter = None
             opposite_stage_letter = None
 
-        if card_type in ('Presentation', 'Rules'):
+        if card_type in ('Campaign', 'Presentation', 'Rules'):
             sphere = 'None'
         elif card_type in ('Contract', 'Treasure'):
             sphere = 'Neutral'
