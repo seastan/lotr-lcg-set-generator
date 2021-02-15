@@ -244,6 +244,12 @@ def _escape_filename(value):
     return re.sub(r'[<>:\/\\|?*\'"’“”…–—]', ' ', value)
 
 
+def _escape_octgn_filename(value):
+    """ Replace spaces in a file name for OCTGN.
+    """
+    return value.replace(' ', '-')
+
+
 def _clear_folder(folder):
     """ Clear the folder.
     """
@@ -994,7 +1000,8 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914
         quest = quests.setdefault(row[CARD_ADVENTURE],
                                   {'name': row[CARD_ADVENTURE],
                                    'sets': set([row[CARD_SET_NAME]]),
-                                   'encounter sets': set()})
+                                   'encounter sets': set(),
+                                   'prefix': ''})
         if row[CARD_ENCOUNTER_SET]:
             quest['encounter sets'].add(row[CARD_ENCOUNTER_SET])
 
@@ -1026,6 +1033,9 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914
         if rules.get('encounter sets'):
             quest['encounter sets'].update(rules['encounter sets'])
 
+        if rules.get('prefix'):
+            quest['prefix'] = rules['prefix'][0] + ' '
+
         cards = [r for r in DATA if r[CARD_SET_NAME] in quest['sets']
                  and r[CARD_ENCOUNTER_SET] in quest['encounter sets']]
         for url in rules.get('external xml', []):
@@ -1052,9 +1062,10 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914
         _create_folder(output_path)
 
         with open(
-            os.path.join(output_path,
-                         _escape_filename('{}.o8d'.format(quest['name']))),
-            'w', encoding='utf-8') as obj:
+                os.path.join(output_path, _escape_octgn_filename(
+                    '{}{}.o8d'.format(quest['prefix'],
+                                      _escape_filename(quest['name'])))),
+                'w', encoding='utf-8') as obj:
             obj.write(
                 '<?xml version="1.0" encoding="utf-8" standalone="yes"?>\n')
             obj.write(ET.tostring(root, encoding='utf-8').decode('utf-8'))
@@ -2276,8 +2287,9 @@ def generate_octgn(set_id, set_name, lang):
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300OCTGN,
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_OCTGN_PATH, _escape_filename(set_name))
-    pack_path = os.path.join(output_path, '{}.{}.o8c'.format(
-        _escape_filename(set_name), lang))
+    pack_path = os.path.join(output_path,
+                             _escape_octgn_filename('{}.{}.o8c'.format(
+                                 _escape_filename(set_name), lang)))
 
     known_filenames = set()
     for _, _, filenames in os.walk(input_path):
