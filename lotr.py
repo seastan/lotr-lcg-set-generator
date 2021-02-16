@@ -184,6 +184,7 @@ SET_COLUMNS = {}
 CARD_COLUMNS = {}
 SETS = {}
 DATA = []
+SELECTED_CARDS = set()
 FOUND_SETS = set()
 FOUND_SCRATCH_SETS = set()
 FOUND_INTERSECTED_SETS = set()
@@ -554,7 +555,7 @@ def _skip_row(row):
     return row[CARD_SET] in ('0', 0) or row[CARD_ID] in ('0', 0)
 
 
-def extract_data(conf):
+def extract_data():
     """ Extract data from the spreadsheet.
     """
     logging.info('Extracting data from the spreadsheet...')
@@ -567,6 +568,7 @@ def extract_data(conf):
     FOUND_SCRATCH_SETS.clear()
     FOUND_INTERSECTED_SETS.clear()
     DATA[:] = []
+    SELECTED_CARDS.clear()
 
     sheet_path = os.path.join(SHEET_ROOT_PATH, SHEET_NAME)
     excel_app = xw.App(visible=False, add_book=False)
@@ -615,9 +617,8 @@ def extract_data(conf):
             DATA.extend(data)
 
             DATA[:] = [row for row in DATA if not _skip_row(row)]
-            if conf['selected_only']:
-                DATA[:] = [row for row in DATA if row[CARD_SELECTED]]
-
+            SELECTED_CARDS.update({row[CARD_ID] for row in DATA
+                                   if row[CARD_SELECTED]})
             FOUND_SETS.update({row[CARD_SET] for row in DATA
                                if row[CARD_SET] and not row[CARD_SCRATCH]})
             scratch_sets = {row[CARD_SET] for row in DATA if row[CARD_SET]
@@ -992,9 +993,12 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914
     logging.info('[%s] Generating .o8d files for OCTGN...', set_name)
     timestamp = time.time()
 
-    rows = [row for row in DATA if row[CARD_SET] == set_id
-            and row[CARD_TYPE] == 'Quest'
-            and row[CARD_ADVENTURE] and row[CARD_ADVENTURE][0] != '[']
+    rows = [row for row in DATA
+            if row[CARD_SET] == set_id
+            and row[CARD_TYPE] in ('Quest', 'Setup')
+            and row[CARD_ADVENTURE]
+            and (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)]
+
     quests = {}
     for row in rows:
         quest = quests.setdefault(row[CARD_ADVENTURE],
@@ -1138,7 +1142,7 @@ def _handle_int_str(value):
     return value
 
 
-def generate_ringsdb_csv(set_id, set_name):  # pylint: disable=R0912
+def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
     """ Generate CSV file for RingsDB.
     """
     logging.info('[%s] Generating CSV file for RingsDB...', set_name)
@@ -1160,6 +1164,9 @@ def generate_ringsdb_csv(set_id, set_name):  # pylint: disable=R0912
         writer.writeheader()
         for row in DATA:
             if row[CARD_SET] != set_id:
+                continue
+
+            if conf['selected_only'] and row[CARD_ID] not in SELECTED_CARDS:
                 continue
 
             card_type = row[CARD_TYPE]
@@ -1227,7 +1234,7 @@ def generate_ringsdb_csv(set_id, set_name):  # pylint: disable=R0912
                  set_name, round(time.time() - timestamp, 3))
 
 
-def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,R0915
+def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R0915
     """ Generate JSON file for Hall of Beorn.
     """
     logging.info('[%s] Generating JSON file for Hall of Beorn...', set_name)
@@ -1256,6 +1263,9 @@ def generate_hallofbeorn_json(set_id, set_name):  # pylint: disable=R0912,R0914,
 
     for row in card_data:
         if row[CARD_SET] != set_id:
+            continue
+
+        if conf['selected_only'] and row[CARD_ID] not in SELECTED_CARDS:
             continue
 
         card_type = row[CARD_TYPE]
@@ -1488,10 +1498,6 @@ def generate_xml(conf, set_id, set_name, lang):
         xlwb_target.sheets[SET_SHEET].range((SET_TITLE_ROW + 1,
                                              _c2n(SET_COLUMNS[SET_LANGUAGE]))
                                             ).value = lang
-        if conf['selected_only']:
-            xlwb_target.sheets[SET_SHEET].range(
-                (SET_TITLE_ROW + 1, _c2n(SET_COLUMNS[SET_SELECTED]))).value = 1
-
         xlwb_target.macro('SaveXML')()
 
     logging.info('[%s, %s] Generating xml file for Strange Eons...',
@@ -1717,6 +1723,12 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
             prop = _get_property(card, 'Encounter Set Total')
             prop.set('value', str(
                 encounter_sets[encounter_cards[card.attrib['id']]]))
+
+    if conf['selected_only']:
+        cards = list(root[0])
+        for card in cards:
+            if card.attrib['id'] not in SELECTED_CARDS:
+                root[0].remove(card)
 
     tree.write(xml_path)
     logging.info('[%s, %s] ...Updating the Strange Eons xml file with'

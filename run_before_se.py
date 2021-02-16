@@ -19,7 +19,7 @@ def main():  # pylint: disable=R0912
 
     lotr.reset_project_folders()
     lotr.download_sheet(conf)
-    lotr.extract_data(conf)
+    lotr.extract_data()
     sets = lotr.get_sets(conf)
     lotr.sanity_check(sets)
 
@@ -33,10 +33,10 @@ def main():  # pylint: disable=R0912
             lotr.generate_octgn_o8d(conf, set_id, set_name)
 
         if conf['ringsdb_csv']:
-            lotr.generate_ringsdb_csv(set_id, set_name)
+            lotr.generate_ringsdb_csv(conf, set_id, set_name)
 
         if conf['hallofbeorn_json']:
-            lotr.generate_hallofbeorn_json(set_id, set_name)
+            lotr.generate_hallofbeorn_json(conf, set_id, set_name)
 
         lotr.copy_custom_images(conf, set_id, set_name)
         for lang in conf['languages']:

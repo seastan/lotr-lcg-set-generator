@@ -103,7 +103,7 @@ def main():  # pylint: disable=R0912
     else:
         conf = lotr.read_conf()
 
-    lotr.extract_data(conf)
+    lotr.extract_data()
     sets = lotr.get_sets(conf)
 
     pre_tasks = []
