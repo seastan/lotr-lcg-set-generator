@@ -43,6 +43,16 @@ function onEdit(e) {
       }
     }
   }
+
+  if (e.range.getFormula().toUpperCase() == "=UUID()") {
+    e.range.setValue(Utilities.getUuid());
+  }
+
+}
+
+function uuid() {
+  // Return UUID placeholder
+  return '';
 }
 
 function getColumnByName(columnName) {
