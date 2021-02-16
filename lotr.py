@@ -89,19 +89,19 @@ MAX_COLUMN = '_Max Column'
 ROW_COLUMN = '_Row'
 
 CARD_TYPES = ('Ally', 'Attachment', 'Campaign', 'Contract', 'Enemy',
-              'Encounter Side Quest', 'Event', 'Hero', 'Location', 'Objective',
-              'Objective Ally', 'Player Side Quest', 'Presentation', 'Quest',
-              'Rules', 'Treachery', 'Treasure')
-CARD_TYPES_DOUBLESIDE_MANDATORY = ('Campaign', 'Presentation', 'Quest',
-                                   'Rules')
-CARD_TYPES_DOUBLESIDE_OPTIONAL = ('Campaign', 'Contract', 'Presentation',
-                                  'Quest', 'Rules')
+              'Encounter Side Quest', 'Event', 'Hero', 'Location', 'Nightmare',
+              'Objective', 'Objective Ally', 'Player Side Quest',
+              'Presentation', 'Quest', 'Rules', 'Treachery', 'Treasure')
+CARD_TYPES_DOUBLESIDE_MANDATORY = ('Campaign', 'Nightmare', 'Presentation',
+                                   'Quest', 'Rules')
+CARD_TYPES_DOUBLESIDE_OPTIONAL = ('Campaign', 'Contract', 'Nightmare',
+                                  'Presentation', 'Quest', 'Rules')
 CARD_TYPES_PLAYER = ('Ally', 'Attachment', 'Contract', 'Event', 'Hero',
                      'Player Side Quest', 'Treasure')
 CARD_TYPES_PLAYER_DECK = ('Ally', 'Attachment', 'Event', 'Player Side Quest')
 CARD_TYPES_ENCOUNTER_SET = ('Campaign', 'Enemy', 'Encounter Side Quest',
-                            'Location', 'Objective', 'Objective Ally', 'Quest',
-                            'Treachery', 'Treasure')
+                            'Location', 'Nightmare', 'Objective',
+                            'Objective Ally', 'Quest', 'Treachery', 'Treasure')
 CARD_TYPES_ADVENTURE = ('Campaign', 'Objective', 'Objective Ally', 'Quest')
 
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
@@ -995,14 +995,15 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914
 
     rows = [row for row in DATA
             if row[CARD_SET] == set_id
-            and row[CARD_TYPE] in ('Quest', 'Setup')
-            and row[CARD_ADVENTURE]
+            and ((row[CARD_TYPE] == 'Quest' and row[CARD_ADVENTURE])
+                 or row[CARD_TYPE] == 'Nightmare')
             and (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)]
 
     quests = {}
     for row in rows:
-        quest = quests.setdefault(row[CARD_ADVENTURE],
-                                  {'name': row[CARD_ADVENTURE],
+        quest = quests.setdefault(row[CARD_ADVENTURE] or row[CARD_NAME],
+                                  {'name': row[CARD_ADVENTURE]
+                                           or row[CARD_NAME],
                                    'sets': set([row[CARD_SET_NAME]]),
                                    'encounter sets': set(),
                                    'prefix': ''})
@@ -1020,7 +1021,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                 logging.warning(
                     'WARNING: Duplicate deck rules for quest %s detected in '
                     'row #%s%s, ignoring',
-                    row[CARD_ADVENTURE], row[ROW_COLUMN],
+                    row[CARD_ADVENTURE] or row[CARD_NAME], row[ROW_COLUMN],
                     ' (Scratch)' if row[CARD_SCRATCH] else '')
             else:
                 quest['rules'] = row[CARD_DECK_RULES]
@@ -1048,17 +1049,23 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914
 
         cards.sort(key=lambda row: (row[CARD_SET_NAME],
                                     _is_positive_or_zero_int(row[CARD_NUMBER])
-                                    and row[CARD_NUMBER] or 0))
+                                    and row[CARD_NUMBER] or 0,
+                                    row[CARD_NAME]))
         quest_cards = []
+        setup_cards = []
         encounter_cards = []
         for card in cards:
             if card[CARD_TYPE] == 'Quest':
                 quest_cards.append(card)
+            elif card[CARD_TYPE] in ('Campaign', 'Nightmare', 'Presentation',
+                                     'Rules'):
+                setup_cards.append(card)
             else:
                 encounter_cards.append(card)
 
         root = ET.fromstring(O8D_TEMPLATE)
         _append_cards(root.findall("./section[@name='Quest']")[0], quest_cards)
+        _append_cards(root.findall("./section[@name='Setup']")[0], setup_cards)
         _append_cards(root.findall("./section[@name='Encounter']")[0],
                       encounter_cards)
         output_path = os.path.join(OUTPUT_OCTGNDECKS_PATH,
@@ -1356,8 +1363,12 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
         subtitle = ((row[CARD_ADVENTURE] or '')
                     if card_type in CARD_TYPES_ADVENTURE
                     else row[CARD_ADVENTURE])
-        type_name = ('Setup' if card_type in ('Presentation', 'Rules')
-                     else card_type)
+        if card_type in ('Presentation', 'Rules'):
+            type_name = 'Setup'
+        elif card_type == 'Nightmare':
+            type_name = 'Nightmare Setup'
+        else:
+            type_name = card_type
 
         if card_type in ('Presentation', 'Rules'):
             victory_points = None
@@ -1614,7 +1625,8 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
         card_sphere = card_sphere and card_sphere[0].attrib['value']
         encounter_set = _find_properties(card, 'Encounter Set')
 
-        if (card_type not in ('Campaign', 'Quest', 'Rules', 'Treasure')
+        if (card_type not in ('Campaign', 'Nightmare', 'Quest', 'Rules',
+                              'Treasure')
                 and card_sphere not in ('Boon', 'Burden') and encounter_set):
             encounter_set = encounter_set[0].attrib['value']
             encounter_cards[card.attrib['id']] = encounter_set

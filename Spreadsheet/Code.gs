@@ -55,6 +55,11 @@ function uuid() {
   return '';
 }
 
+function UUID() {
+  // Return UUID placeholder
+  return '';
+}
+
 function getColumnByName(columnName) {
   // Return column index by its name
   var data = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getDataRange().getValues();

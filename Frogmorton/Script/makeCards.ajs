@@ -9,11 +9,11 @@ importClass(org.w3c.dom.Element);
 importClass(org.w3c.dom.Node);
 importClass(org.w3c.dom.NodeList);
 
-var doubleSideTypes = ['Campaign', 'Presentation', 'Quest', 'Rules', 'Contract'];
+var doubleSideTypes = ['Campaign', 'Contract', 'Nightmare', 'Presentation', 'Quest', 'Rules'];
 var landscapeTypes = ['Encounter Side Quest', 'Player Side Quest', 'Quest'];
 var playerTypes = ['Ally', 'Attachment', 'Event', 'Hero', 'Player Side Quest', 'Treasure'];
 var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Side Quest'];
-var nonUniqueTypes = ['Campaign', 'Encounter Side Quest', 'Event', 'Contract', 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery'];
+var nonUniqueTypes = ['Campaign', 'Contract', 'Encounter Side Quest', 'Event', 'Nightmare', 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery'];
 
 var portraitRegion = {};
 portraitRegion['Ally'] = '87,0,326,330';
@@ -211,6 +211,7 @@ translate['Enemy'] = {'English': 'Enemy', 'French': 'Ennemi', 'German': 'Gegner'
 translate['Event'] = {'English': 'Event', 'French': '\u00c9v\u00e9nement', 'German': 'Ereignis', 'Spanish': 'Evento', 'Polish': 'Wydarzenie', 'Italian': 'Evento'};
 translate['Hero'] = {'English': 'Hero', 'French': 'H\u00e9ros', 'German': 'Held', 'Spanish': 'H\u00e9roe', 'Polish': 'Bohater', 'Italian': 'Eroe'};
 translate['Location'] = {'English': 'Location', 'French': 'Lieu', 'German': 'Ort', 'Spanish': 'Lugar', 'Polish': 'Obszar', 'Italian': 'Luogo'};
+translate['Nightmare'] = {'English': 'Setup', 'French': 'Pr\u00e9paration', 'German': 'Vorbereitung', 'Spanish': 'Preparaci\u00f3n', 'Polish': 'Przygotowanie', 'Italian': 'Preparazione'};
 translate['Objective'] = {'English': 'Objective', 'French': 'Objectif', 'German': 'Ziel', 'Spanish': 'Objetivo', 'Polish': 'Cel', 'Italian': 'Obiettivo'};
 translate['Objective Ally'] = {'English': 'Objective-Ally', 'French': 'Objectif-Alli\u00e9', 'German': 'Ziel-Verb\u00fcndeter', 'Spanish': 'Objetivo-Aliado',
 	'Polish': 'Cel-Sprzymierzeniec', 'Italian': 'Obiettivo-Alleato'};
