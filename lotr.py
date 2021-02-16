@@ -104,10 +104,14 @@ CARD_TYPES_ENCOUNTER_SET = ('Campaign', 'Enemy', 'Encounter Side Quest',
                             'Objective Ally', 'Quest', 'Treachery', 'Treasure')
 CARD_TYPES_ADVENTURE = ('Campaign', 'Objective', 'Objective Ally', 'Quest')
 
+
+GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
 MAGICK_COMMAND_PDF = '"{}" convert "{}\\*.jpg" "{}"'
-GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
+
 IMAGE_MIN_SIZE = 100000
+
+EASY_PREFIX = 'Easy '
 IMAGES_CUSTOM_FOLDER = 'custom'
 OCTGN_ARCHIVE = 'unzip-me-into-sets-folder.zip'
 OCTGN_SET_XML = 'set.xml'
@@ -967,6 +971,7 @@ def _load_external_xml(url, sets, encounter_sets):
         row[CARD_NAME] = card.attrib['name']
         row[CARD_TYPE] = card_type[0].attrib['value']
         row[CARD_QUANTITY] = quantity[0].attrib['value']
+        row[CARD_EASY_MODE] = None
         res.append(row)
 
     return res
@@ -987,7 +992,7 @@ def _append_cards(parent, cards):
             element.tail = '\n    '
 
 
-def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914
+def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R0915
     """ Generate .o8d files for OCTGN.
     """
     logging.info('[%s] Generating .o8d files for OCTGN...', set_name)
@@ -1006,7 +1011,8 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                                            or row[CARD_NAME],
                                    'sets': set([row[CARD_SET_NAME]]),
                                    'encounter sets': set(),
-                                   'prefix': ''})
+                                   'prefix': '',
+                                   'modes': ['']})
         if row[CARD_ENCOUNTER_SET]:
             quest['encounter sets'].add(row[CARD_ENCOUNTER_SET])
 
@@ -1026,7 +1032,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914
             else:
                 quest['rules'] = row[CARD_DECK_RULES]
 
-    for quest in quests.values():
+    for quest in quests.values():  # pylint: disable=R1702
         rules = [r.strip().split(':', 1)
                  for r in quest.get('rules', '').split('\n')]
         rules = {r[0].strip().lower():
@@ -1041,6 +1047,10 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914
         if rules.get('prefix'):
             quest['prefix'] = rules['prefix'][0] + ' '
 
+        if rules.get('easy mode') and rules['easy mode'][0] in ('true',
+                                                                'True'):
+            quest['modes'].append(EASY_PREFIX)
+
         cards = [r for r in DATA if r[CARD_SET_NAME] in quest['sets']
                  and r[CARD_ENCOUNTER_SET] in quest['encounter sets']]
         for url in rules.get('external xml', []):
@@ -1051,35 +1061,47 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                                     _is_positive_or_zero_int(row[CARD_NUMBER])
                                     and row[CARD_NUMBER] or 0,
                                     row[CARD_NAME]))
-        quest_cards = []
-        setup_cards = []
-        encounter_cards = []
-        for card in cards:
-            if card[CARD_TYPE] == 'Quest':
-                quest_cards.append(card)
-            elif card[CARD_TYPE] in ('Campaign', 'Nightmare', 'Presentation',
-                                     'Rules'):
-                setup_cards.append(card)
-            else:
-                encounter_cards.append(card)
 
-        root = ET.fromstring(O8D_TEMPLATE)
-        _append_cards(root.findall("./section[@name='Quest']")[0], quest_cards)
-        _append_cards(root.findall("./section[@name='Setup']")[0], setup_cards)
-        _append_cards(root.findall("./section[@name='Encounter']")[0],
-                      encounter_cards)
-        output_path = os.path.join(OUTPUT_OCTGNDECKS_PATH,
-                                   _escape_filename(set_name))
-        _create_folder(output_path)
+        for mode in quest['modes']:
+            quest_cards = []
+            setup_cards = []
+            encounter_cards = []
+            for card in cards:
+                if card[CARD_TYPE] == 'Quest':
+                    quest_cards.append(card.copy())
+                elif card[CARD_TYPE] in ('Campaign', 'Nightmare',
+                                         'Presentation', 'Rules'):
+                    setup_cards.append(card.copy())
+                else:
+                    copy = card.copy()
+                    if mode == EASY_PREFIX and copy[CARD_EASY_MODE]:
+                        if copy[CARD_EASY_MODE] < copy[CARD_QUANTITY]:
+                            copy[CARD_QUANTITY] -= copy[CARD_EASY_MODE]
+                            encounter_cards.append(copy)
+                    else:
+                        encounter_cards.append(copy)
 
-        with open(
-                os.path.join(output_path, _escape_octgn_filename(
-                    '{}{}.o8d'.format(quest['prefix'],
-                                      _escape_filename(quest['name'])))),
-                'w', encoding='utf-8') as obj:
-            obj.write(
-                '<?xml version="1.0" encoding="utf-8" standalone="yes"?>\n')
-            obj.write(ET.tostring(root, encoding='utf-8').decode('utf-8'))
+            root = ET.fromstring(O8D_TEMPLATE)
+            _append_cards(root.findall("./section[@name='Quest']")[0],
+                          quest_cards)
+            _append_cards(root.findall("./section[@name='Setup']")[0],
+                          setup_cards)
+            _append_cards(root.findall("./section[@name='Encounter']")[0],
+                          encounter_cards)
+            output_path = os.path.join(OUTPUT_OCTGNDECKS_PATH,
+                                       _escape_filename(set_name))
+            _create_folder(output_path)
+
+            with open(
+                    os.path.join(output_path, _escape_octgn_filename(
+                        '{}{}{}.o8d'.format(mode,
+                                            quest['prefix'],
+                                            _escape_filename(quest['name'])))),
+                    'w', encoding='utf-8') as obj:
+                obj.write(
+                    '<?xml version="1.0" encoding="utf-8" standalone="yes"?>')
+                obj.write('\n')
+                obj.write(ET.tostring(root, encoding='utf-8').decode('utf-8'))
 
     logging.info('[%s] ...Generating .o8d files for OCTGN (%ss)',
                  set_name, round(time.time() - timestamp, 3))
