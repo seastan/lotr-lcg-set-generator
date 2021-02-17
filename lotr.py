@@ -15,6 +15,8 @@ import subprocess
 import time
 import zipfile
 
+from collections import OrderedDict
+
 import xml.etree.ElementTree as ET
 import png
 import py7zr
@@ -84,6 +86,7 @@ CARD_CHANGED = 'Changed'
 CARD_SET_NAME = '_Set Name'
 CARD_DOUBLESIDE = '_Card Side'
 CARD_SCRATCH = '_Scratch'
+CARD_ORIGINAL_NAME = '_Original Name'
 
 MAX_COLUMN = '_Max Column'
 ROW_COLUMN = '_Row'
@@ -939,7 +942,7 @@ def _load_external_xml(url, sets, encounter_sets):
     res = []
     content = requests.get(url).content
     root = ET.fromstring(content)
-    set_name = root.attrib['name']
+    set_name = root.attrib['name'].lower()
     if set_name not in sets:
         return res
 
@@ -949,7 +952,7 @@ def _load_external_xml(url, sets, encounter_sets):
         if not encounter_set:
             continue
 
-        encounter_set = encounter_set[0].attrib['value']
+        encounter_set = encounter_set[0].attrib['value'].lower()
         if encounter_set not in encounter_sets:
             continue
 
@@ -961,20 +964,44 @@ def _load_external_xml(url, sets, encounter_sets):
         if not quantity:
             continue
 
+        traits = _find_properties(card, 'Traits')
+        traits = traits[0].attrib['value'] if traits else None
+
         card_number = _find_properties(card, 'Card Number')
-        card_number = int(card_number[0].attrib['value']) if card_number else 0
+        card_number = (
+            int(card_number[0].attrib['value'])
+            if card_number
+            and _is_positive_or_zero_int(card_number[0].attrib['value'])
+            else 0)
 
         row[CARD_ENCOUNTER_SET] = encounter_set
-        row[CARD_SET_NAME] = set_name
         row[CARD_ID] = card.attrib['id']
         row[CARD_NUMBER] = card_number
         row[CARD_NAME] = card.attrib['name']
         row[CARD_TYPE] = card_type[0].attrib['value']
+        row[CARD_TRAITS] = traits
         row[CARD_QUANTITY] = int(quantity[0].attrib['value'])
         row[CARD_EASY_MODE] = None
         res.append(row)
 
     return res
+
+
+def _update_card_for_rules(card):
+    """ Update card structure to simplify rules matching.
+    """
+    card[CARD_ENCOUNTER_SET] = card[CARD_ENCOUNTER_SET].lower()
+    card[CARD_ORIGINAL_NAME] = card[CARD_NAME]
+    card[CARD_NAME] = card[CARD_NAME].lower()
+    card[CARD_TYPE] = card[CARD_TYPE].lower()
+
+    if card[CARD_TRAITS]:
+        card[CARD_TRAITS] = [t.lower().strip()
+                             for t in card[CARD_TRAITS].split('.')]
+    else:
+        card[CARD_TRAITS] = []
+
+    return card
 
 
 def _append_cards(parent, cards):
@@ -984,7 +1011,7 @@ def _append_cards(parent, cards):
     for i, card in enumerate(cards):
         parent.text = '\n    '
         element = ET.SubElement(parent, 'card')
-        element.text = card[CARD_NAME]
+        element.text = card[CARD_ORIGINAL_NAME]
         element.set('qty', str(int(card[CARD_QUANTITY])))
         element.set('id', card[CARD_ID])
         if i == len(cards) - 1:
@@ -993,10 +1020,41 @@ def _append_cards(parent, cards):
             element.tail = '\n    '
 
 
-def _test_rule(card, rule):
+def _test_rule(card, rule):  # pylint: disable=R0912
     """ Test a deck rule and return the number of affected copies.
     """
-    return 0
+    res = re.match(r'^([0-9]+) ', rule)
+    if res:
+        qty = min(int(res.groups()[0]), card[CARD_QUANTITY])
+        rule = re.sub(r'^[0-9]+ +', '', rule)
+    else:
+        qty = card[CARD_QUANTITY]
+
+    parts = [p.strip() for p in rule.split('&') if p.strip()]
+    for part in parts:
+        if re.match(r'^\[[^\]]+\]$', part):
+            if part[1:-1] != card[CARD_ENCOUNTER_SET]:
+                return 0
+        elif re.match(r'^type:', part):
+            card_type = re.sub(r'^type:', '', part).strip()
+            if card_type == 'side quest':
+                card_type = 'encounter side quest'
+
+            if card_type != card[CARD_TYPE]:
+                return 0
+        elif re.match(r'^trait:', part):
+            if re.sub(r'^trait:', '', part).strip() not in card[CARD_TRAITS]:
+                return 0
+        elif re.match(
+                r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-'
+                r'[0-9a-f]{12}$', part):
+            if part != card[CARD_ID]:
+                return 0
+        else:
+            if part != card[CARD_NAME]:
+                return 0
+
+    return qty
 
 
 def _apply_rules(source_cards, target_cards, rules):
@@ -1005,6 +1063,7 @@ def _apply_rules(source_cards, target_cards, rules):
     if not rules:
         return
 
+    rules = [r.lower() for r in rules]
     for card in source_cards:
         for rule in rules:
             qty = _test_rule(card, rule)
@@ -1032,16 +1091,16 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
         quest = quests.setdefault(row[CARD_ADVENTURE] or row[CARD_NAME],
                                   {'name': row[CARD_ADVENTURE]
                                            or row[CARD_NAME],
-                                   'sets': set([row[CARD_SET_NAME]]),
+                                   'sets': set([row[CARD_SET_NAME].lower()]),
                                    'encounter sets': set(),
                                    'prefix': '',
                                    'modes': ['']})
         if row[CARD_ENCOUNTER_SET]:
-            quest['encounter sets'].add(row[CARD_ENCOUNTER_SET])
+            quest['encounter sets'].add(row[CARD_ENCOUNTER_SET].lower())
 
         if row[CARD_ADDITIONAL_ENCOUNTER_SETS]:
             for encounter_set in [
-                    r.strip()
+                    r.lower().strip()
                     for r in row[CARD_ADDITIONAL_ENCOUNTER_SETS].split(';')]:
                 quest['encounter sets'].add(encounter_set)
 
@@ -1054,29 +1113,55 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                     ' (Scratch)' if row[CARD_SCRATCH] else '')
             else:
                 quest['rules'] = row[CARD_DECK_RULES]
+                quest['rules_row'] = row[ROW_COLUMN]
+                quest['scratch'] = ' (Scratch)' if row[CARD_SCRATCH] else ''
 
     for quest in quests.values():
-        rules = [r.strip().split(':', 1)
-                 for r in quest.get('rules', '').split('\n')]
-        rules = {r[0].strip().lower():
-                 [i.strip() for i in r[1].strip().split(';')]
-                 for r in rules if len(r) == 2}
-        if rules.get('sets'):
-            quest['sets'].update(rules['sets'])
+        rules_list = [r.strip().split(':', 1)
+                      for r in quest.get('rules', '').split('\n')]
+        rules_list = [(r[0].lower().strip(),
+                       [i.strip() for i in r[1].strip().split(';')])
+                      for r in rules_list if len(r) == 2]
+        rules = OrderedDict()
+        key_count = {}
+        for key, value in rules_list:
+            if key not in key_count:
+                key_count[key] = 0
+            else:
+                key_count[key] += 1
 
-        if rules.get('encounter sets'):
-            quest['encounter sets'].update(rules['encounter sets'])
+            rules[(key, key_count[key])] = value
 
-        if rules.get('prefix'):
-            quest['prefix'] = rules['prefix'][0] + ' '
+        for key in ('sets', 'encounter sets', 'prefix', 'easy mode',
+                    'external xml'):
+            if key_count.get(key, 0) > 0:
+                logging.warning(
+                    'WARNING: Duplicate key "%s" for deck rules for quest %s '
+                    'detected in row #%s%s, ignoring',
+                    key,
+                    quest['name'],
+                    quest['rules_row'],
+                    quest['scratch'])
 
-        if rules.get('easy mode') and rules['easy mode'][0] in ('true',
-                                                                'True'):
+        if rules.get(('sets', 0)):
+            quest['sets'].update([s.lower() for s in rules[('sets', 0)]])
+
+        if rules.get(('encounter sets', 0)):
+            quest['encounter sets'].update(
+                [s.lower() for s in rules[('encounter sets', 0)]])
+
+        if rules.get(('prefix', 0)):
+            quest['prefix'] = rules[('prefix', 0)][0] + ' '
+
+        if (rules.get(('easy mode', 0))
+                and rules[('easy mode', 0)][0].lower() == 'true'):
             quest['modes'].append(EASY_PREFIX)
 
-        cards = [r for r in DATA if r[CARD_SET_NAME] in quest['sets']
-                 and r[CARD_ENCOUNTER_SET] in quest['encounter sets']]
-        for url in rules.get('external xml', []):
+        cards = [r for r in DATA
+                 if (r[CARD_SET_NAME] or '').lower() in quest['sets']
+                 and (r[CARD_ENCOUNTER_SET] or '').lower()
+                 in quest['encounter sets']]
+        for url in rules.get(('external xml', 0), []):
             cards.extend(_load_external_xml(url, quest['sets'],
                                             quest['encounter sets']))
 
@@ -1097,29 +1182,33 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
             removed_cards = []
             for card in cards:
                 if card[CARD_TYPE] == 'Quest':
-                    quest_cards.append(card.copy())
+                    quest_cards.append(_update_card_for_rules(card.copy()))
                 elif card[CARD_TYPE] in ('Campaign', 'Nightmare',
                                          'Presentation', 'Rules'):
-                    setup_cards.append(card.copy())
+                    setup_cards.append(_update_card_for_rules(card.copy()))
                 elif mode == EASY_PREFIX and card[CARD_EASY_MODE]:
-                    copy = card.copy()
+                    copy = _update_card_for_rules(card.copy())
                     copy[CARD_QUANTITY] -= copy[CARD_EASY_MODE]
                     encounter_cards.append(copy)
                 else:
-                    encounter_cards.append(card.copy())
+                    encounter_cards.append(_update_card_for_rules(card.copy()))
 
-            _apply_rules(quest_cards, removed_cards, rules.get('remove'))
-            _apply_rules(quest_cards, second_quest_cards,
-                         rules.get('second quest deck'))
-            _apply_rules(encounter_cards, removed_cards, rules.get('remove'))
-            _apply_rules(encounter_cards, special_cards, rules.get('special'))
-            _apply_rules(encounter_cards, second_special_cards,
-                         rules.get('second special'))
-            _apply_rules(encounter_cards, setup_cards, rules.get('setup'))
-            _apply_rules(encounter_cards, staging_setup_cards,
-                         rules.get('staging setuo'))
-            _apply_rules(encounter_cards, active_setup_cards,
-                         rules.get('active setup'))
+            for (key, _), value in rules.items():
+                if key == 'remove':
+                    _apply_rules(quest_cards, removed_cards, value)
+                    _apply_rules(encounter_cards, removed_cards, value)
+                elif key == 'second quest deck':
+                    _apply_rules(quest_cards, second_quest_cards, value)
+                elif key == 'special':
+                    _apply_rules(encounter_cards, special_cards, value)
+                elif key == 'second special':
+                    _apply_rules(encounter_cards, second_special_cards, value)
+                elif key == 'setup':
+                    _apply_rules(encounter_cards, setup_cards, value)
+                elif key == 'active setup':
+                    _apply_rules(encounter_cards, active_setup_cards, value)
+                elif key == 'staging setup':
+                    _apply_rules(encounter_cards, staging_setup_cards, value)
 
             root = ET.fromstring(O8D_TEMPLATE)
             _append_cards(root.findall("./section[@name='Quest']")[0],
@@ -1149,10 +1238,12 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                                             quest['prefix'],
                                             _escape_filename(quest['name'])))),
                     'w', encoding='utf-8') as obj:
+                res = ET.tostring(root, encoding='utf-8').decode('utf-8')
+                res = res.replace('<notes />', '<notes><![CDATA[]]></notes>')
                 obj.write(
                     '<?xml version="1.0" encoding="utf-8" standalone="yes"?>')
                 obj.write('\n')
-                obj.write(ET.tostring(root, encoding='utf-8').decode('utf-8'))
+                obj.write(res)
 
     logging.info('[%s] ...Generating .o8d files for OCTGN (%ss)',
                  set_name, round(time.time() - timestamp, 3))
