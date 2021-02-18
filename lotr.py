@@ -949,20 +949,30 @@ def _load_external_xml(url, sets, encounter_sets):
     for card in root[0]:
         row = {}
         encounter_set = _find_properties(card, 'Encounter Set')
-        if not encounter_set:
-            continue
-
-        encounter_set = encounter_set[0].attrib['value'].lower()
-        if encounter_set not in encounter_sets:
-            continue
+        if encounter_set:
+            encounter_set = encounter_set[0].attrib['value'].lower()
+            if encounter_set not in encounter_sets:
+                continue
+        else:
+            encounter_set = None
 
         card_type = _find_properties(card, 'Type')
         if not card_type:
             continue
 
+        card_type = card_type[0].attrib['value']
+        if card_type == 'Side Quest':
+            if encounter_set:
+                card_type = 'Encounter Side Quest'
+            else:
+                card_type = 'Player Side Quest'
+
         quantity = _find_properties(card, 'Quantity')
         if not quantity:
             continue
+
+        sphere = _find_properties(card, 'Sphere')
+        sphere = sphere[0].attrib['value'] if sphere else None
 
         traits = _find_properties(card, 'Traits')
         traits = traits[0].attrib['value'] if traits else None
@@ -978,9 +988,11 @@ def _load_external_xml(url, sets, encounter_sets):
         row[CARD_ID] = card.attrib['id']
         row[CARD_NUMBER] = card_number
         row[CARD_NAME] = card.attrib['name']
-        row[CARD_TYPE] = card_type[0].attrib['value']
+        row[CARD_TYPE] = card_type
+        row[CARD_SPHERE] = sphere
         row[CARD_TRAITS] = traits
         row[CARD_QUANTITY] = int(quantity[0].attrib['value'])
+        row[CARD_SET_NAME] = set_name
         row[CARD_EASY_MODE] = None
         res.append(row)
 
@@ -990,17 +1002,17 @@ def _load_external_xml(url, sets, encounter_sets):
 def _update_card_for_rules(card):
     """ Update card structure to simplify rules matching.
     """
-    card[CARD_ENCOUNTER_SET] = card[CARD_ENCOUNTER_SET].lower()
+    if card[CARD_ENCOUNTER_SET]:
+        card[CARD_ENCOUNTER_SET] = card[CARD_ENCOUNTER_SET].lower()
+
     card[CARD_ORIGINAL_NAME] = card[CARD_NAME]
     card[CARD_NAME] = card[CARD_NAME].lower()
+    card[CARD_SET_NAME] = card[CARD_SET_NAME].lower()
     card[CARD_TYPE] = card[CARD_TYPE].lower()
-
-    if card[CARD_TRAITS]:
-        card[CARD_TRAITS] = [t.lower().strip()
-                             for t in card[CARD_TRAITS].split('.')]
-    else:
-        card[CARD_TRAITS] = []
-
+    card[CARD_SPHERE] = card[CARD_SPHERE].lower() if card[CARD_SPHERE] else ''
+    card[CARD_TRAITS] = ([t.lower().strip()
+                          for t in card[CARD_TRAITS].split('.')]
+                         if card[CARD_TRAITS] else [])
     return card
 
 
@@ -1020,7 +1032,7 @@ def _append_cards(parent, cards):
             element.tail = '\n    '
 
 
-def _test_rule(card, rule):  # pylint: disable=R0912
+def _test_rule(card, rule):  # pylint: disable=R0911,R0912
     """ Test a deck rule and return the number of affected copies.
     """
     res = re.match(r'^([0-9]+) ', rule)
@@ -1041,6 +1053,12 @@ def _test_rule(card, rule):  # pylint: disable=R0912
                 card_type = 'encounter side quest'
 
             if card_type != card[CARD_TYPE]:
+                return 0
+        elif re.match(r'^sphere:', part):
+            if re.sub(r'^sphere:', '', part).strip() != card[CARD_SPHERE]:
+                return 0
+        elif re.match(r'^set:', part):
+            if re.sub(r'^set:', '', part).strip() != card[CARD_SET_NAME]:
                 return 0
         elif re.match(r'^trait:', part):
             if re.sub(r'^trait:', '', part).strip() not in card[CARD_TRAITS]:
@@ -1125,6 +1143,19 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
         rules = OrderedDict()
         key_count = {}
         for key, value in rules_list:
+            if key not in ('sets', 'encounter sets', 'prefix', 'external xml',
+                           'remove', 'second quest deck', 'special',
+                           'second special', 'setup', 'active setup',
+                           'staging setup', 'player'):
+                logging.warning(
+                    'WARNING: Unknown key "%s" for deck rules for quest %s '
+                    'detected in row #%s%s, ignoring',
+                    key,
+                    quest['name'],
+                    quest['rules_row'],
+                    quest['scratch'])
+                continue
+
             if key not in key_count:
                 key_count[key] = 0
             else:
@@ -1132,8 +1163,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
 
             rules[(key, key_count[key])] = value
 
-        for key in ('sets', 'encounter sets', 'prefix', 'easy mode',
-                    'external xml'):
+        for key in ('sets', 'encounter sets', 'prefix', 'external xml'):
             if key_count.get(key, 0) > 0:
                 logging.warning(
                     'WARNING: Duplicate key "%s" for deck rules for quest %s '
@@ -1153,14 +1183,11 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
         if rules.get(('prefix', 0)):
             quest['prefix'] = rules[('prefix', 0)][0] + ' '
 
-        if (rules.get(('easy mode', 0))
-                and rules[('easy mode', 0)][0].lower() == 'true'):
-            quest['modes'].append(EASY_PREFIX)
-
         cards = [r for r in DATA
                  if (r[CARD_SET_NAME] or '').lower() in quest['sets']
-                 and (r[CARD_ENCOUNTER_SET] or '').lower()
-                 in quest['encounter sets']]
+                 and (not r[CARD_ENCOUNTER_SET] or
+                      r[CARD_ENCOUNTER_SET].lower()
+                      in quest['encounter sets'])]
         for url in rules.get(('external xml', 0), []):
             cards.extend(_load_external_xml(url, quest['sets'],
                                             quest['encounter sets']))
@@ -1170,18 +1197,30 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                                     and row[CARD_NUMBER] or 0,
                                     row[CARD_NAME]))
 
+        if [c for c in cards if c[CARD_EASY_MODE]]:
+            quest['modes'].append(EASY_PREFIX)
+
         for mode in quest['modes']:
+            player_cards = []
             quest_cards = []
             second_quest_cards = []
             encounter_cards = []
+            removed_cards = []
             special_cards = []
             second_special_cards = []
             setup_cards = []
             staging_setup_cards = []
             active_setup_cards = []
-            removed_cards = []
+            chosen_player_cards = []
+            hero_cards = []
+            ally_cards = []
+            attachment_cards = []
+            event_cards = []
+            side_quest_cards = []
             for card in cards:
-                if card[CARD_TYPE] == 'Quest':
+                if not card[CARD_ENCOUNTER_SET]:
+                    player_cards.append(_update_card_for_rules(card.copy()))
+                elif card[CARD_TYPE] == 'Quest':
                     quest_cards.append(_update_card_for_rules(card.copy()))
                 elif card[CARD_TYPE] in ('Campaign', 'Nightmare',
                                          'Presentation', 'Rules'):
@@ -1197,18 +1236,36 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                 if key == 'remove':
                     _apply_rules(quest_cards, removed_cards, value)
                     _apply_rules(encounter_cards, removed_cards, value)
+                    _apply_rules(player_cards, removed_cards, value)
                 elif key == 'second quest deck':
                     _apply_rules(quest_cards, second_quest_cards, value)
                 elif key == 'special':
                     _apply_rules(encounter_cards, special_cards, value)
+                    _apply_rules(player_cards, special_cards, value)
                 elif key == 'second special':
                     _apply_rules(encounter_cards, second_special_cards, value)
+                    _apply_rules(player_cards, second_special_cards, value)
                 elif key == 'setup':
                     _apply_rules(encounter_cards, setup_cards, value)
-                elif key == 'active setup':
-                    _apply_rules(encounter_cards, active_setup_cards, value)
+                    _apply_rules(player_cards, setup_cards, value)
                 elif key == 'staging setup':
                     _apply_rules(encounter_cards, staging_setup_cards, value)
+                elif key == 'active setup':
+                    _apply_rules(encounter_cards, active_setup_cards, value)
+                elif key == 'player':
+                    _apply_rules(player_cards, chosen_player_cards, value)
+
+            for card in chosen_player_cards:
+                if card[CARD_TYPE] == 'hero':
+                    hero_cards.append(card)
+                elif card[CARD_TYPE] == 'ally':
+                    ally_cards.append(card)
+                elif card[CARD_TYPE] == 'attachment':
+                    attachment_cards.append(card)
+                elif card[CARD_TYPE] == 'event':
+                    event_cards.append(card)
+                elif card[CARD_TYPE] == 'player side quest':
+                    side_quest_cards.append(card)
 
             root = ET.fromstring(O8D_TEMPLATE)
             _append_cards(root.findall("./section[@name='Quest']")[0],
@@ -1228,6 +1285,17 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                           staging_setup_cards)
             _append_cards(root.findall("./section[@name='Active Setup']")[0],
                           active_setup_cards)
+            _append_cards(root.findall("./section[@name='Hero']")[0],
+                          hero_cards)
+            _append_cards(root.findall("./section[@name='Ally']")[0],
+                          ally_cards)
+            _append_cards(root.findall("./section[@name='Attachment']")[0],
+                          attachment_cards)
+            _append_cards(root.findall("./section[@name='Event']")[0],
+                          event_cards)
+            _append_cards(root.findall("./section[@name='Side Quest']")[0],
+                          side_quest_cards)
+
             output_path = os.path.join(OUTPUT_OCTGNDECKS_PATH,
                                        _escape_filename(set_name))
             _create_folder(output_path)
