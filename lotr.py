@@ -3,6 +3,7 @@
 """ Helper functions for LotR ALeP workflow.
 """
 import codecs
+import copy
 import csv
 import hashlib
 import json
@@ -1086,10 +1087,10 @@ def _apply_rules(source_cards, target_cards, rules):
         for rule in rules:
             qty = _test_rule(card, rule)
             if qty > 0:
-                copy = card.copy()
+                card_copy = card.copy()
                 card[CARD_QUANTITY] -= qty
-                copy[CARD_QUANTITY] = qty
-                target_cards.append(copy)
+                card_copy[CARD_QUANTITY] = qty
+                target_cards.append(card_copy)
 
 
 def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R0915
@@ -1134,7 +1135,21 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                 quest['rules_row'] = row[ROW_COLUMN]
                 quest['scratch'] = ' (Scratch)' if row[CARD_SCRATCH] else ''
 
-    for quest in quests.values():
+    quests = list(quests.values())
+    new_quests = []
+    for quest in quests:
+        parts = quest['rules'].split('\n\n')
+        if len(parts) > 1:
+            quest['rules'] = parts.pop(0)
+            for part in parts:
+                new_quest = copy.deepcopy(quest)
+                new_quest['rules'] = part
+                new_quests.append(new_quest)
+
+    quests.extend(new_quests)
+
+    filenames = set()
+    for quest in quests:
         rules_list = [r.strip().split(':', 1)
                       for r in quest.get('rules', '').split('\n')]
         rules_list = [(r[0].lower().strip(),
@@ -1192,11 +1207,6 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
             cards.extend(_load_external_xml(url, quest['sets'],
                                             quest['encounter sets']))
 
-        cards.sort(key=lambda row: (row[CARD_SET_NAME],
-                                    _is_positive_or_zero_int(row[CARD_NUMBER])
-                                    and row[CARD_NUMBER] or 0,
-                                    row[CARD_NAME]))
-
         if [c for c in cards if c[CARD_EASY_MODE]]:
             quest['modes'].append(EASY_PREFIX)
 
@@ -1208,6 +1218,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
             removed_cards = []
             special_cards = []
             second_special_cards = []
+            default_setup_cards = []
             setup_cards = []
             staging_setup_cards = []
             active_setup_cards = []
@@ -1224,19 +1235,21 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                     quest_cards.append(_update_card_for_rules(card.copy()))
                 elif card[CARD_TYPE] in ('Campaign', 'Nightmare',
                                          'Presentation', 'Rules'):
-                    setup_cards.append(_update_card_for_rules(card.copy()))
+                    default_setup_cards.append(
+                        _update_card_for_rules(card.copy()))
                 elif mode == EASY_PREFIX and card[CARD_EASY_MODE]:
-                    copy = _update_card_for_rules(card.copy())
-                    copy[CARD_QUANTITY] -= copy[CARD_EASY_MODE]
-                    encounter_cards.append(copy)
+                    card_copy = _update_card_for_rules(card.copy())
+                    card_copy[CARD_QUANTITY] -= card_copy[CARD_EASY_MODE]
+                    encounter_cards.append(card_copy)
                 else:
                     encounter_cards.append(_update_card_for_rules(card.copy()))
 
             for (key, _), value in rules.items():
                 if key == 'remove':
-                    _apply_rules(quest_cards, removed_cards, value)
-                    _apply_rules(encounter_cards, removed_cards, value)
                     _apply_rules(player_cards, removed_cards, value)
+                    _apply_rules(quest_cards, removed_cards, value)
+                    _apply_rules(default_setup_cards, removed_cards, value)
+                    _apply_rules(encounter_cards, removed_cards, value)
                 elif key == 'second quest deck':
                     _apply_rules(quest_cards, second_quest_cards, value)
                 elif key == 'special':
@@ -1254,6 +1267,19 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                     _apply_rules(encounter_cards, active_setup_cards, value)
                 elif key == 'player':
                     _apply_rules(player_cards, chosen_player_cards, value)
+
+            setup_cards.extend(default_setup_cards)
+
+            for section in (
+                    quest_cards, second_quest_cards, encounter_cards,
+                    special_cards, second_special_cards, setup_cards,
+                    staging_setup_cards, active_setup_cards,
+                    chosen_player_cards):
+                section.sort(key=lambda card: (
+                    card[CARD_SET_NAME],
+                    _is_positive_or_zero_int(card[CARD_NUMBER])
+                    and int(card[CARD_NUMBER]) or 0,
+                    card[CARD_NAME]))
 
             for card in chosen_player_cards:
                 if card[CARD_TYPE] == 'hero':
@@ -1300,11 +1326,22 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                                        _escape_filename(set_name))
             _create_folder(output_path)
 
+            filename = _escape_octgn_filename(
+                '{}{}{}.o8d'.format(mode, quest['prefix'],
+                                    _escape_filename(quest['name'])))
+            if filename in filenames:
+                logging.warning(
+                    'WARNING: Duplicate file name %s for deck rules for quest '
+                    '%s detected in row #%s%s, ignoring',
+                    filename,
+                    quest['name'],
+                    quest['rules_row'],
+                    quest['scratch'])
+                continue
+
+            filenames.add(filename)
             with open(
-                    os.path.join(output_path, _escape_octgn_filename(
-                        '{}{}{}.o8d'.format(mode,
-                                            quest['prefix'],
-                                            _escape_filename(quest['name'])))),
+                    os.path.join(output_path, filename),
                     'w', encoding='utf-8') as obj:
                 res = ET.tostring(root, encoding='utf-8').decode('utf-8')
                 res = res.replace('<notes />', '<notes><![CDATA[]]></notes>')
