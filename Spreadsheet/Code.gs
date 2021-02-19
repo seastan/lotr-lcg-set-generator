@@ -22,7 +22,7 @@ function onEdit(e) {
         // Get current snapshot
         var currentSnapshot = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getRange(row, getColumnByName('Current Snapshot')).getValue();
         // Copy it over to previous snapshot
-        SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getRange(row, getColumnByName('Last Snapshot')).setValue('="' + currentSnapshot.replace(/"/g, '""') + '"');
+        SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getRange(row, getColumnByName('Last Snapshot')).setValue('=concatenate("' + currentSnapshot.replace(/"/g, '", char(34), "') + '")');
         // Set checkbox to FALSE
         SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getRange(row, column).setValue(false);
       }
