@@ -117,7 +117,8 @@ IMAGE_MIN_SIZE = 100000
 
 EASY_PREFIX = 'Easy '
 IMAGES_CUSTOM_FOLDER = 'custom'
-OCTGN_ARCHIVE = 'unzip-me-into-sets-folder.zip'
+OCTGN_SET_XML_ARCHIVE = '_octgn_set_xml_archive.zip'
+OCTGN_O8D_ARCHIVE = '_octgn_o8d_archive.zip'
 OCTGN_SET_XML = 'set.xml'
 PROCESSED_ARTWORK_FOLDER = 'processed'
 PROJECT_FOLDER = 'Frogmorton'
@@ -3194,27 +3195,6 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
-def _create_octgn_archive(temp_path):
-    """ Create OCTGN archive with all set.xml files.
-    """
-    archive_path = os.path.join(temp_path, OCTGN_ARCHIVE)
-    with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as obj:
-        for _, folders, _ in os.walk(OUTPUT_OCTGN_PATH):
-            for folder in folders:
-                for _, subfolders, _ in os.walk(
-                        os.path.join(OUTPUT_OCTGN_PATH, folder)):
-                    for subfolder in subfolders:
-                        xml_path = os.path.join(OUTPUT_OCTGN_PATH, folder,
-                                                subfolder, OCTGN_SET_XML)
-                        if os.path.exists(xml_path):
-                            obj.write(xml_path, '{}/{}'.format(subfolder,
-                                                               OCTGN_SET_XML))
-
-                    break
-
-            break
-
-
 def _prepare_updated_o8c(temp_path, updates=None):
     """ Copy all updated o8c files to the temporary folder.
 
@@ -3239,8 +3219,8 @@ def _prepare_updated_o8c(temp_path, updates=None):
         break
 
 
-def copy_octgn_outputs(conf, unzip=True):
-    """ Copy OCTGN outputs to the destination folder.
+def copy_octgn_set_xml_outputs(conf):
+    """ Copy all OCTGN set.xml files to the destination folder.
     """
     logging.info('Copying OCTGN outputs to the destination folder...')
     timestamp = time.time()
@@ -3248,27 +3228,31 @@ def copy_octgn_outputs(conf, unzip=True):
     temp_path = os.path.join(TEMP_ROOT_PATH, 'copy_octgn_outputs')
     _create_folder(temp_path)
     _clear_folder(temp_path)
-    _create_octgn_archive(temp_path)
 
-    for _, _, filenames in os.walk(temp_path):
-        for filename in filenames:
-            shutil.move(os.path.join(temp_path, filename),
-                        os.path.join(conf['octgn_destination_path'], filename))
+    archive_path = os.path.join(temp_path, OCTGN_SET_XML_ARCHIVE)
+    with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_STORED) as obj:
+        for _, folders, _ in os.walk(OUTPUT_OCTGN_PATH):
+            for folder in folders:
+                for _, subfolders, _ in os.walk(
+                        os.path.join(OUTPUT_OCTGN_PATH, folder)):
+                    for subfolder in subfolders:
+                        if subfolder not in FOUND_SETS:
+                            continue
 
-        break
+                        xml_path = os.path.join(OUTPUT_OCTGN_PATH, folder,
+                                                subfolder, OCTGN_SET_XML)
+                        if os.path.exists(xml_path):
+                            obj.write(xml_path, '{}/{}'.format(subfolder,
+                                                               OCTGN_SET_XML))
 
-    _delete_folder(temp_path)
-
-    if unzip:
-        for _, _, filenames in os.walk(conf['octgn_destination_path']):
-            for filename in filenames:
-                if filename.split('.')[-1] == 'zip':
-                    with zipfile.ZipFile(
-                            os.path.join(conf['octgn_destination_path'],
-                                         filename)) as obj:
-                        obj.extractall(conf['octgn_destination_path'])
+                    break
 
             break
+
+    with zipfile.ZipFile(archive_path) as obj:
+        obj.extractall(conf['octgn_set_xml_destination_path'])
+
+    _delete_folder(temp_path)
 
     logging.info('...Copying OCTGN outputs to the destination folder (%ss)',
                  round(time.time() - timestamp, 3))

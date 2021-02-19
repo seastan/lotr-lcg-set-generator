@@ -50,10 +50,10 @@ def main():  # pylint: disable=R0912
             lotr.copy_raw_images(conf, set_id, set_name, lang)
             lotr.copy_xml(set_id, set_name, lang)
 
-    if changes:
-        if conf['octgn_set_xml'] and conf['octgn_destination_path']:
-            lotr.copy_octgn_outputs(conf)
+    if conf['octgn_set_xml'] and conf['octgn_set_xml_destination_path']:
+        lotr.copy_octgn_set_xml_outputs(conf)
 
+    if changes:
         lotr.create_project()
     elif strange_eons:
         logging.info('No changes since the last run, skipping creating '

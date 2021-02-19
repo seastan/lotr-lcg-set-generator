@@ -72,13 +72,16 @@ into the root folder of this repo.
   - `artwork_path`: local path to the artwork folder (don't use for that any existing folder in this repo)
   - `gimp_console_path`: path to GIMP console executable
   - `magick_path`: path to ImageMagick executable
-  - `octgn_destination_path`: path to OCTGN destination folder (may be empty)
+  - `octgn_set_xml_destination_path`: path to OCTGN `set.xml` destination folder (may be empty)
+  - `octgn_set_xml_scratch_destination_path`: path to OCTGN `set.xml` scratch destination folder (may be empty)
+  - `octgn_o8d_destination_path`: path to OCTGN `.o8d` destination folder (may be empty)
+  - `octgn_o8d_scratch_destination_path`: path to OCTGN `.o8d` scratch destination folder (may be empty)
   - `reprocess_all`: whether to reprocess all cards (`true`) or update only the cards, changed since the previous script run (`false`)
   - `selected_only`: process only "selected" rows (true or false)
   - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`)
   - `set_ids`: list of set IDs to work on (you can use `all` and `all_scratch` aliases to select all non-scratch and all scratch sets sutomatically)
-  - `octgn_set_xml`: creating set.xml files for OCTGN (true or false)
-  - `octgn_o8d`: creating .o8d files for OCTGN (true or false)
+  - `octgn_set_xml`: creating `set.xml` files for OCTGN (true or false)
+  - `octgn_o8d`: creating `.o8d` files for OCTGN (true or false)
   - `ringsdb_csv`: creating CSV files for RingsDB (true or false)
   - `hallofbeorn_json`: creating JSON files for Hall of Beorn (true or false)
   - `outputs`: list of image outputs for each language (if you added or uncommented new outputs, you also need to set `reprocess_all` to `true`)
@@ -108,10 +111,11 @@ The scripts will generate the following outputs:
 - `Output/MBPrint/<set name>.<language>/`: `zip` and `7z` archives and a PDF file of 800 dpi JPG images to be printed on MBPrint.pl.
 - `Output/OCTGN/<set name>/<octgn id>/set.xml`.
 - `Output/OCTGN/<set name>/<set name>.<language>.o8c`: image packs for OCTGN (300 dpi PNG).
+- `Output/OCTGNDecks/<set name>/<deck name>.o8d`: quest decks for OCTGN.
 - `Output/PDF/<set name>.<language>/`: PDF files in `A4` and `letter` format for home printing (300 dpi PNG).
 - `Output/RingsDB/<set name>.csv`.
 
-Additionally, if you specified `octgn_destination_path`, all `set.xml` files for OCTGN will be copied there.
+Additionally, if you specified OCTGN destination paths, OCTGN outputs will be copied there.
 
 **Supported Tags**
 
