@@ -937,7 +937,7 @@ def generate_octgn_set_xml(conf, set_id, set_name):
                  set_name, round(time.time() - timestamp, 3))
 
 
-def _load_external_xml(url, sets, encounter_sets):
+def _load_external_xml(url, sets, encounter_sets):  # pylint: disable=R0914
     """ Load cards from an external XML file.
     """
     res = []
@@ -978,12 +978,18 @@ def _load_external_xml(url, sets, encounter_sets):
         traits = _find_properties(card, 'Traits')
         traits = traits[0].attrib['value'] if traits else None
 
+        keywords = _find_properties(card, 'Keywords')
+        keywords = keywords[0].attrib['value'] if keywords else None
+
         card_number = _find_properties(card, 'Card Number')
         card_number = (
             int(card_number[0].attrib['value'])
             if card_number
             and _is_positive_or_zero_int(card_number[0].attrib['value'])
             else 0)
+
+        unique = _find_properties(card, 'Unique')
+        unique = 1 if unique else None
 
         row[CARD_ENCOUNTER_SET] = encounter_set
         row[CARD_ID] = card.attrib['id']
@@ -992,8 +998,10 @@ def _load_external_xml(url, sets, encounter_sets):
         row[CARD_TYPE] = card_type
         row[CARD_SPHERE] = sphere
         row[CARD_TRAITS] = traits
+        row[CARD_KEYWORDS] = keywords
         row[CARD_QUANTITY] = int(quantity[0].attrib['value'])
         row[CARD_SET_NAME] = set_name
+        row[CARD_UNIQUE] = unique
         row[CARD_EASY_MODE] = None
         res.append(row)
 
@@ -1012,8 +1020,12 @@ def _update_card_for_rules(card):
     card[CARD_TYPE] = card[CARD_TYPE].lower()
     card[CARD_SPHERE] = card[CARD_SPHERE].lower() if card[CARD_SPHERE] else ''
     card[CARD_TRAITS] = ([t.lower().strip()
-                          for t in card[CARD_TRAITS].split('.')]
+                          for t in card[CARD_TRAITS].split('.') if t]
                          if card[CARD_TRAITS] else [])
+    card[CARD_KEYWORDS] = ([k.lower().strip()
+                            for k in card[CARD_KEYWORDS].split('.') if k]
+                           if card[CARD_KEYWORDS] else [])
+    card[CARD_UNIQUE] = '1' if card[CARD_UNIQUE] else '0'
     return card
 
 
@@ -1061,8 +1073,15 @@ def _test_rule(card, rule):  # pylint: disable=R0911,R0912
         elif re.match(r'^set:', part):
             if re.sub(r'^set:', '', part).strip() != card[CARD_SET_NAME]:
                 return 0
+        elif re.match(r'^unique:', part):
+            if re.sub(r'^unique:', '', part).strip() != card[CARD_UNIQUE]:
+                return 0
         elif re.match(r'^trait:', part):
             if re.sub(r'^trait:', '', part).strip() not in card[CARD_TRAITS]:
+                return 0
+        elif re.match(r'^keyword:', part):
+            if (re.sub(r'^keyword:', '', part).strip()
+                    not in card[CARD_KEYWORDS]):
                 return 0
         elif re.match(
                 r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-'
@@ -1231,10 +1250,9 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
             for card in cards:
                 if not card[CARD_ENCOUNTER_SET]:
                     player_cards.append(_update_card_for_rules(card.copy()))
-                elif card[CARD_TYPE] == 'Quest':
+                elif card[CARD_TYPE] in ('Campaign', 'Nightmare', 'Quest'):
                     quest_cards.append(_update_card_for_rules(card.copy()))
-                elif card[CARD_TYPE] in ('Campaign', 'Nightmare',
-                                         'Presentation', 'Rules'):
+                elif card[CARD_TYPE] in ('Presentation', 'Rules'):
                     default_setup_cards.append(
                         _update_card_for_rules(card.copy()))
                 elif mode == EASY_PREFIX and card[CARD_EASY_MODE]:
