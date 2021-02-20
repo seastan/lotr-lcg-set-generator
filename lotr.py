@@ -544,16 +544,10 @@ def _update_data():
             row[CARD_SIDE_B] = row[CARD_NAME]
 
         if row[CARD_TYPE] == 'Side Quest':
-            if row[CARD_ENCOUNTER_SET] is not None:
-                row[CARD_TYPE] = 'Encounter Side Quest'
-            else:
-                row[CARD_TYPE] = 'Player Side Quest'
+            row[CARD_TYPE] = 'Encounter Side Quest'
 
         if row[BACK_PREFIX + CARD_TYPE] == 'Side Quest':
-            if row[CARD_ENCOUNTER_SET] is not None:
-                row[BACK_PREFIX + CARD_TYPE] = 'Encounter Side Quest'
-            else:
-                row[BACK_PREFIX + CARD_TYPE] = 'Player Side Quest'
+            row[BACK_PREFIX + CARD_TYPE] = 'Encounter Side Quest'
 
 
 def _skip_row(row):
