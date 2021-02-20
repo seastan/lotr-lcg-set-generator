@@ -117,8 +117,6 @@ IMAGE_MIN_SIZE = 100000
 
 EASY_PREFIX = 'Easy '
 IMAGES_CUSTOM_FOLDER = 'custom'
-OCTGN_SET_XML_ARCHIVE = '_octgn_set_xml_archive.zip'
-OCTGN_O8D_ARCHIVE = '_octgn_o8d_archive.zip'
 OCTGN_SET_XML = 'set.xml'
 PROCESSED_ARTWORK_FOLDER = 'processed'
 PROJECT_FOLDER = 'Frogmorton'
@@ -157,7 +155,7 @@ OUTPUT_HALLOFBEORN_PATH = os.path.join('Output', 'HallOfBeorn')
 OUTPUT_MBPRINT_PATH = os.path.join('Output', 'MBPrint')
 OUTPUT_MPC_PATH = os.path.join('Output', 'MakePlayingCards')
 OUTPUT_OCTGN_PATH = os.path.join('Output', 'OCTGN')
-OUTPUT_OCTGNDECKS_PATH = os.path.join('Output', 'OCTGNDecks')
+OUTPUT_OCTGN_DECKS_PATH = os.path.join('Output', 'OCTGNDecks')
 OUTPUT_PDF_PATH = os.path.join('Output', 'PDF')
 OUTPUT_RINGSDB_PATH = os.path.join('Output', 'RingsDB')
 PROJECT_PATH = 'setGenerator.seproject'
@@ -1341,7 +1339,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
             _append_cards(root.findall("./section[@name='Side Quest']")[0],
                           side_quest_cards)
 
-            output_path = os.path.join(OUTPUT_OCTGNDECKS_PATH,
+            output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
                                        _escape_filename(set_name))
             _create_folder(output_path)
 
@@ -3195,48 +3193,17 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
-def _prepare_updated_o8c(temp_path, updates=None):
-    """ Copy all updated o8c files to the temporary folder.
-
-    NOT USED.
+def _copy_octgn_set_xml_outputs(temp_path, destination_path, sets):
+    """ Copy OCTGN set.xml files to the destination folder.
     """
-    for _, folders, _ in os.walk(OUTPUT_OCTGN_PATH):
-        for folder in folders:
-            for _, _, filenames in os.walk(
-                    os.path.join(OUTPUT_OCTGN_PATH, folder)):
-                for filename in filenames:
-                    parts = filename.split('.')
-                    if len(parts) != 3 or parts[-1] != 'o8c':
-                        continue
-
-                    if not updates or (parts[0], parts[1]) in updates:
-                        shutil.copyfile(os.path.join(OUTPUT_OCTGN_PATH,
-                                                     folder, filename),
-                                        os.path.join(temp_path, filename))
-
-                break
-
-        break
-
-
-def copy_octgn_set_xml_outputs(conf):
-    """ Copy all OCTGN set.xml files to the destination folder.
-    """
-    logging.info('Copying OCTGN outputs to the destination folder...')
-    timestamp = time.time()
-
-    temp_path = os.path.join(TEMP_ROOT_PATH, 'copy_octgn_outputs')
-    _create_folder(temp_path)
-    _clear_folder(temp_path)
-
-    archive_path = os.path.join(temp_path, OCTGN_SET_XML_ARCHIVE)
+    archive_path = os.path.join(temp_path, 'copy_octgn_set_xml_outputs.zip')
     with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_STORED) as obj:
         for _, folders, _ in os.walk(OUTPUT_OCTGN_PATH):
             for folder in folders:
                 for _, subfolders, _ in os.walk(
                         os.path.join(OUTPUT_OCTGN_PATH, folder)):
                     for subfolder in subfolders:
-                        if subfolder not in FOUND_SETS:
+                        if subfolder not in sets:
                             continue
 
                         xml_path = os.path.join(OUTPUT_OCTGN_PATH, folder,
@@ -3250,7 +3217,83 @@ def copy_octgn_set_xml_outputs(conf):
             break
 
     with zipfile.ZipFile(archive_path) as obj:
-        obj.extractall(conf['octgn_set_xml_destination_path'])
+        obj.extractall(destination_path)
+
+    os.remove(archive_path)
+
+
+def _copy_octgn_o8d_outputs(temp_path, destination_path, sets):
+    """ Copy OCTGN set.xml files to the destination folder.
+    """
+    set_folders = {_escape_filename(SETS[s]['Name']) for s in sets}
+    archive_path = os.path.join(temp_path, 'copy_octgn_o8d_outputs.zip')
+    with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_STORED) as obj:
+        for _, folders, _ in os.walk(OUTPUT_OCTGN_DECKS_PATH):
+            for folder in folders:
+                if folder not in set_folders:
+                    continue
+
+                for _, _, filenames in os.walk(
+                        os.path.join(OUTPUT_OCTGN_DECKS_PATH, folder)):
+
+                    for filename in filenames:
+                        if not filename.endswith('.o8d'):
+                            continue
+
+                        obj.write(os.path.join(OUTPUT_OCTGN_DECKS_PATH, folder,
+                                               filename),
+                                  filename)
+
+                    break
+
+            break
+
+    with zipfile.ZipFile(archive_path) as obj:
+        obj.extractall(destination_path)
+
+    os.remove(archive_path)
+
+
+def copy_octgn_outputs(conf, sets):
+    """ Copy OCTGN outputs to the destination folder.
+    """
+    logging.info('Copying OCTGN outputs to the destination folder...')
+    timestamp = time.time()
+
+    chosen_sets = {s[0] for s in sets}.intersection(FOUND_SETS)
+    chosen_scratch_sets = {s[0] for s in sets}.intersection(FOUND_SCRATCH_SETS)
+
+    temp_path = os.path.join(TEMP_ROOT_PATH, 'copy_octgn_outputs')
+    _create_folder(temp_path)
+    _clear_folder(temp_path)
+
+    if (chosen_sets and conf['octgn_set_xml']
+            and conf['octgn_set_xml_destination_path']):
+        _copy_octgn_set_xml_outputs(
+            temp_path,
+            conf['octgn_set_xml_destination_path'],
+            chosen_sets)
+
+    if (chosen_scratch_sets and conf['octgn_set_xml']
+            and conf['octgn_set_xml_scratch_destination_path']):
+        _copy_octgn_set_xml_outputs(
+            temp_path,
+            conf['octgn_set_xml_scratch_destination_path'],
+            chosen_scratch_sets)
+
+    if (chosen_sets and conf['octgn_o8d']
+            and conf['octgn_o8d_destination_path']):
+        _copy_octgn_o8d_outputs(
+            temp_path,
+            conf['octgn_o8d_destination_path'],
+            chosen_sets)
+
+    if (chosen_scratch_sets and conf['octgn_o8d']
+            and conf['octgn_o8d_scratch_destination_path']):
+        _copy_octgn_o8d_outputs(
+            temp_path,
+            conf['octgn_o8d_scratch_destination_path'],
+            chosen_scratch_sets)
 
     _delete_folder(temp_path)
 

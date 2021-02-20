@@ -50,8 +50,7 @@ def main():  # pylint: disable=R0912
             lotr.copy_raw_images(conf, set_id, set_name, lang)
             lotr.copy_xml(set_id, set_name, lang)
 
-    if conf['octgn_set_xml'] and conf['octgn_set_xml_destination_path']:
-        lotr.copy_octgn_set_xml_outputs(conf)
+    lotr.copy_octgn_outputs(conf, sets)
 
     if changes:
         lotr.create_project()
