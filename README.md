@@ -174,15 +174,15 @@ Icons:
 OCTGN `.o8d` files are generated automatically for each scenario detected on `Quest` and `Nightmare` cards.
 By default, the deck includes all cards, which share both the set and encounter set from the
 "parent" `Quest` or `Nightmare` card (including encounter sets from `Additional Encounter Sets` column).
-All `Quest`, `Nightmare` and `Campaign` cards are put into `Quest` section, all `Rules`
+All `Quest`, `Nightmare`, and `Campaign` cards are put into `Quest` section, all `Rules`
 cards are put into `Setup` section and all encounter cards are put into `Encounter` section.
-File name of the deck is the same as `Adventure` value (`Quest` cards) or `Name` value (`Nightmare` cards)
-with all spaces replaced with `-`.  Easy mode version is generated automatically, if any card included
-in the deck has different quantity for the normal and easy modes.
+Filename of the deck is the same as `Adventure` value (`Quest` cards) or `Name` value (`Nightmare` cards)
+with all spaces replaced with `-`.  Easy mode version is generated automatically if any card included
+in the deck has a different quantity for the normal and easy modes.
 
 To adjust the deck, you need to describe the rules in `Deck Rules` column (for a corresponding `Quest`
 or `Nightmare` card).  The rules are separated by a line break.  If you want to create several decks
-for the same scenario (for example, a normal and a campaign deck), describe the rules for each of the deck
+for the same scenario (for example, a normal and a campaign deck), describe the rules for each of the decks
 and separate them using an additional empty line.  For example:
 
 ```
@@ -208,8 +208,8 @@ Setup: Saruman; Grima; Brandywine Gate
 
 Below is a list of all supported rules:
 
-- `Prefix`: Specify a custom file name prefix.  For example: `Prefix: ALeP-Standalone-01` will result
-  in a file name like `ALeP-Standalone-01-The-Scouring-of-the-Shire.o8d`.
+- `Prefix`: Specify a custom filename prefix.  For example: `Prefix: ALeP-Standalone-01` will result
+  in a filename like `ALeP-Standalone-01-The-Scouring-of-the-Shire.o8d`.
 - `Sets`: Specify additional sets to be included.  For example: `Sets: ALeP - Children of Eorl`.
 - `Encounter Sets`: Specify additional encounter sets to be included.  For example:
   `Encounter Sets: Journey in the Dark`.
@@ -217,9 +217,9 @@ Below is a list of all supported rules:
   For example: `External XML: https://raw.githubusercontent.com/seastan/Lord-of-the-Rings/master/o8g/Sets/The%20Road%20Darkens/set.xml`.
 - `Remove`: list of filters to select cards that need to be removed from the deck.  For example:
   `Remove: Type:Campaign` (remove any cards with `Campaign` type from the normal deck).
-- `Second Quest Deck`, `Special`, `Second Special`, `Setup`, `Staging Setup` and `Active Setup`:
+- `Second Quest Deck`, `Special`, `Second Special`, `Setup`, `Staging Setup`, and `Active Setup`:
   list of filters to select cards for that section.  For example: `Setup: Saruman; Grima; Brandywine Gate`.
-- `Player`: list of filters to select cards for `Hero`, `Ally`, `Attachment`, `Event` and `Side Quest`
+- `Player`: list of filters to select cards for `Hero`, `Ally`, `Attachment`, `Event`, and `Side Quest`
   sections (exact section is defined automatically).  For example: `Player: Frodo Baggins`.
 
 Order of rules is important.  For example:
@@ -247,7 +247,7 @@ Below is a list of all supported filters:
 You can combine several filters with `&`.  For example: `[The Aldburg Plot] & Trait:Suspicious`
 means all cards with `Suspicious` trait from `The Aldburg Plot` encounter set.
 
-Instead of selecting all copies of a card you can specify exact number.  For example:
+Instead of selecting all copies of a card, you can specify the exact number.  For example:
 `4 One-feather Shirriff` means 4 copies of `One-feather Shirriff` and `1 Type:Enemy`
 means one copy of each different enemy.
 
