@@ -64,6 +64,8 @@ outputs:
 #    - mbprint_zip
 #    - mbprint_7z
 #    - mbprint_pdf
+#    - generic_png_zip
+#    - generic_png_7z
   German:
 #    - db
 #    - octgn
@@ -76,6 +78,8 @@ outputs:
 #    - mbprint_zip
 #    - mbprint_7z
 #    - mbprint_pdf
+#    - generic_png_zip
+#    - generic_png_7z
   Spanish:
 #    - db
 #    - octgn
@@ -88,6 +92,8 @@ outputs:
 #    - mbprint_zip
 #    - mbprint_7z
 #    - mbprint_pdf
+#    - generic_png_zip
+#    - generic_png_7z
   French:
 #    - db
 #    - octgn
@@ -100,6 +106,8 @@ outputs:
 #    - mbprint_zip
 #    - mbprint_7z
 #    - mbprint_pdf
+#    - generic_png_zip
+#    - generic_png_7z
   Polish:
 #    - db
 #    - octgn
@@ -112,6 +120,8 @@ outputs:
 #    - mbprint_zip
 #    - mbprint_7z
 #    - mbprint_pdf
+#    - generic_png_zip
+#    - generic_png_7z
   Italian:
 #    - db
 #    - octgn
@@ -124,3 +134,5 @@ outputs:
 #    - mbprint_zip
 #    - mbprint_7z
 #    - mbprint_pdf
+#    - generic_png_zip
+#    - generic_png_7z

@@ -106,6 +106,7 @@ The scripts will generate the following outputs:
 
 - `Output/DB/<set name>.<language>/`: 300 dpi PNG images for general purposes.
 - `Output/DriveThruCards/<set name>.<language>/`: `zip` and `7z` archives of 300 dpi JPG images to be printed on DriveThruCards.com.
+- `Output/GenericPNG/<set name>.<language>/`: `zip` and `7z` archives of generic 800 dpi PNG images.
 - `Output/HallOfBeorn/<set name>.json`.
 - `Output/MakePlayingCards/<set name>.<language>/`: `zip` and `7z` archives of 800 dpi PNG images to be printed on MakePlayingCards.com.
 - `Output/MBPrint/<set name>.<language>/`: `zip` and `7z` archives and a PDF file of 800 dpi JPG images to be printed on MBPrint.pl.

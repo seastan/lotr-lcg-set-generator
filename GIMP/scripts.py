@@ -433,6 +433,28 @@ def prepare_mbprint_jpg(img, drawable, output_folder):
     pdb.gimp_undo_push_group_end(img)
 
 
+def prepare_generic_png(img, drawable, output_folder):
+    """ Prepare a generic PNG image.
+    """
+    gimp.progress_init('Prepare a generic PNG image...')
+    pdb.gimp_undo_push_group_start(img)
+
+    try:
+        file_name, back_side = _get_filename_backside(img, 'png')
+    except Exception:  # pylint: disable=W0703
+        pdb.gimp_undo_push_group_end(img)
+        return
+
+    rotation = _get_rotation(drawable)
+    if rotation:
+        _rotate(drawable, back_side)
+
+    pdb.file_png_save(img, drawable,
+                      os.path.join(output_folder, file_name), file_name,
+                      0, 9, 1, 0, 0, 1, 1)
+    pdb.gimp_undo_push_group_end(img)
+
+
 def cut_bleed_margins_folder(input_folder, output_folder):
     """ Cut bleed margins from a folder of images.
     """
@@ -495,6 +517,14 @@ def prepare_mbprint_jpg_folder(input_folder, output_folder):
     gimp.progress_init(
         'Prepare a folder of images for MBPrint printing (JPG)...')
     _iterate_folder(input_folder, output_folder, prepare_mbprint_jpg)
+
+
+def prepare_generic_png_folder(input_folder, output_folder):
+    """ Prepare a folder of generic PNG images.
+    """
+    gimp.progress_init(
+        'Prepare a folder of generic PNG images...')
+    _iterate_folder(input_folder, output_folder, prepare_generic_png)
 
 
 register(
@@ -775,6 +805,41 @@ register(
     ],
     [],
     prepare_mbprint_jpg_folder,
+    menu='<Image>/Filters')
+
+register(
+    'python_prepare_generic_png',
+    'Prepare a generic PNG image',
+    '1. Rotate a landscape image. 2. Export PNG.',
+    'A.R.',
+    'A.R.',
+    '2020',
+    'Prepare Generic PNG',
+    '*',
+    [
+        (PF_IMAGE, 'image', 'Input image', None),
+        (PF_DRAWABLE, 'drawable', 'Input drawable', None),
+        (PF_DIRNAME, 'output_folder', 'Output folder', None)
+    ],
+    [],
+    prepare_generic_png,
+    menu='<Image>/Filters')
+
+register(
+    'python_prepare_generic_png_folder',
+    'Prepare a folder of generic PNG images',
+    '1. Rotate a landscape image. 2. Export PNG.',
+    'A.R.',
+    'A.R.',
+    '2020',
+    'Prepare Generic PNG Folder',
+    '*',
+    [
+        (PF_DIRNAME, 'input_folder', 'Input folder', None),
+        (PF_DIRNAME, 'output_folder', 'Output folder', None)
+    ],
+    [],
+    prepare_generic_png_folder,
     menu='<Image>/Filters')
 
 

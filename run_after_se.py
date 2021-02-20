@@ -59,6 +59,13 @@ def generate_mbprint(conf, set_id, set_name, lang, skip_ids, card_data):  # pyli
     lotr.generate_mbprint(conf, set_id, set_name, lang, card_data)
 
 
+def generate_generic_png(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: disable=R0913
+    """ Generate generic PNG outputs.
+    """
+    lotr.generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids)
+    lotr.generate_generic_png(conf, set_id, set_name, lang, card_data)
+
+
 def run(args):
     """ Run the function.
     """
@@ -143,6 +150,10 @@ def main():  # pylint: disable=R0912
             if 'mbprint' in conf['outputs'][lang]:
                 tasks.append([generate_mbprint, conf, set_id, set_name, lang,
                               skip_ids, lotr.DATA])
+
+            if 'generic_png' in conf['outputs'][lang]:
+                tasks.append([generate_generic_png, conf, set_id, set_name,
+                              lang, skip_ids, lotr.DATA])
 
     execute_tasks(conf, pre_tasks)
     execute_tasks(conf, tasks)
