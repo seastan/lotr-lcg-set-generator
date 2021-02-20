@@ -169,6 +169,117 @@ Icons:
 - `[eos]`: Eye of Sauron
 - `[pp]`: per player
 
+**Deck Rules**
+
+OCTGN `.o8d` are generated automatically for each scenario detected on `Quest` and `Nightmare` cards.
+By default, the deck includes all cards, which share both the set and encounter set from the
+"parent" `Quest` or `Nightmare` card (including encounter sets from `Additional Encounter Sets` column).
+All `Quest`, `Nightmare` and `Campaign` cards are put into `Quest` section, all `Rules`
+cards are put into `Setup` section and all encounter cards are put into `Encounter` section.
+File name of the deck is the same as `Adventure` value (`Quest` cards) or `Name` value (`Nightmare` cards)
+with all spaces replaced with `-`.  Easy mode version is generated automatically, if any card included
+in the deck has different quantity for the normal and easy modes.
+
+To adjust the deck, you need to describe the rules in `Deck Rules` column.  The rules are separated
+by a line break.  If you want to create several decks for the same scenario (for example, a normal
+and a campaign deck), describe the rules for each of the deck and separate them using an additional
+empty line.  For example:
+
+```
+[rule 1 for deck 1]
+[rule 2 for deck 1]
+
+[rule 1 for deck 2]
+[rule 2 for deck 2]
+[rule 3 for deck 2]
+```
+
+Each rule is a key-value pair, separated by `:`.  For example:
+
+```
+Prefix: ALeP-Standalone-01
+```
+
+If you want to set a list of values, separate them by `;`.  For example:
+
+```
+Setup: Saruman; Grima; Brandywine Gate
+```
+
+Below is a list of all supported rules:
+
+- `Prefix`: Specify a custom file name prefix.  For example: `Prefix: ALeP-Standalone-01` will result
+  in a file name like `ALeP-Standalone-01-The-Scouring-of-the-Shire.o8d`.
+- `Sets`: Specify additional sets to be included.  For example: `Sets: ALeP - Children of Eorl`.
+- `Encounter Sets`: Specify additional encounter sets to be included.  For example:
+  `Encounter Sets: Journey in the Dark`.
+- `External XML`: links to external `set.xml` files (if those cards are not in the spreadsheet).
+  For example: `External XML: https://raw.githubusercontent.com/seastan/Lord-of-the-Rings/master/o8g/Sets/The%20Road%20Darkens/set.xml`.
+- `Remove`: list of filters to select cards that need to be removed from the deck.  For example:
+  `Remove: Type:Campaign` (removing any cards with `Campaign` type from the normal deck).
+- `Second Quest Deck`, `Special`, `Second Special`, `Setup`, `Staging Setup` and `Active Setup`:
+  list of filters to select cards for that section.  For example: `Setup: Saruman; Grima; Brandywine Gate`.
+- `Player`: list of filters to select cards for `Hero`, `Ally`, `Attachment`, `Event` and `Side Quest`
+  sections (exact section is defined automatically).  For example: `Player: Frodo Baggins`.
+
+Order of rules is important.  For example:
+
+```
+Setup: Grievous Wound
+Remove: Set:The Road Darkens
+```
+
+First, we add `Grievous Wound` to `Setup` section.  After that, we remove all other cards from
+`The Road Darkens` set.
+
+Below is a list of all supported filters:
+
+- `[encounter set]` - all cards from a particular encounter set.  For example: `[Caves Map]`.
+- `card name` - all cards with a particular name.  For example: `Shores of Anduin`.
+- `card GUID` - all cards with a particular GUID.  For example: `de8c3087-3a5d-424c-b137-fb548beb659e`.
+- `Type:card type` - all cards with a particular type.  For example: `Type:Enemy`.
+- `Sphere:card sphere` - all cards with a particular sphere.  For example: `Sphere:Boon`.
+- `Set:card set` - all cards from a particular set.  For example: `Set:The Road Darkens`.
+- `Trait:card trait` - all cards with a particular trait.  For example: `Trait:Rohan`.
+- `Keyword:keyword` - all cards with a particular keyword.  For example: `Keyword:Safe`.
+- `Unique:1` - all unique cards.
+
+You can combine several filters with `&`.  For example: `[The Aldburg Plot] & Trait:Suspicious`
+means all cards with trait `Suspicious` from `The Aldburg Plot` encounter set.
+
+Instead of selecting all copies of a card you can specify exact number.  For example: `1 Type:Enemy`
+means one copy of each different enemy.
+
+A few more examples:
+
+```
+Prefix: ALeP-Standalone-01
+Remove: Type:Campaign
+Special: Trait:Sharkey & Type:Treachery
+Setup: Saruman; Grima; Brandywine Gate; Type:Side Quest; 4 One-feather Shirriff
+Player: Frodo Baggins
+
+Prefix: ALeP-Standalone-01-Campaign
+External XML: https://raw.githubusercontent.com/seastan/Lord-of-the-Rings/master/o8g/Sets/The%20Road%20Darkens/set.xml
+Sets: The Road Darkens
+Encounter Sets: Journey in the Dark
+Setup: Grievous Wound
+Remove: Set:The Road Darkens
+Special: Trait:Sharkey & Type:Treachery
+Setup: Saruman; Grima; Brandywine Gate; Type:Side Quest; 4 One-feather Shirriff; Sphere:Boon
+Player: Frodo Baggins
+```
+
+```
+Prefix: Nightmare-1.5
+External XML: https://raw.githubusercontent.com/seastan/Lord-of-the-Rings/master/o8g/Sets/Core%20Set/set.xml; https://raw.githubusercontent.com/seastan/Lord-of-the-Rings/master/o8g/Sets/Conflict%20at%20the%20Carrock/set.xml; https://raw.githubusercontent.com/seastan/Lord-of-the-Rings/master/o8g/Sets/Shadows%20of%20Mirkwood%20-%20Nightmare/set.xml
+Sets: Core Set; Conflict at the Carrock; Shadows of Mirkwood - Nightmare
+Encounter Sets: Journey Down the Anduin; Wilderlands; Conflict at the Carrock; Conflict at the Carrock - Nightmare
+Remove: [Journey Down the Anduin] & Type:Quest; Grimbeorn the Old; [Conflict at the Carrock] & Louis; [Conflict at the Carrock] & Morris; [Conflict at the Carrock] & Stuart; [Conflict at the Carrock] & Rupert; Bee Pastures; Oak-wood Grove; 1 Roasted Slowly; Misty Mountain Goblins; Banks of the Anduin; Wolf Rider; Goblin Sniper; Wargs; Despair; The Brown Lands; The East Bight
+Setup: Unique:1 & Trait:Troll; 4 Sacked!
+Staging Setup: The Carrock
+```
+
 **GIMP Plugins**
 
 You may use GIMP plugins separately.  See the description of each of them in `GIMP/scripts.py`.
