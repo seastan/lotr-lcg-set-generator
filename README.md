@@ -171,7 +171,7 @@ Icons:
 
 **Deck Rules**
 
-OCTGN `.o8d` are generated automatically for each scenario detected on `Quest` and `Nightmare` cards.
+OCTGN `.o8d` files are generated automatically for each scenario detected on `Quest` and `Nightmare` cards.
 By default, the deck includes all cards, which share both the set and encounter set from the
 "parent" `Quest` or `Nightmare` card (including encounter sets from `Additional Encounter Sets` column).
 All `Quest`, `Nightmare` and `Campaign` cards are put into `Quest` section, all `Rules`
@@ -180,10 +180,10 @@ File name of the deck is the same as `Adventure` value (`Quest` cards) or `Name`
 with all spaces replaced with `-`.  Easy mode version is generated automatically, if any card included
 in the deck has different quantity for the normal and easy modes.
 
-To adjust the deck, you need to describe the rules in `Deck Rules` column.  The rules are separated
-by a line break.  If you want to create several decks for the same scenario (for example, a normal
-and a campaign deck), describe the rules for each of the deck and separate them using an additional
-empty line.  For example:
+To adjust the deck, you need to describe the rules in `Deck Rules` column (for a corresponding `Quest`
+or `Nightmare` card).  The rules are separated by a line break.  If you want to create several decks
+for the same scenario (for example, a normal and a campaign deck), describe the rules for each of the deck
+and separate them using an additional empty line.  For example:
 
 ```
 [rule 1 for deck 1]
@@ -216,7 +216,7 @@ Below is a list of all supported rules:
 - `External XML`: links to external `set.xml` files (if those cards are not in the spreadsheet).
   For example: `External XML: https://raw.githubusercontent.com/seastan/Lord-of-the-Rings/master/o8g/Sets/The%20Road%20Darkens/set.xml`.
 - `Remove`: list of filters to select cards that need to be removed from the deck.  For example:
-  `Remove: Type:Campaign` (removing any cards with `Campaign` type from the normal deck).
+  `Remove: Type:Campaign` (remove any cards with `Campaign` type from the normal deck).
 - `Second Quest Deck`, `Special`, `Second Special`, `Setup`, `Staging Setup` and `Active Setup`:
   list of filters to select cards for that section.  For example: `Setup: Saruman; Grima; Brandywine Gate`.
 - `Player`: list of filters to select cards for `Hero`, `Ally`, `Attachment`, `Event` and `Side Quest`
@@ -235,19 +235,20 @@ First, we add `Grievous Wound` to `Setup` section.  After that, we remove all ot
 Below is a list of all supported filters:
 
 - `[encounter set]` - all cards from a particular encounter set.  For example: `[Caves Map]`.
-- `card name` - all cards with a particular name.  For example: `Shores of Anduin`.
-- `card GUID` - all cards with a particular GUID.  For example: `de8c3087-3a5d-424c-b137-fb548beb659e`.
+- `Set:card set` - all cards from a particular set.  For example: `Set:The Road Darkens`.
 - `Type:card type` - all cards with a particular type.  For example: `Type:Enemy`.
 - `Sphere:card sphere` - all cards with a particular sphere.  For example: `Sphere:Boon`.
-- `Set:card set` - all cards from a particular set.  For example: `Set:The Road Darkens`.
 - `Trait:card trait` - all cards with a particular trait.  For example: `Trait:Rohan`.
 - `Keyword:keyword` - all cards with a particular keyword.  For example: `Keyword:Safe`.
 - `Unique:1` - all unique cards.
+- `card name` - all copies of a card with a particular name.  For example: `Shores of Anduin`.
+- `card GUID` - all copies of a card with a particular GUID.  For example: `de8c3087-3a5d-424c-b137-fb548beb659e`.
 
 You can combine several filters with `&`.  For example: `[The Aldburg Plot] & Trait:Suspicious`
-means all cards with trait `Suspicious` from `The Aldburg Plot` encounter set.
+means all cards with `Suspicious` trait from `The Aldburg Plot` encounter set.
 
-Instead of selecting all copies of a card you can specify exact number.  For example: `1 Type:Enemy`
+Instead of selecting all copies of a card you can specify exact number.  For example:
+`4 One-feather Shirriff` means 4 copies of `One-feather Shirriff` and `1 Type:Enemy`
 means one copy of each different enemy.
 
 A few more examples:
