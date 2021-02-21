@@ -92,25 +92,30 @@ CARD_ORIGINAL_NAME = '_Original Name'
 MAX_COLUMN = '_Max Column'
 ROW_COLUMN = '_Row'
 
-CARD_TYPES = ('Ally', 'Attachment', 'Campaign', 'Contract', 'Enemy',
+CARD_TYPES = {'Ally', 'Attachment', 'Campaign', 'Contract', 'Enemy',
               'Encounter Side Quest', 'Event', 'Hero', 'Location', 'Nightmare',
-              'Objective', 'Objective Ally', 'Player Side Quest',
-              'Presentation', 'Quest', 'Rules', 'Ship Enemy', 'Ship Objective',
-              'Treachery', 'Treasure')
-CARD_TYPES_DOUBLESIDE_MANDATORY = ('Campaign', 'Nightmare', 'Presentation',
-                                   'Quest', 'Rules')
-CARD_TYPES_DOUBLESIDE_OPTIONAL = ('Campaign', 'Contract', 'Nightmare',
-                                  'Presentation', 'Quest', 'Rules')
-CARD_TYPES_PLAYER = ('Ally', 'Attachment', 'Contract', 'Event', 'Hero',
-                     'Player Side Quest', 'Treasure')
-CARD_TYPES_PLAYER_DECK = ('Ally', 'Attachment', 'Event', 'Player Side Quest')
-CARD_TYPES_ENCOUNTER_SET = ('Campaign', 'Enemy', 'Encounter Side Quest',
+              'Objective', 'Objective Ally', 'Objective Hero',
+              'Objective Location', 'Player Side Quest', 'Presentation',
+              'Quest', 'Rules', 'Ship Enemy', 'Ship Objective', 'Treachery',
+              'Treasure'}
+CARD_TYPES_DOUBLESIDE_MANDATORY = {'Campaign', 'Nightmare', 'Presentation',
+                                   'Quest', 'Rules'}
+CARD_TYPES_DOUBLESIDE_OPTIONAL = {'Campaign', 'Contract', 'Nightmare',
+                                  'Presentation', 'Quest', 'Rules'}
+CARD_TYPES_PLAYER = {'Ally', 'Attachment', 'Contract', 'Event', 'Hero',
+                     'Player Side Quest', 'Treasure'}
+CARD_TYPES_PLAYER_DECK = {'Ally', 'Attachment', 'Event', 'Player Side Quest'}
+CARD_TYPES_ENCOUNTER_SET = {'Campaign', 'Enemy', 'Encounter Side Quest',
                             'Location', 'Nightmare', 'Objective',
-                            'Objective Ally', 'Quest', 'Ship Enemy',
-                            'Ship Objective', 'Treachery', 'Treasure')
-CARD_TYPES_ADVENTURE = ('Campaign', 'Objective', 'Objective Ally',
-                        'Ship Objective', 'Quest')
-
+                            'Objective Ally', 'Objective Hero',
+                            'Objective Location', 'Quest', 'Ship Enemy',
+                            'Ship Objective', 'Treachery', 'Treasure'}
+CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
+                        'Objective Hero', 'Objective Location',
+                        'Ship Objective', 'Quest'}
+SPHERES = {'Leadership', 'Lore', 'Spirit', 'Tactics', 'Neutral', 'Fellowship',
+           'Baggins', 'Mastery', 'Boon', 'Burden', 'Nightmare', 'Upgraded',
+           'Setup'}
 
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
@@ -702,8 +707,10 @@ def sanity_check(sets):  # pylint: disable=R0912,R0914,R0915
         card_name = row[CARD_NAME]
         card_unique = row[CARD_UNIQUE]
         card_type = row[CARD_TYPE]
+        card_sphere = row[CARD_SPHERE]
         card_unique_back = row[BACK_PREFIX + CARD_UNIQUE]
         card_type_back = row[BACK_PREFIX + CARD_TYPE]
+        card_sphere_back = row[BACK_PREFIX + CARD_SPHERE]
         card_easy_mode = row[CARD_EASY_MODE]
         card_scratch = row[CARD_SCRATCH]
         scratch = ' (Scratch)' if card_scratch else ''
@@ -788,6 +795,17 @@ def sanity_check(sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL
               and card_type_back in CARD_TYPES_DOUBLESIDE_OPTIONAL):
             logging.error('ERROR: Incorrect card type back for row #%s%s', i,
+                          scratch)
+            errors_found = errors_found if card_scratch else True
+
+        if (card_type != 'Presentation' and card_sphere is not None
+                and card_sphere not in SPHERES):
+            logging.error('ERROR: Unknown sphere for row #%s%s', i, scratch)
+            errors_found = errors_found if card_scratch else True
+
+        if (card_type_back != 'Presentation' and card_sphere_back is not None
+                and card_sphere_back not in SPHERES):
+            logging.error('ERROR: Unknown sphere back for row #%s%s', i,
                           scratch)
             errors_found = errors_found if card_scratch else True
 
@@ -988,7 +1006,8 @@ def _load_external_xml(url, sets, encounter_sets):  # pylint: disable=R0912,R091
         sphere = _find_properties(card, 'Sphere')
         sphere = sphere[0].attrib['value'] if sphere else None
 
-        if (not sphere and encounter_set.endswith(' - nightmare')
+        if (not sphere and encounter_set
+                and encounter_set.endswith(' - nightmare')
                 and card_type in ('Encounter Side Quest', 'Enemy', 'Location',
                                   'Objective', 'Quest', 'Ship Enemy',
                                   'Treachery')):
@@ -1620,6 +1639,8 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
         elif card_type in ('Contract', 'Treasure'):
             sphere = 'Neutral'
         elif row[CARD_SPHERE] == 'Nightmare':
+            sphere = 'None'
+        elif row[CARD_SPHERE] == 'Upgraded':
             sphere = 'None'
         elif row[CARD_SPHERE] is not None:
             sphere = row[CARD_SPHERE]
