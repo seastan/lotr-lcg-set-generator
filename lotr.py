@@ -95,7 +95,8 @@ ROW_COLUMN = '_Row'
 CARD_TYPES = ('Ally', 'Attachment', 'Campaign', 'Contract', 'Enemy',
               'Encounter Side Quest', 'Event', 'Hero', 'Location', 'Nightmare',
               'Objective', 'Objective Ally', 'Player Side Quest',
-              'Presentation', 'Quest', 'Rules', 'Treachery', 'Treasure')
+              'Presentation', 'Quest', 'Rules', 'Ship Enemy', 'Ship Objective',
+              'Treachery', 'Treasure')
 CARD_TYPES_DOUBLESIDE_MANDATORY = ('Campaign', 'Nightmare', 'Presentation',
                                    'Quest', 'Rules')
 CARD_TYPES_DOUBLESIDE_OPTIONAL = ('Campaign', 'Contract', 'Nightmare',
@@ -105,8 +106,10 @@ CARD_TYPES_PLAYER = ('Ally', 'Attachment', 'Contract', 'Event', 'Hero',
 CARD_TYPES_PLAYER_DECK = ('Ally', 'Attachment', 'Event', 'Player Side Quest')
 CARD_TYPES_ENCOUNTER_SET = ('Campaign', 'Enemy', 'Encounter Side Quest',
                             'Location', 'Nightmare', 'Objective',
-                            'Objective Ally', 'Quest', 'Treachery', 'Treasure')
-CARD_TYPES_ADVENTURE = ('Campaign', 'Objective', 'Objective Ally', 'Quest')
+                            'Objective Ally', 'Quest', 'Ship Enemy',
+                            'Ship Objective', 'Treachery', 'Treasure')
+CARD_TYPES_ADVENTURE = ('Campaign', 'Objective', 'Objective Ally',
+                        'Ship Objective', 'Quest')
 
 
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
