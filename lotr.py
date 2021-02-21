@@ -941,7 +941,7 @@ def generate_octgn_set_xml(conf, set_id, set_name):
                  set_name, round(time.time() - timestamp, 3))
 
 
-def _load_external_xml(url, sets, encounter_sets):  # pylint: disable=R0914
+def _load_external_xml(url, sets, encounter_sets):  # pylint: disable=R0912,R0914,R0915
     """ Load cards from an external XML file.
     """
     res = []
@@ -961,9 +961,16 @@ def _load_external_xml(url, sets, encounter_sets):  # pylint: disable=R0914
         else:
             encounter_set = None
 
+        quantity = _find_properties(card, 'Quantity')
+        if not quantity:
+            continue
+
         card_type = _find_properties(card, 'Type')
         if not card_type:
             continue
+
+        traits = _find_properties(card, 'Traits')
+        traits = traits[0].attrib['value'] if traits else None
 
         card_type = card_type[0].attrib['value']
         if card_type == 'Side Quest':
@@ -971,16 +978,23 @@ def _load_external_xml(url, sets, encounter_sets):  # pylint: disable=R0914
                 card_type = 'Encounter Side Quest'
             else:
                 card_type = 'Player Side Quest'
-
-        quantity = _find_properties(card, 'Quantity')
-        if not quantity:
-            continue
+        elif card_type == 'Enemy':
+            if 'Ship' in [t.strip() for t in traits.split('.')]:
+                card_type = 'Ship Enemy'
+        elif card_type == 'Objective':
+            if 'Ship' in [t.strip() for t in traits.split('.')]:
+                card_type = 'Ship Objective'
 
         sphere = _find_properties(card, 'Sphere')
         sphere = sphere[0].attrib['value'] if sphere else None
 
-        traits = _find_properties(card, 'Traits')
-        traits = traits[0].attrib['value'] if traits else None
+        if (not sphere and encounter_set.endswith(' - nightmare')
+                and card_type in ('Encounter Side Quest', 'Enemy', 'Location',
+                                  'Objective', 'Quest', 'Ship Enemy',
+                                  'Treachery')):
+            sphere = 'Nightmare'
+        elif sphere == 'Neutral' and card_type == 'Treasure':
+            sphere = None
 
         keywords = _find_properties(card, 'Keywords')
         keywords = keywords[0].attrib['value'] if keywords else None
@@ -1605,6 +1619,8 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
             sphere = 'None'
         elif card_type in ('Contract', 'Treasure'):
             sphere = 'Neutral'
+        elif row[CARD_SPHERE] == 'Nightmare':
+            sphere = 'None'
         elif row[CARD_SPHERE] is not None:
             sphere = row[CARD_SPHERE]
         else:

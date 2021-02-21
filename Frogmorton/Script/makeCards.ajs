@@ -388,6 +388,17 @@ function run(progress, target, filename, icons) {
 					cardName = card['Name'];
 					cardType = card['Type'] + '';
 					cardSphere = card['Sphere'] + '';
+
+					if ((cardSphere == 'Boon') && (['Ally', 'Hero', 'Player Side Quest', 'Ship Objective'].indexOf(cardType) > -1)) {
+						card['Sphere'] = 'Neutral';
+					}
+					else if ((cardSphere == 'Burden') && (['Encounter Side Quest', 'Enemy', 'Location', 'Ship Enemy'].indexOf(cardType) > -1)) {
+						card['Sphere'] = '';
+					}
+					else if ((cardSphere == 'Nightmare') && (['Encounter Side Quest', 'Objective', 'Ship Enemy', 'Presentation'].indexOf(cardType) > -1)) {
+						card['Sphere'] = '';
+					}
+
 					keywords = card['Keywords'];
 					suffix = '';
 					mapping = [
@@ -435,6 +446,17 @@ function run(progress, target, filename, icons) {
 					cardName = card['BName'];
 					cardType = card['BType'] + '';
 					cardSphere = card['BSphere'] + '';
+
+					if ((cardSphere == 'Boon') && (['Ally', 'Hero', 'Player Side Quest', 'Ship Objective'].indexOf(cardType) > -1)) {
+						card['BSphere'] = 'Neutral';
+					}
+					else if ((cardSphere == 'Burden') && (['Encounter Side Quest', 'Enemy', 'Location', 'Ship Enemy'].indexOf(cardType) > -1)) {
+						card['BSphere'] = '';
+					}
+					else if ((cardSphere == 'Nightmare') && (['Encounter Side Quest', 'Objective', 'Ship Enemy', 'Presentation'].indexOf(cardType) > -1)) {
+						card['BSphere'] = '';
+					}
+
 					keywords = card['BKeywords'];
 					suffix = '-2';
 					mapping = [
@@ -467,13 +489,6 @@ function run(progress, target, filename, icons) {
 						['CollectionNumberCustom', 'Card Number'],
 						['CollectionInfo', 'Version']
 					];
-				}
-
-				if ((cardSphere == 'Boon') && (['Ally', 'Hero', 'Player Side Quest', 'Ship Objective'].indexOf(cardType) > -1)) {
-					continue;
-				}
-				else if ((cardSphere == 'Burden') && (['Encounter Side Quest', 'Enemy', 'Location', 'Ship Enemy'].indexOf(cardType) > -1)) {
-					continue;
 				}
 
 				progress.status = cardName;

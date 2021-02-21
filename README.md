@@ -245,6 +245,8 @@ Below is a list of all supported filters:
 - `card name` - all copies of a card with a particular name.  For example: `Shores of Anduin`.
 - `card GUID` - all copies of a card with a particular GUID.  For example: `de8c3087-3a5d-424c-b137-fb548beb659e`.
 
+You can filter by an empty value.  For example: `Sphere:` (all non-Nightmare cards).
+
 You can combine several filters with `&`.  For example: `[The Aldburg Plot] & Trait:Suspicious`
 means all cards with `Suspicious` trait from `The Aldburg Plot` encounter set.
 
