@@ -170,6 +170,56 @@ Icons:
 - `[eos]`: Eye of Sauron
 - `[pp]`: per player
 
+**Card Types & Spheres**
+
+List of available card types:
+
+- `Ally`
+- `Attachment`
+- `Campaign`
+- `Contract`
+- `Enemy`
+- `Encounter Side Quest` (alias: `Side Quest`)
+- `Event`
+- `Hero`
+- `Location`
+- `Nightmare`
+- `Objective`
+- `Objective Ally`
+- `Objective Hero`
+- `Objective Location`
+- `Player Side Quest`
+- `Presentation`
+- `Quest`
+- `Rules`
+- `Ship Enemy`
+- `Ship Objective`
+- `Treachery`
+- `Treasure`
+
+List of available sphere values:
+
+- `Baggins`
+- `Fellowship`
+- `Leadership`
+- `Lore`
+- `Neutral`
+- `Spirit`
+- `Tactics`
+- `Boon`
+- `Burden`
+- `Nightmare`
+- `Setup` (`Campaign` only)
+- `Upgraded` (`Ship Objective` only)
+- `Blue` (`Presentation` only)
+- `Green` (`Presentation` only)
+- `Purple` (`Presentation` only)
+- `Red` (`Presentation` only)
+- `Brown` (`Presentation` only)
+- `Yellow` (`Presentation` only)
+
+Please note, that not all card types and spheres are currently supported by Strange Eons.
+
 **Deck Rules**
 
 OCTGN `.o8d` files are generated automatically for each scenario detected on `Quest` and `Nightmare` cards.

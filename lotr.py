@@ -113,9 +113,9 @@ CARD_TYPES_ENCOUNTER_SET = {'Campaign', 'Enemy', 'Encounter Side Quest',
 CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
                         'Objective Hero', 'Objective Location',
                         'Ship Objective', 'Quest'}
-SPHERES = {'Leadership', 'Lore', 'Spirit', 'Tactics', 'Neutral', 'Fellowship',
-           'Baggins', 'Mastery', 'Boon', 'Burden', 'Nightmare', 'Upgraded',
-           'Setup'}
+SPHERES = {'Baggins', 'Fellowship', 'Leadership', 'Lore', 'Mastery', 'Neutral',
+           'Spirit', 'Tactics', 'Boon', 'Burden', 'Nightmare', 'Setup',
+           'Upgraded', 'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow'}
 
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
@@ -798,13 +798,11 @@ def sanity_check(sets):  # pylint: disable=R0912,R0914,R0915
                           scratch)
             errors_found = errors_found if card_scratch else True
 
-        if (card_type != 'Presentation' and card_sphere is not None
-                and card_sphere not in SPHERES):
+        if (card_sphere is not None and card_sphere not in SPHERES):
             logging.error('ERROR: Unknown sphere for row #%s%s', i, scratch)
             errors_found = errors_found if card_scratch else True
 
-        if (card_type_back != 'Presentation' and card_sphere_back is not None
-                and card_sphere_back not in SPHERES):
+        if (card_sphere_back is not None and card_sphere_back not in SPHERES):
             logging.error('ERROR: Unknown sphere back for row #%s%s', i,
                           scratch)
             errors_found = errors_found if card_scratch else True
