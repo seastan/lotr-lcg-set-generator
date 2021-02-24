@@ -110,6 +110,10 @@ CARD_TYPES_ENCOUNTER_SET = {'Campaign', 'Enemy', 'Encounter Side Quest',
                             'Objective Ally', 'Objective Hero',
                             'Objective Location', 'Quest', 'Ship Enemy',
                             'Ship Objective', 'Treachery', 'Treasure'}
+CARD_TYPES_ENCOUNTER_SIZE = {'Enemy', 'Location', 'Objective',
+                             'Objective Ally', 'Objective Hero',
+                             'Objective Location', 'Ship Enemy',
+                             'Ship Objective', 'Treachery'}
 CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
                         'Objective Hero', 'Objective Location',
                         'Ship Objective', 'Quest'}
@@ -179,8 +183,13 @@ TEMPLATES_SOURCE_PATH = os.path.join('Templates')
 TEMPLATES_PATH = os.path.join(PROJECT_FOLDER, 'Templates')
 XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
 
-O8D_TEMPLATE = """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<deck game="a21af4e8-be4b-4cda-a6b6-534f9717391f" sleeveid="0">
+SET_XML_TEMPLATE = """<set gameId="a21af4e8-be4b-4cda-a6b6-534f9717391f"
+    gameVersion="2.3.6.0">
+  <cards />
+</set>
+"""
+O8D_TEMPLATE = """<deck game="a21af4e8-be4b-4cda-a6b6-534f9717391f"
+    sleeveid="0">
   <section name="Hero" shared="False" />
   <section name="Ally" shared="False" />
   <section name="Attachment" shared="False" />
@@ -256,6 +265,78 @@ def _is_positive_or_zero_int(value):
         return False
     except (TypeError, ValueError):
         return False
+
+
+def _handle_int(value):
+    """ Handle (not always) integer values.
+    """
+    if _is_positive_or_zero_int(value):
+        return int(value)
+
+    return value
+
+
+def _handle_int_str(value):
+    """ Handle (not always) integer values and convert them to string.
+    """
+    if _is_positive_or_zero_int(value):
+        return str(int(value))
+
+    return value
+
+
+def _update_card_text(text):  # pylint: disable=R0915
+    """ Update card text for RingsDB and Hall of Beorn.
+    """
+    text = re.sub(r'\b(Quest Resolution)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', text)
+    text = re.sub(r'\b(Valour )?(Resource |Planning |Quest |Travel |Encounter '
+                  r'|Combat |Refresh )?(Action):', '[b]\\1\\2\\3[/b]:', text)
+    text = re.sub(r'\b(When Revealed|Setup|Forced|Valour Response|Response'
+                  r'|Travel|Shadow|Resolution):', '[b]\\1[/b]:', text)
+    text = re.sub(r'\b(Condition)\b', '[bi]\\1[/bi]', text)
+
+    text = re.sub(r'\[center\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/center\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[right\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/right\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[bi\]', '<b><i>', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/bi\]', '</i></b>', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[b\]', '<b>', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/b\]', '</b>', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[i\]', '<i>', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/i\]', '</i>', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[u\]', '<u>', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/u\]', '</u>', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[strike\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/strike\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[red\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/red\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[lotr [^\]]+\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/lotr\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[size [^\]]+\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/size\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[defaultsize [^\]]+\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[img [^\]]+\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[space\]', ' ', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[tab\]', '    ', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[nobr\]', ' ', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[inline\]\n', ' ', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[inline\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[lsb\]', '[', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[rsb\]', ']', text, flags=re.IGNORECASE)
+
+    text = text.strip()
+    text = re.sub(r' +(?=\n)', '', text)
+    text = re.sub(r' +', ' ', text)
+    return text
+
+
+def _update_octgn_card_text(text):
+    """ Update card text for OCTGN.
+    """
+    text = _update_card_text(text)
+    text = re.sub(r'(?:<b>|<\/b>|<i>|<\/i>|<u>|<\/u>)', '', text)
+    return text
 
 
 def _escape_filename(value):
@@ -492,10 +573,10 @@ def _clean_data(data):
                     value = value.replace('[name]', card_name)
 
                 value = value.strip()
-                value = value.replace("...", '…')
-                value = value.replace("---", '—')
-                value = value.replace("--", '–')
-                value = value.replace("[hyphen]", '-')
+                value = value.replace('...', '…')
+                value = value.replace('---', '—')
+                value = value.replace('--', '–')
+                value = value.replace('[hyphen]', '-')
                 value = value.replace("'", '’')
                 value = value.replace('“', '"')
                 value = value.replace('”', '"')
@@ -633,7 +714,14 @@ def extract_data():
 
             DATA.extend(data)
 
-            DATA[:] = [row for row in DATA if not _skip_row(row)]
+            DATA[:] = sorted(
+                [row for row in DATA if not _skip_row(row)],
+                key=lambda row: (
+                    str(row[CARD_SET]),
+                    _is_positive_or_zero_int(row[CARD_NUMBER])
+                    and int(row[CARD_NUMBER]) or 0,
+                    str(row[CARD_NUMBER]),
+                    str(row[CARD_NAME])))
             SELECTED_CARDS.update({row[CARD_ID] for row in DATA
                                    if row[CARD_SELECTED]})
             FOUND_SETS.update({row[CARD_SET] for row in DATA
@@ -937,21 +1025,206 @@ def _run_macro(set_row, callback):
         excel_app.quit()
 
 
-def generate_octgn_set_xml(conf, set_id, set_name):
+def _get_property_value(row, name, card_type):  # pylint: disable=R0911,R0912
+    """ Get property value for the given column name.
+    """
+    value = row[name]
+    if value is None:
+        value = ''
+
+    if name == CARD_NUMBER:
+        if not _is_positive_int(value):
+            value = 0
+
+        return value
+
+    if name == CARD_QUANTITY:
+        if card_type == 'Rules' and not value:
+            value = 1
+
+        return value
+
+    if name in (CARD_TYPE, BACK_PREFIX + CARD_TYPE):
+        if card_type == 'Presentation':
+            value = 'Rules'
+        elif card_type in CARD_TYPES_DOUBLESIDE_MANDATORY:
+            value = card_type
+        elif value in ('Encounter Side Quest', 'Player Side Quest'):
+            value = 'Side Quest'
+        elif value == 'Ship Enemy':
+            value = 'Enemy'
+        elif value in ('Ship Objective', 'Objective Hero'):
+            value = 'Objective'
+        elif value == 'Objective Location':
+            value = 'Location'
+
+        return value
+
+    if name in (CARD_SPHERE, BACK_PREFIX + CARD_SPHERE):
+        if card_type == 'Treasure':
+            value = 'Neutral'
+        elif card_type in ('Presentation', 'Rules'):
+            value = ''
+        elif value in ('Nightmare', 'Setup', 'Upgraded'):
+            value = ''
+
+        return value
+
+    if name in (CARD_UNIQUE, BACK_PREFIX + CARD_UNIQUE):
+        if value:
+            value = '‰'
+
+        return value
+
+    if name in (CARD_VICTORY, BACK_PREFIX + CARD_VICTORY):
+        if card_type in ('Presentation', 'Rules'):
+            value = ''
+
+        return value
+
+    if name == CARD_TEXT and card_type == 'Presentation':
+        value = ''
+    elif name == BACK_PREFIX + CARD_TEXT and card_type == 'Presentation':
+        value = row[CARD_TEXT] or ''
+
+    return value
+
+
+def _add_properties(parent, properties, tab):
+    """ Append property elements to XML.
+    """
+    parent.text = '\n' + tab + '  '
+    for i, (name, value) in enumerate(properties):
+        if not name:
+            continue
+
+        prop = ET.SubElement(parent, 'property')
+        prop.set('name', name)
+        prop.set('value', _update_octgn_card_text(_handle_int_str(value)))
+
+        if i == len(properties) - 1:
+            prop.tail = '\n' + tab
+        else:
+            prop.tail = '\n' + tab + '  '
+
+
+def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R0915
     """ Generate set.xml file for OCTGN.
     """
-    def _callback(_, xlwb_target):
-        if conf['selected_only']:
-            xlwb_target.sheets[SET_SHEET].range(
-                (SET_TITLE_ROW + 1, _c2n(SET_COLUMNS[SET_SELECTED]))).value = 1
-
-        xlwb_target.macro('SaveOCTGN')()
-
     logging.info('[%s] Generating set.xml file for OCTGN...', set_name)
     timestamp = time.time()
 
     _backup_previous_octgn_xml(set_id)
-    _run_macro(SETS[set_id][SET_ROW], _callback)
+
+    root = ET.fromstring(SET_XML_TEMPLATE)
+    root.set('name', set_name)
+    root.set('id', set_id)
+    root.set('version', SETS[set_id]['Version'])
+    cards = root.findall("./cards")[0]
+
+    chosen_data = []
+    for row in DATA:
+        if row[CARD_ID] is None:
+            continue
+
+        if row[CARD_SET] != set_id:
+            continue
+
+        if conf['selected_only'] and row[CARD_ID] not in SELECTED_CARDS:
+            continue
+
+        chosen_data.append(row)
+
+    tab_appended = False
+    for i, row in enumerate(chosen_data):
+        if not tab_appended:
+            cards.text = '\n    '
+            tab_appended = True
+
+        card = ET.SubElement(cards, 'card')
+        card.set('id', row[CARD_ID])
+        card.set('name', _update_octgn_card_text(row[CARD_NAME]))
+
+        card_type = row[CARD_TYPE]
+        if card_type == 'Player Side Quest':
+            card_size = 'PlayerQuestCard'
+        elif card_type in ('Encounter Side Quest', 'Quest'):
+            card_size = 'QuestCard'
+        elif (card_type in CARD_TYPES_ENCOUNTER_SIZE or 'Encounter' in (
+                row[CARD_KEYWORDS] and
+                [k.strip() for k in row[CARD_KEYWORDS].split('.')] or [])):
+            card_size = 'EncounterCard'
+        else:
+            card_size = None
+
+        if card_size:
+            card.set('size', card_size)
+
+        properties = []
+        for name in (CARD_NUMBER, CARD_QUANTITY, CARD_ENCOUNTER_SET,
+                     CARD_UNIQUE, CARD_TYPE, CARD_SPHERE, CARD_TRAITS,
+                     CARD_KEYWORDS, CARD_COST, CARD_ENGAGEMENT, CARD_THREAT,
+                     CARD_WILLPOWER, CARD_ATTACK, CARD_DEFENSE, CARD_HEALTH,
+                     CARD_QUEST, CARD_VICTORY, CARD_TEXT, CARD_SHADOW):
+            value = _get_property_value(row, name, card_type)
+            if value != '':
+                properties.append((name, value))
+
+        side_b = (card_type in CARD_TYPES_DOUBLESIDE_MANDATORY
+                  or row[CARD_SIDE_B])
+        if properties:
+            if side_b:
+                properties.append(('', ''))
+
+            _add_properties(card, properties, '    ')
+
+        if side_b:
+            if (card_type in CARD_TYPES_DOUBLESIDE_MANDATORY
+                    and not row[CARD_SIDE_B]):
+                alternate_name = row[CARD_NAME]
+            else:
+                alternate_name = row[CARD_SIDE_B]
+
+            alternate = ET.SubElement(card, 'alternate')
+            alternate.set('name', _update_octgn_card_text(alternate_name))
+            alternate.set('type', 'B')
+            if card_size:
+                alternate.set('size', card_size)
+
+            alternate.tail = '\n    '
+
+            properties = []
+            value = _get_property_value(row, CARD_ENCOUNTER_SET, card_type)
+            if value != '':
+                properties.append((CARD_ENCOUNTER_SET, value))
+
+            for name in (CARD_UNIQUE, CARD_TYPE, CARD_SPHERE, CARD_TRAITS,
+                         CARD_KEYWORDS, CARD_COST, CARD_ENGAGEMENT,
+                         CARD_THREAT, CARD_WILLPOWER, CARD_ATTACK,
+                         CARD_DEFENSE, CARD_HEALTH, CARD_QUEST, CARD_VICTORY,
+                         CARD_TEXT, CARD_SHADOW):
+                value = _get_property_value(row, BACK_PREFIX + name, card_type)
+                if value != '':
+                    properties.append((name, value))
+
+            if properties:
+                _add_properties(alternate, properties, '      ')
+
+        if i == len(chosen_data) - 1:
+            card.tail = '\n  '
+        else:
+            card.tail = '\n    '
+
+    output_path = os.path.join(SET_OCTGN_PATH, '{}.xml'.format(set_id))
+    with open(output_path, 'w', encoding='utf-8') as obj:
+        res = ET.tostring(root, encoding='utf-8').decode('utf-8')
+        res = res.replace(
+            '<set ',
+            '<set xmlns:noNamespaceSchemaLocation="CardSet.xsd" ')
+        obj.write('<?xml version="1.0" encoding="utf-8" standalone="yes"?>')
+        obj.write('\n')
+        obj.write(res)
+
     _copy_octgn_xml(set_id, set_name)
     logging.info('[%s] ...Generating set.xml file for OCTGN (%ss)',
                  set_name, round(time.time() - timestamp, 3))
@@ -1068,8 +1341,10 @@ def _append_cards(parent, cards):
     """ Append card elements to the section element.
     """
     cards = [c for c in cards if c[CARD_QUANTITY] > 0]
-    for i, card in enumerate(cards):
+    if cards:
         parent.text = '\n    '
+
+    for i, card in enumerate(cards):
         element = ET.SubElement(parent, 'card')
         element.text = card[CARD_ORIGINAL_NAME]
         element.set('qty', str(int(card[CARD_QUANTITY])))
@@ -1405,70 +1680,6 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
 
     logging.info('[%s] ...Generating .o8d files for OCTGN (%ss)',
                  set_name, round(time.time() - timestamp, 3))
-
-
-def _update_card_text(text):  # pylint: disable=R0915
-    """ Update card text for RingsDB and Hall of Beorn.
-    """
-    text = re.sub(r'\b(Quest Resolution)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', text)
-    text = re.sub(r'\b(Valour )?(Resource |Planning |Quest |Travel |Encounter '
-                  r'|Combat |Refresh )?(Action):', '[b]\\1\\2\\3[/b]:', text)
-    text = re.sub(r'\b(When Revealed|Setup|Forced|Valour Response|Response'
-                  r'|Travel|Shadow|Resolution):', '[b]\\1[/b]:', text)
-    text = re.sub(r'\b(Condition)\b', '[bi]\\1[/bi]', text)
-
-    text = re.sub(r'\[center\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/center\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[right\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/right\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[bi\]', '<b><i>', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/bi\]', '</i></b>', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[b\]', '<b>', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/b\]', '</b>', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[i\]', '<i>', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/i\]', '</i>', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[u\]', '<u>', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/u\]', '</u>', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[strike\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/strike\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[red\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/red\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[lotr [^\]]+\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/lotr\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[size [^\]]+\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/size\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[defaultsize [^\]]+\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[img [^\]]+\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[space\]', ' ', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[tab\]', '    ', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[nobr\]', ' ', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[inline\]\n', ' ', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[inline\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[lsb\]', '[', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[rsb\]', ']', text, flags=re.IGNORECASE)
-
-    text = text.strip()
-    text = re.sub(r' +(?=\n)', '', text)
-    text = re.sub(r' +', ' ', text)
-    return text
-
-
-def _handle_int(value):
-    """ Handle (not always) integer values.
-    """
-    if _is_positive_or_zero_int(value):
-        return int(value)
-
-    return value
-
-
-def _handle_int_str(value):
-    """ Handle (not always) integer values and convert them to string.
-    """
-    if _is_positive_or_zero_int(value):
-        return str(int(value))
-
-    return value
 
 
 def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914

@@ -254,8 +254,8 @@ translate['Ship Enemy'] = {'English': 'Ship-Enemy', 'French': 'Navire-Ennemi', '
 translate['Ship Objective'] = {'English': 'Ship-Objective', 'French': 'Navire-Objectif', 'German': 'Schiff-Ziel', 'Spanish': 'Barco-Objetivo', 'Polish': 'Statek-Cel', 'Italian': 'Nave-Obiettivo'};
 translate['Treachery'] = {'English': 'Treachery', 'French': 'Tra\u00eetrise', 'German': 'Verrat', 'Spanish': 'Traici\u00f3n', 'Polish': 'Podst\u0119p', 'Italian': 'Perfidia'};
 translate['Treasure'] = {'English': 'Treasure', 'French': 'Tr\u00e9sor', 'German': 'Schatz', 'Spanish': 'Tesoro', 'Polish': 'Skarb', 'Italian': 'Tesoro'};
-translate['Encounter Keyword'] = {'English': 'Encounter.', 'French': 'Rencontre.', 'German': 'Begegnung.', 'Spanish': 'Encuentro.', 'Polish': 'Spotkanie.',
-	'Italian': 'Incontro.'};
+translate['Encounter Keyword'] = {'English': 'Encounter', 'French': 'Rencontre', 'German': 'Begegnung', 'Spanish': 'Encuentro', 'Polish': 'Spotkanie',
+	'Italian': 'Incontro'};
 translate['Illustrator'] = {'English': 'Illus.', 'French': 'Illus.', 'German': 'Illus.', 'Spanish': 'Ilus.', 'Polish': 'Illus.', 'Italian': 'Illus.'};
 translate['Unknown Artist'] = {'English': 'Unknown Artist', 'French': 'Artiste inconnu', 'German': 'Unbekannter K\u00fcnstler', 'Spanish': 'Artista desconocido',
 	'Polish': 'Artysta nieznany', 'Italian': 'Artista sconosciuto'};
@@ -972,7 +972,7 @@ function run(progress, target, filename, icons) {
 					simple_back = true;
 				}
 				else if (playerTypes.indexOf(cardType) > -1 &&
-					(keywords + '').search(translate['Encounter Keyword'][lang]) == -1) {
+					(keywords + '').replace('. ', '.').split('.').indexOf(translate['Encounter Keyword'][lang]) == -1) {
 					back = 'p';
 					simple_back = true;
 				}
