@@ -1131,7 +1131,7 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
 
         card = ET.SubElement(cards, 'card')
         card.set('id', row[CARD_ID])
-        card.set('name', _update_octgn_card_text(row[CARD_NAME]))
+        card.set('name', _update_octgn_card_text(row[CARD_NAME] or ''))
 
         card_type = row[CARD_TYPE]
         if card_type == 'Player Side Quest':
@@ -1174,7 +1174,8 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 alternate_name = row[CARD_SIDE_B]
 
             alternate = ET.SubElement(card, 'alternate')
-            alternate.set('name', _update_octgn_card_text(alternate_name))
+            alternate.set('name',
+                          _update_octgn_card_text(alternate_name or ''))
             alternate.set('type', 'B')
             if card_size:
                 alternate.set('size', card_size)
@@ -2090,7 +2091,7 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
 
         card = ET.SubElement(cards, 'card')
         card.set('id', row[CARD_ID])
-        card.set('name', row[CARD_NAME])
+        card.set('name', row[CARD_NAME] or '')
 
         card_type = row[CARD_TYPE]
 
@@ -2128,7 +2129,7 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                 alternate_name = row[CARD_SIDE_B]
 
             alternate = ET.SubElement(card, 'alternate')
-            alternate.set('name', alternate_name)
+            alternate.set('name', alternate_name or '')
             alternate.set('type', 'B')
             alternate.tail = '\n    '
 
