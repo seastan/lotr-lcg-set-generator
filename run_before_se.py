@@ -19,9 +19,9 @@ def main():  # pylint: disable=R0912
 
     lotr.reset_project_folders()
     lotr.download_sheet(conf)
-    lotr.extract_data()
+    lotr.extract_data(conf)
     sets = lotr.get_sets(conf)
-    lotr.sanity_check(sets)
+    lotr.sanity_check(conf, sets)
 
     strange_eons = False
     changes = False

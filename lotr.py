@@ -33,16 +33,9 @@ from reportlab.pdfgen.canvas import Canvas
 SET_SHEET = 'Sets'
 CARD_SHEET = 'Card Data'
 SCRATCH_SHEET = 'Scratch Data'
-SET_TITLE_ROW = 2
 SET_MAX_NUMBER = 1000
-CARD_TITLE_ROW = 1
 CARD_MAX_NUMBER = 10000
 MAX_COLUMN_NUMBER = 100
-
-# Name, Traits:Keywords, Victory Points, Text:Flavour, Side B,
-# Traits:Keywords, Victory Points, Text:Flavour, Adventure
-TRANSLATION_RANGES = ['H{}:H{}', 'L{}:M{}', 'V{}:V{}', 'X{}:Z{}', 'AF{}:AF{}',
-                      'AJ{}:AK{}', 'AT{}:AT{}', 'AV{}:AX{}', 'BF{}:BF{}']
 
 SET_ID = 'GUID'
 SET_NAME = 'Name'
@@ -73,14 +66,20 @@ CARD_DEFENSE = 'Defense'
 CARD_HEALTH = 'Health'
 CARD_QUEST = 'Quest Points'
 CARD_VICTORY = 'Victory Points'
-CARD_SHADOW = 'Shadow'
+CARD_SPECIAL_ICON = 'Special Icon'
 CARD_TEXT = 'Text'
+CARD_SHADOW = 'Shadow'
 CARD_FLAVOUR = 'Flavour'
 CARD_ARTIST = 'Artist'
+CARD_PANX = 'PanX'
+CARD_PANY = 'PanY'
+CARD_SCALE = 'Scale'
 CARD_SIDE_B = 'Side B'
 CARD_EASY_MODE = 'Removed for Easy Mode'
 CARD_ADDITIONAL_ENCOUNTER_SETS = 'Additional Encounter Sets'
 CARD_ADVENTURE = 'Adventure'
+CARD_ICON = 'Collection Icon'
+CARD_VERSION = 'Version'
 CARD_DECK_RULES = 'Deck Rules'
 CARD_SELECTED = 'Selected'
 CARD_CHANGED = 'Changed'
@@ -161,8 +160,6 @@ IMAGES_CUSTOM_PATH = os.path.join(PROJECT_FOLDER, 'imagesCustom')
 IMAGES_EONS_PATH = 'imagesEons'
 IMAGES_RAW_PATH = os.path.join(PROJECT_FOLDER, 'imagesRaw')
 IMAGES_ZIP_PATH = '{}/Export/'.format(os.path.split(PROJECT_FOLDER)[-1])
-MACROS_PATH = 'macros.xlsm'
-MACROS_COPY_PATH = 'macros_copy.xlsm'
 OCTGN_ZIP_PATH = 'a21af4e8-be4b-4cda-a6b6-534f9717391f/Sets'
 OUTPUT_DB_PATH = os.path.join('Output', 'DB')
 OUTPUT_DTC_PATH = os.path.join('Output', 'DriveThruCards')
@@ -183,11 +180,6 @@ TEMPLATES_SOURCE_PATH = os.path.join('Templates')
 TEMPLATES_PATH = os.path.join(PROJECT_FOLDER, 'Templates')
 XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
 
-SET_XML_TEMPLATE = """<set gameId="a21af4e8-be4b-4cda-a6b6-534f9717391f"
-    gameVersion="2.3.6.0">
-  <cards />
-</set>
-"""
 O8D_TEMPLATE = """<deck game="a21af4e8-be4b-4cda-a6b6-534f9717391f"
     sleeveid="0">
   <section name="Hero" shared="False" />
@@ -207,11 +199,21 @@ O8D_TEMPLATE = """<deck game="a21af4e8-be4b-4cda-a6b6-534f9717391f"
   <notes><![CDATA[]]></notes>
 </deck>
 """
+SET_XML_TEMPLATE = """<set gameId="a21af4e8-be4b-4cda-a6b6-534f9717391f"
+    gameVersion="2.3.6.0">
+  <cards />
+</set>
+"""
+XML_TEMPLATE = """<set>
+  <cards />
+</set>
+"""
 
 SET_COLUMNS = {}
 CARD_COLUMNS = {}
 SETS = {}
 DATA = []
+TRANSLATIONS = {}
 SELECTED_CARDS = set()
 FOUND_SETS = set()
 FOUND_SCRATCH_SETS = set()
@@ -267,10 +269,22 @@ def _is_positive_or_zero_int(value):
         return False
 
 
+def _is_int(value):
+    """ Check whether a value is an int or not.
+    """
+    try:
+        if str(value).isdigit() or int(value) == value:
+            return True
+
+        return False
+    except (TypeError, ValueError):
+        return False
+
+
 def _handle_int(value):
     """ Handle (not always) integer values.
     """
-    if _is_positive_or_zero_int(value):
+    if _is_int(value):
         return int(value)
 
     return value
@@ -279,7 +293,7 @@ def _handle_int(value):
 def _handle_int_str(value):
     """ Handle (not always) integer values and convert them to string.
     """
-    if _is_positive_or_zero_int(value):
+    if _is_int(value):
         return str(int(value))
 
     return value
@@ -619,10 +633,10 @@ def _clean_data(data):
                 row[key] = value
 
 
-def _update_data():
+def _update_data(data):
     """ Update card data from the spreadsheet.
     """
-    for row in DATA:
+    for row in data:
         row[CARD_SET_NAME] = SETS.get(row[CARD_SET], {}).get(SET_NAME)
 
         if row[CARD_SCRATCH] and row[CARD_SET] in FOUND_INTERSECTED_SETS:
@@ -653,7 +667,7 @@ def _skip_row(row):
     return row[CARD_SET] in ('0', 0) or row[CARD_ID] in ('0', 0)
 
 
-def extract_data():
+def extract_data(conf):  # pylint: disable=R0915
     """ Extract data from the spreadsheet.
     """
     logging.info('Extracting data from the spreadsheet...')
@@ -666,6 +680,7 @@ def extract_data():
     FOUND_SCRATCH_SETS.clear()
     FOUND_INTERSECTED_SETS.clear()
     DATA[:] = []
+    TRANSLATIONS.clear()
     SELECTED_CARDS.clear()
 
     sheet_path = os.path.join(SHEET_ROOT_PATH, SHEET_NAME)
@@ -674,41 +689,41 @@ def extract_data():
         xlwb_source = excel_app.books.open(sheet_path)
         try:
             xlwb_range = '{}{}:{}{}'.format('A',  # pylint: disable=W1308
-                                            SET_TITLE_ROW,
+                                            1,
                                             _n2c(MAX_COLUMN_NUMBER),
-                                            SET_TITLE_ROW)
+                                            1)
             data = xlwb_source.sheets[SET_SHEET].range(xlwb_range).value
             SET_COLUMNS.update(_extract_column_names(data))
 
             xlwb_range = '{}{}:{}{}'.format('A',
-                                            SET_TITLE_ROW + 1,
+                                            2,
                                             SET_COLUMNS[MAX_COLUMN],
-                                            SET_MAX_NUMBER + SET_TITLE_ROW)
+                                            1 + SET_MAX_NUMBER)
             data = xlwb_source.sheets[SET_SHEET].range(xlwb_range).value
-            data = _transform_to_dict(data, SET_COLUMNS, SET_TITLE_ROW)
+            data = _transform_to_dict(data, SET_COLUMNS, 1)
             _clean_data(data)
             SETS.update({s[SET_ID]: s for s in data})
 
             xlwb_range = '{}{}:{}{}'.format('A',  # pylint: disable=W1308
-                                            CARD_TITLE_ROW,
+                                            1,
                                             _n2c(MAX_COLUMN_NUMBER),
-                                            CARD_TITLE_ROW)
+                                            1)
             data = xlwb_source.sheets[CARD_SHEET].range(xlwb_range).value
             CARD_COLUMNS.update(_extract_column_names(data))
 
             xlwb_range = '{}{}:{}{}'.format('A',
-                                            CARD_TITLE_ROW + 1,
+                                            2,
                                             CARD_COLUMNS[MAX_COLUMN],
-                                            CARD_TITLE_ROW + CARD_MAX_NUMBER)
+                                            1 + CARD_MAX_NUMBER)
             data = xlwb_source.sheets[CARD_SHEET].range(xlwb_range).value
-            data = _transform_to_dict(data, CARD_COLUMNS, CARD_TITLE_ROW)
+            data = _transform_to_dict(data, CARD_COLUMNS, 1)
             for row in data:
                 row[CARD_SCRATCH] = None
 
             DATA.extend(data)
 
             data = xlwb_source.sheets[SCRATCH_SHEET].range(xlwb_range).value
-            data = _transform_to_dict(data, CARD_COLUMNS, CARD_TITLE_ROW)
+            data = _transform_to_dict(data, CARD_COLUMNS, 1)
             for row in data:
                 row[CARD_SCRATCH] = 1
 
@@ -722,6 +737,33 @@ def extract_data():
                     and int(row[CARD_NUMBER]) or 0,
                     str(row[CARD_NUMBER]),
                     str(row[CARD_NAME])))
+            _clean_data(DATA)
+            _update_data(DATA)
+
+            for lang in conf['languages']:
+                if lang == 'English':
+                    continue
+
+                TRANSLATIONS[lang] = {}
+                xlwb_range = '{}{}:{}{}'.format('A',
+                                                2,
+                                                CARD_COLUMNS[MAX_COLUMN],
+                                                1 + CARD_MAX_NUMBER)
+                data = xlwb_source.sheets[lang].range(xlwb_range).value
+                data = _transform_to_dict(data, CARD_COLUMNS, 1)
+                for row in data:
+                    row[CARD_SCRATCH] = None
+
+                _clean_data(data)
+                _update_data(data)
+                for row in data:
+                    if row[CARD_ID] in TRANSLATIONS[lang]:
+                        logging.warning(
+                            'WARNING: Duplicate card ID %s in %s translations,'
+                            'ignoring', row[CARD_ID], lang)
+                    else:
+                        TRANSLATIONS[lang][row[CARD_ID]] = row
+
             SELECTED_CARDS.update({row[CARD_ID] for row in DATA
                                    if row[CARD_SELECTED]})
             FOUND_SETS.update({row[CARD_SET] for row in DATA
@@ -732,9 +774,6 @@ def extract_data():
                 scratch_sets))
             FOUND_SCRATCH_SETS.update(scratch_sets.difference(
                 FOUND_INTERSECTED_SETS))
-
-            _clean_data(DATA)
-            _update_data()
         finally:
             xlwb_source.close()
     finally:
@@ -773,7 +812,7 @@ def get_sets(conf):
     return chosen_sets
 
 
-def sanity_check(sets):  # pylint: disable=R0912,R0914,R0915
+def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
     """ Perform a sanity check of the spreadsheet.
     """
     logging.info('Performing a sanity check of the spreadsheet...')
@@ -910,6 +949,28 @@ def sanity_check(sets):  # pylint: disable=R0912,R0914,R0915
                               'for row #%s%s', key, i, scratch)
                 errors_found = errors_found if card_scratch else True
 
+        for lang in conf['languages']:
+            if lang == 'English':
+                continue
+
+            if not TRANSLATIONS[lang].get(card_id):
+                logging.error(
+                    'ERROR: No card ID %s in %s translations', card_id, lang)
+                continue
+
+            if TRANSLATIONS[lang][card_id][CARD_NAME] is None:
+                logging.error(
+                    'ERROR: No card name for card ID %s in %s translations, '
+                    'row #%s', card_id, lang,
+                    TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+            for key, value in TRANSLATIONS[lang][card_id].items():
+                if isinstance(value, str) and '[unmatched quot]' in value:
+                    logging.error(
+                        'ERROR: Unmatched quote symbol in %s column for card '
+                        'ID %s in %s translations, row #%s', key, card_id,
+                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
     logging.info('')
     if errors_found:
         raise ValueError('Sanity check of the spreadsheet failed, '
@@ -952,81 +1013,8 @@ def _backup_previous_xml(conf, set_id, lang):
         os.remove(old_path)
 
 
-def _run_macro(set_row, callback):
-    """ Prepare a context to run an Excel macro and execute the callback.
-    """
-    shutil.copyfile(MACROS_PATH, MACROS_COPY_PATH)
-    sheet_path = os.path.join(SHEET_ROOT_PATH, SHEET_NAME)
-
-    excel_app = xw.App(visible=False, add_book=False)
-    try:
-        xlwb_source = excel_app.books.open(sheet_path)
-        try:
-            xlwb_target = excel_app.books.open(MACROS_COPY_PATH)
-            try:
-                data = xlwb_source.sheets[SET_SHEET].range(
-                    '{}{}:{}{}'.format('A',  # pylint: disable=W1308
-                                       set_row,
-                                       SET_COLUMNS[MAX_COLUMN],
-                                       set_row)).value
-                xlwb_target.sheets[SET_SHEET].range(
-                    '{}{}:{}{}'.format('A',  # pylint: disable=W1308
-                                       SET_TITLE_ROW + 1,
-                                       SET_COLUMNS[MAX_COLUMN],
-                                       SET_TITLE_ROW + 1)
-                    ).value = data
-
-                card_sheet = xlwb_target.sheets[CARD_SHEET]
-                xlwb_range = '{}{}:{}{}'.format(
-                    'A',
-                    CARD_TITLE_ROW + 1,
-                    CARD_COLUMNS[MAX_COLUMN],
-                    CARD_TITLE_ROW + CARD_MAX_NUMBER)
-                data = xlwb_source.sheets[CARD_SHEET].range(xlwb_range).value
-                card_sheet.range(xlwb_range).value = data
-
-                data = xlwb_source.sheets[SCRATCH_SHEET].range(xlwb_range).value
-                set_column = _c2n(CARD_COLUMNS[CARD_SET]) - 1
-                for row in data:
-                    if row[set_column] in FOUND_INTERSECTED_SETS:
-                        row[set_column] = None
-
-                xlwb_next_range = '{}{}:{}{}'.format(
-                    'A',
-                    CARD_TITLE_ROW + 1 + CARD_MAX_NUMBER,
-                    CARD_COLUMNS[MAX_COLUMN],
-                    CARD_TITLE_ROW + CARD_MAX_NUMBER + CARD_MAX_NUMBER)
-                card_sheet.range(xlwb_next_range).value = data
-
-                xlwb_full_range = '{}{}:{}{}'.format(
-                    'A',
-                    CARD_TITLE_ROW + 1,
-                    CARD_COLUMNS[MAX_COLUMN],
-                    CARD_TITLE_ROW + CARD_MAX_NUMBER + CARD_MAX_NUMBER)
-                card_sheet.range(xlwb_full_range).api.Sort(
-                    Key1=card_sheet.range(
-                        '{}:{}'.format(CARD_COLUMNS[CARD_SET],  # pylint: disable=W1308
-                                       CARD_COLUMNS[CARD_SET])
-                    ).api,
-                    Order1=xw.constants.SortOrder.xlAscending,
-                    Key2=card_sheet.range(
-                        '{}:{}'.format(CARD_COLUMNS[CARD_NUMBER],  # pylint: disable=W1308
-                                       CARD_COLUMNS[CARD_NUMBER])
-                    ).api,
-                    Order2=xw.constants.SortOrder.xlAscending)
-
-                callback(xlwb_source, xlwb_target)
-                xlwb_target.save()
-            finally:
-                xlwb_target.close()
-        finally:
-            xlwb_source.close()
-    finally:
-        excel_app.quit()
-
-
-def _get_property_value(row, name, card_type):  # pylint: disable=R0911,R0912
-    """ Get property value for the given column name.
+def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,R0912
+    """ Get OCTGN set.xml property value for the given column name.
     """
     value = row[name]
     if value is None:
@@ -1090,8 +1078,8 @@ def _get_property_value(row, name, card_type):  # pylint: disable=R0911,R0912
     return value
 
 
-def _add_properties(parent, properties, tab):
-    """ Append property elements to XML.
+def _add_set_xml_properties(parent, properties, tab):
+    """ Append property elements to OCTGN set.xml.
     """
     parent.text = '\n' + tab + '  '
     for i, (name, value) in enumerate(properties):
@@ -1100,7 +1088,7 @@ def _add_properties(parent, properties, tab):
 
         prop = ET.SubElement(parent, 'property')
         prop.set('name', name)
-        prop.set('value', _update_octgn_card_text(_handle_int_str(value)))
+        prop.set('value', _update_octgn_card_text(str(_handle_int_str(value))))
 
         if i == len(properties) - 1:
             prop.tail = '\n' + tab
@@ -1166,7 +1154,7 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
                      CARD_KEYWORDS, CARD_COST, CARD_ENGAGEMENT, CARD_THREAT,
                      CARD_WILLPOWER, CARD_ATTACK, CARD_DEFENSE, CARD_HEALTH,
                      CARD_QUEST, CARD_VICTORY, CARD_TEXT, CARD_SHADOW):
-            value = _get_property_value(row, name, card_type)
+            value = _get_set_xml_property_value(row, name, card_type)
             if value != '':
                 properties.append((name, value))
 
@@ -1176,7 +1164,7 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
             if side_b:
                 properties.append(('', ''))
 
-            _add_properties(card, properties, '    ')
+            _add_set_xml_properties(card, properties, '    ')
 
         if side_b:
             if (card_type in CARD_TYPES_DOUBLESIDE_MANDATORY
@@ -1194,7 +1182,8 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
             alternate.tail = '\n    '
 
             properties = []
-            value = _get_property_value(row, CARD_ENCOUNTER_SET, card_type)
+            value = _get_set_xml_property_value(row, CARD_ENCOUNTER_SET,
+                                                card_type)
             if value != '':
                 properties.append((CARD_ENCOUNTER_SET, value))
 
@@ -1203,12 +1192,13 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
                          CARD_THREAT, CARD_WILLPOWER, CARD_ATTACK,
                          CARD_DEFENSE, CARD_HEALTH, CARD_QUEST, CARD_VICTORY,
                          CARD_TEXT, CARD_SHADOW):
-                value = _get_property_value(row, BACK_PREFIX + name, card_type)
+                value = _get_set_xml_property_value(row, BACK_PREFIX + name,
+                                                    card_type)
                 if value != '':
                     properties.append((name, value))
 
             if properties:
-                _add_properties(alternate, properties, '      ')
+                _add_set_xml_properties(alternate, properties, '      ')
 
         if i == len(chosen_data) - 1:
             card.tail = '\n  '
@@ -2013,47 +2003,160 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
                  set_name, round(time.time() - timestamp, 3))
 
 
-def generate_xml(conf, set_id, set_name, lang):
+def _get_xml_property_value(row, name, card_type):
+    """ Get Strange Eons xml property value for the given column name.
+    """
+    value = row[name]
+    if value is None:
+        value = ''
+
+    if name == CARD_QUANTITY:
+        if card_type == 'Rules' and not value:
+            value = 1
+
+        return value
+
+    if name in (CARD_TYPE, BACK_PREFIX + CARD_TYPE):
+        if card_type in CARD_TYPES_DOUBLESIDE_MANDATORY:
+            value = card_type
+
+        return value
+
+    return value
+
+
+def _add_xml_properties(parent, properties, tab):
+    """ Append property elements to Strange Eons xml.
+    """
+    parent.text = '\n' + tab + '  '
+    for i, (name, value) in enumerate(properties):
+        if not name:
+            continue
+
+        prop = ET.SubElement(parent, 'property')
+        prop.set('name', name)
+        prop.set('value', str(_handle_int_str(value)))
+
+        if i == len(properties) - 1:
+            prop.tail = '\n' + tab
+        else:
+            prop.tail = '\n' + tab + '  '
+
+
+def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R0915
     """ Generate xml file for Strange Eons.
     """
-    def _callback(xlwb_source, xlwb_target):
-        if lang != 'English':
-            translated = []
-            tr_sheet = xlwb_source.sheets[lang]
-            for source_row in range(CARD_TITLE_ROW + 1,
-                                    CARD_TITLE_ROW + CARD_MAX_NUMBER + 1):
-                if tr_sheet.range((source_row,
-                                   _c2n(CARD_COLUMNS[CARD_SET]))
-                                  ).value == set_id:
-                    card_id = tr_sheet.range((source_row,
-                                              _c2n(CARD_COLUMNS[CARD_ID]))
-                                             ).value
-                    if card_id:
-                        translated.append((card_id, source_row))
-
-            api = xlwb_target.sheets[CARD_SHEET].api
-            card_sheet = xlwb_target.sheets[CARD_SHEET]
-            for card_id, source_row in translated:
-                cell = api.UsedRange.Find(card_id)
-                if cell:
-                    target_row = cell.row
-                    for tr_range in TRANSLATION_RANGES:
-                        source_range = tr_range.format(source_row, source_row)
-                        target_range = tr_range.format(target_row, target_row)
-                        data = tr_sheet.range(source_range).value
-                        card_sheet.range(target_range).value = data
-
-        xlwb_target.sheets[SET_SHEET].range((SET_TITLE_ROW + 1,
-                                             _c2n(SET_COLUMNS[SET_LANGUAGE]))
-                                            ).value = lang
-        xlwb_target.macro('SaveXML')()
-
     logging.info('[%s, %s] Generating xml file for Strange Eons...',
                  set_name, lang)
     timestamp = time.time()
 
     _backup_previous_xml(conf, set_id, lang)
-    _run_macro(SETS[set_id][SET_ROW], _callback)
+
+    root = ET.fromstring(XML_TEMPLATE)
+    root.set('name', set_name)
+    root.set('id', set_id)
+    root.set('icon', SETS[set_id]['Collection Icon'] or '')
+    root.set('copyright', SETS[set_id]['Copyright'] or '')
+    root.set('language', lang)
+    cards = root.findall("./cards")[0]
+
+    translated_columns = {
+        CARD_NAME, CARD_TRAITS, CARD_KEYWORDS, CARD_VICTORY, CARD_TEXT,
+        CARD_SHADOW, CARD_FLAVOUR, CARD_SIDE_B, BACK_PREFIX + CARD_TRAITS,
+        BACK_PREFIX + CARD_KEYWORDS, BACK_PREFIX + CARD_VICTORY,
+        BACK_PREFIX + CARD_TEXT, BACK_PREFIX + CARD_SHADOW,
+        BACK_PREFIX + CARD_FLAVOUR, CARD_ADVENTURE}
+
+    chosen_data = []
+    for row in DATA:
+        if row[CARD_ID] is None:
+            continue
+
+        if row[CARD_SET] != set_id:
+            continue
+
+        row_copy = row.copy()
+        if lang != 'English' and TRANSLATIONS[lang].get(row[CARD_ID]):
+            for key in translated_columns:
+                row_copy[key] = TRANSLATIONS[lang][row[CARD_ID]][key]
+
+        chosen_data.append(row_copy)
+
+    tab_appended = False
+    for i, row in enumerate(chosen_data):
+        if not tab_appended:
+            cards.text = '\n    '
+            tab_appended = True
+
+        card = ET.SubElement(cards, 'card')
+        card.set('id', row[CARD_ID])
+        card.set('name', row[CARD_NAME])
+
+        card_type = row[CARD_TYPE]
+
+        properties = []
+        for name in (CARD_NUMBER, CARD_QUANTITY, CARD_ENCOUNTER_SET,
+                     CARD_UNIQUE, CARD_TYPE, CARD_SPHERE, CARD_TRAITS,
+                     CARD_KEYWORDS, CARD_COST, CARD_ENGAGEMENT, CARD_THREAT,
+                     CARD_WILLPOWER, CARD_ATTACK, CARD_DEFENSE, CARD_HEALTH,
+                     CARD_QUEST, CARD_VICTORY, CARD_SPECIAL_ICON, CARD_TEXT,
+                     CARD_SHADOW, CARD_FLAVOUR, CARD_ARTIST, CARD_PANX,
+                     CARD_PANY, CARD_SCALE, CARD_EASY_MODE,
+                     CARD_ADDITIONAL_ENCOUNTER_SETS, CARD_ADVENTURE, CARD_ICON,
+                     CARD_VERSION):
+            value = _get_xml_property_value(row, name, card_type)
+            if value != '':
+                properties.append((name, value))
+
+        properties.append(('Set Name', set_name))
+        properties.append(('Set Icon', SETS[set_id]['Collection Icon'] or ''))
+        properties.append(('Set Copyright', SETS[set_id]['Copyright'] or ''))
+
+        side_b = (card_type != 'Presentation' and (
+            card_type in CARD_TYPES_DOUBLESIDE_MANDATORY or row[CARD_SIDE_B]))
+        if properties:
+            if side_b:
+                properties.append(('', ''))
+
+            _add_xml_properties(card, properties, '    ')
+
+        if side_b:
+            if (card_type in CARD_TYPES_DOUBLESIDE_MANDATORY
+                    and not row[CARD_SIDE_B]):
+                alternate_name = row[CARD_NAME]
+            else:
+                alternate_name = row[CARD_SIDE_B]
+
+            alternate = ET.SubElement(card, 'alternate')
+            alternate.set('name', alternate_name)
+            alternate.set('type', 'B')
+            alternate.tail = '\n    '
+
+            properties = []
+            for name in (CARD_UNIQUE, CARD_TYPE, CARD_SPHERE, CARD_TRAITS,
+                         CARD_KEYWORDS, CARD_COST, CARD_ENGAGEMENT,
+                         CARD_THREAT, CARD_WILLPOWER, CARD_ATTACK,
+                         CARD_DEFENSE, CARD_HEALTH, CARD_QUEST, CARD_VICTORY,
+                         CARD_SPECIAL_ICON, CARD_TEXT, CARD_SHADOW,
+                         CARD_FLAVOUR, CARD_ARTIST, CARD_PANX, CARD_PANY,
+                         CARD_SCALE):
+                value = _get_xml_property_value(row, BACK_PREFIX + name, card_type)
+                if value != '':
+                    properties.append((name, value))
+
+            if properties:
+                _add_xml_properties(alternate, properties, '      ')
+
+        if i == len(chosen_data) - 1:
+            card.tail = '\n  '
+        else:
+            card.tail = '\n    '
+
+    output_path = os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id, lang))
+    with open(output_path, 'w', encoding='utf-8') as obj:
+        res = ET.tostring(root, encoding='utf-8').decode('utf-8')
+        obj.write(res)
+
     logging.info('[%s, %s] ...Generating xml file for Strange Eons (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 

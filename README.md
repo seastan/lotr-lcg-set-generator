@@ -56,17 +56,15 @@ font from the root folder of this repo.  Additionally, manually copy both `.ttf`
 https://github.com/cjw-network/cjwpublish1411/blob/master/vendor/imagine/imagine/lib/Imagine/resources/Adobe/CMYK/USWebCoatedSWOP.icc
 into the root folder of this repo.
 
-11. Make sure that macros are enabled in Microsoft Excel.
+11. Install Python 3.8 (or other Python 3 version), Pip and VirtualEnv.
 
-12. Install Python 3.8 (or other Python 3 version), Pip and VirtualEnv.
-
-13. Go to the root folder of this repo and follow these steps:
+12. Go to the root folder of this repo and follow these steps:
 
   - `virtualenv env --python=python3.8` (if needed, replace `3.8` with your actual Python version)
   - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
   - `pip install -r requirements.txt`
 
-14. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
+13. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
   - `sheet_gdid`: Google Drive ID of the cards spreadsheet (leave empty to use a local copy)
   - `artwork_path`: local path to the artwork folder (don't use for that any existing folder in this repo)
