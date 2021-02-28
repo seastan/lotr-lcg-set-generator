@@ -2,10 +2,12 @@
 
 1. Clone this repo to a local folder.
 
-2. Make sure you already have a cards spreadsheet on Google Drive.  If you don't, upload
+2. Make sure you already have a cards spreadsheet on Google Sheets.  If you don't, upload
 `Spreadsheet/spreadsheet.xlsx` from this repo as a template and fill in all the required data.
+You will also need to upload Google Apps scripts from `Spreadsheet/Code.gs`.  After that,
+re-run `=SHEETS()` function from `A1` cell of the first `-` tab.
 
-3. Add the folder with the artwork to your own Google Drive to be able to sync it locally.
+3. Add the folder with the artwork to your Google Drive to be able to sync it locally.
 This feature is currently hidden on Google Drive UI, but may still be accessed by a shortcut
 (see https://support.google.com/drive/thread/35817359?hl=en).  If this feature is removed
 completely, you will need to download updates to that folder manually.
@@ -66,7 +68,7 @@ into the root folder of this repo.
 
 13. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
-  - `sheet_gdid`: Google Drive ID of the cards spreadsheet (leave empty to use a local copy)
+  - `sheet_gdid`: Google Sheets ID of the cards spreadsheet (leave empty to use a local copy)
   - `artwork_path`: local path to the artwork folder (don't use for that any existing folder in this repo)
   - `gimp_console_path`: path to GIMP console executable
   - `magick_path`: path to ImageMagick executable

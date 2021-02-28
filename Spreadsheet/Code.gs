@@ -113,3 +113,13 @@ function differences(value1, value2) {
 
   return res;
 }
+
+function SHEETS() {
+  // Print the list of all sheets and their IDs
+  var res = new Array();
+  var sheets = SpreadsheetApp.getActiveSpreadsheet().getSheets();
+  for (let i = 0; i < sheets.length; i++) {
+    res.push([sheets[i].getName(), sheets[i].getSheetId()]);
+  }
+  return res;
+}

@@ -14,15 +14,14 @@ import re
 import shutil
 import subprocess
 import time
+import xml.etree.ElementTree as ET
 import zipfile
 
 from collections import OrderedDict
 
-import xml.etree.ElementTree as ET
 import png
 import py7zr
 import requests
-import xlwings as xw
 import yaml
 
 from reportlab.lib.pagesizes import landscape, letter, A4
@@ -33,9 +32,6 @@ from reportlab.pdfgen.canvas import Canvas
 SET_SHEET = 'Sets'
 CARD_SHEET = 'Card Data'
 SCRATCH_SHEET = 'Scratch Data'
-SET_MAX_NUMBER = 1000
-CARD_MAX_NUMBER = 10000
-MAX_COLUMN_NUMBER = 100
 
 SET_ID = 'GUID'
 SET_NAME = 'Name'
@@ -131,7 +127,6 @@ IMAGES_CUSTOM_FOLDER = 'custom'
 OCTGN_SET_XML = 'set.xml'
 PROCESSED_ARTWORK_FOLDER = 'processed'
 PROJECT_FOLDER = 'Frogmorton'
-SHEET_NAME = 'setExcel.xlsx'
 TEXT_CHUNK_FLAG = b'tEXt'
 
 JPG300BLEEDDTC = 'jpg300BleedDTC'
@@ -155,6 +150,7 @@ CARD_BACKS = {'player': {'mpc': 'playerBackUnofficialMPC.png',
                             'generic_png': 'encounterBackOfficial.png'}}
 
 CONFIGURATION_PATH = 'configuration.yaml'
+DOWNLOAD_PATH = 'Download'
 IMAGES_BACK_PATH = 'imagesBack'
 IMAGES_CUSTOM_PATH = os.path.join(PROJECT_FOLDER, 'imagesCustom')
 IMAGES_EONS_PATH = 'imagesEons'
@@ -174,7 +170,6 @@ OUTPUT_RINGSDB_PATH = os.path.join('Output', 'RingsDB')
 PROJECT_PATH = 'setGenerator.seproject'
 SET_EONS_PATH = 'setEons'
 SET_OCTGN_PATH = 'setOCTGN'
-SHEET_ROOT_PATH = ''
 TEMP_ROOT_PATH = 'Temp'
 TEMPLATES_SOURCE_PATH = os.path.join('Templates')
 TEMPLATES_PATH = os.path.join(PROJECT_FOLDER, 'Templates')
@@ -209,7 +204,6 @@ XML_TEMPLATE = """<set>
 </set>
 """
 
-SET_COLUMNS = {}
 CARD_COLUMNS = {}
 SETS = {}
 DATA = []
@@ -219,30 +213,6 @@ FOUND_SETS = set()
 FOUND_SCRATCH_SETS = set()
 FOUND_INTERSECTED_SETS = set()
 IMAGE_CACHE = {}
-
-
-def _c2n(column):
-    """ Convert column to number.
-    """
-    res = 0
-    multiplier = 1
-    column = column.upper()
-    for symbol in column[::-1]:
-        res += (ord(symbol) - 64) * multiplier
-        multiplier *= 26
-
-    return res
-
-
-def _n2c(number):
-    """ Convert number to column.
-    """
-    res = ''
-    while number > 0:
-        res = '{}{}'.format(chr((number % 26 or 26) + 64), res)
-        number = int((number - (number % 26 or 26)) / 26)
-
-    return res
 
 
 def _is_positive_int(value):
@@ -273,7 +243,10 @@ def _is_int(value):
     """ Check whether a value is an int or not.
     """
     try:
-        if str(value).isdigit() or int(value) == value:
+        if (str(value).isdigit() or
+                (len(str(value)) > 1 and str(value)[0] == '-' and
+                 str(value)[1:].isdigit()) or
+                int(value) == value):
             return True
 
         return False
@@ -512,65 +485,35 @@ def reset_project_folders():
 
 
 def download_sheet(conf):
-    """ Download cards spreadsheet from Google Drive.
+    """ Download cards spreadsheet from Google Sheets.
     """
-    logging.info('Downloading cards spreadsheet from Google Drive...')
+    logging.info('Downloading cards spreadsheet from Google Sheets...')
     timestamp = time.time()
 
-    sheet_path = os.path.join(SHEET_ROOT_PATH, SHEET_NAME)
     if conf['sheet_gdid']:
+        sheets = [SET_SHEET, CARD_SHEET, SCRATCH_SHEET]
+        for lang in set(conf['languages']).difference(set(['English'])):
+            sheets.append(lang)
+
         url = (
-            'https://docs.google.com/spreadsheets/d/{}/export?format=xlsx'
+            'https://docs.google.com/spreadsheets/d/{}/export?format=csv'
             .format(conf['sheet_gdid']))
+        sheet_ids = requests.get(url).content.decode('utf-8')
+        sheet_ids = csv.reader(sheet_ids.splitlines())
+        sheet_ids = dict(row for row in sheet_ids)
 
-        with open(sheet_path, 'wb') as f_sheet:
-            f_sheet.write(requests.get(url).content)
+        for sheet in sheets:
+            url = (
+                'https://docs.google.com/spreadsheets/d/{}/export?format=csv&gid={}'
+                .format(conf['sheet_gdid'], sheet_ids[sheet]))
+            path = os.path.join(DOWNLOAD_PATH, '{}.csv'.format(sheet))
+            with open(path, 'wb') as f_sheet:
+                f_sheet.write(requests.get(url).content)
     else:
-        logging.info('No Google Drive ID found, using a local copy')
+        logging.info('No Google Sheets ID found, using a local copy')
 
-    logging.info('...Downloading cards spreadsheet from Google Drive (%ss)',
+    logging.info('...Downloading cards spreadsheet from Google Sheets (%ss)',
                  round(time.time() - timestamp, 3))
-
-
-def _extract_column_names(columns):
-    """ Extract column names.
-    """
-    try:
-        none_index = columns.index(None)
-        columns = columns[:none_index]
-    except ValueError:
-        pass
-
-    names = {}
-    for number, column in enumerate(columns):
-        if column in names:
-            column = BACK_PREFIX + column
-
-        names[column] = _n2c(number + 1)
-
-    names[MAX_COLUMN] = _n2c(len(columns))
-    return names
-
-
-def _transform_to_dict(data, columns, title_row):
-    """ Transform rows to dictionary.
-    """
-    res = []
-    for i, row in enumerate(data):
-        if not any(row):
-            continue
-
-        row_dict = {}
-        row_dict[ROW_COLUMN] = i + title_row + 1
-        for name, column in columns.items():
-            if name == MAX_COLUMN:
-                continue
-
-            row_dict[name] = row[_c2n(column) - 1]
-
-        res.append(row_dict)
-
-    return res
 
 
 def _clean_data(data):
@@ -667,14 +610,82 @@ def _skip_row(row):
     return row[CARD_SET] in ('0', 0) or row[CARD_ID] in ('0', 0)
 
 
+def _extract_csv_value(value):
+    """ Extract a single value from a CSV file.
+    """
+    if value == '':
+        return None
+
+    if value == 'FALSE':
+        return None
+
+    if _is_int(value):
+        return int(value)
+
+    return value
+
+
+def _extract_csv(sheet):
+    """ Extract data from a CSV file.
+    """
+    path = os.path.join(DOWNLOAD_PATH, '{}.csv'.format(sheet))
+    data = []
+    with open(path, newline='', encoding='utf-8') as obj:
+        for row in csv.reader(obj):
+            data.append([_extract_csv_value(v) for v in row])
+
+    return data
+
+
+def _extract_column_names(columns):
+    """ Extract column names.
+    """
+    try:
+        none_index = columns.index(None)
+        columns = columns[:none_index]
+    except ValueError:
+        pass
+
+    names = {}
+    for number, column in enumerate(columns):
+        if column in names:
+            column = BACK_PREFIX + column
+
+        names[column] = number
+
+    names[MAX_COLUMN] = len(columns) - 1
+    return names
+
+
+def _transform_to_dict(data):
+    """ Transform rows to dictionary.
+    """
+    columns = _extract_column_names(data[0])
+    res = []
+    for i, row in enumerate(data[1:]):
+        row = row[:columns[MAX_COLUMN] + 1]
+        if not any(row):
+            continue
+
+        row_dict = {}
+        row_dict[ROW_COLUMN] = i + 2
+        for name, column in columns.items():
+            if name == MAX_COLUMN:
+                continue
+
+            row_dict[name] = row[column]
+
+        res.append(row_dict)
+
+    return res
+
+
 def extract_data(conf):  # pylint: disable=R0915
     """ Extract data from the spreadsheet.
     """
     logging.info('Extracting data from the spreadsheet...')
     timestamp = time.time()
 
-    SET_COLUMNS.clear()
-    CARD_COLUMNS.clear()
     SETS.clear()
     FOUND_SETS.clear()
     FOUND_SCRATCH_SETS.clear()
@@ -683,101 +694,67 @@ def extract_data(conf):  # pylint: disable=R0915
     TRANSLATIONS.clear()
     SELECTED_CARDS.clear()
 
-    sheet_path = os.path.join(SHEET_ROOT_PATH, SHEET_NAME)
-    excel_app = xw.App(visible=False, add_book=False)
-    try:
-        xlwb_source = excel_app.books.open(sheet_path)
-        try:
-            xlwb_range = '{}{}:{}{}'.format('A',  # pylint: disable=W1308
-                                            1,
-                                            _n2c(MAX_COLUMN_NUMBER),
-                                            1)
-            data = xlwb_source.sheets[SET_SHEET].range(xlwb_range).value
-            SET_COLUMNS.update(_extract_column_names(data))
+    data = _extract_csv(SET_SHEET)
+    if data:
+        data = _transform_to_dict(data)
+        _clean_data(data)
+        SETS.update({s[SET_ID]: s for s in data})
 
-            xlwb_range = '{}{}:{}{}'.format('A',
-                                            2,
-                                            SET_COLUMNS[MAX_COLUMN],
-                                            1 + SET_MAX_NUMBER)
-            data = xlwb_source.sheets[SET_SHEET].range(xlwb_range).value
-            data = _transform_to_dict(data, SET_COLUMNS, 1)
-            _clean_data(data)
-            SETS.update({s[SET_ID]: s for s in data})
+    data = _extract_csv(CARD_SHEET)
+    if data:
+        data = _transform_to_dict(data)
+        for row in data:
+            row[CARD_SCRATCH] = None
 
-            xlwb_range = '{}{}:{}{}'.format('A',  # pylint: disable=W1308
-                                            1,
-                                            _n2c(MAX_COLUMN_NUMBER),
-                                            1)
-            data = xlwb_source.sheets[CARD_SHEET].range(xlwb_range).value
-            CARD_COLUMNS.update(_extract_column_names(data))
+        DATA.extend(data)
 
-            xlwb_range = '{}{}:{}{}'.format('A',
-                                            2,
-                                            CARD_COLUMNS[MAX_COLUMN],
-                                            1 + CARD_MAX_NUMBER)
-            data = xlwb_source.sheets[CARD_SHEET].range(xlwb_range).value
-            data = _transform_to_dict(data, CARD_COLUMNS, 1)
+    data = _extract_csv(SCRATCH_SHEET)
+    if data:
+        data = _transform_to_dict(data)
+        for row in data:
+            row[CARD_SCRATCH] = 1
+
+        DATA.extend(data)
+
+    DATA[:] = sorted(
+        [row for row in DATA if not _skip_row(row)],
+        key=lambda row: (
+            str(row[CARD_SET]),
+            _is_positive_or_zero_int(row[CARD_NUMBER])
+            and int(row[CARD_NUMBER]) or 0,
+            str(row[CARD_NUMBER]),
+            str(row[CARD_NAME])))
+    _clean_data(DATA)
+    _update_data(DATA)
+
+    for lang in conf['languages']:
+        if lang == 'English':
+            continue
+
+        TRANSLATIONS[lang] = {}
+        data = _extract_csv(lang)
+        if data:
+            data = _transform_to_dict(data)
             for row in data:
                 row[CARD_SCRATCH] = None
 
-            DATA.extend(data)
-
-            data = xlwb_source.sheets[SCRATCH_SHEET].range(xlwb_range).value
-            data = _transform_to_dict(data, CARD_COLUMNS, 1)
+            _clean_data(data)
+            _update_data(data)
             for row in data:
-                row[CARD_SCRATCH] = 1
+                if row[CARD_ID] in TRANSLATIONS[lang]:
+                    logging.warning(
+                        'WARNING: Duplicate card ID %s in %s translations,'
+                        'ignoring', row[CARD_ID], lang)
+                else:
+                    TRANSLATIONS[lang][row[CARD_ID]] = row
 
-            DATA.extend(data)
-
-            DATA[:] = sorted(
-                [row for row in DATA if not _skip_row(row)],
-                key=lambda row: (
-                    str(row[CARD_SET]),
-                    _is_positive_or_zero_int(row[CARD_NUMBER])
-                    and int(row[CARD_NUMBER]) or 0,
-                    str(row[CARD_NUMBER]),
-                    str(row[CARD_NAME])))
-            _clean_data(DATA)
-            _update_data(DATA)
-
-            for lang in conf['languages']:
-                if lang == 'English':
-                    continue
-
-                TRANSLATIONS[lang] = {}
-                xlwb_range = '{}{}:{}{}'.format('A',
-                                                2,
-                                                CARD_COLUMNS[MAX_COLUMN],
-                                                1 + CARD_MAX_NUMBER)
-                data = xlwb_source.sheets[lang].range(xlwb_range).value
-                data = _transform_to_dict(data, CARD_COLUMNS, 1)
-                for row in data:
-                    row[CARD_SCRATCH] = None
-
-                _clean_data(data)
-                _update_data(data)
-                for row in data:
-                    if row[CARD_ID] in TRANSLATIONS[lang]:
-                        logging.warning(
-                            'WARNING: Duplicate card ID %s in %s translations,'
-                            'ignoring', row[CARD_ID], lang)
-                    else:
-                        TRANSLATIONS[lang][row[CARD_ID]] = row
-
-            SELECTED_CARDS.update({row[CARD_ID] for row in DATA
-                                   if row[CARD_SELECTED]})
-            FOUND_SETS.update({row[CARD_SET] for row in DATA
-                               if row[CARD_SET] and not row[CARD_SCRATCH]})
-            scratch_sets = {row[CARD_SET] for row in DATA if row[CARD_SET]
-                            and row[CARD_SCRATCH]}
-            FOUND_INTERSECTED_SETS.update(FOUND_SETS.intersection(
-                scratch_sets))
-            FOUND_SCRATCH_SETS.update(scratch_sets.difference(
-                FOUND_INTERSECTED_SETS))
-        finally:
-            xlwb_source.close()
-    finally:
-        excel_app.quit()
+    SELECTED_CARDS.update({row[CARD_ID] for row in DATA if row[CARD_SELECTED]})
+    FOUND_SETS.update({row[CARD_SET] for row in DATA
+                       if row[CARD_SET] and not row[CARD_SCRATCH]})
+    scratch_sets = {row[CARD_SET] for row in DATA if row[CARD_SET]
+                    and row[CARD_SCRATCH]}
+    FOUND_INTERSECTED_SETS.update(FOUND_SETS.intersection(scratch_sets))
+    FOUND_SCRATCH_SETS.update(scratch_sets.difference(FOUND_INTERSECTED_SETS))
 
     logging.info('...Extracting data from the spreadsheet (%ss)',
                  round(time.time() - timestamp, 3))

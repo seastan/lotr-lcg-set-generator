@@ -3,7 +3,5 @@ py7zr
 pylint
 pypng
 pyyaml
-pywin32==228
 reportlab
 requests
-xlwings==0.19.5

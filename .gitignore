@@ -1,5 +1,6 @@
 .ipynb_checkpoints/
 __pycache__/
+Download/*.csv
 Frogmorton/imagesCustom/*.jpg
 Frogmorton/imagesCustom/*.png
 Frogmorton/imagesRaw/*.jpg
@@ -18,7 +19,6 @@ Temp/*/*
 
 configuration*.yaml
 log.txt
-setExcel.xlsx
 setGenerator.seproject
 USWebCoatedSWOP.icc
 ~*.*
