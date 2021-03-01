@@ -209,8 +209,9 @@ List of available sphere values:
 - `Boon`
 - `Burden`
 - `Nightmare`
-- `Setup` (`Campaign` only)
 - `Upgraded` (`Ship Objective` only)
+- `Back` (`Rules` only)
+- `Setup` (`Campaign` only)
 - `Blue` (`Presentation` only)
 - `Green` (`Presentation` only)
 - `Purple` (`Presentation` only)

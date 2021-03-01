@@ -113,12 +113,12 @@ CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
                         'Objective Hero', 'Objective Location',
                         'Ship Objective', 'Quest'}
 SPHERES = {'Baggins', 'Fellowship', 'Leadership', 'Lore', 'Mastery', 'Neutral',
-           'Spirit', 'Tactics', 'Boon', 'Burden', 'Nightmare', 'Setup',
-           'Upgraded', 'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow'}
+           'Spirit', 'Tactics', 'Boon', 'Burden', 'Nightmare', 'Upgraded',
+           'Back', 'Setup', 'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow'}
 
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
-MAGICK_COMMAND_PDF = '"{}" convert "{}\\*.jpg" "{}"'
+MAGICK_COMMAND_PDF = '"{}" convert "{}\\*o.jpg" "{}"'
 
 IMAGE_MIN_SIZE = 100000
 
@@ -140,14 +140,22 @@ PNG800BLEED = 'png800Bleed'
 PNG800BLEEDMPC = 'png800BleedMPC'
 PNG800BLEEDGENERIC = 'png800BleedGeneric'
 
-CARD_BACKS = {'player': {'mpc': 'playerBackUnofficialMPC.png',
-                         'dtc': 'playerBackOfficialDTC.jpg',
-                         'mbprint': 'playerBackOfficialMBPRINT.jpg',
-                         'generic_png': 'playerBackOfficial.png'},
-              'encounter': {'mpc': 'encounterBackUnofficialMPC.png',
-                            'dtc': 'encounterBackOfficialDTC.jpg',
-                            'mbprint': 'encounterBackOfficialMBPRINT.jpg',
-                            'generic_png': 'encounterBackOfficial.png'}}
+CARD_BACKS = {'player': {'mpc': ['playerBackOfficialMPC.png',
+                                 'playerBackUnofficialMPC.png'],
+                         'dtc': ['playerBackOfficialDTC.jpg',
+                                 'playerBackUnofficialDTC.jpg'],
+                         'mbprint': ['playerBackOfficialMBPRINT.jpg',
+                                     'playerBackUnofficialMBPRINT.jpg'],
+                         'generic_png': ['playerBackOfficial.png',
+                                         'playerBackUnofficial.png']},
+              'encounter': {'mpc': ['encounterBackOfficialMPC.png',
+                                    'encounterBackUnofficialMPC.png'],
+                            'dtc': ['encounterBackOfficialDTC.jpg',
+                                    'encounterBackUnofficialDTC.jpg'],
+                            'mbprint': ['encounterBackOfficialMBPRINT.jpg',
+                                        'encounterBackUnofficialMBPRINT.jpg'],
+                            'generic_png': ['encounterBackOfficial.png',
+                                            'encounterBackUnofficial.png']}}
 
 CONFIGURATION_PATH = 'configuration.yaml'
 DOWNLOAD_PATH = 'Download'
@@ -1028,9 +1036,9 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
     if name in (CARD_SPHERE, BACK_PREFIX + CARD_SPHERE):
         if card_type == 'Treasure':
             value = 'Neutral'
-        elif card_type in ('Presentation', 'Rules'):
+        elif card_type in ('Presentation', 'Rules', 'Campaign'):
             value = ''
-        elif value in ('Nightmare', 'Setup', 'Upgraded'):
+        elif value in ('Nightmare', 'Upgraded'):
             value = ''
 
         return value
@@ -3120,28 +3128,6 @@ def generate_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0914
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
-def _insert_png_text(filepath, text):
-    """ Insert text into a PNG file.
-    """
-    reader = png.Reader(filename=filepath)
-    chunk_list = list(reader.chunks())
-    chunk_item = tuple([TEXT_CHUNK_FLAG, bytes(text, 'utf-8')])
-    chunk_list.insert(1, chunk_item)
-    with open(filepath, 'wb') as obj:
-        png.write_chunks(obj, chunk_list)
-
-
-def _make_unique_png(input_path):
-    """ Make unique PNG files for MakePlayingCards.
-    """
-    for _, _, filenames in os.walk(input_path):
-        for filename in filenames:
-            if filename.endswith('-1.png') or filename.endswith('-2.png'):
-                _insert_png_text(os.path.join(input_path, filename), filename)
-
-        break
-
-
 def _make_cmyk(conf, input_path):
     """ Convert RGB to CMYK.
     """
@@ -3160,7 +3146,128 @@ def _make_cmyk(conf, input_path):
         break
 
 
-def _combine_doublesided_rules_cards(set_id, input_path, card_data):  # pylint: disable=R0912,R0914
+def _prepare_printing_images(input_path, output_path, service):  # pylint: disable=R0912
+    """ Prepare printing images for various services.
+    """
+    for _, _, filenames in os.walk(input_path):
+        if not filenames:
+            return
+
+        file_type = filenames[0].split('.')[-1]
+        for filename in filenames:
+            parts = filename.split('-')
+            if parts[-1] != '1.{}'.format(file_type):
+                continue
+
+            back_official_path = os.path.join(input_path, '{}-2.{}'.format(
+                '-'.join(parts[:-1]), file_type))
+            back_unofficial_path = back_official_path
+            if not os.path.exists(back_official_path):
+                if parts[2] == 'p':
+                    back_official_path = os.path.join(
+                        IMAGES_BACK_PATH, CARD_BACKS['player'][service][0])
+                    back_unofficial_path = os.path.join(
+                        IMAGES_BACK_PATH, CARD_BACKS['player'][service][1])
+                elif parts[2] == 'e':
+                    back_official_path = os.path.join(
+                        IMAGES_BACK_PATH, CARD_BACKS['encounter'][service][0])
+                    back_unofficial_path = os.path.join(
+                        IMAGES_BACK_PATH, CARD_BACKS['encounter'][service][1])
+                else:
+                    logging.error('ERROR: Missing card back for %s, removing'
+                                  ' the file', filename)
+                    continue
+
+            if parts[1] == 'p':
+                for i in range(3):
+                    parts[1] = str(i + 1)
+                    front_output_path = os.path.join(
+                        output_path, re.sub(
+                            r'-(?:e|p)-', '-',
+                            re.sub('-+', '-',
+                                   re.sub(r'.{36}-1(?=\.(?:png|jpg))', '-1o',
+                                          '-'.join(parts)))))
+                    shutil.copyfile(os.path.join(input_path, filename),
+                                    front_output_path)
+                    back_unofficial_output_path = os.path.join(
+                        output_path, re.sub(
+                            r'-(?:e|p)-', '-',
+                            re.sub('-+', '-',
+                                   re.sub(r'.{36}(?=-2u\.(?:png|jpg)$)', '',
+                                          '{}-2u.{}'.format(
+                                              '-'.join(parts[:-1]),
+                                              file_type)))))
+                    shutil.copyfile(back_unofficial_path,
+                                    back_unofficial_output_path)
+                    if service != 'mpc':
+                        back_official_output_path = os.path.join(
+                            output_path, re.sub(
+                                r'-(?:e|p)-', '-',
+                                re.sub('-+', '-',
+                                       re.sub(r'.{36}(?=-2o\.(?:png|jpg)$)',
+                                              '', '{}-2o.{}'.format(
+                                                  '-'.join(parts[:-1]),
+                                                  file_type)))))
+                        shutil.copyfile(back_official_path,
+                                        back_official_output_path)
+
+            else:
+                front_output_path = os.path.join(
+                    output_path, re.sub(
+                        r'-(?:e|p)-', '-',
+                        re.sub('-+', '-',
+                               re.sub(r'.{36}-1(?=\.(?:png|jpg))', '-1o',
+                                      '-'.join(parts)))))
+                shutil.copyfile(os.path.join(input_path, filename),
+                                front_output_path)
+                back_unofficial_output_path = os.path.join(
+                    output_path, re.sub(
+                        r'-(?:e|p)-', '-',
+                        re.sub('-+', '-',
+                               re.sub(r'.{36}(?=-2u\.(?:png|jpg)$)', '',
+                                      '{}-2u.{}'.format(
+                                          '-'.join(parts[:-1]),
+                                          file_type)))))
+                shutil.copyfile(back_unofficial_path,
+                                back_unofficial_output_path)
+                if service != 'mpc':
+                    back_official_output_path = os.path.join(
+                        output_path, re.sub(
+                            r'-(?:e|p)-', '-',
+                            re.sub('-+', '-',
+                                   re.sub(r'.{36}(?=-2o\.(?:png|jpg)$)', '',
+                                          '{}-2o.{}'.format(
+                                              '-'.join(parts[:-1]),
+                                              file_type)))))
+                    shutil.copyfile(back_official_path,
+                                    back_official_output_path)
+
+        break
+
+
+def _insert_png_text(filepath, text):
+    """ Insert text into a PNG file.
+    """
+    reader = png.Reader(filename=filepath)
+    chunk_list = list(reader.chunks())
+    chunk_item = tuple([TEXT_CHUNK_FLAG, bytes(text, 'utf-8')])
+    chunk_list.insert(1, chunk_item)
+    with open(filepath, 'wb') as obj:
+        png.write_chunks(obj, chunk_list)
+
+
+def _make_unique_png(input_path):
+    """ Make unique PNG files for MakePlayingCards.
+    """
+    for _, _, filenames in os.walk(input_path):
+        for filename in filenames:
+            if filename.endswith('.png'):
+                _insert_png_text(os.path.join(input_path, filename), filename)
+
+        break
+
+
+def _combine_doublesided_rules_cards(set_id, input_path, card_data, service):  # pylint: disable=R0912,R0914
     """ Combine double-sided rules cards.
     """
     card_data = sorted(
@@ -3207,126 +3314,46 @@ def _combine_doublesided_rules_cards(set_id, input_path, card_data):  # pylint: 
         return
 
     for pair in pairs:
-        first_back = os.path.join(input_path,
-                                  '{}-2.{}'.format(pair[0], file_type))
+        first_back_unofficial = os.path.join(
+            input_path, '{}-2u.{}'.format(pair[0], file_type))
         second_front = os.path.join(input_path,
-                                    '{}-1.{}'.format(pair[1], file_type))
-        second_back = os.path.join(input_path,
-                                   '{}-2.{}'.format(pair[1], file_type))
-        if not os.path.exists(first_back):
-            logging.error('ERROR: Path %s does not exist', first_back)
+                                    '{}-1o.{}'.format(pair[1], file_type))
+        second_back_unofficial = os.path.join(
+            input_path, '{}-2u.{}'.format(pair[1], file_type))
+        if not os.path.exists(first_back_unofficial):
+            logging.error('ERROR: Path %s does not exist',
+                          first_back_unofficial)
             continue
 
         if not os.path.exists(second_front):
             logging.error('ERROR: Path %s does not exist', second_front)
             continue
 
-        if not os.path.exists(second_back):
-            logging.error('ERROR: Path %s does not exist', second_back)
+        if not os.path.exists(second_back_unofficial):
+            logging.error('ERROR: Path %s does not exist',
+                          second_back_unofficial)
             continue
 
-        shutil.move(second_front, first_back)
-        os.remove(second_back)
-
-
-def _flip_first_card(input_path):
-    """ Flip first card of the deck.
-
-    NOT USED:
-    1. I got no proof yet that the front side of the front card has additional
-       risks to be damaged.
-    2. I did get a proof that the back sides of all cards have more risks to be
-       damaged.
-    3. That may create an additional ground for confusion.
-    """
-    for _, _, filenames in os.walk(input_path):
-        filenames = sorted(filenames)
-        if len(filenames) < 2:
-            break
-
-        file_type = filenames[0].split('.')[-1]
-        if not (filenames[0].endswith('-1.{}'.format(file_type)) and
-                filenames[1].endswith('-2.{}'.format(file_type))):
-            break
-
-        if (filenames[0].split('-1.{}'.format(file_type))[0] !=
-                filenames[1].split('-2.{}'.format(file_type))[0]):
-            break
-
-        temp_name = 'temp_file'
-        shutil.move(os.path.join(input_path, filenames[0]),
-                    os.path.join(input_path, temp_name))
-        shutil.move(os.path.join(input_path, filenames[1]),
-                    os.path.join(input_path, filenames[0]))
-        shutil.move(os.path.join(input_path, temp_name),
-                    os.path.join(input_path, filenames[1]))
-        break
-
-
-def _prepare_printing_images(input_path, output_path, service, file_type):
-    """ Prepare printing images for various services.
-    """
-    for _, _, filenames in os.walk(input_path):
-        for filename in filenames:
-            parts = filename.split('-')
-            if parts[-1] != '1.{}'.format(file_type):
+        if service != 'mpc':
+            first_back_official = os.path.join(
+                input_path, '{}-2o.{}'.format(pair[0], file_type))
+            second_back_official = os.path.join(
+                input_path, '{}-2o.{}'.format(pair[1], file_type))
+            if not os.path.exists(first_back_official):
+                logging.error('ERROR: Path %s does not exist',
+                              first_back_official)
                 continue
 
-            back_path = os.path.join(input_path, '{}-2.{}'.format(
-                '-'.join(parts[:-1]), file_type))
-            if not os.path.exists(back_path):
-                if parts[2] == 'p':
-                    back_path = os.path.join(IMAGES_BACK_PATH,
-                                             CARD_BACKS['player'][service])
-                elif parts[2] == 'e':
-                    back_path = os.path.join(IMAGES_BACK_PATH,
-                                             CARD_BACKS['encounter'][service])
-                else:
-                    logging.error('ERROR: Missing card back for %s, removing'
-                                  ' the file', filename)
-                    continue
+            if not os.path.exists(second_back_official):
+                logging.error('ERROR: Path %s does not exist',
+                              second_back_official)
+                continue
 
-            if parts[1] == 'p':
-                for i in range(3):
-                    parts[1] = str(i + 1)
-                    front_output_path = os.path.join(
-                        output_path, re.sub(
-                            r'-(?:e|p)-', '-',
-                            re.sub('-+', '-',
-                                   re.sub(r'.{36}(?=-1\.(?:png|jpg))', '',
-                                          '-'.join(parts)))))
-                    back_output_path = os.path.join(
-                        output_path, re.sub(
-                            r'-(?:e|p)-', '-',
-                            re.sub('-+', '-',
-                                   re.sub(r'.{36}(?=-2\.(?:png|jpg))', '',
-                                          '{}-2.{}'.format(
-                                              '-'.join(parts[:-1]),
-                                              file_type)))))
-                    shutil.copyfile(os.path.join(input_path, filename),
-                                    front_output_path)
-                    shutil.copyfile(back_path, back_output_path)
-
-            else:
-                front_output_path = os.path.join(
-                    output_path, re.sub(
-                        r'-(?:e|p)-', '-',
-                        re.sub('-+', '-',
-                               re.sub(r'.{36}(?=-1\.(?:png|jpg))', '',
-                                      '-'.join(parts)))))
-                back_output_path = os.path.join(
-                    output_path, re.sub(
-                        r'-(?:e|p)-', '-',
-                        re.sub('-+', '-',
-                               re.sub(r'.{36}(?=-2\.(?:png|jpg))', '',
-                                      '{}-2.{}'.format(
-                                          '-'.join(parts[:-1]),
-                                          file_type)))))
-                shutil.copyfile(os.path.join(input_path, filename),
-                                front_output_path)
-                shutil.copyfile(back_path, back_output_path)
-
-        break
+        shutil.move(second_front, first_back_unofficial)
+        os.remove(second_back_unofficial)
+        if service != 'mpc':
+            shutil.copyfile(first_back_unofficial, first_back_official)
+            os.remove(second_back_official)
 
 
 def _prepare_mpc_printing_archive(input_path, obj):
@@ -3334,10 +3361,10 @@ def _prepare_mpc_printing_archive(input_path, obj):
     """
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
-            if filename.endswith('-1.png'):
+            if filename.endswith('-1o.png'):
                 obj.write(os.path.join(input_path, filename),
                           'front/{}'.format(filename))
-            elif filename.endswith('-2.png'):
+            elif filename.endswith('-2u.png'):
                 obj.write(os.path.join(input_path, filename),
                           'back/{}'.format(filename))
 
@@ -3359,22 +3386,31 @@ def _prepare_dtc_printing_archive(input_path, obj):
     """
     for _, _, filenames in os.walk(input_path):
         front_cnt = 0
-        back_cnt = 0
+        back_official_cnt = 0
+        back_unofficial_cnt = 0
         filenames = sorted(f for f in filenames
-                           if f.endswith('-1.jpg')
-                           or f.endswith('-2.jpg'))
-        total_cnt = len(filenames) / 2
+                           if f.endswith('-1o.jpg')
+                           or f.endswith('-2o.jpg')
+                           or f.endswith('-2u.jpg'))
+        total_cnt = len(filenames) / 3
         for filename in filenames:
-            if filename.endswith('-1.jpg'):
+            if filename.endswith('-1o.jpg'):
                 front_cnt += 1
                 obj.write(os.path.join(input_path, filename),
                           '{}front/{}'.format(_deck_name(front_cnt, total_cnt),
                                               filename))
-            elif filename.endswith('-2.jpg'):
-                back_cnt += 1
+            elif filename.endswith('-2o.jpg'):
+                back_official_cnt += 1
                 obj.write(os.path.join(input_path, filename),
-                          '{}back/{}'.format(_deck_name(back_cnt, total_cnt),
-                                             filename))
+                          '{}back_official/{}'.format(
+                              _deck_name(back_official_cnt, total_cnt),
+                              filename))
+            elif filename.endswith('-2u.jpg'):
+                back_unofficial_cnt += 1
+                obj.write(os.path.join(input_path, filename),
+                          '{}back_unofficial/{}'.format(
+                              _deck_name(back_unofficial_cnt, total_cnt),
+                              filename))
 
         break
 
@@ -3384,9 +3420,15 @@ def _prepare_mbprint_printing_archive(input_path, obj):
     """
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
-            if filename.endswith('-1.jpg') or filename.endswith('-0.jpg'):
+            if filename.endswith('-1o.jpg'):
                 obj.write(os.path.join(input_path, filename),
-                          filename)
+                          'front/{}'.format(filename))
+            elif filename.endswith('-0o.jpg'):
+                obj.write(os.path.join(input_path, filename),
+                          'back_official/{}'.format(filename))
+            elif filename.endswith('-0u.jpg'):
+                obj.write(os.path.join(input_path, filename),
+                          'back_unofficial/{}'.format(filename))
 
         break
 
@@ -3396,12 +3438,15 @@ def _prepare_generic_png_printing_archive(input_path, obj):
     """
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
-            if filename.endswith('-1.png'):
+            if filename.endswith('-1o.png'):
                 obj.write(os.path.join(input_path, filename),
                           'front/{}'.format(filename))
-            elif filename.endswith('-2.png'):
+            elif filename.endswith('-2o.png'):
                 obj.write(os.path.join(input_path, filename),
-                          'back/{}'.format(filename))
+                          'back_official/{}'.format(filename))
+            elif filename.endswith('-2u.png'):
+                obj.write(os.path.join(input_path, filename),
+                          'back_unofficial/{}'.format(filename))
 
         break
 
@@ -3433,9 +3478,9 @@ def generate_mpc(conf, set_id, set_name, lang, card_data):
     _create_folder(output_path)
     _create_folder(temp_path)
     _clear_folder(temp_path)
-    _prepare_printing_images(input_path, temp_path, 'mpc', 'png')
+    _prepare_printing_images(input_path, temp_path, 'mpc')
     _make_unique_png(temp_path)
-    _combine_doublesided_rules_cards(set_id, temp_path, card_data)
+    _combine_doublesided_rules_cards(set_id, temp_path, card_data, 'mpc')
 
     if 'makeplayingcards_zip' in conf['outputs'][lang]:
         with zipfile.ZipFile(
@@ -3487,8 +3532,8 @@ def generate_dtc(conf, set_id, set_name, lang, card_data):
     _create_folder(output_path)
     _create_folder(temp_path)
     _clear_folder(temp_path)
-    _prepare_printing_images(input_path, temp_path, 'dtc', 'jpg')
-    _combine_doublesided_rules_cards(set_id, temp_path, card_data)
+    _prepare_printing_images(input_path, temp_path, 'dtc')
+    _combine_doublesided_rules_cards(set_id, temp_path, card_data, 'dtc')
 
     if 'drivethrucards_zip' in conf['outputs'][lang]:
         with zipfile.ZipFile(
@@ -3540,16 +3585,21 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):
     _create_folder(output_path)
     _create_folder(temp_path)
     _clear_folder(temp_path)
-    _prepare_printing_images(input_path, temp_path, 'mbprint', 'jpg')
-    _combine_doublesided_rules_cards(set_id, temp_path, card_data)
+    _prepare_printing_images(input_path, temp_path, 'mbprint')
+    _combine_doublesided_rules_cards(set_id, temp_path, card_data, 'mbprint')
 
     for _, _, filenames in os.walk(temp_path):
         for filename in filenames:
-            if filename.endswith('-2.jpg'):
+            if filename.endswith('-2o.jpg'):
                 os.rename(
                     os.path.join(temp_path, filename),
                     os.path.join(temp_path,
-                                 re.sub(r'-2\.jpg$', '-0.jpg', filename)))
+                                 re.sub(r'-2o\.jpg$', '-0o.jpg', filename)))
+            elif filename.endswith('-2u.jpg'):
+                os.rename(
+                    os.path.join(temp_path, filename),
+                    os.path.join(temp_path,
+                                 re.sub(r'-2u\.jpg$', '-0u.jpg', filename)))
 
         break
 
@@ -3609,8 +3659,9 @@ def generate_generic_png(conf, set_id, set_name, lang, card_data):
     _create_folder(output_path)
     _create_folder(temp_path)
     _clear_folder(temp_path)
-    _prepare_printing_images(input_path, temp_path, 'generic_png', 'png')
-    _combine_doublesided_rules_cards(set_id, temp_path, card_data)
+    _prepare_printing_images(input_path, temp_path, 'generic_png')
+    _combine_doublesided_rules_cards(set_id, temp_path, card_data,
+                                     'generic_png')
 
     if 'generic_png_zip' in conf['outputs'][lang]:
         with zipfile.ZipFile(
