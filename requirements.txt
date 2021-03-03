@@ -1,4 +1,3 @@
-jupyter
 py7zr
 pylint
 pypng

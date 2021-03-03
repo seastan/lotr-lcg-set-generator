@@ -63,8 +63,12 @@ into the root folder of this repo.
 12. Go to the root folder of this repo and follow these steps:
 
   - `virtualenv env --python=python3.8` (if needed, replace `3.8` with your actual Python version)
-  - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
+  - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
   - `pip install -r requirements.txt`
+
+  If for debugging purposes you plan to use Jupyter notebook, additionally run:
+
+  - `pip install jupyter`
 
 13. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
@@ -90,7 +94,7 @@ into the root folder of this repo.
 
 To run the workflow, go to the root folder of this repo and follow these steps:
 
-- `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
+- `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
 - `python run_before_se.py` (or `python run_before_se.py <path to a different configuration yaml>` if you want to pass a different configuration file)
 - Open `setGenerator.seproject` in Strange Eons and run `Script/makeCards` script by double clicking it.
   Once completed, close Strange Eons and wait until it finished packing the project.
