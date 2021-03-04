@@ -3,6 +3,11 @@
 
 NOTE: This script heavily relies on my existing smart home environment.
 
+Setup rclone:
+
+curl -L https://raw.github.com/pageauc/rclone4pi/master/rclone-install.sh | bash
+rclone confi
+
 Setup a cron as:
 */5 * * * * flock -xn /home/homeassistant/lotr-lcg-set-generator/cron.lock -c 'python3 /home/homeassistant/lotr-lcg-set-generator/run_before_se_cron.py > /dev/null' 2>&1
 """
