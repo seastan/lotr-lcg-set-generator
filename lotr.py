@@ -434,7 +434,6 @@ def read_conf(path=CONFIGURATION_PATH):
     logging.info('Reading project configuration (%s)...', path)
     timestamp = time.time()
 
-    logging.info('Reading project configuration...')
     with open(path, 'r') as f_conf:
         conf = yaml.safe_load(f_conf)
 
@@ -744,6 +743,15 @@ def extract_data(conf):  # pylint: disable=R0915
             and int(row[CARD_NUMBER]) or 0,
             str(row[CARD_NUMBER]),
             str(row[CARD_NAME])))
+
+    SELECTED_CARDS.update({row[CARD_ID] for row in DATA if row[CARD_SELECTED]})
+    FOUND_SETS.update({row[CARD_SET] for row in DATA
+                       if row[CARD_SET] and not row[CARD_SCRATCH]})
+    scratch_sets = {row[CARD_SET] for row in DATA if row[CARD_SET]
+                    and row[CARD_SCRATCH]}
+    FOUND_INTERSECTED_SETS.update(FOUND_SETS.intersection(scratch_sets))
+    FOUND_SCRATCH_SETS.update(scratch_sets.difference(FOUND_INTERSECTED_SETS))
+
     _clean_data(DATA)
     _update_data(DATA)
 
@@ -767,14 +775,6 @@ def extract_data(conf):  # pylint: disable=R0915
                         'ignoring', row[CARD_ID], lang)
                 else:
                     TRANSLATIONS[lang][row[CARD_ID]] = row
-
-    SELECTED_CARDS.update({row[CARD_ID] for row in DATA if row[CARD_SELECTED]})
-    FOUND_SETS.update({row[CARD_SET] for row in DATA
-                       if row[CARD_SET] and not row[CARD_SCRATCH]})
-    scratch_sets = {row[CARD_SET] for row in DATA if row[CARD_SET]
-                    and row[CARD_SCRATCH]}
-    FOUND_INTERSECTED_SETS.update(FOUND_SETS.intersection(scratch_sets))
-    FOUND_SCRATCH_SETS.update(scratch_sets.difference(FOUND_INTERSECTED_SETS))
 
     logging.info('...Extracting data from the spreadsheet (%ss)',
                  round(time.time() - timestamp, 3))
@@ -1355,9 +1355,9 @@ def _update_card_for_rules(card):
         card[CARD_ENCOUNTER_SET] = card[CARD_ENCOUNTER_SET].lower()
 
     card[CARD_ORIGINAL_NAME] = card[CARD_NAME]
-    card[CARD_NAME] = card[CARD_NAME].lower()
     card[CARD_SET_NAME] = card[CARD_SET_NAME].lower()
-    card[CARD_TYPE] = card[CARD_TYPE].lower()
+    card[CARD_NAME] = card[CARD_NAME].lower() if card[CARD_NAME] else ''
+    card[CARD_TYPE] = card[CARD_TYPE].lower() if card[CARD_TYPE] else ''
     card[CARD_SPHERE] = card[CARD_SPHERE].lower() if card[CARD_SPHERE] else ''
     card[CARD_TRAITS] = ([t.lower().strip()
                           for t in card[CARD_TRAITS].split('.') if t]
@@ -1600,7 +1600,9 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                         _update_card_for_rules(card.copy()))
                 elif mode == EASY_PREFIX and card[CARD_EASY_MODE]:
                     card_copy = _update_card_for_rules(card.copy())
-                    card_copy[CARD_QUANTITY] -= card_copy[CARD_EASY_MODE]
+                    easy_mode = (int(card_copy[CARD_EASY_MODE])
+                                 if _is_int(card_copy[CARD_EASY_MODE]) else 0)
+                    card_copy[CARD_QUANTITY] -= easy_mode
                     encounter_cards.append(card_copy)
                 else:
                     encounter_cards.append(_update_card_for_rules(card.copy()))
@@ -1773,6 +1775,9 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                 cost = _handle_int(row[CARD_COST])
                 threat = None
 
+            quantity = (int(row[CARD_QUANTITY])
+                        if _is_int(row[CARD_QUANTITY]) else 0)
+
             csv_row = {
                 'pack': set_name,
                 'type': card_type,
@@ -1795,8 +1800,8 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                 'health': _handle_int(row[CARD_HEALTH]),
                 'victory': _handle_int(row[CARD_VICTORY]),
                 'quest': _handle_int(row[CARD_QUEST]),
-                'quantity': int(row[CARD_QUANTITY]),
-                'deckLimit': limit or int(row[CARD_QUANTITY]),
+                'quantity': quantity,
+                'deckLimit': limit or quantity,
                 'illustrator': row[CARD_ARTIST],
                 'octgnid': row[CARD_ID],
                 'hasErrata': None
@@ -1938,7 +1943,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
         elif card_type == 'Nightmare':
             type_name = 'Nightmare Setup'
         else:
-            type_name = card_type
+            type_name = card_type or ''
 
         if card_type in ('Presentation', 'Rules'):
             victory_points = None
@@ -1984,10 +1989,13 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
                                             ).replace('\n', '\r\n').strip()
             flavor = 'Side A: {} Side B: {}'.format(flavor, flavor_back)
 
+        quantity = (int(row[CARD_QUANTITY])
+                    if _is_int(row[CARD_QUANTITY]) else 0)
+
         json_row = {
             'code': '{}{}'.format(int(SETS[set_id][SET_RINGSDB_CODE]),
                                   str(position).zfill(3)),
-            'deck_limit': limit or int(row[CARD_QUANTITY]),
+            'deck_limit': limit or quantity,
             'flavor': flavor,
             'has_errata': False,
             'illustrator': row[CARD_ARTIST] or 'None',
@@ -2000,7 +2008,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
             'pack_code': SETS[set_id][SET_HOB_CODE],
             'pack_name': set_name,
             'position': position,
-            'quantity': int(row[CARD_QUANTITY]),
+            'quantity': quantity,
             'sphere_code': sphere.lower().replace(' ', '-'),
             'sphere_name': sphere,
             'text': text,
