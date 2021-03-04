@@ -1372,7 +1372,7 @@ def _update_card_for_rules(card):
 def _append_cards(parent, cards):
     """ Append card elements to the section element.
     """
-    cards = [c for c in cards if _is_int(CARD_QUANTITY) and
+    cards = [c for c in cards if _is_int(c[CARD_QUANTITY]) and
              c[CARD_QUANTITY] > 0]
     if cards:
         parent.text = '\n    '
@@ -1392,7 +1392,7 @@ def _test_rule(card, rule):  # pylint: disable=R0911,R0912
     """ Test a deck rule and return the number of affected copies.
     """
     res = re.match(r'^([0-9]+) ', rule)
-    if res and _is_int(CARD_QUANTITY):
+    if res and _is_int(card[CARD_QUANTITY]):
         qty = min(int(res.groups()[0]), card[CARD_QUANTITY])
         rule = re.sub(r'^[0-9]+ +', '', rule)
     else:
