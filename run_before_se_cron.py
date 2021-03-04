@@ -15,6 +15,7 @@ import re
 import time
 import uuid
 
+from lotr import SanityCheckError
 from run_before_se import main as imported_main
 
 
@@ -22,9 +23,11 @@ INTERNET_SENSOR_PATH = '/home/homeassistant/.homeassistant/internet_state'
 LOG_PATH = 'cron.log'
 MAIL_COUNTER_PATH = 'cron.cnt'
 MAILS_PATH = '/home/homeassistant/.homeassistant/mails'
+SANITY_CHECK_PATH = 'sanity_check.txt'
 WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 
 ERROR_SUBJECT_TEMPLATE = 'LotR ALeP Cron ERROR: {}'
+SANITY_CHECK_SUBJECT_TEMPLATE = 'LotR ALeP Cron: {}'
 WARNING_SUBJECT_TEMPLATE = 'LotR ALeP Cron WARNING: {}'
 MAIL_QUOTA = 50
 
@@ -33,6 +36,7 @@ def set_directory():
     """ Set working directory.
     """
     os.chdir(WORKING_DIRECTORY)
+
 
 def init_logging():
     """ Init logging.
@@ -49,8 +53,32 @@ def internet_state():
             value = obj.read().strip()
             return value != 'off'
     except Exception as exc:
-        logging.warning(exc)
+        message = str(exc)
+        logging.warning(message)
+        create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
         return True
+
+
+def get_sanity_check_message():
+    """ Get the latest sanity check message.
+    """
+    try:
+        with open(SANITY_CHECK_PATH, 'r') as obj:
+            return obj.read().strip()
+    except Exception:
+        return ''
+
+
+def set_sanity_check_message(message):
+    """ Set a new sanity check message.
+    """
+    try:
+        with open(SANITY_CHECK_PATH, 'w') as obj:
+            obj.write(message)
+    except Exception as exc:
+        message = str(exc)
+        logging.warning(message)
+        create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
 
 
 def is_non_ascii(value):
@@ -89,9 +117,6 @@ def check_mail_counter():
         with open(MAIL_COUNTER_PATH, 'w') as fobj:
             json.dump(data, fobj)
 
-        message = 'No previous mail counter found'
-        logging.warning(message)
-        create_mail(WARNING_SUBJECT_TEMPLATE.format(message), '')
         return True
 
     if today != data['day']:
@@ -121,7 +146,7 @@ def check_mail_counter():
         message = 'Mail quota exceeded: {}/{}'.format(data['value'] + 1,
                                                       MAIL_QUOTA)
         logging.warning(message)
-        create_mail(WARNING_SUBJECT_TEMPLATE.format(message), '')
+        create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
         return False
 
     return True
@@ -152,14 +177,28 @@ def main():
         if not check_mail_counter():
             return
 
+        last_message = get_sanity_check_message()
         imported_main()
-    except Exception as ex:
-        message = str(ex)
+        if last_message:
+            set_sanity_check_message('')
+            create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(
+                'Sanity check passed'))
+    except SanityCheckError as exc:
+        message = str(exc)
         logging.error(message)
+        if message != last_message:
+            try:
+                set_sanity_check_message(message)
+                create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(message))
+            except Exception as exc_new:
+                logging.error(str(exc_new))
+    except Exception as exc:
+        message = str(exc)
+        logging.exception(message)
         try:
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
-        except Exception as ex_new:
-            logging.error(str(ex_new))
+        except Exception as exc_new:
+            logging.error(str(exc_new))
 
 
 if __name__ == '__main__':

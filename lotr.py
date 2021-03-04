@@ -225,6 +225,16 @@ FOUND_INTERSECTED_SETS = set()
 IMAGE_CACHE = {}
 
 
+class SanityCheckError(Exception):
+    """ Sanity check error.
+    """
+
+
+class ImageMagickError(Exception):
+    """ Image Magick error.
+    """
+
+
 def _is_positive_int(value):
     """ Check whether a value is a positive int or not.
     """
@@ -806,7 +816,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
     logging.info('')
     timestamp = time.time()
 
-    errors_found = False
+    errors = []
     card_ids = set()
     card_scratch_ids = set()
     card_set_number_names = set()
@@ -830,23 +840,37 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         scratch = ' (Scratch)' if card_scratch else ''
 
         if set_id is None:
-            logging.error('ERROR: No set ID for row #%s%s', i, scratch)
-            errors_found = errors_found if card_scratch else True
+            message = 'No set ID for row #{}{}'.format(i, scratch)
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
         elif set_id == '[filtered set]':
-            logging.error('ERROR: Reusing non-scratch set ID for row #%s%s', i,
-                          scratch)
+            message = 'Reusing non-scratch set ID for row #{}{}'.format(
+                i, scratch)
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
         elif set_id not in all_set_ids:
-            logging.error('ERROR: Unknown set ID for row #%s%s', i, scratch)
-            errors_found = errors_found if card_scratch else True
+            message = 'Unknown set ID for row #{}{}'.format(i, scratch)
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
 
         if card_id is None:
-            logging.error('ERROR: No card ID for row #%s%s', i, scratch)
-            errors_found = errors_found if card_scratch else True
+            message = 'No card ID for row #{}{}'.format(i, scratch)
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
         elif card_id in card_ids:
-            logging.error('ERROR: Duplicate card ID for row #%s%s', i, scratch)
-            errors_found = errors_found if card_scratch else True
+            message = 'Duplicate card ID for row #{}{}'.format(i, scratch)
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
         elif card_id in card_scratch_ids:
-            logging.error('ERROR: Duplicate card ID for row #%s%s', i, scratch)
+            message = 'Duplicate card ID for row #{}{}'.format(i, scratch)
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
 
         if card_scratch:
             card_scratch_ids.add(card_id)
@@ -857,84 +881,114 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             continue
 
         if card_number is None:
-            logging.error('ERROR: No card number for row #%s%s', i, scratch)
-            errors_found = errors_found if card_scratch else True
+            message = 'No card number for row #{}{}'.format(i, scratch)
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
 
         if card_quantity is None:
-            logging.error('ERROR: No card quantity for row #%s%s', i, scratch)
-            errors_found = errors_found if card_scratch else True
+            message = 'No card quantity for row #{}{}'.format(i, scratch)
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
         elif not _is_positive_int(card_quantity):
-            logging.error('ERROR: Incorrect format for card quantity'
-                          ' for row #%s%s', i, scratch)
-            errors_found = errors_found if card_scratch else True
+            message = ('Incorrect format for card quantity for row '
+                       '#{}{}'.format(i, scratch))
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
 
         if card_name is None:
-            logging.error('ERROR: No card name for row #%s%s', i, scratch)
-            errors_found = errors_found if card_scratch else True
+            message = 'No card name for row #{}{}'.format(i, scratch)
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
         elif set_id is not None and card_number is not None:
             if (set_id, card_number, card_name) in card_set_number_names:
-                logging.error(
-                    'ERROR: Duplicate card set, number and name combination '
-                    'for row #%s%s', i, scratch)
-                errors_found = errors_found if card_scratch else True
+                message = ('Duplicate card set, number and name combination '
+                           'for row #{}{}'.format(i, scratch))
+                logging.error('ERROR: %s', message)
+                if not card_scratch:
+                    errors.append(message)
             else:
                 card_set_number_names.add((set_id, card_number, card_name))
 
         if card_unique is not None and card_unique not in ('1', 1):
-            logging.error('ERROR: Incorrect format for unique for row #%s%s',
-                          i, scratch)
-            errors_found = errors_found if card_scratch else True
+            message = 'Incorrect format for unique for row #{}{}'.format(
+                i, scratch)
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
 
         if card_unique_back is not None and card_unique_back not in ('1', 1):
-            logging.error('ERROR: Incorrect format for unique back'
-                          ' for row #%s%s', i, scratch)
-            errors_found = errors_found if card_scratch else True
+            message = 'Incorrect format for unique back for row #{}{}'.format(
+                i, scratch)
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
 
         if card_type is None:
-            logging.error('ERROR: No card type for row #%s%s', i, scratch)
-            errors_found = errors_found if card_scratch else True
+            message = 'No card type for row #{}{}'.format(i, scratch)
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
         elif card_type not in CARD_TYPES:
-            logging.error('ERROR: Unknown card type for row #%s%s', i, scratch)
-            errors_found = errors_found if card_scratch else True
+            message = 'Unknown card type for row #{}{}'.format(i, scratch)
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
 
         if card_type_back is not None and card_type_back not in CARD_TYPES:
-            logging.error('ERROR: Unknown card type back for row #%s%s', i,
-                          scratch)
-            errors_found = errors_found if card_scratch else True
+            message = 'Unknown card type back for row #{}{}'.format(i, scratch)
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
         elif (card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL
               and card_type_back is not None and card_type_back != card_type):
-            logging.error('ERROR: Incorrect card type back for row #%s%s', i,
-                          scratch)
-            errors_found = errors_found if card_scratch else True
+            message = 'Incorrect card type back for row #{}{}'.format(
+                i, scratch)
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
         elif (card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL
               and card_type_back in CARD_TYPES_DOUBLESIDE_OPTIONAL):
-            logging.error('ERROR: Incorrect card type back for row #%s%s', i,
-                          scratch)
-            errors_found = errors_found if card_scratch else True
+            message = 'Incorrect card type back for row #{}{}'.format(i, scratch)
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
 
         if (card_sphere is not None and card_sphere not in SPHERES):
-            logging.error('ERROR: Unknown sphere for row #%s%s', i, scratch)
-            errors_found = errors_found if card_scratch else True
+            message = 'Unknown sphere for row #{}{}'.format(i, scratch)
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
 
         if (card_sphere_back is not None and card_sphere_back not in SPHERES):
-            logging.error('ERROR: Unknown sphere back for row #%s%s', i,
-                          scratch)
-            errors_found = errors_found if card_scratch else True
+            message = 'Unknown sphere back for row #{}{}'.format(i, scratch)
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
 
         if card_easy_mode is not None and not _is_positive_int(card_easy_mode):
-            logging.error('ERROR: Incorrect format for removed for easy mode'
-                          ' for row #%s%s', i, scratch)
-            errors_found = errors_found if card_scratch else True
+            message = ('Incorrect format for removed for easy mode for row '
+                       '#{}{}'.format(i, scratch))
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
         elif card_easy_mode is not None and card_easy_mode > card_quantity:
-            logging.error('ERROR: Removed for easy mode is greater than card'
-                          ' quantity for row #%s%s', i, scratch)
-            errors_found = errors_found if card_scratch else True
+            message = ('Removed for easy mode is greater than card quantity '
+                       'for row #{}{}'.format(i, scratch))
+            logging.error('ERROR: %s', message)
+            if not card_scratch:
+                errors.append(message)
 
         for key, value in row.items():
             if isinstance(value, str) and '[unmatched quot]' in value:
-                logging.error('ERROR: Unmatched quote symbol in %s column '
-                              'for row #%s%s', key, i, scratch)
-                errors_found = errors_found if card_scratch else True
+                message = ('Unmatched quote symbol in %s column for row '
+                           '#{}{}'.format(i, scratch))
+                logging.error('ERROR: %s', message)
+                if not card_scratch:
+                    errors.append(message)
 
         for lang in conf['languages']:
             if lang == 'English':
@@ -959,9 +1013,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
     logging.info('')
-    if errors_found:
-        raise ValueError('Sanity check of the spreadsheet failed, '
-                         'see error(s) above')
+    if errors:
+        raise SanityCheckError('Sanity check failed: {}.'.format(
+            '. '.join(errors)))
 
     logging.info('...Performing a sanity check of the spreadsheet (%ss)',
                  round(time.time() - timestamp, 3))
@@ -1318,7 +1372,8 @@ def _update_card_for_rules(card):
 def _append_cards(parent, cards):
     """ Append card elements to the section element.
     """
-    cards = [c for c in cards if c[CARD_QUANTITY] > 0]
+    cards = [c for c in cards if _is_int(CARD_QUANTITY) and
+             c[CARD_QUANTITY] > 0]
     if cards:
         parent.text = '\n    '
 
@@ -1337,7 +1392,7 @@ def _test_rule(card, rule):  # pylint: disable=R0911,R0912
     """ Test a deck rule and return the number of affected copies.
     """
     res = re.match(r'^([0-9]+) ', rule)
-    if res:
+    if res and _is_int(CARD_QUANTITY):
         qty = min(int(res.groups()[0]), card[CARD_QUANTITY])
         rule = re.sub(r'^[0-9]+ +', '', rule)
     else:
@@ -3142,8 +3197,9 @@ def _make_cmyk(conf, input_path):
             if (filename.endswith('.jpg')
                     and os.path.getsize(os.path.join(input_path, filename)
                                         ) < IMAGE_MIN_SIZE):
-                raise ValueError('ImageMagick conversion failed for {}'.format(
-                    os.path.join(input_path, filename)))
+                raise ImageMagickError('ImageMagick conversion failed for {}'
+                                       .format(os.path.join(input_path,
+                                                            filename)))
 
         break
 
