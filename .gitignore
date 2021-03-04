@@ -18,8 +18,9 @@ setOCTGN/*.xml.old
 Temp/*/*
 
 configuration*.yaml
-log.txt
 setGenerator.seproject
 USWebCoatedSWOP.icc
-~*.*
+*.cnt
+*.log
 *.swp
+~*.*
