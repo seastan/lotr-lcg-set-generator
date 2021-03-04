@@ -21,6 +21,7 @@ configuration*.yaml
 setGenerator.seproject
 USWebCoatedSWOP.icc
 *.cnt
+*.lock
 *.log
 *.swp
 ~*.*

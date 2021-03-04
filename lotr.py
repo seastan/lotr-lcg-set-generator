@@ -3,6 +3,7 @@
 """ Helper functions for LotR ALeP workflow.
 """
 import codecs
+from collections import OrderedDict
 import copy
 import csv
 import hashlib
@@ -17,16 +18,17 @@ import time
 import xml.etree.ElementTree as ET
 import zipfile
 
-from collections import OrderedDict
-
-import png
-import py7zr
 import requests
 import yaml
 
-from reportlab.lib.pagesizes import landscape, letter, A4
-from reportlab.lib.units import inch
-from reportlab.pdfgen.canvas import Canvas
+try:
+    import png
+    import py7zr
+    from reportlab.lib.pagesizes import landscape, letter, A4
+    from reportlab.lib.units import inch
+    from reportlab.pdfgen.canvas import Canvas
+except Exception:  # pylint: disable=W0703
+    pass
 
 
 SET_SHEET = 'Sets'

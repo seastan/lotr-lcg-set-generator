@@ -5,7 +5,11 @@ import sys
 import time
 import lotr
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
+
+def init_logging():
+    """ Init logging.
+    """
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 
 
 def main():  # pylint: disable=R0912
@@ -65,4 +69,5 @@ def main():  # pylint: disable=R0912
 
 
 if __name__ == '__main__':
+    init_logging()
     main()

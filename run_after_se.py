@@ -8,7 +8,11 @@ from multiprocessing import Pool, cpu_count
 
 import lotr
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
+
+def init_logging():
+    """ Init logging.
+    """
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
 
 
 def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):
@@ -161,4 +165,5 @@ def main():  # pylint: disable=R0912
 
 
 if __name__ == '__main__':
+    init_logging()
     main()

@@ -1,12 +1,16 @@
+# pylint: disable=W0703,C0301
 """ Cron for LotR ALeP workflow (Part 1, before Strange Eons).
 
 NOTE: This script heavily relies on my existing smart home environment.
+
+Setup a cron as:
+*/5 * * * * flock -xn /home/homeassistant/lotr-lcg-set-generator/cron.lock -c 'python3 /home/homeassistant/lotr-lcg-set-generator/run_before_se_cron.py > /dev/null' 2>&1
 """
-# pylint: disable=W0703
 from datetime import datetime
 from email.header import Header
 import json
 import logging
+import os
 import re
 import time
 import uuid
@@ -15,17 +19,26 @@ from run_before_se import main as imported_main
 
 
 INTERNET_SENSOR_PATH = '/home/homeassistant/.homeassistant/internet_state'
-LOG_PATH = '/home/homeassistant/lotr-lcg-set-generator/cron.log'
-MAIL_COUNTER_PATH = '/home/homeassistant/lotr-lcg-set-generator/cron.cnt'
+LOG_PATH = 'cron.log'
+MAIL_COUNTER_PATH = 'cron.cnt'
 MAILS_PATH = '/home/homeassistant/.homeassistant/mails'
+WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 
 ERROR_SUBJECT_TEMPLATE = 'LotR ALeP Cron ERROR: {}'
 WARNING_SUBJECT_TEMPLATE = 'LotR ALeP Cron WARNING: {}'
 MAIL_QUOTA = 50
 
 
-logging.basicConfig(filename=LOG_PATH, level=logging.INFO,
-                    format='%(asctime)s %(levelname)s: %(message)s')
+def set_directory():
+    """ Set working directory.
+    """
+    os.chdir(WORKING_DIRECTORY)
+
+def init_logging():
+    """ Init logging.
+    """
+    logging.basicConfig(filename=LOG_PATH, level=logging.INFO,
+                        format='%(asctime)s %(levelname)s: %(message)s')
 
 
 def internet_state():
@@ -150,4 +163,6 @@ def main():
 
 
 if __name__ == '__main__':
+    set_directory()
+    init_logging()
     main()
