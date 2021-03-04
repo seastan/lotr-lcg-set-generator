@@ -12,6 +12,7 @@ import json
 import logging
 import os
 import re
+import subprocess
 import time
 import uuid
 
@@ -201,7 +202,16 @@ def main():
             logging.error(str(exc_new))
 
 
+def rclone():
+    """ Sync Google Drive.
+    """
+    res = subprocess.run('./rclone.sh', capture_output=True, shell=True,
+                         check=True)
+    logging.info('Rclone: %s', res)
+
+
 if __name__ == '__main__':
     set_directory()
     init_logging()
     main()
+    rclone()
