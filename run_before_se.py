@@ -9,7 +9,8 @@ import lotr
 def init_logging():
     """ Init logging.
     """
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(message)s')
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s %(levelname)s: %(message)s')
 
 
 def main():  # pylint: disable=R0912

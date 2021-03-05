@@ -225,6 +225,11 @@ FOUND_INTERSECTED_SETS = set()
 IMAGE_CACHE = {}
 
 
+class SheetError(Exception):
+    """ Google Sheet error.
+    """
+
+
 class SanityCheckError(Exception):
     """ Sanity check error.
     """
@@ -517,8 +522,11 @@ def download_sheet(conf):
         url = (
             'https://docs.google.com/spreadsheets/d/{}/export?format=csv'
             .format(conf['sheet_gdid']))
-        sheet_ids = requests.get(url).content.decode('utf-8')
-        sheet_ids = csv.reader(sheet_ids.splitlines())
+        res = requests.get(url).content.decode('utf-8')
+        if not res or '<html' in res:
+            raise SheetError("Can't download the Google Sheet")
+
+        sheet_ids = csv.reader(res.splitlines())
         sheet_ids = dict(row for row in sheet_ids)
 
         for sheet in sheets:
@@ -526,8 +534,13 @@ def download_sheet(conf):
                 'https://docs.google.com/spreadsheets/d/{}/export?format=csv&gid={}'
                 .format(conf['sheet_gdid'], sheet_ids[sheet]))
             path = os.path.join(DOWNLOAD_PATH, '{}.csv'.format(sheet))
+            res = requests.get(url).content
+            if not res or b'<html' in res:
+                raise SheetError("Can't download {} from the Google Sheet"
+                                 .format(sheet))
+
             with open(path, 'wb') as f_sheet:
-                f_sheet.write(requests.get(url).content)
+                f_sheet.write(res)
     else:
         logging.info('No Google Sheets ID found, using a local copy')
 
@@ -770,8 +783,8 @@ def extract_data(conf):  # pylint: disable=R0915
             _update_data(data)
             for row in data:
                 if row[CARD_ID] in TRANSLATIONS[lang]:
-                    logging.warning(
-                        'WARNING: Duplicate card ID %s in %s translations,'
+                    logging.error(
+                        'Duplicate card ID %s in %s translations, '
                         'ignoring', row[CARD_ID], lang)
                 else:
                     TRANSLATIONS[lang][row[CARD_ID]] = row
@@ -838,34 +851,34 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         if set_id is None:
             message = 'No set ID for row #{}{}'.format(i, scratch)
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
         elif set_id == '[filtered set]':
             message = 'Reusing non-scratch set ID for row #{}{}'.format(
                 i, scratch)
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
         elif set_id not in all_set_ids:
             message = 'Unknown set ID for row #{}{}'.format(i, scratch)
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
 
         if card_id is None:
             message = 'No card ID for row #{}{}'.format(i, scratch)
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
         elif card_id in card_ids:
             message = 'Duplicate card ID for row #{}{}'.format(i, scratch)
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
         elif card_id in card_scratch_ids:
             message = 'Duplicate card ID for row #{}{}'.format(i, scratch)
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
 
@@ -879,32 +892,32 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         if card_number is None:
             message = 'No card number for row #{}{}'.format(i, scratch)
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
 
         if card_quantity is None:
             message = 'No card quantity for row #{}{}'.format(i, scratch)
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
         elif not _is_positive_int(card_quantity):
             message = ('Incorrect format for card quantity for row '
                        '#{}{}'.format(i, scratch))
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
 
         if card_name is None:
             message = 'No card name for row #{}{}'.format(i, scratch)
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
         elif set_id is not None and card_number is not None:
             if (set_id, card_number, card_name) in card_set_number_names:
                 message = ('Duplicate card set, number and name combination '
                            'for row #{}{}'.format(i, scratch))
-                logging.error('ERROR: %s', message)
+                logging.error(message)
                 if not card_scratch:
                     errors.append(message)
             else:
@@ -913,69 +926,69 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         if card_unique is not None and card_unique not in ('1', 1):
             message = 'Incorrect format for unique for row #{}{}'.format(
                 i, scratch)
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
 
         if card_unique_back is not None and card_unique_back not in ('1', 1):
             message = 'Incorrect format for unique back for row #{}{}'.format(
                 i, scratch)
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
 
         if card_type is None:
             message = 'No card type for row #{}{}'.format(i, scratch)
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
         elif card_type not in CARD_TYPES:
             message = 'Unknown card type for row #{}{}'.format(i, scratch)
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
 
         if card_type_back is not None and card_type_back not in CARD_TYPES:
             message = 'Unknown card type back for row #{}{}'.format(i, scratch)
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
         elif (card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL
               and card_type_back is not None and card_type_back != card_type):
             message = 'Incorrect card type back for row #{}{}'.format(
                 i, scratch)
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
         elif (card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL
               and card_type_back in CARD_TYPES_DOUBLESIDE_OPTIONAL):
             message = 'Incorrect card type back for row #{}{}'.format(i, scratch)
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
 
         if (card_sphere is not None and card_sphere not in SPHERES):
             message = 'Unknown sphere for row #{}{}'.format(i, scratch)
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
 
         if (card_sphere_back is not None and card_sphere_back not in SPHERES):
             message = 'Unknown sphere back for row #{}{}'.format(i, scratch)
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
 
         if card_easy_mode is not None and not _is_positive_int(card_easy_mode):
             message = ('Incorrect format for removed for easy mode for row '
                        '#{}{}'.format(i, scratch))
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
         elif card_easy_mode is not None and card_easy_mode > card_quantity:
             message = ('Removed for easy mode is greater than card quantity '
                        'for row #{}{}'.format(i, scratch))
-            logging.error('ERROR: %s', message)
+            logging.error(message)
             if not card_scratch:
                 errors.append(message)
 
@@ -983,7 +996,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             if isinstance(value, str) and '[unmatched quot]' in value:
                 message = ('Unmatched quote symbol in %s column for row '
                            '#{}{}'.format(i, scratch))
-                logging.error('ERROR: %s', message)
+                logging.error(message)
                 if not card_scratch:
                     errors.append(message)
 
@@ -993,19 +1006,19 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
             if not TRANSLATIONS[lang].get(card_id):
                 logging.error(
-                    'ERROR: No card ID %s in %s translations', card_id, lang)
+                    'No card ID %s in %s translations', card_id, lang)
                 continue
 
             if TRANSLATIONS[lang][card_id][CARD_NAME] is None:
                 logging.error(
-                    'ERROR: No card name for card ID %s in %s translations, '
+                    'No card name for card ID %s in %s translations, '
                     'row #%s', card_id, lang,
                     TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
             for key, value in TRANSLATIONS[lang][card_id].items():
                 if isinstance(value, str) and '[unmatched quot]' in value:
                     logging.error(
-                        'ERROR: Unmatched quote symbol in %s column for card '
+                        'Unmatched quote symbol in %s column for card '
                         'ID %s in %s translations, row #%s', key, card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
@@ -1484,8 +1497,8 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
 
         if row[CARD_DECK_RULES]:
             if quest.get('rules'):
-                logging.warning(
-                    'WARNING: Duplicate deck rules for quest %s detected in '
+                logging.error(
+                    'Duplicate deck rules for quest %s detected in '
                     'row #%s%s, ignoring',
                     row[CARD_ADVENTURE] or row[CARD_NAME], row[ROW_COLUMN],
                     ' (Scratch)' if row[CARD_SCRATCH] else '')
@@ -1521,8 +1534,8 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                            'remove', 'second quest deck', 'special',
                            'second special', 'setup', 'active setup',
                            'staging setup', 'player'):
-                logging.warning(
-                    'WARNING: Unknown key "%s" for deck rules for quest %s '
+                logging.error(
+                    'Unknown key "%s" for deck rules for quest %s '
                     'detected in row #%s%s, ignoring',
                     key,
                     quest['name'],
@@ -1539,8 +1552,8 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
 
         for key in ('sets', 'encounter sets', 'prefix', 'external xml'):
             if key_count.get(key, 0) > 0:
-                logging.warning(
-                    'WARNING: Duplicate key "%s" for deck rules for quest %s '
+                logging.error(
+                    'Duplicate key "%s" for deck rules for quest %s '
                     'detected in row #%s%s, ignoring',
                     key,
                     quest['name'],
@@ -1690,8 +1703,8 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                 '{}{}{}.o8d'.format(mode, quest['prefix'],
                                     _escape_filename(quest['name'])))
             if filename in filenames:
-                logging.warning(
-                    'WARNING: Duplicate file name %s for deck rules for quest '
+                logging.error(
+                    'Duplicate file name %s for deck rules for quest '
                     '%s detected in row #%s%s, ignoring',
                     filename,
                     quest['name'],
@@ -2228,9 +2241,9 @@ def _collect_artwork_images(conf, image_path):
                     image_id = '{}_{}'.format(image_id, lang)
 
                 if image_id in images:
-                    logging.warning('WARNING: Duplicate image detected: %s, ',
-                                    'ignoring', os.path.join(image_path,
-                                    filename))
+                    logging.error('Duplicate image detected: %s, '
+                                  'ignoring', os.path.join(image_path,
+                                                           filename))
                 else:
                     images[image_id] = os.path.join(image_path, filename)
 
@@ -2289,8 +2302,8 @@ def _get_property(parent, name):
 def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R0915
     """ Update the Strange Eons xml file with additional data.
     """
-    logging.info('[%s, %s] Updating the Strange Eons xml file with additional'
-                 ' data...', set_name, lang)
+    logging.info('[%s, %s] Updating the Strange Eons xml file with additional '
+                 'data...', set_name, lang)
     timestamp = time.time()
 
     artwork_path = _get_artwork_path(conf, set_id)
@@ -2433,16 +2446,16 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                 root[0].remove(card)
 
     tree.write(xml_path)
-    logging.info('[%s, %s] ...Updating the Strange Eons xml file with'
-                 ' additional data (%ss)',
+    logging.info('[%s, %s] ...Updating the Strange Eons xml file with '
+                 'additional data (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
 def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0914
     """ Update the Strange Eons xml file with hashes and skip flags.
     """
-    logging.info('[%s, %s] Updating the Strange Eons xml file with hashes and'
-                 ' skip flags...', set_name, lang)
+    logging.info('[%s, %s] Updating the Strange Eons xml file with hashes and '
+                 'skip flags...', set_name, lang)
     timestamp = time.time()
 
     new_path = os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id, lang))
@@ -2495,8 +2508,8 @@ def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0914
 
     tree.write(new_path)
 
-    logging.info('[%s, %s] ...Updating the Strange Eons xml file with hashes'
-                 ' and skip flags (%ss)',
+    logging.info('[%s, %s] ...Updating the Strange Eons xml file with hashes '
+                 'and skip flags (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
     return (new_file_hash, old_file_hash)
 
@@ -2523,8 +2536,8 @@ def copy_custom_images(conf, set_id, set_name):
 
             break
 
-    logging.info('[%s] ...Copying custom image files into the project folder'
-                 ' (%ss)', set_name, round(time.time() - timestamp, 3))
+    logging.info('[%s] ...Copying custom image files into the project folder '
+                 '(%ss)', set_name, round(time.time() - timestamp, 3))
 
 
 def copy_raw_images(conf, set_id, set_name, lang):
@@ -2574,22 +2587,22 @@ def copy_raw_images(conf, set_id, set_name, lang):
                     if not os.path.exists(output_path):
                         shutil.copyfile(input_path, output_path)
 
-    logging.info('[%s, %s] ...Copying raw image files into the project folder'
-                 ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
+    logging.info('[%s, %s] ...Copying raw image files into the project folder '
+                 '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
 def copy_xml(set_id, set_name, lang):
     """ Copy the Strange Eons xml file into the project.
     """
-    logging.info('[%s, %s] Copying the Strange Eons xml file into'
-                 ' the project...', set_name, lang)
+    logging.info('[%s, %s] Copying the Strange Eons xml file into '
+                 'the project...', set_name, lang)
     timestamp = time.time()
 
     shutil.copyfile(os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id,
                                                                    lang)),
                     os.path.join(XML_PATH, '{}.{}.xml'.format(set_id, lang)))
-    logging.info('[%s, %s] ...Copying the Strange Eons xml file into the'
-                 ' project (%ss)',
+    logging.info('[%s, %s] ...Copying the Strange Eons xml file into the '
+                 'project (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
@@ -2669,8 +2682,8 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
     logging.info('[%s, %s] %s', set_name, lang, res)
     _delete_folder(temp_path)
 
-    logging.info('[%s, %s] ...Generating images without bleed margins'
-                 ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
+    logging.info('[%s, %s] ...Generating images without bleed margins '
+                 '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
 def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
@@ -2715,8 +2728,8 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disab
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     _delete_folder(temp_path)
-    logging.info('[%s, %s] ...Generating images for DB outputs'
-                 ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
+    logging.info('[%s, %s] ...Generating images for DB outputs '
+                 '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
 def generate_png300_octgn(set_id, set_name, lang, skip_ids):
@@ -2748,8 +2761,8 @@ def generate_png300_octgn(set_id, set_name, lang, skip_ids):
 
         break
 
-    logging.info('[%s, %s] ...Generating images for OCTGN outputs'
-                 ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
+    logging.info('[%s, %s] ...Generating images for OCTGN outputs '
+                 '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
 def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
@@ -2856,8 +2869,8 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     _delete_folder(temp_path)
-    logging.info('[%s, %s] ...Generating images for MakePlayingCards outputs'
-                 ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
+    logging.info('[%s, %s] ...Generating images for MakePlayingCards outputs '
+                 '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
 def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
@@ -2902,8 +2915,8 @@ def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint:
 
     _make_cmyk(conf, output_path)
     _delete_folder(temp_path)
-    logging.info('[%s, %s] ...Generating images for DriveThruCards outputs'
-                 ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
+    logging.info('[%s, %s] ...Generating images for DriveThruCards outputs '
+                 '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
 def generate_jpg800_bleedmbprint(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
@@ -2948,8 +2961,8 @@ def generate_jpg800_bleedmbprint(conf, set_id, set_name, lang, skip_ids):  # pyl
 
     _make_cmyk(conf, output_path)
     _delete_folder(temp_path)
-    logging.info('[%s, %s] ...Generating images for MBPrint outputs'
-                 ' (%ss)', set_name, lang, round(time.time() - timestamp, 3))
+    logging.info('[%s, %s] ...Generating images for MBPrint outputs '
+                 '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
 def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
@@ -3009,7 +3022,7 @@ def generate_db(set_id, set_name, lang):
     known_filenames = set()
     for _, _, filenames in os.walk(input_path):
         if not filenames:
-            logging.error('[%s, %s] ERROR: No cards found', set_name, lang)
+            logging.error('[%s, %s] No cards found', set_name, lang)
             break
 
         _create_folder(output_path)
@@ -3051,7 +3064,7 @@ def generate_octgn(set_id, set_name, lang):
     known_filenames = set()
     for _, _, filenames in os.walk(input_path):
         if not filenames:
-            logging.error('[%s, %s] ERROR: No cards found', set_name, lang)
+            logging.error('[%s, %s] No cards found', set_name, lang)
             break
 
         _create_folder(output_path)
@@ -3106,8 +3119,8 @@ def _collect_pdf_images(input_path):
                     back_path = os.path.join(IMAGES_BACK_PATH,
                                              'encounterBackOfficial.png')
                 else:
-                    logging.error('ERROR: Missing card back for %s, removing'
-                                  ' the file', filename)
+                    logging.error('Missing card back for %s, removing '
+                                  'the file', filename)
                     continue
 
             copies = 3 if parts[1] == 'p' else 1
@@ -3133,7 +3146,7 @@ def generate_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0914
 
     images = _collect_pdf_images(input_path)
     if not images:
-        logging.error('[%s, %s] ERROR: No cards found', set_name, lang)
+        logging.error('[%s, %s] No cards found', set_name, lang)
         logging.info('[%s, %s] ...Generating PDF outputs (%ss)',
                      set_name, lang, round(time.time() - timestamp, 3))
         return
@@ -3238,8 +3251,8 @@ def _prepare_printing_images(input_path, output_path, service):  # pylint: disab
                     back_unofficial_path = os.path.join(
                         IMAGES_BACK_PATH, CARD_BACKS['encounter'][service][1])
                 else:
-                    logging.error('ERROR: Missing card back for %s, removing'
-                                  ' the file', filename)
+                    logging.error('Missing card back for %s, removing '
+                                  'the file', filename)
                     continue
 
             if parts[1] == 'p':
@@ -3385,17 +3398,15 @@ def _combine_doublesided_rules_cards(set_id, input_path, card_data, service):  #
         second_back_unofficial = os.path.join(
             input_path, '{}-2u.{}'.format(pair[1], file_type))
         if not os.path.exists(first_back_unofficial):
-            logging.error('ERROR: Path %s does not exist',
-                          first_back_unofficial)
+            logging.error('Path %s does not exist', first_back_unofficial)
             continue
 
         if not os.path.exists(second_front):
-            logging.error('ERROR: Path %s does not exist', second_front)
+            logging.error('Path %s does not exist', second_front)
             continue
 
         if not os.path.exists(second_back_unofficial):
-            logging.error('ERROR: Path %s does not exist',
-                          second_back_unofficial)
+            logging.error('Path %s does not exist', second_back_unofficial)
             continue
 
         if service != 'mpc':
@@ -3404,13 +3415,11 @@ def _combine_doublesided_rules_cards(set_id, input_path, card_data, service):  #
             second_back_official = os.path.join(
                 input_path, '{}-2o.{}'.format(pair[1], file_type))
             if not os.path.exists(first_back_official):
-                logging.error('ERROR: Path %s does not exist',
-                              first_back_official)
+                logging.error('Path %s does not exist', first_back_official)
                 continue
 
             if not os.path.exists(second_back_official):
-                logging.error('ERROR: Path %s does not exist',
-                              second_back_official)
+                logging.error('Path %s does not exist', second_back_official)
                 continue
 
         shutil.move(second_front, first_back_unofficial)
@@ -3531,7 +3540,7 @@ def generate_mpc(conf, set_id, set_name, lang, card_data):
 
     for _, _, filenames in os.walk(input_path):
         if not filenames:
-            logging.error('[%s, %s] ERROR: No cards found', set_name, lang)
+            logging.error('[%s, %s] No cards found', set_name, lang)
             logging.info('[%s, %s] ...Generating MakePlayingCards outputs '
                          '(%ss)',
                          set_name, lang, round(time.time() - timestamp, 3))
@@ -3586,7 +3595,7 @@ def generate_dtc(conf, set_id, set_name, lang, card_data):
 
     for _, _, filenames in os.walk(input_path):
         if not filenames:
-            logging.error('[%s, %s] ERROR: No cards found', set_name, lang)
+            logging.error('[%s, %s] No cards found', set_name, lang)
             logging.info('[%s, %s] ...Generating DriveThruCards outputs (%ss)',
                          set_name, lang, round(time.time() - timestamp, 3))
             return
@@ -3639,7 +3648,7 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):
 
     for _, _, filenames in os.walk(input_path):
         if not filenames:
-            logging.error('[%s, %s] ERROR: No cards found', set_name, lang)
+            logging.error('[%s, %s] No cards found', set_name, lang)
             logging.info('[%s, %s] ...Generating MBPrint outputs (%ss)',
                          set_name, lang, round(time.time() - timestamp, 3))
             return
@@ -3713,7 +3722,7 @@ def generate_generic_png(conf, set_id, set_name, lang, card_data):
 
     for _, _, filenames in os.walk(input_path):
         if not filenames:
-            logging.error('[%s, %s] ERROR: No cards found', set_name, lang)
+            logging.error('[%s, %s] No cards found', set_name, lang)
             logging.info('[%s, %s] ...Generating generic PNG outputs (%ss)',
                          set_name, lang, round(time.time() - timestamp, 3))
             return

@@ -17,7 +17,8 @@ setOCTGN/*.xml
 setOCTGN/*.xml.old
 Temp/*/*
 
-configuration*.yaml
+configuration.yaml
+discord.yaml
 sanity_check.txt
 setGenerator.seproject
 USWebCoatedSWOP.icc

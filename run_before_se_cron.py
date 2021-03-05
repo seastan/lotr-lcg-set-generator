@@ -3,6 +3,8 @@
 
 NOTE: This script heavily relies on my existing smart home environment.
 
+Create discord.yaml (see discord.default.yaml).
+
 Setup rclone:
 
 curl -L https://raw.github.com/pageauc/rclone4pi/master/rclone-install.sh | bash
@@ -21,10 +23,14 @@ import subprocess
 import time
 import uuid
 
+import requests
+import yaml
+
 from lotr import SanityCheckError
 from run_before_se import main as imported_main
 
 
+DISCORD_CONF_PATH = 'discord.yaml'
 INTERNET_SENSOR_PATH = '/home/homeassistant/.homeassistant/internet_state'
 LOG_PATH = 'cron.log'
 MAIL_COUNTER_PATH = 'cron.cnt'
@@ -41,12 +47,6 @@ MAIL_QUOTA = 50
 class RCloneError(Exception):
     """ RClone error.
     """
-
-
-def set_directory():
-    """ Set working directory.
-    """
-    os.chdir(WORKING_DIRECTORY)
 
 
 def init_logging():
@@ -92,6 +92,18 @@ def set_sanity_check_message(message):
         create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
 
 
+def send_discord(message):
+    """ Send a message to a Discord channel.
+    """
+    with open(DISCORD_CONF_PATH, 'r') as f_conf:
+        conf = yaml.safe_load(f_conf)
+
+    if conf.get('webhook_url'):
+        data = {'content': message}
+        res = requests.post(conf['webhook_url'], json=data)
+        logging.info('Discord response: %s', res.content.decode('utf-8'))
+
+
 def is_non_ascii(value):
     """ Check whether the string is ASCII only or not.
     """
@@ -101,6 +113,9 @@ def is_non_ascii(value):
 def create_mail(subject, body=''):
     """ Create mail file.
     """
+    if not check_mail_counter():
+        return
+
     increment_mail_counter()
     subject = re.sub(r'\s+', ' ', subject)
     if len(subject) > 200:
@@ -193,22 +208,22 @@ def rclone():
 def main():
     """ Main function.
     """
+    cron_id = uuid.uuid4()
+    logging.info('Start: %s', cron_id)
     try:
         if not internet_state():
-            logging.info('Internet is not available right now, exiting')
-            return
-
-        if not check_mail_counter():
+            logging.warning('Internet is not available right now, exiting')
             return
 
         last_message = get_sanity_check_message()
         imported_main()
+        rclone()
         if last_message:
             set_sanity_check_message('')
-            create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(
-                'Sanity check passed'))
+            message = 'Sanity check passed'
+            create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(message))
+            send_discord(message)
 
-        rclone()
     except SanityCheckError as exc:
         message = str(exc)
         logging.error(message)
@@ -216,6 +231,7 @@ def main():
             try:
                 set_sanity_check_message(message)
                 create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(message))
+                send_discord(message)
             except Exception as exc_new:
                 logging.error(str(exc_new))
     except Exception as exc:
@@ -223,11 +239,14 @@ def main():
         logging.exception(message)
         try:
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+            send_discord(message)
         except Exception as exc_new:
             logging.error(str(exc_new))
+    finally:
+        logging.info('Finish: %s', cron_id)
 
 
 if __name__ == '__main__':
-    set_directory()
+    os.chdir(WORKING_DIRECTORY)
     init_logging()
     main()
