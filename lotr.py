@@ -801,9 +801,6 @@ def get_sets(conf):
 
     chosen_sets = list(chosen_sets)
     chosen_sets = [[SETS[s][SET_ID], SETS[s][SET_NAME]] for s in chosen_sets]
-    if not chosen_sets:
-        logging.error('ERROR: No sets to work on')
-
     logging.info('...Getting all sets to work on (%ss)',
                  round(time.time() - timestamp, 3))
     return chosen_sets
@@ -2231,10 +2228,11 @@ def _collect_artwork_images(conf, image_path):
                     image_id = '{}_{}'.format(image_id, lang)
 
                 if image_id in images:
-                    logging.warning('WARNING: Duplicate image detected: %s',
-                                    os.path.join(image_path, filename))
-
-                images[image_id] = os.path.join(image_path, filename)
+                    logging.warning('WARNING: Duplicate image detected: %s, ',
+                                    'ignoring', os.path.join(image_path,
+                                    filename))
+                else:
+                    images[image_id] = os.path.join(image_path, filename)
 
         break
 

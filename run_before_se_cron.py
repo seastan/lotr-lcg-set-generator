@@ -38,6 +38,11 @@ WARNING_SUBJECT_TEMPLATE = 'LotR ALeP Cron WARNING: {}'
 MAIL_QUOTA = 50
 
 
+class RCloneError(Exception):
+    """ RClone error.
+    """
+
+
 def set_directory():
     """ Set working directory.
     """
@@ -172,6 +177,19 @@ def increment_mail_counter():
         pass
 
 
+def rclone():
+    """ Sync Google Drive.
+    """
+    res = subprocess.run('./rclone.sh', capture_output=True, shell=True,
+                         check=True)
+    stdout = res.stdout.decode('utf-8').strip()
+    stderr = res.stderr.decode('utf-8').strip()
+    logging.info('Rclone finished, stdout: %s, stderr: %s', stdout, stderr)
+    if stdout != 'Done':
+        raise RCloneError('RClone failed, stdout: {}, stderr: {}'.format(
+            stdout, stderr))
+
+
 def main():
     """ Main function.
     """
@@ -189,6 +207,8 @@ def main():
             set_sanity_check_message('')
             create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(
                 'Sanity check passed'))
+
+        rclone()
     except SanityCheckError as exc:
         message = str(exc)
         logging.error(message)
@@ -207,16 +227,7 @@ def main():
             logging.error(str(exc_new))
 
 
-def rclone():
-    """ Sync Google Drive.
-    """
-    res = subprocess.run('./rclone.sh', capture_output=True, shell=True,
-                         check=True)
-    logging.info('Rclone: %s', res)
-
-
 if __name__ == '__main__':
     set_directory()
     init_logging()
     main()
-    rclone()
