@@ -1605,6 +1605,12 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
 
     quests.extend(new_quests)
 
+    output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
+                               _escape_filename(set_name))
+    _clear_folder(output_path)
+    if quests:
+        _create_folder(output_path)
+
     for quest in quests:
         rules_list = [r.strip().split(':', 1)
                       for r in quest['rules'].split('\n')]
@@ -1762,10 +1768,6 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                           event_cards)
             _append_cards(root.findall("./section[@name='Side Quest']")[0],
                           side_quest_cards)
-
-            output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
-                                       _escape_filename(set_name))
-            _create_folder(output_path)
 
             filename = _escape_octgn_filename(
                 '{}{}{}.o8d'.format(mode, quest['prefix'],
