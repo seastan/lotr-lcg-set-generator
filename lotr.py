@@ -2160,6 +2160,12 @@ def _get_xml_property_value(row, name, card_type):
 
         return value
 
+    if name in (CARD_SPHERE, BACK_PREFIX + CARD_SPHERE):
+        if card_type == 'Rules':
+            value = ''
+
+        return value
+
     return value
 
 
