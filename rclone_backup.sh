@@ -6,4 +6,3 @@ rclone copy "/home/homeassistant/Drive/OCTGN Files/Set Folders" "ALeP:/Backup/$D
 rclone copy "/home/homeassistant/Drive/OCTGN Files/Encounter Decks" "ALeP:/Backup/$DATE/Encounter Decks"
 rclone copy "/home/homeassistant/Drive/OCTGN Files/Scratch Set Folders" "ALeP:/Backup/$DATE/Scratch Set Folders"
 rclone copy "/home/homeassistant/Drive/OCTGN Files/Scratch Encounter Decks" "ALeP:/Backup/$DATE/Scratch Encounter Decks"
-echo "Done"
