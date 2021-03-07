@@ -1,4 +1,4 @@
-# pylint: disable=C0301
+# pylint: disable=W0703,C0301
 """ Backup Google Spreadsheet.
 
 Setup a cron as:
@@ -61,5 +61,5 @@ def main():
 if __name__ == '__main__':
     try:
         main()
-    except Exception as ex:  # pylint: disable=W0703
-        create_mail(ERROR_SUBJECT, '{}'.format(ex))
+    except Exception as exc:
+        create_mail(ERROR_SUBJECT, '{}'.format(exc))
