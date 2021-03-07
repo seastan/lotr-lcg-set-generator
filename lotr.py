@@ -115,8 +115,10 @@ CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
                         'Objective Hero', 'Objective Location',
                         'Ship Objective', 'Quest'}
 SPHERES = {'Baggins', 'Fellowship', 'Leadership', 'Lore', 'Mastery', 'Neutral',
-           'Spirit', 'Tactics', 'Boon', 'Burden', 'Nightmare', 'Upgraded',
-           'Back', 'Setup', 'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow'}
+           'Spirit', 'Tactics', 'Boon', 'Burden', 'Nightmare', 'Upgraded'}
+SPHERES_CAMPAIGN = {'Setup'}
+SPHERES_RULES = {'Back'}
+SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow'}
 
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
@@ -970,13 +972,22 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             if not card_scratch:
                 errors.append(message)
 
-        if (card_sphere is not None and card_sphere not in SPHERES):
+        if card_type == 'Campaign':
+            spheres = SPHERES_CAMPAIGN
+        elif card_type == 'Rules':
+            spheres = SPHERES_RULES
+        elif card_type == 'Presentation':
+            spheres = SPHERES_PRESENTATION
+        else:
+            spheres = SPHERES
+
+        if (card_sphere is not None and card_sphere not in spheres):
             message = 'Unknown sphere for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
 
-        if (card_sphere_back is not None and card_sphere_back not in SPHERES):
+        if (card_sphere_back is not None and card_sphere_back not in spheres):
             message = 'Unknown sphere back for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
