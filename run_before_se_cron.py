@@ -39,9 +39,14 @@ SANITY_CHECK_PATH = 'sanity_check.txt'
 WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 
 ERROR_SUBJECT_TEMPLATE = 'LotR ALeP Cron ERROR: {}'
-SANITY_CHECK_SUBJECT_TEMPLATE = 'LotR ALeP Cron: {}'
+SANITY_CHECK_SUBJECT_TEMPLATE = 'LotR ALeP Cron CHECK: {}'
 WARNING_SUBJECT_TEMPLATE = 'LotR ALeP Cron WARNING: {}'
 MAIL_QUOTA = 50
+
+
+class DiscordResponseError(Exception):
+    """ Discord Result error.
+    """
 
 
 class RCloneError(Exception):
@@ -95,13 +100,22 @@ def set_sanity_check_message(message):
 def send_discord(message):
     """ Send a message to a Discord channel.
     """
-    with open(DISCORD_CONF_PATH, 'r') as f_conf:
-        conf = yaml.safe_load(f_conf)
+    try:
+        with open(DISCORD_CONF_PATH, 'r') as f_conf:
+            conf = yaml.safe_load(f_conf)
 
-    if conf.get('webhook_url'):
-        data = {'content': message}
-        res = requests.post(conf['webhook_url'], json=data)
-        logging.info('Discord response: %s', res.content.decode('utf-8'))
+        if conf.get('webhook_url'):
+            data = {'content': message}
+            res = requests.post(conf['webhook_url'], json=data)
+            res = res.content.decode('utf-8')
+            if res != '':
+                raise DiscordResponseError(
+                    'Non-empty response: {}'.format(res))
+    except Exception as exc:
+        message = 'Discord message failed: {}: {}'.format(
+            type(exc).__name__, str(exc))
+        logging.exception(message)
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
 
 
 def is_non_ascii(value):
@@ -209,7 +223,7 @@ def main():
     """ Main function.
     """
     cron_id = uuid.uuid4()
-    logging.info('Start: %s', cron_id)
+    logging.info('Started: %s', cron_id)
     try:
         if not internet_state():
             logging.warning('Internet is not available right now, exiting')
@@ -219,11 +233,13 @@ def main():
         imported_main()
         rclone()
         if last_message:
-            set_sanity_check_message('')
             message = 'Sanity check passed'
-            create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(message))
-            send_discord(message)
-
+            try:
+                set_sanity_check_message('')
+                create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(message))
+                send_discord(message)
+            except Exception as exc_new:
+                logging.error(str(exc_new))
     except SanityCheckError as exc:
         message = str(exc)
         logging.error(message)
@@ -235,7 +251,7 @@ def main():
             except Exception as exc_new:
                 logging.error(str(exc_new))
     except Exception as exc:
-        message = str(exc)
+        message = 'Script failed: {}: {}'.format(type(exc).__name__, str(exc))
         logging.exception(message)
         try:
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
@@ -243,7 +259,9 @@ def main():
         except Exception as exc_new:
             logging.error(str(exc_new))
     finally:
-        logging.info('Finish: %s', cron_id)
+        logging.info('Finished: %s', cron_id)
+        logging.info('')
+        logging.info('')
 
 
 if __name__ == '__main__':
