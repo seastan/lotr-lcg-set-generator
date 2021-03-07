@@ -19,11 +19,11 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):
     lotr.generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids)
 
 
-def generate_db(conf, set_id, set_name, lang, skip_ids):
+def generate_db(conf, set_id, set_name, lang, skip_ids, card_data, sets):  # pylint: disable=R0913
     """ Generate DB outputs.
     """
     lotr.generate_png300_db(conf, set_id, set_name, lang, skip_ids)
-    lotr.generate_db(set_id, set_name, lang)
+    lotr.generate_db(set_id, set_name, lang, card_data, sets)
 
 
 def generate_octgn(set_id, set_name, lang, skip_ids):
@@ -131,7 +131,7 @@ def main():  # pylint: disable=R0912
 
             if 'db' in conf['outputs'][lang]:
                 tasks.append([generate_db, conf, set_id, set_name, lang,
-                              skip_ids])
+                              skip_ids, lotr.DATA, lotr.SETS])
 
             if 'octgn' in conf['outputs'][lang]:
                 tasks.append([generate_octgn, set_id, set_name, lang,

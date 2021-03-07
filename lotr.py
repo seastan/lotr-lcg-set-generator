@@ -175,8 +175,10 @@ OUTPUT_MBPRINT_PATH = os.path.join('Output', 'MBPrint')
 OUTPUT_MPC_PATH = os.path.join('Output', 'MakePlayingCards')
 OUTPUT_OCTGN_PATH = os.path.join('Output', 'OCTGN')
 OUTPUT_OCTGN_DECKS_PATH = os.path.join('Output', 'OCTGNDecks')
+OUTPUT_OCTGN_IMAGES_PATH = os.path.join('Output', 'OCTGNImages')
 OUTPUT_PDF_PATH = os.path.join('Output', 'PDF')
 OUTPUT_RINGSDB_PATH = os.path.join('Output', 'RingsDB')
+OUTPUT_RINGSDB_IMAGES_PATH = os.path.join('Output', 'RingsDBImages')
 PROJECT_PATH = 'setGenerator.seproject'
 SET_EONS_PATH = 'setEons'
 SET_OCTGN_PATH = 'setOCTGN'
@@ -832,7 +834,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
     card_set_number_names = set()
     set_ids = [s[0] for s in sets]
     all_set_ids = list(SETS.keys())
-    for row in DATA:
+    deck_rules = set()
+    for row in DATA:  # pylint: disable=R1702
         i = row[ROW_COLUMN]
         set_id = row[CARD_SET]
         card_id = row[CARD_ID]
@@ -999,6 +1002,85 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)
+
+        if (((row[CARD_TYPE] == 'Quest' and row[CARD_ADVENTURE])
+             or row[CARD_TYPE] == 'Nightmare')
+                and row[CARD_DECK_RULES]):
+            quest_id = (row[CARD_SET], row[CARD_ADVENTURE] or row[CARD_NAME])
+            if quest_id in deck_rules:
+                message = (
+                    'Duplicate deck rules for quest {} in row #{}{}'.format(
+                        row[CARD_ADVENTURE] or row[CARD_NAME],
+                        row[ROW_COLUMN],
+                        scratch))
+                logging.error(message)
+                if conf['octgn_o8d'] and not card_scratch:
+                    errors.append(message)
+            else:
+                deck_rules.add(quest_id)
+
+            prefixes = set()
+            for part in row[CARD_DECK_RULES].split('\n\n'):
+                rules_list = [r.strip().split(':', 1)
+                              for r in part.split('\n')]
+                rules_list = [(r[0].lower().strip(),
+                               [i.strip() for i in r[1].strip().split(';')])
+                              for r in rules_list if len(r) == 2]
+                rules = {}
+                key_count = {}
+                for key, value in rules_list:
+                    if key not in (
+                            'sets', 'encounter sets', 'prefix', 'external xml',
+                            'remove', 'second quest deck', 'special',
+                            'second special', 'setup', 'active setup',
+                            'staging setup', 'player'):
+                        message = (
+                            'Unknown key "{}" for deck rules for quest {} in '
+                            'row #{}{}'.format(
+                                key,
+                                row[CARD_ADVENTURE] or row[CARD_NAME],
+                                row[ROW_COLUMN],
+                                scratch))
+                        logging.error(message)
+                        if conf['octgn_o8d'] and not card_scratch:
+                            errors.append(message)
+
+                        continue
+
+                    if key not in key_count:
+                        key_count[key] = 0
+                    else:
+                        key_count[key] += 1
+
+                    rules[(key, key_count[key])] = value
+
+                for key in ('sets', 'encounter sets', 'prefix', 'external xml'):
+                    if key_count.get(key, 0) > 0:
+                        message = (
+                            'Duplicate key "{}" for deck rules for quest {} '
+                            'in row #{}{}'.format(
+                                key,
+                                row[CARD_ADVENTURE] or row[CARD_NAME],
+                                row[ROW_COLUMN],
+                                scratch))
+                        logging.error(message)
+                        if conf['octgn_o8d'] and not card_scratch:
+                            errors.append(message)
+
+                prefix = rules.get(('prefix', 0), [''])[0]
+                if prefix in prefixes:
+                    message = (
+                        'Duplicate prefix "{}" for deck rules for quest {} '
+                        'in row #{}{}'.format(
+                            prefix,
+                            row[CARD_ADVENTURE] or row[CARD_NAME],
+                            row[ROW_COLUMN],
+                            scratch))
+                    logging.error(message)
+                    if conf['octgn_o8d'] and not card_scratch:
+                        errors.append(message)
+                else:
+                    prefixes.add(prefix)
 
         for lang in conf['languages']:
             if lang == 'English':
@@ -1485,6 +1567,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                                    'sets': set([row[CARD_SET_NAME].lower()]),
                                    'encounter sets': set(),
                                    'prefix': '',
+                                   'rules': '',
                                    'modes': ['']})
         if row[CARD_ENCOUNTER_SET]:
             quest['encounter sets'].add(row[CARD_ENCOUNTER_SET].lower())
@@ -1496,16 +1579,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                 quest['encounter sets'].add(encounter_set)
 
         if row[CARD_DECK_RULES]:
-            if quest.get('rules'):
-                logging.error(
-                    'Duplicate deck rules for quest %s detected in '
-                    'row #%s%s, ignoring',
-                    row[CARD_ADVENTURE] or row[CARD_NAME], row[ROW_COLUMN],
-                    ' (Scratch)' if row[CARD_SCRATCH] else '')
-            else:
-                quest['rules'] = row[CARD_DECK_RULES]
-                quest['rules_row'] = row[ROW_COLUMN]
-                quest['scratch'] = ' (Scratch)' if row[CARD_SCRATCH] else ''
+            quest['rules'] = row[CARD_DECK_RULES]
 
     quests = list(quests.values())
     new_quests = []
@@ -1520,27 +1594,20 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
 
     quests.extend(new_quests)
 
-    filenames = set()
     for quest in quests:
         rules_list = [r.strip().split(':', 1)
-                      for r in quest.get('rules', '').split('\n')]
+                      for r in quest['rules'].split('\n')]
         rules_list = [(r[0].lower().strip(),
                        [i.strip() for i in r[1].strip().split(';')])
                       for r in rules_list if len(r) == 2]
         rules = OrderedDict()
         key_count = {}
         for key, value in rules_list:
-            if key not in ('sets', 'encounter sets', 'prefix', 'external xml',
-                           'remove', 'second quest deck', 'special',
-                           'second special', 'setup', 'active setup',
-                           'staging setup', 'player'):
-                logging.error(
-                    'Unknown key "%s" for deck rules for quest %s '
-                    'detected in row #%s%s, ignoring',
-                    key,
-                    quest['name'],
-                    quest['rules_row'],
-                    quest['scratch'])
+            if key not in (
+                    'sets', 'encounter sets', 'prefix', 'external xml',
+                    'remove', 'second quest deck', 'special',
+                    'second special', 'setup', 'active setup',
+                    'staging setup', 'player'):
                 continue
 
             if key not in key_count:
@@ -1549,16 +1616,6 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                 key_count[key] += 1
 
             rules[(key, key_count[key])] = value
-
-        for key in ('sets', 'encounter sets', 'prefix', 'external xml'):
-            if key_count.get(key, 0) > 0:
-                logging.error(
-                    'Duplicate key "%s" for deck rules for quest %s '
-                    'detected in row #%s%s, ignoring',
-                    key,
-                    quest['name'],
-                    quest['rules_row'],
-                    quest['scratch'])
 
         if rules.get(('sets', 0)):
             quest['sets'].update([s.lower() for s in rules[('sets', 0)]])
@@ -1702,17 +1759,6 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
             filename = _escape_octgn_filename(
                 '{}{}{}.o8d'.format(mode, quest['prefix'],
                                     _escape_filename(quest['name'])))
-            if filename in filenames:
-                logging.error(
-                    'Duplicate file name %s for deck rules for quest '
-                    '%s detected in row #%s%s, ignoring',
-                    filename,
-                    quest['name'],
-                    quest['rules_row'],
-                    quest['scratch'])
-                continue
-
-            filenames.add(filename)
             with open(
                     os.path.join(output_path, filename),
                     'w', encoding='utf-8') as obj:
@@ -1725,6 +1771,27 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
 
     logging.info('[%s] ...Generating .o8d files for OCTGN (%ss)',
                  set_name, round(time.time() - timestamp, 3))
+
+
+def _needed_for_ringsdb(row, set_id):
+    """ Check whether a card is needed for RingsDB or not.
+    """
+    if row[CARD_SET] != set_id:
+        return False
+
+    card_type = 'Treasure' if row[CARD_SPHERE] == 'Boon' else row[CARD_TYPE]
+    return card_type in CARD_TYPES_PLAYER
+
+
+def _ringsdb_code(row, sets):
+    """ Return the card's RingsDB code.
+    """
+    card_number = (str(int(row[CARD_NUMBER])).zfill(3)
+                   if _is_positive_or_zero_int(row[CARD_NUMBER])
+                   else '000')
+    code = '{}{}'.format(int(sets[row[CARD_SET]][SET_RINGSDB_CODE]),
+                         card_number)
+    return code
 
 
 def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
@@ -1748,18 +1815,15 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
         writer = csv.DictWriter(obj, fieldnames=fieldnames)
         writer.writeheader()
         for row in DATA:
-            if row[CARD_SET] != set_id:
+            if not _needed_for_ringsdb(row, set_id):
                 continue
 
             if conf['selected_only'] and row[CARD_ID] not in SELECTED_CARDS:
                 continue
 
-            card_type = row[CARD_TYPE]
-            if row[CARD_SPHERE] == 'Boon':
-                card_type = 'Treasure'
-
-            if card_type not in CARD_TYPES_PLAYER:
-                continue
+            card_type = ('Treasure'
+                         if row[CARD_SPHERE] == 'Boon'
+                         else row[CARD_TYPE])
 
             if card_type in CARD_TYPES_PLAYER_DECK:
                 limit = re.search(r'limit .*([0-9]+) per deck',
@@ -1770,9 +1834,6 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
             else:
                 limit = None
 
-            code_card_number = (str(int(row[CARD_NUMBER])).zfill(3)
-                                if _is_positive_or_zero_int(row[CARD_NUMBER])
-                                else '000')
             if card_type in ('Contract', 'Treasure'):
                 sphere = 'Neutral'
             else:
@@ -1788,19 +1849,37 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
             quantity = (int(row[CARD_QUANTITY])
                         if _is_int(row[CARD_QUANTITY]) else 0)
 
+            text = _update_card_text('{}\n{}'.format(
+                row[CARD_KEYWORDS] or '',
+                row[CARD_TEXT] or '')).strip()
+
+            if (row[CARD_SIDE_B] is not None and
+                    row[BACK_PREFIX + CARD_TEXT] is not None and
+                    row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL):
+                text_back = _update_card_text('{}\n{}'.format(
+                    row[BACK_PREFIX + CARD_KEYWORDS] or '',
+                    row[BACK_PREFIX + CARD_TEXT])).strip()
+                text = '<b>Side A</b>\n{}\n<b>Side B</b>\n{}'.format(
+                    text, text_back)
+
+            flavor = _update_card_text(row[CARD_FLAVOUR] or '')
+            if (row[CARD_SIDE_B] is not None and
+                    row[BACK_PREFIX + CARD_FLAVOUR] is not None and
+                    row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL):
+                flavor_back = _update_card_text(
+                    row[BACK_PREFIX + CARD_FLAVOUR])
+                flavor = '{}\n{}'.format(flavor, flavor_back)
+
             csv_row = {
                 'pack': set_name,
                 'type': card_type,
                 'sphere': sphere,
                 'position': _handle_int(row[CARD_NUMBER]),
-                'code': '{}{}'.format(int(SETS[set_id][SET_RINGSDB_CODE]),
-                                      code_card_number),
+                'code': _ringsdb_code(row, SETS),
                 'name': row[CARD_NAME],
                 'traits': row[CARD_TRAITS],
-                'text': _update_card_text('{}\n{}'.format(
-                    row[CARD_KEYWORDS] or '',
-                    row[CARD_TEXT] or '')).strip(),
-                'flavor': _update_card_text(row[CARD_FLAVOUR] or ''),
+                'text': text,
+                'flavor': flavor,
                 'isUnique': row[CARD_UNIQUE] and int(row[CARD_UNIQUE]),
                 'cost': cost,
                 'threat': threat,
@@ -1895,9 +1974,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
             sphere = 'None'
         elif card_type in ('Contract', 'Treasure'):
             sphere = 'Neutral'
-        elif row[CARD_SPHERE] == 'Nightmare':
-            sphere = 'None'
-        elif row[CARD_SPHERE] == 'Upgraded':
+        elif row[CARD_SPHERE] in ('Nightmare', 'Upgraded'):
             sphere = 'None'
         elif row[CARD_SPHERE] is not None:
             sphere = row[CARD_SPHERE]
@@ -1995,7 +2072,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
         if (row[CARD_SIDE_B] is not None and
                 row[BACK_PREFIX + CARD_FLAVOUR] is not None and
                 card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL):
-            flavor_back = _update_card_text(row[CARD_FLAVOUR]
+            flavor_back = _update_card_text(BACK_PREFIX + row[CARD_FLAVOUR]
                                             ).replace('\n', '\r\n').strip()
             flavor = 'Side A: {} Side B: {}'.format(flavor, flavor_back)
 
@@ -3008,10 +3085,11 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
                  lang, round(time.time() - timestamp, 3))
 
 
-def generate_db(set_id, set_name, lang):
+def generate_db(set_id, set_name, lang, card_data, sets):  # pylint: disable=R0912,R0914
     """ Generate DB outputs.
     """
-    logging.info('[%s, %s] Generating DB outputs...', set_name, lang)
+    logging.info('[%s, %s] Generating DB and RingsDB image outputs...',
+                 set_name, lang)
     timestamp = time.time()
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300DB,
@@ -3044,19 +3122,49 @@ def generate_db(set_id, set_name, lang):
 
         break
 
-    logging.info('[%s, %s] ...Generating DB outputs (%ss)',
+    ringsdb_cards = {}
+    for row in card_data:
+        if _needed_for_ringsdb(row, set_id):
+            card_number = str(_handle_int(row[CARD_NUMBER])).zfill(3)
+            ringsdb_cards[card_number] = _ringsdb_code(row, sets)
+
+    pairs = []
+    if ringsdb_cards and os.path.exists(output_path):
+        for _, _, filenames in os.walk(output_path):
+            for filename in filenames:
+                card_number = filename[:3]
+                if card_number in ringsdb_cards:
+                    suffix = '-2' if filename.endswith('-2.png') else ''
+                    pairs.append((
+                        filename,
+                        '{}{}.png'.format(ringsdb_cards[card_number], suffix)))
+
+            break
+
+    if pairs:
+        ringsdb_output_path = os.path.join(
+            OUTPUT_RINGSDB_IMAGES_PATH, '{}.{}'.format(
+                _escape_filename(set_name), lang))
+        _create_folder(ringsdb_output_path)
+        _clear_folder(ringsdb_output_path)
+        for source_filename, target_filename in pairs:
+            shutil.copyfile(os.path.join(output_path, source_filename),
+                            os.path.join(ringsdb_output_path, target_filename))
+
+    logging.info('[%s, %s] ...Generating DB and RingsDB image outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
 def generate_octgn(set_id, set_name, lang):
-    """ Generate OCTGN outputs.
+    """ Generate OCTGN image outputs.
     """
-    logging.info('[%s, %s] Generating OCTGN outputs...', set_name, lang)
+    logging.info('[%s, %s] Generating OCTGN image outputs...', set_name, lang)
     timestamp = time.time()
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300OCTGN,
                               '{}.{}'.format(set_id, lang))
-    output_path = os.path.join(OUTPUT_OCTGN_PATH, _escape_filename(set_name))
+    output_path = os.path.join(OUTPUT_OCTGN_IMAGES_PATH, '{}.{}'.format(
+        _escape_filename(set_name), lang))
     pack_path = os.path.join(output_path,
                              _escape_octgn_filename('{}.{}.o8c'.format(
                                  _escape_filename(set_name), lang)))
@@ -3086,7 +3194,7 @@ def generate_octgn(set_id, set_name, lang):
 
         break
 
-    logging.info('[%s, %s] ...Generating OCTGN outputs (%ss)',
+    logging.info('[%s, %s] ...Generating OCTGN image outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 
 

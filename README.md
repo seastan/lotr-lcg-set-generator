@@ -115,10 +115,11 @@ The scripts will generate the following outputs:
 - `Output/MakePlayingCards/<set name>.<language>/`: `zip` and `7z` archives of 800 dpi PNG images to be printed on MakePlayingCards.com.
 - `Output/MBPrint/<set name>.<language>/`: `zip` and `7z` archives and a PDF file of 800 dpi JPG images to be printed on MBPrint.pl.
 - `Output/OCTGN/<set name>/<octgn id>/set.xml`.
-- `Output/OCTGN/<set name>/<set name>.<language>.o8c`: image packs for OCTGN (300 dpi PNG).
 - `Output/OCTGNDecks/<set name>/<deck name>.o8d`: quest decks for OCTGN.
+- `Output/OCTGNImages/<set name>.<language>/<set name>.<language>.o8c`: image packs for OCTGN (300 dpi PNG).
 - `Output/PDF/<set name>.<language>/`: PDF files in `A4` and `letter` format for home printing (300 dpi PNG).
 - `Output/RingsDB/<set name>.csv`.
+- `Output/RingsDBImages/<set name>.<language>/`: 300 dpi PNG images for RingsDB (the same as `Output/DB`, but player cards only and differently named).
 
 Additionally, if you specified OCTGN destination paths, OCTGN outputs will be copied there.
 
@@ -213,7 +214,7 @@ List of available sphere values:
 - `Boon`
 - `Burden`
 - `Nightmare`
-- `Upgraded` (`Ship Objective` only)
+- `Upgraded`
 - `Back` (`Rules` only)
 - `Setup` (`Campaign` only)
 - `Blue` (`Presentation` only)
