@@ -97,7 +97,7 @@ To run the workflow, go to the root folder of this repo and follow these steps:
 
 - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux) [skip this step, if you don't use VirtualEnv]
 - `python run_before_se.py` (or `python run_before_se.py <path to a different configuration yaml>` if you want to pass a different configuration file)
-- Open `setGenerator.seproject` in Strange Eons and run `Script/makeCards` script by double clicking it.
+- Open `setGenerator.seproject`and run `Script/makeCards` script by double clicking it.
   Once completed, close Strange Eons and wait until it finished packing the project.
 - `python run_after_se.py` (or `python run_after_se.py <path to a different configuration yaml>` if you want to pass a different configuration file)
 
