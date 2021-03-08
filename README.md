@@ -1,11 +1,12 @@
 **Setup**
 
-1. Clone this repo to a local folder.
+1. Clone this repo to a local folder (you can click `Code` and then `Download ZIP`).
 
-2. Make sure you already have a cards spreadsheet on Google Sheets.  If you don't, upload
-`Spreadsheet/spreadsheet.xlsx` from this repo as a template and fill in all the required data.
-You will also need to upload Google Apps scripts from `Spreadsheet/Code.gs`.  After that,
-re-run `=SHEETS()` function from `A1` cell of the first `-` tab.
+2. Make sure you already have a cards spreadsheet on Google Sheets.
+
+  If you don't, upload `Spreadsheet/spreadsheet.xlsx` from this repo as a template
+  and fill in all the required data.  You will also need to upload Google Apps scripts
+  from `Spreadsheet/Code.gs`.  After that, re-run `=SHEETS()` function from `A1` cell of the first `-` tab.
 
 3. Add the folder with the artwork to your Google Drive to be able to sync it locally.
 This feature is currently hidden on Google Drive UI, but may still be accessed by a shortcut
@@ -41,37 +42,34 @@ completely, you will need to download updates to that folder manually.
 4. Install Backup and Sync from Google (if it's not installed yet) and make sure that the folder
 with the artwork is being synced.
 
-5. Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir.  Install it together with `Vafthaurdir`
-font from the root folder of this repo.  Additionally, manually copy both `.ttf` files into your system fonts folder
-(`C:\Windows\Fonts` in Windows), if they are not there.  Otherwise, Strange Eons won't detect them.
+5. Install Strange Eons and the custom plugin, see https://github.com/seastan/lotr-lcg-se-plugin for details.
 
-6. Install Strange Eons and the custom plugin, see https://github.com/seastan/lotr-lcg-se-plugin for details.
+6. Install GIMP (https://www.gimp.org/downloads/).
 
-7. Install GIMP (https://www.gimp.org/downloads/).
-
-8. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `GIMP` folder
+7. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `GIMP` folder
 from this repo, click `OK` and then close GIMP.
 
-9. Install ImageMagick (https://imagemagick.org/script/download.php).
+8. Install ImageMagick (https://imagemagick.org/script/download.php).
 
-10. Download `USWebCoatedSWOP.icc` from
+9. Download `USWebCoatedSWOP.icc` from
 https://github.com/cjw-network/cjwpublish1411/blob/master/vendor/imagine/imagine/lib/Imagine/resources/Adobe/CMYK/USWebCoatedSWOP.icc
 into the root folder of this repo.
 
-11. Install Python 3.8 (or other Python 3 version) and VirtualEnv.  If you don't have any other Python environments,
-you may skip the VirtualEnv part.
+10. Install the latest Python 3 version from https://www.python.org/downloads/.
+Optionally, install VirtualEnv (see https://help.dreamhost.com/hc/en-us/articles/115000695551-Installing-and-using-virtualenv-with-Python-3
+for details).
 
-12. Go to the root folder of this repo and follow these steps:
+11. Go to the root folder of this repo and follow these steps:
 
-  - `virtualenv env --python=python3.8` (if needed, replace `3.8` with your actual Python version) [skip this step, if you don't use VirtualEnv]
-  - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux) [skip this step, if you don't use VirtualEnv]
+  - [skip this step, if you don't use VirtualEnv] `virtualenv env --python=python3.9` (replace `3.9` with your actual Python version)
+  - [skip this step, if you don't use VirtualEnv] `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
   - `pip install -r requirements.txt`
 
   If for debugging purposes you plan to use Jupyter notebook, additionally run:
 
   - `pip install jupyter`
 
-13. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
+12. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
   - `sheet_gdid`: Google Sheets ID of the cards spreadsheet (leave empty to use a local copy)
   - `artwork_path`: local path to the artwork folder (don't use for that any existing folder in this repo)
@@ -95,7 +93,7 @@ you may skip the VirtualEnv part.
 
 To run the workflow, go to the root folder of this repo and follow these steps:
 
-- `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux) [skip this step, if you don't use VirtualEnv]
+- [skip this step, if you don't use VirtualEnv] `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
 - Make sure that Strange Eons is closed.
 - `python run_before_se.py` (or `python run_before_se.py <path to a different configuration yaml>` if you want to pass a different configuration file)
 - Open `setGenerator.seproject`and run `Script/makeCards` script by double clicking it.
@@ -104,7 +102,7 @@ To run the workflow, go to the root folder of this repo and follow these steps:
 
 For debugging purposes you can also run these steps using the Jupyter notebook (it doesn't use parallelism):
 
-- `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac) [skip this step, if you don't use VirtualEnv]
+- [skip this step, if you don't use VirtualEnv] `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
 - `jupyter notebook`
 - Open `setGenerator.ipynb` in the browser.
 
@@ -135,7 +133,7 @@ Additionally, if you specified OCTGN destination paths, OCTGN outputs will be co
 - `[u]` ... `[/u]`: underlined text
 - `[strike]` ... `[/strike]`: strikethrough text
 - `[red]` ... `[/red]`: red text
-- `[lotr X]` ... `[/lotr]`: Vafthrundir font + text size X (X may be float)
+- `[lotr X]` ... `[/lotr]`: Vafthrudnir font + text size X (X may be float)
 - `[size X]` ... `[/size]`: text size X (X may be float)
 - `[defaultsize X]`: put it at the beginning of a field, to set default text size X (X may be float)
 - `[img PATH]`: insert image from PATH (PATH may start either with "custom/" or "icons/")
