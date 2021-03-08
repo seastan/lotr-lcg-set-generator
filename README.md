@@ -4,9 +4,9 @@
 
 2. Make sure you already have a cards spreadsheet on Google Sheets.
 
-  If you don't, upload `Spreadsheet/spreadsheet.xlsx` from this repo as a template
-  and fill in all the required data.  You will also need to upload Google Apps scripts
-  from `Spreadsheet/Code.gs`.  After that, re-run `=SHEETS()` function from `A1` cell of the first `-` tab.
+    If you don't, upload `Spreadsheet/spreadsheet.xlsx` from this repo as a template
+    and fill in all the required data.  You will also need to upload Google Apps scripts
+    from `Spreadsheet/Code.gs`.  After that, re-run `=SHEETS()` function from `A1` cell of the first `-` tab.
 
 3. Add the folder with the artwork to your Google Drive to be able to sync it locally.
 This feature is currently hidden on Google Drive UI, but may still be accessed by a shortcut
@@ -65,7 +65,7 @@ for details).
   - [skip this step, if you don't use VirtualEnv] `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
   - `pip install -r requirements.txt`
 
-  If for debugging purposes you plan to use Jupyter notebook, additionally run:
+    If for debugging purposes you plan to use Jupyter notebook, additionally run:
 
   - `pip install jupyter`
 
