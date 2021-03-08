@@ -41,18 +41,18 @@ completely, you will need to download updates to that folder manually.
 4. Install Backup and Sync from Google (if it's not installed yet) and make sure that the folder
 with the artwork is being synced.
 
-5. Install Strange Eons and the custom plugin, see https://github.com/seastan/lotr-lcg-se-plugin for details.
-
-6. Install GIMP (https://www.gimp.org/downloads/).
-
-7. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `GIMP` folder
-from this repo, click `OK` and then close GIMP.
-
-8. Install ImageMagick (https://imagemagick.org/script/download.php).
-
-9. Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir.  Install it together with `Vafthaurdir`
+5. Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir.  Install it together with `Vafthaurdir`
 font from the root folder of this repo.  Additionally, manually copy both `.ttf` files into your system fonts folder
 (`C:\Windows\Fonts` in Windows), if they are not there.  Otherwise, Strange Eons won't detect them.
+
+6. Install Strange Eons and the custom plugin, see https://github.com/seastan/lotr-lcg-se-plugin for details.
+
+7. Install GIMP (https://www.gimp.org/downloads/).
+
+8. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `GIMP` folder
+from this repo, click `OK` and then close GIMP.
+
+9. Install ImageMagick (https://imagemagick.org/script/download.php).
 
 10. Download `USWebCoatedSWOP.icc` from
 https://github.com/cjw-network/cjwpublish1411/blob/master/vendor/imagine/imagine/lib/Imagine/resources/Adobe/CMYK/USWebCoatedSWOP.icc
