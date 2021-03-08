@@ -58,12 +58,13 @@ font from the root folder of this repo.  Additionally, manually copy both `.ttf`
 https://github.com/cjw-network/cjwpublish1411/blob/master/vendor/imagine/imagine/lib/Imagine/resources/Adobe/CMYK/USWebCoatedSWOP.icc
 into the root folder of this repo.
 
-11. Install Python 3.8 (or other Python 3 version), Pip and VirtualEnv.
+11. Install Python 3.8 (or other Python 3 version) and VirtualEnv.  If you don't have any other Python environments,
+you may skip the VirtualEnv part.
 
 12. Go to the root folder of this repo and follow these steps:
 
-  - `virtualenv env --python=python3.8` (if needed, replace `3.8` with your actual Python version)
-  - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
+  - `virtualenv env --python=python3.8` (if needed, replace `3.8` with your actual Python version) [skip this step, if you don't use VirtualEnv]
+  - `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux) [skip this step, if you don't use VirtualEnv]
   - `pip install -r requirements.txt`
 
   If for debugging purposes you plan to use Jupyter notebook, additionally run:
@@ -94,7 +95,7 @@ into the root folder of this repo.
 
 To run the workflow, go to the root folder of this repo and follow these steps:
 
-- `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
+- `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux) [skip this step, if you don't use VirtualEnv]
 - `python run_before_se.py` (or `python run_before_se.py <path to a different configuration yaml>` if you want to pass a different configuration file)
 - Open `setGenerator.seproject` in Strange Eons and run `Script/makeCards` script by double clicking it.
   Once completed, close Strange Eons and wait until it finished packing the project.
@@ -102,7 +103,7 @@ To run the workflow, go to the root folder of this repo and follow these steps:
 
 For debugging purposes you can also run these steps using the Jupyter notebook (it doesn't use parallelism):
 
-- `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
+- `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac) [skip this step, if you don't use VirtualEnv]
 - `jupyter notebook`
 - Open `setGenerator.ipynb` in the browser.
 
