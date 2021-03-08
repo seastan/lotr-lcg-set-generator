@@ -189,6 +189,10 @@ TEMPLATES_SOURCE_PATH = os.path.join('Templates')
 TEMPLATES_PATH = os.path.join(PROJECT_FOLDER, 'Templates')
 XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
 
+URL_TIMEOUT = 30
+URL_RETRIES = 3
+URL_SLEEP = 10
+
 O8D_TEMPLATE = """<deck game="a21af4e8-be4b-4cda-a6b6-534f9717391f"
     sleeveid="0">
   <section name="Hero" shared="False" />
@@ -512,6 +516,22 @@ def reset_project_folders():
                  round(time.time() - timestamp, 3))
 
 
+def _get_content(url):
+    """ Get URL content.
+    """
+    for i in range(URL_RETRIES):
+        try:
+            req = requests.get(url, timeout=URL_TIMEOUT)
+            res = req.content
+            break
+        except Exception:  # pylint: disable=W0703
+            if i < URL_RETRIES - 1:
+                time.sleep(URL_SLEEP)
+            else:
+                raise
+
+    return res
+
 def download_sheet(conf):
     """ Download cards spreadsheet from Google Sheets.
     """
@@ -526,7 +546,7 @@ def download_sheet(conf):
         url = (
             'https://docs.google.com/spreadsheets/d/{}/export?format=csv'
             .format(conf['sheet_gdid']))
-        res = requests.get(url).content.decode('utf-8')
+        res = _get_content(url).decode('utf-8')
         if not res or '<html' in res:
             raise SheetError("Can't download the Google Sheet")
 
@@ -538,7 +558,7 @@ def download_sheet(conf):
                 'https://docs.google.com/spreadsheets/d/{}/export?format=csv&gid={}'
                 .format(conf['sheet_gdid'], sheet_ids[sheet]))
             path = os.path.join(DOWNLOAD_PATH, '{}.csv'.format(sheet))
-            res = requests.get(url).content
+            res = _get_content(url)
             if not res or b'<html' in res:
                 raise SheetError("Can't download {} from the Google Sheet"
                                  .format(sheet))
@@ -1369,7 +1389,7 @@ def _load_external_xml(url, sets, encounter_sets):  # pylint: disable=R0912,R091
     """ Load cards from an external XML file.
     """
     res = []
-    content = requests.get(url).content
+    content = _get_content(url)
     root = ET.fromstring(content)
     set_name = root.attrib['name'].lower()
     if set_name not in sets:
