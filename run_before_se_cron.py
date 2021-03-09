@@ -11,7 +11,7 @@ curl -L https://raw.github.com/pageauc/rclone4pi/master/rclone-install.sh | bash
 rclone confi
 
 Setup a cron as:
-*/5 * * * * flock -xn /home/homeassistant/lotr-lcg-set-generator/cron.lock -c 'python3 /home/homeassistant/lotr-lcg-set-generator/run_before_se_cron.py > /dev/null' 2>&1
+*/2 * * * * flock -xn /home/homeassistant/lotr-lcg-set-generator/cron.lock -c 'python3 /home/homeassistant/lotr-lcg-set-generator/run_before_se_cron.py > /dev/null' 2>&1
 """
 from datetime import datetime
 from email.header import Header
@@ -111,11 +111,15 @@ def send_discord(message):
             if res != '':
                 raise DiscordResponseError(
                     'Non-empty response: {}'.format(res))
+
+            return True
     except Exception as exc:
         message = 'Discord message failed: {}: {}'.format(
             type(exc).__name__, str(exc))
         logging.exception(message)
         create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+
+    return False
 
 
 def is_non_ascii(value):
@@ -235,9 +239,9 @@ def main():
         if last_message:
             message = 'Sanity check passed'
             try:
-                set_sanity_check_message('')
-                create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(message))
-                send_discord(message)
+                if send_discord(message):
+                    set_sanity_check_message('')
+                    create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(message))
             except Exception as exc_new:
                 logging.error(str(exc_new))
     except SanityCheckError as exc:
@@ -245,17 +249,17 @@ def main():
         logging.error(message)
         if message != last_message:
             try:
-                set_sanity_check_message(message)
-                create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(message))
-                send_discord(message)
+                if send_discord(message):
+                    set_sanity_check_message(message)
+                    create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(message))
             except Exception as exc_new:
                 logging.error(str(exc_new))
     except Exception as exc:
         message = 'Script failed: {}: {}'.format(type(exc).__name__, str(exc))
         logging.exception(message)
         try:
-            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
             send_discord(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
         except Exception as exc_new:
             logging.error(str(exc_new))
     finally:
