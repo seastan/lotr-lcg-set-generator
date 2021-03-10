@@ -1677,7 +1677,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
             quest['modes'].append(EASY_PREFIX)
 
         for mode in quest['modes']:
-            player_cards = []
+            other_cards = []
             quest_cards = []
             second_quest_cards = []
             encounter_cards = []
@@ -1696,7 +1696,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
             side_quest_cards = []
             for card in cards:
                 if not card[CARD_ENCOUNTER_SET]:
-                    player_cards.append(_update_card_for_rules(card.copy()))
+                    other_cards.append(_update_card_for_rules(card.copy()))
                 elif card[CARD_TYPE] in ('Campaign', 'Nightmare', 'Quest'):
                     quest_cards.append(_update_card_for_rules(card.copy()))
                 elif card[CARD_TYPE] in ('Presentation', 'Rules'):
@@ -1713,7 +1713,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
 
             for (key, _), value in rules.items():
                 if key == 'remove':
-                    _apply_rules(player_cards, removed_cards, value)
+                    _apply_rules(other_cards, removed_cards, value)
                     _apply_rules(quest_cards, removed_cards, value)
                     _apply_rules(default_setup_cards, removed_cards, value)
                     _apply_rules(encounter_cards, removed_cards, value)
@@ -1721,19 +1721,19 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                     _apply_rules(quest_cards, second_quest_cards, value)
                 elif key == 'special':
                     _apply_rules(encounter_cards, special_cards, value)
-                    _apply_rules(player_cards, special_cards, value)
+                    _apply_rules(other_cards, special_cards, value)
                 elif key == 'second special':
                     _apply_rules(encounter_cards, second_special_cards, value)
-                    _apply_rules(player_cards, second_special_cards, value)
+                    _apply_rules(other_cards, second_special_cards, value)
                 elif key == 'setup':
                     _apply_rules(encounter_cards, setup_cards, value)
-                    _apply_rules(player_cards, setup_cards, value)
+                    _apply_rules(other_cards, setup_cards, value)
                 elif key == 'staging setup':
                     _apply_rules(encounter_cards, staging_setup_cards, value)
                 elif key == 'active setup':
                     _apply_rules(encounter_cards, active_setup_cards, value)
                 elif key == 'player':
-                    _apply_rules(player_cards, chosen_player_cards, value)
+                    _apply_rules(other_cards, chosen_player_cards, value)
 
             setup_cards.extend(default_setup_cards)
 
@@ -2803,7 +2803,7 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
 
 
 def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
-    """ Generate images for DB (general purposes) outputs.
+    """ Generate images for DB outputs.
     """
     logging.info('[%s, %s] Generating images for DB outputs...',
                  set_name, lang)
@@ -3125,7 +3125,7 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
 
 
 def generate_db(set_id, set_name, lang, card_data, sets):  # pylint: disable=R0912,R0914
-    """ Generate DB (general purposes) outputs.
+    """ Generate DB outputs.
     """
     logging.info('[%s, %s] Generating DB and RingsDB image outputs...',
                  set_name, lang)
