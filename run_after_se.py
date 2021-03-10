@@ -20,7 +20,7 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):
 
 
 def generate_db(conf, set_id, set_name, lang, skip_ids, card_data, sets):  # pylint: disable=R0913
-    """ Generate DB outputs.
+    """ Generate DB (general purposes) outputs.
     """
     lotr.generate_png300_db(conf, set_id, set_name, lang, skip_ids)
     lotr.generate_db(set_id, set_name, lang, card_data, sets)

@@ -2803,7 +2803,7 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
 
 
 def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
-    """ Generate images for DB outputs.
+    """ Generate images for DB (general purposes) outputs.
     """
     logging.info('[%s, %s] Generating images for DB outputs...',
                  set_name, lang)
@@ -3125,7 +3125,7 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
 
 
 def generate_db(set_id, set_name, lang, card_data, sets):  # pylint: disable=R0912,R0914
-    """ Generate DB outputs.
+    """ Generate DB (general purposes) outputs.
     """
     logging.info('[%s, %s] Generating DB and RingsDB image outputs...',
                  set_name, lang)
