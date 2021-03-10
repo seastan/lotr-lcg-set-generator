@@ -375,7 +375,7 @@ def _update_octgn_card_text(text):
     text = text.replace('[stormy]', '¾')
     text = text.replace('[sailing]', '¹')
     text = text.replace('[eos]', '(S)')
-    text = text.replace('[pp]', ' per player')
+    text = text.replace('[pp]', '(per player)')
     return text
 
 
@@ -1197,7 +1197,7 @@ def _backup_previous_xml(conf, set_id, lang):
         os.remove(old_path)
 
 
-def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,R0912
+def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,R0912,R0915
     """ Get OCTGN set.xml property value for the given column name.
     """
     value = row[name]
@@ -1258,11 +1258,19 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
         value = ''
     elif name == BACK_PREFIX + CARD_TEXT and card_type == 'Presentation':
         value = row[CARD_TEXT] or ''
-    elif name == CARD_TEXT and card_type == 'Rules':
+    elif name in (CARD_TEXT, BACK_PREFIX + CARD_TEXT) and card_type == 'Rules':
         value = ''
+    elif name == CARD_TEXT and row[CARD_KEYWORDS]:
+        value = '{} {}'.format(row[CARD_KEYWORDS], value)
+    elif name == BACK_PREFIX + CARD_TEXT and row[BACK_PREFIX + CARD_KEYWORDS]:
+        value = '{} {}'.format(row[BACK_PREFIX + CARD_KEYWORDS], value)
 
     if name == CARD_KEYWORDS and card_type == 'Rules':
-        value = row[CARD_KEYWORDS] or row[CARD_TEXT] or ''
+        value = row[CARD_TEXT] or ''
+    elif name == BACK_PREFIX + CARD_KEYWORDS and card_type == 'Rules':
+        value = row[BACK_PREFIX + CARD_TEXT] or ''
+    elif name in (CARD_KEYWORDS, BACK_PREFIX + CARD_KEYWORDS):
+        value = ''
 
     return value
 
