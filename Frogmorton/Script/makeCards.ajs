@@ -633,6 +633,7 @@ function run(progress, target, filename, icons) {
 					s.set('Body-region', '48,73,317,418');
 					s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
 					s.set('GameName-external-path', 'project:imagesRaw/' + card['ArtworkTop']);
+					s.set('GameName-portrait-clip-region', '50,38,313,130');
 					s.set('Name-external-path', 'project:imagesRaw/' + card['ArtworkBottom']);
 					s.set('Name-portrait-clip-region', '50,423,313,108');
 					s.set('PageIn-region', '48,488,317,15');

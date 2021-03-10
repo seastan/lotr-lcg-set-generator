@@ -356,6 +356,26 @@ def _update_octgn_card_text(text):
     """
     text = _update_card_text(text)
     text = re.sub(r'(?:<b>|<\/b>|<i>|<\/i>|<u>|<\/u>)', '', text)
+    text = re.sub(r'\n+', '\n', text)
+
+    text = text.replace('[willpower]', 'Ò')
+    text = text.replace('[threat]', '$')
+    text = text.replace('[attack]', 'Û')
+    text = text.replace('[defense]', 'Ú')
+    text = text.replace('[leadership]', 'Ì')
+    text = text.replace('[spirit]', 'Ê')
+    text = text.replace('[tactics]', 'Ï')
+    text = text.replace('[lore]', 'Î')
+    text = text.replace('[baggins]', 'Í')
+    text = text.replace('[fellowship]', '☺')
+    text = text.replace('[unique]', '‰')
+    text = text.replace('[sunny]', 'º')
+    text = text.replace('[cloudy]', '¼')
+    text = text.replace('[rainy]', '½')
+    text = text.replace('[stormy]', '¾')
+    text = text.replace('[sailing]', '¹')
+    text = text.replace('[eos]', '(S)')
+    text = text.replace('[pp]', ' per player')
     return text
 
 
@@ -1238,6 +1258,11 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
         value = ''
     elif name == BACK_PREFIX + CARD_TEXT and card_type == 'Presentation':
         value = row[CARD_TEXT] or ''
+    elif name == CARD_TEXT and card_type == 'Rules':
+        value = ''
+
+    if name == CARD_KEYWORDS and card_type == 'Rules':
+        value = row[CARD_KEYWORDS] or row[CARD_TEXT] or ''
 
     return value
 
