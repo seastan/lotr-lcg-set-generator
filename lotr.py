@@ -325,8 +325,8 @@ def _update_card_text(text):  # pylint: disable=R0915
     text = re.sub(r'\[\/b\]', '</b>', text, flags=re.IGNORECASE)
     text = re.sub(r'\[i\]', '<i>', text, flags=re.IGNORECASE)
     text = re.sub(r'\[\/i\]', '</i>', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[u\]', '<u>', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/u\]', '</u>', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[u\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/u\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[strike\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[\/strike\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[red\]', '', text, flags=re.IGNORECASE)
@@ -355,7 +355,7 @@ def _update_octgn_card_text(text):
     """ Update card text for OCTGN.
     """
     text = _update_card_text(text)
-    text = re.sub(r'(?:<b>|<\/b>|<i>|<\/i>|<u>|<\/u>)', '', text)
+    text = re.sub(r'(?:<b>|<\/b>|<i>|<\/i>)', '', text)
     text = re.sub(r'\n+', '\n', text)
 
     text = text.replace('[willpower]', 'Ò')
@@ -1258,18 +1258,15 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
         value = ''
     elif name == BACK_PREFIX + CARD_TEXT and card_type == 'Presentation':
         value = row[CARD_TEXT] or ''
-    elif name in (CARD_TEXT, BACK_PREFIX + CARD_TEXT) and card_type == 'Rules':
-        value = ''
-    elif name == CARD_TEXT and row[CARD_KEYWORDS]:
+    elif (name == CARD_TEXT and row[CARD_KEYWORDS]
+          and card_type not in ('Campaign', 'Nightmare')):
         value = '{} {}'.format(row[CARD_KEYWORDS], value)
-    elif name == BACK_PREFIX + CARD_TEXT and row[BACK_PREFIX + CARD_KEYWORDS]:
+    elif (name == BACK_PREFIX + CARD_TEXT and row[BACK_PREFIX + CARD_KEYWORDS]
+          and card_type not in ('Campaign', 'Nightmare')):
         value = '{} {}'.format(row[BACK_PREFIX + CARD_KEYWORDS], value)
 
-    if name == CARD_KEYWORDS and card_type == 'Rules':
-        value = row[CARD_TEXT] or ''
-    elif name == BACK_PREFIX + CARD_KEYWORDS and card_type == 'Rules':
-        value = row[BACK_PREFIX + CARD_TEXT] or ''
-    elif name in (CARD_KEYWORDS, BACK_PREFIX + CARD_KEYWORDS):
+    if (name in (CARD_KEYWORDS, BACK_PREFIX + CARD_KEYWORDS)
+            and card_type not in ('Campaign', 'Nightmare')):
         value = ''
 
     return value
