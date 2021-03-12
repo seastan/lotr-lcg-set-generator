@@ -187,6 +187,7 @@ SET_OCTGN_PATH = 'setOCTGN'
 TEMP_ROOT_PATH = 'Temp'
 TEMPLATES_SOURCE_PATH = os.path.join('Templates')
 TEMPLATES_PATH = os.path.join(PROJECT_FOLDER, 'Templates')
+URL_CACHE_PATH = 'urlCache'
 XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
 
 URL_TIMEOUT = 30
@@ -1433,12 +1434,46 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
                  set_name, round(time.time() - timestamp, 3))
 
 
+def _get_cached_content(url):
+    """ Find URL's content in the cache first.
+    """
+    path = os.path.join(URL_CACHE_PATH, '{}.cache'.format(
+        re.sub(r'[^A-Za-z0-9_\.\-]', '', url)))
+    if os.path.exists(path):
+        with open(path, 'br') as obj:
+            content = obj.read()
+            return content
+
+    content = _get_content(url)
+    return content
+
+
+def _save_content(url, content):
+    """ Save URL's content into cache.
+    """
+    path = os.path.join(URL_CACHE_PATH, '{}.cache'.format(
+        re.sub(r'[^A-Za-z0-9_\.\-]', '', url)))
+    with open(path, 'bw') as obj:
+        obj.write(content)
+
+
 def _load_external_xml(url, sets, encounter_sets):  # pylint: disable=R0912,R0914,R0915
     """ Load cards from an external XML file.
     """
     res = []
-    content = _get_content(url)
-    root = ET.fromstring(content)
+    content = _get_cached_content(url)
+    if not content or not b'<?xml' in content:
+        logging.error("Can't download XML from %s, ignoring", url)
+        return res
+
+    try:
+        root = ET.fromstring(content)
+    except ET.ParseError:
+        logging.error("Can't download XML from %s, ignoring", url)
+        return res
+
+    _save_content(url, content)
+
     set_name = root.attrib['name'].lower()
     if set_name not in sets:
         return res
