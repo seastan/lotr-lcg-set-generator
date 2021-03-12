@@ -1238,10 +1238,12 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
     if name in (CARD_SPHERE, BACK_PREFIX + CARD_SPHERE):
         if card_type == 'Treasure':
             value = 'Neutral'
-        elif card_type in ('Presentation', 'Rules', 'Campaign'):
+        elif card_type in ('Presentation', 'Rules'):
             value = ''
         elif value in ('Nightmare', 'Upgraded'):
             value = ''
+        elif card_type == 'Campaign' and value == '':
+            value = 'Campaign'
 
         return value
 
@@ -1270,6 +1272,12 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
 
     if (name in (CARD_KEYWORDS, BACK_PREFIX + CARD_KEYWORDS)
             and card_type not in ('Campaign', 'Nightmare')):
+        value = ''
+
+    if name == CARD_ENCOUNTER_SET and row[CARD_ADVENTURE]:
+        value = row[CARD_ADVENTURE]
+
+    if name == CARD_ADVENTURE:
         value = ''
 
     return value
@@ -1350,10 +1358,14 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
                      CARD_UNIQUE, CARD_TYPE, CARD_SPHERE, CARD_TRAITS,
                      CARD_KEYWORDS, CARD_COST, CARD_ENGAGEMENT, CARD_THREAT,
                      CARD_WILLPOWER, CARD_ATTACK, CARD_DEFENSE, CARD_HEALTH,
-                     CARD_QUEST, CARD_VICTORY, CARD_TEXT, CARD_SHADOW):
+                     CARD_QUEST, CARD_VICTORY, CARD_TEXT, CARD_SHADOW,
+                     CARD_ADVENTURE):
             value = _get_set_xml_property_value(row, name, card_type)
             if value != '':
                 properties.append((name, value))
+
+        if card_type in ('Campaign', 'Nightmare'):
+            properties.append((CARD_ENGAGEMENT, 'A'))
 
         side_b = (card_type in CARD_TYPES_DOUBLESIDE_MANDATORY
                   or row[CARD_SIDE_B])
@@ -1394,6 +1406,9 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
                                                     card_type)
                 if value != '':
                     properties.append((name, value))
+
+            if card_type in ('Campaign', 'Nightmare'):
+                properties.append((CARD_ENGAGEMENT, 'B'))
 
             if properties:
                 _add_set_xml_properties(alternate, properties, '      ')
