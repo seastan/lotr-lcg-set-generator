@@ -571,7 +571,10 @@ def download_sheet(conf):
             raise SheetError("Can't download the Google Sheet")
 
         sheet_ids = csv.reader(res.splitlines())
-        sheet_ids = dict(row for row in sheet_ids)
+        try:
+            sheet_ids = dict(row for row in sheet_ids)
+        except ValueError:
+            raise SheetError("Can't download the Google Sheet")
 
         for sheet in sheets:
             url = (
