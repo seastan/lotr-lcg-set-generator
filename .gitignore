@@ -16,6 +16,7 @@ setEons/*.xml.old
 setOCTGN/*.xml
 setOCTGN/*.xml.old
 Temp/*/*
+urlCache/*.cache
 
 configuration.yaml
 discord.yaml
