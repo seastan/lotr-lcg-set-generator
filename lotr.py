@@ -1225,12 +1225,12 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
             value = 'Rules'
         elif card_type in CARD_TYPES_DOUBLESIDE_MANDATORY:
             value = card_type
-        elif value in ('Encounter Side Quest', 'Player Side Quest'):
+        elif value == 'Encounter Side Quest':
             value = 'Side Quest'
         elif value == 'Ship Enemy':
             value = 'Enemy'
         elif value in ('Ship Objective', 'Objective Hero'):
-            value = 'Objective'
+            value = 'Objective Ally'
         elif value == 'Objective Location':
             value = 'Location'
 
@@ -1243,8 +1243,8 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
             value = ''
         elif value in ('Nightmare', 'Upgraded'):
             value = ''
-        elif card_type == 'Campaign' and value == '':
-            value = 'Campaign'
+        elif card_type == 'Campaign':
+            value = value.upper() if value else 'CAMPAIGN'
 
         return value
 
@@ -1257,6 +1257,20 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
     if name in (CARD_VICTORY, BACK_PREFIX + CARD_VICTORY):
         if card_type in ('Presentation', 'Rules'):
             value = ''
+        elif _is_positive_or_zero_int(value):
+            value = 'VICTORY {}'.format(value)
+
+        return value
+
+    if name in (CARD_KEYWORDS, BACK_PREFIX + CARD_KEYWORDS):
+        if card_type not in ('Campaign', 'Nightmare'):
+            value = ''
+
+        return value
+
+    if name == CARD_ENCOUNTER_SET:
+        if row[CARD_ADVENTURE]:
+            value = row[CARD_ADVENTURE]
 
         return value
 
@@ -1270,16 +1284,6 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
     elif (name == BACK_PREFIX + CARD_TEXT and row[BACK_PREFIX + CARD_KEYWORDS]
           and card_type not in ('Campaign', 'Nightmare')):
         value = '{} {}'.format(row[BACK_PREFIX + CARD_KEYWORDS], value)
-
-    if (name in (CARD_KEYWORDS, BACK_PREFIX + CARD_KEYWORDS)
-            and card_type not in ('Campaign', 'Nightmare')):
-        value = ''
-
-    if name == CARD_ENCOUNTER_SET and row[CARD_ADVENTURE]:
-        value = row[CARD_ADVENTURE]
-
-    if name == CARD_ADVENTURE:
-        value = ''
 
     return value
 
@@ -1359,8 +1363,7 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
                      CARD_UNIQUE, CARD_TYPE, CARD_SPHERE, CARD_TRAITS,
                      CARD_KEYWORDS, CARD_COST, CARD_ENGAGEMENT, CARD_THREAT,
                      CARD_WILLPOWER, CARD_ATTACK, CARD_DEFENSE, CARD_HEALTH,
-                     CARD_QUEST, CARD_VICTORY, CARD_TEXT, CARD_SHADOW,
-                     CARD_ADVENTURE):
+                     CARD_QUEST, CARD_VICTORY, CARD_TEXT, CARD_SHADOW):
             value = _get_set_xml_property_value(row, name, card_type)
             if value != '':
                 properties.append((name, value))
