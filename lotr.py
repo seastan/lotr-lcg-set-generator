@@ -1663,6 +1663,31 @@ def _apply_rules(source_cards, target_cards, rules):
                 target_cards.append(card_copy)
 
 
+def _generate_octgn_o8d_player(conf, set_id, set_name):
+    """ Generate .o8d file with player cards for OCTGN.
+    """
+    rows = [row for row in DATA
+            if row[CARD_SET] == set_id
+            and row[CARD_TYPE] in CARD_TYPES_PLAYER
+            and (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)]
+    cards = [_update_card_for_rules(r.copy()) for r in rows]
+    root = ET.fromstring(O8D_TEMPLATE)
+    _append_cards(root.findall("./section[@name='Hero']")[0], cards)
+
+    output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
+                               _escape_filename(set_name))
+    filename = _escape_octgn_filename(
+        'Player-{}.o8d'.format(_escape_filename(set_name)))
+    with open(
+            os.path.join(output_path, filename),
+            'w', encoding='utf-8') as obj:
+        res = ET.tostring(root, encoding='utf-8').decode('utf-8')
+        res = res.replace('<notes />', '<notes><![CDATA[]]></notes>')
+        obj.write('<?xml version="1.0" encoding="utf-8" standalone="yes"?>')
+        obj.write('\n')
+        obj.write(res)
+
+
 def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R0915
     """ Generate .o8d files for OCTGN.
     """
@@ -1886,6 +1911,8 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                     '<?xml version="1.0" encoding="utf-8" standalone="yes"?>')
                 obj.write('\n')
                 obj.write(res)
+
+    _generate_octgn_o8d_player(conf, set_id, set_name)
 
     logging.info('[%s] ...Generating .o8d files for OCTGN (%ss)',
                  set_name, round(time.time() - timestamp, 3))
