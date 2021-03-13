@@ -596,7 +596,7 @@ def download_sheet(conf):
                  round(time.time() - timestamp, 3))
 
 
-def _clean_data(data):
+def _clean_data(data):  # pylint: disable=R0915
     """ Clean data from the spreadsheet.
     """
     for row in data:
@@ -613,6 +613,7 @@ def _clean_data(data):
                 value = value.replace('...', '…')
                 value = value.replace('---', '—')
                 value = value.replace('--', '–')
+                value = re.sub(r' -(?=[0-9])', ' –', value)
                 value = value.replace('[hyphen]', '-')
                 value = value.replace("'", '’')
                 value = value.replace('“', '"')
@@ -1255,16 +1256,8 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
         return value
 
     if name in (CARD_VICTORY, BACK_PREFIX + CARD_VICTORY):
-        if card_type in ('Presentation', 'Rules'):
-            value = ''
-        elif _is_positive_or_zero_int(value):
+        if _is_positive_or_zero_int(value):
             value = 'VICTORY {}'.format(value)
-
-        return value
-
-    if name in (CARD_KEYWORDS, BACK_PREFIX + CARD_KEYWORDS):
-        if card_type not in ('Campaign', 'Nightmare'):
-            value = ''
 
         return value
 
@@ -1278,12 +1271,16 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
         value = ''
     elif name == BACK_PREFIX + CARD_TEXT and card_type == 'Presentation':
         value = row[CARD_TEXT] or ''
-    elif (name == CARD_TEXT and row[CARD_KEYWORDS]
-          and card_type not in ('Campaign', 'Nightmare')):
-        value = '{} {}'.format(row[CARD_KEYWORDS], value)
-    elif (name == BACK_PREFIX + CARD_TEXT and row[BACK_PREFIX + CARD_KEYWORDS]
-          and card_type not in ('Campaign', 'Nightmare')):
-        value = '{} {}'.format(row[BACK_PREFIX + CARD_KEYWORDS], value)
+    elif name == CARD_TEXT and row[CARD_KEYWORDS]:
+        if row[CARD_SHADOW]:
+            value = '{} {}'.format(row[CARD_KEYWORDS], value)
+        else:
+            value = '{}\n{}'.format(row[CARD_KEYWORDS], value)
+    elif name == BACK_PREFIX + CARD_TEXT and row[BACK_PREFIX + CARD_KEYWORDS]:
+        if row[BACK_PREFIX + CARD_SHADOW]:
+            value = '{} {}'.format(row[BACK_PREFIX + CARD_KEYWORDS], value)
+        else:
+            value = '{}\n{}'.format(row[BACK_PREFIX + CARD_KEYWORDS], value)
 
     return value
 
@@ -1361,18 +1358,20 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
         properties = []
         for name in (CARD_NUMBER, CARD_QUANTITY, CARD_ENCOUNTER_SET,
                      CARD_UNIQUE, CARD_TYPE, CARD_SPHERE, CARD_TRAITS,
-                     CARD_KEYWORDS, CARD_COST, CARD_ENGAGEMENT, CARD_THREAT,
-                     CARD_WILLPOWER, CARD_ATTACK, CARD_DEFENSE, CARD_HEALTH,
-                     CARD_QUEST, CARD_VICTORY, CARD_TEXT, CARD_SHADOW):
+                     CARD_COST, CARD_ENGAGEMENT, CARD_THREAT, CARD_WILLPOWER,
+                     CARD_ATTACK, CARD_DEFENSE, CARD_HEALTH, CARD_QUEST,
+                     CARD_VICTORY, CARD_TEXT, CARD_SHADOW):
             value = _get_set_xml_property_value(row, name, card_type)
             if value != '':
                 properties.append((name, value))
 
-        if card_type in ('Campaign', 'Nightmare'):
-            properties.append((CARD_ENGAGEMENT, 'A'))
-
         side_b = (card_type in CARD_TYPES_DOUBLESIDE_MANDATORY
                   or row[CARD_SIDE_B])
+        if card_type in ('Campaign', 'Nightmare'):
+            properties.append((CARD_ENGAGEMENT, 'A'))
+        elif card_type == 'Contract' and side_b:
+            properties.append((CARD_ENGAGEMENT, 'A'))
+
         if properties:
             if side_b:
                 properties.append(('', ''))
@@ -1402,16 +1401,16 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 properties.append((CARD_ENCOUNTER_SET, value))
 
             for name in (CARD_UNIQUE, CARD_TYPE, CARD_SPHERE, CARD_TRAITS,
-                         CARD_KEYWORDS, CARD_COST, CARD_ENGAGEMENT,
-                         CARD_THREAT, CARD_WILLPOWER, CARD_ATTACK,
-                         CARD_DEFENSE, CARD_HEALTH, CARD_QUEST, CARD_VICTORY,
-                         CARD_TEXT, CARD_SHADOW):
+                         CARD_COST, CARD_ENGAGEMENT, CARD_THREAT,
+                         CARD_WILLPOWER, CARD_ATTACK, CARD_DEFENSE,
+                         CARD_HEALTH, CARD_QUEST, CARD_VICTORY, CARD_TEXT,
+                         CARD_SHADOW):
                 value = _get_set_xml_property_value(row, BACK_PREFIX + name,
                                                     card_type)
                 if value != '':
                     properties.append((name, value))
 
-            if card_type in ('Campaign', 'Nightmare'):
+            if card_type in ('Campaign', 'Nightmare', 'Contract'):
                 properties.append((CARD_ENGAGEMENT, 'B'))
 
             if properties:
