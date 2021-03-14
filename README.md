@@ -4,9 +4,10 @@
 
 2. Make sure you already have a cards spreadsheet on Google Sheets.
 
-    If you don't, upload `Spreadsheet/spreadsheet.xlsx` from this repo as a template
-    and fill in all the required data.  You will also need to upload Google Apps scripts
+    If you don't, upload `Spreadsheet/spreadsheet.xlsx` from this repo, click `Save as Google Sheets`,
+    click `Share` and `Change to anyone with the link`.  Click `Script editor` and upload the scripts
     from `Spreadsheet/Code.gs`.  After that, re-run `=SHEETS()` function from `A1` cell of the first `-` tab.
+    Add all the sets and cards data.
 
 3. Add the folder with the artwork to your Google Drive to be able to sync it locally.
 This feature is currently hidden on Google Drive UI, but may still be accessed by a shortcut
