@@ -1999,8 +1999,7 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                 row[CARD_TEXT] or '')).strip()
 
             if (row[CARD_SIDE_B] is not None and
-                    row[BACK_PREFIX + CARD_TEXT] is not None and
-                    row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL):
+                    row[BACK_PREFIX + CARD_TEXT] is not None):
                 text_back = _update_card_text('{}\n{}'.format(
                     row[BACK_PREFIX + CARD_KEYWORDS] or '',
                     row[BACK_PREFIX + CARD_TEXT])).strip()
@@ -2009,8 +2008,7 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
 
             flavor = _update_card_text(row[CARD_FLAVOUR] or '')
             if (row[CARD_SIDE_B] is not None and
-                    row[BACK_PREFIX + CARD_FLAVOUR] is not None and
-                    row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL):
+                    row[BACK_PREFIX + CARD_FLAVOUR] is not None):
                 flavor_back = _update_card_text(
                     row[BACK_PREFIX + CARD_FLAVOUR])
                 flavor = '{}\n{}'.format(flavor, flavor_back)
