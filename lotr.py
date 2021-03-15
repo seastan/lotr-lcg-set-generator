@@ -1228,9 +1228,7 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
             value = card_type
         elif value == 'Encounter Side Quest':
             value = 'Side Quest'
-        elif value == 'Ship Enemy':
-            value = 'Enemy'
-        elif value in ('Ship Objective', 'Objective Hero'):
+        elif value == 'Objective Hero':
             value = 'Objective Ally'
         elif value == 'Objective Location':
             value = 'Location'
@@ -1242,7 +1240,7 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
             value = 'Neutral'
         elif card_type in ('Presentation', 'Rules'):
             value = ''
-        elif value in ('Nightmare', 'Upgraded'):
+        elif value == 'Upgraded':
             value = ''
         elif card_type == 'Campaign':
             value = value.upper() if value else 'CAMPAIGN'
