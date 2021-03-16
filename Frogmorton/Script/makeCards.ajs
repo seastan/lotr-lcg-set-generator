@@ -124,31 +124,31 @@ hitPointsRegion['Ship Enemy'] = '64,269,58,40';
 hitPointsRegion['Ship Objective'] = '61,272,58,40';
 
 var attackRegion = {};
-attackRegion['Ally'] = '75,157,16,16';
-attackRegion['Enemy'] = '73,156,16,16';
-attackRegion['Hero'] = '73,157,16,16';
-attackRegion['Objective Ally'] = '70,159,16,16';
-attackRegion['Ship Enemy'] = '73,156,16,16';
-attackRegion['Ship Objective'] = '70,159,16,16';
+attackRegion['Ally'] = '70,157,26,16';
+attackRegion['Enemy'] = '68,156,26,16';
+attackRegion['Hero'] = '68,157,26,16';
+attackRegion['Objective Ally'] = '65,159,26,16';
+attackRegion['Ship Enemy'] = '68,156,26,16';
+attackRegion['Ship Objective'] = '65,159,26,16';
 
 var defenseRegion = {};
-defenseRegion['Ally'] = '75,200,16,16';
-defenseRegion['Enemy'] = '73,199,16,16';
-defenseRegion['Hero'] = '73,200,16,16';
-defenseRegion['Objective Ally'] = '70,203,16,16';
-defenseRegion['Ship Enemy'] = '73,199,16,16';
-defenseRegion['Ship Objective'] = '70,203,16,16';
+defenseRegion['Ally'] = '70,200,26,16';
+defenseRegion['Enemy'] = '68,199,26,16';
+defenseRegion['Hero'] = '68,200,26,16';
+defenseRegion['Objective Ally'] = '65,203,26,16';
+defenseRegion['Ship Enemy'] = '68,199,26,16';
+defenseRegion['Ship Objective'] = '65,203,26,16';
 
 var willpowerRegion = {};
-willpowerRegion['Ally'] = '75,117,16,16';
-willpowerRegion['Hero'] = '73,117,16,16';
-willpowerRegion['Objective Ally'] = '70,113,16,16';
-willpowerRegion['Ship Objective'] = '70,113,16,16';
+willpowerRegion['Ally'] = '70,117,26,16';
+willpowerRegion['Hero'] = '68,117,26,16';
+willpowerRegion['Objective Ally'] = '65,113,26,16';
+willpowerRegion['Ship Objective'] = '65,113,26,16';
 
 var threatRegion = {};
-threatRegion['Enemy'] = '73,115,16,16';
-threatRegion['Location'] = '59,92,16,16';
-threatRegion['Ship Enemy'] = '73,115,16,16';
+threatRegion['Enemy'] = '68,115,26,16';
+threatRegion['Location'] = '54,92,26,16';
+threatRegion['Ship Enemy'] = '68,115,26,16';
 
 var progressRegion = {};
 progressRegion['Encounter Side Quest'] = '52,202,35,24';
@@ -586,8 +586,9 @@ function run(progress, target, filename, icons) {
 				s.set('Engagement-region', '76,48,36,25');
 				s.set('ThreatCost-region', '75,50,36,25');
 				s.set('Type-region', '136,504,141,20');
-				s.set('Engagement-tint', '28.0,1.0,0.9');
-				s.set('Progress-tint', '28.0,1.0,0.9');
+				s.set('Engagement-tint', '32.0,1.0,0.9');
+				s.set('Progress-tint', '32.0,1.0,0.9');
+				s.set('HitPoints-tint', '0.0,0.8,1.0');
 				s.set('Sphere-Body-shape', '0,0,472,40,0');
 				s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
 				s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
