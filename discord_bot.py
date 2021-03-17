@@ -17,6 +17,8 @@ DISCORD_CONF_PATH = 'discord.yaml'
 LOG_PATH = 'discord_bot.log'
 WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 
+PLAYTEST_FILE = 'discord_playtest.txt'
+
 SLEEP_TIME = 1
 
 
@@ -98,10 +100,13 @@ async def save_new_target(content):
     if len(lines) == 1:
         return False
 
-    lines = lines[1:]
+    lines = [line.strip() for line in lines[1:]]
     for line in lines:
         if not re.match(r'^[0-9]+[\. ]', line):
             return False
+
+    with open(PLAYTEST_FILE, 'w') as obj:
+        obj.write('\n'.join(lines))
 
     return True
 
@@ -115,7 +120,7 @@ class MyClient(discord.Client):
         """
         logging.info('Logged in as %s (%s)', self.user.name, self.user.id)
 
-    async def _process_cron_command(self, message):
+    async def _process_cron_command(self, message):  #pylint: disable=R0912
         """ Process a cron command.
         """
         if not message.channel.name == 'cron':
@@ -134,14 +139,20 @@ class MyClient(discord.Client):
             if not res:
                 res = 'no cron log found'
 
-            for chunk in split_result(res):
+            for i, chunk in enumerate(split_result(res)):
+                if i > 0:
+                    await asyncio.sleep(SLEEP_TIME)
+
                 await message.reply(chunk)
         elif command.lower() == 'errors':
             res = await get_errors()
             if not res:
                 res = 'no cron log found'
 
-            for chunk in split_result(res):
+            for i, chunk in enumerate(split_result(res)):
+                if i > 0:
+                    await asyncio.sleep(SLEEP_TIME)
+
                 await message.reply(chunk)
         else:
             await message.reply('excuse me?')
@@ -152,7 +163,12 @@ class MyClient(discord.Client):
         command = message.content.split('\n')[0][10:]
         logging.info('Received playtest command: %s', command)
         if command.lower() == 'new':
-            res = await save_new_target(message.content)
+            try:
+                res = await save_new_target(message.content)
+            except Exception as exc:
+                message.reply('unexpected error: {}'.format(str(exc)))
+                return
+
             if not res:
                 await message.reply(
                     """incorrect command format, try something like:
