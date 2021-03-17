@@ -1,12 +1,13 @@
-# pylint: disable=W0703
+# pylint: disable=C0103,W0703
 """ Discord bot.
 
 You need to install dependency:
 pip install discord.py
 """
+import asyncio
 import logging
 import os
-import subprocess
+import re
 
 import discord
 import yaml
@@ -17,6 +18,9 @@ LOG_PATH = 'discord_bot.log'
 WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 
 SLEEP_TIME = 1
+
+
+playtest_lock = asyncio.Lock()
 
 
 def init_logging():
@@ -39,29 +43,35 @@ def get_token():
         return ''
 
 
-def get_log():
+async def get_log():
     """ Get full log of the last cron execution.
     """
     try:
-        res = subprocess.run('./cron_log.sh', capture_output=True, shell=True,
-                             check=True)
-    except subprocess.CalledProcessError:
+        proc = await asyncio.create_subprocess_shell(
+            './cron_log.sh',
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE)
+        stdout, _ = await proc.communicate()
+    except Exception:
         return ''
 
-    res = res.stdout.decode('utf-8').strip()
+    res = stdout.decode('utf-8').strip()
     return res
 
 
-def get_errors():
+async def get_errors():
     """ Get errors of the last cron execution.
     """
     try:
-        res = subprocess.run('./cron_errors.sh', capture_output=True,
-                             shell=True, check=True)
-    except subprocess.CalledProcessError:
+        proc = await asyncio.create_subprocess_shell(
+            './cron_errors.sh',
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE)
+        stdout, _ = await proc.communicate()
+    except Exception:
         return ''
 
-    res = res.stdout.decode('utf-8').strip()
+    res = stdout.decode('utf-8').strip()
     return res
 
 
@@ -81,6 +91,21 @@ def split_result(value):
     return res
 
 
+async def save_new_target(content):
+    """ Save new playtesting target.
+    """
+    lines = content.split('\n')
+    if len(lines) == 1:
+        return False
+
+    lines = lines[1:]
+    for line in lines:
+        if not re.match(r'^[0-9]+[\. ]', line):
+            return False
+
+    return True
+
+
 class MyClient(discord.Client):
     """ My bot class.
     """
@@ -90,39 +115,68 @@ class MyClient(discord.Client):
         """
         logging.info('Logged in as %s (%s)', self.user.name, self.user.id)
 
+    async def _process_cron_command(self, message):
+        """ Process a cron command.
+        """
+        if not message.channel.name == 'cron':
+            return
+
+        command = message.content.split('\n')[0][6:]
+        logging.info('Received cron command: %s', command)
+        if command.lower() == 'hello':
+            await message.reply('hello')
+        elif command.lower() == 'test':
+            await message.reply('passed')
+        elif command.lower() == 'thank you':
+            await message.reply('you are welcome')
+        elif command.lower() == 'log':
+            res = await get_log()
+            if not res:
+                res = 'no cron log found'
+
+            for chunk in split_result(res):
+                await message.reply(chunk)
+        elif command.lower() == 'errors':
+            res = await get_errors()
+            if not res:
+                res = 'no cron log found'
+
+            for chunk in split_result(res):
+                await message.reply(chunk)
+        else:
+            await message.reply('excuse me?')
+
+    async def _process_playtest_command(self, message):
+        """ Process a playtest command.
+        """
+        command = message.content.split('\n')[0][10:]
+        logging.info('Received playtest command: %s', command)
+        if command.lower() == 'new':
+            res = await save_new_target(message.content)
+            if not res:
+                await message.reply(
+                    """incorrect command format, try something like:
+!playtest new
+1. Escape From Dol Guldur (solo)
+2. Frogs deck
+""")
+                return
+
+            await message.reply('done')
+        else:
+            await message.reply('excuse me?')
+
     async def on_message(self, message):
         """ Invoked when a new message posted.
         """
         try:
-            if (not message.channel.name == 'cron'
-                    or not message.content.startswith('!cron ')
-                    or message.author.id == self.user.id):
+            if message.author.id == self.user.id:
                 return
 
-            command = message.content[6:]
-            logging.info('Received command: %s', command)
-            if command.lower() == 'hello':
-                await message.reply('hello')
-            elif command.lower() == 'test':
-                await message.reply('passed')
-            elif command.lower() == 'thank you':
-                await message.reply('uou are welcome')
-            elif command.lower() == 'log':
-                res = get_log()
-                if not res:
-                    res = 'no cron log found'
-
-                for chunk in split_result(res):
-                    await message.reply(chunk)
-            elif command.lower() == 'errors':
-                res = get_errors()
-                if not res:
-                    res = 'no cron log found'
-
-                for chunk in split_result(res):
-                    await message.reply(chunk)
-            else:
-                await message.reply('excuse me?')
+            if message.content.startswith('!cron '):
+                await self._process_cron_command(message)
+            elif message.content.startswith('!playtest '):
+                await self._process_playtest_command(message)
         except Exception as exc:
             logging.exception(str(exc))
 
