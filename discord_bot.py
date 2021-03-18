@@ -18,8 +18,8 @@ DISCORD_CONF_PATH = 'discord.yaml'
 LOG_PATH = 'discord_bot.log'
 WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 
-PLAYTESTING_CHANNEL_ID = 821853410084651048
-PLAYTEST_FILE = os.path.join('Discord', 'playtest.json')
+PLAYTEST_CHANNEL_ID = 821853410084651048
+PLAYTEST_PATH = os.path.join('Discord', 'playtest.json')
 
 SLEEP_TIME = 1
 
@@ -121,6 +121,7 @@ class MyClient(discord.Client):
         """
         logging.info('Logged in as %s (%s)', self.user.name, self.user.id)
 
+
     async def _process_cron_command(self, message):  #pylint: disable=R0912
         """ Process a cron command.
         """
@@ -156,8 +157,9 @@ class MyClient(discord.Client):
         else:
             await message.channel.send('excuse me?')
 
-    async def _add_new_target(self, content):
-        """ Add new playtesting target.
+
+    async def _new_target(self, content):
+        """ Set new playtesting targets.
         """
         error_message = """incorrect command format: {}
 try something like:
@@ -192,14 +194,15 @@ try something like:
                          'user': None})
 
         async with playtest_lock:
-            with open(PLAYTEST_FILE, 'w') as obj:
+            with open(PLAYTEST_PATH, 'w') as obj:
                 json.dump(data, obj)
 
         playtest_message = """----------
 New playtesting targets:
 {}""".format(format_playtest_message(data))
-        await self.get_channel(PLAYTESTING_CHANNEL_ID).send(playtest_message)
+        await self.get_channel(PLAYTEST_CHANNEL_ID).send(playtest_message)
         return ''
+
 
     async def _complete_target(self, content, num, user, url):
         """ Complete playtesting target.
@@ -211,7 +214,7 @@ New playtesting targets:
             return 'please add a playtesting report'
 
         async with playtest_lock:
-            with open(PLAYTEST_FILE, 'r+') as obj:
+            with open(PLAYTEST_PATH, 'r+') as obj:
                 data = json.load(obj)
 
                 nums = [target['num'] for target in data]
@@ -240,8 +243,9 @@ New playtesting targets:
 Target "{}" completed. Link: {}
 {}
 {}""".format(num, url, format_playtest_message(data), all_targets)
-        await self.get_channel(PLAYTESTING_CHANNEL_ID).send(playtest_message)
+        await self.get_channel(PLAYTEST_CHANNEL_ID).send(playtest_message)
         return ''
+
 
     async def _update_target(self, params):
         """ Update playtesting target.
@@ -265,7 +269,7 @@ Target "{}" completed. Link: {}
 
         user = ' '.join(params)
         async with playtest_lock:
-            with open(PLAYTEST_FILE, 'r+') as obj:
+            with open(PLAYTEST_PATH, 'r+') as obj:
                 data = json.load(obj)
 
                 existing_nums = set(target['num'] for target in data)
@@ -293,17 +297,113 @@ Target "{}" completed. Link: {}
 Targets updated.
 {}
 {}""".format(format_playtest_message(data), all_targets)
-        await self.get_channel(PLAYTESTING_CHANNEL_ID).send(playtest_message)
+        await self.get_channel(PLAYTEST_CHANNEL_ID).send(playtest_message)
         return ''
 
-    async def _process_playtest_command(self, message):
+
+    async def _add_target(self, content):
+        """ Add additional playtesting targets.
+        """
+
+        lines = content.split('\n')
+        if len(lines) == 1:
+            return 'no targets specified'
+
+        lines = [line.strip() for line in lines[1:]]
+        nums = set()
+        new_data = []
+        for line in lines:
+            if not re.match(r'^[0-9]+\.? ', line):
+                return 'no number for a target'
+
+            if '~~' in line:
+                return 'a target is already crossed out'
+
+            num, title = line.split(' ', 1)
+            num = re.sub(r'\.$', '', num)
+            if num in nums:
+                return 'a duplicate target number "{}"'.format(num)
+
+            nums.add(num)
+            new_data.append({'num': num,
+                             'title': title,
+                             'completed': False,
+                             'user': None})
+
+        async with playtest_lock:
+            with open(PLAYTEST_PATH, 'r+') as obj:
+                data = json.load(obj)
+
+                existing_nums = set(target['num'] for target in data)
+                for num in nums:
+                    if num in existing_nums:
+                        return 'a duplicate target number "{}"'.format(num)
+
+                data.extend(new_data)
+                obj.seek(0)
+                obj.truncate()
+                json.dump(data, obj)
+
+        playtest_message = """----------
+Targets added.
+{}""".format(format_playtest_message(data))
+        await self.get_channel(PLAYTEST_CHANNEL_ID).send(playtest_message)
+        return ''
+
+
+    async def _remove_target(self, params):
+        """ Remove existing playtesting targets.
+        """
+        nums = set()
+        while params:
+            param = params[0]
+            if not param:
+                params.pop(0)
+            elif re.match(r'^[0-9]+$', param):
+                if param in nums:
+                    return 'a duplicate target number "{}"'.format(param)
+
+                params.pop(0)
+                nums.add(param)
+            else:
+                return 'target number "{}" doesn\'t look correct'.format(param)
+
+        if not nums:
+            return 'no target number(s) specified'
+
+        async with playtest_lock:
+            with open(PLAYTEST_PATH, 'r+') as obj:
+                data = json.load(obj)
+
+                existing_nums = set(target['num'] for target in data)
+                for num in nums:
+                    if num not in existing_nums:
+                        return 'target "{}" not found'.format(num)
+
+                new_data = []
+                for target in data:
+                    if target['num'] not in nums:
+                        new_data.append(target)
+
+                obj.seek(0)
+                obj.truncate()
+                json.dump(new_data, obj)
+
+        playtest_message = """----------
+Targets removed.
+{}""".format(format_playtest_message(new_data))
+        await self.get_channel(PLAYTEST_CHANNEL_ID).send(playtest_message)
+        return ''
+
+
+    async def _process_playtest_command(self, message):  # pylint: disable=R0911,R0912,R0915
         """ Process a playtest command.
         """
         command = re.sub(r'^!playtest ', '', message.content).split('\n')[0]
         logging.info('Received playtest command: %s', command)
         if command == 'new':
             try:
-                error = await self._add_new_target(message.content)
+                error = await self._new_target(message.content)
             except Exception as exc:
                 logging.error(str(exc))
                 await message.channel.send(
@@ -347,8 +447,38 @@ Targets updated.
                 return
 
             await message.channel.send('done')
+        elif command == 'add':
+            try:
+                error = await self._add_target(message.content)
+            except Exception as exc:
+                logging.error(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            if error:
+                await message.channel.send(error)
+                return
+
+            await message.channel.send('done')
+        elif command.startswith('remove '):
+            try:
+                params = re.sub(r'^remove ', '', command).split(' ')
+                error = await self._remove_target(params)
+            except Exception as exc:
+                logging.error(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            if error:
+                await message.channel.send(error)
+                return
+
+            await message.channel.send('done')
         else:
             await message.channel.send('excuse me?')
+
 
     async def on_message(self, message):
         """ Invoked when a new message posted.
