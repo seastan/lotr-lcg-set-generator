@@ -709,7 +709,6 @@ function run(progress, target, filename, icons) {
 					s.set('StoryBack-format', '<left><size 7><i>');
 					s.set('Story-formatEnd', '</i></size>');
 					s.set('StoryBack-formatEnd', '</i></size>');
-					s.set('Stage-region', '45,44,60,42');
 					s.set('EncounterSet1-portrait-clip-region', '450,213,20,20');
 					s.set('EncounterSet2-portrait-clip-region', '426,213,20,20');
 					s.set('EncounterSet3-portrait-clip-region', '402,213,20,20');
@@ -740,6 +739,39 @@ function run(progress, target, filename, icons) {
 
 				if (cardType == 'Quest') {
 					s.set('NameShare', 0);
+					if (s.get('Stage') + '' == '0') {
+						s.set('Stage-region', '45,43,62,42');
+					}
+					else if (s.get('Stage') + '' == '1') {
+						s.set('Stage-region', '44,43,62,42');
+					}
+					else if (s.get('Stage') + '' == '2') {
+						s.set('Stage-region', '46,44,62,42');
+					}
+					else if (s.get('Stage') + '' == '3') {
+						s.set('Stage-region', '45,44,62,42');
+					}
+					else if (s.get('Stage') + '' == '4') {
+						s.set('Stage-region', '44,43,62,42');
+					}
+					else if (s.get('Stage') + '' == '5') {
+						s.set('Stage-region', '44,43,62,42');
+					}
+					else if (s.get('Stage') + '' == '6') {
+						s.set('Stage-region', '45,43,62,42');
+					}
+					else if (s.get('Stage') + '' == '7') {
+						s.set('Stage-region', '45,43,62,42');
+					}
+					else if (s.get('Stage') + '' == '8') {
+						s.set('Stage-region', '45,43,62,42');
+					}
+					else if (s.get('Stage') + '' == '9') {
+						s.set('Stage-region', '45,43,62,42');
+					}
+					else {
+						s.set('Stage-region', '45,43,62,42');
+					}
 				}
 
 				if ((cardType == 'Presentation') || (cardType == 'Rules')) {
