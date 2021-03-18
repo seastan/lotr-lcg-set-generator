@@ -19,7 +19,7 @@ LOG_PATH = 'discord_bot.log'
 WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 
 PLAYTESTING_CHANNEL_ID = 821853410084651048
-PLAYTEST_FILE = 'discord_playtest.json'
+PLAYTEST_FILE = os.path.join('Discord', 'playtest.json')
 
 SLEEP_TIME = 1
 

@@ -1,5 +1,6 @@
 .ipynb_checkpoints/
 __pycache__/
+Discord/*.json
 Download/*.csv
 Frogmorton/imagesCustom/*.jpg
 Frogmorton/imagesCustom/*.png
@@ -19,7 +20,6 @@ Temp/*/*
 urlCache/*.cache
 
 configuration.yaml
-discord_playtest.json
 discord.yaml
 sanity_check.txt
 setGenerator.seproject
