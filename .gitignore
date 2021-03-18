@@ -19,6 +19,7 @@ Temp/*/*
 urlCache/*.cache
 
 configuration.yaml
+discord_playtest.json
 discord.yaml
 sanity_check.txt
 setGenerator.seproject
