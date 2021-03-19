@@ -254,6 +254,14 @@ class ImageMagickError(Exception):
     """
 
 
+def normalized_name(value):
+    """ Return a normalized card name.
+    """
+    value = unidecode.unidecode(value).lower().replace(' ', '-')
+    value = re.sub(r'[^a-z0-9\-]', '', value)[:98]
+    return value
+
+
 def _is_positive_int(value):
     """ Check whether a value is a positive int or not.
     """
@@ -856,7 +864,7 @@ def save_data_for_bot():
     data = [{key: value for key, value in row.items() if value is not None}
             for row in DATA if not row[CARD_SCRATCH]]
     for row in data:
-        row[CARD_NORMALIZED_NAME] = unidecode.unidecode(row[CARD_NAME]).lower()
+        row[CARD_NORMALIZED_NAME] = normalized_name(row[CARD_NAME])
 
     with open(DISCORD_CARD_DATA_PATH, 'w', encoding='utf-8') as obj:
         res = json.dumps(data, ensure_ascii=False)
