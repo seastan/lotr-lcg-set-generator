@@ -99,7 +99,10 @@ def format_playtest_message(data):
     """ Format playtest message to post to Discord.
     """
     res = ''
-    for line in data:
+    if data['description']:
+        res += '{}\n'.format(data['description'])
+
+    for line in data['targets']:
         completed = '~~' if line['completed'] else ''
         user = ' ({})'.format(line['user']) if line['user'] else ''
         res += '{}{}. {}{}{}\n'.format(completed,  # pylint: disable=W1308
@@ -163,20 +166,24 @@ class MyClient(discord.Client):
         """
         error_message = """incorrect command format: {}
 try something like:
+```
 !playtest new
+Deadline: tomorrow.
 1. Escape From Dol Guldur (solo)
 2. Frogs deck
+```
 """
-        lines = content.split('\n')
-        if len(lines) == 1:
-            return error_message.format('no targets specified')
-
-        lines = [line.strip() for line in lines[1:]]
+        lines = [line.strip() for line in content.split('\n')[1:]]
         nums = set()
-        data = []
+        description = []
+        targets = []
         for line in lines:
             if not re.match(r'^[0-9]+\.? ', line):
-                return error_message.format('no number for a target')
+                if nums:
+                    return error_message.format('no number for a target')
+
+                description.append(line)
+                continue
 
             if '~~' in line:
                 return error_message.format('a target is already crossed out')
@@ -188,10 +195,16 @@ try something like:
                     'a duplicate target number "{}"'.format(num))
 
             nums.add(num)
-            data.append({'num': num,
-                         'title': title,
-                         'completed': False,
-                         'user': None})
+            targets.append({'num': num,
+                            'title': title,
+                            'completed': False,
+                            'user': None})
+
+        if not targets:
+            return error_message.format('no targets specified')
+
+        data = {'targets': targets,
+                'description': '\n'.join(description)}
 
         async with playtest_lock:
             with open(PLAYTEST_PATH, 'w') as obj:
@@ -217,16 +230,16 @@ New playtesting targets:
             with open(PLAYTEST_PATH, 'r+') as obj:
                 data = json.load(obj)
 
-                nums = [target['num'] for target in data]
+                nums = [target['num'] for target in data['targets']]
                 if num not in nums:
                     return 'target "{}" not found'.format(num)
 
-                nums = [target['num'] for target in data
+                nums = [target['num'] for target in data['targets']
                         if not target['completed']]
                 if num not in nums:
                     return 'target "{}" already completed'.format(num)
 
-                for target in data:
+                for target in data['targets']:
                     if target['num'] == num:
                         target['completed'] = True
                         target['user'] = user
@@ -237,7 +250,8 @@ New playtesting targets:
                 json.dump(data, obj)
 
         all_targets = ('All targets completed now!'
-                       if all(target['completed'] for target in data)
+                       if all(target['completed']
+                              for target in data['targets'])
                        else '')
         playtest_message = """----------
 Target "{}" completed. Link: {}
@@ -272,12 +286,13 @@ Target "{}" completed. Link: {}
             with open(PLAYTEST_PATH, 'r+') as obj:
                 data = json.load(obj)
 
-                existing_nums = set(target['num'] for target in data)
+                existing_nums = set(target['num']
+                                    for target in data['targets'])
                 for num in nums:
                     if num not in existing_nums:
                         return 'target "{}" not found'.format(num)
 
-                for target in data:
+                for target in data['targets']:
                     if target['num'] in nums:
                         if user:
                             target['completed'] = True
@@ -291,7 +306,8 @@ Target "{}" completed. Link: {}
                 json.dump(data, obj)
 
         all_targets = ('All targets completed now!'
-                       if all(target['completed'] for target in data)
+                       if all(target['completed']
+                              for target in data['targets'])
                        else '')
         playtest_message = """----------
 Targets updated.
@@ -304,17 +320,17 @@ Targets updated.
     async def _add_target(self, content):
         """ Add additional playtesting targets.
         """
-
-        lines = content.split('\n')
-        if len(lines) == 1:
-            return 'no targets specified'
-
-        lines = [line.strip() for line in lines[1:]]
+        lines = [line.strip() for line in content.split('\n')[1:]]
         nums = set()
-        new_data = []
+        description = []
+        targets = []
         for line in lines:
             if not re.match(r'^[0-9]+\.? ', line):
-                return 'no number for a target'
+                if nums:
+                    return 'no number for a target'
+
+                description.append(line)
+                continue
 
             if '~~' in line:
                 return 'a target is already crossed out'
@@ -325,21 +341,28 @@ Targets updated.
                 return 'a duplicate target number "{}"'.format(num)
 
             nums.add(num)
-            new_data.append({'num': num,
-                             'title': title,
-                             'completed': False,
-                             'user': None})
+            targets.append({'num': num,
+                            'title': title,
+                            'completed': False,
+                            'user': None})
+
+        if not description and not targets:
+            return 'no new desription or targets specified'
 
         async with playtest_lock:
             with open(PLAYTEST_PATH, 'r+') as obj:
                 data = json.load(obj)
 
-                existing_nums = set(target['num'] for target in data)
+                existing_nums = set(target['num']
+                                    for target in data['targets'])
                 for num in nums:
                     if num in existing_nums:
                         return 'a duplicate target number "{}"'.format(num)
 
-                data.extend(new_data)
+                if description:
+                    data['description'] = '\n'.join(description)
+
+                data['targets'].extend(targets)
                 obj.seek(0)
                 obj.truncate()
                 json.dump(data, obj)
@@ -375,23 +398,21 @@ Targets added.
             with open(PLAYTEST_PATH, 'r+') as obj:
                 data = json.load(obj)
 
-                existing_nums = set(target['num'] for target in data)
+                existing_nums = set(target['num']
+                                    for target in data['targets'])
                 for num in nums:
                     if num not in existing_nums:
                         return 'target "{}" not found'.format(num)
 
-                new_data = []
-                for target in data:
-                    if target['num'] not in nums:
-                        new_data.append(target)
-
+                data['targets'] = [target for target in data['targets']
+                                   if target['num'] not in nums]
                 obj.seek(0)
                 obj.truncate()
-                json.dump(new_data, obj)
+                json.dump(data, obj)
 
         playtest_message = """----------
 Targets removed.
-{}""".format(format_playtest_message(new_data))
+{}""".format(format_playtest_message(data))
         await self.get_channel(PLAYTEST_CHANNEL_ID).send(playtest_message)
         return ''
 
