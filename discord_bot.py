@@ -26,7 +26,6 @@ PLAYTEST_CHANNEL_ID = 821853410084651048
 
 SLEEP_TIME = 1
 
-
 playtest_lock = asyncio.Lock()
 
 
@@ -147,6 +146,57 @@ def match(card_name, search_name):
     return 0
 
 
+def format_card(card):
+    """ Format the card.
+    """
+    name = card.get(lotr.CARD_NAME, '')
+    if name != '':
+        name = '**{}**'.format(name)
+
+    card_type = card.get(lotr.CARD_TYPE, '')
+
+    sphere = card.get(lotr.CARD_SPHERE, '')
+    if sphere == 'Lore':
+        sphere_icon = '<:lore:822573464678301736> '
+        sphere = '*Lore* '
+    elif sphere == 'Spirit':
+        sphere_icon = '<:spirit:822573464417206273> '
+        sphere = '*Spirit* '
+    elif sphere == 'Tactics':
+        sphere_icon = '<:tactics:822573464593629264> '
+        sphere = '*Tactics* '
+    elif sphere == 'Leadership':
+        sphere_icon = '<:leadership:822573464601886740> '
+        sphere = '*Leadership* '
+    elif sphere == 'Baggins':
+        sphere_icon = '<:baggins:822573762415296602> '
+        sphere = '*Baggins* '
+    elif sphere == 'Fellowship':
+        sphere_icon = '<:fellowship:822573464586027058> '
+        sphere = '*Fellowship* '
+    elif sphere in ('Neutral', 'Boon', 'Burden', 'Nightmare', 'Upgraded'):
+        sphere_icon = ''
+        sphere = '*{}* '.format(sphere)
+    else:
+        sphere_icon = ''
+        sphere = ''
+
+    cost = card.get(lotr.CARD_COST, '')
+    if cost != '':
+        if card_type == 'Hero':
+            cost = ', *Threat Cost*: **{}**'.format(cost)
+        elif card_type == 'Quest':
+            cost = ''
+        else:
+            cost = ', *Cost*: **{}**'.format(cost)
+
+    res = f"""
+{sphere_icon}{name}
+{sphere}{card_type}{cost}
+    """
+    return res
+
+
 async def get_card(command, category=''):
     """ Get the card information.
     """
@@ -160,13 +210,14 @@ async def get_card(command, category=''):
         num = 1
 
     name = lotr.normalized_name(name)
-    matches = [m for m in [(card, match(card[lotr.CARD_NORMALIZED_NAME], name))
-                           for card in data] if m[1] > 0]
+    matches = [m for m in [
+        (card, match(card.get(lotr.CARD_NORMALIZED_NAME, ''), name))
+        for card in data] if m[1] > 0]
     if not matches:
         return 'no cards found'
 
-    matches.sort(key=lambda m: (m[1], m[0][lotr.CARD_NAME]))
-    return matches[num - 1]
+    matches.sort(key=lambda m: (m[1], m[0].get(lotr.CARD_NAME, '')))
+    return format_card(matches[num - 1][0])
 
 
 class MyClient(discord.Client):
@@ -557,10 +608,10 @@ Targets removed.
     async def _process_card_command(self, message):
         """ Process a card command.
         """
-        command = re.sub(r'^!acard ', '', message.content).split('\n')[0]
+        command = re.sub(r'^!alepcard ', '', message.content).split('\n')[0]
         logging.info('Received card command: %s', command)
         if command == 'this':
-            command = re.sub(r'^✓-?', '', message.channel.name)
+            command = message.channel.name
             category = message.channel.category
         else:
             category = ''
@@ -587,7 +638,7 @@ Targets removed.
                 await self._process_cron_command(message)
             elif message.content.startswith('!playtest '):
                 await self._process_playtest_command(message)
-            elif message.content.startswith('!acard '):
+            elif message.content.startswith('!alepcard '):
                 await self._process_card_command(message)
         except Exception as exc:
             logging.exception(str(exc))
