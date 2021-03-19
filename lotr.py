@@ -19,6 +19,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 import requests
+import unidecode
 import yaml
 
 try:
@@ -81,9 +82,12 @@ CARD_VERSION = 'Version'
 CARD_DECK_RULES = 'Deck Rules'
 CARD_SELECTED = 'Selected'
 CARD_CHANGED = 'Changed'
-CARD_SET_NAME = '_Set Name'
-CARD_DOUBLESIDE = '_Card Side'
+
 CARD_SCRATCH = '_Scratch'
+CARD_SET_NAME = '_Set Name'
+CARD_NORMALIZED_NAME = '_Normalized Name'
+
+CARD_DOUBLESIDE = '_Card Side'
 CARD_ORIGINAL_NAME = '_Original Name'
 
 MAX_COLUMN = '_Max Column'
@@ -162,6 +166,7 @@ CARD_BACKS = {'player': {'mpc': ['playerBackOfficialMPC.png',
                                             'encounterBackUnofficial.png']}}
 
 CONFIGURATION_PATH = 'configuration.yaml'
+DISCORD_CARD_DATA_PATH = os.path.join('Discord', 'card_data.json')
 DOWNLOAD_PATH = 'Download'
 IMAGES_BACK_PATH = 'imagesBack'
 IMAGES_CUSTOM_PATH = os.path.join(PROJECT_FOLDER, 'imagesCustom')
@@ -839,6 +844,25 @@ def extract_data(conf):  # pylint: disable=R0915
                     TRANSLATIONS[lang][row[CARD_ID]] = row
 
     logging.info('...Extracting data from the spreadsheet (%ss)',
+                 round(time.time() - timestamp, 3))
+
+
+def save_data_for_bot():
+    """ Save the data for the Discord bot.
+    """
+    logging.info('Saving the data for the Discord bot...')
+    timestamp = time.time()
+
+    data = [{key: value for key, value in row.items() if value is not None}
+            for row in DATA if not row[CARD_SCRATCH]]
+    for row in data:
+        row[CARD_NORMALIZED_NAME] = unidecode.unidecode(row[CARD_NAME]).lower()
+
+    with open(DISCORD_CARD_DATA_PATH, 'w', encoding='utf-8') as obj:
+        res = json.dumps(data, ensure_ascii=False)
+        obj.write(res)
+
+    logging.info('...Saving the data for the Discord bot (%ss)',
                  round(time.time() - timestamp, 3))
 
 
