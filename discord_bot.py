@@ -22,9 +22,23 @@ LOG_PATH = 'discord_bot.log'
 PLAYTEST_PATH = os.path.join('Discord', 'playtest.json')
 WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 
-PLAYTEST_CHANNEL_ID = 821853410084651048
-
 SLEEP_TIME = 1
+
+EMOJIS = {
+    '[leadership]': '<:leadership:822573464601886740>',
+    '[lore]': '<:lore:822573464678301736>',
+    '[spirit]': '<:spirit:822573464417206273>',
+    '[tactics]': '<:tactics:822573464593629264>',
+    '[baggins]': '<:baggins:822573762415296602>',
+    '[fellowship]': '<:fellowship:822573464586027058>',
+    '[unique]': '<:unique:822573762474016818>',
+    '[threat]': '<:threat:822572608994148362>',
+    '[attack]': '<:attack:822573464367792221>',
+    '[defense]': '<:defense:822573464615518209>',
+    '[willpower]': '<:willpower:822573464367792170>',
+    '[hitpoints]': '<:hitpoints:822572931254714389>'
+}
+PLAYTEST_CHANNEL_ID = 821853410084651048
 
 playtest_lock = asyncio.Lock()
 
@@ -146,34 +160,16 @@ def match(card_name, search_name):
     return 0
 
 
-def format_card(card):
+def format_card(card):  # pylint: disable=R0912
     """ Format the card.
     """
-    name = card.get(lotr.CARD_NAME, '')
-    if name != '':
-        name = '**{}**'.format(name)
-
-    card_type = card.get(lotr.CARD_TYPE, '')
-
+    card_name = '**{}**'.format(card[lotr.CARD_NAME])
+    card_type = card[lotr.CARD_TYPE]
     sphere = card.get(lotr.CARD_SPHERE, '')
-    if sphere == 'Lore':
-        sphere_icon = '<:lore:822573464678301736> '
-        sphere = '*Lore* '
-    elif sphere == 'Spirit':
-        sphere_icon = '<:spirit:822573464417206273> '
-        sphere = '*Spirit* '
-    elif sphere == 'Tactics':
-        sphere_icon = '<:tactics:822573464593629264> '
-        sphere = '*Tactics* '
-    elif sphere == 'Leadership':
-        sphere_icon = '<:leadership:822573464601886740> '
-        sphere = '*Leadership* '
-    elif sphere == 'Baggins':
-        sphere_icon = '<:baggins:822573762415296602> '
-        sphere = '*Baggins* '
-    elif sphere == 'Fellowship':
-        sphere_icon = '<:fellowship:822573464586027058> '
-        sphere = '*Fellowship* '
+    if sphere in ('Leadership', 'Lore', 'Spirit', 'Tactics', 'Baggins',
+                  'Fellowship'):
+        sphere_icon = '{} '.format(EMOJIS['[{}]'.format(sphere.lower())])
+        sphere = '*{}* '.format(sphere)
     elif sphere in ('Neutral', 'Boon', 'Burden', 'Nightmare', 'Upgraded'):
         sphere_icon = ''
         sphere = '*{}* '.format(sphere)
@@ -190,9 +186,20 @@ def format_card(card):
         else:
             cost = ', *Cost*: **{}**'.format(cost)
 
+    card_set = '*{}*'.format(card[lotr.CARD_SET_NAME])
+    card_number = '**#{}**'.format(card[lotr.CARD_NUMBER])
+    card_id = '*guid: {}*'.format(card[lotr.CARD_ID])
+    card_row = '*row: {}*'.format(card[lotr.ROW_COLUMN])
+    ringsdb_url = 'https://test.ringsdb.com/card/{}'.format(
+        card[lotr.CARD_RINGSDB_CODE])
+
     res = f"""
-{sphere_icon}{name}
+{sphere_icon}{card_name}
 {sphere}{card_type}{cost}
+
+{card_set}, {card_number}
+{card_id}, {card_row}
+{ringsdb_url}
     """
     return res
 
@@ -216,7 +223,13 @@ async def get_card(command, category=''):
     if not matches:
         return 'no cards found'
 
-    matches.sort(key=lambda m: (m[1], m[0].get(lotr.CARD_NAME, '')))
+    matches.sort(key=lambda m: (
+        m[1],
+        m[0].get(lotr.CARD_NAME, ''),
+        m[0].get(lotr.CARD_SET_RINGSDB_CODE, 0),
+        lotr.is_positive_or_zero_int(m[0].get(lotr.CARD_NUMBER, ''))
+        and int(m[0][lotr.CARD_NUMBER]) or 0,
+        m[0].get(lotr.CARD_NUMBER, '')))
     return format_card(matches[num - 1][0])
 
 
