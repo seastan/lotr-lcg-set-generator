@@ -1202,7 +1202,8 @@ def save_data_for_bot(sets):
             and not row[CARD_SCRATCH]]
     for row in data:
         row[CARD_NORMALIZED_NAME] = normalized_name(row[CARD_NAME])
-        row[CARD_RINGSDB_CODE] = _ringsdb_code(row)
+        if _needed_for_ringsdb(row):
+            row[CARD_RINGSDB_CODE] = _ringsdb_code(row)
 
     with open(DISCORD_CARD_DATA_PATH, 'w', encoding='utf-8') as obj:
         res = json.dumps(data, ensure_ascii=False)
@@ -1960,13 +1961,11 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                  set_name, round(time.time() - timestamp, 3))
 
 
-def _needed_for_ringsdb(row, set_id):
+def _needed_for_ringsdb(row):
     """ Check whether a card is needed for RingsDB or not.
     """
-    if row[CARD_SET] != set_id:
-        return False
-
-    card_type = 'Treasure' if row[CARD_SPHERE] == 'Boon' else row[CARD_TYPE]
+    card_type = ('Treasure' if row.get(CARD_SPHERE) == 'Boon'
+                 else row[CARD_TYPE])
     return card_type in CARD_TYPES_PLAYER
 
 
@@ -2001,10 +2000,10 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
         writer = csv.DictWriter(obj, fieldnames=fieldnames)
         writer.writeheader()
         for row in DATA:
-            if not _needed_for_ringsdb(row, set_id):
-                continue
-
-            if conf['selected_only'] and row[CARD_ID] not in SELECTED_CARDS:
+            if (row[CARD_SET] != set_id
+                    or not _needed_for_ringsdb(row)
+                    or (conf['selected_only']
+                        and row[CARD_ID] not in SELECTED_CARDS)):
                 continue
 
             card_type = ('Treasure'
@@ -3314,7 +3313,7 @@ def generate_db(set_id, set_name, lang, card_data):  # pylint: disable=R0912,R09
 
     ringsdb_cards = {}
     for row in card_data:
-        if _needed_for_ringsdb(row, set_id):
+        if row[CARD_SET] == set_id and _needed_for_ringsdb(row):
             card_number = str(_handle_int(row[CARD_NUMBER])).zfill(3)
             ringsdb_cards[card_number] = _ringsdb_code(row)
 
