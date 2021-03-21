@@ -371,7 +371,7 @@ def _update_octgn_card_text(text):
     """ Update card text for OCTGN.
     """
     text = _update_card_text(text)
-    text = re.sub(r'(?:<b>|<\/b>|<i>|<\/i>)', '', text)
+    text = re.sub(r'(?:<b>|<\/b>|<i>|<\/i>)', '', text, flags=re.IGNORECASE)
 
     text = text.replace('[willpower]', 'Ò')
     text = text.replace('[threat]', '$')
@@ -628,16 +628,16 @@ def _clean_data(data):  # pylint: disable=R0915
                 value = value.replace('---', '—')
                 value = value.replace('--', '–')
                 value = re.sub(r' -(?=[0-9])', ' –', value)
-                value = value.replace('[hyphen]', '-')
+                value = re.sub(r'\[hyphen\]', '-', value, flags=re.IGNORECASE)
                 value = value.replace("'", '’')
                 value = value.replace('“', '"')
                 value = value.replace('”', '"')
                 value = re.sub(r'"([^"]*)"', '“\\1”', value)
                 value = value.replace('"', '[unmatched quot]')
-                value = value.replace('[lquot]', '“')
-                value = value.replace('[rquot]', '”')
-                value = value.replace('[quot]', '"')
-                value = value.replace('[apos]', "'")
+                value = re.sub(r'\[lquot\]', '“', value, flags=re.IGNORECASE)
+                value = re.sub(r'\[rquot\]', '”', value, flags=re.IGNORECASE)
+                value = re.sub(r'\[quot\]', '"', value, flags=re.IGNORECASE)
+                value = re.sub(r'\[apos\]', "'", value, flags=re.IGNORECASE)
                 while True:
                     value_old = value
                     value = re.sub(r'[“”]([^\[]*)\]', '"\\1]', value)
@@ -645,26 +645,40 @@ def _clean_data(data):  # pylint: disable=R0915
                     if value == value_old:
                         break
 
-                value = value.replace('[Unique]', '[unique]')
-                value = value.replace('[Threat]', '[threat]')
-                value = value.replace('[Attack]', '[attack]')
-                value = value.replace('[Defense]', '[defense]')
-                value = value.replace('[Willpower]', '[willpower]')
-                value = value.replace('[Leadership]', '[leadership]')
-                value = value.replace('[Lore]', '[lore]')
-                value = value.replace('[Spirit]', '[spirit]')
-                value = value.replace('[Tactics]', '[tactics]')
-                value = value.replace('[Baggins]', '[baggins]')
-                value = value.replace('[Fellowship]', '[fellowship]')
-                value = value.replace('[Mastery]', '[mastery]')
-                value = value.replace('[Sunny]', '[sunny]')
-                value = value.replace('[Cloudy]', '[cloudy]')
-                value = value.replace('[Rainy]', '[rainy]')
-                value = value.replace('[Stormy]', '[stormy]')
-                value = value.replace('[Sailing]', '[sailing]')
-                value = value.replace('[EOS]', '[eos]')
-                value = value.replace('[Person]', '[person]')
-                value = value.replace('[PP]', '[pp]')
+                value = re.sub(r'\[unique\]', '[unique]', value,
+                               flags=re.IGNORECASE)
+                value = re.sub(r'\[threat\]', '[threat]', value,
+                               flags=re.IGNORECASE)
+                value = re.sub(r'\[attack\]', '[attack]', value,
+                               flags=re.IGNORECASE)
+                value = re.sub(r'\[defense\]', '[defense]', value,
+                               flags=re.IGNORECASE)
+                value = re.sub(r'\[willpower\]', '[willpower]', value,
+                               flags=re.IGNORECASE)
+                value = re.sub(r'\[leadership\]', '[leadership]', value,
+                               flags=re.IGNORECASE)
+                value = re.sub(r'\[lore\]', '[lore]', value,
+                               flags=re.IGNORECASE)
+                value = re.sub(r'\[spirit\]', '[spirit]', value,
+                               flags=re.IGNORECASE)
+                value = re.sub(r'\[tactics\]', '[tactics]', value,
+                               flags=re.IGNORECASE)
+                value = re.sub(r'\[baggins\]', '[baggins]', value,
+                               flags=re.IGNORECASE)
+                value = re.sub(r'\[fellowship\]', '[fellowship]', value,
+                               flags=re.IGNORECASE)
+                value = re.sub(r'\[sunny\]', '[sunny]', value,
+                               flags=re.IGNORECASE)
+                value = re.sub(r'\[cloudy\]', '[cloudy]', value,
+                               flags=re.IGNORECASE)
+                value = re.sub(r'\[rainy\]', '[rainy]', value,
+                               flags=re.IGNORECASE)
+                value = re.sub(r'\[stormy\]', '[stormy]', value,
+                               flags=re.IGNORECASE)
+                value = re.sub(r'\[sailing\]', '[sailing]', value,
+                               flags=re.IGNORECASE)
+                value = re.sub(r'\[eos\]', '[eos]', value, flags=re.IGNORECASE)
+                value = re.sub(r'\[pp\]', '[pp]', value, flags=re.IGNORECASE)
 
                 value = re.sub(r' +(?=\n)', '', value)
                 value = re.sub(r' +', ' ', value)
