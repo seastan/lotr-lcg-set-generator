@@ -1237,10 +1237,10 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 		tagSuffix = '</size><family "Times New Roman"><size ' + defaultFontSize + '>';
 	}
 
-	vXml = vXml.replace(/</g, '[lt]');
-	vXml = vXml.replace(/>/g, '[gt]');
-	vXml = vXml.replace(/\[lt\]/g, '<lt>');
-	vXml = vXml.replace(/\[gt\]/g, '<gt>');
+	vXml = vXml.replace(/</ig, '[lt]');
+	vXml = vXml.replace(/>/ig, '[gt]');
+	vXml = vXml.replace(/\[lt\]/ig, '<lt>');
+	vXml = vXml.replace(/\[gt\]/ig, '<gt>');
 	vXml = vXml.replace(/\[unique\]/ig, tagPrefix + '<uni>' + tagSuffix);
 	vXml = vXml.replace(/\[threat\]/ig, tagPrefix + '<thr>' + tagSuffix);
 	vXml = vXml.replace(/\[attack\]/ig, tagPrefix + '<att>' + tagSuffix);
