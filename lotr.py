@@ -19,6 +19,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 import requests
+import unidecode
 import yaml
 
 try:
@@ -39,9 +40,6 @@ SET_ID = 'GUID'
 SET_NAME = 'Name'
 SET_RINGSDB_CODE = 'RingsDB Code'
 SET_HOB_CODE = 'HoB Code'
-SET_LANGUAGE = 'Language'
-SET_SELECTED = 'Selected'
-SET_ROW = '_Row'
 
 BACK_PREFIX = 'Back_'
 CARD_SET = 'Set'
@@ -81,9 +79,15 @@ CARD_VERSION = 'Version'
 CARD_DECK_RULES = 'Deck Rules'
 CARD_SELECTED = 'Selected'
 CARD_CHANGED = 'Changed'
-CARD_SET_NAME = '_Set Name'
-CARD_DOUBLESIDE = '_Card Side'
+
 CARD_SCRATCH = '_Scratch'
+CARD_SET_NAME = '_Set Name'
+CARD_SET_RINGSDB_CODE = '_Set RingsDB Code'
+CARD_SET_HOB_CODE = '_Set HoB Code'
+CARD_RINGSDB_CODE = '_RingsDB Code'
+CARD_NORMALIZED_NAME = '_Normalized Name'
+
+CARD_DOUBLESIDE = '_Card Side'
 CARD_ORIGINAL_NAME = '_Original Name'
 
 MAX_COLUMN = '_Max Column'
@@ -162,6 +166,7 @@ CARD_BACKS = {'player': {'mpc': ['playerBackOfficialMPC.png',
                                             'encounterBackUnofficial.png']}}
 
 CONFIGURATION_PATH = 'configuration.yaml'
+DISCORD_CARD_DATA_PATH = os.path.join('Discord', 'card_data.json')
 DOWNLOAD_PATH = 'Download'
 IMAGES_BACK_PATH = 'imagesBack'
 IMAGES_CUSTOM_PATH = os.path.join(PROJECT_FOLDER, 'imagesCustom')
@@ -223,7 +228,7 @@ XML_TEMPLATE = """<set>
 </set>
 """
 
-CARD_COLUMNS = {}
+SHEET_IDS = {}
 SETS = {}
 DATA = []
 TRANSLATIONS = {}
@@ -249,6 +254,14 @@ class ImageMagickError(Exception):
     """
 
 
+def normalized_name(value):
+    """ Return a normalized card name.
+    """
+    value = unidecode.unidecode(value).lower().replace(' ', '-')
+    value = re.sub(r'[^a-z0-9\-]', '', value)[:98]
+    return value
+
+
 def _is_positive_int(value):
     """ Check whether a value is a positive int or not.
     """
@@ -261,7 +274,7 @@ def _is_positive_int(value):
         return False
 
 
-def _is_positive_or_zero_int(value):
+def is_positive_or_zero_int(value):
     """ Check whether a value is a positive int or zero or not.
     """
     try:
@@ -560,6 +573,7 @@ def download_sheet(conf):
     timestamp = time.time()
 
     if conf['sheet_gdid']:
+        SHEET_IDS.clear()
         sheets = [SET_SHEET, CARD_SHEET, SCRATCH_SHEET]
         for lang in set(conf['languages']).difference(set(['English'])):
             sheets.append(lang)
@@ -571,16 +585,15 @@ def download_sheet(conf):
         if not res or '<html' in res:
             raise SheetError("Can't download the Google Sheet")
 
-        sheet_ids = csv.reader(res.splitlines())
         try:
-            sheet_ids = dict(row for row in sheet_ids)
+            SHEET_IDS.update(dict(row for row in csv.reader(res.splitlines())))
         except ValueError:
             raise SheetError("Can't download the Google Sheet")
 
         for sheet in sheets:
             url = (
                 'https://docs.google.com/spreadsheets/d/{}/export?format=csv&gid={}'
-                .format(conf['sheet_gdid'], sheet_ids[sheet]))
+                .format(conf['sheet_gdid'], SHEET_IDS[sheet]))
             path = os.path.join(DOWNLOAD_PATH, '{}.csv'.format(sheet))
             res = _get_content(url)
             if not res or b'<html' in res:
@@ -661,7 +674,15 @@ def _update_data(data):
     """ Update card data from the spreadsheet.
     """
     for row in data:
-        row[CARD_SET_NAME] = SETS.get(row[CARD_SET], {}).get(SET_NAME)
+        row[CARD_SET_NAME] = SETS.get(row[CARD_SET], {}).get(SET_NAME, '')
+        row[CARD_SET_HOB_CODE] = SETS.get(row[CARD_SET],
+                                          {}).get(SET_HOB_CODE, '')
+        set_ringsdb_code = SETS.get(row[CARD_SET],
+                                    {}).get(SET_RINGSDB_CODE, '')
+        row[CARD_SET_RINGSDB_CODE] = (
+            int(set_ringsdb_code)
+            if is_positive_or_zero_int(set_ringsdb_code)
+            else 0)
 
         if row[CARD_SCRATCH] and row[CARD_SET] in FOUND_INTERSECTED_SETS:
             row[CARD_SET] = '[filtered set]'
@@ -797,14 +818,7 @@ def extract_data(conf):  # pylint: disable=R0915
 
         DATA.extend(data)
 
-    DATA[:] = sorted(
-        [row for row in DATA if not _skip_row(row)],
-        key=lambda row: (
-            str(row[CARD_SET]),
-            _is_positive_or_zero_int(row[CARD_NUMBER])
-            and int(row[CARD_NUMBER]) or 0,
-            str(row[CARD_NUMBER]),
-            str(row[CARD_NAME])))
+    DATA[:] = [row for row in DATA if not _skip_row(row)]
 
     SELECTED_CARDS.update({row[CARD_ID] for row in DATA if row[CARD_SELECTED]})
     FOUND_SETS.update({row[CARD_SET] for row in DATA
@@ -816,6 +830,13 @@ def extract_data(conf):  # pylint: disable=R0915
 
     _clean_data(DATA)
     _update_data(DATA)
+
+    DATA[:] = sorted(DATA, key=lambda row: (
+        row[CARD_SET_RINGSDB_CODE],
+        is_positive_or_zero_int(row[CARD_NUMBER])
+        and int(row[CARD_NUMBER]) or 0,
+        str(row[CARD_NUMBER]),
+        str(row[CARD_NAME])))
 
     for lang in conf['languages']:
         if lang == 'English':
@@ -1169,6 +1190,34 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                  round(time.time() - timestamp, 3))
 
 
+def save_data_for_bot(conf, sets):
+    """ Save the data for the Discord bot.
+    """
+    logging.info('Saving the data for the Discord bot...')
+    timestamp = time.time()
+
+    url = (
+        'https://docs.google.com/spreadsheets/d/{}/edit#gid={}'
+        .format(conf['sheet_gdid'], SHEET_IDS[CARD_SHEET]))
+    set_ids = [s[0] for s in sets]
+    data = [{key: value for key, value in row.items() if value is not None}
+            for row in DATA if row[CARD_SET] in set_ids
+            and not row[CARD_SCRATCH]]
+    for row in data:
+        row[CARD_NORMALIZED_NAME] = normalized_name(row[CARD_NAME])
+        if _needed_for_ringsdb(row):
+            row[CARD_RINGSDB_CODE] = _ringsdb_code(row)
+
+    output = {'url': url,
+              'data': data}
+    with open(DISCORD_CARD_DATA_PATH, 'w', encoding='utf-8') as obj:
+        res = json.dumps(output, ensure_ascii=False)
+        obj.write(res)
+
+    logging.info('...Saving the data for the Discord bot (%ss)',
+                 round(time.time() - timestamp, 3))
+
+
 def _backup_previous_octgn_xml(set_id):
     """ Backup a previous OCTGN xml file.
     """
@@ -1254,7 +1303,9 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
         return value
 
     if name in (CARD_VICTORY, BACK_PREFIX + CARD_VICTORY):
-        if _is_positive_or_zero_int(value):
+        if card_type in ('Presentation', 'Rules'):
+            value = 'Page {}'.format(value)
+        elif is_positive_or_zero_int(value):
             value = 'VICTORY {}'.format(value)
 
         return value
@@ -1531,7 +1582,7 @@ def _load_external_xml(url, sets, encounter_sets):  # pylint: disable=R0912,R091
         card_number = (
             int(card_number[0].attrib['value'])
             if card_number
-            and _is_positive_or_zero_int(card_number[0].attrib['value'])
+            and is_positive_or_zero_int(card_number[0].attrib['value'])
             else 0)
 
         unique = _find_properties(card, 'Unique')
@@ -1852,8 +1903,9 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                     chosen_player_cards):
                 section.sort(key=lambda card: (
                     card[CARD_SET_NAME],
-                    _is_positive_or_zero_int(card[CARD_NUMBER])
+                    is_positive_or_zero_int(card[CARD_NUMBER])
                     and int(card[CARD_NUMBER]) or 0,
+                    card[CARD_NUMBER],
                     card[CARD_NAME]))
 
             for card in chosen_player_cards:
@@ -1916,24 +1968,21 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                  set_name, round(time.time() - timestamp, 3))
 
 
-def _needed_for_ringsdb(row, set_id):
+def _needed_for_ringsdb(row):
     """ Check whether a card is needed for RingsDB or not.
     """
-    if row[CARD_SET] != set_id:
-        return False
-
-    card_type = 'Treasure' if row[CARD_SPHERE] == 'Boon' else row[CARD_TYPE]
+    card_type = ('Treasure' if row.get(CARD_SPHERE) == 'Boon'
+                 else row[CARD_TYPE])
     return card_type in CARD_TYPES_PLAYER
 
 
-def _ringsdb_code(row, sets):
+def _ringsdb_code(row):
     """ Return the card's RingsDB code.
     """
     card_number = (str(int(row[CARD_NUMBER])).zfill(3)
-                   if _is_positive_or_zero_int(row[CARD_NUMBER])
+                   if is_positive_or_zero_int(row[CARD_NUMBER])
                    else '000')
-    code = '{}{}'.format(int(sets[row[CARD_SET]][SET_RINGSDB_CODE]),
-                         card_number)
+    code = '{}{}'.format(row[CARD_SET_RINGSDB_CODE], card_number)
     return code
 
 
@@ -1958,10 +2007,10 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
         writer = csv.DictWriter(obj, fieldnames=fieldnames)
         writer.writeheader()
         for row in DATA:
-            if not _needed_for_ringsdb(row, set_id):
-                continue
-
-            if conf['selected_only'] and row[CARD_ID] not in SELECTED_CARDS:
+            if (row[CARD_SET] != set_id
+                    or not _needed_for_ringsdb(row)
+                    or (conf['selected_only']
+                        and row[CARD_ID] not in SELECTED_CARDS)):
                 continue
 
             card_type = ('Treasure'
@@ -2016,7 +2065,7 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                 'type': card_type,
                 'sphere': sphere,
                 'position': _handle_int(row[CARD_NUMBER]),
-                'code': _ringsdb_code(row, SETS),
+                'code': _ringsdb_code(row),
                 'name': row[CARD_NAME],
                 'traits': row[CARD_TRAITS],
                 'text': text,
@@ -2159,7 +2208,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
         traits = [t.strip() for t in
                   (row[CARD_TRAITS] or '').split('.') if t != '']
         position = (int(row[CARD_NUMBER])
-                    if _is_positive_or_zero_int(row[CARD_NUMBER]) else 0)
+                    if is_positive_or_zero_int(row[CARD_NUMBER]) else 0)
         encounter_set = ((row[CARD_ENCOUNTER_SET] or '')
                          if card_type in CARD_TYPES_ENCOUNTER_SET
                          else row[CARD_ENCOUNTER_SET])
@@ -2221,7 +2270,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
                     if _is_int(row[CARD_QUANTITY]) else 0)
 
         json_row = {
-            'code': '{}{}'.format(int(SETS[set_id][SET_RINGSDB_CODE]),
+            'code': '{}{}'.format(row[CARD_SET_RINGSDB_CODE],
                                   str(position).zfill(3)),
             'deck_limit': limit or quantity,
             'flavor': flavor,
@@ -2233,7 +2282,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
             'keywords': keywords,
             'name': row[CARD_NAME],
             'octgnid': row[CARD_ID],
-            'pack_code': SETS[set_id][SET_HOB_CODE],
+            'pack_code': row[CARD_SET_HOB_CODE],
             'pack_name': set_name,
             'position': position,
             'quantity': quantity,
@@ -3232,7 +3281,7 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
                  lang, round(time.time() - timestamp, 3))
 
 
-def generate_db(set_id, set_name, lang, card_data, sets):  # pylint: disable=R0912,R0914
+def generate_db(set_id, set_name, lang, card_data):  # pylint: disable=R0912,R0914
     """ Generate DB outputs.
     """
     logging.info('[%s, %s] Generating DB and RingsDB image outputs...',
@@ -3271,9 +3320,9 @@ def generate_db(set_id, set_name, lang, card_data, sets):  # pylint: disable=R09
 
     ringsdb_cards = {}
     for row in card_data:
-        if _needed_for_ringsdb(row, set_id):
+        if row[CARD_SET] == set_id and _needed_for_ringsdb(row):
             card_number = str(_handle_int(row[CARD_NUMBER])).zfill(3)
-            ringsdb_cards[card_number] = _ringsdb_code(row, sets)
+            ringsdb_cards[card_number] = _ringsdb_code(row)
 
     pairs = []
     if ringsdb_cards and os.path.exists(output_path):
@@ -3606,7 +3655,7 @@ def _combine_doublesided_rules_cards(set_id, input_path, card_data, service):  #
         [r for r in card_data if r[CARD_SET] == set_id],
         key=lambda r: (
             (str(int(r[CARD_NUMBER])).zfill(3)
-             if _is_positive_or_zero_int(r[CARD_NUMBER])
+             if is_positive_or_zero_int(r[CARD_NUMBER])
              else str(r[CARD_NUMBER])),
             _escape_filename(r[CARD_NAME])))
 
@@ -3617,7 +3666,7 @@ def _combine_doublesided_rules_cards(set_id, input_path, card_data, service):  #
                 row[BACK_PREFIX + CARD_TEXT] is None and
                 row[BACK_PREFIX + CARD_VICTORY] is None):
             card_number = (str(int(row[CARD_NUMBER])).zfill(3)
-                           if _is_positive_or_zero_int(row[CARD_NUMBER])
+                           if is_positive_or_zero_int(row[CARD_NUMBER])
                            else str(row[CARD_NUMBER]))
             card_name = _escape_filename(row[CARD_NAME])
             selected.append((i, '{}-1-{}'.format(card_number, card_name)))

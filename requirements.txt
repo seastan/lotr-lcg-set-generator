@@ -4,3 +4,4 @@ pypng
 pyyaml
 reportlab
 requests
+unidecode

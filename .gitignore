@@ -1,5 +1,6 @@
 .ipynb_checkpoints/
 __pycache__/
+Discord/*.json
 Download/*.csv
 Frogmorton/imagesCustom/*.jpg
 Frogmorton/imagesCustom/*.png
