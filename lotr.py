@@ -1303,7 +1303,9 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
         return value
 
     if name in (CARD_VICTORY, BACK_PREFIX + CARD_VICTORY):
-        if is_positive_or_zero_int(value):
+        if card_type in ('Presentation', 'Rules'):
+            value = 'Page {}'.format(value)
+        elif is_positive_or_zero_int(value):
             value = 'VICTORY {}'.format(value)
 
         return value
