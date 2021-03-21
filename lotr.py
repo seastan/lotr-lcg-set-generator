@@ -720,6 +720,8 @@ def _update_data(data):
         if row[BACK_PREFIX + CARD_TYPE] == 'Side Quest':
             row[BACK_PREFIX + CARD_TYPE] = 'Encounter Side Quest'
 
+        row[BACK_PREFIX + CARD_NAME] = row[CARD_SIDE_B]
+
 
 def _skip_row(row):
     """ Check whether a row should be skipped or not.
@@ -1220,9 +1222,9 @@ def save_data_for_bot(conf, sets):
             and not row[CARD_SCRATCH]]
     for row in data:
         row[CARD_NORMALIZED_NAME] = normalized_name(row[CARD_NAME])
-        if row.get(CARD_SIDE_B) and row[CARD_SIDE_B] != row[CARD_NAME]:
+        if row.get(BACK_PREFIX + CARD_NAME):
             row[BACK_PREFIX + CARD_NORMALIZED_NAME] = normalized_name(
-                row[CARD_SIDE_B])
+                row[BACK_PREFIX + CARD_NAME])
 
         if _needed_for_ringsdb(row):
             row[CARD_RINGSDB_CODE] = _ringsdb_code(row)
