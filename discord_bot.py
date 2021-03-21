@@ -36,7 +36,15 @@ EMOJIS = {
     '[attack]': '<:attack:822573464367792221>',
     '[defense]': '<:defense:822573464615518209>',
     '[willpower]': '<:willpower:822573464367792170>',
-    '[hitpoints]': '<:hitpoints:822572931254714389>'
+    '[sunny]': '',
+    '[cloudy]': '',
+    '[rainy]': '',
+    '[stormy]': '',
+    '[sailing]': '',
+    '[eos]': '',
+    '[pp]': '<:pp:823008093898145792>',
+    '[hitpoints]': '<:hitpoints:822572931254714389>',
+    '[progress]': '<:progress:823007871494520872>'
 }
 PLAYTEST_CHANNEL = 'playtesting-checklist'
 
@@ -145,22 +153,78 @@ async def read_card_data():
     return data
 
 
-def match(card_name, search_name):
+def card_match(card_name, card_back_name, search_name):
     """ Compare a search name with a card name.
     """
-    if search_name == card_name:
+    if search_name in (card_name, card_back_name):
         return 1
 
-    if card_name.startswith(search_name + '-'):
+    if (card_name.startswith(search_name + '-') or
+            card_back_name.startswith(search_name + '-')):
         return 2
 
-    if card_name.startswith(search_name):
+    if (card_name.startswith(search_name) or
+            card_back_name.startswith(search_name)):
         return 3
 
     return 0
 
 
-def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0914
+def update_text(text):
+    """ Update card text.
+    """
+    text = re.sub(r'\b(Quest Resolution)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', text)
+    text = re.sub(r'\b(Valour )?(Resource |Planning |Quest |Travel |Encounter '
+                  r'|Combat |Refresh )?(Action):', '[b]\\1\\2\\3[/b]:', text)
+    text = re.sub(r'\b(When Revealed|Setup|Forced|Valour Response|Response'
+                  r'|Travel|Shadow|Resolution):', '[b]\\1[/b]:', text)
+    text = re.sub(r'\b(Condition)\b', '[bi]\\1[/bi]', text)
+
+    text = re.sub(r'\[bi\]', '***', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/bi\]', '***', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[b\]', '**', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/b\]', '**', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[i\]', '*', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/i\]', '*', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[u\]', '`__', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/u\]', '__', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[strike\]', '~~', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/strike\]', '~~', text, flags=re.IGNORECASE)
+
+    text = text.replace('[willpower]', EMOJIS['[willpower]'])
+    text = text.replace('[threat]', EMOJIS['[threat]'])
+    text = text.replace('[attack]', EMOJIS['[attack]'])
+    text = text.replace('[defense]', EMOJIS['[defense]'])
+    text = text.replace('[leadership]', EMOJIS['[leadership]'])
+    text = text.replace('[spirit]', EMOJIS['[spirit]'])
+    text = text.replace('[tactics]', EMOJIS['[tactics]'])
+    text = text.replace('[lore]', EMOJIS['[lore]'])
+    text = text.replace('[baggins]', EMOJIS['[baggins]'])
+    text = text.replace('[fellowship]', EMOJIS['[fellowship]'])
+    text = text.replace('[unique]', EMOJIS['[unique]'])
+    text = text.replace('[sunny]', EMOJIS['[sunny]'])
+    text = text.replace('[cloudy]', EMOJIS['[cloudy]'])
+    text = text.replace('[rainy]', EMOJIS['[rainy]'])
+    text = text.replace('[stormy]', EMOJIS['[stormy]'])
+    text = text.replace('[sailing]', EMOJIS['[sailing]'])
+    text = text.replace('[eos]', EMOJIS['[eos]'])
+    text = text.replace('[pp]', EMOJIS['[pp]'])
+
+    text = text.replace('[', '`[')
+    text = text.replace(']', ']`')
+    text = text.replace('``', '')
+
+    text = re.sub(r'`\[lsb\]`', '[', text, flags=re.IGNORECASE)
+    text = re.sub(r'`\[rsb\]`', ']', text, flags=re.IGNORECASE)
+
+    text = text.strip()
+    text = re.sub(r' +(?=\n)', '', text)
+    text = re.sub(r' +', ' ', text)
+    text = re.sub(r'\n+', '\n', text)
+    return text
+
+
+def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0914,R0915
     """ Format the card.
     """
     card_name = '**{}**'.format(card[lotr.CARD_NAME])
@@ -188,13 +252,26 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
     else:
         card_cost = ', *Cost*: **{}**'.format(cost)
 
+    engagement = card.get(lotr.CARD_ENGAGEMENT, '')
+    if engagement == '' or card_type == 'Quest':
+        card_engagement = ''
+    else:
+        card_engagement = ', *Engagement Cost*: **{}**'.format(engagement)
+
+    if card_type == 'Quest':
+        card_stage = ', **{}{}**'.format(card.get(lotr.CARD_COST, ''),
+                                         card.get(lotr.CARD_ENGAGEMENT, ''))
+    else:
+        card_stage = ''
+
     card_skills = ''
     skill_map = {
         'threat': lotr.CARD_THREAT,
         'willpower': lotr.CARD_WILLPOWER,
         'attack': lotr.CARD_ATTACK,
         'defense': lotr.CARD_DEFENSE,
-        'hitpoints': lotr.CARD_HEALTH
+        'hitpoints': lotr.CARD_HEALTH,
+        'progress': lotr.CARD_QUEST
     }
     for skill in skill_map:
         if card.get(skill_map[skill], '') != '':
@@ -205,10 +282,76 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
     if card_skills:
         card_skills = '\n' + card_skills
 
+    traits = card.get(lotr.CARD_TRAITS, '')
+    card_traits = '' if traits == '' else '\n***{}***'.format(traits)
+
+    keywords = update_text(card.get(lotr.CARD_KEYWORDS, ''))
+    if keywords == '':
+        card_keywords = ''
+    elif keywords.endswith('`[inline]`'):
+        card_keywords = '{} '.format(re.sub(r'`\[inline\]`$', '', keywords))
+    else:
+        card_keywords = '{}\n'.format(keywords)
+
+    card_text = update_text(card.get(lotr.CARD_TEXT, ''))
+
+    shadow = update_text(card.get(lotr.CARD_SHADOW, ''))
+    card_shadow = (
+        '' if shadow == ''
+        else '\n**\\~\\~\\~\\~\\~\\~\\~\\~\\~\\~**\n{}'.format(shadow))
+
+    flavour = update_text(card.get(lotr.CARD_FLAVOUR, ''))
+    card_flavour = '' if flavour == '' else '\n\n*{}*'.format(flavour)
+
+    victory = card.get(lotr.CARD_VICTORY, '')
+    if victory == '':
+        card_victory = ''
+    elif card_type in ('Presentation', 'Rules'):
+        card_victory = '**Page {}**\n'.format(victory)
+    elif lotr.is_positive_or_zero_int(victory):
+        card_victory = '**VICTORY {}**\n'.format(victory)
+    else:
+        card_victory = '**{}**\n'.format(victory)
+
+    adventure = card.get(lotr.CARD_ADVENTURE, '')
+    if adventure == '':
+        card_adventure = ''
+    elif card_type == 'Campaign':
+        card_adventure = '*Campaign*: {}\n'.format(adventure)
+    else:
+        card_adventure = '*Adventure*: {}\n'.format(adventure)
+
+    encounter_set = card.get(lotr.CARD_ENCOUNTER_SET, '')
+    additional_sets = card.get(lotr.CARD_ADDITIONAL_ENCOUNTER_SETS, '')
+    if additional_sets != '':
+        additional_sets = ' (+{})'.format(additional_sets).replace(';', ',')
+
+    card_encounter_set = (
+        '' if encounter_set == ''
+        else '*Encounter Set*: {}{}\n'.format(encounter_set, additional_sets))
+
     card_set = re.sub(r'^ALeP - ', '', card[lotr.CARD_SET_NAME])
-    card_quantity = '(x{})'.format(card[lotr.CARD_QUANTITY])
     card_number = '**#{}**'.format(card[lotr.CARD_NUMBER])
     card_id = '*id:* {}'.format(card[lotr.CARD_ID])
+
+    icon = card.get(lotr.CARD_ICON, '')
+    card_icon = '' if icon == '' else ' ({})'.format(icon)
+
+    version = card.get(lotr.CARD_VERSION, '')
+    card_version = '' if version == '' else ' **{}**'.format(version)
+
+    quantity = card[lotr.CARD_QUANTITY]
+    removed_easy_mode = card.get(lotr.CARD_EASY_MODE, 0)
+    if removed_easy_mode > 0:
+        easy_mode = '/x{}'.format(quantity - removed_easy_mode)
+    else:
+        easy_mode = ''
+
+    card_quantity = '(x{}{})'.format(quantity, easy_mode)
+
+    deck_rules = card.get(lotr.CARD_DECK_RULES, '')
+    card_deck_rules = ('' if deck_rules == ''
+                       else '```{}```\n'.format(deck_rules))
 
     if card.get(lotr.CARD_RINGSDB_CODE):
         ringsdb_url = '<https://test.ringsdb.com/card/{}>\n'.format(
@@ -222,12 +365,14 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
 
     res = f"""
 {card_unique}{card_name}
-{card_sphere}{card_type}{card_cost}{card_skills}
+{card_sphere}{card_type}{card_cost}{card_engagement}{card_stage}{card_skills}{card_traits}
 
-{card_set} {card_quantity}, {card_number}
-{card_id}
+{card_keywords}{card_text}{card_shadow}{card_flavour}
 
-{ringsdb_url}{row_url}
+{card_victory}{card_set}{card_icon}, {card_number}{card_version} {card_quantity}
+{card_encounter_set}{card_adventure}{card_id}
+
+{card_deck_rules}{ringsdb_url}{row_url}
 {channel_url}
     """
     return res
@@ -657,18 +802,21 @@ Targets removed.
 
         name = lotr.normalized_name(name)
         matches = [m for m in [
-            (card, match(card.get(lotr.CARD_NORMALIZED_NAME, ''), name))
+            (card, card_match(
+                card[lotr.CARD_NORMALIZED_NAME],
+                card.get(lotr.BACK_PREFIX + lotr.CARD_NORMALIZED_NAME, ''),
+                name))
             for card in data['data']] if m[1] > 0]
         if not matches:
             return 'no cards found'
 
         matches.sort(key=lambda m: (
             m[1],
-            m[0].get(lotr.CARD_NAME, ''),
+            m[0][lotr.CARD_NAME],
             m[0].get(lotr.CARD_SET_RINGSDB_CODE, 0),
-            lotr.is_positive_or_zero_int(m[0].get(lotr.CARD_NUMBER, ''))
+            lotr.is_positive_or_zero_int(m[0][lotr.CARD_NUMBER])
             and int(m[0][lotr.CARD_NUMBER]) or 0,
-            m[0].get(lotr.CARD_NUMBER, '')))
+            m[0][lotr.CARD_NUMBER]))
 
         card = matches[num - 1][0]
         if card[lotr.CARD_NORMALIZED_NAME] in self.channels:
