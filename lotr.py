@@ -66,6 +66,7 @@ CARD_SPECIAL_ICON = 'Special Icon'
 CARD_TEXT = 'Text'
 CARD_SHADOW = 'Shadow'
 CARD_FLAVOUR = 'Flavour'
+CARD_PRINTED_NUMBER = 'Printed Card Number'
 CARD_ARTIST = 'Artist'
 CARD_PANX = 'PanX'
 CARD_PANY = 'PanY'
@@ -362,6 +363,7 @@ def _update_card_text(text):  # pylint: disable=R0915
     text = text.strip()
     text = re.sub(r' +(?=\n)', '', text)
     text = re.sub(r' +', ' ', text)
+    text = re.sub(r'\n+', '\n', text)
     return text
 
 
@@ -370,7 +372,6 @@ def _update_octgn_card_text(text):
     """
     text = _update_card_text(text)
     text = re.sub(r'(?:<b>|<\/b>|<i>|<\/i>)', '', text)
-    text = re.sub(r'\n+', '\n', text)
 
     text = text.replace('[willpower]', 'Ò')
     text = text.replace('[threat]', '$')
@@ -2434,10 +2435,10 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                      CARD_KEYWORDS, CARD_COST, CARD_ENGAGEMENT, CARD_THREAT,
                      CARD_WILLPOWER, CARD_ATTACK, CARD_DEFENSE, CARD_HEALTH,
                      CARD_QUEST, CARD_VICTORY, CARD_SPECIAL_ICON, CARD_TEXT,
-                     CARD_SHADOW, CARD_FLAVOUR, CARD_ARTIST, CARD_PANX,
-                     CARD_PANY, CARD_SCALE, CARD_EASY_MODE,
-                     CARD_ADDITIONAL_ENCOUNTER_SETS, CARD_ADVENTURE, CARD_ICON,
-                     CARD_VERSION):
+                     CARD_SHADOW, CARD_FLAVOUR, CARD_PRINTED_NUMBER,
+                     CARD_ARTIST, CARD_PANX, CARD_PANY, CARD_SCALE,
+                     CARD_EASY_MODE, CARD_ADDITIONAL_ENCOUNTER_SETS,
+                     CARD_ADVENTURE, CARD_ICON, CARD_VERSION):
             value = _get_xml_property_value(row, name, card_type)
             if value != '':
                 properties.append((name, value))
@@ -2472,8 +2473,8 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                          CARD_THREAT, CARD_WILLPOWER, CARD_ATTACK,
                          CARD_DEFENSE, CARD_HEALTH, CARD_QUEST, CARD_VICTORY,
                          CARD_SPECIAL_ICON, CARD_TEXT, CARD_SHADOW,
-                         CARD_FLAVOUR, CARD_ARTIST, CARD_PANX, CARD_PANY,
-                         CARD_SCALE):
+                         CARD_FLAVOUR, CARD_PRINTED_NUMBER, CARD_ARTIST,
+                         CARD_PANX, CARD_PANY, CARD_SCALE):
                 value = _get_xml_property_value(row, BACK_PREFIX + name, card_type)
                 if value != '':
                     properties.append((name, value))
