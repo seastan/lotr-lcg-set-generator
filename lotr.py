@@ -228,7 +228,7 @@ XML_TEMPLATE = """<set>
 </set>
 """
 
-CARD_COLUMNS = {}
+SHEET_IDS = {}
 SETS = {}
 DATA = []
 TRANSLATIONS = {}
@@ -573,6 +573,7 @@ def download_sheet(conf):
     timestamp = time.time()
 
     if conf['sheet_gdid']:
+        SHEET_IDS.clear()
         sheets = [SET_SHEET, CARD_SHEET, SCRATCH_SHEET]
         for lang in set(conf['languages']).difference(set(['English'])):
             sheets.append(lang)
@@ -584,16 +585,15 @@ def download_sheet(conf):
         if not res or '<html' in res:
             raise SheetError("Can't download the Google Sheet")
 
-        sheet_ids = csv.reader(res.splitlines())
         try:
-            sheet_ids = dict(row for row in sheet_ids)
+            SHEET_IDS.update(dict(row for row in csv.reader(res.splitlines())))
         except ValueError:
             raise SheetError("Can't download the Google Sheet")
 
         for sheet in sheets:
             url = (
                 'https://docs.google.com/spreadsheets/d/{}/export?format=csv&gid={}'
-                .format(conf['sheet_gdid'], sheet_ids[sheet]))
+                .format(conf['sheet_gdid'], SHEET_IDS[sheet]))
             path = os.path.join(DOWNLOAD_PATH, '{}.csv'.format(sheet))
             res = _get_content(url)
             if not res or b'<html' in res:
@@ -1190,12 +1190,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                  round(time.time() - timestamp, 3))
 
 
-def save_data_for_bot(sets):
+def save_data_for_bot(conf, sets):
     """ Save the data for the Discord bot.
     """
     logging.info('Saving the data for the Discord bot...')
     timestamp = time.time()
 
+    url = (
+        'https://docs.google.com/spreadsheets/d/{}/edit#gid={}'
+        .format(conf['sheet_gdid'], SHEET_IDS[CARD_SHEET]))
     set_ids = [s[0] for s in sets]
     data = [{key: value for key, value in row.items() if value is not None}
             for row in DATA if row[CARD_SET] in set_ids
@@ -1205,8 +1208,10 @@ def save_data_for_bot(sets):
         if _needed_for_ringsdb(row):
             row[CARD_RINGSDB_CODE] = _ringsdb_code(row)
 
+    output = {'url': url,
+              'data': data}
     with open(DISCORD_CARD_DATA_PATH, 'w', encoding='utf-8') as obj:
-        res = json.dumps(data, ensure_ascii=False)
+        res = json.dumps(output, ensure_ascii=False)
         obj.write(res)
 
     logging.info('...Saving the data for the Discord bot (%ss)',

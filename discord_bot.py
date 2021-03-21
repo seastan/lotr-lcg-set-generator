@@ -38,7 +38,7 @@ EMOJIS = {
     '[willpower]': '<:willpower:822573464367792170>',
     '[hitpoints]': '<:hitpoints:822572931254714389>'
 }
-PLAYTEST_CHANNEL_ID = 821853410084651048
+PLAYTEST_CHANNEL = 'playtesting-checklist'
 
 playtest_lock = asyncio.Lock()
 
@@ -160,87 +160,100 @@ def match(card_name, search_name):
     return 0
 
 
-def format_card(card):  # pylint: disable=R0912
+def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0914
     """ Format the card.
     """
     card_name = '**{}**'.format(card[lotr.CARD_NAME])
     card_type = card[lotr.CARD_TYPE]
+
+    card_unique = ('{} '.format(EMOJIS['[unique]'])
+                   if card.get(lotr.CARD_UNIQUE, '')
+                   else '')
+
     sphere = card.get(lotr.CARD_SPHERE, '')
     if sphere in ('Leadership', 'Lore', 'Spirit', 'Tactics', 'Baggins',
                   'Fellowship'):
-        sphere_icon = '{} '.format(EMOJIS['[{}]'.format(sphere.lower())])
-        sphere = '*{}* '.format(sphere)
+        card_sphere = '*{}* {} '.format(sphere,
+                                        EMOJIS['[{}]'.format(sphere.lower())])
     elif sphere in ('Neutral', 'Boon', 'Burden', 'Nightmare', 'Upgraded'):
-        sphere_icon = ''
-        sphere = '*{}* '.format(sphere)
+        card_sphere = '*{}* '.format(sphere)
     else:
-        sphere_icon = ''
-        sphere = ''
+        card_sphere = ''
 
     cost = card.get(lotr.CARD_COST, '')
-    if cost != '':
-        if card_type == 'Hero':
-            cost = ', *Threat Cost*: **{}**'.format(cost)
-        elif card_type == 'Quest':
-            cost = ''
-        else:
-            cost = ', *Cost*: **{}**'.format(cost)
+    if cost == '' or card_type == 'Quest':
+        card_cost = ''
+    elif card_type == 'Hero':
+        card_cost = ', *Threat Cost*: **{}**'.format(cost)
+    else:
+        card_cost = ', *Cost*: **{}**'.format(cost)
 
-    card_set = '*{}*'.format(card[lotr.CARD_SET_NAME])
+    card_skills = ''
+    skill_map = {
+        'threat': lotr.CARD_THREAT,
+        'willpower': lotr.CARD_WILLPOWER,
+        'attack': lotr.CARD_ATTACK,
+        'defense': lotr.CARD_DEFENSE,
+        'hitpoints': lotr.CARD_HEALTH
+    }
+    for skill in skill_map:
+        if card.get(skill_map[skill], '') != '':
+            card_skills += '   {} {}'.format(EMOJIS['[{}]'.format(skill)],
+                                             card[skill_map[skill]])
+
+    card_skills = card_skills.strip()
+    if card_skills:
+        card_skills = '\n' + card_skills
+
+    card_set = re.sub(r'^ALeP - ', '', card[lotr.CARD_SET_NAME])
+    card_quantity = '(x{})'.format(card[lotr.CARD_QUANTITY])
     card_number = '**#{}**'.format(card[lotr.CARD_NUMBER])
-    card_id = '*guid: {}*'.format(card[lotr.CARD_ID])
-    card_row = '*row: {}*'.format(card[lotr.ROW_COLUMN])
-    ringsdb_url = 'https://test.ringsdb.com/card/{}'.format(
-        card[lotr.CARD_RINGSDB_CODE])
+    card_id = '*id:* {}'.format(card[lotr.CARD_ID])
+
+    if card.get(lotr.CARD_RINGSDB_CODE):
+        ringsdb_url = '<https://test.ringsdb.com/card/{}>\n'.format(
+            card[lotr.CARD_RINGSDB_CODE])
+    else:
+        ringsdb_url = ''
+
+    row_url = '<{}&range=A{}>'.format(spreadsheet_url, card[lotr.ROW_COLUMN])
+    if channel_url:
+        channel_url = '<{}>'.format(channel_url)
 
     res = f"""
-{sphere_icon}{card_name}
-{sphere}{card_type}{cost}
+{card_unique}{card_name}
+{card_sphere}{card_type}{card_cost}{card_skills}
 
-{card_set}, {card_number}
-{card_id}, {card_row}
-{ringsdb_url}
+{card_set} {card_quantity}, {card_number}
+{card_id}
+
+{ringsdb_url}{row_url}
+{channel_url}
     """
     return res
-
-
-async def get_card(command, category=''):
-    """ Get the card information.
-    """
-    data = await read_card_data()
-    if re.match(r' [0-9]+$', command):
-        parts = command.split(' ')
-        name = ' '.join(parts[:-1])
-        num = parts[-1]
-    else:
-        name = command
-        num = 1
-
-    name = lotr.normalized_name(name)
-    matches = [m for m in [
-        (card, match(card.get(lotr.CARD_NORMALIZED_NAME, ''), name))
-        for card in data] if m[1] > 0]
-    if not matches:
-        return 'no cards found'
-
-    matches.sort(key=lambda m: (
-        m[1],
-        m[0].get(lotr.CARD_NAME, ''),
-        m[0].get(lotr.CARD_SET_RINGSDB_CODE, 0),
-        lotr.is_positive_or_zero_int(m[0].get(lotr.CARD_NUMBER, ''))
-        and int(m[0][lotr.CARD_NUMBER]) or 0,
-        m[0].get(lotr.CARD_NUMBER, '')))
-    return format_card(matches[num - 1][0])
 
 
 class MyClient(discord.Client):
     """ My bot class.
     """
 
+    channels = {}
+
+
     async def on_ready(self):
         """ Invoked when the client is ready.
         """
         logging.info('Logged in as %s (%s)', self.user.name, self.user.id)
+        for channel in self.get_all_channels():
+            self.channels[channel.name] = (channel.id, channel.guild.id)
+
+
+    async def _send_channel(self, channel, content):
+        for i, chunk in enumerate(split_result(content)):
+            if i > 0:
+                await asyncio.sleep(SLEEP_TIME)
+
+            await channel.send(chunk)
 
 
     async def _process_cron_command(self, message):  #pylint: disable=R0912
@@ -259,21 +272,13 @@ class MyClient(discord.Client):
             if not res:
                 res = 'no cron log found'
 
-            for i, chunk in enumerate(split_result(res)):
-                if i > 0:
-                    await asyncio.sleep(SLEEP_TIME)
-
-                await message.channel.send(chunk)
+            await self._send_channel(message.channel, res)
         elif command == 'errors':
             res = await get_errors()
             if not res:
                 res = 'no cron log found'
 
-            for i, chunk in enumerate(split_result(res)):
-                if i > 0:
-                    await asyncio.sleep(SLEEP_TIME)
-
-                await message.channel.send(chunk)
+            await self._send_channel(message.channel, res)
         else:
             await message.channel.send('excuse me?')
 
@@ -330,7 +335,11 @@ Deadline: tomorrow.
         playtest_message = """----------
 New playtesting targets:
 {}""".format(format_playtest_message(data))
-        await self.get_channel(PLAYTEST_CHANNEL_ID).send(playtest_message)
+        if PLAYTEST_CHANNEL in self.channels:
+            await self._send_channel(
+                self.get_channel(self.channels[PLAYTEST_CHANNEL][0]),
+                playtest_message)
+
         return ''
 
 
@@ -374,11 +383,15 @@ New playtesting targets:
 Target "{}" completed. Link: {}
 {}
 {}""".format(num, url, format_playtest_message(data), all_targets)
-        await self.get_channel(PLAYTEST_CHANNEL_ID).send(playtest_message)
+        if PLAYTEST_CHANNEL in self.channels:
+            await self._send_channel(
+                self.get_channel(self.channels[PLAYTEST_CHANNEL][0]),
+                playtest_message)
+
         return ''
 
 
-    async def _update_target(self, params):
+    async def _update_target(self, params):  # pylint: disable=R0912
         """ Update playtesting target.
         """
         nums = set()
@@ -430,7 +443,11 @@ Target "{}" completed. Link: {}
 Targets updated.
 {}
 {}""".format(format_playtest_message(data), all_targets)
-        await self.get_channel(PLAYTEST_CHANNEL_ID).send(playtest_message)
+        if PLAYTEST_CHANNEL in self.channels:
+            await self._send_channel(
+                self.get_channel(self.channels[PLAYTEST_CHANNEL][0]),
+                playtest_message)
+
         return ''
 
 
@@ -487,7 +504,11 @@ Targets updated.
         playtest_message = """----------
 Targets added.
 {}""".format(format_playtest_message(data))
-        await self.get_channel(PLAYTEST_CHANNEL_ID).send(playtest_message)
+        if PLAYTEST_CHANNEL in self.channels:
+            await self._send_channel(
+                self.get_channel(self.channels[PLAYTEST_CHANNEL][0]),
+                playtest_message)
+
         return ''
 
 
@@ -530,7 +551,11 @@ Targets added.
         playtest_message = """----------
 Targets removed.
 {}""".format(format_playtest_message(data))
-        await self.get_channel(PLAYTEST_CHANNEL_ID).send(playtest_message)
+        if PLAYTEST_CHANNEL in self.channels:
+            await self._send_channel(
+                self.get_channel(self.channels[PLAYTEST_CHANNEL][0]),
+                playtest_message)
+
         return ''
 
 
@@ -618,6 +643,44 @@ Targets removed.
             await message.channel.send('excuse me?')
 
 
+    async def _get_card(self, command):
+        """ Get the card information.
+        """
+        data = await read_card_data()
+        if re.match(r' [0-9]+$', command):
+            parts = command.split(' ')
+            name = ' '.join(parts[:-1])
+            num = parts[-1]
+        else:
+            name = command
+            num = 1
+
+        name = lotr.normalized_name(name)
+        matches = [m for m in [
+            (card, match(card.get(lotr.CARD_NORMALIZED_NAME, ''), name))
+            for card in data['data']] if m[1] > 0]
+        if not matches:
+            return 'no cards found'
+
+        matches.sort(key=lambda m: (
+            m[1],
+            m[0].get(lotr.CARD_NAME, ''),
+            m[0].get(lotr.CARD_SET_RINGSDB_CODE, 0),
+            lotr.is_positive_or_zero_int(m[0].get(lotr.CARD_NUMBER, ''))
+            and int(m[0][lotr.CARD_NUMBER]) or 0,
+            m[0].get(lotr.CARD_NUMBER, '')))
+
+        card = matches[num - 1][0]
+        if card[lotr.CARD_NORMALIZED_NAME] in self.channels:
+            channel_id, guild_id = self.channels[
+                card[lotr.CARD_NORMALIZED_NAME]]
+            channel_url = ('https://discord.com/channels/{}/{}'
+                           .format(guild_id, channel_id))
+        else:
+            channel_url = ''
+        return format_card(card, data['url'], channel_url)
+
+
     async def _process_card_command(self, message):
         """ Process a card command.
         """
@@ -625,19 +688,16 @@ Targets removed.
         logging.info('Received card command: %s', command)
         if command == 'this':
             command = message.channel.name
-            category = message.channel.category
-        else:
-            category = ''
 
         try:
-            res = await get_card(command, category)
+            res = await self._get_card(command)
         except Exception as exc:
             logging.error(str(exc))
             await message.channel.send(
                 'unexpected error: {}'.format(str(exc)))
             return
 
-        await message.channel.send(res)
+        await self._send_channel(message.channel, res)
 
 
     async def on_message(self, message):
