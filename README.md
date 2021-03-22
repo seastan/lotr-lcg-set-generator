@@ -110,11 +110,11 @@ For debugging purposes you can also run these steps using the Jupyter notebook (
 The scripts will generate the following outputs:
 
 - `Output/DB/<set name>.<language>/`: 300 dpi PNG images for general purposes.
-- `Output/DriveThruCards/<set name>.<language>/`: `zip` and `7z` archives of 300 dpi JPG images to be printed on DriveThruCards.com.
-- `Output/GenericPNG/<set name>.<language>/`: `zip` and `7z` archives of generic 800 dpi PNG images.
+- `Output/DriveThruCards/<set name>.<language>/`: a `7z` archive of 300 dpi JPG images to be printed on DriveThruCards.com.
+- `Output/GenericPNG/<set name>.<language>/`: a `7z` archive of generic 800 dpi PNG images.
 - `Output/HallOfBeorn/<set name>.json`.
-- `Output/MakePlayingCards/<set name>.<language>/`: `zip` and `7z` archives of 800 dpi PNG images to be printed on MakePlayingCards.com.
-- `Output/MBPrint/<set name>.<language>/`: `zip` and `7z` archives and a PDF file of 800 dpi JPG images to be printed on MBPrint.pl.
+- `Output/MakePlayingCards/<set name>.<language>/`: a `7z` archive of 800 dpi PNG images to be printed on MakePlayingCards.com.
+- `Output/MBPrint/<set name>.<language>/`: a `7z` archive and a PDF file of 800 dpi JPG images to be printed on MBPrint.pl.
 - `Output/OCTGN/<set name>/<octgn id>/set.xml`.
 - `Output/OCTGNDecks/<set name>/<deck name>.o8d`: quest decks for OCTGN.
 - `Output/OCTGNImages/<set name>.<language>/<set name>.<language>.o8c`: image packs for OCTGN (300 dpi PNG).

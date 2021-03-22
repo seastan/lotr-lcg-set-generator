@@ -389,8 +389,8 @@ def _update_octgn_card_text(text):
     text = text.replace('[rainy]', '½')
     text = text.replace('[stormy]', '¾')
     text = text.replace('[sailing]', '¹')
-    text = text.replace('[eos]', '(S)')
-    text = text.replace('[pp]', '(per player)')
+    text = text.replace('[eos]', '²')
+    text = text.replace('[pp]', '³')
     return text
 
 
