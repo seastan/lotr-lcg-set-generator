@@ -21,6 +21,7 @@ urlCache/*.cache
 
 configuration.yaml
 discord.yaml
+mpc_monitor.json
 sanity_check.txt
 setGenerator.seproject
 USWebCoatedSWOP.icc
