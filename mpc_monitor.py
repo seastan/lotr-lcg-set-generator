@@ -14,12 +14,6 @@ import requests
 import yaml
 
 
-COOKIES = {
-    "ASP.NET_SessionId": "m54mkkfuyyfl0df2wkfxhbp0",
-    "PrinterStudioCookie": "B13C6275B2336A094A58EE9CBF88F314ACDC4C729AA9F7C348727E005F44F3DEF92611CE25CF4082DD139E760A8531CEE24015DA7B3705BB1C994DD172C4888DDAE11891F5F980E933E2216DC5BAAC6B0B972B6A49E0D10E0BAC07D017F2E2685B45D901D850198E03BF4E900FBC6954926BD0D26F53F34F1C8A6A343090229BF64E6A973BDDFF70714030510F7E25D9B374DBE7C21443AFEC73FDE63EAE5EB1062C946072703C8DBE53FA75AD83F66D6A75868B3B884B3DAD4909E7FF1C2ED8C3C91392C682D8182437F8837710E26E5F577982",
-    "PrinterStudioUserName": "alongextendedparty@gmail.com"
-}
-
 ID_REGEX = r'src="\.\.\/\/PreviewFiles\/Normal\/temp\/thumb\/([0-9A-F]+)_'
 
 ALERT_SUBJECT_TEMPLATE = 'LotR MPC Monitor ALERT: {}'
@@ -27,9 +21,9 @@ ERROR_SUBJECT_TEMPLATE = 'LotR MPC Monitor ERROR: {}'
 WARNING_SUBJECT_TEMPLATE = 'LotR MPC Monitor WARNING: {}'
 MAIL_QUOTA = 50
 
+CONF_PATH = 'mpc_monitor.json'
 DISCORD_CONF_PATH = 'discord.yaml'
 INTERNET_SENSOR_PATH = '/home/homeassistant/.homeassistant/internet_state'
-LINKS_PATH = 'mpc_monitor.json'
 LOG_PATH = 'mpc_monitor.log'
 MAIL_COUNTER_PATH = 'mpc_monitor.cnt'
 MAILS_PATH = '/home/homeassistant/.homeassistant/mails'
@@ -38,6 +32,11 @@ WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 URL_TIMEOUT = 30
 URL_RETRIES = 3
 URL_SLEEP = 1
+
+
+class ConfigurationError(Exception):
+    """ Configuration error.
+    """
 
 
 class ResponseError(Exception):
@@ -205,33 +204,49 @@ def run():
     """ Run the check.
     """
     try:
-        with open(LINKS_PATH, 'r') as fobj:
+        with open(CONF_PATH, 'r') as fobj:
             data = json.load(fobj)
     except Exception:
-        message = 'No links found'
-        logging.warning(message)
-        create_mail(WARNING_SUBJECT_TEMPLATE.format(message), '')
+        message = 'No configuration found'
+        logging.error(message)
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
         return
 
-    session = requests.Session()
-    session.cookies.update(COOKIES)
+    if not data.get('cookies'):
+        raise ConfigurationError('No cookies found')
 
-    for deck in data:
+    session = requests.Session()
+    session.cookies.update(data['cookies'])
+    session.headers['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+    session.headers['Accept-Encoding'] = 'gzip, deflate, br'
+    session.headers['Accept-Language'] = 'en-US'
+    session.headers['Cache-Control'] = 'no-cache'
+    session.headers['Connection'] = 'keep-alive'
+    session.headers['DNT'] = '1'
+    session.headers['Host'] = 'www.makeplayingcards.com'
+    session.headers['Pragma'] = 'no-cache'
+    session.headers['Upgrade-Insecure-Requests'] = '1'
+    session.headers['User-Agent'] = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0'
+
+    for deck in data.get('decks', {}):
         logging.info('Processing %s', deck)
-        content = get_url(session, data[deck]['url'])
+        content = get_url(session, data['decks'][deck]['url'])
         match = re.search(ID_REGEX, content)
         if not match:
             raise ResponseError('No ID found')
 
         deck_id = match.groups()[0]
-        if deck_id != data[deck]['id']:
+        if deck_id != data['decks'][deck]['id']:
             message = 'Deck {} has been changed!'.format(deck)
             logging.info(message)
             send_discord(message)
             create_mail(ALERT_SUBJECT_TEMPLATE.format(message))
-            data[deck]['id'] = deck_id
-            with open(LINKS_PATH, 'w') as fobj:
-                json.dump(data, fobj, indent=4)
+            data['decks'][deck]['id'] = deck_id
+
+    data['cookies'] = session.cookies.get_dict()
+    with open(CONF_PATH, 'w') as fobj:
+        json.dump(data, fobj, indent=4)
+
 
 def main():
     """ Main function.

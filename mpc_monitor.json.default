@@ -1,6 +1,9 @@
 {
-    "<Deck Name>": {
-        "url": "https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id=<Link ID>",
-        "id": "<Deck ID>"
+    "cookies": "<dictionary of cookies>",
+    "decks: {
+        "<Deck Name 1>": {
+            "url": "https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id=<Link ID>",
+            "id": "<Deck ID>"
+        }
     }
 }
