@@ -14,7 +14,18 @@ import requests
 import yaml
 
 
-ID_REGEX = r'src="\.\.\/\/PreviewFiles\/Normal\/temp\/thumb\/([0-9A-F]+)_'
+SAVED_PROJECTS_URL = \
+    'https://www.makeplayingcards.com/design/dn_temporary_designes.aspx'
+VIEWSTATE_REGEX = r'id="__VIEWSTATE" value="([^"]+)"'
+VIEWSTATEGENERATOR_REGEX = r'id="__VIEWSTATEGENERATOR" value="([^"]+)"'
+CONTENT_ID_REGEX = \
+    r'<img src="[^?]+\?([^"]+)" alt="[^"]*"><\/a><\/div><div class="bmrbox"><div class="bmname">{}<\/div>'
+
+DEFAULT_VIEWSTATE = \
+    '/wEPDwUJNjAwNDE3MDgyDxYCHhNWYWxpZGF0ZVJlcXVlc3RNb2RlAgFkZKxwlxJ+dQzVGn0L8+0kT3Qk5oie'
+DEFAULT_VIEWSTATEGENERATOR = '7D57AF60'
+DEFAULT_HIDDGRECAPTCHAV3TOKEN = \
+    '03AGdBq25A2GL4dhQ7lzrQbq4yeJycZQ2Hgi-5zhDei6hpGs3eap2F_eyLtIPSdtMPn5ardl-fTRFaxI8mj12HNBp-ezuEiTdRXRCHnuRt5039oDE1znUCzJhxz1l_R-kqpgGQoaXGPPjXvgOxeTYCaHXUcuq1PgCJrz4LPId18uvY0bZwPM9hdVA6avdiS_K_Ia7eLfWaPrBbuJvrS9L7hwW0uCP3cgaxRQdRF9tpLzo1ZEWEPmDUeYUaz_iHKoW44oZkthNjnb1SbJir0gz3_jmpslf4b-UUQZvO_-JNjkvYPmU9aOPmakhrk0WrdMzl74C5PlDEZSKdHmLUqSGlZ2OhgGu_2N9tbIVDlA5vkxL4koRPD2EQsnFoiDW5WZAmlzjdCzRjeDY79Aphs-PM508cKnl9CrDvvu9zDn36_jqqrRAf_YzJ-Rl1_VfMMoKpa-DAi_mUWleLWURV-Ik3b3YZbuCHe8gxQA'
 
 ALERT_SUBJECT_TEMPLATE = 'LotR MPC Monitor ALERT: {}'
 ERROR_SUBJECT_TEMPLATE = 'LotR MPC Monitor ERROR: {}'
@@ -30,7 +41,7 @@ MAILS_PATH = '/home/homeassistant/.homeassistant/mails'
 WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 
 URL_TIMEOUT = 30
-URL_RETRIES = 3
+URL_RETRIES = 1
 URL_SLEEP = 1
 
 
@@ -183,8 +194,8 @@ def send_discord(message):
     return False
 
 
-def get_url(session, url):
-    """ Get URL content.
+def send_get(session, url):
+    """ Send GET request.
     """
     for i in range(URL_RETRIES):
         try:
@@ -200,7 +211,43 @@ def get_url(session, url):
     return res
 
 
-def run():
+def send_post(session, url, form_data):
+    """ Send POST request.
+    """
+    for i in range(URL_RETRIES):
+        try:
+            req = session.post(url, data=form_data, timeout=URL_TIMEOUT)
+            res = req.content.decode('unicode-escape', errors='ignore')
+            break
+        except Exception:
+            if i < URL_RETRIES - 1:
+                time.sleep(URL_SLEEP)
+            else:
+                raise
+
+    return res
+
+
+def get_viewstate(session):
+    """ Get VIEWSTATE values.
+    """
+    content = send_get(session, SAVED_PROJECTS_URL)
+    viewstate = re.search(VIEWSTATE_REGEX, content)
+    if not viewstate:
+        raise ResponseError('No VIEWSTATE found, content length: {}'
+                            .format(len(content)))
+
+    viewstategenerator = re.search(VIEWSTATEGENERATOR_REGEX, content)
+    if not viewstategenerator:
+        raise ResponseError('No VIEWSTATEGENERATOR found, content length: {}'
+                            .format(len(content)))
+
+    viewstate = viewstate.groups()[0]
+    viewstategenerator = viewstategenerator.groups()[0]
+    return viewstate, viewstategenerator
+
+
+def run():  # pylint: disable=R0915
     """ Run the check.
     """
     try:
@@ -217,31 +264,74 @@ def run():
 
     session = requests.Session()
     session.cookies.update(data['cookies'])
-    session.headers['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+    session.headers['Accept'] = \
+        'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
     session.headers['Accept-Encoding'] = 'gzip, deflate, br'
     session.headers['Accept-Language'] = 'en-US'
     session.headers['Cache-Control'] = 'no-cache'
     session.headers['Connection'] = 'keep-alive'
     session.headers['DNT'] = '1'
     session.headers['Host'] = 'www.makeplayingcards.com'
+    session.headers['Origin'] = 'https://www.makeplayingcards.com'
     session.headers['Pragma'] = 'no-cache'
+    session.headers['Referer'] = SAVED_PROJECTS_URL
     session.headers['Upgrade-Insecure-Requests'] = '1'
-    session.headers['User-Agent'] = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0'
+    session.headers['User-Agent'] = \
+        'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0'
+
+    # viewstate, viewstategenerator = get_viewstate(session)
+    viewstate = DEFAULT_VIEWSTATE
+    viewstategenerator = DEFAULT_VIEWSTATEGENERATOR
+
+    hiddgrecaptchav3token = DEFAULT_HIDDGRECAPTCHAV3TOKEN
+    form_data = {'__EVENTTARGET': 'btn_pageload_handle',
+                 '__EVENTARGUMENT': '',
+                 '__VIEWSTATE': viewstate,
+                 '__VIEWSTATEGENERATOR': viewstategenerator,
+                 'hidd_type': '',
+                 'hidd_value': '',
+                 'hidd_project_name': '',
+                 'hidd_product_type': '',
+                 'hidd_sortby': 'Date',
+                 'hidd_close_shop_message_info': '',
+                 'hiddGrecaptChaV3Token': hiddgrecaptchav3token}
+    content = send_post(session, SAVED_PROJECTS_URL, form_data)
+    if 'My saved projects' not in content:
+        raise ResponseError('No saved projects found, content length: {}'
+                            .format(len(content)))
 
     for deck in data.get('decks', {}):
         logging.info('Processing %s', deck)
-        content = get_url(session, data['decks'][deck]['url'])
-        match = re.search(ID_REGEX, content)
+        regex = CONTENT_ID_REGEX.format(deck)
+        match = re.search(regex, content)
         if not match:
-            raise ResponseError('No ID found')
+            message = ('No content ID found for deck {}, content length: {}'
+                       .format(deck, len(content)))
+            logging.error(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+            continue
 
-        deck_id = match.groups()[0]
-        if deck_id != data['decks'][deck]['id']:
-            message = 'Deck {} has been changed!'.format(deck)
-            logging.info(message)
-            send_discord(message)
-            create_mail(ALERT_SUBJECT_TEMPLATE.format(message))
-            data['decks'][deck]['id'] = deck_id
+        content_id = match.groups()[0]
+        if content_id != data['decks'][deck]['last_id']:
+            if content_id != data['decks'][deck]['content_id']:
+                message = 'Deck {} has been corrupted!'.format(deck)
+                logging.info(message)
+                create_mail(ALERT_SUBJECT_TEMPLATE.format(message))
+                discord_message = f"""Deck **{deck}** has been corrupted!
+Do the following:
+1. Open https://www.makeplayingcards.com/design/dn_temporary_designes.aspx and login into ALeP account (if needed)
+2. Find **{deck}** deck in the list, click *Save As*, type **Corrupted** and click *Save* (to inspect it later)
+3. Ater page refresh, click *Delete* near **{deck}** deck
+4. Find **{deck} Backup** deck in the list, click *Save As*, type **{deck}** and click *Save*
+5. Find **{deck}** deck in the list again, right click on the checkbox and copy its ID (after "chk_")
+6. Construct a URL https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id=<ID>
+7. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/4960180109813771074 and login into ALeP account (if needed)
+8. Switch to *Compose view* and update the link for "MakePlayingCards Direct Order Link"
+<@!637024738782216212> <@!134863257050677248> <@!464924763312226304>"""
+                if not send_discord(discord_message):
+                    continue
+
+            data['decks'][deck]['last_id'] = content_id
 
     data['cookies'] = session.cookies.get_dict()
     with open(CONF_PATH, 'w') as fobj:
@@ -258,13 +348,6 @@ def main():
             return
 
         run()
-    except ResponseError as exc:
-        message = 'Response Error: {}'.format(str(exc))
-        logging.error(message)
-        try:
-            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
-        except Exception as exc_new:
-            logging.exception(str(exc_new))
     except Exception as exc:
         message = 'Script failed: {}: {}'.format(type(exc).__name__, str(exc))
         logging.exception(message)
