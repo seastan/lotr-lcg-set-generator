@@ -2,8 +2,8 @@
     "cookies": "<dictionary of cookies>",
     "decks: {
         "<Deck Name 1>": {
-            "url": "https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id=<Link ID>",
-            "id": "<Deck ID>"
+            "content_id": "<Correct Content ID>",
+            "last_id": "<Last Content ID>"
         }
     }
 }
