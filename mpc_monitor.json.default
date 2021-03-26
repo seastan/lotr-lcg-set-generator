@@ -2,8 +2,9 @@
     "cookies": "<dictionary of cookies>",
     "decks: {
         "<Deck Name 1>": {
-            "content_id": "<Correct Content ID>",
-            "last_id": "<Last Content ID>"
+            "content_id": "<Content ID>",
+            "backup_deck_id": "<Backup Deck ID>",
+            "current_deck_id": "<Current Deck ID>"
         }
     }
 }

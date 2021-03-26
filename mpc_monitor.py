@@ -22,6 +22,10 @@ DECK_REGEX = (
     r'<a href="javascript:oTempSave.show\(\'([^\']+)\'[^"]+">'
     r'<img src="[^?]+\?([^"]+)" alt="[^"]*"><\/a><\/div>'
     r'<div class="bmrbox"><div class="bmname">{}<\/div>')
+DECK_ID_REGEX = (
+    r'<a href="javascript:oTempSave.show\(\'{}\'[^"]+">'
+    r'<img src="[^?]+\?([^"]+)" alt="[^"]*"><\/a><\/div>'
+    r'<div class="bmrbox"><div class="bmname">([^<]+)<\/div>')
 
 DEFAULT_VIEWSTATE = \
     '/wEPDwUJNjAwNDE3MDgyDxYCHhNWYWxpZGF0ZVJlcXVlc3RNb2RlAgFkZKxwlxJ+dQzVGn0L8+0kT3Qk5oie'
@@ -355,7 +359,7 @@ Attempting to fix it automatically...
         new_deck = '{} Corrupted {}'.format(deck, uuid.uuid4())
         content = clone_deck(session, content, deck_id, new_deck)
         logging.info('...done.')
-        regex = DECK_REGEX.format(new_deck)
+        regex = DECK_REGEX.format(new_deck.replace("'", r'\''))
         match = re.search(regex, content)
         if not match:
             raise ResponseError('Deck {} not found, content length: {}'
@@ -367,7 +371,7 @@ Attempting to fix it automatically...
         logging.info('Deleting the deck...')
         content = delete_deck(session, content, deck_id, deck)
         logging.info('...done.')
-        regex = DECK_REGEX.format(deck)
+        regex = DECK_REGEX.format(deck.replace("'", r'\''))
         match = re.search(regex, content)
         if match:
             raise ResponseError('Deck {} was not deleted'.format(new_deck))
@@ -377,7 +381,7 @@ Attempting to fix it automatically...
 
         logging.info('Creating a new deck from backup...')
         backup_deck = '{} Backup'.format(deck)
-        regex = DECK_REGEX.format(backup_deck)
+        regex = DECK_REGEX.format(backup_deck.replace("'", r'\''))
         match = re.search(regex, content)
         if not match:
             raise ResponseError('Deck {} not found, content length: {}'
@@ -386,7 +390,7 @@ Attempting to fix it automatically...
         backup_deck_id = match.groups()[0]
         content = clone_deck(session, content, backup_deck_id, deck)
         logging.info('...done.')
-        regex = DECK_REGEX.format(deck)
+        regex = DECK_REGEX.format(deck.replace("'", r'\''))
         match = re.search(regex, content)
         if not match:
             raise ResponseError('Deck {} not found, content length: {}'
@@ -413,7 +417,7 @@ Attempting to fix it automatically...
 5. Find {deck} deck in the list again, right click on the checkbox and copy its ID (after "chk_")
 6. Construct a URL https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id=<ID>
 7. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/4960180109813771074 and login into ALeP account (if needed)
-8. Switch to Compose view and update the link for "MakePlayingCards Direct Order Link" to that URL
+8. Switch to Compose view and update the link to that URL
 """
         create_mail(ERROR_SUBJECT_TEMPLATE.format(message), body)
         discord_message = f"""Attempt to fix deck **{deck}** automatically failed!
@@ -426,7 +430,7 @@ Do the following:
 5. Find **{deck}** deck in the list again, right click on the checkbox and copy its ID (after "chk_")
 6. Construct a URL https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id=<ID>
 7. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/4960180109813771074 and login into ALeP account (if needed)
-8. Switch to Compose view and update the link for "MakePlayingCards Direct Order Link" to that URL
+8. Switch to Compose view and update the link to that URL
 {DISCORD_USERS}"""
         send_discord(discord_message)
         return ''
@@ -436,14 +440,14 @@ Do the following:
         logging.info(message)
         body = f"""Do the following:
 1. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/4960180109813771074 and login into ALeP account (if needed)
-2. Switch to Compose view and update the link for "MakePlayingCards Direct Order Link" to:
+2. Switch to Compose view and update the link to:
 https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id={deck_id}
 """
         create_mail(ALERT_SUBJECT_TEMPLATE.format(message), body)
         discord_message = f"""Attempt to fix deck **{deck}** automatically succeeded!
 Do the following:
 1. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/4960180109813771074 and login into ALeP account (if needed)
-2. Switch to Compose view and update the link for "MakePlayingCards Direct Order Link" to:
+2. Switch to Compose view and update the link to:
 https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id={deck_id}
 {DISCORD_USERS}"""
         send_discord(discord_message)
@@ -470,7 +474,7 @@ def run():
 
     for deck in data.get('decks', {}):
         logging.info('Processing %s', deck)
-        regex = DECK_REGEX.format(deck)
+        regex = DECK_REGEX.format(deck.replace("'", r'\''))
         match = re.search(regex, content)
         if not match:
             message = ('Deck {} not found, content length: {}'
