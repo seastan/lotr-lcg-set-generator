@@ -9,6 +9,7 @@ import asyncio
 import json
 import logging
 import os
+import random
 import re
 
 import discord
@@ -803,6 +804,14 @@ Targets removed.
                 return
 
             await message.channel.send('done')
+        elif command.startswith('random '):
+            num = re.sub(r'^random ', '', command)
+            if lotr.is_positive_int(num):
+                res = random.randint(1, int(num))
+                await message.channel.send(str(res))
+            else:
+                await message.channel.send(
+                    '"{}" is not a positive integer'.format(num))
         else:
             await message.channel.send('excuse me?')
 

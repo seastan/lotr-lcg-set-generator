@@ -263,7 +263,7 @@ def normalized_name(value):
     return value
 
 
-def _is_positive_int(value):
+def is_positive_int(value):
     """ Check whether a value is a positive int or not.
     """
     try:
@@ -989,7 +989,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
-        elif not _is_positive_int(card_quantity):
+        elif not is_positive_int(card_quantity):
             message = ('Incorrect format for card quantity for row '
                        '#{}{}'.format(i, scratch))
             logging.error(message)
@@ -1076,7 +1076,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             if not card_scratch:
                 errors.append(message)
 
-        if card_easy_mode is not None and not _is_positive_int(card_easy_mode):
+        if card_easy_mode is not None and not is_positive_int(card_easy_mode):
             message = ('Incorrect format for removed for easy mode for row '
                        '#{}{}'.format(i, scratch))
             logging.error(message)
@@ -1280,7 +1280,7 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
         value = ''
 
     if name == CARD_NUMBER:
-        if not _is_positive_int(value):
+        if not is_positive_int(value):
             value = 0
 
         return value
