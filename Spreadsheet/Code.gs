@@ -1,24 +1,23 @@
 function onEdit(e) {
   var sheetName = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getName();
-
+  var range = e.range;
+  var row = range.getRow();
+  var column = range.getColumn();
+  // Check if edited column was the checkbox column
+  var columnHeader = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getRange(1, column).getValue().toString();
   // Check if sheet is a translation sheet
   if (
-    sheetName == "Snapshot" ||
-    sheetName == "Italian" ||
-    sheetName == "French" ||
-    sheetName == "German" ||
-    sheetName == "Spanish" ||
-    sheetName == "Polish"
+    sheetName == 'Snapshot' ||
+    sheetName == 'Italian' ||
+    sheetName == 'French' ||
+    sheetName == 'German' ||
+    sheetName == 'Spanish' ||
+    sheetName == 'Polish'
   ) {
-    var range = e.range;
-    var row = range.getRow();
-    var column = range.getColumn();
-    // Check if edited column was the checkbox column
-    var columnHeader = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getRange(1, column).getValue().toString();
-    if(columnHeader == "Updated") {
+    if (columnHeader == 'Updated') {
       // Check if the checkbox was changed to TRUE
       var check = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getRange(row, column).getValue();
-      if (check==true) {
+      if (check == true) {
         // Get current snapshot
         var currentSnapshot = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getRange(row, getColumnByName('Current Snapshot')).getValue();
         // Copy it over to previous snapshot
@@ -27,9 +26,9 @@ function onEdit(e) {
         SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getRange(row, column).setValue(false);
       }
     }
-    else if(columnHeader == "Diff") {
+    else if (columnHeader == 'Diff') {
       var check = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getRange(row, column).getValue();
-      if (check==true) {
+      if (check == true) {
         var currentSnapshot = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getRange(row, getColumnByName('Current Snapshot')).getValue();
         var lastSnapshot = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getRange(row, getColumnByName('Last Snapshot')).getValue();
         var diff = differences(lastSnapshot, currentSnapshot);
@@ -44,10 +43,54 @@ function onEdit(e) {
     }
   }
 
-  if (e.range.getFormula().toUpperCase() == "=UUID()") {
+  if (e.range.getFormula().toUpperCase() == '=UUID()') {
     e.range.setValue(Utilities.getUuid());
   }
 
+  if (sheetName == 'Card Data' && columnHeader == 'Text') {
+    const lineLength = 50; // Average of characters per line
+    var text = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getRange(row, column).getValue();
+    var lines = text.split('\n');
+    var totalLines = 0;
+    for (var line of lines) {
+      // Count lines for images
+      if (line.includes('Do-Not-Read')) {
+        totalLines += 1;
+      }
+      else if (line.includes('Encounter-Icons')) {
+        totalLines += 2;
+      }
+      else if (line.includes('Header-')) {
+        totalLines += 0;
+      }
+      // Trim tags
+      while (line.includes('[')) {
+        const start = line.indexOf('[');
+        const end = line.indexOf(']');
+        line = cut(line, start, end);
+      }
+      // Count lines for text
+      if (line.length == 0) {
+        totalLines += 1; // Just a newline character
+      }
+      else {
+        totalLines += Math.ceil(line.length / lineLength)
+      }
+    }
+    var linecountCol;
+    if (column < getColumnByName('Side B')) {
+      linecountCol = getColumnByName('Side A linecount');
+    }
+    else {
+      linecountCol = getColumnByName('Side B linecount');
+    }
+    SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getRange(row, linecountCol).setValue(totalLines);
+  }
+}
+
+function cut(str, cutStart, cutEnd) {
+  // Cut the content between two characters
+  return str.substr(0, cutStart) + str.substr(cutEnd + 1);
 }
 
 function uuid() {

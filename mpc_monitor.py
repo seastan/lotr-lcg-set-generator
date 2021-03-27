@@ -16,8 +16,6 @@ import yaml
 
 SAVED_PROJECTS_URL = \
     'https://www.makeplayingcards.com/design/dn_temporary_designes.aspx'
-VIEWSTATE_REGEX = r'id="__VIEWSTATE" value="([^"]+)"'
-VIEWSTATEGENERATOR_REGEX = r'id="__VIEWSTATEGENERATOR" value="([^"]+)"'
 DECK_REGEX = (
     r'<a href="javascript:oTempSave.show\(\'([^\']+)\'[^"]+">'
     r'<img src="[^?]+\?([^"]+)" alt="[^"]*"><\/a><\/div>'
@@ -26,6 +24,8 @@ DECK_ID_REGEX = (
     r'<a href="javascript:oTempSave.show\(\'{}\'[^"]+">'
     r'<img src="[^?]+\?([^"]+)" alt="[^"]*"><\/a><\/div>'
     r'<div class="bmrbox"><div class="bmname">([^<]+)<\/div>')
+VIEWSTATE_REGEX = r'id="__VIEWSTATE" value="([^"]+)"'
+VIEWSTATEGENERATOR_REGEX = r'id="__VIEWSTATEGENERATOR" value="([^"]+)"'
 
 DEFAULT_VIEWSTATE = \
     '/wEPDwUJNjAwNDE3MDgyDxYCHhNWYWxpZGF0ZVJlcXVlc3RNb2RlAgFkZKxwlxJ+dQzVGn0L8+0kT3Qk5oie'
@@ -327,13 +327,13 @@ def delete_deck(session, content, deck_id, deck):
     return content
 
 
-def clone_deck(session, content, deck_id, new_deck):
+def clone_deck(session, content, deck_id, new_deck_name):
     """ Delete the deck.
     """
     viewstate, viewstategenerator = get_viewstate(session, content)
     form_data = init_form_data('btn_submit', viewstate, viewstategenerator,
                                hidd_type='saveas', hidd_value=deck_id,
-                               hidd_project_name=new_deck)
+                               hidd_project_name=new_deck_name)
     content = send_post(session, SAVED_PROJECTS_URL, form_data)
     if 'My saved projects' not in content:
         raise ResponseError('No saved projects found, content length: {}'
@@ -342,116 +342,144 @@ def clone_deck(session, content, deck_id, new_deck):
     return content
 
 
-def fix_deck(session, content, deck_id, deck, correct_content_id):  # pylint: disable=R0915
+def fix_deck(session, content, deck_id, backup_id, deck_name, actual_deck_name,  # pylint: disable=R0912,R0913,R0914,R0915
+             content_id, actual_content_id):
     """ Fix a corrupted deck.
     """
-    message = ('Deck {} has been corrupted! Attempting to fix it '
-               'automatically...'.format(deck))
-    logging.info(message)
-    create_mail(ALERT_SUBJECT_TEMPLATE.format(message))
-    discord_message = f"""Deck **{deck}** has been corrupted!
+    if actual_deck_name != deck_name:
+        message = ('Deck {} has been changed and renamed to {}! Attempting to '
+                   'fix it automatically...'.format(deck_name,
+                                                    actual_deck_name))
+        discord_message = f"""Deck **{deck_name}** has been changed and renamed to **{actual_deck_name}**!
 Attempting to fix it automatically...
 {DISCORD_USERS}"""
+    else:
+        message = ('Deck {} has been changed! Attempting to fix it '
+                   'automatically...'.format(deck_name))
+        discord_message = f"""Deck **{deck_name}** has been changed!
+Attempting to fix it automatically...
+{DISCORD_USERS}"""
+    logging.info(message)
+    create_mail(ALERT_SUBJECT_TEMPLATE.format(message))
     send_discord(discord_message)
 
     try:
-        logging.info('Creating a copy of the deck...')
-        new_deck = '{} Corrupted {}'.format(deck, uuid.uuid4())
-        content = clone_deck(session, content, deck_id, new_deck)
-        logging.info('...done.')
-        regex = DECK_REGEX.format(new_deck.replace("'", r'\''))
-        match = re.search(regex, content)
-        if not match:
-            raise ResponseError('Deck {} not found, content length: {}'
-                                .format(new_deck, len(content)))
+        if actual_deck_name != deck_name:
+            new_deck_name = 'Corrupted {} ({}, {})'.format(deck_name,
+                                                           actual_deck_name,
+                                                           actual_content_id)
+        else:
+            new_deck_name = 'Corrupted {} ({})'.format(deck_name,
+                                                       actual_content_id)
 
-        discord_message = 'Created a copy of the deck...'
-        send_discord(discord_message)
-
-        logging.info('Deleting the deck...')
-        content = delete_deck(session, content, deck_id, deck)
-        logging.info('...done.')
-        regex = DECK_REGEX.format(deck.replace("'", r'\''))
+        regex = DECK_REGEX.format(re.escape(new_deck_name))
         match = re.search(regex, content)
         if match:
-            raise ResponseError('Deck {} was not deleted'.format(new_deck))
+            logging.info('A copy of the deck already exists: %s',
+                         new_deck_name)
+        else:
+            logging.info('Creating a copy of the deck: %s...', new_deck_name)
+            content = clone_deck(session, content, deck_id, new_deck_name)
+            logging.info('...done.')
+            match = re.search(regex, content)
+            if match:
+                discord_message = 'Created a copy of the deck: {}...'.format(
+                    new_deck_name)
+                send_discord(discord_message)
+            else:
+                message = 'Deck {} not found, content length: {}'.format(
+                    new_deck_name, len(content))
+                logging.error(message)
+                create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+
+        logging.info('Deleting the deck...')
+        content = delete_deck(session, content, deck_id, actual_deck_name)
+        logging.info('...done.')
+        regex = DECK_ID_REGEX.format(deck_id)
+        match = re.search(regex, content)
+        if match:
+            raise ResponseError('Deck {} was not deleted'.format(
+                                actual_deck_name))
 
         discord_message = 'Deleted the deck...'
         send_discord(discord_message)
 
+        regex = DECK_ID_REGEX.format(backup_id)
+        match = re.search(regex, content)
+        if not match:
+            raise ResponseError('Deck {} Backup not found, content length: {}'
+                                .format(deck_name, len(content)))
+
+        regex = DECK_REGEX.format(re.escape(deck_name))
+        match = re.search(regex, content)
+        if match:
+            raise ResponseError('Deck {} already exists'.format(deck_name))
+
         logging.info('Creating a new deck from backup...')
-        backup_deck = '{} Backup'.format(deck)
-        regex = DECK_REGEX.format(backup_deck.replace("'", r'\''))
-        match = re.search(regex, content)
-        if not match:
-            raise ResponseError('Deck {} not found, content length: {}'
-                                .format(backup_deck, len(content)))
-
-        backup_deck_id = match.groups()[0]
-        content = clone_deck(session, content, backup_deck_id, deck)
+        content = clone_deck(session, content, backup_id, deck_name)
         logging.info('...done.')
-        regex = DECK_REGEX.format(deck.replace("'", r'\''))
+        regex = DECK_REGEX.format(re.escape(deck_name))
         match = re.search(regex, content)
         if not match:
             raise ResponseError('Deck {} not found, content length: {}'
-                                .format(deck, len(content)))
+                                .format(deck_name, len(content)))
 
-        deck_id = match.groups()[0]
-        content_id = match.groups()[1]
-        if content_id != correct_content_id:
-            raise ResponseError('Deck {} from backup has incorrect content ID'
-                                .format(deck))
+        new_deck_id = match.groups()[0]
+        new_content_id = match.groups()[1]
+        if new_content_id != content_id:
+            raise ResponseError('Deck {} from backup has incorrect content'
+                                .format(deck_name))
 
         discord_message = 'Created a new deck from backup...'
         send_discord(discord_message)
     except Exception as exc:
         message = ('Attempt to fix deck {} automatically failed: {}: {}'
-                   .format(deck, type(exc).__name__, str(exc)))
+                   .format(deck_name, type(exc).__name__, str(exc)))
         logging.exception(message)
         body = f"""Do the following:
 (depending on the error, some steps may be already done)
 1. Open https://www.makeplayingcards.com/design/dn_temporary_designes.aspx and login into ALeP account (if needed)
-2. Find {deck} deck in the list, click Save As, type "Corrupted" and click Save
-3. Ater page refresh, click Delete near {deck} deck
-4. Find {deck} Backup deck in the list, click Save As, type "{deck}" and click Save
-5. Find {deck} deck in the list again, right click on the checkbox and copy its ID (after "chk_")
+2. Find {actual_deck_name} deck in the list, click Save As, type "Corrupted" and click Save
+3. Ater page refresh, click Delete near {actual_deck_name} deck
+4. Find {deck_name} Backup deck in the list, click Save As, type "{deck_name}" and click Save
+5. Find {deck_name} deck in the list again, right click on the checkbox and copy its ID (after "chk_")
 6. Construct a URL https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id=<ID>
 7. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/4960180109813771074 and login into ALeP account (if needed)
 8. Switch to Compose view and update the link to that URL
 """
         create_mail(ERROR_SUBJECT_TEMPLATE.format(message), body)
-        discord_message = f"""Attempt to fix deck **{deck}** automatically failed!
+        discord_message = f"""Attempt to fix deck **{deck_name}** automatically failed!
 Do the following:
 (depending on the error, some steps may be already done)
 1. Open https://www.makeplayingcards.com/design/dn_temporary_designes.aspx and login into ALeP account (if needed)
-2. Find **{deck}** deck in the list, click *Save As*, type "Corrupted" and click *Save*
-3. Ater page refresh, click *Delete* near **{deck}** deck
-4. Find **{deck} Backup** deck in the list, click *Save As*, type "{deck}" and click *Save*
-5. Find **{deck}** deck in the list again, right click on the checkbox and copy its ID (after "chk_")
+2. Find **{actual_deck_name}** deck in the list, click *Save As*, type "Corrupted" and click *Save*
+3. Ater page refresh, click *Delete* near **{actual_deck_name}** deck
+4. Find **{deck_name} Backup** deck in the list, click *Save As*, type "{deck_name}" and click *Save*
+5. Find **{deck_name}** deck in the list again, right click on the checkbox and copy its ID (after "chk_")
 6. Construct a URL https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id=<ID>
 7. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/4960180109813771074 and login into ALeP account (if needed)
 8. Switch to Compose view and update the link to that URL
 {DISCORD_USERS}"""
         send_discord(discord_message)
-        return ''
+        return '', ''
     else:
         message = ('Attempt to fix deck {} automatically succeeded! '
-                   'New deck ID: {}'.format(deck, deck_id))
+                   'New deck ID: {}'.format(deck_name, new_deck_id))
         logging.info(message)
         body = f"""Do the following:
 1. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/4960180109813771074 and login into ALeP account (if needed)
 2. Switch to Compose view and update the link to:
-https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id={deck_id}
+https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id={new_deck_id}
 """
         create_mail(ALERT_SUBJECT_TEMPLATE.format(message), body)
-        discord_message = f"""Attempt to fix deck **{deck}** automatically succeeded!
+        discord_message = f"""Attempt to fix deck **{deck_name}** automatically succeeded!
 Do the following:
 1. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/4960180109813771074 and login into ALeP account (if needed)
 2. Switch to Compose view and update the link to:
-https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id={deck_id}
+https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id={new_deck_id}
 {DISCORD_USERS}"""
         send_discord(discord_message)
-        return content
+        return content, new_deck_id
 
 
 def run():
@@ -472,24 +500,29 @@ def run():
     session = init_session(data['cookies'])
     content = get_decks(session)
 
-    for deck in data.get('decks', {}):
-        logging.info('Processing %s', deck)
-        regex = DECK_REGEX.format(deck.replace("'", r'\''))
+    for deck_name in data.get('decks', {}):
+        content_id = data['decks'][deck_name]['content_id']
+        deck_id = data['decks'][deck_name]['deck_id']
+        backup_id = data['decks'][deck_name]['backup_id']
+        logging.info('Processing %s', deck_name)
+        regex = DECK_ID_REGEX.format(deck_id)
         match = re.search(regex, content)
         if not match:
-            message = ('Deck {} not found, content length: {}'
-                       .format(deck, len(content)))
+            message = 'Deck {} not found, content length: {}'.format(
+                deck_name, len(content))
             logging.error(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
             continue
 
-        deck_id = match.groups()[0]
-        content_id = match.groups()[1]
-        if content_id != data['decks'][deck]['content_id']:
-            res = fix_deck(session, content, deck_id, deck,
-                           data['decks'][deck]['content_id'])
-            if res:
-                content = res
+        actual_content_id = match.groups()[0]
+        actual_deck_name = match.groups()[1]
+        if actual_content_id != content_id:
+            new_content, new_deck_id = fix_deck(
+                session, content, deck_id, backup_id, deck_name,
+                actual_deck_name, content_id, actual_content_id)
+            if new_content:
+                content = new_content
+                data['decks'][deck_name]['deck_id'] = new_deck_id
 
     data['cookies'] = session.cookies.get_dict()
     with open(CONF_PATH, 'w') as fobj:

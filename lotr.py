@@ -1097,8 +1097,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         for key, value in row.items():
             if isinstance(value, str) and '[unmatched quot]' in value:
-                message = ('Unmatched quote symbol in %s column for row '
-                           '#{}{}'.format(i, scratch))
+                message = ('Unmatched quote symbol in {} column for row '
+                           '#{}{}'.format(key, i, scratch))
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)
