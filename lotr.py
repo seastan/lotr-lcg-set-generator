@@ -397,7 +397,7 @@ def _update_octgn_card_text(text):
 def _escape_filename(value):
     """ Escape forbidden symbols in a file name.
     """
-    return re.sub(r'[<>:\/\\|?*\'"’“”…–—]', ' ', value)
+    return re.sub(r'[<>:\/\\|?*\'"’“”„«»…–—]', ' ', value)
 
 
 def _escape_octgn_filename(value):
@@ -624,6 +624,7 @@ def _clean_data(data):  # pylint: disable=R0915
                     value = value.replace('[name]', card_name)
 
                 value = value.strip()
+                value = value.replace('\xa0', ' ')
                 value = value.replace('...', '…')
                 value = value.replace('---', '—')
                 value = value.replace('--', '–')
@@ -632,6 +633,11 @@ def _clean_data(data):  # pylint: disable=R0915
                 value = value.replace("'", '’')
                 value = value.replace('“', '"')
                 value = value.replace('”', '"')
+                value = value.replace('„', '"')
+                value = value.replace('« ', '"')
+                value = value.replace('«', '"')
+                value = value.replace(' »', '"')
+                value = value.replace('»', '"')
                 value = re.sub(r'"([^"]*)"', '“\\1”', value)
                 value = value.replace('"', '[unmatched quot]')
                 value = re.sub(r'\[lquot\]', '“', value, flags=re.IGNORECASE)

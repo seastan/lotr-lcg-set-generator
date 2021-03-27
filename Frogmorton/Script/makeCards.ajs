@@ -688,8 +688,8 @@ function run(progress, target, filename, icons) {
 					s.set('Side-region', '0,279,413,17');
 					s.set('Side-style', 'FAMILY: {"Vafthrudnir"}');
 					s.set('Side-pointsize', 3.52);
-					s.set('SideA', updateVafthrudnir(translate['Side'][lang].toUpperCase() + ' A', 3.515));
-					s.set('SideB', updateVafthrudnir(translate['Side'][lang].toUpperCase() + ' B', 3.515));
+					s.set('SideA', updateVafthrudnir(translate['Side'][lang].toUpperCase() + ' A', 3.515, lang));
+					s.set('SideB', updateVafthrudnir(translate['Side'][lang].toUpperCase() + ' B', 3.515, lang));
 
 					if (card['BName']) {
 						s.set('Template', 'DoubleSided');
@@ -781,11 +781,11 @@ function run(progress, target, filename, icons) {
 				}
 				else {
 					if ((cardType == 'Campaign') && (cardSphere == 'Setup')) {
-						s.set('Type', updateVafthrudnir(translate['Setup'][lang].toUpperCase(), 5.095));
+						s.set('Type', updateVafthrudnir(translate['Setup'][lang].toUpperCase(), 5.095, lang));
 						s.set('Template', 'Standard');
 					}
 					else {
-						s.set('Type', updateVafthrudnir(translate[cardType][lang].toUpperCase(), 5.095));
+						s.set('Type', updateVafthrudnir(translate[cardType][lang].toUpperCase(), 5.095, lang));
 					}
 
 					s.set('Copyright', copyrightText);
@@ -961,7 +961,7 @@ function run(progress, target, filename, icons) {
 				}
 
 				if (['Boon', 'Burden'].indexOf(cardSphere) > -1) {
-					s.set('Subtype', updateVafthrudnir(translate[cardSphere][lang].toUpperCase(), 3.515));
+					s.set('Subtype', updateVafthrudnir(translate[cardSphere][lang].toUpperCase(), 3.515, lang));
 				}
 
 				if (card['Encounter Set Number']) {
@@ -1063,7 +1063,7 @@ function fixSpecialSymbols(value) {
 	value = value.replace(/\u00e2/g, 'a');
 	value = value.replace(/[\u00da\u00db]/g, 'U');
 	value = value.replace(/[\u00fa\u00fb]/g, 'u');
-	value = value.replace(/[,\(\)'"\u2013\u2014\u2026\u2019\u201c\u201d]/g, '');
+	value = value.replace(/[,\(\)'"\u2013\u2014\u2026\u2019\u201c\u201d\u201e\u00ab\u00bb]/g, '');
 	return value;
 }
 
@@ -1087,13 +1087,26 @@ function convertIconName(value) {
 
 function escapeFileName(value) {
 	value += '';
-	return value.replace(/[<>:\/\\|?*'"\u2013\u2014\u2026\u2019\u201c\u201d]/g, ' ');
+	return value.replace(/[<>:\/\\|?*'"\u2013\u2014\u2026\u2019\u201c\u201d\u201e\u00ab\u00bb]/g, ' ');
 }
 
-function updateVafthrudnir(value, lowerSize) {
+function updateQuotes(value, lang) {
+	if ((lang == 'German') || (lang == 'Polish')) {
+		value = value.replace(/\u201c/g, '\u201e');
+	}
+	else if (lang == 'French') {
+		value = value.replace(/\u201c[ \u00a0]?/g, '\u00ab\u00a0');
+		value = value.replace(/[ \u00a0]?\u201d/g, '\u00a0\u00bb');
+	}
+
+	return value;
+}
+
+function updateVafthrudnir(value, lowerSize, lang) {
 	var upperSize = Math.round(lowerSize * 1.423 * 100) / 100;
 	var res = '';
 	var tag = false;
+	value = updateQuotes(value, lang);
 	for (let i = 0; i < value.length; i++) {
 		let ch = value[i];
 		if (ch == '<') {
@@ -1107,7 +1120,7 @@ function updateVafthrudnir(value, lowerSize) {
 		else if (tag) {
 			res += ch;
 		}
-		else if ((ch == ch.toLowerCase()) && !ch.match(/[&0-9;:,.!?\-\u2013\(\)'\u2019"\u201c\u201d \u00a0]/)) {
+		else if ((ch == ch.toLowerCase()) && !ch.match(/[&0-9;:,.!?\-\u2013\(\)'\u2019"\u201c\u201d\u201e\u00ab\u00bb \u00a0]/)) {
 			if (ch.match(/[a-z&0-9;:,.!? ]/i)) {
 				res += ch.toUpperCase();
 			}
@@ -1146,17 +1159,17 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 		else {
 			lowerSize = 6.5;
 		}
-		return updateVafthrudnir(vXml, lowerSize);
+		return updateVafthrudnir(vXml, lowerSize, lang);
 	}
 	else if ((['Victory Points', 'BVictory Points'].indexOf(nXml + '') > -1) && (['Presentation', 'Rules'].indexOf(cardType) == -1)) {
-		return updateVafthrudnir(vXml, 3.69);
+		return updateVafthrudnir(vXml, 3.69, lang);
 	}
 	else if (nXml == 'Adventure') {
 		if (cardType == 'Campaign') {
-			return updateVafthrudnir(vXml, 6.5);
+			return updateVafthrudnir(vXml, 6.5, lang);
 		}
 		else {
-			return updateVafthrudnir(vXml, 3.69);
+			return updateVafthrudnir(vXml, 3.69, lang);
 		}
 	}
 
@@ -1317,13 +1330,20 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 	vXml = vXml.replace(/\n(<left>|<right>|<center>)?(?=\n)/g, '\n$1<vs>');
 
 	function updateVafthrudnirReplacer(match, p1, p2, offset, string) {
-		var res = '</size></family>' + updateVafthrudnir(p2, p1) + '<family "Times New Roman"><size ' + defaultFontSize + '>';
+		var res = '</size></family>' + updateVafthrudnir(p2, p1, lang) + '<family "Times New Roman"><size ' + defaultFontSize + '>';
 		return res;
 	}
 
 	vXml = vXml.replace(/<lotr ([0-9\.]+)>(.*?)<\/lotr>/ig, updateVafthrudnirReplacer);
 	vXml = vXml.replace(/<size [^>]+><\/size>/g, '');
 	vXml = vXml.replace(/<family [^>]+><\/family>/g, '');
+
+	vXml = updateQuotes(vXml, lang);
+	if ((['Traits', 'BTraits'].indexOf(nXml + '') > -1) && (lang == 'Spanish')) {
+		vXml = vXml.replace(/\. /g, ' \u00b7 ');
+		vXml = vXml.replace(/\.$/g, '');
+	}
+
 	return vXml;
 }
 
