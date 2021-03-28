@@ -3410,8 +3410,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
 
         temp_path = os.path.join(TEMP_ROOT_PATH,
                                  'generate_db.{}.{}'.format(set_id, lang))
-        _create_folder(temp_path)
-        _clear_folder(temp_path)
+        _delete_folder(temp_path)
         shutil.copytree(output_path, temp_path)
         _make_low_quality(conf, temp_path)
 
@@ -3445,8 +3444,7 @@ def generate_octgn(conf, set_id, set_name, lang):
     output_path = os.path.join(OUTPUT_OCTGN_IMAGES_PATH, '{}.{}'.format(
         _escape_filename(set_name), lang))
 
-    _create_folder(temp_path)
-    _clear_folder(temp_path)
+    _delete_folder(temp_path)
     shutil.copytree(input_path, temp_path)
     _make_low_quality(conf, temp_path)
 
