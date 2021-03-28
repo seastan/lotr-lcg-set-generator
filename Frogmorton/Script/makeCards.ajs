@@ -1340,7 +1340,7 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 
 	vXml = updateQuotes(vXml, lang);
 	if ((['Traits', 'BTraits'].indexOf(nXml + '') > -1) && (lang == 'Spanish')) {
-		vXml = vXml.replace(/\. /g, ' \u00b7 ');
+		vXml = vXml.replace(/\. /g, ' \u2022 ');
 		vXml = vXml.replace(/\.$/g, '');
 	}
 
