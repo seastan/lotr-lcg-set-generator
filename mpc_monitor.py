@@ -1,6 +1,13 @@
-""" Monitor MakePlayingCards shared URLs.
-"""
 # pylint: disable=W0703,C0301
+""" Monitor MakePlayingCards shared URLs.
+
+NOTE: This script heavily relies on my existing smart home environment.
+
+Create discord.yaml (see discord.default.yaml).
+
+Setup a cron as:
+*/2 * * * * flock -xn /home/homeassistant/lotr-lcg-set-generator/mpc_monitor.lock -c 'python3 /home/homeassistant/lotr-lcg-set-generator/mpc_monitor.py > /dev/null' 2>&1
+"""
 from datetime import datetime
 from email.header import Header
 import json
@@ -26,6 +33,8 @@ DECK_ID_REGEX = (
     r'<div class="bmrbox"><div class="bmname">([^<]+)<\/div>')
 VIEWSTATE_REGEX = r'id="__VIEWSTATE" value="([^"]+)"'
 VIEWSTATEGENERATOR_REGEX = r'id="__VIEWSTATEGENERATOR" value="([^"]+)"'
+SESSIONID_REGEX = \
+    r'<form method="post" action="\.\/dn_preview_layout\.aspx\?ssid=([^"]+)"'
 
 DEFAULT_VIEWSTATE = \
     '/wEPDwUJNjAwNDE3MDgyDxYCHhNWYWxpZGF0ZVJlcXVlc3RNb2RlAgFkZKxwlxJ+dQzVGn0L8+0kT3Qk5oie'
@@ -342,6 +351,63 @@ def clone_deck(session, content, deck_id, new_deck_name):
     return content
 
 
+def rename_deck(session, content, deck_id, deck_name, actual_deck_name):
+    """ Rename a deck.
+    """
+    message = ('Deck {} has been renamed to {}! Attempting to '
+               'rename it automatically...'.format(deck_name,
+                                                   actual_deck_name))
+    discord_message = f"""Deck **{deck_name}** has been renamed to **{actual_deck_name}**!
+Attempting to rename it automatically..."""
+    logging.info(message)
+    create_mail(ALERT_SUBJECT_TEMPLATE.format(message))
+    send_discord(discord_message)
+
+    try:
+        res = send_get(
+            session,
+            'https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id={}&edit=Y'
+            .format(deck_id))
+        match = re.search(SESSIONID_REGEX, res)
+        if not match:
+            raise ResponseError('No session ID found, content length: {}'
+                                .format(len(res)))
+
+        session_id = match.groups()[0]
+        res = send_post(
+            session,
+            'https://www.makeplayingcards.com/design/dn_project_save.aspx?ssid={}'
+            .format(session_id), {'name': deck_name})
+        if not '[CDATA[SUCCESS]]' in res:
+            raise ResponseError('Deck {} was not renamed, response: {}'.format(
+                                actual_deck_name, res))
+
+        content = get_decks(session)
+        regex = DECK_REGEX.format(re.escape(deck_name))
+        match = re.search(regex, content)
+        if not match:
+            raise ResponseError('Deck {} was not renamed, content length: {}'
+                                .format(actual_deck_name, len(content)))
+    except Exception as exc:
+        message = ('Attempt to rename deck {} automatically failed: {}: {}'
+                   .format(actual_deck_name, type(exc).__name__, str(exc)))
+        logging.exception(message)
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+        discord_message = f"""Attempt to rename deck **{actual_deck_name}** automatically failed!
+{DISCORD_USERS}"""
+        send_discord(discord_message)
+        return ''
+    else:
+        message = ('Attempt to rename deck {} automatically succeeded!'
+                   .format(actual_deck_name))
+        logging.info(message)
+        create_mail(ALERT_SUBJECT_TEMPLATE.format(message))
+        discord_message = f"""Attempt to rename deck **{actual_deck_name}** automatically succeeded!
+{DISCORD_USERS}"""
+        send_discord(discord_message)
+        return content
+
+
 def fix_deck(session, content, deck_id, backup_id, deck_name, actual_deck_name,  # pylint: disable=R0912,R0913,R0914,R0915
              content_id, actual_content_id):
     """ Fix a corrupted deck.
@@ -523,6 +589,11 @@ def run():
             if new_content:
                 content = new_content
                 data['decks'][deck_name]['deck_id'] = new_deck_id
+        elif actual_deck_name != deck_name:
+            new_content = rename_deck(session, content, deck_id, deck_name,
+                                      actual_deck_name)
+            if new_content:
+                content = new_content
 
     data['cookies'] = session.cookies.get_dict()
     with open(CONF_PATH, 'w') as fobj:

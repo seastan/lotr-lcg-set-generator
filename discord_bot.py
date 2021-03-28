@@ -4,6 +4,8 @@
 
 You need to install dependency:
 pip install discord.py
+
+Create discord.yaml (see discord.default.yaml).
 """
 import asyncio
 import json
