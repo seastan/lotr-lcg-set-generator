@@ -28,6 +28,9 @@ try:
     from reportlab.lib.pagesizes import landscape, letter, A4
     from reportlab.lib.units import inch
     from reportlab.pdfgen.canvas import Canvas
+
+    PY7ZR_FILTERS = [{'id': py7zr.FILTER_LZMA2,
+                      'preset': py7zr.PRESET_EXTREME}]
 except Exception:  # pylint: disable=W0703
     pass
 
@@ -127,9 +130,10 @@ SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow'}
 
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
+MAGICK_COMMAND_LOW = '"{}" mogrify -resize 600x600 -format jpg "{}\\*.png"'
 MAGICK_COMMAND_PDF = '"{}" convert "{}\\*o.jpg" "{}"'
 
-IMAGE_MIN_SIZE = 100000
+IMAGE_MIN_SIZE = 50000
 
 EASY_PREFIX = 'Easy '
 IMAGES_CUSTOM_FOLDER = 'custom'
@@ -155,16 +159,16 @@ CARD_BACKS = {'player': {'mpc': ['playerBackOfficialMPC.png',
                                  'playerBackUnofficialDTC.jpg'],
                          'mbprint': ['playerBackOfficialMBPRINT.jpg',
                                      'playerBackUnofficialMBPRINT.jpg'],
-                         'generic_png': ['playerBackOfficial.png',
-                                         'playerBackUnofficial.png']},
+                         'genericpng': ['playerBackOfficial.png',
+                                        'playerBackUnofficial.png']},
               'encounter': {'mpc': ['encounterBackOfficialMPC.png',
                                     'encounterBackUnofficialMPC.png'],
                             'dtc': ['encounterBackOfficialDTC.jpg',
                                     'encounterBackUnofficialDTC.jpg'],
                             'mbprint': ['encounterBackOfficialMBPRINT.jpg',
                                         'encounterBackUnofficialMBPRINT.jpg'],
-                            'generic_png': ['encounterBackOfficial.png',
-                                            'encounterBackUnofficial.png']}}
+                            'genericpng': ['encounterBackOfficial.png',
+                                           'encounterBackUnofficial.png']}}
 
 CONFIGURATION_PATH = 'configuration.yaml'
 DISCORD_CARD_DATA_PATH = os.path.join('Discord', 'card_data.json')
@@ -177,14 +181,16 @@ IMAGES_ZIP_PATH = '{}/Export/'.format(os.path.split(PROJECT_FOLDER)[-1])
 OCTGN_ZIP_PATH = 'a21af4e8-be4b-4cda-a6b6-534f9717391f/Sets'
 OUTPUT_DB_PATH = os.path.join('Output', 'DB')
 OUTPUT_DTC_PATH = os.path.join('Output', 'DriveThruCards')
-OUTPUT_GENERIC_PNG_PATH = os.path.join('Output', 'GenericPNG')
+OUTPUT_GENERICPNG_PATH = os.path.join('Output', 'GenericPNG')
 OUTPUT_HALLOFBEORN_PATH = os.path.join('Output', 'HallOfBeorn')
 OUTPUT_MBPRINT_PATH = os.path.join('Output', 'MBPrint')
+OUTPUT_MBPRINT_PDF_PATH = os.path.join('Output', 'MBPrintPDF')
 OUTPUT_MPC_PATH = os.path.join('Output', 'MakePlayingCards')
 OUTPUT_OCTGN_PATH = os.path.join('Output', 'OCTGN')
 OUTPUT_OCTGN_DECKS_PATH = os.path.join('Output', 'OCTGNDecks')
 OUTPUT_OCTGN_IMAGES_PATH = os.path.join('Output', 'OCTGNImages')
 OUTPUT_PDF_PATH = os.path.join('Output', 'PDF')
+OUTPUT_PREVIEW_IMAGES_PATH = os.path.join('Output', 'PreviewImages')
 OUTPUT_RINGSDB_PATH = os.path.join('Output', 'RingsDB')
 OUTPUT_RINGSDB_IMAGES_PATH = os.path.join('Output', 'RingsDBImages')
 PROJECT_PATH = 'setGenerator.seproject'
@@ -485,7 +491,7 @@ def read_conf(path=CONFIGURATION_PATH):
     with open(path, 'r') as f_conf:
         conf = yaml.safe_load(f_conf)
 
-    conf['all_languages'] = [lang for lang in conf['outputs']]
+    conf['all_languages'] = list(conf['outputs'].keys())
     conf['languages'] = [lang for lang in conf['outputs']
                          if conf['outputs'][lang]]
     conf['nobleed'] = {}
@@ -507,12 +513,13 @@ def read_conf(path=CONFIGURATION_PATH):
 
         if ('mbprint_zip' in conf['outputs'][lang]
                 or 'mbprint_7z' in conf['outputs'][lang]
-                or 'mbprint_pdf' in conf['outputs'][lang]):
+                or 'mbprint_pdf_zip' in conf['outputs'][lang]
+                or 'mbprint_pdf_7z' in conf['outputs'][lang]):
             conf['outputs'][lang].add('mbprint')
 
-        if ('generic_png_zip' in conf['outputs'][lang]
-                or 'generic_png_7z' in conf['outputs'][lang]):
-            conf['outputs'][lang].add('generic_png')
+        if ('genericpng_zip' in conf['outputs'][lang]
+                or 'genericpng_7z' in conf['outputs'][lang]):
+            conf['outputs'][lang].add('genericpng')
 
         conf['nobleed'][lang] = ('db' in conf['outputs'][lang]
                                  or 'octgn' in conf['outputs'][lang]
@@ -2583,7 +2590,7 @@ def _set_outputs(conf, lang, root):
 
     if ('makeplayingcards' in conf['outputs'][lang]
             or 'mbprint' in conf['outputs'][lang]
-            or 'generic_png' in conf['outputs'][lang]):
+            or 'genericpng' in conf['outputs'][lang]):
         root.set('png800Bleed', '1')
 
 
@@ -2988,9 +2995,9 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
 
 
 def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
-    """ Generate images for DB outputs.
+    """ Generate images for all DB outputs.
     """
-    logging.info('[%s, %s] Generating images for DB outputs...',
+    logging.info('[%s, %s] Generating images for all DB outputs...',
                  set_name, lang)
     timestamp = time.time()
 
@@ -3029,7 +3036,7 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disab
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     _delete_folder(temp_path)
-    logging.info('[%s, %s] ...Generating images for DB outputs '
+    logging.info('[%s, %s] ...Generating images for all DB outputs '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
@@ -3309,11 +3316,30 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
                  lang, round(time.time() - timestamp, 3))
 
 
-def generate_db(set_id, set_name, lang, card_data):  # pylint: disable=R0912,R0914
-    """ Generate DB outputs.
+def _make_low_quality(conf, input_path):
+    """ Make low quality 600x429 JPG images from PNG inputs.
     """
-    logging.info('[%s, %s] Generating DB and RingsDB image outputs...',
-                 set_name, lang)
+    cmd = MAGICK_COMMAND_LOW.format(conf['magick_path'], input_path)
+    res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+    logging.info(res)
+
+    for _, _, filenames in os.walk(input_path):
+        for filename in filenames:
+            if (filename.endswith('.jpg')
+                    and os.path.getsize(os.path.join(input_path, filename)
+                                        ) < IMAGE_MIN_SIZE):
+                raise ImageMagickError('ImageMagick conversion failed for {}'
+                                       .format(os.path.join(input_path,
+                                                            filename)))
+
+        break
+
+
+def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R0912,R0914
+    """ Generate DB, Preview and RingsDB image outputs.
+    """
+    logging.info('[%s, %s] Generating DB, Preview and RingsDB image '
+                 'outputs...', set_name, lang)
     timestamp = time.time()
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300DB,
@@ -3375,11 +3401,38 @@ def generate_db(set_id, set_name, lang, card_data):  # pylint: disable=R0912,R09
             shutil.copyfile(os.path.join(output_path, source_filename),
                             os.path.join(ringsdb_output_path, target_filename))
 
-    logging.info('[%s, %s] ...Generating DB and RingsDB image outputs (%ss)',
-                 set_name, lang, round(time.time() - timestamp, 3))
+    if known_filenames:
+        preview_output_path = os.path.join(
+            OUTPUT_PREVIEW_IMAGES_PATH, '{}.{}'.format(
+                _escape_filename(set_name), lang))
+        _create_folder(preview_output_path)
+        _clear_folder(preview_output_path)
+
+        temp_path = os.path.join(TEMP_ROOT_PATH,
+                                 'generate_db.{}.{}'.format(set_id, lang))
+        _create_folder(temp_path)
+        _clear_folder(temp_path)
+        shutil.copytree(output_path, temp_path)
+        _make_low_quality(conf, temp_path)
+
+        for _, _, filenames in os.walk(temp_path):
+            for filename in filenames:
+                if filename.split('.')[-1] != 'jpg':
+                    continue
+
+                shutil.copyfile(os.path.join(temp_path, filename),
+                                os.path.join(preview_output_path, filename))
+
+            break
+
+        _delete_folder(temp_path)
+
+    logging.info('[%s, %s] ...Generating DB, Preview and RingsDB image '
+                 'outputs (%ss)', set_name, lang,
+                 round(time.time() - timestamp, 3))
 
 
-def generate_octgn(set_id, set_name, lang):
+def generate_octgn(conf, set_id, set_name, lang):
     """ Generate OCTGN image outputs.
     """
     logging.info('[%s, %s] Generating OCTGN image outputs...', set_name, lang)
@@ -3387,14 +3440,22 @@ def generate_octgn(set_id, set_name, lang):
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300OCTGN,
                               '{}.{}'.format(set_id, lang))
+    temp_path = os.path.join(TEMP_ROOT_PATH,
+                             'generate_octgn.{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_OCTGN_IMAGES_PATH, '{}.{}'.format(
         _escape_filename(set_name), lang))
+
+    _create_folder(temp_path)
+    _clear_folder(temp_path)
+    shutil.copytree(input_path, temp_path)
+    _make_low_quality(conf, temp_path)
+
     pack_path = os.path.join(output_path,
                              _escape_octgn_filename('{}.{}.o8c'.format(
                                  _escape_filename(set_name), lang)))
 
     known_filenames = set()
-    for _, _, filenames in os.walk(input_path):
+    for _, _, filenames in os.walk(temp_path):
         if not filenames:
             logging.error('[%s, %s] No cards found', set_name, lang)
             break
@@ -3403,20 +3464,22 @@ def generate_octgn(set_id, set_name, lang):
         filenames = sorted(filenames)
         with zipfile.ZipFile(pack_path, 'w') as zip_obj:
             for filename in filenames:
-                if filename.split('.')[-1] != 'png':
+                if filename.split('.')[-1] != 'jpg':
                     continue
 
                 octgn_filename = re.sub(
-                    r'-1\.png$', '.png',
-                    re.sub(r'-2\.png$', '.B.png', filename))[50:]
+                    r'-1\.jpg$', '.jpg',
+                    re.sub(r'-2\.jpg$', '.B.jpg', filename))[50:]
                 if octgn_filename not in known_filenames:
                     known_filenames.add(octgn_filename)
-                    zip_obj.write(os.path.join(input_path, filename),
+                    zip_obj.write(os.path.join(temp_path, filename),
                                   '{}/{}/Cards/{}'.format(OCTGN_ZIP_PATH,
                                                           set_id,
                                                           octgn_filename))
 
         break
+
+    _delete_folder(temp_path)
 
     logging.info('[%s, %s] ...Generating OCTGN image outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
@@ -3838,7 +3901,7 @@ def _prepare_mbprint_printing_archive(input_path, obj):
         break
 
 
-def _prepare_generic_png_printing_archive(input_path, obj):
+def _prepare_genericpng_printing_archive(input_path, obj):
     """ Prepare archive of generic PNG images.
     """
     for _, _, filenames in os.walk(input_path):
@@ -3890,7 +3953,7 @@ def generate_mpc(conf, set_id, set_name, lang, card_data):
     if 'makeplayingcards_zip' in conf['outputs'][lang]:
         with zipfile.ZipFile(
                 os.path.join(output_path,
-                             'MPC.{}.{}.zip'.format(
+                             'MPC.{}.{}.images.zip'.format(
                                  _escape_filename(set_name), lang)),
                 'w') as obj:
             _prepare_mpc_printing_archive(temp_path, obj)
@@ -3899,9 +3962,9 @@ def generate_mpc(conf, set_id, set_name, lang, card_data):
     if 'makeplayingcards_7z' in conf['outputs'][lang]:
         with py7zr.SevenZipFile(
                 os.path.join(output_path,
-                             'MPC.{}.{}.7z'.format(
+                             'MPC.{}.{}.images.7z'.format(
                                  _escape_filename(set_name), lang)),
-                'w') as obj:
+                'w', filters=PY7ZR_FILTERS) as obj:
             _prepare_mpc_printing_archive(temp_path, obj)
             obj.write('MakePlayingCards.pdf', 'MakePlayingCards.pdf')
 
@@ -3943,7 +4006,7 @@ def generate_dtc(conf, set_id, set_name, lang, card_data):
     if 'drivethrucards_zip' in conf['outputs'][lang]:
         with zipfile.ZipFile(
                 os.path.join(output_path,
-                             'DTC.{}.{}.zip'.format(
+                             'DTC.{}.{}.images.zip'.format(
                                  _escape_filename(set_name), lang)),
                 'w') as obj:
             _prepare_dtc_printing_archive(temp_path, obj)
@@ -3952,9 +4015,9 @@ def generate_dtc(conf, set_id, set_name, lang, card_data):
     if 'drivethrucards_7z' in conf['outputs'][lang]:
         with py7zr.SevenZipFile(
                 os.path.join(output_path,
-                             'DTC.{}.{}.7z'.format(
+                             'DTC.{}.{}.images.7z'.format(
                                  _escape_filename(set_name), lang)),
-                'w') as obj:
+                'w', filters=PY7ZR_FILTERS) as obj:
             _prepare_dtc_printing_archive(temp_path, obj)
             obj.write('DriveThruCards.pdf', 'DriveThruCards.pdf')
 
@@ -3963,7 +4026,7 @@ def generate_dtc(conf, set_id, set_name, lang, card_data):
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
-def generate_mbprint(conf, set_id, set_name, lang, card_data):
+def generate_mbprint(conf, set_id, set_name, lang, card_data):  # pylint: disable=R0914
     """ Generate MBPrint outputs.
     """
     logging.info('[%s, %s] Generating MBPrint outputs...',
@@ -3973,8 +4036,6 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):
     input_path = os.path.join(IMAGES_EONS_PATH,
                               JPG800BLEEDMBPRINT,
                               '{}.{}'.format(set_id, lang))
-    output_path = os.path.join(OUTPUT_MBPRINT_PATH, '{}.{}'.format(
-        _escape_filename(set_name), lang))
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_mbprint.{}.{}'.format(set_id, lang))
 
@@ -3987,7 +4048,6 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):
 
         break
 
-    _create_folder(output_path)
     _create_folder(temp_path)
     _clear_folder(temp_path)
     _prepare_printing_images(input_path, temp_path, 'mbprint')
@@ -4008,38 +4068,66 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):
 
         break
 
-    if 'mbprint_zip' in conf['outputs'][lang]:
-        with zipfile.ZipFile(
-                os.path.join(output_path,
-                             'MBPRINT.{}.{}.zip'.format(
-                                 _escape_filename(set_name), lang)),
-                'w') as obj:
-            _prepare_mbprint_printing_archive(temp_path, obj)
-            obj.write('MBPrint.pdf', 'MBPrint.pdf')
+    if ('mbprint_zip' in conf['outputs'][lang] or
+            'mbprint_7z' in conf['outputs'][lang]):
+        output_path = os.path.join(OUTPUT_MBPRINT_PATH, '{}.{}'.format(
+            _escape_filename(set_name), lang))
+        _create_folder(output_path)
 
-    if 'mbprint_7z' in conf['outputs'][lang]:
-        with py7zr.SevenZipFile(
-                os.path.join(output_path,
-                             'MBPRINT.{}.{}.7z'.format(
-                                 _escape_filename(set_name), lang)),
-                'w') as obj:
-            _prepare_mbprint_printing_archive(temp_path, obj)
-            obj.write('MBPrint.pdf', 'MBPrint.pdf')
+        if 'mbprint_zip' in conf['outputs'][lang]:
+            with zipfile.ZipFile(
+                    os.path.join(output_path,
+                                 'MBPRINT.{}.{}.images.zip'.format(
+                                     _escape_filename(set_name), lang)),
+                    'w') as obj:
+                _prepare_mbprint_printing_archive(temp_path, obj)
+                obj.write('MBPrint.pdf', 'MBPrint.pdf')
 
-    if 'mbprint_pdf' in conf['outputs'][lang]:
-        cmd = MAGICK_COMMAND_PDF.format(
-            conf['magick_path'], temp_path,
-            os.path.join(output_path, 'MBPRINT.{}.{}.pdf'.format(
-                _escape_filename(set_name), lang)))
+        if 'mbprint_7z' in conf['outputs'][lang]:
+            with py7zr.SevenZipFile(
+                    os.path.join(output_path,
+                                 'MBPRINT.{}.{}.images.7z'.format(
+                                     _escape_filename(set_name), lang)),
+                    'w', filters=PY7ZR_FILTERS) as obj:
+                _prepare_mbprint_printing_archive(temp_path, obj)
+                obj.write('MBPrint.pdf', 'MBPrint.pdf')
+
+    if ('mbprint_pdf_zip' in conf['outputs'][lang] or
+            'mbprint_pdf_7z' in conf['outputs'][lang]):
+        pdf_filename = 'MBPRINT.{}.{}.pdf'.format(_escape_filename(set_name),
+                                                  lang)
+        pdf_path = os.path.join(temp_path, pdf_filename)
+        cmd = MAGICK_COMMAND_PDF.format(conf['magick_path'], temp_path,
+                                        pdf_path)
         res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
         logging.info(res)
+
+        output_path = os.path.join(OUTPUT_MBPRINT_PDF_PATH, '{}.{}'.format(
+            _escape_filename(set_name), lang))
+        _create_folder(output_path)
+
+        if 'mbprint_pdf_zip' in conf['outputs'][lang]:
+            with zipfile.ZipFile(
+                    os.path.join(output_path,
+                                 'MBPRINT.{}.{}.pdf.zip'.format(
+                                     _escape_filename(set_name), lang)),
+                    'w') as obj:
+                obj.write(pdf_path, pdf_filename)
+
+        if 'mbprint_pdf_7z' in conf['outputs'][lang]:
+            with py7zr.SevenZipFile(
+                    os.path.join(output_path,
+                                 'MBPRINT.{}.{}.pdf.7z'.format(
+                                     _escape_filename(set_name), lang)),
+                    'w', filters=PY7ZR_FILTERS) as obj:
+                obj.write(pdf_path, pdf_filename)
 
     _delete_folder(temp_path)
     logging.info('[%s, %s] ...Generating MBPrint outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
-def generate_generic_png(conf, set_id, set_name, lang, card_data):
+def generate_genericpng(conf, set_id, set_name, lang, card_data):
     """ Generate generic PNG outputs.
     """
     logging.info('[%s, %s] Generating generic PNG outputs...', set_name, lang)
@@ -4047,10 +4135,10 @@ def generate_generic_png(conf, set_id, set_name, lang, card_data):
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG800BLEEDGENERIC,
                               '{}.{}'.format(set_id, lang))
-    output_path = os.path.join(OUTPUT_GENERIC_PNG_PATH, '{}.{}'.format(
+    output_path = os.path.join(OUTPUT_GENERICPNG_PATH, '{}.{}'.format(
         _escape_filename(set_name), lang))
     temp_path = os.path.join(TEMP_ROOT_PATH,
-                             'generate_generic_png.{}.{}'.format(set_id, lang))
+                             'generate_genericpng.{}.{}'.format(set_id, lang))
 
     for _, _, filenames in os.walk(input_path):
         if not filenames:
@@ -4064,25 +4152,25 @@ def generate_generic_png(conf, set_id, set_name, lang, card_data):
     _create_folder(output_path)
     _create_folder(temp_path)
     _clear_folder(temp_path)
-    _prepare_printing_images(input_path, temp_path, 'generic_png')
+    _prepare_printing_images(input_path, temp_path, 'genericpng')
     _combine_doublesided_rules_cards(set_id, temp_path, card_data,
-                                     'generic_png')
+                                     'genericpng')
 
-    if 'generic_png_zip' in conf['outputs'][lang]:
+    if 'genericpng_zip' in conf['outputs'][lang]:
         with zipfile.ZipFile(
                 os.path.join(output_path,
-                             'Generic.{}.{}.zip'.format(
+                             'Generic.{}.{}.images.zip'.format(
                                  _escape_filename(set_name), lang)),
                 'w') as obj:
-            _prepare_generic_png_printing_archive(temp_path, obj)
+            _prepare_genericpng_printing_archive(temp_path, obj)
 
-    if 'generic_png_7z' in conf['outputs'][lang]:
+    if 'genericpng_7z' in conf['outputs'][lang]:
         with py7zr.SevenZipFile(
                 os.path.join(output_path,
-                             'Generic.{}.{}.7z'.format(
+                             'Generic.{}.{}.images.7z'.format(
                                  _escape_filename(set_name), lang)),
-                'w') as obj:
-            _prepare_generic_png_printing_archive(temp_path, obj)
+                'w', filters=PY7ZR_FILTERS) as obj:
+            _prepare_genericpng_printing_archive(temp_path, obj)
 
     _delete_folder(temp_path)
     logging.info('[%s, %s] ...Generating generic PNG outputs (%ss)',

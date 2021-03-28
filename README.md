@@ -114,13 +114,17 @@ The scripts will generate the following outputs:
 - `Output/GenericPNG/<set name>.<language>/`: a `7z` archive of generic 800 dpi PNG images.
 - `Output/HallOfBeorn/<set name>.json`.
 - `Output/MakePlayingCards/<set name>.<language>/`: a `7z` archive of 800 dpi PNG images to be printed on MakePlayingCards.com.
-- `Output/MBPrint/<set name>.<language>/`: a `7z` archive and a PDF file of 800 dpi JPG images to be printed on MBPrint.pl.
+- `Output/MBPrint/<set name>.<language>/`: a `7z` archive of 800 dpi JPG images to be printed on MBPrint.pl.
+- `Output/MBPrintPDF/<set name>.<language>/`: a `7z` archive of a PDF file to be printed on MBPrint.pl.
 - `Output/OCTGN/<set name>/<octgn id>/set.xml`.
 - `Output/OCTGNDecks/<set name>/<deck name>.o8d`: quest decks for OCTGN.
-- `Output/OCTGNImages/<set name>.<language>/<set name>.<language>.o8c`: image packs for OCTGN (300 dpi PNG).
-- `Output/PDF/<set name>.<language>/`: PDF files in `A4` and `letter` format for home printing (300 dpi PNG).
+- `Output/OCTGNImages/<set name>.<language>/<set name>.<language>.o8c`: image packs for OCTGN (600x429 JPG).
+- `Output/PDF/<set name>.<language>/`: PDF files in `A4` and `letter` format for home printing.
 - `Output/RingsDB/<set name>.csv`.
+- `Output/PreviewImages/<set name>.<language>/`: 600x429 JPG images for preview purposes.
 - `Output/RingsDBImages/<set name>.<language>/`: 300 dpi PNG images for RingsDB (the same as `Output/DB`, but player cards only and differently named).
+
+Please note that `Output/DB`, `Output/PreviewImages` and `Output/RingsDBImages` are generated together when `db` output is enabled in the configuration.
 
 Additionally, if you specified OCTGN destination paths, OCTGN outputs will be copied there.
 

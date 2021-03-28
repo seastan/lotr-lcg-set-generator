@@ -23,14 +23,14 @@ def generate_db(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: d
     """ Generate DB (general purposes) outputs.
     """
     lotr.generate_png300_db(conf, set_id, set_name, lang, skip_ids)
-    lotr.generate_db(set_id, set_name, lang, card_data)
+    lotr.generate_db(conf, set_id, set_name, lang, card_data)
 
 
-def generate_octgn(set_id, set_name, lang, skip_ids):
+def generate_octgn(conf, set_id, set_name, lang, skip_ids):
     """ Generate OCTGN outputs.
     """
     lotr.generate_png300_octgn(set_id, set_name, lang, skip_ids)
-    lotr.generate_octgn(set_id, set_name, lang)
+    lotr.generate_octgn(conf, set_id, set_name, lang)
 
 
 def generate_pdf(conf, set_id, set_name, lang, skip_ids):
@@ -61,11 +61,11 @@ def generate_mbprint(conf, set_id, set_name, lang, skip_ids, card_data):  # pyli
     lotr.generate_mbprint(conf, set_id, set_name, lang, card_data)
 
 
-def generate_generic_png(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: disable=R0913
+def generate_genericpng(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: disable=R0913
     """ Generate generic PNG outputs.
     """
     lotr.generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids)
-    lotr.generate_generic_png(conf, set_id, set_name, lang, card_data)
+    lotr.generate_genericpng(conf, set_id, set_name, lang, card_data)
 
 
 def run(args):
@@ -134,7 +134,7 @@ def main():  # pylint: disable=R0912
                               skip_ids, lotr.DATA])
 
             if 'octgn' in conf['outputs'][lang]:
-                tasks.append([generate_octgn, set_id, set_name, lang,
+                tasks.append([generate_octgn, conf, set_id, set_name, lang,
                               skip_ids])
 
             if 'pdf' in conf['outputs'][lang]:
@@ -153,8 +153,8 @@ def main():  # pylint: disable=R0912
                 tasks.append([generate_mbprint, conf, set_id, set_name, lang,
                               skip_ids, lotr.DATA])
 
-            if 'generic_png' in conf['outputs'][lang]:
-                tasks.append([generate_generic_png, conf, set_id, set_name,
+            if 'genericpng' in conf['outputs'][lang]:
+                tasks.append([generate_genericpng, conf, set_id, set_name,
                               lang, skip_ids, lotr.DATA])
 
     execute_tasks(conf, pre_tasks)
