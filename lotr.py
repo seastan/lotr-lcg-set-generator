@@ -397,7 +397,7 @@ def _update_octgn_card_text(text):
 def _escape_filename(value):
     """ Escape forbidden symbols in a file name.
     """
-    return re.sub(r'[<>:\/\\|?*\'"’“”…–—]', ' ', value)
+    return re.sub(r'[<>:\/\\|?*\'"’“”„«»…–—]', ' ', value)
 
 
 def _escape_octgn_filename(value):
@@ -485,6 +485,7 @@ def read_conf(path=CONFIGURATION_PATH):
     with open(path, 'r') as f_conf:
         conf = yaml.safe_load(f_conf)
 
+    conf['all_languages'] = [lang for lang in conf['outputs']]
     conf['languages'] = [lang for lang in conf['outputs']
                          if conf['outputs'][lang]]
     conf['nobleed'] = {}
@@ -624,6 +625,7 @@ def _clean_data(data):  # pylint: disable=R0915
                     value = value.replace('[name]', card_name)
 
                 value = value.strip()
+                value = value.replace('\xa0', ' ')
                 value = value.replace('...', '…')
                 value = value.replace('---', '—')
                 value = value.replace('--', '–')
@@ -632,6 +634,11 @@ def _clean_data(data):  # pylint: disable=R0915
                 value = value.replace("'", '’')
                 value = value.replace('“', '"')
                 value = value.replace('”', '"')
+                value = value.replace('„', '"')
+                value = value.replace('« ', '"')
+                value = value.replace('«', '"')
+                value = value.replace(' »', '"')
+                value = value.replace('»', '"')
                 value = re.sub(r'"([^"]*)"', '“\\1”', value)
                 value = value.replace('"', '[unmatched quot]')
                 value = re.sub(r'\[lquot\]', '“', value, flags=re.IGNORECASE)
@@ -2531,7 +2538,7 @@ def _collect_artwork_images(conf, image_path):
             if filename.split('.')[-1] in ('jpg', 'png'):
                 image_id = '_'.join(filename.split('_')[:2])
                 lang = filename.split('.')[-2]
-                if lang in conf['languages']:
+                if lang in conf['all_languages']:
                     image_id = '{}_{}'.format(image_id, lang)
 
                 if image_id in images:
