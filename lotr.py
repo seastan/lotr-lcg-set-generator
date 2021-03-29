@@ -1110,6 +1110,12 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)
+            elif value == '#REF!':
+                message = ('Reference error in {} column for row '
+                           '#{}{}'.format(key, i, scratch))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
 
         if (((row[CARD_TYPE] == 'Quest' and row[CARD_ADVENTURE])
              or row[CARD_TYPE] == 'Nightmare')
@@ -2949,6 +2955,15 @@ def get_skip_info(set_id, set_name, lang):
     return skip_set, skip_ids
 
 
+def _run_cmd(cmd):
+    try:
+        res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+        return res
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError('Command "{}" returned error (code {}): {}'
+                           .format(cmd, exc.returncode, exc.output))
+
+
 def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
     """ Generate images without bleed margins.
     """
@@ -2986,7 +3001,7 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
         'python-cut-bleed-margins-folder',
         temp_path.replace('\\', '\\\\'),
         output_path.replace('\\', '\\\\'))
-    res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+    res = _run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
     _delete_folder(temp_path)
 
@@ -3032,7 +3047,7 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disab
         'python-prepare-db-output-folder',
         temp_path.replace('\\', '\\\\'),
         output_path.replace('\\', '\\\\'))
-    res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+    res = _run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     _delete_folder(temp_path)
@@ -3109,7 +3124,7 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
         'python-prepare-pdf-back-folder',
         temp_path.replace('\\', '\\\\'),
         output_path.replace('\\', '\\\\'))
-    res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+    res = _run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     _clear_folder(temp_path)
@@ -3129,7 +3144,7 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
         'python-prepare-pdf-front-folder',
         temp_path.replace('\\', '\\\\'),
         output_path.replace('\\', '\\\\'))
-    res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+    res = _run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     _delete_folder(temp_path)
@@ -3173,7 +3188,7 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
         'python-prepare-makeplayingcards-folder',
         temp_path.replace('\\', '\\\\'),
         output_path.replace('\\', '\\\\'))
-    res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+    res = _run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     _delete_folder(temp_path)
@@ -3218,7 +3233,7 @@ def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint:
         'python-prepare-drivethrucards-jpg-folder',
         temp_path.replace('\\', '\\\\'),
         output_path.replace('\\', '\\\\'))
-    res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+    res = _run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     _make_cmyk(conf, output_path)
@@ -3264,7 +3279,7 @@ def generate_jpg800_bleedmbprint(conf, set_id, set_name, lang, skip_ids):  # pyl
         'python-prepare-mbprint-jpg-folder',
         temp_path.replace('\\', '\\\\'),
         output_path.replace('\\', '\\\\'))
-    res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+    res = _run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     _make_cmyk(conf, output_path)
@@ -3308,7 +3323,7 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
         'python-prepare-generic-png-folder',
         temp_path.replace('\\', '\\\\'),
         output_path.replace('\\', '\\\\'))
-    res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+    res = _run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     _delete_folder(temp_path)
@@ -3320,7 +3335,7 @@ def _make_low_quality(conf, input_path):
     """ Make low quality 600x429 JPG images from PNG inputs.
     """
     cmd = MAGICK_COMMAND_LOW.format(conf['magick_path'], input_path)
-    res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+    res = _run_cmd(cmd)
     logging.info(res)
 
     for _, _, filenames in os.walk(input_path):
@@ -3601,7 +3616,7 @@ def _make_cmyk(conf, input_path):
     """ Convert RGB to CMYK.
     """
     cmd = MAGICK_COMMAND_CMYK.format(conf['magick_path'], input_path)
-    res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+    res = _run_cmd(cmd)
     logging.info(res)
 
     for _, _, filenames in os.walk(input_path):
@@ -4097,7 +4112,7 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):  # pylint: disabl
         pdf_path = os.path.join(temp_path, pdf_filename)
         cmd = MAGICK_COMMAND_PDF.format(conf['magick_path'], temp_path,
                                         pdf_path)
-        res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+        res = _run_cmd(cmd)
         logging.info(res)
 
         output_path = os.path.join(OUTPUT_MBPRINT_PDF_PATH, '{}.{}'.format(

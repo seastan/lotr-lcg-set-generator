@@ -904,6 +904,9 @@ function run(progress, target, filename, icons) {
 							s.set('Portrait-external-scale', card['Scale'] / 100);
 						}
 					}
+					else {
+						s.set('Portrait-external-path', 'project:imagesOther/white.jpg');
+					}
 					if ((cardType == 'Quest') || (cardType == 'Contract')) {
 						if (card['BArtwork'] && (card['BArtwork'] != card['Artwork'])) {
 							s.set('PortraitBack-external-path', 'project:imagesRaw/' + card['BArtwork']);
@@ -922,6 +925,9 @@ function run(progress, target, filename, icons) {
 								s.set('PortraitBack-external-scale', card['Scale'] / 100);
 							}
 						}
+						else {
+							s.set('PortraitBack-external-path', 'project:imagesOther/white.jpg');
+						}
 					}
 				}
 				else {
@@ -932,6 +938,9 @@ function run(progress, target, filename, icons) {
 							s.set('Portrait-external-pany', card['BPanY']);
 							s.set('Portrait-external-scale', card['BScale'] / 100);
 						}
+					}
+					else {
+						s.set('Portrait-external-path', 'project:imagesOther/white.jpg');
 					}
 				}
 
