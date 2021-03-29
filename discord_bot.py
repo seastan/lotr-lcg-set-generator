@@ -131,7 +131,7 @@ def format_playtest_message(data):
 
     for line in data['targets']:
         completed = '~~' if line['completed'] else ''
-        user = ' ({})'.format(line['user']) if line['user'] else ''
+        user = ' (**{}**)'.format(line['user']) if line['user'] else ''
         res += '{}{}. {}{}{}\n'.format(completed,  # pylint: disable=W1308
                                        line['num'],
                                        line['title'],
@@ -735,7 +735,7 @@ Targets removed.
             try:
                 error = await self._new_target(message.content)
             except Exception as exc:
-                logging.error(str(exc))
+                logging.exception(str(exc))
                 await message.channel.send(
                     'unexpected error: {}'.format(str(exc)))
                 return
@@ -752,7 +752,7 @@ Targets removed.
                 error = await self._complete_target(message.content, num, user,
                                                     message.jump_url)
             except Exception as exc:
-                logging.error(str(exc))
+                logging.exception(str(exc))
                 await message.channel.send(
                     'unexpected error: {}'.format(str(exc)))
                 return
@@ -767,7 +767,7 @@ Targets removed.
                 params = re.sub(r'^update ', '', command).split(' ')
                 error = await self._update_target(params)
             except Exception as exc:
-                logging.error(str(exc))
+                logging.exception(str(exc))
                 await message.channel.send(
                     'unexpected error: {}'.format(str(exc)))
                 return
@@ -781,7 +781,7 @@ Targets removed.
             try:
                 error = await self._add_target(message.content)
             except Exception as exc:
-                logging.error(str(exc))
+                logging.exception(str(exc))
                 await message.channel.send(
                     'unexpected error: {}'.format(str(exc)))
                 return
@@ -796,7 +796,7 @@ Targets removed.
                 params = re.sub(r'^remove ', '', command).split(' ')
                 error = await self._remove_target(params)
             except Exception as exc:
-                logging.error(str(exc))
+                logging.exception(str(exc))
                 await message.channel.send(
                     'unexpected error: {}'.format(str(exc)))
                 return
@@ -816,6 +816,39 @@ Targets removed.
                     '"{}" is not a positive integer'.format(num))
         else:
             await message.channel.send('excuse me?')
+
+
+    async def _get_quest_keywords(self, quest):
+        """ Get all keywords for a quest.
+        """
+        data = await read_card_data()
+        encounter_sets = set()
+        for card in data['data']:
+            if (card[lotr.CARD_TYPE] == 'Quest' and
+                    lotr.normalized_name(card.get(lotr.CARD_ADVENTURE)) ==
+                    lotr.normalized_name(quest)):
+                encounter_sets.add(card.get(lotr.CARD_ENCOUNTER_SET, ''))
+                additional_sets = card.get(lotr.CARD_ADDITIONAL_ENCOUNTER_SETS)
+                if additional_sets:
+                    encounter_sets = encounter_sets.union(
+                        [e.strip() for e in additional_sets.split(';')])
+
+        encounter_sets = {e for e in encounter_sets if e}
+        if not encounter_sets:
+            return 'No cards for quest "{}" found'.format(quest)
+
+        keywords = set()
+        for card in data['data']:
+            if (card.get(lotr.CARD_ENCOUNTER_SET) in encounter_sets and
+                    card.get(lotr.CARD_KEYWORDS)):
+                keywords = keywords.union(
+                    lotr.extract_keywords(card[lotr.CARD_KEYWORDS]))
+
+        if not keywords:
+            return 'No keywords for quest "{}" found'.format(quest)
+
+        res = '\n'.join(sorted(keywords))
+        return res
 
 
     async def _get_card(self, command):
@@ -864,18 +897,40 @@ Targets removed.
         """
         command = re.sub(r'^!alepcard ', '', message.content).split('\n')[0]
         logging.info('Received card command: %s', command)
+
         if command == 'this':
             command = message.channel.name
 
         try:
             res = await self._get_card(command)
         except Exception as exc:
-            logging.error(str(exc))
+            logging.exception(str(exc))
             await message.channel.send(
                 'unexpected error: {}'.format(str(exc)))
             return
 
         await self._send_channel(message.channel, res)
+
+
+    async def _process_stat_command(self, message):
+        """ Process a stat command.
+        """
+        command = re.sub(r'^!stat ', '', message.content).split('\n')[0]
+        logging.info('Received stat command: %s', command)
+
+        if command.startswith('questkeywords '):
+            try:
+                quest = re.sub(r'^questkeywords ', '', command)
+                res = await self._get_quest_keywords(quest)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await self._send_channel(message.channel, res)
+        else:
+            await message.channel.send('excuse me?')
 
 
     async def on_message(self, message):
@@ -891,6 +946,8 @@ Targets removed.
                 await self._process_playtest_command(message)
             elif message.content.startswith('!alepcard '):
                 await self._process_card_command(message)
+            elif message.content.startswith('!stat '):
+                await self._process_stat_command(message)
         except Exception as exc:
             logging.exception(str(exc))
 

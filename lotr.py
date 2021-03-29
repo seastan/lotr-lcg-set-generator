@@ -406,6 +406,19 @@ def _escape_octgn_filename(value):
     return value.replace(' ', '-')
 
 
+def extract_keywords(value):
+    """ Extract all keywords from the string.
+    """
+    keywords = [k.strip() for k in (value or '').replace(
+                '[inline]', '').split('.') if k != '']
+    keywords = [re.sub(r' ([0-9]+)\[pp\]$', ' \\1 Per Player', k, re.I)
+                for k in keywords]
+    keywords = [k for k in keywords if re.match(
+                r'^[a-z]+(?: -?[0-9X]+(?: Per Player)?)?(?: \([^\)]+\))?$',
+                k, re.I)]
+    return keywords
+
+
 def _clear_folder(folder):
     """ Clear the folder.
     """
@@ -2223,16 +2236,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
         else:
             opposite_title = None
 
-        keywords = [k.strip() for k in
-                    (row[CARD_KEYWORDS] or '').replace('[inline]', ''
-                                                       ).split('.') if k != '']
-        keywords = [re.sub(r' ([0-9]+)\[pp\]$', ' \\1 Per Player', k, re.I)
-                    for k in keywords]
-        keywords = [
-            k for k in keywords if re.match(
-                r'^[a-z]+(?: -?[0-9X]+(?: Per Player)?)?(?: \([^\)]+\))?$',
-                k, re.I)]
-
+        keywords = extract_keywords(row[CARD_KEYWORDS])
         traits = [t.strip() for t in
                   (row[CARD_TRAITS] or '').split('.') if t != '']
         position = (int(row[CARD_NUMBER])
