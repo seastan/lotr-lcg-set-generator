@@ -1,4 +1,4 @@
-# pylint: disable=C0103,W0703
+# pylint: disable=C0103,C0302,W0703
 # -*- coding: utf8 -*-
 """ Discord bot.
 
@@ -166,22 +166,38 @@ def card_match(card_name, card_back_name, search_name):
             card_back_name.startswith(search_name + '-')):
         return 2
 
-    if (card_name.startswith(search_name) or
-            card_back_name.startswith(search_name)):
+    if ('-' + search_name + '-' in card_name or
+            '-' + search_name + '-' in card_back_name):
+        return 3
+
+    if (card_name.endswith('-' + search_name) or
+            card_back_name.endswith('-' + search_name)):
         return 3
 
     return 0
 
 
-def update_text(text):
+def update_text(text):  # pylint: disable=R0915
     """ Update card text.
     """
-    text = re.sub(r'\b(Quest Resolution)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', text)
+    text = re.sub(r'\b(Quest Resolution)( \([^\)]+\))?:', '[b]\\1[/b]\\2:',
+                  text)
     text = re.sub(r'\b(Valour )?(Resource |Planning |Quest |Travel |Encounter '
                   r'|Combat |Refresh )?(Action):', '[b]\\1\\2\\3[/b]:', text)
     text = re.sub(r'\b(When Revealed|Setup|Forced|Valour Response|Response'
                   r'|Travel|Shadow|Resolution):', '[b]\\1[/b]:', text)
     text = re.sub(r'\b(Condition)\b', '[bi]\\1[/bi]', text)
+
+    def _fix_bi_in_b(match):
+        return '[b]{}[/b]'.format(
+            match.groups()[0].replace('[bi]', '[i]').replace('[/bi]', '[/i]'))
+
+    def _fix_bi_in_i(match):
+        return '[i]{}[/i]'.format(
+            match.groups()[0].replace('[bi]', '[b]').replace('[/bi]', '[/b]'))
+
+    text = re.sub(r'\[b\](.+?)\[\/b\]', _fix_bi_in_b, text, flags=re.DOTALL)
+    text = re.sub(r'\[i\](.+?)\[\/i\]', _fix_bi_in_i, text, flags=re.DOTALL)
 
     text = re.sub(r'\[bi\]', '***', text, flags=re.IGNORECASE)
     text = re.sub(r'\[\/bi\]', '***', text, flags=re.IGNORECASE)
@@ -397,7 +413,39 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0914
 {channel_url}"""
     res = re.sub(r'\n{3,}', '\n\n', res)
     res = res.replace('\n\n', '\n` `\n')
+    res = res.strip()
+    logging.info(res)
     return res
+
+
+def format_match(card, num, match_type):
+    """ Format a match.
+    """
+    card_name = card[lotr.CARD_NAME]
+    if (card.get(lotr.BACK_PREFIX + lotr.CARD_NAME) and
+            card[lotr.BACK_PREFIX + lotr.CARD_NAME] != card_name):
+        card_name = '{} / {}'.format(card_name,
+                                     card[lotr.BACK_PREFIX + lotr.CARD_NAME])
+
+    if match_type == 1:
+        card_name = '**{}**'.format(card_name)
+
+    card_set = re.sub(r'^ALeP - ', '', card[lotr.CARD_SET_NAME])
+    res = f'**{num}.** {card_name} *({card_set})*'
+    return res
+
+
+def format_matches(matches, num):
+    """ Format other matches.
+    """
+    res = []
+    for i, (card, match_type) in enumerate(matches):
+        if i == num - 1:
+            continue
+
+        res.append(format_match(card, i + 1, match_type))
+
+    return '\n'.join(res)
 
 
 class MyClient(discord.Client):
@@ -855,10 +903,10 @@ Targets removed.
         """ Get the card information.
         """
         data = await read_card_data()
-        if re.match(r' [0-9]+$', command):
+        if re.search(r' [0-9]+$', command):
             parts = command.split(' ')
             name = ' '.join(parts[:-1])
-            num = parts[-1]
+            num = int(parts[-1])
         else:
             name = command
             num = 1
@@ -873,8 +921,15 @@ Targets removed.
         if not matches:
             return 'no cards found'
 
+        matches = matches[:25]
+        if num > len(matches):
+            list_matches = format_matches(matches, num)
+            return 'we found only {} cards:\n{}'.format(len(matches),
+                                                        list_matches)
+
         matches.sort(key=lambda m: (
             m[1],
+            m[0][lotr.CARD_TYPE] in ('Rules', 'Presentation'),
             m[0][lotr.CARD_NAME],
             m[0].get(lotr.CARD_SET_RINGSDB_CODE, 0),
             lotr.is_positive_or_zero_int(m[0][lotr.CARD_NUMBER])
@@ -889,7 +944,13 @@ Targets removed.
                            .format(guild_id, channel_id))
         else:
             channel_url = ''
-        return format_card(card, data['url'], channel_url)
+
+        res = format_card(card, data['url'], channel_url)
+        if len(matches) > 1:
+            list_matches = format_matches(matches, num)
+            res += '\n` `\n**more matches:**\n{}'.format(list_matches)
+
+        return res
 
 
     async def _process_card_command(self, message):
