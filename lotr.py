@@ -30,7 +30,7 @@ try:
     from reportlab.pdfgen.canvas import Canvas
 
     PY7ZR_FILTERS = [{'id': py7zr.FILTER_LZMA2,
-                      'preset': py7zr.PRESET_EXTREME}]
+                      'preset': 9 | py7zr.PRESET_EXTREME}]
 except Exception:  # pylint: disable=W0703
     pass
 
