@@ -30,7 +30,7 @@ try:
     from reportlab.pdfgen.canvas import Canvas
 
     PY7ZR_FILTERS = [{'id': py7zr.FILTER_LZMA2,
-                      'preset': py7zr.PRESET_EXTREME}]
+                      'preset': 9 | py7zr.PRESET_EXTREME}]
 except Exception:  # pylint: disable=W0703
     pass
 
@@ -133,7 +133,13 @@ MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
 MAGICK_COMMAND_LOW = '"{}" mogrify -resize 600x600 -format jpg "{}\\*.png"'
 MAGICK_COMMAND_PDF = '"{}" convert "{}\\*o.jpg" "{}"'
 
-IMAGE_MIN_SIZE = 50000
+JPG_PREVIEW_MIN_SIZE = 50000
+JPG_300_MIN_SIZE = 250000
+JPG_800_MIN_SIZE = 1000000
+JPG_300CMYK_MIN_SIZE = 1000000
+JPG_800CMYK_MIN_SIZE = 4000000
+PNG_300_MIN_SIZE = 500000
+PNG_800_MIN_SIZE = 2000000
 
 EASY_PREFIX = 'Easy '
 IMAGES_CUSTOM_FOLDER = 'custom'
@@ -253,6 +259,11 @@ class SheetError(Exception):
 
 class SanityCheckError(Exception):
     """ Sanity check error.
+    """
+
+
+class GIMPError(Exception):
+    """ GIMP error.
     """
 
 
@@ -2961,10 +2972,11 @@ def get_skip_info(set_id, set_name, lang):
 
 def _run_cmd(cmd):
     try:
-        res = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+        res = subprocess.run(cmd, stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT, shell=True, check=True)
         return res
     except subprocess.CalledProcessError as exc:
-        raise RuntimeError('Command "{}" returned error (code {}): {}'
+        raise RuntimeError('Command "{}" returned error with code {}: {}'
                            .format(cmd, exc.returncode, exc.output))
 
 
@@ -2975,17 +2987,19 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
                  set_name, lang)
     timestamp = time.time()
 
-    output_path = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED,
-                               '{}.{}'.format(set_id, lang))
-    _create_folder(output_path)
-    _clear_modified_images(output_path, skip_ids)
-
     temp_path = os.path.join(
         TEMP_ROOT_PATH, 'generate_png300_nobleed.{}.{}'.format(set_id,
                                                                lang))
     _create_folder(temp_path)
     _clear_folder(temp_path)
 
+    temp_path2 = os.path.join(
+        TEMP_ROOT_PATH, 'generate_png300_nobleed2.{}.{}'.format(set_id,
+                                                                lang))
+    _create_folder(temp_path2)
+    _clear_folder(temp_path2)
+
+    input_cnt = 0
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
@@ -2994,6 +3008,7 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
                     and f.split('.')[-2] == lang
                     and f.split('.')[-3] == set_id]
         for filename in filelist:
+            input_cnt += 1
             output_filename = _update_zip_filename(filename)
             with zip_obj.open(filename) as zip_file:
                 with open(os.path.join(temp_path, output_filename),
@@ -3004,10 +3019,39 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
         conf['gimp_console_path'],
         'python-cut-bleed-margins-folder',
         temp_path.replace('\\', '\\\\'),
-        output_path.replace('\\', '\\\\'))
+        temp_path2.replace('\\', '\\\\'))
     res = _run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
+
+    output_cnt = 0
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            output_cnt += 1
+            if os.path.getsize(os.path.join(temp_path2, filename)
+                               ) < PNG_300_MIN_SIZE:
+                raise GIMPError('GIMP failed for {}'.format(
+                    os.path.join(temp_path2, filename)))
+
+        break
+
+    if output_cnt != input_cnt:
+        raise GIMPError('Wrong number of output files: {} instead of {}'
+                        .format(output_cnt, input_cnt))
+
+    output_path = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED,
+                               '{}.{}'.format(set_id, lang))
+    _create_folder(output_path)
+    _clear_modified_images(output_path, skip_ids)
+
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            shutil.move(os.path.join(temp_path2, filename),
+                        os.path.join(output_path, filename))
+
+        break
+
     _delete_folder(temp_path)
+    _delete_folder(temp_path2)
 
     logging.info('[%s, %s] ...Generating images without bleed margins '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
@@ -3020,18 +3064,20 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disab
                  set_name, lang)
     timestamp = time.time()
 
-    output_path = os.path.join(IMAGES_EONS_PATH, PNG300DB,
-                               '{}.{}'.format(set_id, lang))
-    _create_folder(output_path)
-    _clear_modified_images(output_path, skip_ids)
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_png300_db.{}.{}'.format(set_id, lang))
     _create_folder(temp_path)
     _clear_folder(temp_path)
 
+    temp_path2 = os.path.join(TEMP_ROOT_PATH,
+                              'generate_png300_db2.{}.{}'.format(set_id, lang))
+    _create_folder(temp_path2)
+    _clear_folder(temp_path2)
+
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED,
                               '{}.{}'.format(set_id, lang))
     known_keys = set()
+    input_cnt = 0
     for _, _, filenames in os.walk(input_path):
         filenames = sorted(filenames)
         for filename in filenames:
@@ -3040,6 +3086,7 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disab
 
             key = filename[50:88]
             if key not in known_keys:
+                input_cnt += 1
                 known_keys.add(key)
                 shutil.copyfile(os.path.join(input_path, filename),
                                 os.path.join(temp_path, filename))
@@ -3050,11 +3097,40 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disab
         conf['gimp_console_path'],
         'python-prepare-db-output-folder',
         temp_path.replace('\\', '\\\\'),
-        output_path.replace('\\', '\\\\'))
+        temp_path2.replace('\\', '\\\\'))
     res = _run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
+    output_cnt = 0
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            output_cnt += 1
+            if os.path.getsize(os.path.join(temp_path2, filename)
+                               ) < PNG_300_MIN_SIZE:
+                raise GIMPError('GIMP failed for {}'.format(
+                    os.path.join(temp_path2, filename)))
+
+        break
+
+    if output_cnt != input_cnt:
+        raise GIMPError('Wrong number of output files: {} instead of {}'
+                        .format(output_cnt, input_cnt))
+
+    output_path = os.path.join(IMAGES_EONS_PATH, PNG300DB,
+                               '{}.{}'.format(set_id, lang))
+    _create_folder(output_path)
+    _clear_modified_images(output_path, skip_ids)
+
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            shutil.move(os.path.join(temp_path2, filename),
+                        os.path.join(output_path, filename))
+
+        break
+
     _delete_folder(temp_path)
+    _delete_folder(temp_path2)
+
     logging.info('[%s, %s] ...Generating images for all DB outputs '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
@@ -3092,22 +3168,25 @@ def generate_png300_octgn(set_id, set_name, lang, skip_ids):
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
-def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
+def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0912,R0914,R0915
     """ Generate images for PDF outputs.
     """
     logging.info('[%s, %s] Generating images for PDF outputs...',
                  set_name, lang)
     timestamp = time.time()
 
-    output_path = os.path.join(IMAGES_EONS_PATH, PNG300PDF,
-                               '{}.{}'.format(set_id, lang))
-    _create_folder(output_path)
-    _clear_modified_images(output_path, skip_ids)
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_png300_pdf.{}.{}'.format(set_id, lang))
     _create_folder(temp_path)
     _clear_folder(temp_path)
 
+    temp_path2 = os.path.join(TEMP_ROOT_PATH,
+                              'generate_png300_pdf2.{}.{}'.format(set_id,
+                                                                  lang))
+    _create_folder(temp_path2)
+    _clear_folder(temp_path2)
+
+    input_cnt = 0
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
@@ -3118,6 +3197,7 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
         for filename in filelist:
             output_filename = _update_zip_filename(filename)
             if output_filename.endswith('-2.png'):
+                input_cnt += 1
                 with zip_obj.open(filename) as zip_file:
                     with open(os.path.join(temp_path, output_filename),
                               'wb') as output_file:
@@ -3127,17 +3207,40 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
         conf['gimp_console_path'],
         'python-prepare-pdf-back-folder',
         temp_path.replace('\\', '\\\\'),
-        output_path.replace('\\', '\\\\'))
+        temp_path2.replace('\\', '\\\\'))
     res = _run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
+    output_cnt = 0
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            output_cnt += 1
+            if os.path.getsize(os.path.join(temp_path2, filename)
+                               ) < PNG_300_MIN_SIZE:
+                raise GIMPError('GIMP failed for {}'.format(
+                    os.path.join(temp_path2, filename)))
+
+        break
+
+    if output_cnt != input_cnt:
+        raise GIMPError('Wrong number of output files: {} instead of {}'
+                        .format(output_cnt, input_cnt))
+
     _clear_folder(temp_path)
+
+    temp_path3 = os.path.join(TEMP_ROOT_PATH,
+                              'generate_png300_pdf3.{}.{}'.format(set_id,
+                                                                  lang))
+    _create_folder(temp_path3)
+    _clear_folder(temp_path3)
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED,
                               '{}.{}'.format(set_id, lang))
+    input_cnt = 0
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
             if filename.endswith('-1.png'):
+                input_cnt += 1
                 shutil.copyfile(os.path.join(input_path, filename),
                                 os.path.join(temp_path, filename))
 
@@ -3147,11 +3250,48 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
         conf['gimp_console_path'],
         'python-prepare-pdf-front-folder',
         temp_path.replace('\\', '\\\\'),
-        output_path.replace('\\', '\\\\'))
+        temp_path3.replace('\\', '\\\\'))
     res = _run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
+    output_cnt = 0
+    for _, _, filenames in os.walk(temp_path3):
+        for filename in filenames:
+            output_cnt += 1
+            if os.path.getsize(os.path.join(temp_path3, filename)
+                               ) < PNG_300_MIN_SIZE:
+                raise GIMPError('GIMP failed for {}'.format(
+                    os.path.join(temp_path3, filename)))
+
+        break
+
+    if output_cnt != input_cnt:
+        raise GIMPError('Wrong number of output files: {} instead of {}'
+                        .format(output_cnt, input_cnt))
+
+    output_path = os.path.join(IMAGES_EONS_PATH, PNG300PDF,
+                               '{}.{}'.format(set_id, lang))
+    _create_folder(output_path)
+    _clear_modified_images(output_path, skip_ids)
+
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            shutil.move(os.path.join(temp_path2, filename),
+                        os.path.join(output_path, filename))
+
+        break
+
+    for _, _, filenames in os.walk(temp_path3):
+        for filename in filenames:
+            shutil.move(os.path.join(temp_path3, filename),
+                        os.path.join(output_path, filename))
+
+        break
+
     _delete_folder(temp_path)
+    _delete_folder(temp_path2)
+    _delete_folder(temp_path3)
+
     logging.info('[%s, %s] ...Generating images for PDF outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 
@@ -3163,16 +3303,19 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
                  set_name, lang)
     timestamp = time.time()
 
-    output_path = os.path.join(IMAGES_EONS_PATH, PNG800BLEEDMPC,
-                               '{}.{}'.format(set_id, lang))
-    _create_folder(output_path)
-    _clear_modified_images(output_path, skip_ids)
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_png800_bleedmpc.{}.{}'.format(set_id,
                                                                      lang))
     _create_folder(temp_path)
     _clear_folder(temp_path)
 
+    temp_path2 = os.path.join(TEMP_ROOT_PATH,
+                              'generate_png800_bleedmpc2.{}.{}'.format(set_id,
+                                                                       lang))
+    _create_folder(temp_path2)
+    _clear_folder(temp_path2)
+
+    input_cnt = 0
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
@@ -3181,6 +3324,7 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
                     and f.split('.')[-2] == lang
                     and f.split('.')[-3] == set_id]
         for filename in filelist:
+            input_cnt += 1
             output_filename = _update_zip_filename(filename)
             with zip_obj.open(filename) as zip_file:
                 with open(os.path.join(temp_path, output_filename),
@@ -3191,11 +3335,40 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
         conf['gimp_console_path'],
         'python-prepare-makeplayingcards-folder',
         temp_path.replace('\\', '\\\\'),
-        output_path.replace('\\', '\\\\'))
+        temp_path2.replace('\\', '\\\\'))
     res = _run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
+    output_cnt = 0
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            output_cnt += 1
+            if os.path.getsize(os.path.join(temp_path2, filename)
+                               ) < PNG_800_MIN_SIZE:
+                raise GIMPError('GIMP failed for {}'.format(
+                    os.path.join(temp_path2, filename)))
+
+        break
+
+    if output_cnt != input_cnt:
+        raise GIMPError('Wrong number of output files: {} instead of {}'
+                        .format(output_cnt, input_cnt))
+
+    output_path = os.path.join(IMAGES_EONS_PATH, PNG800BLEEDMPC,
+                               '{}.{}'.format(set_id, lang))
+    _create_folder(output_path)
+    _clear_modified_images(output_path, skip_ids)
+
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            shutil.move(os.path.join(temp_path2, filename),
+                        os.path.join(output_path, filename))
+
+        break
+
     _delete_folder(temp_path)
+    _delete_folder(temp_path2)
+
     logging.info('[%s, %s] ...Generating images for MakePlayingCards outputs '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
@@ -3207,17 +3380,19 @@ def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint:
                  set_name, lang)
     timestamp = time.time()
 
-    output_path = os.path.join(IMAGES_EONS_PATH,
-                               JPG300BLEEDDTC,
-                               '{}.{}'.format(set_id, lang))
-    _create_folder(output_path)
-    _clear_modified_images(output_path, skip_ids)
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_jpg300_bleeddtc.{}.{}'.format(set_id,
                                                                      lang))
     _create_folder(temp_path)
     _clear_folder(temp_path)
 
+    temp_path2 = os.path.join(TEMP_ROOT_PATH,
+                              'generate_jpg300_bleeddtc2.{}.{}'.format(set_id,
+                                                                       lang))
+    _create_folder(temp_path2)
+    _clear_folder(temp_path2)
+
+    input_cnt = 0
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
@@ -3226,6 +3401,7 @@ def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint:
                     and f.split('.')[-2] == lang
                     and f.split('.')[-3] == set_id]
         for filename in filelist:
+            input_cnt += 1
             output_filename = _update_zip_filename(filename)
             with zip_obj.open(filename) as zip_file:
                 with open(os.path.join(temp_path, output_filename),
@@ -3236,12 +3412,43 @@ def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint:
         conf['gimp_console_path'],
         'python-prepare-drivethrucards-jpg-folder',
         temp_path.replace('\\', '\\\\'),
-        output_path.replace('\\', '\\\\'))
+        temp_path2.replace('\\', '\\\\'))
     res = _run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
-    _make_cmyk(conf, output_path)
+    output_cnt = 0
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            output_cnt += 1
+            if os.path.getsize(os.path.join(temp_path2, filename)
+                               ) < JPG_300_MIN_SIZE:
+                raise GIMPError('GIMP failed for {}'.format(
+                    os.path.join(temp_path2, filename)))
+
+        break
+
+    if output_cnt != input_cnt:
+        raise GIMPError('Wrong number of output files: {} instead of {}'
+                        .format(output_cnt, input_cnt))
+
+    _make_cmyk(conf, temp_path2, JPG_300CMYK_MIN_SIZE)
+
+    output_path = os.path.join(IMAGES_EONS_PATH,
+                               JPG300BLEEDDTC,
+                               '{}.{}'.format(set_id, lang))
+    _create_folder(output_path)
+    _clear_modified_images(output_path, skip_ids)
+
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            shutil.move(os.path.join(temp_path2, filename),
+                        os.path.join(output_path, filename))
+
+        break
+
     _delete_folder(temp_path)
+    _delete_folder(temp_path2)
+
     logging.info('[%s, %s] ...Generating images for DriveThruCards outputs '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
@@ -3253,17 +3460,19 @@ def generate_jpg800_bleedmbprint(conf, set_id, set_name, lang, skip_ids):  # pyl
                  set_name, lang)
     timestamp = time.time()
 
-    output_path = os.path.join(IMAGES_EONS_PATH,
-                               JPG800BLEEDMBPRINT,
-                               '{}.{}'.format(set_id, lang))
-    _create_folder(output_path)
-    _clear_modified_images(output_path, skip_ids)
     temp_path = os.path.join(
         TEMP_ROOT_PATH, 'generate_jpg800_bleedmbprint.{}.{}'.format(set_id,
                                                                     lang))
     _create_folder(temp_path)
     _clear_folder(temp_path)
 
+    temp_path2 = os.path.join(
+        TEMP_ROOT_PATH, 'generate_jpg800_bleedmbprint2.{}.{}'.format(set_id,
+                                                                     lang))
+    _create_folder(temp_path2)
+    _clear_folder(temp_path2)
+
+    input_cnt = 0
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
@@ -3272,6 +3481,7 @@ def generate_jpg800_bleedmbprint(conf, set_id, set_name, lang, skip_ids):  # pyl
                     and f.split('.')[-2] == lang
                     and f.split('.')[-3] == set_id]
         for filename in filelist:
+            input_cnt += 1
             output_filename = _update_zip_filename(filename)
             with zip_obj.open(filename) as zip_file:
                 with open(os.path.join(temp_path, output_filename),
@@ -3282,12 +3492,43 @@ def generate_jpg800_bleedmbprint(conf, set_id, set_name, lang, skip_ids):  # pyl
         conf['gimp_console_path'],
         'python-prepare-mbprint-jpg-folder',
         temp_path.replace('\\', '\\\\'),
-        output_path.replace('\\', '\\\\'))
+        temp_path2.replace('\\', '\\\\'))
     res = _run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
-    _make_cmyk(conf, output_path)
+    output_cnt = 0
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            output_cnt += 1
+            if os.path.getsize(os.path.join(temp_path2, filename)
+                               ) < JPG_800_MIN_SIZE:
+                raise GIMPError('GIMP failed for {}'.format(
+                    os.path.join(temp_path2, filename)))
+
+        break
+
+    if output_cnt != input_cnt:
+        raise GIMPError('Wrong number of output files: {} instead of {}'
+                        .format(output_cnt, input_cnt))
+
+    _make_cmyk(conf, temp_path2, JPG_800CMYK_MIN_SIZE)
+
+    output_path = os.path.join(IMAGES_EONS_PATH,
+                               JPG800BLEEDMBPRINT,
+                               '{}.{}'.format(set_id, lang))
+    _create_folder(output_path)
+    _clear_modified_images(output_path, skip_ids)
+
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            shutil.move(os.path.join(temp_path2, filename),
+                        os.path.join(output_path, filename))
+
+        break
+
     _delete_folder(temp_path)
+    _delete_folder(temp_path2)
+
     logging.info('[%s, %s] ...Generating images for MBPrint outputs '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
@@ -3298,16 +3539,19 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
     logging.info('[%s, %s] Generating generic PNG images...', set_name, lang)
     timestamp = time.time()
 
-    output_path = os.path.join(IMAGES_EONS_PATH, PNG800BLEEDGENERIC,
-                               '{}.{}'.format(set_id, lang))
-    _create_folder(output_path)
-    _clear_modified_images(output_path, skip_ids)
     temp_path = os.path.join(
         TEMP_ROOT_PATH, 'generate_png800_bleedgeneric.{}.{}'.format(set_id,
                                                                     lang))
     _create_folder(temp_path)
     _clear_folder(temp_path)
 
+    temp_path2 = os.path.join(
+        TEMP_ROOT_PATH, 'generate_png800_bleedgeneric2.{}.{}'.format(set_id,
+                                                                     lang))
+    _create_folder(temp_path2)
+    _clear_folder(temp_path2)
+
+    input_cnt = 0
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
@@ -3316,6 +3560,7 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
                     and f.split('.')[-2] == lang
                     and f.split('.')[-3] == set_id]
         for filename in filelist:
+            input_cnt += 1
             output_filename = _update_zip_filename(filename)
             with zip_obj.open(filename) as zip_file:
                 with open(os.path.join(temp_path, output_filename),
@@ -3326,11 +3571,40 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
         conf['gimp_console_path'],
         'python-prepare-generic-png-folder',
         temp_path.replace('\\', '\\\\'),
-        output_path.replace('\\', '\\\\'))
+        temp_path2.replace('\\', '\\\\'))
     res = _run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
+    output_cnt = 0
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            output_cnt += 1
+            if os.path.getsize(os.path.join(temp_path2, filename)
+                               ) < PNG_800_MIN_SIZE:
+                raise GIMPError('GIMP failed for {}'.format(
+                    os.path.join(temp_path2, filename)))
+
+        break
+
+    if output_cnt != input_cnt:
+        raise GIMPError('Wrong number of output files: {} instead of {}'
+                        .format(output_cnt, input_cnt))
+
+    output_path = os.path.join(IMAGES_EONS_PATH, PNG800BLEEDGENERIC,
+                               '{}.{}'.format(set_id, lang))
+    _create_folder(output_path)
+    _clear_modified_images(output_path, skip_ids)
+
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            shutil.move(os.path.join(temp_path2, filename),
+                        os.path.join(output_path, filename))
+
+        break
+
     _delete_folder(temp_path)
+    _delete_folder(temp_path2)
+
     logging.info('[%s, %s] ...Generating generic PNG images (%ss)', set_name,
                  lang, round(time.time() - timestamp, 3))
 
@@ -3338,20 +3612,31 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
 def _make_low_quality(conf, input_path):
     """ Make low quality 600x429 JPG images from PNG inputs.
     """
+    input_cnt = 0
+    for _, _, filenames in os.walk(input_path):
+        for filename in filenames:
+            input_cnt += 1
+
+        break
+
     cmd = MAGICK_COMMAND_LOW.format(conf['magick_path'], input_path)
     res = _run_cmd(cmd)
     logging.info(res)
 
+    output_cnt = 0
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
-            if (filename.endswith('.jpg')
-                    and os.path.getsize(os.path.join(input_path, filename)
-                                        ) < IMAGE_MIN_SIZE):
-                raise ImageMagickError('ImageMagick conversion failed for {}'
-                                       .format(os.path.join(input_path,
-                                                            filename)))
+            output_cnt += 1
+            if os.path.getsize(os.path.join(input_path, filename)
+                               ) < JPG_PREVIEW_MIN_SIZE:
+                raise ImageMagickError('ImageMagick failed for {}'.format(
+                    os.path.join(input_path, filename)))
 
         break
+
+    if output_cnt != input_cnt * 2:
+        raise ImageMagickError('Wrong number of output files: {} instead of {}'
+                               .format(output_cnt, input_cnt))
 
 
 def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R0912,R0914
@@ -3616,23 +3901,34 @@ def generate_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0914
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
-def _make_cmyk(conf, input_path):
+def _make_cmyk(conf, input_path, min_size):
     """ Convert RGB to CMYK.
     """
+    input_cnt = 0
+    for _, _, filenames in os.walk(input_path):
+        for filename in filenames:
+            input_cnt += 1
+
+        break
+
     cmd = MAGICK_COMMAND_CMYK.format(conf['magick_path'], input_path)
     res = _run_cmd(cmd)
     logging.info(res)
 
+    output_cnt = 0
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
-            if (filename.endswith('.jpg')
-                    and os.path.getsize(os.path.join(input_path, filename)
-                                        ) < IMAGE_MIN_SIZE):
-                raise ImageMagickError('ImageMagick conversion failed for {}'
-                                       .format(os.path.join(input_path,
-                                                            filename)))
+            output_cnt += 1
+            if os.path.getsize(os.path.join(input_path, filename)
+                               ) < min_size:
+                raise ImageMagickError('ImageMagick failed for {}'.format(
+                    os.path.join(input_path, filename)))
 
         break
+
+    if output_cnt != input_cnt:
+        raise ImageMagickError('Wrong number of output files: {} instead of {}'
+                               .format(output_cnt, input_cnt))
 
 
 def _prepare_printing_images(input_path, output_path, service):  # pylint: disable=R0912

@@ -4,21 +4,50 @@ import logging
 import signal
 import sys
 import time
+from functools import wraps
 from multiprocessing import Pool, cpu_count
 
 import lotr
+
+
+RETRIES = 2
 
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s: %(message)s')
 
 
+def retry():
+    """Retry decorator.
+    """
+    def _wrap(func):
+        @wraps(func)
+        def _retry(*args, **kwargs):
+            for i in range(RETRIES):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as exc:  # pylint: disable=W0703
+                    logging.exception('Function %s failed: %s: %s',
+                                      func.__name__, type(exc).__name__,
+                                      str(exc))
+                    if i < RETRIES - 1:
+                        logging.info('Retrying function %s...', func.__name__)
+                    else:
+                        raise
+
+        return _retry
+
+    return _wrap
+
+
+@retry()
 def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):
     """ Generate images without bleed margins.
     """
     lotr.generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids)
 
 
+@retry()
 def generate_db(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: disable=R0913
     """ Generate DB (general purposes) outputs.
     """
@@ -26,6 +55,7 @@ def generate_db(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: d
     lotr.generate_db(conf, set_id, set_name, lang, card_data)
 
 
+@retry()
 def generate_octgn(conf, set_id, set_name, lang, skip_ids):
     """ Generate OCTGN outputs.
     """
@@ -33,6 +63,7 @@ def generate_octgn(conf, set_id, set_name, lang, skip_ids):
     lotr.generate_octgn(conf, set_id, set_name, lang)
 
 
+@retry()
 def generate_pdf(conf, set_id, set_name, lang, skip_ids):
     """ Generate PDF outputs.
     """
@@ -40,6 +71,7 @@ def generate_pdf(conf, set_id, set_name, lang, skip_ids):
     lotr.generate_pdf(conf, set_id, set_name, lang)
 
 
+@retry()
 def generate_mpc(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: disable=R0913
     """ Generate MakePlayingCards outputs.
     """
@@ -47,6 +79,7 @@ def generate_mpc(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: 
     lotr.generate_mpc(conf, set_id, set_name, lang, card_data)
 
 
+@retry()
 def generate_dtc(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: disable=R0913
     """ Generate DriveThruCards outputs.
     """
@@ -54,6 +87,7 @@ def generate_dtc(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: 
     lotr.generate_dtc(conf, set_id, set_name, lang, card_data)
 
 
+@retry()
 def generate_mbprint(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: disable=R0913
     """ Generate MBPrint outputs.
     """
@@ -61,6 +95,7 @@ def generate_mbprint(conf, set_id, set_name, lang, skip_ids, card_data):  # pyli
     lotr.generate_mbprint(conf, set_id, set_name, lang, card_data)
 
 
+@retry()
 def generate_genericpng(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: disable=R0913
     """ Generate generic PNG outputs.
     """
