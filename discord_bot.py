@@ -963,6 +963,14 @@ Targets removed.
         if not matches:
             return 'no cards found'
 
+        matches.sort(key=lambda m: (
+            m[1],
+            m[0][lotr.CARD_TYPE] in ('Rules', 'Presentation'),
+            m[0].get(lotr.CARD_SET_RINGSDB_CODE, 0),
+            lotr.is_positive_or_zero_int(m[0][lotr.CARD_NUMBER])
+            and int(m[0][lotr.CARD_NUMBER]) or 0,
+            m[0][lotr.CARD_NUMBER]))
+
         ending = '\n...' if len(matches) > 25 else ''
         matches = matches[:25]
         if num > len(matches):
@@ -971,14 +979,6 @@ Targets removed.
             return 'we found only {} {}:\n{}'.format(len(matches),
                                                      cards_text,
                                                      list_matches)
-
-        matches.sort(key=lambda m: (
-            m[1],
-            m[0][lotr.CARD_TYPE] in ('Rules', 'Presentation'),
-            m[0].get(lotr.CARD_SET_RINGSDB_CODE, 0),
-            lotr.is_positive_or_zero_int(m[0][lotr.CARD_NUMBER])
-            and int(m[0][lotr.CARD_NUMBER]) or 0,
-            m[0][lotr.CARD_NUMBER]))
 
         card = matches[num - 1][0]
         if card[lotr.CARD_NORMALIZED_NAME] in self.channels:
