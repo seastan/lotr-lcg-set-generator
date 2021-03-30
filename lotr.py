@@ -3634,7 +3634,7 @@ def _make_low_quality(conf, input_path):
 
         break
 
-    if output_cnt != input_cnt:
+    if output_cnt != input_cnt * 2:
         raise ImageMagickError('Wrong number of output files: {} instead of {}'
                                .format(output_cnt, input_cnt))
 
