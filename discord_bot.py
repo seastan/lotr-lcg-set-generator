@@ -239,7 +239,7 @@ def update_text(text):  # pylint: disable=R0915
     text = text.strip()
     text = re.sub(r' +(?=\n)', '', text)
     text = re.sub(r' +', ' ', text)
-    text = re.sub(r'(?<!\n)\n(?!\n)', ' ', text)
+    text = re.sub(r'(?<![\n`])\n(?!\n)', ' ', text)
     text = re.sub(r'\n+', '\n', text)
     return text
 
@@ -251,7 +251,7 @@ def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
     card_type = card[prefix + lotr.CARD_TYPE]
 
     card_unique = ('{} '.format(EMOJIS['[unique]'])
-                   if card.get(prefix + lotr.CARD_UNIQUE, '')
+                   if card.get(prefix + lotr.CARD_UNIQUE)
                    else '')
 
     sphere = card.get(prefix + lotr.CARD_SPHERE, '')
@@ -418,20 +418,47 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0914
     return res
 
 
-def format_match(card, num, match_type):
+def format_match(card, num):
     """ Format a match.
     """
+    card_unique = ('{} '.format(EMOJIS['[unique]'])
+                   if card.get(lotr.CARD_UNIQUE)
+                   else '')
     card_name = card[lotr.CARD_NAME]
-    if (card.get(lotr.BACK_PREFIX + lotr.CARD_NAME) and
-            card[lotr.BACK_PREFIX + lotr.CARD_NAME] != card_name):
-        card_name = '{} / {}'.format(card_name,
-                                     card[lotr.BACK_PREFIX + lotr.CARD_NAME])
+    card_type = card[lotr.CARD_TYPE]
 
-    if match_type == 1:
-        card_name = '**{}**'.format(card_name)
+    sphere = card.get(lotr.CARD_SPHERE, '')
+    if sphere in ('Leadership', 'Lore', 'Spirit', 'Tactics', 'Baggins',
+                  'Fellowship'):
+        card_type = '{} {} {}'.format(sphere,
+                                      EMOJIS['[{}]'.format(sphere.lower())],
+                                      card_type)
+    elif sphere in ('Neutral', 'Boon', 'Burden', 'Nightmare', 'Upgraded'):
+        card_type = '{} {}'.format(sphere, card_type)
+
+    card_name_back = card.get(lotr.BACK_PREFIX + lotr.CARD_NAME)
+    if card_name_back and card_name_back != card_name:
+        card_unique_back = ('{} '.format(EMOJIS['[unique]'])
+                            if card.get(lotr.BACK_PREFIX + lotr.CARD_UNIQUE)
+                            else '')
+        card_name = '{} / {}{}'.format(card_name, card_unique_back,
+                                       card_name_back)
+
+    card_type_back = card.get(lotr.BACK_PREFIX + lotr.CARD_TYPE, '')
+    sphere = card.get(lotr.BACK_PREFIX + lotr.CARD_SPHERE, '')
+    if sphere in ('Leadership', 'Lore', 'Spirit', 'Tactics', 'Baggins',
+                  'Fellowship'):
+        card_type_back = '{} {} {}'.format(
+            sphere, EMOJIS['[{}]'.format(sphere.lower())], card_type_back)
+    elif sphere in ('Neutral', 'Boon', 'Burden', 'Nightmare', 'Upgraded'):
+        card_type_back = '{} {}'.format(sphere, card_type_back)
+
+    if card_type_back and card_type_back != card_type:
+        card_type = '{} / {}'.format(card_type, card_type_back)
 
     card_set = re.sub(r'^ALeP - ', '', card[lotr.CARD_SET_NAME])
-    res = f'**{num}.** {card_name} *({card_set})*'
+    card_number = '*#{}*'.format(card[lotr.CARD_NUMBER])
+    res = f'**{num}.** {card_unique}{card_name}  (*{card_type}*, {card_set}, {card_number})'
     return res
 
 
@@ -439,11 +466,9 @@ def format_matches(matches, num):
     """ Format other matches.
     """
     res = []
-    for i, (card, match_type) in enumerate(matches):
-        if i == num - 1:
-            continue
-
-        res.append(format_match(card, i + 1, match_type))
+    for i, (card, _) in enumerate(matches):
+        prefix = '**>>>**  ' if i == num - 1 else ''
+        res.append(prefix + format_match(card, i + 1))
 
     return '\n'.join(res)
 
@@ -903,10 +928,10 @@ Targets removed.
         """ Get the card information.
         """
         data = await read_card_data()
-        if re.search(r' [0-9]+$', command):
+        if re.search(r' n:[0-9]+$', command):
             parts = command.split(' ')
             name = ' '.join(parts[:-1])
-            num = int(parts[-1])
+            num = int(parts[-1].replace('n:', ''))
         else:
             name = command
             num = 1
@@ -921,6 +946,7 @@ Targets removed.
         if not matches:
             return 'no cards found'
 
+        ending = '\n...' if len(matches) > 25 else ''
         matches = matches[:25]
         if num > len(matches):
             list_matches = format_matches(matches, num)
@@ -948,7 +974,7 @@ Targets removed.
         res = format_card(card, data['url'], channel_url)
         if len(matches) > 1:
             list_matches = format_matches(matches, num)
-            res += '\n` `\n**more matches:**\n{}'.format(list_matches)
+            res += '\n` `\n**all matches:**\n{}{}'.format(list_matches, ending)
 
         return res
 
