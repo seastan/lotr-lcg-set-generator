@@ -414,7 +414,6 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0914
     res = re.sub(r'\n{3,}', '\n\n', res)
     res = res.replace('\n\n', '\n` `\n')
     res = res.strip()
-    logging.info(res)
     return res
 
 
@@ -924,25 +923,43 @@ Targets removed.
         return res
 
 
-    async def _get_card(self, command):
+    async def _get_card(self, command):  # pylint: disable=R0914
         """ Get the card information.
         """
         data = await read_card_data()
-        if re.search(r' n:[0-9]+$', command):
-            parts = command.split(' ')
-            name = ' '.join(parts[:-1])
-            num = int(parts[-1].replace('n:', ''))
-        else:
-            name = command
-            num = 1
 
-        name = lotr.normalized_name(name)
-        matches = [m for m in [
-            (card, card_match(
-                card[lotr.CARD_NORMALIZED_NAME],
-                card.get(lotr.BACK_PREFIX + lotr.CARD_NORMALIZED_NAME, ''),
-                name))
-            for card in data['data']] if m[1] > 0]
+        if re.match(r'^[0-9]+$', command):
+            matches = [(card, 1) for card in data['data']
+                       if card[lotr.ROW_COLUMN] == int(command)]
+            num = 1
+        else:
+            if re.search(r' n:[0-9]+$', command):
+                parts = command.split(' ')
+                command = ' '.join(parts[:-1])
+                num = int(parts[-1].replace('n:', ''))
+            else:
+                num = 1
+
+            if re.search(r' s:[a-z][a-z0-9]+$', command, flags=re.IGNORECASE):
+                parts = command.split(' ')
+                name = ' '.join(parts[:-1])
+                set_code = parts[-1].replace('s:', '').lower()
+            else:
+                name = command
+                set_code = None
+
+            name = lotr.normalized_name(name)
+            matches = [m for m in [
+                (card, card_match(
+                    card[lotr.CARD_NORMALIZED_NAME],
+                    card.get(lotr.BACK_PREFIX + lotr.CARD_NORMALIZED_NAME, ''),
+                    name))
+                for card in data['data']] if m[1] > 0]
+
+            if set_code:
+                matches = [m for m in matches
+                           if m[0][lotr.CARD_SET_HOB_CODE].lower() == set_code]
+
         if not matches:
             return 'no cards found'
 
@@ -950,13 +967,14 @@ Targets removed.
         matches = matches[:25]
         if num > len(matches):
             list_matches = format_matches(matches, num)
-            return 'we found only {} cards:\n{}'.format(len(matches),
-                                                        list_matches)
+            cards_text = 'cards' if len(matches) > 1 else 'card'
+            return 'we found only {} {}:\n{}'.format(len(matches),
+                                                     cards_text,
+                                                     list_matches)
 
         matches.sort(key=lambda m: (
             m[1],
             m[0][lotr.CARD_TYPE] in ('Rules', 'Presentation'),
-            m[0][lotr.CARD_NAME],
             m[0].get(lotr.CARD_SET_RINGSDB_CODE, 0),
             lotr.is_positive_or_zero_int(m[0][lotr.CARD_NUMBER])
             and int(m[0][lotr.CARD_NUMBER]) or 0,
