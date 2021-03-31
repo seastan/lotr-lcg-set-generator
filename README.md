@@ -84,6 +84,7 @@ for details).
   - `selected_only`: process only "selected" rows (true or false)
   - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`)
   - `set_ids`: list of set IDs to work on (you can use `all` and `all_scratch` aliases to select all non-scratch and all scratch sets sutomatically)
+  - `ignore_set_ids`: list of set IDs to ignore
   - `octgn_set_xml`: creating `set.xml` files for OCTGN (true or false)
   - `octgn_o8d`: creating `.o8d` files for OCTGN (true or false)
   - `ringsdb_csv`: creating CSV files for RingsDB (true or false)

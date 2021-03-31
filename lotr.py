@@ -938,6 +938,8 @@ def get_sets(conf):
         chosen_sets.update(s for s in FOUND_SCRATCH_SETS if s in SETS)
 
     chosen_sets = list(chosen_sets)
+    chosen_sets = [s for s in chosen_sets
+                   if s not in conf.get('ignore_set_ids', [])]
     chosen_sets = [[SETS[s][SET_ID], SETS[s][SET_NAME]] for s in chosen_sets]
     logging.info('...Getting all sets to work on (%ss)',
                  round(time.time() - timestamp, 3))
@@ -1251,7 +1253,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                  round(time.time() - timestamp, 3))
 
 
-def save_data_for_bot(conf, sets):
+def save_data_for_bot(conf):
     """ Save the data for the Discord bot.
     """
     logging.info('Saving the data for the Discord bot...')
@@ -1260,10 +1262,8 @@ def save_data_for_bot(conf, sets):
     url = (
         'https://docs.google.com/spreadsheets/d/{}/edit#gid={}'
         .format(conf['sheet_gdid'], SHEET_IDS[CARD_SHEET]))
-    set_ids = [s[0] for s in sets]
     data = [{key: value for key, value in row.items() if value is not None}
-            for row in DATA if row[CARD_SET] in set_ids
-            and not row[CARD_SCRATCH]]
+            for row in DATA if not row[CARD_SCRATCH]]
     for row in data:
         row[CARD_NORMALIZED_NAME] = normalized_name(row[CARD_NAME])
         if row.get(BACK_PREFIX + CARD_NAME):
