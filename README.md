@@ -235,6 +235,11 @@ List of available sphere values:
 
 Please note, that not all card types and spheres are currently supported by Strange Eons.
 
+**Special Icons**
+
+- `Eye Of Sauron`
+- `Sailing`
+
 **Deck Rules**
 
 OCTGN `.o8d` files are generated automatically for each scenario detected on `Quest` and `Nightmare` cards.
