@@ -498,21 +498,23 @@ class MyClient(discord.Client):
     async def _process_cron_command(self, message):  #pylint: disable=R0912
         """ Process a cron command.
         """
-        command = re.sub(r'^!cron ', '', message.content).split('\n')[0]
+        command = re.sub(r'^!cron ', '', message.content, flags=re.IGNORECASE
+                        ).split('\n')[0]
         logging.info('Received cron command: %s', command)
-        if command == 'hello':
+        if command.lower().startswith('hello'):
             await message.channel.send('hello')
-        elif command == 'test':
+        elif command.lower().startswith('test'):
             await message.channel.send('passed')
-        elif command == 'thank you':
+        elif (command.lower().startswith('thank you') or
+              command.lower().startswith('thanks')):
             await message.channel.send('you are welcome')
-        elif command == 'log':
+        elif command.lower() == 'log':
             res = await get_log()
             if not res:
                 res = 'no cron log found'
 
             await self._send_channel(message.channel, res)
-        elif command == 'errors':
+        elif command.lower() == 'errors':
             res = await get_errors()
             if not res:
                 res = 'no cron log found'
@@ -801,9 +803,10 @@ Targets removed.
     async def _process_playtest_command(self, message):  # pylint: disable=R0911,R0912,R0915
         """ Process a playtest command.
         """
-        command = re.sub(r'^!playtest ', '', message.content).split('\n')[0]
+        command = re.sub(r'^!playtest ', '', message.content,
+                         flags=re.IGNORECASE).split('\n')[0]
         logging.info('Received playtest command: %s', command)
-        if command == 'new':
+        if command.lower() == 'new':
             try:
                 error = await self._new_target(message.content)
             except Exception as exc:
@@ -817,9 +820,9 @@ Targets removed.
                 return
 
             await message.channel.send('done')
-        elif command.startswith('complete '):
+        elif command.lower().startswith('complete '):
             try:
-                num = re.sub(r'^complete ', '', command)
+                num = re.sub(r'^complete ', '', command, flags=re.IGNORECASE)
                 user = re.sub(r'#.+$', '', str(message.author))
                 error = await self._complete_target(message.content, num, user,
                                                     message.jump_url)
@@ -834,9 +837,10 @@ Targets removed.
                 return
 
             await message.channel.send('done')
-        elif command.startswith('update '):
+        elif command.lower().startswith('update '):
             try:
-                params = re.sub(r'^update ', '', command).split(' ')
+                params = re.sub(r'^update ', '', command, flags=re.IGNORECASE
+                               ).split(' ')
                 error = await self._update_target(params)
             except Exception as exc:
                 logging.exception(str(exc))
@@ -849,7 +853,7 @@ Targets removed.
                 return
 
             await message.channel.send('done')
-        elif command == 'add':
+        elif command.lower() == 'add':
             try:
                 error = await self._add_target(message.content)
             except Exception as exc:
@@ -863,9 +867,10 @@ Targets removed.
                 return
 
             await message.channel.send('done')
-        elif command.startswith('remove '):
+        elif command.lower().startswith('remove '):
             try:
-                params = re.sub(r'^remove ', '', command).split(' ')
+                params = re.sub(r'^remove ', '', command, flags=re.IGNORECASE
+                               ).split(' ')
                 error = await self._remove_target(params)
             except Exception as exc:
                 logging.exception(str(exc))
@@ -878,8 +883,8 @@ Targets removed.
                 return
 
             await message.channel.send('done')
-        elif command.startswith('random '):
-            num = re.sub(r'^random ', '', command)
+        elif command.lower().startswith('random '):
+            num = re.sub(r'^random ', '', command, flags=re.IGNORECASE)
             if lotr.is_positive_int(num):
                 res = random.randint(1, int(num))
                 await message.channel.send(str(res))
@@ -940,7 +945,7 @@ Targets removed.
             else:
                 num = 1
 
-            if re.search(r' s:[a-z][a-z0-9]+$', command, flags=re.IGNORECASE):
+            if re.search(r' s:[a-zA-Z][a-zA-Z0-9]+$', command):
                 parts = command.split(' ')
                 name = ' '.join(parts[:-1])
                 set_code = parts[-1].replace('s:', '').lower()
@@ -1003,10 +1008,11 @@ Targets removed.
     async def _process_card_command(self, message):
         """ Process a card command.
         """
-        command = re.sub(r'^!alepcard ', '', message.content).split('\n')[0]
+        command = re.sub(r'^!alepcard ', '', message.content,
+                         flags=re.IGNORECASE).split('\n')[0]
         logging.info('Received card command: %s', command)
 
-        if command == 'this':
+        if command.lower() == 'this':
             command = message.channel.name
             this = True
         else:
@@ -1026,12 +1032,14 @@ Targets removed.
     async def _process_stat_command(self, message):
         """ Process a stat command.
         """
-        command = re.sub(r'^!stat ', '', message.content).split('\n')[0]
+        command = re.sub(r'^!stat ', '', message.content,
+                         flags=re.IGNORECASE).split('\n')[0]
         logging.info('Received stat command: %s', command)
 
-        if command.startswith('questkeywords '):
+        if command.lower().startswith('questkeywords '):
             try:
-                quest = re.sub(r'^questkeywords ', '', command)
+                quest = re.sub(r'^questkeywords ', '', command,
+                               flags=re.IGNORECASE)
                 res = await self._get_quest_keywords(quest)
             except Exception as exc:
                 logging.exception(str(exc))
@@ -1054,13 +1062,13 @@ Targets removed.
             if message.author.id == self.user.id:
                 return
 
-            if message.content.startswith('!cron '):
+            if message.content.lower().startswith('!cron '):
                 await self._process_cron_command(message)
-            elif message.content.startswith('!playtest '):
+            elif message.content.lower().startswith('!playtest '):
                 await self._process_playtest_command(message)
-            elif message.content.startswith('!alepcard '):
+            elif message.content.lower().startswith('!alepcard '):
                 await self._process_card_command(message)
-            elif message.content.startswith('!stat '):
+            elif message.content.lower().startswith('!stat '):
                 await self._process_stat_command(message)
         except Exception as exc:
             logging.exception(str(exc))
