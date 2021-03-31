@@ -959,7 +959,7 @@ def get_sets(conf):
 
     chosen_sets = list(chosen_sets)
     chosen_sets = [s for s in chosen_sets
-                   if s not in conf.get('ignore_set_ids', [])]
+                   if s not in (conf.get('ignore_set_ids') or [])]
     chosen_sets = [[SETS[s][SET_ID], SETS[s][SET_NAME]] for s in chosen_sets]
     logging.info('...Getting all sets to work on (%ss)',
                  round(time.time() - timestamp, 3))
