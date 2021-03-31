@@ -24,6 +24,7 @@ CONF_PATH = 'discord.yaml'
 LOG_PATH = 'discord_bot.log'
 PLAYTEST_PATH = os.path.join('Discord', 'playtest.json')
 WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
+PLAYTEST_CHANNEL = 'playtesting-checklist'
 
 SLEEP_TIME = 1
 
@@ -49,7 +50,65 @@ EMOJIS = {
     '[hitpoints]': '<:hitpoints:822572931254714389>',
     '[progress]': '<:progress:823007871494520872>'
 }
-PLAYTEST_CHANNEL = 'playtesting-checklist'
+
+HELP = {
+    'alepcard': """
+List of **!alepcard** commands:
+
+**!alepcard <card name>** - display the first card matching a given card name (for example: `!alepcard Thengel`)
+**!alepcard <card name> n:<number>** - display the card #number matching a given card name (for example: `!alepcard Back Card n:2`)
+**!alepcard <card name> s:<set code>** - display the first card matching a given card name from a given set (for example: `!alepcard Back Card s:CoE`)
+**!alepcard <card name> s:<set code> n:<number>** - display the card #number matching a given card name from a given set (for example: `!alepcard Roused s:TSotS n:2`)
+**!alepcard this** - if in a card channel, display this card
+**!alepcard help** - display this help message
+""",
+    'cron': """
+List of **!cron** commands:
+
+**!cron errors** - display all errors from the latest cron run
+**!cron log** - display a full execution log of the latest cron run
+**!cron help** - display this help message
+""",
+    'playtest': """
+List of **!playtest** commands:
+
+**!playtest new
+<optional description>
+<list of targets>**
+Create a new list of targets, for example:
+```
+!playtest new
+Deadline: tomorrow.
+1. Escape From Dol Guldur (solo)
+2. Frogs deck
+```
+**!playtest add
+<optional new description>
+<list of new targets>**
+Add new target(s) to the current list, for example:
+```
+!playtest add
+3. Frogs deck (again)
+```
+**!playtest complete <target>
+<mandatory playtesting report>**
+Mark a given target as completed by you, for example:
+```
+!playtest complete 5
+Some report
+```
+**!playtest remove <target or list of targets separated by space>** - remove a given target or a list of targets (for example: `!playtest remove 11 12`)
+**!playtest update <target or list of targets separated by space> <player>** - mark a given target or a list of targets as completed by a given player (for example: `!playtest random 7 Shellin`)
+**!playtest random <number>** - generate a random number from 1 to a given number (for example: `!playtest random 10`)
+**!playtest help** - display this help message
+""",
+    'stat': """
+List of **!stat** commands:
+
+**!stat questkeywords <quest>** - display the list of all keywords for a given quest (for example: `!stat questkeywords The Battle for the Beacon`)
+**!stat help** - display this help message
+"""
+}
 
 playtest_lock = asyncio.Lock()
 
@@ -520,6 +579,9 @@ class MyClient(discord.Client):
                 res = 'no cron log found'
 
             await self._send_channel(message.channel, res)
+        elif command.lower().startswith('help'):
+            res = HELP['cron']
+            await self._send_channel(message.channel, res)
         else:
             await message.channel.send('excuse me?')
 
@@ -891,6 +953,9 @@ Targets removed.
             else:
                 await message.channel.send(
                     '"{}" is not a positive integer'.format(num))
+        elif command.lower().startswith('help'):
+            res = HELP['playtest']
+            await self._send_channel(message.channel, res)
         else:
             await message.channel.send('excuse me?')
 
@@ -1012,6 +1077,11 @@ Targets removed.
                          flags=re.IGNORECASE).split('\n')[0]
         logging.info('Received card command: %s', command)
 
+        if command.lower().startswith('help'):
+            res = HELP['alepcard']
+            await self._send_channel(message.channel, res)
+            return
+
         if command.lower() == 'this':
             command = message.channel.name
             this = True
@@ -1048,8 +1118,20 @@ Targets removed.
                 return
 
             await self._send_channel(message.channel, res)
+        elif command.lower().startswith('help'):
+            res = HELP['stat']
+            await self._send_channel(message.channel, res)
         else:
             await message.channel.send('excuse me?')
+
+
+    async def _process_help_command(self, message):
+        """ Process a help command.
+        """
+        logging.info('Received help command')
+
+        res = ''.join(HELP[key] for key in sorted(HELP.keys()))
+        await self._send_channel(message.channel, res)
 
 
     async def on_message(self, message):
@@ -1070,6 +1152,8 @@ Targets removed.
                 await self._process_card_command(message)
             elif message.content.lower().startswith('!stat '):
                 await self._process_stat_command(message)
+            elif message.content.lower().startswith('!help'):
+                await self._process_help_command(message)
         except Exception as exc:
             logging.exception(str(exc))
 
