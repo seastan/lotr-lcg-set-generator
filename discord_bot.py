@@ -923,7 +923,7 @@ Targets removed.
         return res
 
 
-    async def _get_card(self, command):  # pylint: disable=R0914
+    async def _get_card(self, command, this):  # pylint: disable=R0912,R0914
         """ Get the card information.
         """
         data = await read_card_data()
@@ -971,6 +971,9 @@ Targets removed.
             and int(m[0][lotr.CARD_NUMBER]) or 0,
             m[0][lotr.CARD_NUMBER]))
 
+        if this:
+            matches = matches[:1]
+
         ending = '\n...' if len(matches) > 25 else ''
         matches = matches[:25]
         if num > len(matches):
@@ -1005,9 +1008,12 @@ Targets removed.
 
         if command == 'this':
             command = message.channel.name
+            this = True
+        else:
+            this = False
 
         try:
-            res = await self._get_card(command)
+            res = await self._get_card(command, this)
         except Exception as exc:
             logging.exception(str(exc))
             await message.channel.send(
