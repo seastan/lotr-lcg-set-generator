@@ -24,6 +24,7 @@ discord.yaml
 mpc_monitor.json
 sanity_check.txt
 setGenerator.seproject
+sheets.json
 USWebCoatedSWOP.icc
 *.cnt
 *.lock

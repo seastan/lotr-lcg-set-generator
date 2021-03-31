@@ -1048,6 +1048,9 @@ Targets removed.
         """ Invoked when a new message posted.
         """
         try:
+            if message.content[0] != '!':
+                return
+
             if message.author.id == self.user.id:
                 return
 

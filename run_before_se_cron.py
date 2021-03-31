@@ -223,7 +223,7 @@ def rclone():
             stdout, stderr))
 
 
-def main():
+def main():  # pylint: disable=R0912
     """ Main function.
     """
     cron_id = uuid.uuid4()
@@ -233,10 +233,12 @@ def main():
             logging.warning('Internet is not available right now, exiting')
             return
 
-        last_message = get_sanity_check_message()
-        imported_main()
+        changes = imported_main()
+        if not changes:
+            return
+
         rclone()
-        if last_message:
+        if get_sanity_check_message():
             message = 'Sanity check passed'
             try:
                 if send_discord(message):
@@ -247,7 +249,7 @@ def main():
     except SanityCheckError as exc:
         message = str(exc)
         logging.error(message)
-        if message != last_message:
+        if message != get_sanity_check_message():
             try:
                 if send_discord(message):
                     set_sanity_check_message(message)

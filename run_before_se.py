@@ -22,12 +22,17 @@ def main():  # pylint: disable=R0912
     else:
         conf = lotr.read_conf()
 
-    lotr.reset_project_folders()
-    lotr.download_sheet(conf)
+    sheet_changes = lotr.download_sheet(conf)
+    if conf['exit_if_no_spreadsheet_changes'] and not sheet_changes:
+        logging.info('No spreadsheet changes, exiting')
+        logging.info('Done (%ss)', round(time.time() - timestamp, 3))
+        return False
+
     lotr.extract_data(conf)
     sets = lotr.get_sets(conf)
     lotr.sanity_check(conf, sets)
     lotr.save_data_for_bot(conf)
+    lotr.reset_project_folders()
 
     strange_eons = False
     changes = False
@@ -44,7 +49,9 @@ def main():  # pylint: disable=R0912
         if conf['hallofbeorn_json']:
             lotr.generate_hallofbeorn_json(conf, set_id, set_name)
 
-        lotr.copy_custom_images(conf, set_id, set_name)
+        if conf['languages']:
+            lotr.copy_custom_images(conf, set_id, set_name)
+
         for lang in conf['languages']:
             strange_eons = True
             lotr.generate_xml(conf, set_id, set_name, lang)
@@ -68,6 +75,7 @@ def main():  # pylint: disable=R0912
                      'project')
 
     logging.info('Done (%ss)', round(time.time() - timestamp, 3))
+    return True
 
 
 if __name__ == '__main__':

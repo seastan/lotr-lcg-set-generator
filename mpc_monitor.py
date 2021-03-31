@@ -6,7 +6,7 @@ NOTE: This script heavily relies on my existing smart home environment.
 Create discord.yaml (see discord.default.yaml).
 
 Setup a cron as:
-*/2 * * * * flock -xn /home/homeassistant/lotr-lcg-set-generator/mpc_monitor.lock -c 'python3 /home/homeassistant/lotr-lcg-set-generator/mpc_monitor.py > /dev/null' 2>&1
+1-59/2 * * * * flock -xn /home/homeassistant/lotr-lcg-set-generator/mpc_monitor.lock -c 'python3 /home/homeassistant/lotr-lcg-set-generator/mpc_monitor.py > /dev/null' 2>&1
 """
 from datetime import datetime
 from email.header import Header
@@ -310,7 +310,6 @@ def get_decks(session):
     """
     viewstate = DEFAULT_VIEWSTATE
     viewstategenerator = DEFAULT_VIEWSTATEGENERATOR
-    # viewstate, viewstategenerator = get_viewstate(session)
     form_data = init_form_data('btn_pageload_handle', viewstate,
                                viewstategenerator)
     content = send_post(session, SAVED_PROJECTS_URL, form_data)

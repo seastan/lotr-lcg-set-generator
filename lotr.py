@@ -202,6 +202,7 @@ OUTPUT_RINGSDB_IMAGES_PATH = os.path.join('Output', 'RingsDBImages')
 PROJECT_PATH = 'setGenerator.seproject'
 SET_EONS_PATH = 'setEons'
 SET_OCTGN_PATH = 'setOCTGN'
+SHEETS_JSON_PATH = 'sheets.json'
 TEMP_ROOT_PATH = 'Temp'
 TEMPLATES_SOURCE_PATH = os.path.join('Templates')
 TEMPLATES_PATH = os.path.join(PROJECT_FOLDER, 'Templates')
@@ -605,6 +606,7 @@ def download_sheet(conf):
     logging.info('Downloading cards spreadsheet from Google Sheets...')
     timestamp = time.time()
 
+    changes = False
     if conf['sheet_gdid']:
         SHEET_IDS.clear()
         sheets = [SET_SHEET, CARD_SHEET, SCRATCH_SHEET]
@@ -623,6 +625,13 @@ def download_sheet(conf):
         except ValueError:
             raise SheetError("Can't download the Google Sheet")
 
+        try:
+            with open(SHEETS_JSON_PATH, 'r') as fobj:
+                old_checksums = json.load(fobj)
+        except Exception:  # pylint: disable=W0703
+            old_checksums = {}
+
+        new_checksums = {}
         for sheet in sheets:
             url = (
                 'https://docs.google.com/spreadsheets/d/{}/export?format=csv&gid={}'
@@ -633,13 +642,24 @@ def download_sheet(conf):
                 raise SheetError("Can't download {} from the Google Sheet"
                                  .format(sheet))
 
+            new_checksums[sheet] = hashlib.md5(res.strip()).hexdigest()
             with open(path, 'wb') as f_sheet:
                 f_sheet.write(res)
+
+
+        for sheet in new_checksums:
+            if new_checksums[sheet] != old_checksums.get(sheet, ''):
+                changes = True
+
+        if changes:
+            with open(SHEETS_JSON_PATH, 'w') as fobj:
+                json.dump(new_checksums, fobj)
     else:
         logging.info('No Google Sheets ID found, using a local copy')
 
     logging.info('...Downloading cards spreadsheet from Google Sheets (%ss)',
                  round(time.time() - timestamp, 3))
+    return changes
 
 
 def _clean_data(data):  # pylint: disable=R0915
