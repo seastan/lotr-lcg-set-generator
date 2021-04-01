@@ -107,7 +107,7 @@ To run the workflow, go to the root folder of this repo and follow these steps:
 
 For debugging purposes you can also run these steps using the Jupyter notebook (it doesn't use parallelism):
 
-- [skip this step, if you don't use VirtualEnv] `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac)
+- [skip this step, if you don't use VirtualEnv] `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
 - `jupyter notebook`
 - Open `setGenerator.ipynb` in the browser.
 
