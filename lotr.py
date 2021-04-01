@@ -129,9 +129,9 @@ SPHERES_RULES = {'Back'}
 SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow'}
 
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
-MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}\\*.jpg"'
-MAGICK_COMMAND_LOW = '"{}" mogrify -resize 600x600 -format jpg "{}\\*.png"'
-MAGICK_COMMAND_PDF = '"{}" convert "{}\\*o.jpg" "{}"'
+MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}{}*.jpg"'
+MAGICK_COMMAND_LOW = '"{}" mogrify -resize 600x600 -format jpg "{}{}*.png"'
+MAGICK_COMMAND_PDF = '"{}" convert "{}{}*o.jpg" "{}"'
 
 JPG_PREVIEW_MIN_SIZE = 50000
 JPG_300_MIN_SIZE = 250000
@@ -3639,7 +3639,7 @@ def _make_low_quality(conf, input_path):
 
         break
 
-    cmd = MAGICK_COMMAND_LOW.format(conf['magick_path'], input_path)
+    cmd = MAGICK_COMMAND_LOW.format(conf['magick_path'], input_path, os.sep)
     res = _run_cmd(cmd)
     logging.info(res)
 
@@ -3931,7 +3931,7 @@ def _make_cmyk(conf, input_path, min_size):
 
         break
 
-    cmd = MAGICK_COMMAND_CMYK.format(conf['magick_path'], input_path)
+    cmd = MAGICK_COMMAND_CMYK.format(conf['magick_path'], input_path, os.sep)
     res = _run_cmd(cmd)
     logging.info(res)
 
@@ -4431,7 +4431,7 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):  # pylint: disabl
                                                   lang)
         pdf_path = os.path.join(temp_path, pdf_filename)
         cmd = MAGICK_COMMAND_PDF.format(conf['magick_path'], temp_path,
-                                        pdf_path)
+                                        os.sep, pdf_path)
         res = _run_cmd(cmd)
         logging.info(res)
 
