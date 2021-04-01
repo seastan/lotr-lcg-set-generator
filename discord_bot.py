@@ -46,6 +46,7 @@ EMOJIS = {
     '[stormy]': '<:stormy:826923723646173236>',
     '[sailing]': '<:sailing:826923723780784168>',
     '[eos]': '<:eyeofsauron:826923723662557215>',
+    '[eyeofsauron]': '<:eyeofsauron:826923723662557215>',
     '[pp]': '<:pp:823008093898145792>',
     '[hitpoints]': '<:hitpoints:822572931254714389>',
     '[progress]': '<:progress:823007871494520872>'
@@ -388,7 +389,14 @@ def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
     elif lotr.is_positive_or_zero_int(victory):
         card_victory = '\n**VICTORY {}**'.format(victory)
     else:
-        card_victory = '**{}**\n'.format(victory)
+        card_victory = '\n**{}**'.format(victory)
+
+    special_icon = card.get(prefix + lotr.CARD_SPECIAL_ICON, '')
+    if special_icon == '':
+        card_special_icon = ''
+    else:
+        card_special_icon = '\n{}'.format(
+            EMOJIS['[{}]'.format(special_icon.lower().replace(' ', ''))])
 
     flavour = update_text(card.get(prefix + lotr.CARD_FLAVOUR, ''))
     card_flavour = '' if flavour == '' else '\n\n*{}*'.format(flavour)
@@ -396,7 +404,7 @@ def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
     res = f"""{card_unique}{card_name}
 {card_sphere}{card_type}{card_cost}{card_engagement}{card_stage}{card_skills}
 
-{card_traits}{card_keywords}{card_text}{card_shadow}{card_victory}{card_flavour}"""
+{card_traits}{card_keywords}{card_text}{card_shadow}{card_victory}{card_special_icon}{card_flavour}"""  # pylint: disable=C0301
     return res
 
 
