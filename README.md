@@ -50,7 +50,8 @@ with the artwork is being synced.
 7. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `GIMP` folder
 from this repo, click `OK` and then close GIMP.
 
-8. Install ImageMagick from https://drive.google.com/file/d/1tBFGjE9OakbQNjY-Nqpxky14XVFdGL_G/view?usp=sharing.
+8. Install ImageMagick 7.0.10-28 (download Windows version from https://drive.google.com/file/d/1tBFGjE9OakbQNjY-Nqpxky14XVFdGL_G/view?usp=sharing,
+for other platforms look at https://download.imagemagick.org/ImageMagick/download/releases/).
 
 9. Download `USWebCoatedSWOP.icc` from
 https://github.com/cjw-network/cjwpublish1411/blob/master/vendor/imagine/imagine/lib/Imagine/resources/Adobe/CMYK/USWebCoatedSWOP.icc
