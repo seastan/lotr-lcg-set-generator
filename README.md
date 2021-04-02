@@ -45,12 +45,12 @@ with the artwork is being synced.
 
 5. Install Strange Eons and the custom plugin, see https://github.com/seastan/lotr-lcg-se-plugin for details.
 
-6. Install GIMP (https://www.gimp.org/downloads/).
+6. Install the latest GIMP version from https://www.gimp.org/downloads/.
 
 7. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `GIMP` folder
 from this repo, click `OK` and then close GIMP.
 
-8. Install ImageMagick (https://imagemagick.org/script/download.php).
+8. Install ImageMagick from https://drive.google.com/file/d/1tBFGjE9OakbQNjY-Nqpxky14XVFdGL_G/view?usp=sharing.
 
 9. Download `USWebCoatedSWOP.icc` from
 https://github.com/cjw-network/cjwpublish1411/blob/master/vendor/imagine/imagine/lib/Imagine/resources/Adobe/CMYK/USWebCoatedSWOP.icc
