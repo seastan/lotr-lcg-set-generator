@@ -589,6 +589,15 @@ class MyClient(discord.Client):
 
             name = card[lotr.CARD_DISCORD_CHANNEL]
             if name in channels:
+                if (card[lotr.CARD_DISCORD_CATEGORY] !=
+                        channels[name]['category_name']):
+                    logging.warning(
+                        'Card %s (%s) has a wrong channel category: %s '
+                        'instead of %s', card[lotr.CARD_NAME],
+                        card[lotr.CARD_DISCORD_CHANNEL],
+                        channels[name]['category_name'],
+                        card[lotr.CARD_DISCORD_CATEGORY])
+
                 del channels[name]
             else:
                 orphan_cards.append(card)

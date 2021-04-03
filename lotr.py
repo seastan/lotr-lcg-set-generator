@@ -91,6 +91,7 @@ CARD_SET_HOB_CODE = '_Set HoB Code'
 CARD_RINGSDB_CODE = '_RingsDB Code'
 CARD_NORMALIZED_NAME = '_Normalized Name'
 CARD_DISCORD_CHANNEL = '_Discord Channel'
+CARD_DISCORD_CATEGORY = '_Discord Category'
 
 CARD_DOUBLESIDE = '_Card Side'
 CARD_ORIGINAL_NAME = '_Original Name'
@@ -661,6 +662,16 @@ def download_sheet(conf):
     logging.info('...Downloading cards spreadsheet from Google Sheets (%ss)',
                  round(time.time() - timestamp, 3))
     return changes
+
+
+def _update_discord_category(category):
+    """ Update the name of a Discord category.
+    """
+    category = re.sub(r'[“”]', '"', category)
+    category = re.sub(r'’', "'", category)
+    category = re.sub(r'…', '', category)
+    category = re.sub(r'[–—]', '-', category)
+    return category
 
 
 def _clean_data(data):  # pylint: disable=R0915
@@ -1325,6 +1336,16 @@ def save_data_for_bot(conf):
 
             channels.add(channel)
             row[CARD_DISCORD_CHANNEL] = channel
+
+            card_set = re.sub(r'^ALeP - ', '', row[CARD_SET_NAME])
+            category = row.get(CARD_ENCOUNTER_SET, '')
+            if not category:
+                category = 'Player - {}'.format(card_set)
+            elif category != card_set:
+                category = '{} ({})'.format(category, card_set)
+
+            category = _update_discord_category(category)
+            row[CARD_DISCORD_CATEGORY] = category
 
     data.sort(key=lambda row: (
         row[CARD_SET_RINGSDB_CODE],
