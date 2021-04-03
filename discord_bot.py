@@ -23,10 +23,14 @@ import lotr
 CONF_PATH = 'discord.yaml'
 LOG_PATH = 'discord_bot.log'
 PLAYTEST_PATH = os.path.join('Discord', 'playtest.json')
-WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
-PLAYTEST_CHANNEL = 'playtesting-checklist'
-
 SLEEP_TIME = 1
+WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
+
+PLAYTEST_CHANNEL = 'playtesting-checklist'
+GENERAL_CATEGORIES = {
+    'Text Channels', 'Division of Labor', 'Player Card Design', 'Printing',
+    'Rules', 'Voice Channels', 'Archive', 'Archive 2'
+}
 
 EMOJIS = {
     '[leadership]': '<:leadership:822573464601886740>',
@@ -106,6 +110,7 @@ Some report
     'stat': """
 List of **!stat** commands:
 
+**!stat channels** - number of Discord channels and free channel slots
 **!stat questkeywords <quest>** - display the list of all keywords for a given quest (for example: `!stat questkeywords The Battle for the Beacon`)
 **!stat help** - display this help message
 """
@@ -551,7 +556,54 @@ class MyClient(discord.Client):
         """
         logging.info('Logged in as %s (%s)', self.user.name, self.user.id)
         for channel in self.get_all_channels():
-            self.channels[channel.name] = (channel.id, channel.guild.id)
+            if (not channel.category_id
+                    or channel.category.name in GENERAL_CATEGORIES
+                    or channel.name == 'general'):
+                continue
+
+            if channel.name in self.channels:
+                logging.warning(
+                    'Duplicate channel name detected: %s (categories "%s" '
+                    'and "%s")',
+                    channel.name,
+                    self.channels[channel.name]['category_name'],
+                    channel.category.name)
+            else:
+                self.channels[channel.name] = {
+                    'name': channel.name,
+                    'id': channel.id,
+                    'guild_id': channel.guild.id,
+                    'category_id': channel.category_id,
+                    'category_name': channel.category.name}
+
+        # temporary code
+        channels = self.channels.copy()
+        data = await read_card_data()
+        categories = set()
+        orphan_cards = []
+        for card in data['data']:
+            if (card[lotr.CARD_NAME] == 'T.B.D.'
+                    or card[lotr.CARD_TYPE] in ('Rules', 'Presentation')):
+                continue
+
+            name = card[lotr.CARD_NORMALIZED_NAME]
+            if name in channels:
+                categories.add(channels[name]['category_name'])
+                del channels[name]
+            else:
+                orphan_cards.append(card)
+
+        logging.info('')
+        logging.info('ORPHAN CARDS:')
+        for card in sorted(orphan_cards, key=lambda c: c[lotr.CARD_SET_NAME]):
+            logging.info('%s - %s - %s - %s', card[lotr.CARD_NORMALIZED_NAME],
+                         card[lotr.CARD_NAME], card[lotr.CARD_SET_NAME],
+                         card[lotr.CARD_TYPE])
+
+        logging.info('')
+        logging.info('ORPHAN CHANNELS:')
+        for channel in sorted(channels.values(), key=lambda c: c['category_name']):
+            logging.info('%s - %s', channel['name'], channel['category_name'])
 
 
     async def _send_channel(self, channel, content):
@@ -648,7 +700,7 @@ New playtesting targets:
 {}""".format(format_playtest_message(data))
         if PLAYTEST_CHANNEL in self.channels:
             await self._send_channel(
-                self.get_channel(self.channels[PLAYTEST_CHANNEL][0]),
+                self.get_channel(self.channels[PLAYTEST_CHANNEL]['id']),
                 playtest_message)
 
         return ''
@@ -696,7 +748,7 @@ Target "{}" completed. Link: {}
 {}""".format(num, url, format_playtest_message(data), all_targets)
         if PLAYTEST_CHANNEL in self.channels:
             await self._send_channel(
-                self.get_channel(self.channels[PLAYTEST_CHANNEL][0]),
+                self.get_channel(self.channels[PLAYTEST_CHANNEL]['id']),
                 playtest_message)
 
         return ''
@@ -756,7 +808,7 @@ Targets updated.
 {}""".format(format_playtest_message(data), all_targets)
         if PLAYTEST_CHANNEL in self.channels:
             await self._send_channel(
-                self.get_channel(self.channels[PLAYTEST_CHANNEL][0]),
+                self.get_channel(self.channels[PLAYTEST_CHANNEL]['id']),
                 playtest_message)
 
         return ''
@@ -817,7 +869,7 @@ Targets added.
 {}""".format(format_playtest_message(data))
         if PLAYTEST_CHANNEL in self.channels:
             await self._send_channel(
-                self.get_channel(self.channels[PLAYTEST_CHANNEL][0]),
+                self.get_channel(self.channels[PLAYTEST_CHANNEL]['id']),
                 playtest_message)
 
         return ''
@@ -864,7 +916,7 @@ Targets removed.
 {}""".format(format_playtest_message(data))
         if PLAYTEST_CHANNEL in self.channels:
             await self._send_channel(
-                self.get_channel(self.channels[PLAYTEST_CHANNEL][0]),
+                self.get_channel(self.channels[PLAYTEST_CHANNEL]['id']),
                 playtest_message)
 
         return ''
@@ -1063,10 +1115,9 @@ Targets removed.
 
         card = matches[num - 1][0]
         if card[lotr.CARD_NORMALIZED_NAME] in self.channels:
-            channel_id, guild_id = self.channels[
-                card[lotr.CARD_NORMALIZED_NAME]]
+            channel = self.channels[card[lotr.CARD_NORMALIZED_NAME]]
             channel_url = ('https://discord.com/channels/{}/{}'
-                           .format(guild_id, channel_id))
+                           .format(channel['guild_id'], channel['id']))
         else:
             channel_url = ''
 
@@ -1126,6 +1177,18 @@ Targets removed.
                 return
 
             await self._send_channel(message.channel, res)
+        elif command.lower() == 'channels':
+            try:
+                num = len(list(self.get_all_channels()))
+                res = 'There are {} channels and {} free slots'.format(
+                    num, 500 - num)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await self._send_channel(message.channel, res)
         elif command.lower().startswith('help'):
             res = HELP['stat']
             await self._send_channel(message.channel, res)
@@ -1146,7 +1209,7 @@ Targets removed.
         """ Invoked when a new message posted.
         """
         try:
-            if message.content[0] != '!':
+            if not message.content or message.content[0] != '!':
                 return
 
             if message.author.id == self.user.id:
