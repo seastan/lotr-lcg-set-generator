@@ -29,7 +29,7 @@ WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 PLAYTEST_CHANNEL = 'playtesting-checklist'
 GENERAL_CATEGORIES = {
     'Text Channels', 'Division of Labor', 'Player Card Design', 'Printing',
-    'Rules', 'Voice Channels', 'Archive', 'Archive 2'
+    'Rules', 'Voice Channels', 'Archive'
 }
 
 EMOJIS = {
@@ -558,7 +558,7 @@ class MyClient(discord.Client):
         for channel in self.get_all_channels():
             if (not channel.category_id
                     or channel.category.name in GENERAL_CATEGORIES
-                    or channel.name == 'general'):
+                    or channel.name in ('general', 'rules')):
                 continue
 
             if channel.name in self.channels:
@@ -576,10 +576,12 @@ class MyClient(discord.Client):
                     'category_id': channel.category_id,
                     'category_name': channel.category.name}
 
-        # temporary code
+        await self._test_channels()
+
+
+    async def _test_channels(self):
         channels = self.channels.copy()
         data = await read_card_data()
-        categories = set()
         orphan_cards = []
         for card in data['data']:
             if (card[lotr.CARD_NAME] == 'T.B.D.'
@@ -588,22 +590,23 @@ class MyClient(discord.Client):
 
             name = card[lotr.CARD_NORMALIZED_NAME]
             if name in channels:
-                categories.add(channels[name]['category_name'])
                 del channels[name]
             else:
                 orphan_cards.append(card)
 
-        logging.info('')
-        logging.info('ORPHAN CARDS:')
-        for card in sorted(orphan_cards, key=lambda c: c[lotr.CARD_SET_NAME]):
-            logging.info('%s - %s - %s - %s', card[lotr.CARD_NORMALIZED_NAME],
-                         card[lotr.CARD_NAME], card[lotr.CARD_SET_NAME],
-                         card[lotr.CARD_TYPE])
+        if orphan_cards:
+            logging.warning('Orphan cards detected:')
+            for card in orphan_cards:
+                logging.warning('%s (%s): %s, %s', card[lotr.CARD_NAME],
+                                card[lotr.CARD_NORMALIZED_NAME],
+                                card[lotr.CARD_TYPE],
+                                card[lotr.CARD_SET_NAME])
 
-        logging.info('')
-        logging.info('ORPHAN CHANNELS:')
-        for channel in sorted(channels.values(), key=lambda c: c['category_name']):
-            logging.info('%s - %s', channel['name'], channel['category_name'])
+        if channels:
+            logging.info('Non-card channels detected:')
+            for channel in channels:
+                logging.info('%s (%s)', channel,
+                             channels[channel]['category_name'])
 
 
     async def _send_channel(self, channel, content):
