@@ -584,11 +584,10 @@ class MyClient(discord.Client):
         data = await read_card_data()
         orphan_cards = []
         for card in data['data']:
-            if (card[lotr.CARD_NAME] == 'T.B.D.'
-                    or card[lotr.CARD_TYPE] in ('Rules', 'Presentation')):
+            if not card.get(lotr.CARD_DISCORD_CHANNEL):
                 continue
 
-            name = card[lotr.CARD_NORMALIZED_NAME]
+            name = card[lotr.CARD_DISCORD_CHANNEL]
             if name in channels:
                 del channels[name]
             else:
@@ -598,7 +597,7 @@ class MyClient(discord.Client):
             logging.warning('Orphan cards detected:')
             for card in orphan_cards:
                 logging.warning('%s (%s): %s, %s', card[lotr.CARD_NAME],
-                                card[lotr.CARD_NORMALIZED_NAME],
+                                card[lotr.CARD_DISCORD_CHANNEL],
                                 card[lotr.CARD_TYPE],
                                 card[lotr.CARD_SET_NAME])
 
@@ -1061,7 +1060,11 @@ Targets removed.
         """
         data = await read_card_data()
 
-        if re.match(r'^[0-9]+$', command):
+        if this:
+            matches = [(card, 1) for card in data['data']
+                       if card.get(lotr.CARD_DISCORD_CHANNEL, '') == command]
+            num = 1
+        elif re.match(r'^[0-9]+$', command):
             matches = [(card, 1) for card in data['data']
                        if card[lotr.ROW_COLUMN] == int(command)]
             num = 1
@@ -1099,13 +1102,10 @@ Targets removed.
         matches.sort(key=lambda m: (
             m[1],
             m[0][lotr.CARD_TYPE] in ('Rules', 'Presentation'),
-            m[0].get(lotr.CARD_SET_RINGSDB_CODE, 0),
+            m[0][lotr.CARD_SET_RINGSDB_CODE],
             lotr.is_positive_or_zero_int(m[0][lotr.CARD_NUMBER])
             and int(m[0][lotr.CARD_NUMBER]) or 0,
             m[0][lotr.CARD_NUMBER]))
-
-        if this:
-            matches = matches[:1]
 
         ending = '\n...' if len(matches) > 25 else ''
         matches = matches[:25]

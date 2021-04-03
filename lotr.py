@@ -90,6 +90,7 @@ CARD_SET_RINGSDB_CODE = '_Set RingsDB Code'
 CARD_SET_HOB_CODE = '_Set HoB Code'
 CARD_RINGSDB_CODE = '_RingsDB Code'
 CARD_NORMALIZED_NAME = '_Normalized Name'
+CARD_DISCORD_CHANNEL = '_Discord Channel'
 
 CARD_DOUBLESIDE = '_Card Side'
 CARD_ORIGINAL_NAME = '_Original Name'
@@ -1273,6 +1274,28 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                  round(time.time() - timestamp, 3))
 
 
+def _has_discord_channel(card):
+    """ Check whether a card has Discord channel or not.
+    """
+    if (card[CARD_NAME] == 'T.B.D.'
+            or card[CARD_TYPE] in ('Rules', 'Presentation')):
+        return False
+
+    return True
+
+
+def _increment_channel_name(channel):
+    """ Increment a channel's name.
+    """
+    if re.search(r'-[0-9]+$', channel):
+        parts = channel.split('-')
+        channel = '{}-{}'.format('-'.join(parts[:-1]), int(parts[-1]) + 1)
+    else:
+        channel = '{}-2'.format(channel)
+
+    return channel
+
+
 def save_data_for_bot(conf):
     """ Save the data for the Discord bot.
     """
@@ -1284,6 +1307,8 @@ def save_data_for_bot(conf):
         .format(conf['sheet_gdid'], SHEET_IDS[CARD_SHEET]))
     data = [{key: value for key, value in row.items() if value is not None}
             for row in DATA if not row[CARD_SCRATCH]]
+    channels = set()
+
     for row in data:
         row[CARD_NORMALIZED_NAME] = normalized_name(row[CARD_NAME])
         if row.get(BACK_PREFIX + CARD_NAME):
@@ -1292,6 +1317,20 @@ def save_data_for_bot(conf):
 
         if _needed_for_ringsdb(row):
             row[CARD_RINGSDB_CODE] = _ringsdb_code(row)
+
+        if _has_discord_channel(row):
+            channel = row[CARD_NORMALIZED_NAME]
+            while channel in channels:
+                channel = _increment_channel_name(channel)
+
+            channels.add(channel)
+            row[CARD_DISCORD_CHANNEL] = channel
+
+    data.sort(key=lambda row: (
+        row[CARD_SET_RINGSDB_CODE],
+        is_positive_or_zero_int(row[CARD_NUMBER])
+        and int(row[CARD_NUMBER]) or 0,
+        row[CARD_NUMBER]))
 
     output = {'url': url,
               'data': data}
@@ -2053,11 +2092,11 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                  set_name, round(time.time() - timestamp, 3))
 
 
-def _needed_for_ringsdb(row):
+def _needed_for_ringsdb(card):
     """ Check whether a card is needed for RingsDB or not.
     """
-    card_type = ('Treasure' if row.get(CARD_SPHERE) == 'Boon'
-                 else row[CARD_TYPE])
+    card_type = ('Treasure' if card.get(CARD_SPHERE) == 'Boon'
+                 else card[CARD_TYPE])
     return card_type in CARD_TYPES_PLAYER
 
 
