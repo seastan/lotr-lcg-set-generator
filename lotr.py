@@ -41,8 +41,12 @@ SCRATCH_SHEET = 'Scratch Data'
 
 SET_ID = 'GUID'
 SET_NAME = 'Name'
+SET_VERSION = 'Version'
+SET_COLLECTION_ICON = 'Collection Icon'
 SET_RINGSDB_CODE = 'RingsDB Code'
 SET_HOB_CODE = 'HoB Code'
+SET_DISCORD_PREFIX = 'Discord Prefix'
+SET_COPYRIGHT = 'Copyright'
 
 BACK_PREFIX = 'Back_'
 CARD_SET = 'Set'
@@ -88,6 +92,7 @@ CARD_SCRATCH = '_Scratch'
 CARD_SET_NAME = '_Set Name'
 CARD_SET_RINGSDB_CODE = '_Set RingsDB Code'
 CARD_SET_HOB_CODE = '_Set HoB Code'
+CARD_SET_DISCORD_PREFIX = '_Discord Prefix'
 CARD_RINGSDB_CODE = '_RingsDB Code'
 CARD_NORMALIZED_NAME = '_Normalized Name'
 CARD_DISCORD_CHANNEL = '_Discord Channel'
@@ -769,6 +774,9 @@ def _update_data(data):
             if is_positive_or_zero_int(set_ringsdb_code)
             else 0)
 
+        row[CARD_SET_DISCORD_PREFIX] = str(SETS.get(
+            row[CARD_SET], {}).get(SET_DISCORD_PREFIX, '') or '')
+
         if row[CARD_SCRATCH] and row[CARD_SET] in FOUND_INTERSECTED_SETS:
             row[CARD_SET] = '[filtered set]'
 
@@ -1338,11 +1346,18 @@ def save_data_for_bot(conf):
             row[CARD_DISCORD_CHANNEL] = channel
 
             card_set = re.sub(r'^ALeP - ', '', row[CARD_SET_NAME])
+            discord_prefix = row.get(CARD_SET_DISCORD_PREFIX, '')
+            if discord_prefix:
+                discord_prefix = '{} '.format(discord_prefix)
+
             category = row.get(CARD_ENCOUNTER_SET, '')
             if not category:
-                category = 'Player - {}'.format(card_set)
+                category = 'Player - {}{}'.format(discord_prefix, card_set)
             elif category != card_set:
-                category = '{} ({})'.format(category, card_set)
+                category = '{} ({}{})'.format(category, discord_prefix,
+                                              card_set)
+            else:
+                category = '{}{}'.format(discord_prefix, category)
 
             category = _update_discord_category(category)
             row[CARD_DISCORD_CATEGORY] = category
@@ -1508,7 +1523,7 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
     root = ET.fromstring(SET_XML_TEMPLATE)
     root.set('name', set_name)
     root.set('id', set_id)
-    root.set('version', SETS[set_id]['Version'])
+    root.set('version', SETS[set_id][SET_VERSION])
     cards = root.findall("./cards")[0]
 
     chosen_data = []
@@ -2525,8 +2540,8 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
     root = ET.fromstring(XML_TEMPLATE)
     root.set('name', set_name)
     root.set('id', set_id)
-    root.set('icon', SETS[set_id]['Collection Icon'] or '')
-    root.set('copyright', SETS[set_id]['Copyright'] or '')
+    root.set('icon', SETS[set_id][SET_COLLECTION_ICON] or '')
+    root.set('copyright', SETS[set_id][SET_COPYRIGHT] or '')
     root.set('language', lang)
     cards = root.findall("./cards")[0]
 
@@ -2579,8 +2594,9 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                 properties.append((name, value))
 
         properties.append(('Set Name', set_name))
-        properties.append(('Set Icon', SETS[set_id]['Collection Icon'] or ''))
-        properties.append(('Set Copyright', SETS[set_id]['Copyright'] or ''))
+        properties.append(('Set Icon',
+                           SETS[set_id][SET_COLLECTION_ICON] or ''))
+        properties.append(('Set Copyright', SETS[set_id][SET_COPYRIGHT] or ''))
 
         side_b = (card_type != 'Presentation' and (
             card_type in CARD_TYPES_DOUBLESIDE_MANDATORY or row[CARD_SIDE_B]))
