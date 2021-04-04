@@ -1126,8 +1126,8 @@ Targets removed.
                                                      list_matches)
 
         card = matches[num - 1][0]
-        if card[lotr.CARD_NORMALIZED_NAME] in self.channels:
-            channel = self.channels[card[lotr.CARD_NORMALIZED_NAME]]
+        if card.get(lotr.CARD_DISCORD_CHANNEL) in self.channels:
+            channel = self.channels[card[lotr.CARD_DISCORD_CHANNEL]]
             channel_url = ('https://discord.com/channels/{}/{}'
                            .format(channel['guild_id'], channel['id']))
         else:
