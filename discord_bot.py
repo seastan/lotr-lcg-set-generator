@@ -406,14 +406,17 @@ def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
     flavour = update_text(card.get(prefix + lotr.CARD_FLAVOUR, ''))
     card_flavour = '' if flavour == '' else '\n\n*{}*'.format(flavour)
 
+    artist = card.get(prefix + lotr.CARD_ARTIST, '')
+    card_artist = '' if artist == '' else '\n\n*Artist*: {}'.format(artist)
+
     res = f"""{card_unique}{card_name}
 {card_sphere}{card_type}{card_cost}{card_engagement}{card_stage}{card_skills}
 
-{card_traits}{card_keywords}{card_text}{card_shadow}{card_victory}{card_special_icon}{card_flavour}"""  # pylint: disable=C0301
+{card_traits}{card_keywords}{card_text}{card_shadow}{card_victory}{card_special_icon}{card_flavour}{card_artist}"""  # pylint: disable=C0301
     return res
 
 
-def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0914
+def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0914,R0915
     """ Format the card.
     """
     card_type = card[lotr.CARD_TYPE]
@@ -444,8 +447,23 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0914
         else '*Encounter Set*: {}{}\n'.format(encounter_set, additional_sets))
 
     card_set = re.sub(r'^ALeP - ', '', card[lotr.CARD_SET_NAME])
-    card_number = '**#{}**'.format(card[lotr.CARD_NUMBER])
     card_id = '*id:* {}'.format(card[lotr.CARD_ID])
+
+    card_number = '**#{}**'.format(card[lotr.CARD_NUMBER])
+    if (card.get(lotr.CARD_PRINTED_NUMBER) or
+            card.get(lotr.BACK_PREFIX + lotr.CARD_PRINTED_NUMBER)):
+        if res_b:
+            front_number = (card.get(lotr.CARD_PRINTED_NUMBER) or
+                            card[lotr.CARD_NUMBER])
+            back_number = (card.get(lotr.BACK_PREFIX +
+                                    lotr.CARD_PRINTED_NUMBER) or
+                           card[lotr.CARD_NUMBER])
+            card_number = '{} *({}/{})*'.format(card_number, front_number,
+                                                back_number)
+        else:
+            front_number = (card.get(lotr.CARD_PRINTED_NUMBER) or
+                            card[lotr.CARD_NUMBER])
+            card_number = '{} *({})*'.format(card_number, front_number)
 
     icon = card.get(lotr.CARD_ICON, '')
     card_icon = '' if icon == '' else ' ({})'.format(icon)
@@ -464,7 +482,7 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0914
 
     deck_rules = card.get(lotr.CARD_DECK_RULES, '')
     card_deck_rules = ('' if deck_rules == ''
-                       else '```{}```\n'.format(deck_rules))
+                       else '*Deck Rules*:\n```{}```\n'.format(deck_rules))
 
     if card.get(lotr.CARD_RINGSDB_CODE):
         ringsdb_url = '<https://test.ringsdb.com/card/{}>\n'.format(

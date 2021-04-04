@@ -15,6 +15,7 @@ import re
 import shutil
 import subprocess
 import time
+import uuid
 import xml.etree.ElementTree as ET
 import zipfile
 
@@ -97,6 +98,18 @@ CARD_RINGSDB_CODE = '_RingsDB Code'
 CARD_NORMALIZED_NAME = '_Normalized Name'
 CARD_DISCORD_CHANNEL = '_Discord Channel'
 CARD_DISCORD_CATEGORY = '_Discord Category'
+
+DISCORD_IGNORE_FIELDS = {
+    CARD_SET, CARD_PANX, CARD_PANY, CARD_SCALE, BACK_PREFIX + CARD_PANX,
+    BACK_PREFIX + CARD_PANY, BACK_PREFIX + CARD_SCALE, CARD_SIDE_B,
+    CARD_SELECTED, CARD_CHANGED, CARD_SCRATCH, CARD_SET_DISCORD_PREFIX
+}
+
+DISCORD_IGNORE_CHANGES_FIELDS = {
+    CARD_NUMBER, CARD_SET_NAME, CARD_SET_RINGSDB_CODE, CARD_SET_HOB_CODE,
+    CARD_RINGSDB_CODE, CARD_NORMALIZED_NAME, CARD_DISCORD_CHANNEL,
+    CARD_DISCORD_CATEGORY
+}
 
 CARD_DOUBLESIDE = '_Card Side'
 CARD_ORIGINAL_NAME = '_Original Name'
@@ -184,7 +197,8 @@ CARD_BACKS = {'player': {'mpc': ['playerBackOfficialMPC.png',
                                            'encounterBackUnofficial.png']}}
 
 CONFIGURATION_PATH = 'configuration.yaml'
-DISCORD_CARD_DATA_PATH = os.path.join('Discord', 'card_data.json')
+DISCORD_PATH = 'Discord'
+DISCORD_CARD_DATA_PATH = os.path.join(DISCORD_PATH, 'card_data.json')
 DOWNLOAD_PATH = 'Download'
 IMAGES_BACK_PATH = 'imagesBack'
 IMAGES_CUSTOM_PATH = os.path.join(PROJECT_FOLDER, 'imagesCustom')
@@ -1315,7 +1329,31 @@ def _increment_channel_name(channel):
     return channel
 
 
-def save_data_for_bot(conf):
+def _get_card_diffs(old_card, new_card):
+    """ Find differences between two card versions.
+    """
+    diffs = []
+    old_card = old_card.copy()
+    new_card = new_card.copy()
+    for key in old_card:
+        if (key in DISCORD_IGNORE_CHANGES_FIELDS or
+                key in DISCORD_IGNORE_FIELDS):
+            continue
+
+        if key not in new_card:
+            diffs.append((key, (old_card[key], None)))
+        elif old_card[key] != new_card[key]:
+            diffs.append((key, (old_card[key], new_card[key])))
+
+    for key in new_card:
+        if (key not in DISCORD_IGNORE_CHANGES_FIELDS and
+                key not in DISCORD_IGNORE_FIELDS and key not in old_card):
+            diffs.append((key, (None, new_card[key])))
+
+    return diffs
+
+
+def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
     """ Save the data for the Discord bot.
     """
     logging.info('Saving the data for the Discord bot...')
@@ -1362,17 +1400,125 @@ def save_data_for_bot(conf):
             category = _update_discord_category(category)
             row[CARD_DISCORD_CATEGORY] = category
 
+        for key in list(row.keys()):
+            if key in DISCORD_IGNORE_FIELDS:
+                del row[key]
+
     data.sort(key=lambda row: (
         row[CARD_SET_RINGSDB_CODE],
         is_positive_or_zero_int(row[CARD_NUMBER])
         and int(row[CARD_NUMBER]) or 0,
         row[CARD_NUMBER]))
 
+    try:
+        with open(DISCORD_CARD_DATA_PATH, 'r') as obj:
+            old_data = json.load(obj)['data']
+    except Exception:  # pylint: disable=W0703
+        old_data = None
+
+    card_changes = []
+    category_diffs = []
+    channel_diffs = []
+    old_categories = set()
+    new_categories = set()
+    if old_data:
+        old_categories = set(row[CARD_DISCORD_CATEGORY] for row in old_data
+                             if row.get(CARD_DISCORD_CATEGORY))
+        new_categories = set(row[CARD_DISCORD_CATEGORY] for row in data
+                             if row.get(CARD_DISCORD_CATEGORY))
+        old_dict = {row[CARD_ID]:row for row in old_data}
+        new_dict = {row[CARD_ID]:row for row in data}
+        for card_id in new_dict:
+            if card_id not in old_dict:
+                if new_dict[card_id].get(CARD_DISCORD_CATEGORY):
+                    channel_diffs.append(
+                        (None,
+                         (new_dict[card_id][CARD_DISCORD_CHANNEL],
+                          new_dict[card_id][CARD_DISCORD_CATEGORY])))
+            elif old_dict[card_id] != new_dict[card_id]:
+                diffs = _get_card_diffs(old_dict[card_id], new_dict[card_id])
+                if diffs:
+                    card_changes.append((card_id, diffs))
+
+                if (old_dict[card_id].get(CARD_DISCORD_CATEGORY) and
+                        new_dict[card_id].get(CARD_DISCORD_CATEGORY) and
+                        old_dict[card_id][CARD_DISCORD_CATEGORY] !=
+                        new_dict[card_id][CARD_DISCORD_CATEGORY]):
+                    category_diffs.append((
+                        old_dict[card_id][CARD_DISCORD_CATEGORY],
+                        new_dict[card_id][CARD_DISCORD_CATEGORY]))
+
+                if (old_dict[card_id].get(CARD_DISCORD_CATEGORY) and
+                        new_dict[card_id].get(CARD_DISCORD_CATEGORY) and
+                        (old_dict[card_id][CARD_DISCORD_CATEGORY] !=
+                         new_dict[card_id][CARD_DISCORD_CATEGORY] or
+                         old_dict[card_id][CARD_DISCORD_CHANNEL] !=
+                         new_dict[card_id][CARD_DISCORD_CHANNEL])):
+                    channel_diffs.append((
+                        (old_dict[card_id][CARD_DISCORD_CHANNEL],
+                         old_dict[card_id][CARD_DISCORD_CATEGORY]),
+                        (new_dict[card_id][CARD_DISCORD_CHANNEL],
+                         new_dict[card_id][CARD_DISCORD_CATEGORY])))
+
+
+
+        for card_id in old_dict:
+            if (card_id not in new_dict and
+                    old_dict[card_id].get(CARD_DISCORD_CATEGORY)):
+                channel_diffs.append(
+                    ((old_dict[card_id][CARD_DISCORD_CHANNEL],
+                      old_dict[card_id][CARD_DISCORD_CATEGORY]),
+                     None))
+
+        for category in list(old_categories):
+            if category in new_categories:
+                old_categories.remove(category)
+                new_categories.remove(category)
+
+    category_changes = []
+    for new_category in new_categories:
+        for old_category in list(old_categories):
+            if (old_category, new_category) in category_diffs:
+                old_categories.remove(old_category)
+                category_changes.append(('rename',
+                                         (old_category, new_category)))
+                break
+        else:
+            category_changes.append(('add', new_category))
+
+    channel_changes = []
+    for diff in channel_diffs:
+        if not diff[0]:
+            channel_changes.append(('add', diff[1]))
+        elif not diff[1]:
+            channel_changes.append(('remove', diff[0][0]))
+        elif diff[0][0] == diff[1][0]:
+            if ('rename', (diff[0][1], diff[1][1])) not in category_changes:
+                channel_changes.append(('move', diff[1]))
+        elif diff[0][1] == diff[1][1]:
+            channel_changes.append(('rename', (diff[0][0], diff[1][0])))
+        else:
+            if ('rename', (diff[0][1], diff[1][1])) not in category_changes:
+                channel_changes.append(('move', (diff[0][0], diff[1][1])))
+
+            channel_changes.append(('rename', (diff[0][0], diff[1][0])))
+
     output = {'url': url,
               'data': data}
     with open(DISCORD_CARD_DATA_PATH, 'w', encoding='utf-8') as obj:
         res = json.dumps(output, ensure_ascii=False)
         obj.write(res)
+
+    if category_changes or channel_changes or card_changes:
+        output = {'categories': category_changes,
+                  'channels': channel_changes,
+                  'cards': card_changes}
+        path = os.path.join(
+            DISCORD_PATH, 'Changes',
+            '{}_{}.json'.format(int(time.time()), uuid.uuid4()))
+        with open(path, 'w', encoding='utf-8') as obj:
+            res = json.dumps(output, ensure_ascii=False)
+            obj.write(res)
 
     logging.info('...Saving the data for the Discord bot (%ss)',
                  round(time.time() - timestamp, 3))
