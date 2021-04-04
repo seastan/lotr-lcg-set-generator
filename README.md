@@ -115,17 +115,18 @@ For debugging purposes you can also run these steps using the Jupyter notebook (
 The scripts will generate the following outputs:
 
 - `Output/DB/<set name>.<language>/`: 300 dpi PNG images for general purposes.
-- `Output/DriveThruCards/<set name>.<language>/`: a `7z` archive of 300 dpi JPG images to be printed on DriveThruCards.com.
+- `Output/DriveThruCards/<set name>.<language>/`: a `7z` archive of 300 dpi CMYK JPG images to be printed on DriveThruCards.com.
 - `Output/GenericPNG/<set name>.<language>/`: a `7z` archive of generic 800 dpi PNG images.
-- `Output/HallOfBeorn/<set name>.json`.
+- `Output/GenericPNGPDF/<set name>.<language>/`: PDF files in `A4` and `letter` format (800 dpi PNG).
+- `Output/HallOfBeorn/<set name>.json`: an output file for Hall of Beorn.
 - `Output/MakePlayingCards/<set name>.<language>/`: a `7z` archive of 800 dpi PNG images to be printed on MakePlayingCards.com.
-- `Output/MBPrint/<set name>.<language>/`: a `7z` archive of 800 dpi JPG images to be printed on MBPrint.pl.
-- `Output/MBPrintPDF/<set name>.<language>/`: a `7z` archive of a PDF file to be printed on MBPrint.pl.
-- `Output/OCTGN/<set name>/<octgn id>/set.xml`.
+- `Output/MBPrint/<set name>.<language>/`: a `7z` archive of 800 dpi CMYK JPG images to be printed on MBPrint.pl.
+- `Output/MBPrintPDF/<set name>.<language>/`: a `7z` archive of a PDF file to be printed on MBPrint.pl (800 dpi CMYK JPG).
+- `Output/OCTGN/<set name>/<octgn id>/set.xml`: an output file for OCTGN.
 - `Output/OCTGNDecks/<set name>/<deck name>.o8d`: quest decks for OCTGN.
 - `Output/OCTGNImages/<set name>.<language>/<set name>.<language>.o8c`: image packs for OCTGN (600x429 JPG).
-- `Output/PDF/<set name>.<language>/`: PDF files in `A4` and `letter` format for home printing.
-- `Output/RingsDB/<set name>.csv`.
+- `Output/PDF/<set name>.<language>/`: PDF files in `A4` and `letter` format for home printing (300 dpi PNG).
+- `Output/RingsDB/<set name>.csv`: an output file for RIngsDB.
 - `Output/PreviewImages/<set name>.<language>/`: 600x429 JPG images for preview purposes.
 - `Output/RingsDBImages/<set name>.<language>/`: 300 dpi PNG images for RingsDB (the same as `Output/DB`, but player cards only and differently named).
 
