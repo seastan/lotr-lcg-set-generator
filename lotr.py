@@ -4430,7 +4430,7 @@ def generate_genericpng_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0
     card_height = 3.75 * inch
 
     for page_format in formats:
-        pdf_filename = 'Generic.{}.{}.{}.pdf'.format(
+        pdf_filename = '800dpi.{}.{}.{}.pdf'.format(
             page_format, _escape_filename(set_name), lang)
         pdf_path = os.path.join(temp_path, pdf_filename)
         canvas = Canvas(pdf_path, pagesize=landscape(formats[page_format][0]))
@@ -5042,7 +5042,7 @@ def generate_genericpng(conf, set_id, set_name, lang, card_data):
     if 'genericpng_zip' in conf['outputs'][lang]:
         with zipfile.ZipFile(
                 os.path.join(output_path,
-                             'Generic.{}.{}.images.zip'.format(
+                             'PNG.{}.{}.images.zip'.format(
                                  _escape_filename(set_name), lang)),
                 'w') as obj:
             _prepare_genericpng_printing_archive(temp_path, obj)
@@ -5050,7 +5050,7 @@ def generate_genericpng(conf, set_id, set_name, lang, card_data):
     if 'genericpng_7z' in conf['outputs'][lang]:
         with py7zr.SevenZipFile(
                 os.path.join(output_path,
-                             'Generic.{}.{}.images.7z'.format(
+                             'PNG.{}.{}.images.7z'.format(
                                  _escape_filename(set_name), lang)),
                 'w', filters=PY7ZR_FILTERS) as obj:
             _prepare_genericpng_printing_archive(temp_path, obj)
