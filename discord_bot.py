@@ -26,6 +26,7 @@ LOG_PATH = 'discord_bot.log'
 PLAYTEST_PATH = os.path.join('Discord', 'playtest.json')
 WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 
+CMD_SLEEP_TIME = 5
 IO_SLEEP_TIME = 1
 MESSAGE_SLEEP_TIME = 1
 WATCH_SLEEP_TIME = 10
@@ -122,6 +123,16 @@ List of **!stat** commands:
 }
 
 playtest_lock = asyncio.Lock()
+
+
+class DiscordError(Exception):
+    """ Discord error.
+    """
+
+
+class FormatError(Exception):
+    """ Change format error.
+    """
 
 
 def init_logging():
@@ -571,6 +582,7 @@ class MyClient(discord.Client):
     """ My bot class.
     """
 
+    categories = {}
     channels = {}
 
 
@@ -578,29 +590,47 @@ class MyClient(discord.Client):
         """ Invoked when the client is ready.
         """
         logging.info('Logged in as %s (%s)', self.user.name, self.user.id)
-        for channel in self.get_all_channels():
-            if (not channel.category_id
-                    or channel.category.name in GENERAL_CATEGORIES
-                    or channel.name in ('general', 'rules')):
-                continue
-
-            if channel.name in self.channels:
-                logging.warning(
-                    'Duplicate channel name detected: %s (categories "%s" '
-                    'and "%s")',
-                    channel.name,
-                    self.channels[channel.name]['category_name'],
-                    channel.category.name)
-            else:
-                self.channels[channel.name] = {
-                    'name': channel.name,
-                    'id': channel.id,
-                    'guild_id': channel.guild.id,
-                    'category_id': channel.category_id,
-                    'category_name': channel.category.name}
-
+        self.categories, self.channels = await self._load_channels()
         await self._test_channels()
         self.loop.create_task(self._watch_changes_schedule())
+
+
+    async def _load_channels(self):
+        categories = {}
+        channels = {}
+        for channel in self.get_all_channels():
+            if str(channel.type) == 'category':
+                if channel.name in GENERAL_CATEGORIES:
+                    continue
+
+                if channel.name in categories:
+                    logging.warning(
+                        'Duplicate category name detected: %s', channel.name)
+                else:
+                    categories[channel.name] = {
+                        'name': channel.name,
+                        'id': channel.id}
+            elif str(channel.type) == 'text':
+                if (not channel.category_id
+                        or channel.category.name in GENERAL_CATEGORIES
+                        or channel.name in ('general', 'rules')):
+                    continue
+
+                if channel.name in channels:
+                    logging.warning(
+                        'Duplicate channel name detected: %s (categories "%s" '
+                        'and "%s")',
+                        channel.name,
+                        channels[channel.name]['category_name'],
+                        channel.category.name)
+                else:
+                    channels[channel.name] = {
+                        'name': channel.name,
+                        'id': channel.id,
+                        'category_id': channel.category_id,
+                        'category_name': channel.category.name}
+
+        return categories, channels
 
 
     async def _watch_changes_schedule(self):
@@ -619,6 +649,7 @@ class MyClient(discord.Client):
 
                 path = os.path.join(CHANGES_PATH, filename)
                 data = await read_json_data(path)
+                logging.info('Processing changes: %s', data)
                 try:
                     await self._process_changes(data)
                 except Exception as exc:
@@ -631,12 +662,39 @@ class MyClient(discord.Client):
                                                              str(exc)))
                 else:
                     os.remove(path)
+                    self.categories, self.channels = (
+                        await self._load_channels())
 
             break
 
 
     async def _process_changes(self, data):
-        logging.info(data)
+        changes = data['categories']
+        for change in changes:
+            if len(change) != 2:
+                raise FormatError('Incorrect change format: {}'.format(change))
+
+            if change[0] == 'add':
+                await self.guilds[0].create_category(change[1])
+                logging.info('Created new category "%s"', change[1])
+                await asyncio.sleep(CMD_SLEEP_TIME)
+            elif change[0] == 'rename':
+                if len(change[1]) != 2:
+                    raise FormatError('Incorrect change format: {}'.format(
+                        change))
+
+                if change[1][0] not in self.categories:
+                    raise DiscordError('Categoty {} not found'.format(
+                        change[1][0]))
+
+                await self.get_channel(self.categories[change[1][0]]['id']
+                                       ).edit(name=change[1][1])
+                logging.info('Renamed category "%s" to "%s"', change[1][0],
+                             change[1][1])
+                await asyncio.sleep(CMD_SLEEP_TIME)
+            else:
+                raise FormatError('Unknown category change type: {}'.format(
+                    change[0]))
 
 
     async def _test_channels(self):
@@ -1189,7 +1247,7 @@ Targets removed.
         if card.get(lotr.CARD_DISCORD_CHANNEL) in self.channels:
             channel = self.channels[card[lotr.CARD_DISCORD_CHANNEL]]
             channel_url = ('https://discord.com/channels/{}/{}'
-                           .format(channel['guild_id'], channel['id']))
+                           .format(self.guilds[0].id, channel['id']))
         else:
             channel_url = ''
 
