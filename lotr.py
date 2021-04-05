@@ -178,6 +178,8 @@ PNG300PDF = 'png300PDF'
 PNG800BLEED = 'png800Bleed'
 PNG800BLEEDMPC = 'png800BleedMPC'
 PNG800BLEEDGENERIC = 'png800BleedGeneric'
+PNG800NOBLEED = 'png800NoBleed'
+PNG800PDF = 'png800PDF'
 
 CARD_BACKS = {'player': {'mpc': ['playerBackOfficialMPC.png',
                                  'playerBackUnofficialMPC.png'],
@@ -209,6 +211,7 @@ OCTGN_ZIP_PATH = 'a21af4e8-be4b-4cda-a6b6-534f9717391f/Sets'
 OUTPUT_DB_PATH = os.path.join('Output', 'DB')
 OUTPUT_DTC_PATH = os.path.join('Output', 'DriveThruCards')
 OUTPUT_GENERICPNG_PATH = os.path.join('Output', 'GenericPNG')
+OUTPUT_GENERICPNG_PDF_PATH = os.path.join('Output', 'GenericPNGPDF')
 OUTPUT_HALLOFBEORN_PATH = os.path.join('Output', 'HallOfBeorn')
 OUTPUT_MBPRINT_PATH = os.path.join('Output', 'MBPrint')
 OUTPUT_MBPRINT_PDF_PATH = os.path.join('Output', 'MBPrintPDF')
@@ -540,7 +543,8 @@ def read_conf(path=CONFIGURATION_PATH):
     conf['all_languages'] = list(conf['outputs'].keys())
     conf['languages'] = [lang for lang in conf['outputs']
                          if conf['outputs'][lang]]
-    conf['nobleed'] = {}
+    conf['nobleed_300'] = {}
+    conf['nobleed_800'] = {}
 
     for lang in conf['languages']:
         conf['outputs'][lang] = set(conf['outputs'][lang])
@@ -548,6 +552,12 @@ def read_conf(path=CONFIGURATION_PATH):
         if ('pdf_a4' in conf['outputs'][lang]
                 or 'pdf_letter' in conf['outputs'][lang]):
             conf['outputs'][lang].add('pdf')
+
+        if ('genericpng_pdf_a4_7z' in conf['outputs'][lang]
+                or 'genericpng_pdf_letter_7z' in conf['outputs'][lang]
+                or 'genericpng_pdf_a4_zip' in conf['outputs'][lang]
+                or 'genericpng_pdf_letter_zip' in conf['outputs'][lang]):
+            conf['outputs'][lang].add('genericpng_pdf')
 
         if ('makeplayingcards_zip' in conf['outputs'][lang]
                 or 'makeplayingcards_7z' in conf['outputs'][lang]):
@@ -567,9 +577,11 @@ def read_conf(path=CONFIGURATION_PATH):
                 or 'genericpng_7z' in conf['outputs'][lang]):
             conf['outputs'][lang].add('genericpng')
 
-        conf['nobleed'][lang] = ('db' in conf['outputs'][lang]
-                                 or 'octgn' in conf['outputs'][lang]
-                                 or 'pdf' in conf['outputs'][lang])
+        conf['nobleed_300'][lang] = ('db' in conf['outputs'][lang]
+                                     or 'octgn' in conf['outputs'][lang]
+                                     or 'pdf' in conf['outputs'][lang])
+
+        conf['nobleed_800'][lang] = 'genericpng_pdf' in conf['outputs'][lang]
 
     logging.info('...Reading project configuration (%ss)',
                  round(time.time() - timestamp, 3))
@@ -588,6 +600,13 @@ def reset_project_folders():
     _clear_folder(XML_PATH)
 
     nobleed_folder = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED)
+    for _, subfolders, _ in os.walk(nobleed_folder):
+        for subfolder in subfolders:
+            _delete_folder(os.path.join(nobleed_folder, subfolder))
+
+        break
+
+    nobleed_folder = os.path.join(IMAGES_EONS_PATH, PNG800NOBLEED)
     for _, subfolders, _ in os.walk(nobleed_folder):
         for subfolder in subfolders:
             _delete_folder(os.path.join(nobleed_folder, subfolder))
@@ -2848,12 +2867,13 @@ def _collect_custom_images(image_path):
 def _set_outputs(conf, lang, root):
     """ Set required outputs for Strange Eons.
     """
-    if conf['nobleed'][lang] or 'drivethrucards' in conf['outputs'][lang]:
+    if conf['nobleed_300'][lang] or 'drivethrucards' in conf['outputs'][lang]:
         root.set('png300Bleed', '1')
 
     if ('makeplayingcards' in conf['outputs'][lang]
             or 'mbprint' in conf['outputs'][lang]
-            or 'genericpng' in conf['outputs'][lang]):
+            or 'genericpng' in conf['outputs'][lang]
+            or 'genericpng_pdf' in conf['outputs'][lang]):
         root.set('png800Bleed', '1')
 
 
@@ -3223,10 +3243,10 @@ def _run_cmd(cmd):
 
 
 def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
-    """ Generate images without bleed margins.
+    """ Generate PNG 300 dpi images without bleed margins.
     """
-    logging.info('[%s, %s] Generating images without bleed margins...',
-                 set_name, lang)
+    logging.info('[%s, %s] Generating PNG 300 dpi images without bleed '
+                 'margins...', set_name, lang)
     timestamp = time.time()
 
     temp_path = os.path.join(
@@ -3295,8 +3315,87 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
     _delete_folder(temp_path)
     _delete_folder(temp_path2)
 
-    logging.info('[%s, %s] ...Generating images without bleed margins '
-                 '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
+    logging.info('[%s, %s] ...Generating PNG 300 dpi images without bleed '
+                 'margins (%ss)', set_name, lang,
+                 round(time.time() - timestamp, 3))
+
+
+def generate_png800_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
+    """ Generate PNG 800 dpi images without bleed margins.
+    """
+    logging.info('[%s, %s] Generating PNG 800 dpi images without bleed '
+                 'margins...', set_name, lang)
+    timestamp = time.time()
+
+    temp_path = os.path.join(
+        TEMP_ROOT_PATH, 'generate_png800_nobleed.{}.{}'.format(set_id,
+                                                               lang))
+    _create_folder(temp_path)
+    _clear_folder(temp_path)
+
+    temp_path2 = os.path.join(
+        TEMP_ROOT_PATH, 'generate_png800_nobleed2.{}.{}'.format(set_id,
+                                                                lang))
+    _create_folder(temp_path2)
+    _clear_folder(temp_path2)
+
+    input_cnt = 0
+    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+        filelist = [f for f in zip_obj.namelist()
+                    if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
+                                                  PNG800BLEED))
+                    and f.split('.')[-1] == 'png'
+                    and f.split('.')[-2] == lang
+                    and f.split('.')[-3] == set_id]
+        for filename in filelist:
+            input_cnt += 1
+            output_filename = _update_zip_filename(filename)
+            with zip_obj.open(filename) as zip_file:
+                with open(os.path.join(temp_path, output_filename),
+                          'wb') as output_file:
+                    shutil.copyfileobj(zip_file, output_file)
+
+    cmd = GIMP_COMMAND.format(
+        conf['gimp_console_path'],
+        'python-cut-bleed-margins-folder',
+        temp_path.replace('\\', '\\\\'),
+        temp_path2.replace('\\', '\\\\'))
+    res = _run_cmd(cmd)
+    logging.info('[%s, %s] %s', set_name, lang, res)
+
+    output_cnt = 0
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            output_cnt += 1
+            if os.path.getsize(os.path.join(temp_path2, filename)
+                               ) < PNG_800_MIN_SIZE:
+                raise GIMPError('GIMP failed for {}'.format(
+                    os.path.join(temp_path2, filename)))
+
+        break
+
+    if output_cnt != input_cnt:
+        raise GIMPError('Wrong number of output files: {} instead of {}'
+                        .format(output_cnt, input_cnt))
+
+    output_path = os.path.join(IMAGES_EONS_PATH, PNG800NOBLEED,
+                               '{}.{}'.format(set_id, lang))
+    _create_folder(output_path)
+    _clear_modified_images(output_path, skip_ids)
+
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            shutil.move(os.path.join(temp_path2, filename),
+                        os.path.join(output_path, filename))
+
+        break
+
+    _delete_folder(temp_path)
+    _delete_folder(temp_path2)
+
+    logging.info('[%s, %s] ...Generating PNG 800 dpi images without bleed '
+                 'margins (%ss)', set_name, lang,
+                 round(time.time() - timestamp, 3))
 
 
 def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
@@ -3536,6 +3635,134 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
 
     logging.info('[%s, %s] ...Generating images for PDF outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
+
+
+def generate_png800_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0912,R0914,R0915
+    """ Generate images for generic PNG PDF outputs.
+    """
+    logging.info('[%s, %s] Generating images for generic PNG PDF outputs...',
+                 set_name, lang)
+    timestamp = time.time()
+
+    temp_path = os.path.join(TEMP_ROOT_PATH,
+                             'generate_png800_pdf.{}.{}'.format(set_id, lang))
+    _create_folder(temp_path)
+    _clear_folder(temp_path)
+
+    temp_path2 = os.path.join(TEMP_ROOT_PATH,
+                              'generate_png800_pdf2.{}.{}'.format(set_id,
+                                                                  lang))
+    _create_folder(temp_path2)
+    _clear_folder(temp_path2)
+
+    input_cnt = 0
+    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+        filelist = [f for f in zip_obj.namelist()
+                    if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
+                                                  PNG800BLEED))
+                    and f.split('.')[-1] == 'png'
+                    and f.split('.')[-2] == lang
+                    and f.split('.')[-3] == set_id]
+        for filename in filelist:
+            output_filename = _update_zip_filename(filename)
+            if output_filename.endswith('-2.png'):
+                input_cnt += 1
+                with zip_obj.open(filename) as zip_file:
+                    with open(os.path.join(temp_path, output_filename),
+                              'wb') as output_file:
+                        shutil.copyfileobj(zip_file, output_file)
+
+    cmd = GIMP_COMMAND.format(
+        conf['gimp_console_path'],
+        'python-prepare-pdf-back-folder',
+        temp_path.replace('\\', '\\\\'),
+        temp_path2.replace('\\', '\\\\'))
+    res = _run_cmd(cmd)
+    logging.info('[%s, %s] %s', set_name, lang, res)
+
+    output_cnt = 0
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            output_cnt += 1
+            if os.path.getsize(os.path.join(temp_path2, filename)
+                               ) < PNG_800_MIN_SIZE:
+                raise GIMPError('GIMP failed for {}'.format(
+                    os.path.join(temp_path2, filename)))
+
+        break
+
+    if output_cnt != input_cnt:
+        raise GIMPError('Wrong number of output files: {} instead of {}'
+                        .format(output_cnt, input_cnt))
+
+    _clear_folder(temp_path)
+
+    temp_path3 = os.path.join(TEMP_ROOT_PATH,
+                              'generate_png800_pdf3.{}.{}'.format(set_id,
+                                                                  lang))
+    _create_folder(temp_path3)
+    _clear_folder(temp_path3)
+
+    input_path = os.path.join(IMAGES_EONS_PATH, PNG800NOBLEED,
+                              '{}.{}'.format(set_id, lang))
+    input_cnt = 0
+    for _, _, filenames in os.walk(input_path):
+        for filename in filenames:
+            if filename.endswith('-1.png'):
+                input_cnt += 1
+                shutil.copyfile(os.path.join(input_path, filename),
+                                os.path.join(temp_path, filename))
+
+        break
+
+    cmd = GIMP_COMMAND.format(
+        conf['gimp_console_path'],
+        'python-prepare-pdf-front-folder',
+        temp_path.replace('\\', '\\\\'),
+        temp_path3.replace('\\', '\\\\'))
+    res = _run_cmd(cmd)
+    logging.info('[%s, %s] %s', set_name, lang, res)
+
+    output_cnt = 0
+    for _, _, filenames in os.walk(temp_path3):
+        for filename in filenames:
+            output_cnt += 1
+            if os.path.getsize(os.path.join(temp_path3, filename)
+                               ) < PNG_800_MIN_SIZE:
+                raise GIMPError('GIMP failed for {}'.format(
+                    os.path.join(temp_path3, filename)))
+
+        break
+
+    if output_cnt != input_cnt:
+        raise GIMPError('Wrong number of output files: {} instead of {}'
+                        .format(output_cnt, input_cnt))
+
+    output_path = os.path.join(IMAGES_EONS_PATH, PNG800PDF,
+                               '{}.{}'.format(set_id, lang))
+    _create_folder(output_path)
+    _clear_modified_images(output_path, skip_ids)
+
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            shutil.move(os.path.join(temp_path2, filename),
+                        os.path.join(output_path, filename))
+
+        break
+
+    for _, _, filenames in os.walk(temp_path3):
+        for filename in filenames:
+            shutil.move(os.path.join(temp_path3, filename),
+                        os.path.join(output_path, filename))
+
+        break
+
+    _delete_folder(temp_path)
+    _delete_folder(temp_path2)
+    _delete_folder(temp_path3)
+
+    logging.info('[%s, %s] ...Generating images for generic PNG PDF outputs '
+                 '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
 def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
@@ -4116,7 +4343,7 @@ def generate_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0914
 
     for page_format in formats:
         canvas = Canvas(
-            os.path.join(output_path, '{}.{}.{}.pdf'.format(
+            os.path.join(output_path, 'Home.{}.{}.{}.pdf'.format(
                 page_format, _escape_filename(set_name), lang)),
             pagesize=landscape(formats[page_format]))
         width, height = landscape(formats[page_format])
@@ -4140,6 +4367,107 @@ def generate_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0914
         canvas.save()
 
     logging.info('[%s, %s] ...Generating PDF outputs (%ss)',
+                 set_name, lang, round(time.time() - timestamp, 3))
+
+
+def generate_genericpng_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R0915
+    """ Generate generic PNG PDF outputs.
+    """
+    logging.info('[%s, %s] Generating generic PNG PDF outputs...', set_name,
+                 lang)
+    timestamp = time.time()
+
+    input_path = os.path.join(IMAGES_EONS_PATH, PNG800PDF,
+                              '{}.{}'.format(set_id, lang))
+    output_path = os.path.join(OUTPUT_GENERICPNG_PDF_PATH, '{}.{}'.format(
+        _escape_filename(set_name), lang))
+    temp_path = os.path.join(TEMP_ROOT_PATH,
+                             'generate_mpc.{}.{}'.format(set_id, lang))
+
+    images = _collect_pdf_images(input_path)
+    if not images:
+        logging.error('[%s, %s] No cards found', set_name, lang)
+        logging.info('[%s, %s] ...Generating generic PNG PDF outputs (%ss)',
+                     set_name, lang, round(time.time() - timestamp, 3))
+        return
+
+    _create_folder(temp_path)
+    _clear_folder(temp_path)
+    _create_folder(output_path)
+    pages_raw = []
+    for key in images:
+        pages_raw.extend([(images[key][i * 6:(i + 1) * 6] + [None] * 6)[:6]
+                          for i in range(math.ceil(len(images[key]) / 6))])
+
+    pages = []
+    for page in pages_raw:
+        front_page = [i and i[0] or None for i in page]
+        back_page = [i and i[1] or None for i in page]
+        back_page = [back_page[2], back_page[1], back_page[0],
+                     back_page[5], back_page[4], back_page[3]]
+        pages.extend([front_page, back_page])
+
+    formats = {}
+    if ('genericpng_pdf_a4_zip' in conf['outputs'][lang] or
+            'genericpng_pdf_a4_7z' in conf['outputs'][lang]):
+        formats['A4'] = [A4, []]
+        if 'genericpng_pdf_a4_zip' in conf['outputs'][lang]:
+            formats['A4'][1].append('zip')
+
+        if 'genericpng_pdf_a4_7z' in conf['outputs'][lang]:
+            formats['A4'][1].append('7z')
+
+    if ('genericpng_pdf_letter_zip' in conf['outputs'][lang] or
+            'genericpng_pdf_letter_7z' in conf['outputs'][lang]):
+        formats['Letter'] = [letter, []]
+        if 'genericpng_pdf_letter_zip' in conf['outputs'][lang]:
+            formats['Letter'][1].append('zip')
+
+        if 'genericpng_pdf_letter_7z' in conf['outputs'][lang]:
+            formats['Letter'][1].append('7z')
+
+    card_width = 2.75 * inch
+    card_height = 3.75 * inch
+
+    for page_format in formats:
+        pdf_filename = 'Generic.{}.{}.{}.pdf'.format(
+            page_format, _escape_filename(set_name), lang)
+        pdf_path = os.path.join(temp_path, pdf_filename)
+        canvas = Canvas(pdf_path, pagesize=landscape(formats[page_format][0]))
+        width, height = landscape(formats[page_format][0])
+        width_margin = (width - 3 * card_width) / 2
+        height_margin = (height - 2 * card_height) / 2
+        for page in pages:
+            for i, card in enumerate(page):
+                if card:
+                    width_pos = (
+                        width_margin + i * card_width
+                        if i < 6 / 2
+                        else width_margin + (i - 6 / 2) * card_width)
+                    height_pos = (height_margin + card_height
+                                  if i < 6 / 2
+                                  else height_margin)
+                    canvas.drawImage(card, width_pos, height_pos,
+                                     card_width, card_height, anchor='sw')
+
+            canvas.showPage()
+
+        canvas.save()
+
+        if 'zip' in formats[page_format][1]:
+            with zipfile.ZipFile(
+                    os.path.join(output_path, '{}.zip'.format(pdf_filename)),
+                    'w') as obj:
+                obj.write(pdf_path, pdf_filename)
+
+        if '7z' in formats[page_format][1]:
+            with py7zr.SevenZipFile(
+                    os.path.join(output_path, '{}.7z'.format(pdf_filename)),
+                    'w', filters=PY7ZR_FILTERS) as obj:
+                obj.write(pdf_path, pdf_filename)
+
+    _delete_folder(temp_path)
+    logging.info('[%s, %s] ...Generating generic PNG PDF outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 
 

@@ -42,9 +42,16 @@ def retry():
 
 @retry()
 def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):
-    """ Generate images without bleed margins.
+    """ Generate PNG 300 dpi images without bleed margins.
     """
     lotr.generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids)
+
+
+@retry()
+def generate_png800_nobleed(conf, set_id, set_name, lang, skip_ids):
+    """ Generate PNG 800 dpi images without bleed margins.
+    """
+    lotr.generate_png800_nobleed(conf, set_id, set_name, lang, skip_ids)
 
 
 @retry()
@@ -69,6 +76,14 @@ def generate_pdf(conf, set_id, set_name, lang, skip_ids):
     """
     lotr.generate_png300_pdf(conf, set_id, set_name, lang, skip_ids)
     lotr.generate_pdf(conf, set_id, set_name, lang)
+
+
+@retry()
+def generate_genericpng_pdf(conf, set_id, set_name, lang, skip_ids):
+    """ Generate generic PNG PDF outputs.
+    """
+    lotr.generate_png800_pdf(conf, set_id, set_name, lang, skip_ids)
+    lotr.generate_genericpng_pdf(conf, set_id, set_name, lang)
 
 
 @retry()
@@ -160,8 +175,12 @@ def main():  # pylint: disable=R0912
                              ' skipping', set_name, lang)
                 continue
 
-            if conf['nobleed'][lang]:
+            if conf['nobleed_300'][lang]:
                 pre_tasks.append([generate_png300_nobleed, conf, set_id,
+                                  set_name, lang, skip_ids])
+
+            if conf['nobleed_800'][lang]:
+                pre_tasks.append([generate_png800_nobleed, conf, set_id,
                                   set_name, lang, skip_ids])
 
             if 'db' in conf['outputs'][lang]:
@@ -175,6 +194,10 @@ def main():  # pylint: disable=R0912
             if 'pdf' in conf['outputs'][lang]:
                 tasks.append([generate_pdf, conf, set_id, set_name, lang,
                               skip_ids])
+
+            if 'genericpng_pdf' in conf['outputs'][lang]:
+                tasks.append([generate_genericpng_pdf, conf, set_id, set_name,
+                              lang, skip_ids])
 
             if 'makeplayingcards' in conf['outputs'][lang]:
                 tasks.append([generate_mpc, conf, set_id, set_name, lang,
