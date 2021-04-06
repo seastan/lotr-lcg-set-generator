@@ -2,17 +2,22 @@
 # -*- coding: utf8 -*-
 """ Discord bot.
 
-You need to install dependency:
-pip install discord.py
+You need to install a new dependency:
+pip install discord.py==1.7.0
 
 Create discord.yaml (see discord.default.yaml).
 """
+from datetime import datetime
+from email.header import Header
 import asyncio
 import json
 import logging
 import os
 import random
 import re
+import shutil
+import time
+import uuid
 
 import discord
 import yaml
@@ -23,6 +28,8 @@ import lotr
 CHANGES_PATH = os.path.join('Discord', 'Changes')
 CONF_PATH = 'discord.yaml'
 LOG_PATH = 'discord_bot.log'
+MAIL_COUNTER_PATH = 'discord_bot.cnt'
+MAILS_PATH = '/home/homeassistant/.homeassistant/mails'
 PLAYTEST_PATH = os.path.join('Discord', 'playtest.json')
 WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 
@@ -31,12 +38,19 @@ IO_SLEEP_TIME = 1
 MESSAGE_SLEEP_TIME = 1
 WATCH_SLEEP_TIME = 10
 
+ERROR_SUBJECT_TEMPLATE = 'LotR Discord Bot ERROR: {}'
+WARNING_SUBJECT_TEMPLATE = 'LotR Discord Bot WARNING: {}'
+MAIL_QUOTA = 50
+
+CHANNEL_LIMIT = 500
+ARCHIVE_CATEGORY = 'Archive'
 CRON_CHANNEL = 'cron'
 PLAYTEST_CHANNEL = 'playtesting-checklist'
 GENERAL_CATEGORIES = {
     'Text Channels', 'Division of Labor', 'Player Card Design', 'Printing',
     'Rules', 'Voice Channels', 'Archive'
 }
+MAX_ERROR_COUNT = 3
 
 EMOJIS = {
     '[leadership]': '<:leadership:822573464601886740>',
@@ -125,6 +139,8 @@ List of **!stat** commands:
 """
 }
 
+ERROR_COUNTS = {}
+
 playtest_lock = asyncio.Lock()
 
 
@@ -145,6 +161,94 @@ def init_logging():
                         format='%(asctime)s %(levelname)s: %(message)s')
 
 
+def is_non_ascii(value):
+    """ Check whether the string is ASCII only or not.
+    """
+    return not all(ord(c) < 128 for c in value)
+
+
+def create_mail(subject, body=''):
+    """ Create mail file.
+    """
+    if not check_mail_counter():
+        return
+
+    increment_mail_counter()
+    subject = re.sub(r'\s+', ' ', subject)
+    if len(subject) > 200:
+        subject = subject[:200] + '...'
+
+    if is_non_ascii(subject):
+        subject = Header(subject, 'utf8').encode()
+
+    with open('{}/{}_{}'.format(MAILS_PATH, int(time.time()), uuid.uuid4()),
+              'w') as fobj:
+        json.dump({'subject': subject, 'body': body, 'html': False}, fobj)
+
+
+def check_mail_counter():
+    """ Check whether a new email may be sent or not.
+    """
+    today = datetime.today().strftime('%Y-%m-%d')
+    try:
+        with open(MAIL_COUNTER_PATH, 'r') as fobj:
+            data = json.load(fobj)
+    except Exception:
+        data = {'day': today,
+                'value': 0,
+                'allowed': True}
+        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+            json.dump(data, fobj)
+
+        return True
+
+    if today != data['day']:
+        data = {'day': today,
+                'value': 0,
+                'allowed': True}
+        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+            json.dump(data, fobj)
+
+        return True
+
+    if not data['allowed']:
+        if data['value'] >= MAIL_QUOTA:
+            return False
+
+        data['allowed'] = True
+        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+            json.dump(data, fobj)
+
+        return True
+
+    if data['value'] >= MAIL_QUOTA:
+        data['allowed'] = False
+        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+            json.dump(data, fobj)
+
+        message = 'Mail quota exceeded: {}/{}'.format(data['value'] + 1,
+                                                      MAIL_QUOTA)
+        logging.warning(message)
+        create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
+        return False
+
+    return True
+
+
+def increment_mail_counter():
+    """ Increment mail counter.
+    """
+    try:
+        with open(MAIL_COUNTER_PATH, 'r') as fobj:
+            data = json.load(fobj)
+
+        data['value'] += 1
+        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+            json.dump(data, fobj)
+    except Exception:
+        pass
+
+
 def get_token():
     """ Get Discord token.
     """
@@ -155,6 +259,8 @@ def get_token():
         return conf.get('token', '')
     except Exception as exc:
         logging.exception(str(exc))
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(
+            'error obtaining Discord token: {}'.format(str(exc))))
         return ''
 
 
@@ -585,6 +691,7 @@ class MyClient(discord.Client):
     """ My bot class.
     """
 
+    archive_category = None
     cron_channel = None
     playtest_channel = None
     categories = {}
@@ -596,18 +703,34 @@ class MyClient(discord.Client):
         """
         logging.info('Logged in as %s (%s)', self.user.name, self.user.id)
         try:
-            self.cron_channel = self.get_channel(
+            self.archive_category = self.get_channel(
                 [c for c in self.get_all_channels()
-                 if c.name == CRON_CHANNEL][0].id)
+                 if str(c.type) == 'category' and
+                 c.name == ARCHIVE_CATEGORY][0].id)
         except Exception as exc:
             logging.exception(str(exc))
+            create_mail(WARNING_SUBJECT_TEMPLATE.format(
+                'error obtaining archive category: {}'.format(str(exc))))
+
+        try:
+            self.cron_channel = self.get_channel(
+                [c for c in self.get_all_channels()
+                 if str(c.type) == 'text' and
+                 c.name == CRON_CHANNEL][0].id)
+        except Exception as exc:
+            logging.exception(str(exc))
+            create_mail(WARNING_SUBJECT_TEMPLATE.format(
+                'error obtaining Cron channel: {}'.format(str(exc))))
 
         try:
             self.playtest_channel = self.get_channel(
                 [c for c in self.get_all_channels()
-                 if c.name == PLAYTEST_CHANNEL][0].id)
+                 if str(c.type) == 'text' and
+                 c.name == PLAYTEST_CHANNEL][0].id)
         except Exception as exc:
             logging.exception(str(exc))
+            create_mail(WARNING_SUBJECT_TEMPLATE.format(
+                'error obtaining Playtest channel: {}'.format(str(exc))))
 
         self.categories, self.channels = await self._load_channels()
         await self._test_channels()
@@ -665,21 +788,36 @@ class MyClient(discord.Client):
             for _, _, filenames in os.walk(CHANGES_PATH):
                 filenames.sort()
                 for filename in filenames:
-                    if not filename.endswith('.json'):
+                    if (not filename.endswith('.json') or
+                            filename.startswith('__')):
                         continue
 
                     path = os.path.join(CHANGES_PATH, filename)
-                    data = await read_json_data(path)
-                    logging.info('Processing changes: %s', data)
                     try:
+                        data = await read_json_data(path)
+                        logging.info('Processing changes: %s', data)
                         await self._process_changes(data)
                     except Exception as exc:
                         logging.exception(str(exc))
+                        error_count = ERROR_COUNTS.get(filename, 0) + 1
+                        moved_text = (' (moving to quarantine)'
+                                      if error_count >= MAX_ERROR_COUNT
+                                      else '')
+                        message = 'error processing {}{}: {}'.format(
+                            filename, moved_text, str(exc))
+                        create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
                         if self.cron_channel:
-                            await self._send_channel(
-                                self.cron_channel,
-                                'error processing {}: {}'.format(filename,
-                                                                 str(exc)))
+                            await self._send_channel(self.cron_channel,
+                                                     message)
+
+                        if error_count >= MAX_ERROR_COUNT:
+                            shutil.move(
+                                path, os.path.join(
+                                    CHANGES_PATH, '__{}'.format(filename)))
+                            logging.warning('Moved %s to quarantine', filename)
+                            del ERROR_COUNTS[filename]
+                        else:
+                            ERROR_COUNTS[filename] = error_count
                     else:
                         os.remove(path)
                     finally:
@@ -690,20 +828,37 @@ class MyClient(discord.Client):
                 break
         except Exception as exc:
             logging.exception(str(exc))
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(
+                'unexpected error during watching for changes: {}'
+                .format(str(exc))))
 
 
-    async def _process_changes(self, data):
-        changes = data['categories']
+    async def _process_changes(self, data):  #pylint: disable=R0912,R0915
+        changes = data.get('categories', [])
         for change in changes:
             if len(change) != 2:
                 raise FormatError('Incorrect change format: {}'.format(change))
 
             if change[0] == 'add':
+                if CHANNEL_LIMIT - len(list(self.get_all_channels())) <= 0:
+                    raise DiscordError(
+                        'No free slots to create a new category "{}"'.format(
+                            change[1]))
+
                 position = max(
                     [c['position'] for c in self.categories.values()] or [0])
                 await self.guilds[0].create_category(change[1],
                                                      position=position)
                 logging.info('Created new category "%s"', change[1])
+
+                slots = CHANNEL_LIMIT - len(list(self.get_all_channels()))
+                if slots < 5:
+                    logging.warning('Only %s channel slots remain', slots)
+                    message = 'only {} channel slots remain'.format(slots)
+                    create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
+                    if self.cron_channel:
+                        await self._send_channel(self.cron_channel, message)
+
                 await asyncio.sleep(CMD_SLEEP_TIME)
             elif change[0] == 'rename':
                 if len(change[1]) != 2:
@@ -711,11 +866,12 @@ class MyClient(discord.Client):
                         change))
 
                 if change[1][0] not in self.categories:
-                    raise DiscordError('Categoty {} not found'.format(
+                    raise DiscordError('Category "{}" not found'.format(
                         change[1][0]))
 
-                await self.get_channel(self.categories[change[1][0]]['id']
-                                       ).edit(name=change[1][1])
+                category = self.get_channel(
+                    self.categories[change[1][0]]['id'])
+                await category.edit(name=change[1][1])
                 logging.info('Renamed category "%s" to "%s"', change[1][0],
                              change[1][1])
                 await asyncio.sleep(CMD_SLEEP_TIME)
@@ -726,6 +882,101 @@ class MyClient(discord.Client):
         if 'categories' in data and 'channels' in data:
             self.categories, self.channels = await self._load_channels()
 
+        changes = data.get('channels', [])
+        for change in changes:
+            if len(change) != 2:
+                raise FormatError('Incorrect change format: {}'.format(change))
+
+            if change[0] == 'add':
+                if len(change[1]) != 2:
+                    raise FormatError('Incorrect change format: {}'.format(
+                        change))
+
+                if change[1][1] not in self.categories:
+                    raise DiscordError('Category "{}" not found'.format(
+                        change[1][1]))
+
+                if CHANNEL_LIMIT - len(list(self.get_all_channels())) <= 0:
+                    raise DiscordError(
+                        'No free slots to create a new channel "{}"'.format(
+                            change[1][0]))
+
+                category = self.get_channel(
+                    self.categories[change[1][1]]['id'])
+                channel = await self.guilds[0].create_text_channel(
+                    change[1][0], category=category)
+                logging.info('Created new channel "%s" in category "%s"',
+                             change[1][0], change[1][1])
+                await channel.send('!alepcard this')
+
+                slots = CHANNEL_LIMIT - len(list(self.get_all_channels()))
+                if slots < 5:
+                    logging.warning('Only %s channel slots remain', slots)
+                    message = 'only {} channel slots remain'.format(slots)
+                    create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
+                    if self.cron_channel:
+                        await self._send_channel(self.cron_channel, message)
+
+                await asyncio.sleep(CMD_SLEEP_TIME)
+            elif change[0] == 'move':
+                if len(change[1]) != 2:
+                    raise FormatError('Incorrect change format: {}'.format(
+                        change))
+
+                if change[1][0] not in self.channels:
+                    raise DiscordError('Channel "{}" not found'.format(
+                        change[1][0]))
+
+                if change[1][1] not in self.categories:
+                    raise DiscordError('Category "{}" not found'.format(
+                        change[1][1]))
+
+                channel = self.get_channel(self.channels[change[1][0]]['id'])
+                old_category_name = channel.category.name
+                category = self.get_channel(
+                    self.categories[change[1][1]]['id'])
+                await channel.move(category=category, end=True)
+                logging.info('Moved channel "%s" from category "%s" to "%s"',
+                             change[1][0], old_category_name, change[1][1])
+                await channel.send('Moved from category "{}" to "{}"'.format(
+                    old_category_name, change[1][1]))
+                await asyncio.sleep(CMD_SLEEP_TIME)
+            elif change[0] == 'remove':
+                if change[1] not in self.channels:
+                    raise DiscordError('Channel "{}" not found'.format(
+                        change[1]))
+
+                if not self.archive_category:
+                    raise DiscordError('Category "{}" not found'.format(
+                        ARCHIVE_CATEGORY))
+
+                channel = self.get_channel(self.channels[change[1]]['id'])
+                old_category_name = channel.category.name
+                await channel.move(category=self.archive_category, end=True)
+                logging.info('Moved channel "%s" from category "%s" to "%s"',
+                             change[1], old_category_name, ARCHIVE_CATEGORY)
+                await channel.send('Moved from category "{}" to "{}"'.format(
+                    old_category_name, ARCHIVE_CATEGORY))
+                await asyncio.sleep(CMD_SLEEP_TIME)
+            elif change[0] == 'rename':
+                if len(change[1]) != 2:
+                    raise FormatError('Incorrect change format: {}'.format(
+                        change))
+
+                if change[1][0] not in self.channels:
+                    raise DiscordError('Channel {} not found'.format(
+                        change[1][0]))
+
+                channel = self.get_channel(self.channels[change[1][0]]['id'])
+                await channel.edit(name=change[1][1])
+                logging.info('Renamed channel "%s" to "%s"', change[1][0],
+                             change[1][1])
+                await channel.send('Renamed from "{}" to "{}"'.format(
+                    change[1][0], change[1][1]))
+                await asyncio.sleep(CMD_SLEEP_TIME)
+            else:
+                raise FormatError('Unknown category change type: {}'.format(
+                    change[0]))
 
     async def _test_channels(self):
         channels = self.channels.copy()
@@ -1331,7 +1582,7 @@ Targets removed.
             try:
                 num = len(list(self.get_all_channels()))
                 res = 'There are {} channels and {} free slots'.format(
-                    num, 500 - num)
+                    num, CHANNEL_LIMIT - num)
             except Exception as exc:
                 logging.exception(str(exc))
                 await message.channel.send(
@@ -1362,9 +1613,6 @@ Targets removed.
             if not message.content or message.content[0] != '!':
                 return
 
-            if message.author.id == self.user.id:
-                return
-
             if message.content.lower().startswith('!cron '):
                 await self._process_cron_command(message)
             elif message.content.lower().startswith('!playtest '):
@@ -1377,6 +1625,9 @@ Targets removed.
                 await self._process_help_command(message)
         except Exception as exc:
             logging.exception(str(exc))
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(
+                'unexpected error during processing a message: {}'
+                .format(str(exc))))
 
 
 if __name__ == '__main__':
