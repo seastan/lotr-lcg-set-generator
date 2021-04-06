@@ -26,7 +26,7 @@ LOG_PATH = 'discord_bot.log'
 PLAYTEST_PATH = os.path.join('Discord', 'playtest.json')
 WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 
-CMD_SLEEP_TIME = 5
+CMD_SLEEP_TIME = 2
 IO_SLEEP_TIME = 1
 MESSAGE_SLEEP_TIME = 1
 WATCH_SLEEP_TIME = 10
@@ -109,8 +109,11 @@ Mark a given target as completed by you, for example:
 Some report
 ```
 **!playtest remove <target or list of targets separated by space>** - remove a given target or a list of targets (for example: `!playtest remove 11 12`)
-**!playtest update <target or list of targets separated by space> <player>** - mark a given target or a list of targets as completed by a given player (for example: `!playtest random 7 Shellin`)
+
+**!playtest update <target or list of targets separated by space> <player>** - mark a given target or a list of targets as completed by a given player (for example: `!playtest update 7 Shellin`)
+
 **!playtest random <number>** - generate a random number from 1 to a given number (for example: `!playtest random 10`)
+
 **!playtest help** - display this help message
 """,
     'stat': """
@@ -582,6 +585,8 @@ class MyClient(discord.Client):
     """ My bot class.
     """
 
+    cron_channel = None
+    playtest_channel = None
     categories = {}
     channels = {}
 
@@ -590,6 +595,20 @@ class MyClient(discord.Client):
         """ Invoked when the client is ready.
         """
         logging.info('Logged in as %s (%s)', self.user.name, self.user.id)
+        try:
+            self.cron_channel = self.get_channel(
+                [c for c in self.get_all_channels()
+                 if c.name == CRON_CHANNEL][0].id)
+        except Exception as exc:
+            logging.exception(str(exc))
+
+        try:
+            self.playtest_channel = self.get_channel(
+                [c for c in self.get_all_channels()
+                 if c.name == PLAYTEST_CHANNEL][0].id)
+        except Exception as exc:
+            logging.exception(str(exc))
+
         self.categories, self.channels = await self._load_channels()
         await self._test_channels()
         self.loop.create_task(self._watch_changes_schedule())
@@ -609,7 +628,8 @@ class MyClient(discord.Client):
                 else:
                     categories[channel.name] = {
                         'name': channel.name,
-                        'id': channel.id}
+                        'id': channel.id,
+                        'position': channel.position}
             elif str(channel.type) == 'text':
                 if (not channel.category_id
                         or channel.category.name in GENERAL_CATEGORIES
@@ -641,31 +661,35 @@ class MyClient(discord.Client):
 
 
     async def _watch_changes(self):
-        for _, _, filenames in os.walk(CHANGES_PATH):
-            filenames.sort()
-            for filename in filenames:
-                if not filename.endswith('.json'):
-                    continue
+        try:
+            for _, _, filenames in os.walk(CHANGES_PATH):
+                filenames.sort()
+                for filename in filenames:
+                    if not filename.endswith('.json'):
+                        continue
 
-                path = os.path.join(CHANGES_PATH, filename)
-                data = await read_json_data(path)
-                logging.info('Processing changes: %s', data)
-                try:
-                    await self._process_changes(data)
-                except Exception as exc:
-                    logging.exception(str(exc))
-                    if CRON_CHANNEL in self.channels:
-                        await self._send_channel(
-                            self.get_channel(
-                                self.channels[CRON_CHANNEL]['id']),
-                            'error processing {}: {}'.format(filename,
-                                                             str(exc)))
-                else:
-                    os.remove(path)
-                    self.categories, self.channels = (
-                        await self._load_channels())
+                    path = os.path.join(CHANGES_PATH, filename)
+                    data = await read_json_data(path)
+                    logging.info('Processing changes: %s', data)
+                    try:
+                        await self._process_changes(data)
+                    except Exception as exc:
+                        logging.exception(str(exc))
+                        if self.cron_channel:
+                            await self._send_channel(
+                                self.cron_channel,
+                                'error processing {}: {}'.format(filename,
+                                                                 str(exc)))
+                    else:
+                        os.remove(path)
+                    finally:
+                        if 'categories' in data or 'channels' in data:
+                            self.categories, self.channels = (
+                                await self._load_channels())
 
-            break
+                break
+        except Exception as exc:
+            logging.exception(str(exc))
 
 
     async def _process_changes(self, data):
@@ -675,7 +699,10 @@ class MyClient(discord.Client):
                 raise FormatError('Incorrect change format: {}'.format(change))
 
             if change[0] == 'add':
-                await self.guilds[0].create_category(change[1])
+                position = max(
+                    [c['position'] for c in self.categories.values()] or [0])
+                await self.guilds[0].create_category(change[1],
+                                                     position=position)
                 logging.info('Created new category "%s"', change[1])
                 await asyncio.sleep(CMD_SLEEP_TIME)
             elif change[0] == 'rename':
@@ -695,6 +722,9 @@ class MyClient(discord.Client):
             else:
                 raise FormatError('Unknown category change type: {}'.format(
                     change[0]))
+
+        if 'categories' in data and 'channels' in data:
+            self.categories, self.channels = await self._load_channels()
 
 
     async def _test_channels(self):
@@ -827,10 +857,8 @@ Deadline: tomorrow.
         playtest_message = """----------
 New playtesting targets:
 {}""".format(format_playtest_message(data))
-        if PLAYTEST_CHANNEL in self.channels:
-            await self._send_channel(
-                self.get_channel(self.channels[PLAYTEST_CHANNEL]['id']),
-                playtest_message)
+        if self.playtest_channel:
+            await self._send_channel(self.playtest_channel, playtest_message)
 
         return ''
 
@@ -875,10 +903,8 @@ New playtesting targets:
 Target "{}" completed. Link: {}
 {}
 {}""".format(num, url, format_playtest_message(data), all_targets)
-        if PLAYTEST_CHANNEL in self.channels:
-            await self._send_channel(
-                self.get_channel(self.channels[PLAYTEST_CHANNEL]['id']),
-                playtest_message)
+        if self.playtest_channel:
+            await self._send_channel(self.playtest_channel, playtest_message)
 
         return ''
 
@@ -935,10 +961,8 @@ Target "{}" completed. Link: {}
 Targets updated.
 {}
 {}""".format(format_playtest_message(data), all_targets)
-        if PLAYTEST_CHANNEL in self.channels:
-            await self._send_channel(
-                self.get_channel(self.channels[PLAYTEST_CHANNEL]['id']),
-                playtest_message)
+        if self.playtest_channel:
+            await self._send_channel(self.playtest_channel, playtest_message)
 
         return ''
 
@@ -996,10 +1020,8 @@ Targets updated.
         playtest_message = """----------
 Targets added.
 {}""".format(format_playtest_message(data))
-        if PLAYTEST_CHANNEL in self.channels:
-            await self._send_channel(
-                self.get_channel(self.channels[PLAYTEST_CHANNEL]['id']),
-                playtest_message)
+        if self.playtest_channel:
+            await self._send_channel(self.playtest_channel, playtest_message)
 
         return ''
 
@@ -1043,10 +1065,8 @@ Targets added.
         playtest_message = """----------
 Targets removed.
 {}""".format(format_playtest_message(data))
-        if PLAYTEST_CHANNEL in self.channels:
-            await self._send_channel(
-                self.get_channel(self.channels[PLAYTEST_CHANNEL]['id']),
-                playtest_message)
+        if self.playtest_channel:
+            await self._send_channel(self.playtest_channel, playtest_message)
 
         return ''
 
