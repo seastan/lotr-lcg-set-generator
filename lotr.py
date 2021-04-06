@@ -2152,7 +2152,11 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                  if (r[CARD_SET_NAME] or '').lower() in quest['sets']
                  and (not r[CARD_ENCOUNTER_SET] or
                       r[CARD_ENCOUNTER_SET].lower()
-                      in quest['encounter sets'])]
+                      in quest['encounter sets'])
+                 and (r[CARD_TYPE] != 'Rules' or
+                      (r.get(CARD_TEXT) or '') not in ('', 'T.B.D.') or
+                      (r.get(BACK_PREFIX + CARD_TEXT) or '')
+                      not in ('', 'T.B.D.'))]
         for url in rules.get(('external xml', 0), []):
             cards.extend(_load_external_xml(url, quest['sets'],
                                             quest['encounter sets']))
