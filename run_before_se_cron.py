@@ -8,7 +8,7 @@ Create discord.yaml (see discord.default.yaml).
 Setup rclone:
 
 curl -L https://raw.github.com/pageauc/rclone4pi/master/rclone-install.sh | bash
-rclone confi
+rclone config
 
 Setup a cron as:
 */2 * * * * flock -xn /home/homeassistant/lotr-lcg-set-generator/cron.lock -c 'python3 /home/homeassistant/lotr-lcg-set-generator/run_before_se_cron.py > /dev/null' 2>&1
@@ -27,7 +27,7 @@ import requests
 import yaml
 
 from lotr import SanityCheckError
-from run_before_se import main as imported_main
+from run_before_se import main
 
 
 DISCORD_CONF_PATH = 'discord.yaml'
@@ -237,7 +237,7 @@ def rclone_scratch():
                           .format(stdout, stderr))
 
 
-def main():  # pylint: disable=R0912
+def run(conf=None):  # pylint: disable=R0912
     """ Main function.
     """
     cron_id = uuid.uuid4()
@@ -247,7 +247,7 @@ def main():  # pylint: disable=R0912
             logging.warning('Internet is not available right now, exiting')
             return
 
-        sheet_changes, scratch_changes = imported_main()
+        sheet_changes, scratch_changes = main(conf)
 
         if sheet_changes:
             if get_sanity_check_message():
@@ -291,4 +291,4 @@ def main():  # pylint: disable=R0912
 if __name__ == '__main__':
     os.chdir(WORKING_DIRECTORY)
     init_logging()
-    main()
+    run()
