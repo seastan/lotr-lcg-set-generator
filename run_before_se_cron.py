@@ -211,7 +211,7 @@ def increment_mail_counter():
 
 
 def rclone():
-    """ Sync Google Drive.
+    """ Sync folders to Google Drive.
     """
     res = subprocess.run('./rclone.sh', capture_output=True, shell=True,
                          check=True)
@@ -223,29 +223,47 @@ def rclone():
             stdout, stderr))
 
 
+def rclone_scratch():
+    """ Sync scratch folders to Google Drive.
+    """
+    res = subprocess.run('./rclone_scratch.sh', capture_output=True,
+                         shell=True, check=True)
+    stdout = res.stdout.decode('utf-8').strip()
+    stderr = res.stderr.decode('utf-8').strip()
+    logging.info('Rclone Scratch finished, stdout: %s, stderr: %s',
+                 stdout, stderr)
+    if stdout != 'Done':
+        raise RCloneError('RClone Scratch failed, stdout: {}, stderr: {}'
+                          .format(stdout, stderr))
+
+
 def main():  # pylint: disable=R0912
     """ Main function.
     """
     cron_id = uuid.uuid4()
     logging.info('Started: %s', cron_id)
-    try:
+    try:  # pylint: disable=R1702
         if not internet_state():
             logging.warning('Internet is not available right now, exiting')
             return
 
-        changes = imported_main()
-        if not changes:
-            return
+        sheet_changes, scratch_changes = imported_main()
 
-        rclone()
-        if get_sanity_check_message():
-            message = 'Sanity check passed'
-            try:
-                if send_discord(message):
-                    set_sanity_check_message('')
-                    create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(message))
-            except Exception as exc_new:
-                logging.exception(str(exc_new))
+        if sheet_changes:
+            if get_sanity_check_message():
+                message = 'Sanity check passed'
+                try:
+                    if send_discord(message):
+                        set_sanity_check_message('')
+                        create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(message))
+                except Exception as exc_new:
+                    logging.exception(str(exc_new))
+
+            rclone()
+
+        if scratch_changes:
+            rclone_scratch()
+
     except SanityCheckError as exc:
         message = str(exc)
         logging.error(message)

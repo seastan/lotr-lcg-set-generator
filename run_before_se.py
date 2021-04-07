@@ -13,26 +13,34 @@ def init_logging():
                         format='%(asctime)s %(levelname)s: %(message)s')
 
 
-def main():  # pylint: disable=R0912
+def main(conf=None):  # pylint: disable=R0912
     """ Main function.
     """
     timestamp = time.time()
-    if len(sys.argv) > 1:
-        conf = lotr.read_conf(sys.argv[1])
-    else:
-        conf = lotr.read_conf()
+    if not conf:
+        if len(sys.argv) > 1:
+            conf = lotr.read_conf(sys.argv[1])
+        else:
+            conf = lotr.read_conf()
 
-    sheet_changes = lotr.download_sheet(conf)
-    if conf['exit_if_no_spreadsheet_changes'] and not sheet_changes:
+    sheet_changes, scratch_changes = lotr.download_sheet(conf)
+    if not conf['exit_if_no_spreadsheet_changes']:
+        sheet_changes = True
+        scratch_changes = True
+
+    if not sheet_changes and not scratch_changes:
         logging.info('No spreadsheet changes, exiting')
         logging.info('Done (%ss)', round(time.time() - timestamp, 3))
-        return False
+        return (sheet_changes, scratch_changes)
 
-    lotr.extract_data(conf)
-    sets = lotr.get_sets(conf)
+    lotr.extract_data(conf, sheet_changes, scratch_changes)
+    sets = lotr.get_sets(conf, sheet_changes, scratch_changes)
     lotr.sanity_check(conf, sets)
-    lotr.save_data_for_bot(conf)
-    lotr.reset_project_folders()
+    if sheet_changes:
+        lotr.save_data_for_bot(conf)
+
+    if conf['languages']:
+        lotr.reset_project_folders()
 
     strange_eons = False
     changes = False
@@ -63,7 +71,8 @@ def main():  # pylint: disable=R0912
             lotr.copy_raw_images(conf, set_id, set_name, lang)
             lotr.copy_xml(set_id, set_name, lang)
 
-    lotr.copy_octgn_outputs(conf, sets)
+    if conf['octgn_set_xml'] or conf['octgn_o8d']:
+        lotr.copy_octgn_outputs(conf, sets)
 
     if changes:
         lotr.create_project()
@@ -75,7 +84,7 @@ def main():  # pylint: disable=R0912
                      'project')
 
     logging.info('Done (%ss)', round(time.time() - timestamp, 3))
-    return True
+    return (sheet_changes, scratch_changes)
 
 
 if __name__ == '__main__':

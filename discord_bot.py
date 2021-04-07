@@ -7,9 +7,9 @@ pip install discord.py==1.7.0
 
 Create discord.yaml (see discord.default.yaml).
 """
+import asyncio
 from datetime import datetime
 from email.header import Header
-import asyncio
 import json
 import logging
 import os
@@ -977,6 +977,7 @@ class MyClient(discord.Client):
             else:
                 raise FormatError('Unknown category change type: {}'.format(
                     change[0]))
+
 
     async def _test_channels(self):
         channels = self.channels.copy()

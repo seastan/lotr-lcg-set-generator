@@ -7,6 +7,7 @@ from collections import OrderedDict
 import copy
 import csv
 import hashlib
+from io import StringIO
 import json
 import logging
 import math
@@ -275,6 +276,7 @@ FOUND_SETS = set()
 FOUND_SCRATCH_SETS = set()
 FOUND_INTERSECTED_SETS = set()
 IMAGE_CACHE = {}
+JSON_CACHE = {}
 
 
 class SheetError(Exception):
@@ -640,13 +642,30 @@ def _get_content(url):
 
     return res
 
-def download_sheet(conf):
+
+def _fix_csv_value(value):
+    """ Extract a single value.
+    """
+    if value == '':
+        return None
+
+    if value == 'FALSE':
+        return None
+
+    if _is_int(value):
+        return int(value)
+
+    return value
+
+
+def download_sheet(conf):  # pylint: disable=R0912, R0915
     """ Download cards spreadsheet from Google Sheets.
     """
     logging.info('Downloading cards spreadsheet from Google Sheets...')
     timestamp = time.time()
 
     changes = False
+    scratch_changes = False
     if conf['sheet_gdid']:
         SHEET_IDS.clear()
         sheets = [SET_SHEET, CARD_SHEET, SCRATCH_SHEET]
@@ -676,22 +695,39 @@ def download_sheet(conf):
             url = (
                 'https://docs.google.com/spreadsheets/d/{}/export?format=csv&gid={}'
                 .format(conf['sheet_gdid'], SHEET_IDS[sheet]))
-            path = os.path.join(DOWNLOAD_PATH, '{}.csv'.format(sheet))
-            res = _get_content(url)
-            if not res or b'<html' in res:
+            res = _get_content(url).decode('utf-8')
+            if not res or '<html' in res:
                 raise SheetError("Can't download {} from the Google Sheet"
                                  .format(sheet))
 
-            new_checksums[sheet] = hashlib.md5(res.strip()).hexdigest()
-            with open(path, 'wb') as f_sheet:
-                f_sheet.write(res)
+            try:
+                data = [row for row in csv.reader(StringIO(res))]
+            except Exception:  # pylint: disable=W0703
+                raise SheetError("Can't download {} from the Google Sheet"
+                                 .format(sheet))
 
+            none_index = data[0].index('')
+            data = [row[:none_index] for row in data]
+            data = [[_fix_csv_value(v) for v in row] for row in data]
+            while not any(data[-1]):
+                data.pop()
 
-        for sheet in new_checksums:
+            JSON_CACHE[sheet] = data
+            res = json.dumps(data)
+            new_checksums[sheet] = hashlib.md5(res.encode('utf-8')).hexdigest()
             if new_checksums[sheet] != old_checksums.get(sheet, ''):
-                changes = True
+                logging.info('Sheet %s changed', sheet)
+                if sheet != SCRATCH_SHEET:
+                    changes = True
 
-        if changes:
+                if sheet in (SET_SHEET, SCRATCH_SHEET):
+                    scratch_changes = True
+
+                path = os.path.join(DOWNLOAD_PATH, '{}.json'.format(sheet))
+                with open(path, 'w') as fobj:
+                    fobj.write(res)
+
+        if changes or scratch_changes:
             with open(SHEETS_JSON_PATH, 'w') as fobj:
                 json.dump(new_checksums, fobj)
     else:
@@ -699,7 +735,7 @@ def download_sheet(conf):
 
     logging.info('...Downloading cards spreadsheet from Google Sheets (%ss)',
                  round(time.time() - timestamp, 3))
-    return changes
+    return (changes, scratch_changes)
 
 
 def _update_discord_category(category):
@@ -840,29 +876,16 @@ def _skip_row(row):
     return row[CARD_SET] in ('0', 0) or row[CARD_ID] in ('0', 0)
 
 
-def _extract_csv_value(value):
-    """ Extract a single value from a CSV file.
+def _read_sheet_json(sheet):
+    """ Read sheet data from a JSON file.
     """
-    if value == '':
-        return None
+    data = JSON_CACHE.get(sheet)
+    if data:
+        return data
 
-    if value == 'FALSE':
-        return None
-
-    if _is_int(value):
-        return int(value)
-
-    return value
-
-
-def _extract_csv(sheet):
-    """ Extract data from a CSV file.
-    """
-    path = os.path.join(DOWNLOAD_PATH, '{}.csv'.format(sheet))
-    data = []
-    with open(path, newline='', encoding='utf-8') as obj:
-        for row in csv.reader(obj):
-            data.append([_extract_csv_value(v) for v in row])
+    path = os.path.join(DOWNLOAD_PATH, '{}.json'.format(sheet))
+    with open(path, 'r') as fobj:
+        data = json.load(fobj)
 
     return data
 
@@ -910,7 +933,7 @@ def _transform_to_dict(data):
     return res
 
 
-def extract_data(conf):  # pylint: disable=R0915
+def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: disable=R0912,R0915
     """ Extract data from the spreadsheet.
     """
     logging.info('Extracting data from the spreadsheet...')
@@ -924,27 +947,29 @@ def extract_data(conf):  # pylint: disable=R0915
     TRANSLATIONS.clear()
     SELECTED_CARDS.clear()
 
-    data = _extract_csv(SET_SHEET)
+    data = _read_sheet_json(SET_SHEET)
     if data:
         data = _transform_to_dict(data)
         _clean_data(data)
         SETS.update({s[SET_ID]: s for s in data})
 
-    data = _extract_csv(CARD_SHEET)
-    if data:
-        data = _transform_to_dict(data)
-        for row in data:
-            row[CARD_SCRATCH] = None
+    if sheet_changes:
+        data = _read_sheet_json(CARD_SHEET)
+        if data:
+            data = _transform_to_dict(data)
+            for row in data:
+                row[CARD_SCRATCH] = None
 
-        DATA.extend(data)
+            DATA.extend(data)
 
-    data = _extract_csv(SCRATCH_SHEET)
-    if data:
-        data = _transform_to_dict(data)
-        for row in data:
-            row[CARD_SCRATCH] = 1
+    if scratch_changes:
+        data = _read_sheet_json(SCRATCH_SHEET)
+        if data:
+            data = _transform_to_dict(data)
+            for row in data:
+                row[CARD_SCRATCH] = 1
 
-        DATA.extend(data)
+            DATA.extend(data)
 
     DATA[:] = [row for row in DATA if not _skip_row(row)]
 
@@ -971,7 +996,7 @@ def extract_data(conf):  # pylint: disable=R0915
             continue
 
         TRANSLATIONS[lang] = {}
-        data = _extract_csv(lang)
+        data = _read_sheet_json(lang)
         if data:
             data = _transform_to_dict(data)
             for row in data:
@@ -991,7 +1016,7 @@ def extract_data(conf):  # pylint: disable=R0915
                  round(time.time() - timestamp, 3))
 
 
-def get_sets(conf):
+def get_sets(conf, sheet_changes=True, scratch_changes=True):
     """ Get all sets to work on and return list of (set id, set name) tuples.
     """
     logging.info('Getting all sets to work on...')
@@ -1000,14 +1025,14 @@ def get_sets(conf):
     chosen_sets = set()
     for row in SETS.values():
         if (row[SET_ID] in conf['set_ids'] and
-                (row[SET_ID] in FOUND_SETS or
-                 row[SET_ID] in FOUND_SCRATCH_SETS)):
+                ((row[SET_ID] in FOUND_SETS and sheet_changes) or
+                 (row[SET_ID] in FOUND_SCRATCH_SETS and scratch_changes))):
             chosen_sets.add(row[SET_ID])
 
-    if 'all' in conf['set_ids']:
+    if 'all' in conf['set_ids'] and sheet_changes:
         chosen_sets.update(s for s in FOUND_SETS if s in SETS)
 
-    if 'all_scratch' in conf['set_ids']:
+    if 'all_scratch' in conf['set_ids'] and scratch_changes:
         chosen_sets.update(s for s in FOUND_SCRATCH_SETS if s in SETS)
 
     chosen_sets = list(chosen_sets)
