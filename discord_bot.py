@@ -850,7 +850,7 @@ class MyClient(discord.Client):
                 .format(str(exc))))
 
 
-    async def _process_changes(self, data):  #pylint: disable=R0912,R0915
+    async def _process_category_changes(self, data):
         changes = data.get('categories', [])
         for change in changes:
             if len(change) != 2:
@@ -896,9 +896,8 @@ class MyClient(discord.Client):
                 raise FormatError('Unknown category change type: {}'.format(
                     change[0]))
 
-        if 'categories' in data and 'channels' in data:
-            self.categories, self.channels = await self._load_channels()
 
+    async def _process_channel_changes(self, data):  #pylint: disable=R0912,R0915
         changes = data.get('channels', [])
         for change in changes:
             if len(change) != 2:
@@ -992,8 +991,26 @@ class MyClient(discord.Client):
                     change[1][0], change[1][1]))
                 await asyncio.sleep(CMD_SLEEP_TIME)
             else:
-                raise FormatError('Unknown category change type: {}'.format(
+                raise FormatError('Unknown channel change type: {}'.format(
                     change[0]))
+
+
+    async def _process_card_changes(self, data):
+        changes = data.get('cards', [])
+        for change in changes:
+            pass
+
+
+    async def _process_changes(self, data):
+        await self._process_category_changes(data)
+        if 'categories' in data and 'channels' in data:
+            self.categories, self.channels = await self._load_channels()
+
+        await self._process_channel_changes(data)
+#        if 'channels' in data and 'card' in data:
+#            self.categories, self.channels = await self._load_channels()
+
+        await self._process_card_changes(data)
 
 
     async def _test_channels(self):
