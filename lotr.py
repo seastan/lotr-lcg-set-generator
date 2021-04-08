@@ -202,7 +202,6 @@ CARD_BACKS = {'player': {'mpc': ['playerBackOfficialMPC.png',
 CONFIGURATION_PATH = 'configuration.yaml'
 DISCORD_PATH = 'Discord'
 DISCORD_CARD_DATA_PATH = os.path.join(DISCORD_PATH, 'card_data.json')
-DOWNLOAD_PATH = 'Download'
 IMAGES_BACK_PATH = 'imagesBack'
 IMAGES_CUSTOM_PATH = os.path.join(PROJECT_FOLDER, 'imagesCustom')
 IMAGES_EONS_PATH = 'imagesEons'
@@ -658,7 +657,7 @@ def _fix_csv_value(value):
     return value
 
 
-def download_sheet(conf):  # pylint: disable=R0912, R0915
+def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
     """ Download cards spreadsheet from Google Sheets.
     """
     logging.info('Downloading cards spreadsheet from Google Sheets...')
@@ -666,12 +665,13 @@ def download_sheet(conf):  # pylint: disable=R0912, R0915
 
     changes = False
     scratch_changes = False
-    if conf['sheet_gdid']:
-        SHEET_IDS.clear()
-        sheets = [SET_SHEET, CARD_SHEET, SCRATCH_SHEET]
-        for lang in set(conf['languages']).difference(set(['English'])):
-            sheets.append(lang)
+    sheets = [SET_SHEET, CARD_SHEET, SCRATCH_SHEET]
+    for lang in set(conf['languages']).difference(set(['English'])):
+        sheets.append(lang)
 
+    if [sheet for sheet in sheets if sheet not in SHEET_IDS]:
+        logging.info('Obtaining sheet IDs')
+        SHEET_IDS.clear()
         url = (
             'https://docs.google.com/spreadsheets/d/{}/export?format=csv'
             .format(conf['sheet_gdid']))
@@ -680,58 +680,59 @@ def download_sheet(conf):  # pylint: disable=R0912, R0915
             raise SheetError("Can't download the Google Sheet")
 
         try:
-            SHEET_IDS.update(dict(row for row in csv.reader(res.splitlines())))
+            SHEET_IDS.update(dict(row for row in
+                                  csv.reader(res.splitlines())))
         except ValueError:
             raise SheetError("Can't download the Google Sheet")
 
+        missing_sheets = [sheet for sheet in sheets
+                          if sheet not in SHEET_IDS]
+        if missing_sheets:
+            SheetError("Can't find sheet ID(s) for the following "
+                       "sheet(s): {}".format(', '.join(missing_sheets)))
+
+    try:
+        with open(SHEETS_JSON_PATH, 'r') as fobj:
+            old_checksums = json.load(fobj)
+    except Exception:  # pylint: disable=W0703
+        old_checksums = {}
+
+    new_checksums = {}
+    for sheet in sheets:
+        url = (
+            'https://docs.google.com/spreadsheets/d/{}/export?format=csv&gid={}'
+            .format(conf['sheet_gdid'], SHEET_IDS[sheet]))
+        res = _get_content(url).decode('utf-8')
+        if not res or '<html' in res:
+            raise SheetError("Can't download {} from the Google Sheet"
+                             .format(sheet))
+
         try:
-            with open(SHEETS_JSON_PATH, 'r') as fobj:
-                old_checksums = json.load(fobj)
+            data = [row for row in csv.reader(StringIO(res))]
         except Exception:  # pylint: disable=W0703
-            old_checksums = {}
+            raise SheetError("Can't download {} from the Google Sheet"
+                             .format(sheet))
 
-        new_checksums = {}
-        for sheet in sheets:
-            url = (
-                'https://docs.google.com/spreadsheets/d/{}/export?format=csv&gid={}'
-                .format(conf['sheet_gdid'], SHEET_IDS[sheet]))
-            res = _get_content(url).decode('utf-8')
-            if not res or '<html' in res:
-                raise SheetError("Can't download {} from the Google Sheet"
-                                 .format(sheet))
+        none_index = data[0].index('')
+        data = [row[:none_index] for row in data]
+        data = [[_fix_csv_value(v) for v in row] for row in data]
+        while not any(data[-1]):
+            data.pop()
 
-            try:
-                data = [row for row in csv.reader(StringIO(res))]
-            except Exception:  # pylint: disable=W0703
-                raise SheetError("Can't download {} from the Google Sheet"
-                                 .format(sheet))
+        JSON_CACHE[sheet] = data
+        res = json.dumps(data)
+        new_checksums[sheet] = hashlib.md5(res.encode('utf-8')).hexdigest()
+        if new_checksums[sheet] != old_checksums.get(sheet, ''):
+            logging.info('Sheet %s changed', sheet)
+            if sheet != SCRATCH_SHEET:
+                changes = True
 
-            none_index = data[0].index('')
-            data = [row[:none_index] for row in data]
-            data = [[_fix_csv_value(v) for v in row] for row in data]
-            while not any(data[-1]):
-                data.pop()
+            if sheet in (SET_SHEET, SCRATCH_SHEET):
+                scratch_changes = True
 
-            JSON_CACHE[sheet] = data
-            res = json.dumps(data)
-            new_checksums[sheet] = hashlib.md5(res.encode('utf-8')).hexdigest()
-            if new_checksums[sheet] != old_checksums.get(sheet, ''):
-                logging.info('Sheet %s changed', sheet)
-                if sheet != SCRATCH_SHEET:
-                    changes = True
-
-                if sheet in (SET_SHEET, SCRATCH_SHEET):
-                    scratch_changes = True
-
-                path = os.path.join(DOWNLOAD_PATH, '{}.json'.format(sheet))
-                with open(path, 'w') as fobj:
-                    fobj.write(res)
-
-        if changes or scratch_changes:
-            with open(SHEETS_JSON_PATH, 'w') as fobj:
-                json.dump(new_checksums, fobj)
-    else:
-        logging.info('No Google Sheets ID found, using a local copy')
+    if changes or scratch_changes:
+        with open(SHEETS_JSON_PATH, 'w') as fobj:
+            json.dump(new_checksums, fobj)
 
     logging.info('...Downloading cards spreadsheet from Google Sheets (%ss)',
                  round(time.time() - timestamp, 3))
@@ -876,20 +877,6 @@ def _skip_row(row):
     return row[CARD_SET] in ('0', 0) or row[CARD_ID] in ('0', 0)
 
 
-def _read_sheet_json(sheet):
-    """ Read sheet data from a JSON file.
-    """
-    data = JSON_CACHE.get(sheet)
-    if data:
-        return data
-
-    path = os.path.join(DOWNLOAD_PATH, '{}.json'.format(sheet))
-    with open(path, 'r') as fobj:
-        data = json.load(fobj)
-
-    return data
-
-
 def _extract_column_names(columns):
     """ Extract column names.
     """
@@ -947,14 +934,14 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
     TRANSLATIONS.clear()
     SELECTED_CARDS.clear()
 
-    data = _read_sheet_json(SET_SHEET)
+    data = JSON_CACHE.get(SET_SHEET, [])
     if data:
         data = _transform_to_dict(data)
         _clean_data(data)
         SETS.update({s[SET_ID]: s for s in data})
 
     if sheet_changes:
-        data = _read_sheet_json(CARD_SHEET)
+        data = JSON_CACHE.get(CARD_SHEET, [])
         if data:
             data = _transform_to_dict(data)
             for row in data:
@@ -963,7 +950,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
             DATA.extend(data)
 
     if scratch_changes:
-        data = _read_sheet_json(SCRATCH_SHEET)
+        data = JSON_CACHE.get(SCRATCH_SHEET, [])
         if data:
             data = _transform_to_dict(data)
             for row in data:
@@ -996,7 +983,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
             continue
 
         TRANSLATIONS[lang] = {}
-        data = _read_sheet_json(lang)
+        data = JSON_CACHE.get(lang, [])
         if data:
             data = _transform_to_dict(data)
             for row in data:

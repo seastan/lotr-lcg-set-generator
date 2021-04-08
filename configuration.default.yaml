@@ -1,4 +1,4 @@
-# Google Sheets ID of the cards spreadsheet (leave empty to use a local copy)
+# Google Sheets ID of the cards spreadsheet
 sheet_gdid: ***
 
 # Local path to the artwork folder

@@ -73,7 +73,7 @@ for details).
 
 12. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
-  - `sheet_gdid`: Google Sheets ID of the cards spreadsheet (leave empty to use a local copy)
+  - `sheet_gdid`: Google Sheets ID of the cards spreadsheet
   - `artwork_path`: local path to the artwork folder (don't use for that any existing folder in this repo)
   - `gimp_console_path`: path to GIMP console executable
   - `magick_path`: path to ImageMagick executable
