@@ -276,6 +276,7 @@ FOUND_SCRATCH_SETS = set()
 FOUND_INTERSECTED_SETS = set()
 IMAGE_CACHE = {}
 JSON_CACHE = {}
+XML_CACHE = {}
 
 
 class SheetError(Exception):
@@ -1832,8 +1833,7 @@ def _get_cached_content(url):
             content = obj.read()
             return content
 
-    content = _get_content(url)
-    return content
+    return None
 
 
 def _save_content(url, content):
@@ -1849,18 +1849,28 @@ def _load_external_xml(url, sets, encounter_sets):  # pylint: disable=R0912,R091
     """ Load cards from an external XML file.
     """
     res = []
-    content = _get_cached_content(url)
-    if not content or not b'<?xml' in content:
-        logging.error("Can't download XML from %s, ignoring", url)
-        return res
-
-    try:
+    if url in XML_CACHE:
+        content = XML_CACHE[url]
         root = ET.fromstring(content)
-    except ET.ParseError:
-        logging.error("Can't download XML from %s, ignoring", url)
-        return res
+    else:
+        content = _get_cached_content(url)
+        if content:
+            XML_CACHE[url] = content
+            root = ET.fromstring(content)
+        else:
+            content = _get_content(url)
+            if not content or not b'<?xml' in content:
+                logging.error("Can't download XML from %s, ignoring", url)
+                return res
 
-    _save_content(url, content)
+            try:
+                root = ET.fromstring(content)
+            except ET.ParseError:
+                logging.error("Can't download XML from %s, ignoring", url)
+                return res
+
+            XML_CACHE[url] = content
+            _save_content(url, content)
 
     set_name = root.attrib['name'].lower()
     if set_name not in sets:
