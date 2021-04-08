@@ -36,7 +36,7 @@ WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 CMD_SLEEP_TIME = 2
 IO_SLEEP_TIME = 1
 MESSAGE_SLEEP_TIME = 1
-WATCH_SLEEP_TIME = 10
+WATCH_SLEEP_TIME = 5
 
 ERROR_SUBJECT_TEMPLATE = 'LotR Discord Bot ERROR: {}'
 WARNING_SUBJECT_TEMPLATE = 'LotR Discord Bot WARNING: {}'
@@ -813,7 +813,9 @@ class MyClient(discord.Client):
                     try:
                         data = await read_json_data(path)
                         logging.info('Processing changes: %s', data)
-                        await self._process_changes(data)
+                        await self._process_category_changes(data)
+                        await self._process_channel_changes(data)
+                        await self._process_card_changes(data)
                     except Exception as exc:
                         logging.exception(str(exc))
                         error_count = ERROR_COUNTS.get(filename, 0) + 1
@@ -837,10 +839,6 @@ class MyClient(discord.Client):
                             ERROR_COUNTS[filename] = error_count
                     else:
                         os.remove(path)
-                    finally:
-                        if 'categories' in data or 'channels' in data:
-                            self.categories, self.channels = (
-                                await self._load_channels())
 
                 break
         except Exception as exc:
@@ -850,167 +848,276 @@ class MyClient(discord.Client):
                 .format(str(exc))))
 
 
-    async def _process_category_changes(self, data):
+    async def _process_category_changes(self, data):  #pylint: disable=R0912
         changes = data.get('categories', [])
-        for change in changes:
-            if len(change) != 2:
-                raise FormatError('Incorrect change format: {}'.format(change))
+        if not changes:
+            return
 
-            if change[0] == 'add':
-                if CHANNEL_LIMIT - len(list(self.get_all_channels())) <= 0:
-                    raise DiscordError(
-                        'No free slots to create a new category "{}"'.format(
-                            change[1]))
+        new_categories = {}
+        old_category_names = []
+        try:
+            for change in changes:
+                if len(change) != 2:
+                    raise FormatError('Incorrect change format: {}'
+                                      .format(change))
 
-                position = max(
-                    [c['position'] for c in self.categories.values()] or [0])
-                await self.guilds[0].create_category(change[1],
-                                                     position=position)
-                logging.info('Created new category "%s"', change[1])
+                if change[0] == 'add':
+                    if CHANNEL_LIMIT - len(list(self.get_all_channels())) <= 0:
+                        raise DiscordError(
+                            'No free slots to create a new category "{}"'
+                            .format(change[1]))
 
-                slots = CHANNEL_LIMIT - len(list(self.get_all_channels()))
-                if slots < 5:
-                    logging.warning('Only %s channel slots remain', slots)
-                    message = 'only {} channel slots remain'.format(slots)
-                    create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
-                    if self.cron_channel:
-                        await self._send_channel(self.cron_channel, message)
+                    position = max([c['position'] for c
+                                    in self.categories.values()] or [0])
+                    category = await self.guilds[0].create_category(
+                        change[1], position=position)
+                    new_categories[change[1]] = {
+                        'name': category.name,
+                        'id': category.id,
+                        'position': category.position}
+                    logging.info('Created new category "%s"', change[1])
 
-                await asyncio.sleep(CMD_SLEEP_TIME)
-            elif change[0] == 'rename':
-                if len(change[1]) != 2:
-                    raise FormatError('Incorrect change format: {}'.format(
-                        change))
+                    slots = CHANNEL_LIMIT - len(list(self.get_all_channels()))
+                    if slots < 5:
+                        logging.warning('Only %s channel slots remain', slots)
+                        message = 'only {} channel slots remain'.format(slots)
+                        create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
+                        if self.cron_channel:
+                            await self._send_channel(self.cron_channel,
+                                                     message)
 
-                if change[1][0] not in self.categories:
-                    raise DiscordError('Category "{}" not found'.format(
-                        change[1][0]))
+                    await asyncio.sleep(CMD_SLEEP_TIME)
+                elif change[0] == 'rename':
+                    if len(change[1]) != 2:
+                        raise FormatError('Incorrect change format: {}'.format(
+                            change))
 
-                category = self.get_channel(
-                    self.categories[change[1][0]]['id'])
-                await category.edit(name=change[1][1])
-                logging.info('Renamed category "%s" to "%s"', change[1][0],
-                             change[1][1])
-                await asyncio.sleep(CMD_SLEEP_TIME)
-            else:
-                raise FormatError('Unknown category change type: {}'.format(
-                    change[0]))
+                    if change[1][0] not in self.categories:
+                        raise DiscordError('Category "{}" not found'.format(
+                            change[1][0]))
+
+                    category = self.get_channel(
+                        self.categories[change[1][0]]['id'])
+                    await category.edit(name=change[1][1])
+                    new_categories[change[1][1]] = {
+                        'name': category.name,
+                        'id': category.id,
+                        'position': category.position}
+                    old_category_names.append(change[1][0])
+                    logging.info('Renamed category "%s" to "%s"', change[1][0],
+                                 change[1][1])
+                    await asyncio.sleep(CMD_SLEEP_TIME)
+                else:
+                    raise FormatError('Unknown category change type: {}'
+                                      .format(change[0]))
+        finally:
+            for name in old_category_names:
+                del self.categories[name]
+
+            self.categories.update(new_categories)
 
 
     async def _process_channel_changes(self, data):  #pylint: disable=R0912,R0915
         changes = data.get('channels', [])
+        if not changes:
+            return
+
+        new_channels = {}
+        old_channel_names = []
+        try:
+            for change in changes:
+                if len(change) != 2:
+                    raise FormatError('Incorrect change format: {}'
+                                      .format(change))
+
+                if change[0] == 'add':
+                    if len(change[1]) != 2:
+                        raise FormatError('Incorrect change format: {}'.format(
+                            change))
+
+                    if change[1][1] not in self.categories:
+                        raise DiscordError('Category "{}" not found'.format(
+                            change[1][1]))
+
+                    if CHANNEL_LIMIT - len(list(self.get_all_channels())) <= 0:
+                        raise DiscordError(
+                            'No free slots to create a new channel "{}"'
+                            .format(change[1][0]))
+
+                    category = self.get_channel(
+                        self.categories[change[1][1]]['id'])
+                    channel = await self.guilds[0].create_text_channel(
+                        change[1][0], category=category)
+                    new_channels[change[1][0]] = {
+                        'name': channel.name,
+                        'id': channel.id,
+                        'category_id': channel.category_id,
+                        'category_name': channel.category.name}
+                    logging.info('Created new channel "%s" in category "%s"',
+                                 change[1][0], change[1][1])
+                    await channel.send('!alepcard this')
+
+                    slots = CHANNEL_LIMIT - len(list(self.get_all_channels()))
+                    if slots < 5:
+                        logging.warning('Only %s channel slots remain', slots)
+                        message = 'only {} channel slots remain'.format(slots)
+                        create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
+                        if self.cron_channel:
+                            await self._send_channel(self.cron_channel,
+                                                     message)
+
+                    await asyncio.sleep(CMD_SLEEP_TIME)
+                elif change[0] == 'move':
+                    if len(change[1]) != 2:
+                        raise FormatError('Incorrect change format: {}'.format(
+                            change))
+
+                    if change[1][0] not in self.channels:
+                        raise DiscordError('Channel "{}" not found'.format(
+                            change[1][0]))
+
+                    if change[1][1] not in self.categories:
+                        raise DiscordError('Category "{}" not found'.format(
+                            change[1][1]))
+
+                    channel = self.get_channel(
+                        self.channels[change[1][0]]['id'])
+                    old_category_name = channel.category.name
+                    category = self.get_channel(
+                        self.categories[change[1][1]]['id'])
+                    await channel.move(category=category, end=True)
+                    new_channels[change[1][0]] = {
+                        'name': channel.name,
+                        'id': channel.id,
+                        'category_id': channel.category_id,
+                        'category_name': channel.category.name}
+                    logging.info('Moved channel "%s" from category "%s" to '
+                                 '"%s"', change[1][0], old_category_name,
+                                 change[1][1])
+                    await channel.send('Moved from category "{}" to "{}"'
+                                       .format(old_category_name,
+                                               change[1][1]))
+                    await asyncio.sleep(CMD_SLEEP_TIME)
+                elif change[0] == 'remove':
+                    if change[1] not in self.channels:
+                        raise DiscordError('Channel "{}" not found'.format(
+                            change[1]))
+
+                    if not self.archive_category:
+                        raise DiscordError('Category "{}" not found'.format(
+                            ARCHIVE_CATEGORY))
+
+                    channel = self.get_channel(self.channels[change[1]]['id'])
+                    old_category_name = channel.category.name
+                    await channel.move(category=self.archive_category,
+                                       end=True)
+                    old_channel_names.append(change[1])
+                    logging.info('Moved channel "%s" from category "%s" to '
+                                 '"%s"', change[1], old_category_name,
+                                 ARCHIVE_CATEGORY)
+                    await channel.send('Moved from category "{}" to "{}"'
+                                       .format(old_category_name,
+                                               ARCHIVE_CATEGORY))
+                    await asyncio.sleep(CMD_SLEEP_TIME)
+                elif change[0] == 'rename':
+                    if len(change[1]) != 2:
+                        raise FormatError('Incorrect change format: {}'.format(
+                            change))
+
+                    if change[1][0] not in self.channels:
+                        raise DiscordError('Channel {} not found'.format(
+                            change[1][0]))
+
+                    channel = self.get_channel(
+                        self.channels[change[1][0]]['id'])
+                    await channel.edit(name=change[1][1])
+                    new_channels[change[1][1]] = {
+                        'name': channel.name,
+                        'id': channel.id,
+                        'category_id': channel.category_id,
+                        'category_name': channel.category.name}
+                    old_channel_names.append(change[1][0])
+                    logging.info('Renamed channel "%s" to "%s"', change[1][0],
+                                 change[1][1])
+                    await channel.send('Renamed from "{}" to "{}"'.format(
+                        change[1][0], change[1][1]))
+                    await asyncio.sleep(CMD_SLEEP_TIME)
+                else:
+                    raise FormatError('Unknown channel change type: {}'.format(
+                        change[0]))
+        finally:
+            for name in old_channel_names:
+                del self.channels[name]
+
+            self.channels.update(new_channels)
+
+
+    async def _process_card_changes(self, data):  #pylint: disable=R0912
+        changes = data.get('cards', [])
+        if not changes:
+            return
+
+        data = await read_card_data()
         for change in changes:
-            if len(change) != 2:
+            if len(change) != 3:
                 raise FormatError('Incorrect change format: {}'.format(change))
 
             if change[0] == 'add':
-                if len(change[1]) != 2:
-                    raise FormatError('Incorrect change format: {}'.format(
-                        change))
-
-                if change[1][1] not in self.categories:
-                    raise DiscordError('Category "{}" not found'.format(
-                        change[1][1]))
-
-                if CHANNEL_LIMIT - len(list(self.get_all_channels())) <= 0:
-                    raise DiscordError(
-                        'No free slots to create a new channel "{}"'.format(
-                            change[1][0]))
-
-                category = self.get_channel(
-                    self.categories[change[1][1]]['id'])
-                channel = await self.guilds[0].create_text_channel(
-                    change[1][0], category=category)
-                logging.info('Created new channel "%s" in category "%s"',
-                             change[1][0], change[1][1])
-                await channel.send('!alepcard this')
-
-                slots = CHANNEL_LIMIT - len(list(self.get_all_channels()))
-                if slots < 5:
-                    logging.warning('Only %s channel slots remain', slots)
-                    message = 'only {} channel slots remain'.format(slots)
-                    create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
-                    if self.cron_channel:
-                        await self._send_channel(self.cron_channel, message)
-
-                await asyncio.sleep(CMD_SLEEP_TIME)
-            elif change[0] == 'move':
-                if len(change[1]) != 2:
-                    raise FormatError('Incorrect change format: {}'.format(
-                        change))
-
-                if change[1][0] not in self.channels:
-                    raise DiscordError('Channel "{}" not found'.format(
-                        change[1][0]))
-
-                if change[1][1] not in self.categories:
-                    raise DiscordError('Category "{}" not found'.format(
-                        change[1][1]))
-
-                channel = self.get_channel(self.channels[change[1][0]]['id'])
-                old_category_name = channel.category.name
-                category = self.get_channel(
-                    self.categories[change[1][1]]['id'])
-                await channel.move(category=category, end=True)
-                logging.info('Moved channel "%s" from category "%s" to "%s"',
-                             change[1][0], old_category_name, change[1][1])
-                await channel.send('Moved from category "{}" to "{}"'.format(
-                    old_category_name, change[1][1]))
-                await asyncio.sleep(CMD_SLEEP_TIME)
+                pass
             elif change[0] == 'remove':
-                if change[1] not in self.channels:
+                pass
+            elif change[0] == 'change':
+                cards = [row for row in data['data']
+                         if row[lotr.CARD_ID] == change[1]]
+                if len(cards) != 1:
+                    raise DiscordError('Card with ID "{}" not found'
+                                       .format(change[1]))
+
+                card = cards[0]
+                if not card.get(lotr.CARD_DISCORD_CHANNEL):
+                    continue
+
+                channel_name = card[lotr.CARD_DISCORD_CHANNEL]
+                if channel_name not in self.channels:
                     raise DiscordError('Channel "{}" not found'.format(
-                        change[1]))
+                        channel_name))
 
-                if not self.archive_category:
-                    raise DiscordError('Category "{}" not found'.format(
-                        ARCHIVE_CATEGORY))
+                for diff in change[2]:
+                    if len(diff) != 3:
+                        raise FormatError('Incorrect change format: {}'.format(
+                            change))
 
-                channel = self.get_channel(self.channels[change[1]]['id'])
-                old_category_name = channel.category.name
-                await channel.move(category=self.archive_category, end=True)
-                logging.info('Moved channel "%s" from category "%s" to "%s"',
-                             change[1], old_category_name, ARCHIVE_CATEGORY)
-                await channel.send('Moved from category "{}" to "{}"'.format(
-                    old_category_name, ARCHIVE_CATEGORY))
-                await asyncio.sleep(CMD_SLEEP_TIME)
-            elif change[0] == 'rename':
-                if len(change[1]) != 2:
-                    raise FormatError('Incorrect change format: {}'.format(
-                        change))
+                for diff in change[2]:
+                    old_values = (diff[1].strip() or '').split('\n')
+                    new_values = (diff[2].strip() or '').split('\n')
+                    while len(old_values) > len(new_values):
+                        new_values.append('')
 
-                if change[1][0] not in self.channels:
-                    raise DiscordError('Channel {} not found'.format(
-                        change[1][0]))
+                    while len(new_values) > len(old_values):
+                        old_values.append('')
 
-                channel = self.get_channel(self.channels[change[1][0]]['id'])
-                await channel.edit(name=change[1][1])
-                logging.info('Renamed channel "%s" to "%s"', change[1][0],
-                             change[1][1])
-                await channel.send('Renamed from "{}" to "{}"'.format(
-                    change[1][0], change[1][1]))
-                await asyncio.sleep(CMD_SLEEP_TIME)
+                    for i in len(old_values):
+                        if old_values[i] == new_values[i]:
+                            old_values[i] = '*{}*'.format(old_values[i])
+                            new_values[i] = old_values[i]
+
+                    diff[1] = '\n'.join(old_values).strip()
+                    diff[2] = '\n'.join(new_values).strip()
+
+                diffs = ['**{}**\n__OLD__\n{}\n__NEW__\n{}\n'
+                         .format(d[0], d[1] or '', d[2] or '')
+                         for d in change[2]]
+                res = """
+The card has been updated:
+` `
+{}
+""".format('\n'.join(diffs))
+                res.replace('\n\n', '\n` `\n')
+                channel = self.get_channel(self.channels[channel_name]['id'])
+                await self._send_channel(channel, res)
             else:
-                raise FormatError('Unknown channel change type: {}'.format(
+                raise FormatError('Unknown card change type: {}'.format(
                     change[0]))
-
-
-    async def _process_card_changes(self, data):
-        changes = data.get('cards', [])
-        for change in changes:
-            pass
-
-
-    async def _process_changes(self, data):
-        await self._process_category_changes(data)
-        if 'categories' in data and 'channels' in data:
-            self.categories, self.channels = await self._load_channels()
-
-        await self._process_channel_changes(data)
-#        if 'channels' in data and 'card' in data:
-#            self.categories, self.channels = await self._load_channels()
-
-        await self._process_card_changes(data)
 
 
     async def _test_channels(self):

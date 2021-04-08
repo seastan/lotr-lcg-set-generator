@@ -1373,14 +1373,14 @@ def _get_card_diffs(old_card, new_card):
             continue
 
         if key not in new_card:
-            diffs.append((key, (old_card[key], None)))
+            diffs.append((key, old_card[key], None))
         elif old_card[key] != new_card[key]:
-            diffs.append((key, (old_card[key], new_card[key])))
+            diffs.append((key, old_card[key], new_card[key]))
 
     for key in new_card:
         if (key not in DISCORD_IGNORE_CHANGES_FIELDS and
                 key not in DISCORD_IGNORE_FIELDS and key not in old_card):
-            diffs.append((key, (None, new_card[key])))
+            diffs.append((key, None, new_card[key]))
 
     return diffs
 
@@ -1415,22 +1415,22 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
             channels.add(channel)
             row[CARD_DISCORD_CHANNEL] = channel
 
-            card_set = re.sub(r'^ALeP - ', '', row[CARD_SET_NAME])
-            discord_prefix = row.get(CARD_SET_DISCORD_PREFIX, '')
-            if discord_prefix:
-                discord_prefix = '{} '.format(discord_prefix)
+        card_set = re.sub(r'^ALeP - ', '', row[CARD_SET_NAME])
+        discord_prefix = row.get(CARD_SET_DISCORD_PREFIX, '')
+        if discord_prefix:
+            discord_prefix = '{} '.format(discord_prefix)
 
-            category = row.get(CARD_ENCOUNTER_SET, '')
-            if not category:
-                category = 'Player - {}{}'.format(discord_prefix, card_set)
-            elif category != card_set:
-                category = '{} ({}{})'.format(category, discord_prefix,
-                                              card_set)
-            else:
-                category = '{}{}'.format(discord_prefix, category)
+        category = row.get(CARD_ENCOUNTER_SET, '')
+        if not category:
+            category = 'Player - {}{}'.format(discord_prefix, card_set)
+        elif category != card_set:
+            category = '{} ({}{})'.format(category, discord_prefix,
+                                          card_set)
+        else:
+            category = '{}{}'.format(discord_prefix, category)
 
-            category = _update_discord_category(category)
-            row[CARD_DISCORD_CATEGORY] = category
+        category = _update_discord_category(category)
+        row[CARD_DISCORD_CATEGORY] = category
 
         for key in list(row.keys()):
             if key in DISCORD_IGNORE_FIELDS:
@@ -1454,15 +1454,14 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
     old_categories = set()
     new_categories = set()
     if old_data:
-        old_categories = set(row[CARD_DISCORD_CATEGORY] for row in old_data
-                             if row.get(CARD_DISCORD_CATEGORY))
-        new_categories = set(row[CARD_DISCORD_CATEGORY] for row in data
-                             if row.get(CARD_DISCORD_CATEGORY))
+        old_categories = set(row[CARD_DISCORD_CATEGORY] for row in old_data)
+        new_categories = set(row[CARD_DISCORD_CATEGORY] for row in data)
         old_dict = {row[CARD_ID]:row for row in old_data}
         new_dict = {row[CARD_ID]:row for row in data}
         for card_id in new_dict:
             if card_id not in old_dict:
-                if new_dict[card_id].get(CARD_DISCORD_CATEGORY):
+                card_changes.append(('add', card_id, ''))
+                if new_dict[card_id].get(CARD_DISCORD_CHANNEL):
                     channel_diffs.append(
                         (None,
                          (new_dict[card_id][CARD_DISCORD_CHANNEL],
@@ -1470,18 +1469,16 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
             elif old_dict[card_id] != new_dict[card_id]:
                 diffs = _get_card_diffs(old_dict[card_id], new_dict[card_id])
                 if diffs:
-                    card_changes.append((card_id, diffs))
+                    card_changes.append(('change', card_id, diffs))
 
-                if (old_dict[card_id].get(CARD_DISCORD_CATEGORY) and
-                        new_dict[card_id].get(CARD_DISCORD_CATEGORY) and
-                        old_dict[card_id][CARD_DISCORD_CATEGORY] !=
+                if (old_dict[card_id][CARD_DISCORD_CATEGORY] !=
                         new_dict[card_id][CARD_DISCORD_CATEGORY]):
                     category_diffs.append((
                         old_dict[card_id][CARD_DISCORD_CATEGORY],
                         new_dict[card_id][CARD_DISCORD_CATEGORY]))
 
-                if (old_dict[card_id].get(CARD_DISCORD_CATEGORY) and
-                        new_dict[card_id].get(CARD_DISCORD_CATEGORY) and
+                if (old_dict[card_id].get(CARD_DISCORD_CHANNEL) and
+                        new_dict[card_id].get(CARD_DISCORD_CHANNEL) and
                         (old_dict[card_id][CARD_DISCORD_CATEGORY] !=
                          new_dict[card_id][CARD_DISCORD_CATEGORY] or
                          old_dict[card_id][CARD_DISCORD_CHANNEL] !=
@@ -1492,15 +1489,14 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
                         (new_dict[card_id][CARD_DISCORD_CHANNEL],
                          new_dict[card_id][CARD_DISCORD_CATEGORY])))
 
-
-
         for card_id in old_dict:
-            if (card_id not in new_dict and
-                    old_dict[card_id].get(CARD_DISCORD_CATEGORY)):
-                channel_diffs.append(
-                    ((old_dict[card_id][CARD_DISCORD_CHANNEL],
-                      old_dict[card_id][CARD_DISCORD_CATEGORY]),
-                     None))
+            if card_id not in new_dict:
+                card_changes.append(('remove', card_id, ''))
+                if old_dict[card_id].get(CARD_DISCORD_CHANNEL):
+                    channel_diffs.append(
+                        ((old_dict[card_id][CARD_DISCORD_CHANNEL],
+                          old_dict[card_id][CARD_DISCORD_CATEGORY]),
+                         None))
 
         for category in list(old_categories):
             if category in new_categories:
