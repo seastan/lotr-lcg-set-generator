@@ -266,6 +266,7 @@ XML_TEMPLATE = """<set>
 </set>
 """
 
+CARD_COLUMNS = {}
 SHEET_IDS = {}
 SETS = {}
 DATA = []
@@ -927,6 +928,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
     logging.info('Extracting data from the spreadsheet...')
     timestamp = time.time()
 
+    CARD_COLUMNS.clear()
     SETS.clear()
     FOUND_SETS.clear()
     FOUND_SCRATCH_SETS.clear()
@@ -944,6 +946,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
     if sheet_changes:
         data = JSON_CACHE.get(CARD_SHEET, [])
         if data:
+            CARD_COLUMNS.update(_extract_column_names(data[0]))
             data = _transform_to_dict(data)
             for row in data:
                 row[CARD_SCRATCH] = None
@@ -953,6 +956,9 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
     if scratch_changes:
         data = JSON_CACHE.get(SCRATCH_SHEET, [])
         if data:
+            if not CARD_COLUMNS:
+                CARD_COLUMNS.update(_extract_column_names(data[0]))
+
             data = _transform_to_dict(data)
             for row in data:
                 row[CARD_SCRATCH] = 1
@@ -1382,6 +1388,7 @@ def _get_card_diffs(old_card, new_card):
                 key not in DISCORD_IGNORE_FIELDS and key not in old_card):
             diffs.append((key, None, new_card[key]))
 
+    diffs.sort(key=lambda d: CARD_COLUMNS.get(d[0], 0))
     return diffs
 
 

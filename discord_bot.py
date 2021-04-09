@@ -50,7 +50,6 @@ GENERAL_CATEGORIES = {
     'Text Channels', 'Division of Labor', 'Player Card Design', 'Printing',
     'Rules', 'Voice Channels', 'Archive'
 }
-MAX_ERROR_COUNT = 3
 
 EMOJIS = {
     '[leadership]': '<:leadership:822573464601886740>',
@@ -139,7 +138,6 @@ List of **!stat** commands:
 """
 }
 
-ERROR_COUNTS = {}
 CARD_DATA = {}
 
 playtest_lock = asyncio.Lock()
@@ -818,25 +816,15 @@ class MyClient(discord.Client):
                         await self._process_card_changes(data)
                     except Exception as exc:
                         logging.exception(str(exc))
-                        error_count = ERROR_COUNTS.get(filename, 0) + 1
-                        moved_text = (' (moving to quarantine)'
-                                      if error_count >= MAX_ERROR_COUNT
-                                      else '')
-                        message = 'error processing {}{}: {}'.format(
-                            filename, moved_text, str(exc))
+                        message = 'error processing {}: {}'.format(
+                            filename, str(exc))
                         create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
                         if self.cron_channel:
                             await self._send_channel(self.cron_channel,
                                                      message)
 
-                        if error_count >= MAX_ERROR_COUNT:
-                            shutil.move(
-                                path, os.path.join(
-                                    CHANGES_PATH, '__{}'.format(filename)))
-                            logging.warning('Moved %s to quarantine', filename)
-                            del ERROR_COUNTS[filename]
-                        else:
-                            ERROR_COUNTS[filename] = error_count
+                        shutil.move(path, os.path.join(
+                            CHANGES_PATH, '__{}'.format(filename)))
                     else:
                         os.remove(path)
 
@@ -955,7 +943,8 @@ class MyClient(discord.Client):
                         'category_name': channel.category.name}
                     logging.info('Created new channel "%s" in category "%s"',
                                  change[1][0], change[1][1])
-                    await channel.send('!alepcard this')
+                    res = await self._get_card(change[1][0], True)
+                    await self._send_channel(channel, res)
 
                     slots = CHANNEL_LIMIT - len(list(self.get_all_channels()))
                     if slots < 5:
@@ -1052,7 +1041,7 @@ class MyClient(discord.Client):
             self.channels.update(new_channels)
 
 
-    async def _process_card_changes(self, data):  #pylint: disable=R0912
+    async def _process_card_changes(self, data):  #pylint: disable=R0912,R0914
         changes = data.get('cards', [])
         if not changes:
             return
@@ -1088,31 +1077,58 @@ class MyClient(discord.Client):
                             change))
 
                 for diff in change[2]:
-                    old_values = (diff[1].strip() or '').split('\n')
-                    new_values = (diff[2].strip() or '').split('\n')
-                    while len(old_values) > len(new_values):
-                        new_values.append('')
+                    if not str(diff[1] or '').strip():
+                        diff[1] = '```\n ```'
+                        new_lines = str(diff[2] or '').strip().split('\n')
+                        diff[2] = '```diff\n{}```'.format(
+                            '\n'.join('+ {}'.format(r)
+                                      for r in new_lines).strip())
+                        continue
 
-                    while len(new_values) > len(old_values):
-                        old_values.append('')
+                    if not str(diff[2] or '').strip():
+                        old_lines = str(diff[1] or '').strip().split('\n')
+                        diff[1] = '```diff\n{}```'.format(
+                            '\n'.join('- {}'.format(r)
+                                      for r in old_lines).strip())
+                        diff[2] = '```\n ```'
+                        continue
 
-                    for i in len(old_values):
-                        if old_values[i] == new_values[i]:
-                            old_values[i] = '*{}*'.format(old_values[i])
-                            new_values[i] = old_values[i]
+                    old_lines = str(diff[1] or '').strip().split('\n')
+                    new_lines = str(diff[2] or '').strip().split('\n')
+                    max_length = max(len(old_lines), len(new_lines))
+                    while len(old_lines) < max_length:
+                        old_lines.append('')
 
-                    diff[1] = '\n'.join(old_values).strip()
-                    diff[2] = '\n'.join(new_values).strip()
+                    while len(new_lines) < max_length:
+                        new_lines.append('')
 
-                diffs = ['**{}**\n__OLD__\n{}\n__NEW__\n{}\n'
-                         .format(d[0], d[1] or '', d[2] or '')
-                         for d in change[2]]
+                    for i in range(max_length):
+                        if i >= len(old_lines):
+                            new_lines[i] = '+ {}'.format(
+                                new_lines[i])
+                        elif i >= len(new_lines):
+                            old_lines[i] = '- {}'.format(
+                                old_lines[i])
+                        elif old_lines[i] != new_lines[i]:
+                            old_lines[i] = '- {}'.format(
+                                old_lines[i])
+                            new_lines[i] = '+ {}'.format(
+                                new_lines[i])
+
+                    diff[1] = '```diff\n{}```'.format(
+                        '\n'.join(old_lines).strip())
+                    diff[2] = '```diff\n{}```'.format(
+                        '\n'.join(new_lines).strip())
+
+                diffs = [
+                    '**{}**\n\xa0\xa0\xa0\xa0\xa0OLD\n{}\xa0\xa0\xa0\xa0\xa0NEW\n{}'
+                    .format(d[0], d[1] or '', d[2] or '')
+                    for d in change[2]]
                 res = """
 The card has been updated:
-` `
+
 {}
 """.format('\n'.join(diffs))
-                res.replace('\n\n', '\n` `\n')
                 channel = self.get_channel(self.channels[channel_name]['id'])
                 await self._send_channel(channel, res)
             else:
@@ -1595,7 +1611,7 @@ Targets removed.
         return res
 
 
-    async def _get_card(self, command, this):  # pylint: disable=R0912,R0914
+    async def _get_card(self, command, this=False):  # pylint: disable=R0912,R0914
         """ Get the card information.
         """
         data = await read_card_data()
