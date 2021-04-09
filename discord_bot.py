@@ -1001,12 +1001,14 @@ class MyClient(discord.Client):
                     await channel.move(category=self.archive_category,
                                        end=True)
                     old_channel_names.append(change[1])
-                    logging.info('Moved channel "%s" from category "%s" to '
-                                 '"%s"', change[1], old_category_name,
-                                 ARCHIVE_CATEGORY)
-                    await channel.send('Moved from category "{}" to "{}"'
-                                       .format(old_category_name,
-                                               ARCHIVE_CATEGORY))
+                    logging.info('The card has been removed from the '
+                                 'spreadsheet. Moved channel "%s" from '
+                                 'category "%s" to "%s"', change[1],
+                                 old_category_name, ARCHIVE_CATEGORY)
+                    await channel.send('The card has been removed from the '
+                                       'spreadsheet. Moved from category "{}" '
+                                       'to "{}"'.format(old_category_name,
+                                                        ARCHIVE_CATEGORY))
                     await asyncio.sleep(CMD_SLEEP_TIME)
                 elif change[0] == 'rename':
                     if len(change[1]) != 2:
@@ -1041,7 +1043,7 @@ class MyClient(discord.Client):
             self.channels.update(new_channels)
 
 
-    async def _process_card_changes(self, data):  #pylint: disable=R0912,R0914
+    async def _process_card_changes(self, data):  #pylint: disable=R0912,R0914,R0915
         changes = data.get('cards', [])
         if not changes:
             return
@@ -1077,6 +1079,9 @@ class MyClient(discord.Client):
                             change))
 
                 for diff in change[2]:
+                    diff[0] = diff[0].replace(lotr.BACK_PREFIX + lotr.CARD_NAME,
+                                              lotr.CARD_SIDE_B).replace(
+                                                  lotr.BACK_PREFIX, '[Back] ')
                     if not str(diff[1] or '').strip():
                         diff[1] = '```\n ```'
                         new_lines = str(diff[2] or '').strip().split('\n')
@@ -1096,12 +1101,6 @@ class MyClient(discord.Client):
                     old_lines = str(diff[1] or '').strip().split('\n')
                     new_lines = str(diff[2] or '').strip().split('\n')
                     max_length = max(len(old_lines), len(new_lines))
-                    while len(old_lines) < max_length:
-                        old_lines.append('')
-
-                    while len(new_lines) < max_length:
-                        new_lines.append('')
-
                     for i in range(max_length):
                         if i >= len(old_lines):
                             new_lines[i] = '+ {}'.format(
