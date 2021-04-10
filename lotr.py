@@ -110,7 +110,8 @@ ROW_COLUMN = '_Row'
 DISCORD_IGNORE_FIELDS = {
     CARD_SET, CARD_PANX, CARD_PANY, CARD_SCALE, BACK_PREFIX + CARD_PANX,
     BACK_PREFIX + CARD_PANY, BACK_PREFIX + CARD_SCALE, CARD_SIDE_B,
-    CARD_SELECTED, CARD_CHANGED, CARD_SCRATCH, CARD_SET_DISCORD_PREFIX
+    CARD_SELECTED, CARD_CHANGED, CARD_SCRATCH, CARD_SET_DISCORD_PREFIX,
+    CARD_BOT_DISABLED
 }
 
 DISCORD_IGNORE_CHANGES_FIELDS = {
@@ -1469,7 +1470,14 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
         new_dict = {row[CARD_ID]:row for row in data}
         for card_id in new_dict:
             if card_id not in old_dict:
-                card_changes.append(('add', card_id, ''))
+                card_changes.append(('add', card_id, {
+                    CARD_NAME: new_dict[card_id][CARD_NAME],
+                    CARD_SET_NAME: new_dict[card_id][CARD_SET_NAME],
+                    CARD_DISCORD_CATEGORY:
+                        new_dict[card_id][CARD_DISCORD_CATEGORY],
+                    CARD_DISCORD_CHANNEL: new_dict[card_id].get(
+                        CARD_DISCORD_CHANNEL)}))
+
                 if new_dict[card_id].get(CARD_DISCORD_CHANNEL):
                     channel_diffs.append(
                         (None,
@@ -1507,12 +1515,14 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
                         ((old_dict[card_id][CARD_DISCORD_CHANNEL],
                           old_dict[card_id][CARD_DISCORD_CATEGORY]),
                          None))
-                else:
-                    card_changes.append(('remove', card_id, {
-                        CARD_NAME: old_dict[card_id][CARD_NAME],
-                        CARD_SET_NAME: old_dict[card_id][CARD_SET_NAME],
-                        CARD_DISCORD_CATEGORY:
-                            old_dict[card_id][CARD_DISCORD_CATEGORY]}))
+
+                card_changes.append(('remove', card_id, {
+                    CARD_NAME: old_dict[card_id][CARD_NAME],
+                    CARD_SET_NAME: old_dict[card_id][CARD_SET_NAME],
+                    CARD_DISCORD_CATEGORY:
+                        old_dict[card_id][CARD_DISCORD_CATEGORY],
+                    CARD_DISCORD_CHANNEL: old_dict[card_id].get(
+                        CARD_DISCORD_CHANNEL)}))
 
         for category in list(old_categories):
             if category in new_categories:
