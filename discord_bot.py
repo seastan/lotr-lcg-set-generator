@@ -46,6 +46,7 @@ CHANNEL_LIMIT = 500
 ARCHIVE_CATEGORY = 'Archive'
 CRON_CHANNEL = 'cron'
 PLAYTEST_CHANNEL = 'playtesting-checklist'
+UPDATES_CHANNEL = 'spreadsheet-updates'
 GENERAL_CATEGORIES = {
     'Text Channels', 'Division of Labor', 'Player Card Design', 'Printing',
     'Rules', 'Voice Channels', 'Archive'
@@ -709,8 +710,10 @@ class MyClient(discord.Client):
     archive_category = None
     cron_channel = None
     playtest_channel = None
+    updates_channel = None
     categories = {}
     channels = {}
+    general_channels = {}
 
 
     async def on_ready(self):
@@ -747,14 +750,27 @@ class MyClient(discord.Client):
             create_mail(WARNING_SUBJECT_TEMPLATE.format(
                 'error obtaining Playtest channel: {}'.format(str(exc))))
 
-        self.categories, self.channels = await self._load_channels()
+        try:
+            self.updates_channel = self.get_channel(
+                [c for c in self.get_all_channels()
+                 if str(c.type) == 'text' and
+                 c.name == UPDATES_CHANNEL][0].id)
+        except Exception as exc:
+            logging.exception(str(exc))
+            create_mail(WARNING_SUBJECT_TEMPLATE.format(
+                'error obtaining Spreadsheet Updates channel: {}'
+                .format(str(exc))))
+
+        self.categories, self.channels, self.general_channels = (
+            await self._load_channels())
         await self._test_channels()
         self.loop.create_task(self._watch_changes_schedule())
 
 
-    async def _load_channels(self):
+    async def _load_channels(self):  # pylint: disable=R0912
         categories = {}
         channels = {}
+        general_channels = {}
         for channel in self.get_all_channels():
             if str(channel.type) == 'category':
                 if channel.name in GENERAL_CATEGORIES:
@@ -768,10 +784,23 @@ class MyClient(discord.Client):
                         'name': channel.name,
                         'id': channel.id,
                         'position': channel.position}
+            elif str(channel.type) == 'text' and channel.name == 'general':
+                if (not channel.category_id
+                        or channel.category.name in GENERAL_CATEGORIES):
+                    continue
+
+                if channel.category.name in general_channels:
+                    logging.warning(
+                        'Duplicate general channel for category "%s" detected',
+                        channel.category.name)
+                else:
+                    general_channels[channel.category.name] = {
+                        'name': channel.category.name,
+                        'id': channel.id,
+                        'category_id': channel.category_id}
             elif str(channel.type) == 'text':
                 if (not channel.category_id
-                        or channel.category.name in GENERAL_CATEGORIES
-                        or channel.name in ('general', 'rules')):
+                        or channel.category.name in GENERAL_CATEGORIES):
                     continue
 
                 if channel.name in channels:
@@ -788,7 +817,7 @@ class MyClient(discord.Client):
                         'category_id': channel.category_id,
                         'category_name': channel.category.name}
 
-        return categories, channels
+        return categories, channels, general_channels
 
 
     async def _watch_changes_schedule(self):
@@ -865,15 +894,7 @@ class MyClient(discord.Client):
                         'position': category.position}
                     logging.info('Created new category "%s"', change[1])
 
-                    slots = CHANNEL_LIMIT - len(list(self.get_all_channels()))
-                    if slots < 5:
-                        logging.warning('Only %s channel slots remain', slots)
-                        message = 'only {} channel slots remain'.format(slots)
-                        create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
-                        if self.cron_channel:
-                            await self._send_channel(self.cron_channel,
-                                                     message)
-
+                    await self._check_free_slots()
                     await asyncio.sleep(CMD_SLEEP_TIME)
                 elif change[0] == 'rename':
                     if len(change[1]) != 2:
@@ -946,15 +967,7 @@ class MyClient(discord.Client):
                     res = await self._get_card(change[1][0], True)
                     await self._send_channel(channel, res)
 
-                    slots = CHANNEL_LIMIT - len(list(self.get_all_channels()))
-                    if slots < 5:
-                        logging.warning('Only %s channel slots remain', slots)
-                        message = 'only {} channel slots remain'.format(slots)
-                        create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
-                        if self.cron_channel:
-                            await self._send_channel(self.cron_channel,
-                                                     message)
-
+                    await self._check_free_slots()
                     await asyncio.sleep(CMD_SLEEP_TIME)
                 elif change[0] == 'move':
                     if len(change[1]) != 2:
@@ -1009,6 +1022,12 @@ class MyClient(discord.Client):
                                        'spreadsheet. Moved from category "{}" '
                                        'to "{}"'.format(old_category_name,
                                                         ARCHIVE_CATEGORY))
+#                    if self.updates_channel:
+#                        res = ('Card "{}" ("{}") has been removed from the '
+#                               'spreadsheet.'.format(card[lotr.CARD_NAME],
+#                                                     card[lotr.CARD_SET_NAME]))
+#                        await self._send_channel(self.updates_channel, res)
+
                     await asyncio.sleep(CMD_SLEEP_TIME)
                 elif change[0] == 'rename':
                     if len(change[1]) != 2:
@@ -1054,10 +1073,47 @@ class MyClient(discord.Client):
                 raise FormatError('Incorrect change format: {}'.format(change))
 
             if change[0] == 'add':
-                pass
+                if self.updates_channel:
+                    res = ('Card "{}" ("{}") has been removed from the '
+                           'spreadsheet.'.format(card[lotr.CARD_NAME],
+                                                 card[lotr.CARD_SET_NAME]))
+                    await self._send_channel(self.updates_channel, res)
+
+                if card[lotr.CARD_DISCORD_CATEGORY] not in self.categories:
+                    raise DiscordError('Category "{}" not found'.format(
+                        card[lotr.CARD_DISCORD_CATEGORY]))
+
+                if (card[lotr.CARD_DISCORD_CATEGORY]
+                        not in self.general_channels):
+                    self._add_general_channel(
+                        card[lotr.CARD_DISCORD_CATEGORY])
+
+                channel = self.general_channels[
+                    card[lotr.CARD_DISCORD_CATEGORY]]
+                res = ('Card "{}" has been removed from the spreadsheet.'
+                       .format(card[lotr.CARD_NAME]))
+                await self._send_channel(channel, res)
             elif change[0] == 'remove':
-                pass
+                if self.updates_channel:
+                    res = ('Card "{}" ("{}") has been removed from the '
+                           'spreadsheet.'.format(card[lotr.CARD_NAME],
+                                                 card[lotr.CARD_SET_NAME]))
+                    await self._send_channel(self.updates_channel, res)
+
+                if (card[lotr.CARD_DISCORD_CATEGORY] in self.categories and
+                        card[lotr.CARD_DISCORD_CATEGORY]
+                        in self.general_channels):
+                    channel = self.general_channels[
+                        card[lotr.CARD_DISCORD_CATEGORY]]
+                    res = ('Card "{}" has been removed from the spreadsheet.'
+                           .format(card[lotr.CARD_NAME]))
+                    await self._send_channel(channel, res)
             elif change[0] == 'change':
+                for diff in change[2]:
+                    if len(diff) != 3:
+                        raise FormatError('Incorrect change format: {}'.format(
+                            change))
+
                 cards = [row for row in data['data']
                          if row[lotr.CARD_ID] == change[1]]
                 if len(cards) != 1:
@@ -1065,18 +1121,6 @@ class MyClient(discord.Client):
                                        .format(change[1]))
 
                 card = cards[0]
-                if not card.get(lotr.CARD_DISCORD_CHANNEL):
-                    continue
-
-                channel_name = card[lotr.CARD_DISCORD_CHANNEL]
-                if channel_name not in self.channels:
-                    raise DiscordError('Channel "{}" not found'.format(
-                        channel_name))
-
-                for diff in change[2]:
-                    if len(diff) != 3:
-                        raise FormatError('Incorrect change format: {}'.format(
-                            change))
 
                 for diff in change[2]:
                     diff[0] = diff[0].replace(lotr.BACK_PREFIX + lotr.CARD_NAME,
@@ -1123,16 +1167,90 @@ class MyClient(discord.Client):
                     '**{}**\n\xa0\xa0\xa0\xa0\xa0OLD\n{}\xa0\xa0\xa0\xa0\xa0NEW\n{}'
                     .format(d[0], d[1] or '', d[2] or '')
                     for d in change[2]]
-                res = """
+
+                if self.updates_channel:
+                    if card.get(lotr.CARD_DISCORD_CHANNEL) in self.channels:
+                        channel = self.channels[
+                            card[lotr.CARD_DISCORD_CHANNEL]]
+                        channel_url = ('https://discord.com/channels/{}/{}'
+                                       .format(self.guilds[0].id,
+                                               channel['id']))
+                    else:
+                        channel_url = ''
+
+                    res = """
+Card "{}" ("{}") has been updated:
+
+{}
+{}
+""".format(card[lotr.CARD_NAME], card[lotr.CARD_SET_NAME], '\n'.join(diffs),
+           channel_url)
+                    await self._send_channel(self.updates_channel, res)
+
+                if card.get(lotr.CARD_DISCORD_CHANNEL):
+                    channel_name = card[lotr.CARD_DISCORD_CHANNEL]
+                    if channel_name not in self.channels:
+                        raise DiscordError('Channel "{}" not found'.format(
+                            channel_name))
+
+                    res = """
 The card has been updated:
 
 {}
 """.format('\n'.join(diffs))
-                channel = self.get_channel(self.channels[channel_name]['id'])
-                await self._send_channel(channel, res)
+                    channel = self.get_channel(
+                        self.channels[channel_name]['id'])
+                    await self._send_channel(channel, res)
+                else:
+                    if card[lotr.CARD_DISCORD_CATEGORY] not in self.categories:
+                        raise DiscordError('Category "{}" not found'.format(
+                            card[lotr.CARD_DISCORD_CATEGORY]))
+
+                    if (card[lotr.CARD_DISCORD_CATEGORY]
+                            not in self.general_channels):
+                        self._add_general_channel(
+                            card[lotr.CARD_DISCORD_CATEGORY])
+
+                    channel = self.general_channels[
+                        card[lotr.CARD_DISCORD_CATEGORY]]
+                    res = """
+Card "{}" has been updated:
+
+{}
+""".format(card[lotr.CARD_NAME], '\n'.join(diffs))
+                    await self._send_channel(channel, res)
             else:
                 raise FormatError('Unknown card change type: {}'.format(
                     change[0]))
+
+
+    async def _add_general_channel(self, category):
+        if CHANNEL_LIMIT - len(list(self.get_all_channels())) <= 0:
+            raise DiscordError(
+                'No free slots to create a new channel "general" in category '
+                '"{}"'.format(category))
+
+        channel = await self.guilds[0].create_text_channel(
+            'general', category=category, position=0)
+        self.general_channels[category] = {
+            'name': channel.category.name,
+            'id': channel.id,
+            'category_id': channel.category_id}
+        logging.info('Created new channel "general" in category "%s"',
+                     category)
+        await self._check_free_slots()
+        await asyncio.sleep(CMD_SLEEP_TIME)
+
+
+    async def _check_free_slots(self):
+        slots = CHANNEL_LIMIT - len(list(self.get_all_channels()))
+        if slots < 5:
+            logging.warning('Only %s channel slots remain', slots)
+            message = 'only {} channel slots remain'.format(slots)
+            create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
+            if self.cron_channel:
+                await self._send_channel(self.cron_channel,
+                                         message)
 
 
     async def _test_channels(self):

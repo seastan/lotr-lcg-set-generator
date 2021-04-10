@@ -89,6 +89,7 @@ CARD_VERSION = 'Version'
 CARD_DECK_RULES = 'Deck Rules'
 CARD_SELECTED = 'Selected'
 CARD_CHANGED = 'Changed'
+CARD_BOT_DISABLED = 'Bot Disabled'
 
 CARD_SCRATCH = '_Scratch'
 CARD_SET_NAME = '_Set Name'
@@ -1475,9 +1476,11 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
                          (new_dict[card_id][CARD_DISCORD_CHANNEL],
                           new_dict[card_id][CARD_DISCORD_CATEGORY])))
             elif old_dict[card_id] != new_dict[card_id]:
-                diffs = _get_card_diffs(old_dict[card_id], new_dict[card_id])
-                if diffs:
-                    card_changes.append(('change', card_id, diffs))
+                if new_dict[card_id].get(CARD_BOT_DISABLED) not in ('1', 1):
+                    diffs = _get_card_diffs(old_dict[card_id],
+                                            new_dict[card_id])
+                    if diffs:
+                        card_changes.append(('change', card_id, diffs))
 
                 if (old_dict[card_id][CARD_DISCORD_CATEGORY] !=
                         new_dict[card_id][CARD_DISCORD_CATEGORY]):
@@ -1499,12 +1502,17 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
 
         for card_id in old_dict:
             if card_id not in new_dict:
-                card_changes.append(('remove', card_id, ''))
                 if old_dict[card_id].get(CARD_DISCORD_CHANNEL):
                     channel_diffs.append(
                         ((old_dict[card_id][CARD_DISCORD_CHANNEL],
                           old_dict[card_id][CARD_DISCORD_CATEGORY]),
                          None))
+                else:
+                    card_changes.append(('remove', card_id, {
+                        CARD_NAME: old_dict[card_id][CARD_NAME],
+                        CARD_SET_NAME: old_dict[card_id][CARD_SET_NAME],
+                        CARD_DISCORD_CATEGORY:
+                            old_dict[card_id][CARD_DISCORD_CATEGORY]}))
 
         for category in list(old_categories):
             if category in new_categories:
