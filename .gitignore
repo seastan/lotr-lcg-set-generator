@@ -2,6 +2,7 @@
 __pycache__/
 Discord/*.json
 Discord/Changes/*.json
+Download/*.json
 Frogmorton/imagesCustom/*.jpg
 Frogmorton/imagesCustom/*.png
 Frogmorton/imagesRaw/*.jpg

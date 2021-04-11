@@ -204,6 +204,7 @@ CARD_BACKS = {'player': {'mpc': ['playerBackOfficialMPC.png',
 CONFIGURATION_PATH = 'configuration.yaml'
 DISCORD_PATH = 'Discord'
 DISCORD_CARD_DATA_PATH = os.path.join(DISCORD_PATH, 'card_data.json')
+DOWNLOAD_PATH = 'Download'
 IMAGES_BACK_PATH = 'imagesBack'
 IMAGES_CUSTOM_PATH = os.path.join(PROJECT_FOLDER, 'imagesCustom')
 IMAGES_EONS_PATH = 'imagesEons'
@@ -724,6 +725,10 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
             if sheet in (SET_SHEET, SCRATCH_SHEET):
                 scratch_changes = True
 
+            path = os.path.join(DOWNLOAD_PATH, '{}.json'.format(sheet))
+            with open(path, 'w') as fobj:
+                fobj.write(res)
+
     if changes or scratch_changes:
         with open(SHEETS_JSON_PATH, 'w') as fobj:
             json.dump(new_checksums, fobj)
@@ -914,6 +919,24 @@ def _transform_to_dict(data):
     return res
 
 
+def _read_sheet_json(sheet):
+    """ Read sheet data from a JSON file.
+    """
+    data = JSON_CACHE.get(sheet)
+    if data:
+        return data
+
+    path = os.path.join(DOWNLOAD_PATH, '{}.json'.format(sheet))
+    if not os.path.exists(path):
+        return []
+
+    with open(path, 'r') as fobj:
+        data = json.load(fobj)
+
+    JSON_CACHE[sheet] = data
+    return data
+
+
 def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: disable=R0912,R0915
     """ Extract data from the spreadsheet.
     """
@@ -929,14 +952,14 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
     TRANSLATIONS.clear()
     SELECTED_CARDS.clear()
 
-    data = JSON_CACHE.get(SET_SHEET, [])
+    data = _read_sheet_json(SET_SHEET)
     if data:
         data = _transform_to_dict(data)
         _clean_data(data)
         SETS.update({s[SET_ID]: s for s in data})
 
     if sheet_changes:
-        data = JSON_CACHE.get(CARD_SHEET, [])
+        data = _read_sheet_json(CARD_SHEET)
         if data:
             CARD_COLUMNS.update(_extract_column_names(data[0]))
             data = _transform_to_dict(data)
@@ -946,7 +969,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
             DATA.extend(data)
 
     if scratch_changes:
-        data = JSON_CACHE.get(SCRATCH_SHEET, [])
+        data = _read_sheet_json(SCRATCH_SHEET)
         if data:
             if not CARD_COLUMNS:
                 CARD_COLUMNS.update(_extract_column_names(data[0]))
@@ -982,7 +1005,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
             continue
 
         TRANSLATIONS[lang] = {}
-        data = JSON_CACHE.get(lang, [])
+        data = _read_sheet_json(lang)
         if data:
             data = _transform_to_dict(data)
             for row in data:
