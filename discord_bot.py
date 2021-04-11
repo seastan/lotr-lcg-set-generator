@@ -1098,7 +1098,7 @@ class MyClient(discord.Client):
 
                     if (card[lotr.CARD_DISCORD_CATEGORY]
                             not in self.general_channels):
-                        self._add_general_channel(
+                        await self._add_general_channel(
                             card[lotr.CARD_DISCORD_CATEGORY])
 
                     channel = self.get_channel(self.general_channels[
@@ -1225,7 +1225,7 @@ The card has been updated:
 
                     if (card[lotr.CARD_DISCORD_CATEGORY]
                             not in self.general_channels):
-                        self._add_general_channel(
+                        await self._add_general_channel(
                             card[lotr.CARD_DISCORD_CATEGORY])
 
                     channel = self.get_channel(self.general_channels[
@@ -1241,20 +1241,22 @@ Card "{}" has been updated:
                     change[0]))
 
 
-    async def _add_general_channel(self, category):
+    async def _add_general_channel(self, category_name):
         if CHANNEL_LIMIT - len(list(self.get_all_channels())) <= 0:
             raise DiscordError(
                 'No free slots to create a new channel "general" in category '
-                '"{}"'.format(category))
+                '"{}"'.format(category_name))
 
+        category = self.get_channel(self.categories[category_name]['id'])
         channel = await self.guilds[0].create_text_channel(
             'general', category=category, position=0)
-        self.general_channels[category] = {
+        await channel.move(category=category, beginning=True)
+        self.general_channels[category_name] = {
             'name': channel.category.name,
             'id': channel.id,
             'category_id': channel.category_id}
         logging.info('Created new channel "general" in category "%s"',
-                     category)
+                     category_name)
         await self._check_free_slots()
         await asyncio.sleep(CMD_SLEEP_TIME)
 
