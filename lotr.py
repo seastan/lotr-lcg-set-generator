@@ -230,8 +230,6 @@ SET_EONS_PATH = 'setEons'
 SET_OCTGN_PATH = 'setOCTGN'
 SHEETS_JSON_PATH = 'sheets.json'
 TEMP_ROOT_PATH = 'Temp'
-TEMPLATES_SOURCE_PATH = os.path.join('Templates')
-TEMPLATES_PATH = os.path.join(PROJECT_FOLDER, 'Templates')
 URL_CACHE_PATH = 'urlCache'
 XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
 
@@ -601,7 +599,6 @@ def reset_project_folders():
 
     _clear_folder(IMAGES_CUSTOM_PATH)
     _clear_folder(IMAGES_RAW_PATH)
-    _clear_folder(TEMPLATES_PATH)
     _clear_folder(XML_PATH)
 
     nobleed_folder = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED)
@@ -615,13 +612,6 @@ def reset_project_folders():
     for _, subfolders, _ in os.walk(nobleed_folder):
         for subfolder in subfolders:
             _delete_folder(os.path.join(nobleed_folder, subfolder))
-
-        break
-
-    for _, _, filenames in os.walk(TEMPLATES_SOURCE_PATH):
-        for filename in filenames:
-            shutil.copyfile(os.path.join(TEMPLATES_SOURCE_PATH, filename),
-                            os.path.join(TEMPLATES_PATH, filename))
 
         break
 
@@ -712,7 +702,7 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
                              .format(sheet))
 
         try:
-            data = [row for row in csv.reader(StringIO(res))]
+            data = [row for row in csv.reader(StringIO(res))]  # pylint: disable=R1721
         except Exception:  # pylint: disable=W0703
             raise SheetError("Can't download {} from the Google Sheet"
                              .format(sheet))
