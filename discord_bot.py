@@ -964,9 +964,6 @@ class MyClient(discord.Client):
                         'category_name': channel.category.name}
                     logging.info('Created new channel "%s" in category "%s"',
                                  change[1][0], change[1][1])
-                    res = await self._get_card(change[1][0], True)
-                    await self._send_channel(channel, res)
-
                     await self._check_free_slots()
                     await asyncio.sleep(CMD_SLEEP_TIME)
                 elif change[0] == 'move':
@@ -1067,12 +1064,34 @@ class MyClient(discord.Client):
                 raise FormatError('Incorrect change format: {}'.format(change))
 
             if change[0] == 'add':
+                card = change[2]
+                if (card.get(lotr.CARD_DISCORD_CHANNEL) and
+                        card[lotr.CARD_DISCORD_CHANNEL] not in self.channels):
+                    raise DiscordError('Channel "{}" not found'.format(
+                        card[lotr.CARD_DISCORD_CHANNEL]))
+
                 if self.updates_channel:
-                    res = ('Card "{}" from "{}" has been added.'.format(
-                        card[lotr.CARD_NAME], card[lotr.CARD_SET_NAME]))
+                    if card.get(lotr.CARD_DISCORD_CHANNEL):
+                        channel = self.channels[
+                            card[lotr.CARD_DISCORD_CHANNEL]]
+                        channel_url = ('https://discord.com/channels/{}/{}'
+                                       .format(self.guilds[0].id,
+                                               channel['id']))
+                    else:
+                        channel_url = ''
+
+                    res = 'Card "{}" (set "{}") has been added. {}'.format(
+                        card[lotr.CARD_NAME], card[lotr.CARD_SET_NAME],
+                        channel_url)
                     await self._send_channel(self.updates_channel, res)
 
-                if not card.get(lotr.CARD_DISCORD_CHANNEL):
+                if card.get(lotr.CARD_DISCORD_CHANNEL):
+                    channel = self.get_channel(
+                        self.channels[card[lotr.CARD_DISCORD_CHANNEL]]['id'])
+                    res = await self._get_card(card[lotr.CARD_DISCORD_CHANNEL],
+                                               True)
+                    await self._send_channel(channel, res)
+                else:
                     if card[lotr.CARD_DISCORD_CATEGORY] not in self.categories:
                         raise DiscordError('Category "{}" not found'.format(
                             card[lotr.CARD_DISCORD_CATEGORY]))
@@ -1082,14 +1101,17 @@ class MyClient(discord.Client):
                         self._add_general_channel(
                             card[lotr.CARD_DISCORD_CATEGORY])
 
-                    channel = self.general_channels[
-                        card[lotr.CARD_DISCORD_CATEGORY]]
+                    channel = self.get_channel(self.general_channels[
+                        card[lotr.CARD_DISCORD_CATEGORY]]['id'])
                     res = ('Card "{}" has been added.'.format(
                         card[lotr.CARD_NAME]))
                     await self._send_channel(channel, res)
+                    res = await self._get_card(change[1], False)
+                    await self._send_channel(channel, res)
             elif change[0] == 'remove':
+                card = change[2]
                 if self.updates_channel:
-                    res = ('Card "{}" from "{}" has been removed from the '
+                    res = ('Card "{}" (set "{}") has been removed from the '
                            'spreadsheet.'.format(card[lotr.CARD_NAME],
                                                  card[lotr.CARD_SET_NAME]))
                     await self._send_channel(self.updates_channel, res)
@@ -1098,8 +1120,8 @@ class MyClient(discord.Client):
                         card[lotr.CARD_DISCORD_CATEGORY] in self.categories and
                         card[lotr.CARD_DISCORD_CATEGORY]
                         in self.general_channels):
-                    channel = self.general_channels[
-                        card[lotr.CARD_DISCORD_CATEGORY]]
+                    channel = self.get_channel(self.general_channels[
+                        card[lotr.CARD_DISCORD_CATEGORY]]['id'])
                     res = ('Card "{}" has been removed from the spreadsheet.'
                            .format(card[lotr.CARD_NAME]))
                     await self._send_channel(channel, res)
@@ -1174,7 +1196,7 @@ class MyClient(discord.Client):
                         channel_url = ''
 
                     res = """
-Card "{}" from "{}" has been updated:
+Card "{}" (set "{}") has been updated:
 
 {}
 {}
@@ -1206,8 +1228,8 @@ The card has been updated:
                         self._add_general_channel(
                             card[lotr.CARD_DISCORD_CATEGORY])
 
-                    channel = self.general_channels[
-                        card[lotr.CARD_DISCORD_CATEGORY]]
+                    channel = self.get_channel(self.general_channels[
+                        card[lotr.CARD_DISCORD_CATEGORY]]['id'])
                     res = """
 Card "{}" has been updated:
 
@@ -1735,6 +1757,12 @@ Targets removed.
         elif re.match(r'^[0-9]+$', command):
             matches = [(card, 1) for card in data['data']
                        if card[lotr.ROW_COLUMN] == int(command)]
+            num = 1
+        elif re.match(
+                r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+                command):
+            matches = [(card, 1) for card in data['data']
+                       if card[lotr.CARD_ID] == command]
             num = 1
         else:
             if re.search(r' n:[0-9]+$', command):

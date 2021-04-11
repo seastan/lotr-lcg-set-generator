@@ -111,12 +111,11 @@ DISCORD_IGNORE_FIELDS = {
     CARD_SET, CARD_PANX, CARD_PANY, CARD_SCALE, BACK_PREFIX + CARD_PANX,
     BACK_PREFIX + CARD_PANY, BACK_PREFIX + CARD_SCALE, CARD_SIDE_B,
     CARD_SELECTED, CARD_CHANGED, CARD_SCRATCH, CARD_SET_DISCORD_PREFIX,
-    CARD_BOT_DISABLED
 }
 
 DISCORD_IGNORE_CHANGES_FIELDS = {
     CARD_NUMBER, CARD_SET_NAME, CARD_SET_RINGSDB_CODE, CARD_SET_HOB_CODE,
-    CARD_RINGSDB_CODE, CARD_NORMALIZED_NAME,
+    CARD_RINGSDB_CODE, CARD_BOT_DISABLE, DCARD_NORMALIZED_NAME,
     BACK_PREFIX + CARD_NORMALIZED_NAME, CARD_DISCORD_CHANNEL,
     CARD_DISCORD_CATEGORY, ROW_COLUMN
 }
@@ -1391,7 +1390,10 @@ def _get_card_diffs(old_card, new_card):
                 key not in DISCORD_IGNORE_FIELDS and key not in old_card):
             diffs.append((key, None, new_card[key]))
 
-    diffs.sort(key=lambda d: CARD_COLUMNS.get(d[0], 0))
+    diffs.sort(key=lambda d:
+               CARD_COLUMNS.get(CARD_SIDE_B
+                                if d[0] == BACK_PREFIX + CARD_NAME
+                                else d[0], 0))
     return diffs
 
 
@@ -2053,8 +2055,8 @@ def _test_rule(card, rule):  # pylint: disable=R0911,R0912
                     not in card[CARD_KEYWORDS]):
                 return 0
         elif re.match(
-                r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-'
-                r'[0-9a-f]{12}$', part):
+                r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+                part):
             if part != card[CARD_ID]:
                 return 0
         else:
