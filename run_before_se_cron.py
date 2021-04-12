@@ -242,6 +242,8 @@ def run(conf=None):  # pylint: disable=R0912
     """
     cron_id = uuid.uuid4()
     logging.info('Started: %s', cron_id)
+    sheet_changes = True
+    scratch_changes = True
     try:  # pylint: disable=R1702
         if not internet_state():
             logging.warning('Internet is not available right now, exiting')
@@ -283,7 +285,10 @@ def run(conf=None):  # pylint: disable=R0912
         except Exception as exc_new:
             logging.exception(str(exc_new))
     finally:
-        logging.info('Finished: %s', cron_id)
+        if not sheet_changes and not scratch_changes:
+            logging.info('Finished (No Changes): %s', cron_id)
+        else:
+            logging.info('Finished: %s', cron_id)
         logging.info('')
         logging.info('')
 
