@@ -304,7 +304,7 @@ class ImageMagickError(Exception):
 def normalized_name(value):
     """ Return a normalized card name.
     """
-    value = unidecode.unidecode(value).lower().replace(' ', '-')
+    value = unidecode.unidecode(str(value)).lower().replace(' ', '-')
     value = re.sub(r'[^a-z0-9\-]', '', value)[:98]
     return value
 
@@ -369,6 +369,7 @@ def _handle_int_str(value):
 def _update_card_text(text):  # pylint: disable=R0915
     """ Update card text for RingsDB and Hall of Beorn.
     """
+    text = str(text)
     text = re.sub(r'\b(Quest Resolution)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', text)
     text = re.sub(r'\b(Valour )?(Resource |Planning |Quest |Travel |Encounter '
                   r'|Combat |Refresh )?(Action):', '[b]\\1\\2\\3[/b]:', text)
@@ -443,7 +444,7 @@ def _update_octgn_card_text(text):
 def _escape_filename(value):
     """ Escape forbidden symbols in a file name.
     """
-    return re.sub(r'[<>:\/\\|?*\'"’“”„«»…–—]', ' ', value)
+    return re.sub(r'[<>:\/\\|?*\'"’“”„«»…–—]', ' ', str(value))
 
 
 def _escape_octgn_filename(value):
@@ -455,7 +456,7 @@ def _escape_octgn_filename(value):
 def extract_keywords(value):
     """ Extract all keywords from the string.
     """
-    keywords = [k.strip() for k in (value or '').replace(
+    keywords = [k.strip() for k in str(value or '').replace(
                 '[inline]', '').split('.') if k != '']
     keywords = [re.sub(r' ([0-9]+)\[pp\]$', ' \\1 Per Player', k, re.I)
                 for k in keywords]
@@ -703,7 +704,7 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
                              .format(sheet))
 
         try:
-            data = [row for row in csv.reader(StringIO(res))]  # pylint: disable=R1721
+            data = [row for row in csv.reader(StringIO(res))]
         except Exception:  # pylint: disable=W0703
             raise SheetError("Can't download {} from the Google Sheet"
                              .format(sheet))
@@ -748,12 +749,69 @@ def _update_discord_category(category):
     return category
 
 
-def _clean_data(data):  # pylint: disable=R0915
+def _clean_value(value):
+    """ Clean a value from the spreadsheet.
+    """
+    value = str(value).strip()
+    value = value.replace('\xa0', ' ')
+    value = value.replace('...', '…')
+    value = value.replace('---', '—')
+    value = value.replace('--', '–')
+    value = re.sub(r' -(?=[0-9])', ' –', value)
+    value = re.sub(r'\[hyphen\]', '-', value, flags=re.IGNORECASE)
+    value = value.replace("'", '’')
+    value = value.replace('“', '"')
+    value = value.replace('”', '"')
+    value = value.replace('„', '"')
+    value = value.replace('« ', '"')
+    value = value.replace('«', '"')
+    value = value.replace(' »', '"')
+    value = value.replace('»', '"')
+    value = re.sub(r'"([^"]*)"', '“\\1”', value)
+    value = value.replace('"', '[unmatched quot]')
+    value = re.sub(r'\[lquot\]', '“', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[rquot\]', '”', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[quot\]', '"', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[apos\]', "'", value, flags=re.IGNORECASE)
+    while True:
+        value_old = value
+        value = re.sub(r'[“”]([^\[]*)\]', '"\\1]', value)
+        value = re.sub(r'’([^\[]*)\]', "'\\1]", value)
+        if value == value_old:
+            break
+
+    value = re.sub(r'\[unique\]', '[unique]', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[threat\]', '[threat]', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[attack\]', '[attack]', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[defense\]', '[defense]', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[willpower\]', '[willpower]', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[leadership\]', '[leadership]', value,
+                   flags=re.IGNORECASE)
+    value = re.sub(r'\[lore\]', '[lore]', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[spirit\]', '[spirit]', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[tactics\]', '[tactics]', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[baggins\]', '[baggins]', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[fellowship\]', '[fellowship]', value,
+                   flags=re.IGNORECASE)
+    value = re.sub(r'\[sunny\]', '[sunny]', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[cloudy\]', '[cloudy]', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[rainy\]', '[rainy]', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[stormy\]', '[stormy]', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[sailing\]', '[sailing]', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[eos\]', '[eos]', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[pp\]', '[pp]', value, flags=re.IGNORECASE)
+
+    value = re.sub(r' +(?=\n)', '', value)
+    value = re.sub(r' +', ' ', value)
+    return value
+
+
+def _clean_data(data):
     """ Clean data from the spreadsheet.
     """
     for row in data:
-        card_name = (row.get(CARD_NAME) or '').strip()
-        card_name_back = (row.get(CARD_SIDE_B) or '').strip()
+        card_name = str(row.get(CARD_NAME) or '').strip()
+        card_name_back = str(row.get(CARD_SIDE_B) or '').strip()
         for key, value in row.items():
             if isinstance(value, str):
                 if key.startswith(BACK_PREFIX):
@@ -761,71 +819,17 @@ def _clean_data(data):  # pylint: disable=R0915
                 else:
                     value = value.replace('[name]', card_name)
 
-                value = value.strip()
-                value = value.replace('\xa0', ' ')
-                value = value.replace('...', '…')
-                value = value.replace('---', '—')
-                value = value.replace('--', '–')
-                value = re.sub(r' -(?=[0-9])', ' –', value)
-                value = re.sub(r'\[hyphen\]', '-', value, flags=re.IGNORECASE)
-                value = value.replace("'", '’')
-                value = value.replace('“', '"')
-                value = value.replace('”', '"')
-                value = value.replace('„', '"')
-                value = value.replace('« ', '"')
-                value = value.replace('«', '"')
-                value = value.replace(' »', '"')
-                value = value.replace('»', '"')
-                value = re.sub(r'"([^"]*)"', '“\\1”', value)
-                value = value.replace('"', '[unmatched quot]')
-                value = re.sub(r'\[lquot\]', '“', value, flags=re.IGNORECASE)
-                value = re.sub(r'\[rquot\]', '”', value, flags=re.IGNORECASE)
-                value = re.sub(r'\[quot\]', '"', value, flags=re.IGNORECASE)
-                value = re.sub(r'\[apos\]', "'", value, flags=re.IGNORECASE)
-                while True:
-                    value_old = value
-                    value = re.sub(r'[“”]([^\[]*)\]', '"\\1]', value)
-                    value = re.sub(r'’([^\[]*)\]', "'\\1]", value)
-                    if value == value_old:
-                        break
+                value = _clean_value(value)
+                row[key] = value
 
-                value = re.sub(r'\[unique\]', '[unique]', value,
-                               flags=re.IGNORECASE)
-                value = re.sub(r'\[threat\]', '[threat]', value,
-                               flags=re.IGNORECASE)
-                value = re.sub(r'\[attack\]', '[attack]', value,
-                               flags=re.IGNORECASE)
-                value = re.sub(r'\[defense\]', '[defense]', value,
-                               flags=re.IGNORECASE)
-                value = re.sub(r'\[willpower\]', '[willpower]', value,
-                               flags=re.IGNORECASE)
-                value = re.sub(r'\[leadership\]', '[leadership]', value,
-                               flags=re.IGNORECASE)
-                value = re.sub(r'\[lore\]', '[lore]', value,
-                               flags=re.IGNORECASE)
-                value = re.sub(r'\[spirit\]', '[spirit]', value,
-                               flags=re.IGNORECASE)
-                value = re.sub(r'\[tactics\]', '[tactics]', value,
-                               flags=re.IGNORECASE)
-                value = re.sub(r'\[baggins\]', '[baggins]', value,
-                               flags=re.IGNORECASE)
-                value = re.sub(r'\[fellowship\]', '[fellowship]', value,
-                               flags=re.IGNORECASE)
-                value = re.sub(r'\[sunny\]', '[sunny]', value,
-                               flags=re.IGNORECASE)
-                value = re.sub(r'\[cloudy\]', '[cloudy]', value,
-                               flags=re.IGNORECASE)
-                value = re.sub(r'\[rainy\]', '[rainy]', value,
-                               flags=re.IGNORECASE)
-                value = re.sub(r'\[stormy\]', '[stormy]', value,
-                               flags=re.IGNORECASE)
-                value = re.sub(r'\[sailing\]', '[sailing]', value,
-                               flags=re.IGNORECASE)
-                value = re.sub(r'\[eos\]', '[eos]', value, flags=re.IGNORECASE)
-                value = re.sub(r'\[pp\]', '[pp]', value, flags=re.IGNORECASE)
 
-                value = re.sub(r' +(?=\n)', '', value)
-                value = re.sub(r' +', ' ', value)
+def _clean_sets(data):
+    """ Clean sets data from the spreadsheet.
+    """
+    for row in data:
+        for key, value in row.items():
+            if isinstance(value, str):
+                value = _clean_value(value)
                 row[key] = value
 
 
@@ -955,7 +959,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
     data = _read_sheet_json(SET_SHEET)
     if data:
         data = _transform_to_dict(data)
-        _clean_data(data)
+        _clean_sets(data)
         SETS.update({s[SET_ID]: s for s in data})
 
     if sheet_changes:
@@ -1267,11 +1271,12 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 deck_rules.add(quest_id)
 
             prefixes = set()
-            for part in row[CARD_DECK_RULES].split('\n\n'):
+            for part in str(row[CARD_DECK_RULES]).split('\n\n'):
                 rules_list = [r.strip().split(':', 1)
                               for r in part.split('\n')]
                 rules_list = [(r[0].lower().strip(),
-                               [i.strip() for i in r[1].strip().split(';')])
+                               [i.strip()
+                                for i in r[1].strip().split(';')])
                               for r in rules_list if len(r) == 2]
                 rules = {}
                 key_count = {}
@@ -1667,7 +1672,7 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
         elif value == 'Upgraded':
             value = ''
         elif card_type == 'Campaign':
-            value = value.upper() if value else 'CAMPAIGN'
+            value = str(value).upper() if value else 'CAMPAIGN'
 
         return value
 
@@ -1736,9 +1741,9 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
     _backup_previous_octgn_xml(set_id)
 
     root = ET.fromstring(SET_XML_TEMPLATE)
-    root.set('name', set_name)
-    root.set('id', set_id)
-    root.set('version', SETS[set_id][SET_VERSION])
+    root.set('name', str(set_name))
+    root.set('id', str(set_id))
+    root.set('version', str(SETS[set_id][SET_VERSION]))
     cards = root.findall("./cards")[0]
 
     chosen_data = []
@@ -1761,7 +1766,7 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
             tab_appended = True
 
         card = ET.SubElement(cards, 'card')
-        card.set('id', row[CARD_ID])
+        card.set('id', str(row[CARD_ID]))
         card.set('name', _update_octgn_card_text(row[CARD_NAME] or ''))
 
         card_type = row[CARD_TYPE]
@@ -1771,7 +1776,8 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
             card_size = 'QuestCard'
         elif (card_type in CARD_TYPES_ENCOUNTER_SIZE or 'Encounter' in (
                 row[CARD_KEYWORDS] and
-                [k.strip() for k in row[CARD_KEYWORDS].split('.')] or [])):
+                [k.strip() for k in str(row[CARD_KEYWORDS]).split('.')]
+                or [])):
             card_size = 'EncounterCard'
         else:
             card_size = None
@@ -1909,7 +1915,7 @@ def _load_external_xml(url, sets, encounter_sets):  # pylint: disable=R0912,R091
             XML_CACHE[url] = content
             _save_content(url, content)
 
-    set_name = root.attrib['name'].lower()
+    set_name = str(root.attrib['name']).lower()
     if set_name not in sets:
         return res
 
@@ -1917,7 +1923,7 @@ def _load_external_xml(url, sets, encounter_sets):  # pylint: disable=R0912,R091
         row = {}
         encounter_set = _find_properties(card, 'Encounter Set')
         if encounter_set:
-            encounter_set = encounter_set[0].attrib['value'].lower()
+            encounter_set = str(encounter_set[0].attrib['value']).lower()
             if encounter_set not in encounter_sets:
                 continue
         else:
@@ -1941,10 +1947,10 @@ def _load_external_xml(url, sets, encounter_sets):  # pylint: disable=R0912,R091
             else:
                 card_type = 'Player Side Quest'
         elif card_type == 'Enemy':
-            if 'Ship' in [t.strip() for t in traits.split('.')]:
+            if 'Ship' in [t.strip() for t in str(traits).split('.')]:
                 card_type = 'Ship Enemy'
         elif card_type == 'Objective':
-            if 'Ship' in [t.strip() for t in traits.split('.')]:
+            if 'Ship' in [t.strip() for t in str(traits).split('.')]:
                 card_type = 'Ship Objective'
 
         sphere = _find_properties(card, 'Sphere')
@@ -1993,18 +1999,19 @@ def _update_card_for_rules(card):
     """ Update card structure to simplify rules matching.
     """
     if card[CARD_ENCOUNTER_SET]:
-        card[CARD_ENCOUNTER_SET] = card[CARD_ENCOUNTER_SET].lower()
+        card[CARD_ENCOUNTER_SET] = str(card[CARD_ENCOUNTER_SET]).lower()
 
     card[CARD_ORIGINAL_NAME] = card[CARD_NAME]
-    card[CARD_SET_NAME] = card[CARD_SET_NAME].lower()
-    card[CARD_NAME] = card[CARD_NAME].lower() if card[CARD_NAME] else ''
-    card[CARD_TYPE] = card[CARD_TYPE].lower() if card[CARD_TYPE] else ''
-    card[CARD_SPHERE] = card[CARD_SPHERE].lower() if card[CARD_SPHERE] else ''
+    card[CARD_SET_NAME] = str(card[CARD_SET_NAME]).lower()
+    card[CARD_NAME] = str(card[CARD_NAME]).lower() if card[CARD_NAME] else ''
+    card[CARD_TYPE] = str(card[CARD_TYPE]).lower() if card[CARD_TYPE] else ''
+    card[CARD_SPHERE] = (str(card[CARD_SPHERE]).lower()
+                         if card[CARD_SPHERE] else '')
     card[CARD_TRAITS] = ([t.lower().strip()
-                          for t in card[CARD_TRAITS].split('.') if t]
+                          for t in str(card[CARD_TRAITS]).split('.') if t]
                          if card[CARD_TRAITS] else [])
     card[CARD_KEYWORDS] = ([k.lower().strip()
-                            for k in card[CARD_KEYWORDS].split('.') if k]
+                            for k in str(card[CARD_KEYWORDS]).split('.') if k]
                            if card[CARD_KEYWORDS] else [])
     card[CARD_UNIQUE] = '1' if card[CARD_UNIQUE] else '0'
     return card
@@ -2039,7 +2046,7 @@ def _test_rule(card, rule):  # pylint: disable=R0911,R0912
     else:
         qty = card[CARD_QUANTITY]
 
-    parts = [p.strip() for p in rule.split('&') if p.strip()]
+    parts = [p.strip() for p in str(rule).split('&') if p.strip()]
     for part in parts:
         if re.match(r'^\[[^\]]+\]$', part):
             if part[1:-1] != card[CARD_ENCOUNTER_SET]:
@@ -2085,7 +2092,7 @@ def _apply_rules(source_cards, target_cards, rules):
     if not rules:
         return
 
-    rules = [r.lower() for r in rules]
+    rules = [str(r).lower() for r in rules]
     for card in source_cards:
         for rule in rules:
             qty = _test_rule(card, rule)
@@ -2135,21 +2142,22 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
 
     quests = {}
     for row in rows:
-        quest = quests.setdefault(row[CARD_ADVENTURE] or row[CARD_NAME],
-                                  {'name': row[CARD_ADVENTURE]
-                                           or row[CARD_NAME],
-                                   'sets': set([row[CARD_SET_NAME].lower()]),
-                                   'encounter sets': set(),
-                                   'prefix': '',
-                                   'rules': '',
-                                   'modes': ['']})
+        quest = quests.setdefault(
+            row[CARD_ADVENTURE] or row[CARD_NAME],
+            {'name': row[CARD_ADVENTURE] or row[CARD_NAME],
+             'sets': set([str(row[CARD_SET_NAME]).lower()]),
+             'encounter sets': set(),
+             'prefix': '',
+             'rules': '',
+             'modes': ['']})
         if row[CARD_ENCOUNTER_SET]:
-            quest['encounter sets'].add(row[CARD_ENCOUNTER_SET].lower())
+            quest['encounter sets'].add(str(row[CARD_ENCOUNTER_SET]).lower())
 
         if row[CARD_ADDITIONAL_ENCOUNTER_SETS]:
             for encounter_set in [
                     r.lower().strip()
-                    for r in row[CARD_ADDITIONAL_ENCOUNTER_SETS].split(';')]:
+                    for r in
+                    str(row[CARD_ADDITIONAL_ENCOUNTER_SETS]).split(';')]:
                 quest['encounter sets'].add(encounter_set)
 
         if row[CARD_DECK_RULES]:
@@ -2158,7 +2166,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
     quests = list(quests.values())
     new_quests = []
     for quest in quests:
-        parts = quest['rules'].split('\n\n')
+        parts = str(quest['rules']).split('\n\n')
         if len(parts) > 1:
             quest['rules'] = parts.pop(0)
             for part in parts:
@@ -2176,7 +2184,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
 
     for quest in quests:
         rules_list = [r.strip().split(':', 1)
-                      for r in quest['rules'].split('\n')]
+                      for r in str(quest['rules']).split('\n')]
         rules_list = [(r[0].lower().strip(),
                        [i.strip() for i in r[1].strip().split(';')])
                       for r in rules_list if len(r) == 2]
@@ -2198,19 +2206,19 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
             rules[(key, key_count[key])] = value
 
         if rules.get(('sets', 0)):
-            quest['sets'].update([s.lower() for s in rules[('sets', 0)]])
+            quest['sets'].update([str(s).lower() for s in rules[('sets', 0)]])
 
         if rules.get(('encounter sets', 0)):
             quest['encounter sets'].update(
-                [s.lower() for s in rules[('encounter sets', 0)]])
+                [str(s).lower() for s in rules[('encounter sets', 0)]])
 
         if rules.get(('prefix', 0)):
             quest['prefix'] = rules[('prefix', 0)][0] + ' '
 
         cards = [r for r in DATA
-                 if (r[CARD_SET_NAME] or '').lower() in quest['sets']
+                 if str(r[CARD_SET_NAME] or '').lower() in quest['sets']
                  and (not r[CARD_ENCOUNTER_SET] or
-                      r[CARD_ENCOUNTER_SET].lower()
+                      str(r[CARD_ENCOUNTER_SET]).lower()
                       in quest['encounter sets'])
                  and (r[CARD_TYPE] != 'Rules' or
                       (r.get(CARD_TEXT) or '') not in ('', 'T.B.D.') or
@@ -2585,7 +2593,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
 
         keywords = extract_keywords(row[CARD_KEYWORDS])
         traits = [t.strip() for t in
-                  (row[CARD_TRAITS] or '').split('.') if t != '']
+                  str(row[CARD_TRAITS] or '').split('.') if t != '']
         position = (int(row[CARD_NUMBER])
                     if is_positive_or_zero_int(row[CARD_NUMBER]) else 0)
         encounter_set = ((row[CARD_ENCOUNTER_SET] or '')
@@ -2611,8 +2619,8 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
             victory_points = _handle_int_str(row[CARD_VICTORY])
 
         additional_encounter_sets = [
-            s.strip() for s in (row[CARD_ADDITIONAL_ENCOUNTER_SETS] or ''
-                                ).split(';')
+            s.strip() for s in str(row[CARD_ADDITIONAL_ENCOUNTER_SETS] or ''
+                                   ).split(';')
             if s != ''] or None
 
         text = _update_card_text('{}\n{}'.format(
@@ -2665,11 +2673,11 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
             'pack_name': set_name,
             'position': position,
             'quantity': quantity,
-            'sphere_code': sphere.lower().replace(' ', '-'),
+            'sphere_code': str(sphere).lower().replace(' ', '-'),
             'sphere_name': sphere,
             'text': text,
             'traits': traits,
-            'type_code': type_name.lower().replace(' ', '-'),
+            'type_code': str(type_name).lower().replace(' ', '-'),
             'type_name': type_name,
             'url': '',
             'additional_encounter_sets': additional_encounter_sets,
@@ -2691,7 +2699,8 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
                            or None,
             'stage_letter': stage_letter,
             'subtitle': subtitle,
-            'subtype_code': (subtype_name and subtype_name.lower().replace(' ', '-')
+            'subtype_code': (subtype_name and
+                             str(subtype_name).lower().replace(' ', '-')
                              or None),
             'subtype_name': subtype_name,
             'threat': threat,
