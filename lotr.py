@@ -2110,6 +2110,9 @@ def _generate_octgn_o8d_player(conf, set_id, set_name):
             if row[CARD_SET] == set_id
             and row[CARD_TYPE] in CARD_TYPES_PLAYER
             and (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)]
+    if not rows:
+        return
+
     cards = [_update_card_for_rules(r.copy()) for r in rows]
     root = ET.fromstring(O8D_TEMPLATE)
     _append_cards(root.findall("./section[@name='Hero']")[0], cards)
