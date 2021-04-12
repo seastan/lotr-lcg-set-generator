@@ -92,6 +92,7 @@ List of **!cron** commands:
 
 **!cron errors** - display all errors from the latest cron run
 **!cron log** - display a full execution log of the latest cron run
+**!cron trigger** - trigger reprocessing of all sheets in the next cron run
 **!cron help** - display this help message
 """,
     'playtest': """
@@ -701,6 +702,12 @@ def format_matches(matches, num):
         res.append(prefix + format_match(card, i + 1))
 
     return '\n'.join(res)
+
+
+async def delete_sheet_checksums():
+    """ Delete existing spredsheet checksums.
+    """
+    os.remove(lotr.SHEETS_JSON_PATH)
 
 
 class MyClient(discord.Client):
@@ -1334,15 +1341,18 @@ Card "{}" has been updated:
         elif command.lower() == 'log':
             res = await get_log()
             if not res:
-                res = 'no cron log found'
+                res = 'no cron logs found'
 
             await self._send_channel(message.channel, res)
         elif command.lower() == 'errors':
             res = await get_errors()
             if not res:
-                res = 'no cron log found'
+                res = 'no cron logs found'
 
             await self._send_channel(message.channel, res)
+        elif command.lower() == 'trigger':
+            await delete_sheet_checksums()
+            await message.channel.send('done')
         elif command.lower().startswith('help'):
             res = HELP['cron']
             await self._send_channel(message.channel, res)
