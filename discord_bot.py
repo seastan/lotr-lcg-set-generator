@@ -137,6 +137,12 @@ List of **!stat** commands:
 **!stat channels** - number of Discord channels and free channel slots
 **!stat questkeywords <quest>** - display the list of all keywords for a given quest (for example: `!stat questkeywords The Battle for the Beacon`)
 **!stat help** - display this help message
+""",
+    'art': """
+List of **!art** commands:
+
+**!art save <artist>** (as a reply to a message with an image attachment) - save the image as a card's artwork (for example: `!art save Ted Nasmith`)
+**!art help** - display this help message
 """
 }
 
@@ -1328,8 +1334,12 @@ Card "{}" has been updated:
     async def _process_cron_command(self, message):  #pylint: disable=R0912
         """ Process a cron command.
         """
-        command = re.sub(r'^!cron ', '', message.content, flags=re.IGNORECASE
-                        ).split('\n')[0]
+        if message.content.lower() == '!cron':
+            command = 'help'
+        else:
+            command = re.sub(r'^!cron ', '', message.content,
+                             flags=re.IGNORECASE).split('\n')[0]
+
         logging.info('Received cron command: %s', command)
         if command.lower().startswith('hello'):
             await message.channel.send('hello')
@@ -1353,11 +1363,9 @@ Card "{}" has been updated:
         elif command.lower() == 'trigger':
             await delete_sheet_checksums()
             await message.channel.send('done')
-        elif command.lower().startswith('help'):
+        else:
             res = HELP['cron']
             await self._send_channel(message.channel, res)
-        else:
-            await message.channel.send('excuse me?')
 
 
     async def _new_target(self, content):
@@ -1629,8 +1637,12 @@ Targets removed.
     async def _process_playtest_command(self, message):  # pylint: disable=R0911,R0912,R0915
         """ Process a playtest command.
         """
-        command = re.sub(r'^!playtest ', '', message.content,
-                         flags=re.IGNORECASE).split('\n')[0]
+        if message.content.lower() == '!playtest':
+            command = 'help'
+        else:
+            command = re.sub(r'^!playtest ', '', message.content,
+                             flags=re.IGNORECASE).split('\n')[0]
+
         logging.info('Received playtest command: %s', command)
         if command.lower() == 'new':
             try:
@@ -1717,11 +1729,9 @@ Targets removed.
             else:
                 await message.channel.send(
                     '"{}" is not a positive integer'.format(num))
-        elif command.lower().startswith('help'):
+        else:
             res = HELP['playtest']
             await self._send_channel(message.channel, res)
-        else:
-            await message.channel.send('excuse me?')
 
 
     async def _get_quest_keywords(self, quest):
@@ -1843,8 +1853,12 @@ Targets removed.
     async def _process_card_command(self, message):
         """ Process a card command.
         """
-        command = re.sub(r'^!alepcard ', '', message.content,
-                         flags=re.IGNORECASE).split('\n')[0]
+        if message.content.lower() == '!alepcard':
+            command = 'help'
+        else:
+            command = re.sub(r'^!alepcard ', '', message.content,
+                             flags=re.IGNORECASE).split('\n')[0]
+
         logging.info('Received card command: %s', command)
 
         if command.lower().startswith('help'):
@@ -1872,8 +1886,12 @@ Targets removed.
     async def _process_stat_command(self, message):
         """ Process a stat command.
         """
-        command = re.sub(r'^!stat ', '', message.content,
-                         flags=re.IGNORECASE).split('\n')[0]
+        if message.content.lower() == '!stat':
+            command = 'help'
+        else:
+            command = re.sub(r'^!stat ', '', message.content,
+                             flags=re.IGNORECASE).split('\n')[0]
+
         logging.info('Received stat command: %s', command)
 
         if command.lower().startswith('questkeywords '):
@@ -1888,6 +1906,8 @@ Targets removed.
                 return
 
             await self._send_channel(message.channel, res)
+        elif command.lower() == 'questkeywords':
+            await message.channel.send('please specify the quest name')
         elif command.lower() == 'channels':
             try:
                 num = len(list(self.get_all_channels()))
@@ -1900,11 +1920,58 @@ Targets removed.
                 return
 
             await self._send_channel(message.channel, res)
-        elif command.lower().startswith('help'):
+        else:
             res = HELP['stat']
             await self._send_channel(message.channel, res)
+
+
+    async def _save_artwork(self, message, artist):
+        """ Save an artwork image.
+        """
+        data = await read_card_data()
+
+        channel_name = message.channel.name
+        matches = [card for card in data['data']
+                   if card.get(lotr.CARD_DISCORD_CHANNEL, '') == channel_name]
+
+        if not matches:
+            return 'no card found for this channel'
+
+        card = matches[0]
+        return 'not implemented'
+
+
+    async def _process_art_command(self, message):
+        """ Process an art command.
+        """
+        if message.content.lower() == '!art':
+            command = 'help'
         else:
-            await message.channel.send('excuse me?')
+            command = re.sub(r'^!art ', '', message.content,
+                             flags=re.IGNORECASE).split('\n')[0]
+
+        logging.info('Received art command: %s', command)
+
+        if command.lower().startswith('save '):
+            try:
+                artist = re.sub(r'^save ', '', command, flags=re.IGNORECASE)
+                error = await self._save_artwork(message, artist)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            if error:
+                await message.channel.send(error)
+                return
+
+            await message.channel.send('done')
+        elif command.lower() == 'save':
+            await message.channel.send('please specify the artist')
+        else:
+            res = HELP['art']
+            await self._send_channel(message.channel, res)
 
 
     async def _process_help_command(self, message):
@@ -1923,13 +1990,20 @@ Targets removed.
             if not message.content or message.content[0] != '!':
                 return
 
-            if message.content.lower().startswith('!cron '):
-                await self._process_cron_command(message)
-            elif message.content.lower().startswith('!playtest '):
-                await self._process_playtest_command(message)
-            elif message.content.lower().startswith('!alepcard '):
+            if (message.content.lower().startswith('!alepcard ') or
+                    message.content.lower() == '!alepcard'):
                 await self._process_card_command(message)
-            elif message.content.lower().startswith('!stat '):
+            elif (message.content.lower().startswith('!playtest ') or
+                  message.content.lower() == '!playtest'):
+                await self._process_playtest_command(message)
+            elif (message.content.lower().startswith('!cron ') or
+                  message.content.lower() == '!cron'):
+                await self._process_cron_command(message)
+            elif (message.content.lower().startswith('!art ') or
+                  message.content.lower() == '!art'):
+                await self._process_art_command(message)
+            elif (message.content.lower().startswith('!stat ') or
+                  message.content.lower() == '!stat'):
                 await self._process_stat_command(message)
             elif message.content.lower().startswith('!help'):
                 await self._process_help_command(message)
