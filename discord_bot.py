@@ -33,9 +33,13 @@ MAILS_PATH = '/home/homeassistant/.homeassistant/mails'
 PLAYTEST_PATH = os.path.join('Discord', 'playtest.json')
 WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 
+CRON_LOG_CMD = './cron_log.sh'
+RCLONE_ART_CMD = './rclone_art.sh'
+
 CMD_SLEEP_TIME = 2
 IO_SLEEP_TIME = 1
 MESSAGE_SLEEP_TIME = 1
+RCLONE_ART_SLEEP_TIME = 300
 WATCH_SLEEP_TIME = 5
 
 ERROR_SUBJECT_TEMPLATE = 'LotR Discord Bot ERROR: {}'
@@ -141,12 +145,14 @@ List of **!stat** commands:
     'art': """
 List of **!art** commands:
 
-**!art save <artist>** (as a reply to a message with an image attachment) - save the image as a card's artwork (for example: `!art save Ted Nasmith`)
+**!art save <artist>** (as a reply to a message with an image attachment) - save the image as a card's artwork for the front side (for example: `!art save Ted Nasmith`)
+**!art saveb <artist>** (as a reply to a message with an image attachment) - save the image as a card's artwork for the back side (for example: `!art saveb John Howe`)
 **!art help** - display this help message
 """
 }
 
 CARD_DATA = {}
+CONF = {}
 
 playtest_lock = asyncio.Lock()
 
@@ -256,35 +262,36 @@ def increment_mail_counter():
         pass
 
 
-def get_token():
-    """ Get Discord token.
+def get_discord_configuration():
+    """ Get Discord configuration.
     """
     try:
         with open(CONF_PATH, 'r') as f_conf:
             conf = yaml.safe_load(f_conf)
 
-        return conf.get('token', '')
+        return conf
     except Exception as exc:
         logging.exception(str(exc))
         create_mail(ERROR_SUBJECT_TEMPLATE.format(
-            'error obtaining Discord token: {}'.format(str(exc))))
-        return ''
+            'error obtaining Discord configuration: {}'.format(str(exc))))
+        return {}
 
 
-async def get_log():
-    """ Get full log of the last cron execution.
+async def run_shell(cmd):
+    """ Run a shell command.
     """
     try:
         proc = await asyncio.create_subprocess_shell(
-            './cron_log.sh',
+            cmd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE)
-        stdout, _ = await proc.communicate()
+        stdout, stderr = await proc.communicate()
     except Exception:
         return ''
 
-    res = stdout.decode('utf-8').strip()
-    return res
+    stdout = stdout.decode('utf-8').strip()
+    stderr = stderr.decode('utf-8').strip()
+    return (stdout, stderr)
 
 
 async def get_errors():
@@ -716,7 +723,7 @@ async def delete_sheet_checksums():
     os.remove(lotr.SHEETS_JSON_PATH)
 
 
-class MyClient(discord.Client):
+class MyClient(discord.Client):  # pylint: disable=R0902
     """ My bot class.
     """
 
@@ -724,6 +731,7 @@ class MyClient(discord.Client):
     cron_channel = None
     playtest_channel = None
     updates_channel = None
+    rclone_art = False
     categories = {}
     channels = {}
     general_channels = {}
@@ -778,6 +786,7 @@ class MyClient(discord.Client):
             await self._load_channels())
         await self._test_channels()
         self.loop.create_task(self._watch_changes_schedule())
+        self.loop.create_task(self._rclone_art_schedule())
 
 
     async def _load_channels(self):  # pylint: disable=R0912
@@ -834,10 +843,15 @@ class MyClient(discord.Client):
 
 
     async def _watch_changes_schedule(self):
-        logging.info('Start watching for changes...')
         while True:
             await self._watch_changes()
             await asyncio.sleep(WATCH_SLEEP_TIME)
+
+
+    async def _rclone_art_schedule(self):
+        while True:
+            await self._rclone_art()
+            await asyncio.sleep(RCLONE_ART_SLEEP_TIME)
 
 
     async def _watch_changes(self):
@@ -876,6 +890,19 @@ class MyClient(discord.Client):
             create_mail(ERROR_SUBJECT_TEMPLATE.format(
                 'unexpected error during watching for changes: {}'
                 .format(str(exc))))
+
+
+    async def _rclone_art(self):
+        if not self.rclone_art:
+            return
+
+        self.rclone_art = False
+        stdout, stderr = await run_shell(RCLONE_ART_CMD)
+        if stdout != 'Done':
+            message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
+                                                                     stderr)
+            logging.error(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
 
 
     async def _process_category_changes(self, data):  #pylint: disable=R0912
@@ -1349,7 +1376,7 @@ Card "{}" has been updated:
               command.lower().startswith('thanks')):
             await message.channel.send('you are welcome')
         elif command.lower() == 'log':
-            res = await get_log()
+            res, _ = await run_shell(CRON_LOG_CMD)
             if not res:
                 res = 'no cron logs found'
 
@@ -1925,7 +1952,7 @@ Targets removed.
             await self._send_channel(message.channel, res)
 
 
-    async def _save_artwork(self, message, artist):
+    async def _save_artwork(self, message, side, artist):  # pylint: disable=R0914
         """ Save an artwork image.
         """
         data = await read_card_data()
@@ -1933,7 +1960,6 @@ Targets removed.
         channel_name = message.channel.name
         matches = [card for card in data['data']
                    if card.get(lotr.CARD_DISCORD_CHANNEL, '') == channel_name]
-
         if not matches:
             return 'no card found for this channel'
 
@@ -1942,7 +1968,44 @@ Targets removed.
             return 'set {} is locked for modifications'.format(
                 card[lotr.CARD_SET_NAME])
 
-        return 'not implemented'
+        if side == 'B' and not card.get(lotr.BACK_PREFIX + lotr.CARD_NAME):
+            return 'no side B found for the card'
+
+        if (not message.reference or not message.reference.resolved
+                or not message.reference.resolved.attachments):
+            return 'please reply to a message with an image attachment'
+
+        attachment = message.reference.resolved.attachments[0]
+        if attachment.content_type not in ('image/png', 'image/jpeg'):
+            return 'attachment must be either JPG ot PNG image'
+
+
+        filetype = 'png' if attachment.content_type == 'image/png' else 'jpg'
+        folder = os.path.join(CONF.get('artwork_destination_path', ''),
+                              card[lotr.CARD_SET])
+        if not os.path.exists(folder):
+            os.mkdir(folder)
+
+        for _, _, filenames in os.walk(folder):
+            for filename in filenames:
+                if filename.startswith(
+                        '{}_{}'.format(card[lotr.CARD_ID], side)):
+                    os.remove(os.path.join(folder, filename))
+
+            break
+
+        filename = '{}_{}_{}_{}.{}'.format(card[lotr.CARD_ID], side,
+                                           card[lotr.CARD_NAME], artist,
+                                           filetype)
+        filename = lotr.escape_filename(filename).replace(' ', '_')
+        path = os.path.join(folder, filename)
+
+        content = await attachment.read()
+        with open(path, 'wb') as f_obj:
+            f_obj.write(content)
+
+        self.rclone_art = True
+        return ''
 
 
     async def _process_art_command(self, message):
@@ -1956,10 +2019,12 @@ Targets removed.
 
         logging.info('Received art command: %s', command)
 
-        if command.lower().startswith('save '):
+        if (command.lower().startswith('save ') or
+                command.lower().startswith('saveb ')):
             try:
-                artist = re.sub(r'^save ', '', command, flags=re.IGNORECASE)
-                error = await self._save_artwork(message, artist)
+                side = 'B' if command.lower().startswith('saveb ') else 'A'
+                artist = re.sub(r'^saveb? ', '', command, flags=re.IGNORECASE)
+                error = await self._save_artwork(message, side, artist)
             except Exception as exc:
                 logging.exception(str(exc))
                 await message.channel.send(
@@ -2021,4 +2086,5 @@ Targets removed.
 if __name__ == '__main__':
     os.chdir(WORKING_DIRECTORY)
     init_logging()
-    MyClient().run(get_token())
+    CONF.update(get_discord_configuration())
+    MyClient().run(CONF.get('token'))

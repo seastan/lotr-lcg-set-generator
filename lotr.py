@@ -109,14 +109,14 @@ MAX_COLUMN = '_Max Column'
 ROW_COLUMN = '_Row'
 
 DISCORD_IGNORE_FIELDS = {
-    CARD_SET, CARD_PANX, CARD_PANY, CARD_SCALE, BACK_PREFIX + CARD_PANX,
+    CARD_PANX, CARD_PANY, CARD_SCALE, BACK_PREFIX + CARD_PANX,
     BACK_PREFIX + CARD_PANY, BACK_PREFIX + CARD_SCALE, CARD_SIDE_B,
     CARD_SELECTED, CARD_CHANGED, CARD_SCRATCH
 }
 
 DISCORD_IGNORE_CHANGES_FIELDS = {
-    CARD_NUMBER, CARD_SET_NAME, CARD_SET_RINGSDB_CODE, CARD_SET_HOB_CODE,
-    CARD_SET_LOCKED, CARD_RINGSDB_CODE, CARD_BOT_DISABLED,
+    CARD_SET, CARD_NUMBER, CARD_SET_NAME, CARD_SET_RINGSDB_CODE,
+    CARD_SET_HOB_CODE, CARD_SET_LOCKED, CARD_RINGSDB_CODE, CARD_BOT_DISABLED,
     CARD_NORMALIZED_NAME, BACK_PREFIX + CARD_NORMALIZED_NAME,
     CARD_DISCORD_CHANNEL, CARD_DISCORD_CATEGORY, ROW_COLUMN
 }
@@ -442,7 +442,7 @@ def _update_octgn_card_text(text):
     return text
 
 
-def _escape_filename(value):
+def escape_filename(value):
     """ Escape forbidden symbols in a file name.
     """
     return re.sub(r'[<>:\/\\|?*\'"’“”„«»…–—]', ' ', str(value))
@@ -1613,7 +1613,7 @@ def _backup_previous_octgn_xml(set_id):
 def _copy_octgn_xml(set_id, set_name):
     """ Copy set.xml file to OCTGN output folder.
     """
-    output_path = os.path.join(OUTPUT_OCTGN_PATH, _escape_filename(set_name))
+    output_path = os.path.join(OUTPUT_OCTGN_PATH, escape_filename(set_name))
     _create_folder(output_path)
     output_path = os.path.join(output_path, set_id)
     _create_folder(output_path)
@@ -2121,9 +2121,9 @@ def _generate_octgn_o8d_player(conf, set_id, set_name):
     _append_cards(root.findall("./section[@name='Hero']")[0], cards)
 
     output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
-                               _escape_filename(set_name))
+                               escape_filename(set_name))
     filename = _escape_octgn_filename(
-        'Player-{}.o8d'.format(_escape_filename(set_name)))
+        'Player-{}.o8d'.format(escape_filename(set_name)))
     with open(
             os.path.join(output_path, filename),
             'w', encoding='utf-8') as obj:
@@ -2183,7 +2183,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
     quests.extend(new_quests)
 
     output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
-                               _escape_filename(set_name))
+                               escape_filename(set_name))
     _clear_folder(output_path)
     if quests:
         _create_folder(output_path)
@@ -2353,7 +2353,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
 
             filename = _escape_octgn_filename(
                 '{}{}{}.o8d'.format(mode, quest['prefix'],
-                                    _escape_filename(quest['name'])))
+                                    escape_filename(quest['name'])))
             with open(
                     os.path.join(output_path, filename),
                     'w', encoding='utf-8') as obj:
@@ -2394,11 +2394,11 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
     logging.info('[%s] Generating CSV file for RingsDB...', set_name)
     timestamp = time.time()
 
-    output_path = os.path.join(OUTPUT_RINGSDB_PATH, _escape_filename(set_name))
+    output_path = os.path.join(OUTPUT_RINGSDB_PATH, escape_filename(set_name))
     _create_folder(output_path)
 
     output_path = os.path.join(output_path,
-                               '{}.csv'.format(_escape_filename(set_name)))
+                               '{}.csv'.format(escape_filename(set_name)))
     with open(output_path, 'w', newline='', encoding='utf-8') as obj:
         obj.write(codecs.BOM_UTF8.decode('utf-8'))
         fieldnames = ['pack', 'type', 'sphere', 'position', 'code', 'name',
@@ -2500,11 +2500,11 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
     timestamp = time.time()
 
     output_path = os.path.join(OUTPUT_HALLOFBEORN_PATH,
-                               _escape_filename(set_name))
+                               escape_filename(set_name))
     _create_folder(output_path)
 
     output_path = os.path.join(output_path,
-                               '{}.json'.format(_escape_filename(set_name)))
+                               '{}.json'.format(escape_filename(set_name)))
     json_data = []
     card_data = DATA[:]
     for row in DATA:
@@ -4196,7 +4196,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300DB,
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_DB_PATH, '{}.{}'.format(
-        _escape_filename(set_name), lang))
+        escape_filename(set_name), lang))
 
     known_filenames = set()
     for _, _, filenames in os.walk(input_path):
@@ -4245,7 +4245,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
     if pairs:
         ringsdb_output_path = os.path.join(
             OUTPUT_RINGSDB_IMAGES_PATH, '{}.{}'.format(
-                _escape_filename(set_name), lang))
+                escape_filename(set_name), lang))
         _create_folder(ringsdb_output_path)
         _clear_folder(ringsdb_output_path)
         for source_filename, target_filename in pairs:
@@ -4255,7 +4255,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
     if known_filenames:
         preview_output_path = os.path.join(
             OUTPUT_PREVIEW_IMAGES_PATH, '{}.{}'.format(
-                _escape_filename(set_name), lang))
+                escape_filename(set_name), lang))
         _create_folder(preview_output_path)
         _clear_folder(preview_output_path)
 
@@ -4293,7 +4293,7 @@ def generate_octgn(conf, set_id, set_name, lang):
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_octgn.{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_OCTGN_IMAGES_PATH, '{}.{}'.format(
-        _escape_filename(set_name), lang))
+        escape_filename(set_name), lang))
 
     _delete_folder(temp_path)
     shutil.copytree(input_path, temp_path)
@@ -4301,7 +4301,7 @@ def generate_octgn(conf, set_id, set_name, lang):
 
     pack_path = os.path.join(output_path,
                              _escape_octgn_filename('{}.{}.o8c'.format(
-                                 _escape_filename(set_name), lang)))
+                                 escape_filename(set_name), lang)))
 
     known_filenames = set()
     for _, _, filenames in os.walk(temp_path):
@@ -4386,7 +4386,7 @@ def generate_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0914
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300PDF,
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_PDF_PATH, '{}.{}'.format(
-        _escape_filename(set_name), lang))
+        escape_filename(set_name), lang))
 
     images = _collect_pdf_images(input_path)
     if not images:
@@ -4422,7 +4422,7 @@ def generate_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0914
     for page_format in formats:
         canvas = Canvas(
             os.path.join(output_path, 'Home.{}.{}.{}.pdf'.format(
-                page_format, _escape_filename(set_name), lang)),
+                page_format, escape_filename(set_name), lang)),
             pagesize=landscape(formats[page_format]))
         width, height = landscape(formats[page_format])
         width_margin = (width - 3 * card_width) / 2
@@ -4458,7 +4458,7 @@ def generate_genericpng_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0
     input_path = os.path.join(IMAGES_EONS_PATH, PNG800PDF,
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_GENERICPNG_PDF_PATH, '{}.{}'.format(
-        _escape_filename(set_name), lang))
+        escape_filename(set_name), lang))
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_mpc.{}.{}'.format(set_id, lang))
 
@@ -4509,7 +4509,7 @@ def generate_genericpng_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0
 
     for page_format in formats:
         pdf_filename = '800dpi.{}.{}.{}.pdf'.format(
-            page_format, _escape_filename(set_name), lang)
+            page_format, escape_filename(set_name), lang)
         pdf_path = os.path.join(temp_path, pdf_filename)
         canvas = Canvas(pdf_path, pagesize=landscape(formats[page_format][0]))
         width, height = landscape(formats[page_format][0])
@@ -4709,7 +4709,7 @@ def _combine_doublesided_rules_cards(set_id, input_path, card_data, service):  #
             (str(int(r[CARD_NUMBER])).zfill(3)
              if is_positive_or_zero_int(r[CARD_NUMBER])
              else str(r[CARD_NUMBER])),
-            _escape_filename(r[CARD_NAME])))
+            escape_filename(r[CARD_NAME])))
 
     selected = []
     for i, row in enumerate(card_data):
@@ -4720,7 +4720,7 @@ def _combine_doublesided_rules_cards(set_id, input_path, card_data, service):  #
             card_number = (str(int(row[CARD_NUMBER])).zfill(3)
                            if is_positive_or_zero_int(row[CARD_NUMBER])
                            else str(row[CARD_NUMBER]))
-            card_name = _escape_filename(row[CARD_NAME])
+            card_name = escape_filename(row[CARD_NAME])
             selected.append((i, '{}-1-{}'.format(card_number, card_name)))
 
     if not selected:
@@ -4890,7 +4890,7 @@ def generate_mpc(conf, set_id, set_name, lang, card_data):
     input_path = os.path.join(IMAGES_EONS_PATH, PNG800BLEEDMPC,
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_MPC_PATH, '{}.{}'.format(
-        _escape_filename(set_name), lang))
+        escape_filename(set_name), lang))
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_mpc.{}.{}'.format(set_id, lang))
 
@@ -4915,7 +4915,7 @@ def generate_mpc(conf, set_id, set_name, lang, card_data):
         with zipfile.ZipFile(
                 os.path.join(output_path,
                              'MPC.{}.{}.images.zip'.format(
-                                 _escape_filename(set_name), lang)),
+                                 escape_filename(set_name), lang)),
                 'w') as obj:
             _prepare_mpc_printing_archive(temp_path, obj)
             obj.write('MakePlayingCards.pdf', 'MakePlayingCards.pdf')
@@ -4924,7 +4924,7 @@ def generate_mpc(conf, set_id, set_name, lang, card_data):
         with py7zr.SevenZipFile(
                 os.path.join(output_path,
                              'MPC.{}.{}.images.7z'.format(
-                                 _escape_filename(set_name), lang)),
+                                 escape_filename(set_name), lang)),
                 'w', filters=PY7ZR_FILTERS) as obj:
             _prepare_mpc_printing_archive(temp_path, obj)
             obj.write('MakePlayingCards.pdf', 'MakePlayingCards.pdf')
@@ -4945,7 +4945,7 @@ def generate_dtc(conf, set_id, set_name, lang, card_data):
                               JPG300BLEEDDTC,
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_DTC_PATH, '{}.{}'.format(
-        _escape_filename(set_name), lang))
+        escape_filename(set_name), lang))
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_dtc.{}.{}'.format(set_id, lang))
 
@@ -4968,7 +4968,7 @@ def generate_dtc(conf, set_id, set_name, lang, card_data):
         with zipfile.ZipFile(
                 os.path.join(output_path,
                              'DTC.{}.{}.images.zip'.format(
-                                 _escape_filename(set_name), lang)),
+                                 escape_filename(set_name), lang)),
                 'w') as obj:
             _prepare_dtc_printing_archive(temp_path, obj)
             obj.write('DriveThruCards.pdf', 'DriveThruCards.pdf')
@@ -4977,7 +4977,7 @@ def generate_dtc(conf, set_id, set_name, lang, card_data):
         with py7zr.SevenZipFile(
                 os.path.join(output_path,
                              'DTC.{}.{}.images.7z'.format(
-                                 _escape_filename(set_name), lang)),
+                                 escape_filename(set_name), lang)),
                 'w', filters=PY7ZR_FILTERS) as obj:
             _prepare_dtc_printing_archive(temp_path, obj)
             obj.write('DriveThruCards.pdf', 'DriveThruCards.pdf')
@@ -5032,14 +5032,14 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):  # pylint: disabl
     if ('mbprint_zip' in conf['outputs'][lang] or
             'mbprint_7z' in conf['outputs'][lang]):
         output_path = os.path.join(OUTPUT_MBPRINT_PATH, '{}.{}'.format(
-            _escape_filename(set_name), lang))
+            escape_filename(set_name), lang))
         _create_folder(output_path)
 
         if 'mbprint_zip' in conf['outputs'][lang]:
             with zipfile.ZipFile(
                     os.path.join(output_path,
                                  'MBPRINT.{}.{}.images.zip'.format(
-                                     _escape_filename(set_name), lang)),
+                                     escape_filename(set_name), lang)),
                     'w') as obj:
                 _prepare_mbprint_printing_archive(temp_path, obj)
                 obj.write('MBPrint.pdf', 'MBPrint.pdf')
@@ -5048,14 +5048,14 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):  # pylint: disabl
             with py7zr.SevenZipFile(
                     os.path.join(output_path,
                                  'MBPRINT.{}.{}.images.7z'.format(
-                                     _escape_filename(set_name), lang)),
+                                     escape_filename(set_name), lang)),
                     'w', filters=PY7ZR_FILTERS) as obj:
                 _prepare_mbprint_printing_archive(temp_path, obj)
                 obj.write('MBPrint.pdf', 'MBPrint.pdf')
 
     if ('mbprint_pdf_zip' in conf['outputs'][lang] or
             'mbprint_pdf_7z' in conf['outputs'][lang]):
-        pdf_filename = 'MBPRINT.{}.{}.pdf'.format(_escape_filename(set_name),
+        pdf_filename = 'MBPRINT.{}.{}.pdf'.format(escape_filename(set_name),
                                                   lang)
         pdf_path = os.path.join(temp_path, pdf_filename)
         cmd = MAGICK_COMMAND_PDF.format(conf['magick_path'], temp_path,
@@ -5064,14 +5064,14 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):  # pylint: disabl
         logging.info(res)
 
         output_path = os.path.join(OUTPUT_MBPRINT_PDF_PATH, '{}.{}'.format(
-            _escape_filename(set_name), lang))
+            escape_filename(set_name), lang))
         _create_folder(output_path)
 
         if 'mbprint_pdf_zip' in conf['outputs'][lang]:
             with zipfile.ZipFile(
                     os.path.join(output_path,
                                  'MBPRINT.{}.{}.pdf.zip'.format(
-                                     _escape_filename(set_name), lang)),
+                                     escape_filename(set_name), lang)),
                     'w') as obj:
                 obj.write(pdf_path, pdf_filename)
 
@@ -5079,7 +5079,7 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):  # pylint: disabl
             with py7zr.SevenZipFile(
                     os.path.join(output_path,
                                  'MBPRINT.{}.{}.pdf.7z'.format(
-                                     _escape_filename(set_name), lang)),
+                                     escape_filename(set_name), lang)),
                     'w', filters=PY7ZR_FILTERS) as obj:
                 obj.write(pdf_path, pdf_filename)
 
@@ -5097,7 +5097,7 @@ def generate_genericpng(conf, set_id, set_name, lang, card_data):
     input_path = os.path.join(IMAGES_EONS_PATH, PNG800BLEEDGENERIC,
                               '{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_GENERICPNG_PATH, '{}.{}'.format(
-        _escape_filename(set_name), lang))
+        escape_filename(set_name), lang))
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_genericpng.{}.{}'.format(set_id, lang))
 
@@ -5121,7 +5121,7 @@ def generate_genericpng(conf, set_id, set_name, lang, card_data):
         with zipfile.ZipFile(
                 os.path.join(output_path,
                              'PNG.{}.{}.images.zip'.format(
-                                 _escape_filename(set_name), lang)),
+                                 escape_filename(set_name), lang)),
                 'w') as obj:
             _prepare_genericpng_printing_archive(temp_path, obj)
 
@@ -5129,7 +5129,7 @@ def generate_genericpng(conf, set_id, set_name, lang, card_data):
         with py7zr.SevenZipFile(
                 os.path.join(output_path,
                              'PNG.{}.{}.images.7z'.format(
-                                 _escape_filename(set_name), lang)),
+                                 escape_filename(set_name), lang)),
                 'w', filters=PY7ZR_FILTERS) as obj:
             _prepare_genericpng_printing_archive(temp_path, obj)
 
@@ -5170,7 +5170,7 @@ def _copy_octgn_set_xml_outputs(temp_path, destination_path, sets):
 def _copy_octgn_o8d_outputs(temp_path, destination_path, sets):
     """ Copy OCTGN set.xml files to the destination folder.
     """
-    set_folders = {_escape_filename(SETS[s]['Name']) for s in sets}
+    set_folders = {escape_filename(SETS[s]['Name']) for s in sets}
     archive_path = os.path.join(temp_path, 'copy_octgn_o8d_outputs.zip')
     with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_STORED) as obj:
         for _, folders, _ in os.walk(OUTPUT_OCTGN_DECKS_PATH):

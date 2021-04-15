@@ -1,3 +1,8 @@
 # Discord Webhook URL
 webhook_url: 
+
+# Discord token
 token: 
+
+# Path to card artwork destination folder
+artwork_destination_path: 
