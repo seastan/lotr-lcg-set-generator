@@ -155,6 +155,7 @@ CARD_DATA = {}
 CONF = {}
 
 playtest_lock = asyncio.Lock()
+art_lock = asyncio.Lock()
 
 
 class DiscordError(Exception):
@@ -903,6 +904,23 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                                                                      stderr)
             logging.error(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+            return
+
+        artwork_destination_path = CONF.get('artwork_destination_path')
+        if not artwork_destination_path:
+            return
+
+        async with art_lock:
+            if self.rclone_art:
+                return
+
+            for _, subfolders, _ in os.walk(artwork_destination_path):
+                for subfolder in subfolders:
+                    shutil.rmtree(
+                        os.path.join(artwork_destination_path, subfolder),
+                        ignore_errors=True)
+
+                break
 
 
     async def _process_category_changes(self, data):  #pylint: disable=R0912
@@ -1952,7 +1970,7 @@ Targets removed.
             await self._send_channel(message.channel, res)
 
 
-    async def _save_artwork(self, message, side, artist):  # pylint: disable=R0914
+    async def _save_artwork(self, message, side, artist):  # pylint: disable=R0911,R0914
         """ Save an artwork image.
         """
         data = await read_card_data()
@@ -1976,35 +1994,47 @@ Targets removed.
             return 'please reply to a message with an image attachment'
 
         attachment = message.reference.resolved.attachments[0]
-        if attachment.content_type not in ('image/png', 'image/jpeg'):
+        if (attachment.content_type not in ('image/png', 'image/jpeg') and
+                not attachment.filename.lower().split('.')[-1] in
+                ('png', 'jpg', 'jpeg')):
             return 'attachment must be either JPG ot PNG image'
 
+        if (attachment.content_type == 'image/png' or
+                attachment.filename.lower().split('.')[-1] == 'png'):
+            filetype = 'png'
+        else:
+            filetype = 'jpg'
 
-        filetype = 'png' if attachment.content_type == 'image/png' else 'jpg'
-        folder = os.path.join(CONF.get('artwork_destination_path', ''),
-                              card[lotr.CARD_SET])
-        if not os.path.exists(folder):
-            os.mkdir(folder)
+        artwork_destination_path = CONF.get('artwork_destination_path')
+        if not artwork_destination_path:
+            return 'no destination folder specified on the server'
 
-        for _, _, filenames in os.walk(folder):
-            for filename in filenames:
-                if filename.startswith(
-                        '{}_{}'.format(card[lotr.CARD_ID], side)):
-                    os.remove(os.path.join(folder, filename))
+        content = await attachment.read()
 
-            break
-
+        folder = os.path.join(artwork_destination_path, card[lotr.CARD_SET])
         filename = '{}_{}_{}_{}.{}'.format(card[lotr.CARD_ID], side,
                                            card[lotr.CARD_NAME], artist,
                                            filetype)
         filename = lotr.escape_filename(filename).replace(' ', '_')
         path = os.path.join(folder, filename)
 
-        content = await attachment.read()
-        with open(path, 'wb') as f_obj:
-            f_obj.write(content)
+        async with art_lock:
+            if not os.path.exists(folder):
+                os.mkdir(folder)
 
-        self.rclone_art = True
+            for _, _, filenames in os.walk(folder):
+                for filename in filenames:
+                    if filename.startswith(
+                            '{}_{}'.format(card[lotr.CARD_ID], side)):
+                        os.remove(os.path.join(folder, filename))
+
+                break
+
+            with open(path, 'wb') as f_obj:
+                f_obj.write(content)
+
+            self.rclone_art = True
+
         return ''
 
 
