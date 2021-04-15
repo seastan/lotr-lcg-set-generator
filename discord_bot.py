@@ -1938,6 +1938,10 @@ Targets removed.
             return 'no card found for this channel'
 
         card = matches[0]
+        if card.get(lotr.CARD_SET_LOCKED):
+            return 'set {} is locked for modifications'.format(
+                card[lotr.CARD_SET_NAME])
+
         return 'not implemented'
 
 

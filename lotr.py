@@ -49,6 +49,7 @@ SET_RINGSDB_CODE = 'RingsDB Code'
 SET_HOB_CODE = 'HoB Code'
 SET_DISCORD_PREFIX = 'Discord Prefix'
 SET_COPYRIGHT = 'Copyright'
+SET_LOCKED = 'Locked'
 
 BACK_PREFIX = 'Back_'
 CARD_SET = 'Set'
@@ -95,7 +96,7 @@ CARD_SCRATCH = '_Scratch'
 CARD_SET_NAME = '_Set Name'
 CARD_SET_RINGSDB_CODE = '_Set RingsDB Code'
 CARD_SET_HOB_CODE = '_Set HoB Code'
-CARD_SET_DISCORD_PREFIX = '_Discord Prefix'
+CARD_SET_LOCKED = '_Locked'
 CARD_RINGSDB_CODE = '_RingsDB Code'
 CARD_NORMALIZED_NAME = '_Normalized Name'
 CARD_DISCORD_CHANNEL = '_Discord Channel'
@@ -110,14 +111,14 @@ ROW_COLUMN = '_Row'
 DISCORD_IGNORE_FIELDS = {
     CARD_SET, CARD_PANX, CARD_PANY, CARD_SCALE, BACK_PREFIX + CARD_PANX,
     BACK_PREFIX + CARD_PANY, BACK_PREFIX + CARD_SCALE, CARD_SIDE_B,
-    CARD_SELECTED, CARD_CHANGED, CARD_SCRATCH, CARD_SET_DISCORD_PREFIX
+    CARD_SELECTED, CARD_CHANGED, CARD_SCRATCH
 }
 
 DISCORD_IGNORE_CHANGES_FIELDS = {
     CARD_NUMBER, CARD_SET_NAME, CARD_SET_RINGSDB_CODE, CARD_SET_HOB_CODE,
-    CARD_RINGSDB_CODE, CARD_BOT_DISABLED, CARD_NORMALIZED_NAME,
-    BACK_PREFIX + CARD_NORMALIZED_NAME, CARD_DISCORD_CHANNEL,
-    CARD_DISCORD_CATEGORY, ROW_COLUMN
+    CARD_SET_LOCKED, CARD_RINGSDB_CODE, CARD_BOT_DISABLED,
+    CARD_NORMALIZED_NAME, BACK_PREFIX + CARD_NORMALIZED_NAME,
+    CARD_DISCORD_CHANNEL, CARD_DISCORD_CATEGORY, ROW_COLUMN
 }
 
 CARD_TYPES = {'Ally', 'Attachment', 'Campaign', 'Contract', 'Enemy',
@@ -847,9 +848,6 @@ def _update_data(data):
             if is_positive_or_zero_int(set_ringsdb_code)
             else 0)
 
-        row[CARD_SET_DISCORD_PREFIX] = str(SETS.get(
-            row[CARD_SET], {}).get(SET_DISCORD_PREFIX, '') or '')
-
         if row[CARD_SCRATCH] and row[CARD_SET] in FOUND_INTERSECTED_SETS:
             row[CARD_SET] = '[filtered set]'
 
@@ -1445,8 +1443,13 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
             channels.add(channel)
             row[CARD_DISCORD_CHANNEL] = channel
 
+        locked = str(SETS[row[CARD_SET]].get(SET_LOCKED, '') or '')
+        if locked:
+            row[CARD_SET_LOCKED] = locked
+
         card_set = re.sub(r'^ALeP - ', '', row[CARD_SET_NAME])
-        discord_prefix = row.get(CARD_SET_DISCORD_PREFIX, '')
+        discord_prefix = str(SETS[row[CARD_SET]].get(SET_DISCORD_PREFIX, '')
+                             or '')
         if discord_prefix:
             discord_prefix = '{} '.format(discord_prefix)
 
@@ -1504,7 +1507,7 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
                          (new_dict[card_id][CARD_DISCORD_CHANNEL],
                           new_dict[card_id][CARD_DISCORD_CATEGORY])))
             elif old_dict[card_id] != new_dict[card_id]:
-                if new_dict[card_id].get(CARD_BOT_DISABLED) not in ('1', 1):
+                if not new_dict[card_id].get(CARD_BOT_DISABLED):
                     diffs = _get_card_diffs(old_dict[card_id],
                                             new_dict[card_id])
                     if diffs:
