@@ -705,7 +705,7 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
                              .format(sheet))
 
         try:
-            data = [row for row in csv.reader(StringIO(res))]
+            data = list(csv.reader(StringIO(res)))
         except Exception:  # pylint: disable=W0703
             raise SheetError("Can't download {} from the Google Sheet"
                              .format(sheet))
@@ -905,7 +905,7 @@ def _transform_to_dict(data):
     res = []
     for i, row in enumerate(data[1:]):
         row = row[:columns[MAX_COLUMN] + 1]
-        if not any(row):
+        if not [v for v in row if v and v != '#REF!']:
             continue
 
         row_dict = {}
