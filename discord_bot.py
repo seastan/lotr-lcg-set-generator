@@ -18,6 +18,7 @@ import re
 import shutil
 import time
 import uuid
+import xml.etree.ElementTree as ET
 
 import discord
 import yaml
@@ -139,7 +140,7 @@ Some report
 List of **!stat** commands:
 
 **!stat channels** - number of Discord channels and free channel slots
-**!stat questkeywords <quest>** - display the list of all keywords for a given quest (for example: `!stat questkeywords The Battle for the Beacon`)
+**!stat quest <quest>** - display the quest statistics (for example: `!stat quest The Battle for the Beacon`)
 **!stat help** - display this help message
 """,
     'art': """
@@ -151,8 +152,12 @@ List of **!art** commands:
 """
 }
 
+CARD_DECK_SECTION = '_Deck Section'
+
 CARD_DATA = {}
 CONF = {}
+EXTERNAL_DATA = {}
+EXTERNAL_FILES = set()
 
 playtest_lock = asyncio.Lock()
 art_lock = asyncio.Lock()
@@ -367,14 +372,35 @@ async def read_card_data():
     size = os.path.getsize(lotr.DISCORD_CARD_DATA_PATH)
     mtime = os.path.getmtime(lotr.DISCORD_CARD_DATA_PATH)
     if size == CARD_DATA.get('size') and mtime == CARD_DATA.get('mtime'):
-        return CARD_DATA['data']
+        return CARD_DATA['cache']
 
     data = await read_json_data(lotr.DISCORD_CARD_DATA_PATH)
+    data['dict'] = {r[lotr.CARD_ID]:r for r in data['data']}
 
-    CARD_DATA['data'] = data
+    CARD_DATA['cache'] = data
     CARD_DATA['size'] = size
     CARD_DATA['mtime'] = mtime
     return data
+
+
+def read_external_data():
+    """ Read external card data.
+    """
+    new_files = set()
+    for _, _, filenames in os.walk(lotr.URL_CACHE_PATH):
+        for filename in filenames:
+            if filename.endswith('.cache'):
+                new_files.add(filename)
+
+        break
+
+    new_files = new_files.difference(EXTERNAL_FILES)
+    for new_file in new_files:
+        EXTERNAL_FILES.add(new_file)
+        data = lotr.load_external_xml(re.sub(r'\.cache$', '', new_file))
+        EXTERNAL_DATA.update({r[lotr.CARD_ID]:r for r in data})
+
+    return EXTERNAL_DATA
 
 
 def card_match(card_name, card_back_name, search_name):
@@ -718,10 +744,61 @@ def format_matches(matches, num):
     return '\n'.join(res)
 
 
-async def delete_sheet_checksums():
+def delete_sheet_checksums():
     """ Delete existing spredsheet checksums.
     """
     os.remove(lotr.SHEETS_JSON_PATH)
+
+
+async def read_deck_xml(path):
+    """ Read deck XML file.
+    """
+    data = {}
+    data.update(read_external_data())
+    data.update((await read_card_data())['dict'])
+
+    cards = []
+    tree = ET.parse(path)
+    root = tree.getroot()
+    for section in root:
+        section_name = section.attrib.get('name')
+        if not section_name:
+            continue
+
+        for card in section:
+            card_id = card.attrib['id']
+            if card_id not in data:
+                continue
+
+            row = data[card_id].copy()
+            if row[lotr.CARD_TYPE] not in lotr.CARD_TYPES_ENCOUNTER_SET:
+                continue
+
+            row[lotr.CARD_QUANTITY] = card.attrib['qty']
+            row[CARD_DECK_SECTION] = section_name
+            cards.append(row)
+
+    return cards
+
+
+def get_quest_stat(cards):
+    """ Get quest statistics.
+    """
+    res = {
+        'keywords': ''
+    }
+
+    keywords = set()
+    for card in cards:
+        if card.get(lotr.CARD_KEYWORDS):
+            keywords = keywords.union(
+                lotr.extract_keywords(card[lotr.CARD_KEYWORDS]))
+
+    if keywords:
+        res['keywords'] = '*Keywords*\n\n{}\n\n'.format(
+            '\n'.join(sorted(keywords)))
+
+    return res
 
 
 class MyClient(discord.Client):  # pylint: disable=R0902
@@ -788,6 +865,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
         await self._test_channels()
         self.loop.create_task(self._watch_changes_schedule())
         self.loop.create_task(self._rclone_art_schedule())
+        read_external_data()
+        await read_card_data()
 
 
     async def _load_channels(self):  # pylint: disable=R0912
@@ -1406,7 +1485,7 @@ Card "{}" has been updated:
 
             await self._send_channel(message.channel, res)
         elif command.lower() == 'trigger':
-            await delete_sheet_checksums()
+            delete_sheet_checksums()
             await message.channel.send('done')
         else:
             res = HELP['cron']
@@ -1779,36 +1858,38 @@ Targets removed.
             await self._send_channel(message.channel, res)
 
 
-    async def _get_quest_keywords(self, quest):
-        """ Get all keywords for a quest.
+    async def _get_quests_stat(self, quest):  # pylint: disable=R0914
+        """ Get statistics for all found quests.
         """
         data = await read_card_data()
-        encounter_sets = set()
-        for card in data['data']:
-            if (card[lotr.CARD_TYPE] == 'Quest' and
-                    lotr.normalized_name(card.get(lotr.CARD_ADVENTURE)) ==
-                    lotr.normalized_name(quest)):
-                encounter_sets.add(card.get(lotr.CARD_ENCOUNTER_SET, ''))
-                additional_sets = card.get(lotr.CARD_ADDITIONAL_ENCOUNTER_SETS)
-                if additional_sets:
-                    encounter_sets = encounter_sets.union(
-                        [e.strip() for e in additional_sets.split(';')])
+        quest = lotr.escape_octgn_filename(lotr.escape_filename(quest)).lower()
+        set_folders = {lotr.escape_filename(s) for s in data['sets']}
+        quests = {}
+        for _, subfolders, _ in os.walk(lotr.OUTPUT_OCTGN_DECKS_PATH):
+            for subfolder in subfolders:
+                if subfolder not in set_folders:
+                    continue
 
-        encounter_sets = {e for e in encounter_sets if e}
-        if not encounter_sets:
-            return 'No cards for quest "{}" found'.format(quest)
+                path = os.path.join(lotr.OUTPUT_OCTGN_DECKS_PATH, subfolder)
+                for _, _, filenames in os.walk(path):
+                    for filename in filenames:
+                        if (filename.endswith('.o8d') and
+                                not filename.startswith('Player-') and
+                                ('-{}-'.format(quest) in filename.lower() or
+                                 '-{}.'.format(quest) in filename.lower())):
+                            quest_name = re.sub(r'\.o8d$', '', filename)
+                            cards = await read_deck_xml(
+                                os.path.join(path, filename))
+                            quests[quest_name] = get_quest_stat(cards)
 
-        keywords = set()
-        for card in data['data']:
-            if (card.get(lotr.CARD_ENCOUNTER_SET) in encounter_sets and
-                    card.get(lotr.CARD_KEYWORDS)):
-                keywords = keywords.union(
-                    lotr.extract_keywords(card[lotr.CARD_KEYWORDS]))
+                    break
 
-        if not keywords:
-            return 'No keywords for quest "{}" found'.format(quest)
+            break
 
-        res = '\n'.join(sorted(keywords))
+        res = ''
+        for quest_name, stat in quests.items():
+            res += '**{}**\n\n{}'.format(quest_name, stat['keywords'])
+
         return res
 
 
@@ -1939,11 +2020,11 @@ Targets removed.
 
         logging.info('Received stat command: %s', command)
 
-        if command.lower().startswith('questkeywords '):
+        if command.lower().startswith('quest '):
             try:
-                quest = re.sub(r'^questkeywords ', '', command,
+                quest = re.sub(r'^quest ', '', command,
                                flags=re.IGNORECASE)
-                res = await self._get_quest_keywords(quest)
+                res = await self._get_quests_stat(quest)
             except Exception as exc:
                 logging.exception(str(exc))
                 await message.channel.send(
@@ -1951,7 +2032,7 @@ Targets removed.
                 return
 
             await self._send_channel(message.channel, res)
-        elif command.lower() == 'questkeywords':
+        elif command.lower() == 'quest':
             await message.channel.send('please specify the quest name')
         elif command.lower() == 'channels':
             try:

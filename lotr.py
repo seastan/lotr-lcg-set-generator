@@ -138,7 +138,7 @@ CARD_TYPES_ENCOUNTER_SET = {'Campaign', 'Enemy', 'Encounter Side Quest',
                             'Location', 'Nightmare', 'Objective',
                             'Objective Ally', 'Objective Hero',
                             'Objective Location', 'Quest', 'Ship Enemy',
-                            'Ship Objective', 'Treachery', 'Treasure'}
+                            'Ship Objective', 'Treachery'}
 CARD_TYPES_ENCOUNTER_SIZE = {'Enemy', 'Location', 'Objective',
                              'Objective Ally', 'Objective Hero',
                              'Objective Location', 'Ship Enemy',
@@ -448,7 +448,7 @@ def escape_filename(value):
     return re.sub(r'[<>:\/\\|?*\'"’“”„«»…–—]', ' ', str(value))
 
 
-def _escape_octgn_filename(value):
+def escape_octgn_filename(value):
     """ Replace spaces in a file name for OCTGN.
     """
     return value.replace(' ', '-')
@@ -1580,7 +1580,9 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
 
             channel_changes.append(('rename', (diff[0][0], diff[1][0])))
 
+    set_names = [SETS[set_id][SET_NAME] for set_id in FOUND_SETS]
     output = {'url': url,
+              'sets': set_names,
               'data': data}
     with open(DISCORD_CARD_DATA_PATH, 'w', encoding='utf-8') as obj:
         res = json.dumps(output, ensure_ascii=False)
@@ -1891,7 +1893,7 @@ def _save_content(url, content):
         obj.write(content)
 
 
-def _load_external_xml(url, sets, encounter_sets):  # pylint: disable=R0912,R0914,R0915
+def load_external_xml(url, sets=None, encounter_sets=None):  # pylint: disable=R0912,R0914,R0915
     """ Load cards from an external XML file.
     """
     res = []
@@ -1919,7 +1921,7 @@ def _load_external_xml(url, sets, encounter_sets):  # pylint: disable=R0912,R091
             _save_content(url, content)
 
     set_name = str(root.attrib['name']).lower()
-    if set_name not in sets:
+    if sets and set_name not in sets:
         return res
 
     for card in root[0]:
@@ -1927,7 +1929,7 @@ def _load_external_xml(url, sets, encounter_sets):  # pylint: disable=R0912,R091
         encounter_set = _find_properties(card, 'Encounter Set')
         if encounter_set:
             encounter_set = str(encounter_set[0].attrib['value']).lower()
-            if encounter_set not in encounter_sets:
+            if encounter_sets and encounter_set not in encounter_sets:
                 continue
         else:
             encounter_set = None
@@ -2122,7 +2124,7 @@ def _generate_octgn_o8d_player(conf, set_id, set_name):
 
     output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
                                escape_filename(set_name))
-    filename = _escape_octgn_filename(
+    filename = escape_octgn_filename(
         'Player-{}.o8d'.format(escape_filename(set_name)))
     with open(
             os.path.join(output_path, filename),
@@ -2231,8 +2233,8 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                       (r.get(BACK_PREFIX + CARD_TEXT) or '')
                       not in ('', 'T.B.D.'))]
         for url in rules.get(('external xml', 0), []):
-            cards.extend(_load_external_xml(url, quest['sets'],
-                                            quest['encounter sets']))
+            cards.extend(load_external_xml(url, quest['sets'],
+                                           quest['encounter sets']))
 
         if [c for c in cards if c[CARD_EASY_MODE]]:
             quest['modes'].append(EASY_PREFIX)
@@ -2351,7 +2353,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
             _append_cards(root.findall("./section[@name='Side Quest']")[0],
                           side_quest_cards)
 
-            filename = _escape_octgn_filename(
+            filename = escape_octgn_filename(
                 '{}{}{}.o8d'.format(mode, quest['prefix'],
                                     escape_filename(quest['name'])))
             with open(
@@ -4300,7 +4302,7 @@ def generate_octgn(conf, set_id, set_name, lang):
     _make_low_quality(conf, temp_path)
 
     pack_path = os.path.join(output_path,
-                             _escape_octgn_filename('{}.{}.o8c'.format(
+                             escape_octgn_filename('{}.{}.o8c'.format(
                                  escape_filename(set_name), lang)))
 
     known_filenames = set()
