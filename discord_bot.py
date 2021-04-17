@@ -774,29 +774,99 @@ async def read_deck_xml(path):
             if row[lotr.CARD_TYPE] not in lotr.CARD_TYPES_ENCOUNTER_SET:
                 continue
 
-            row[lotr.CARD_QUANTITY] = card.attrib['qty']
+            row[lotr.CARD_QUANTITY] = int(card.attrib['qty'])
             row[CARD_DECK_SECTION] = section_name
             cards.append(row)
 
     return cards
 
 
-def get_quest_stat(cards):
+def get_quest_stat(cards):  # pylint: disable=R0912,R0915
     """ Get quest statistics.
     """
-    res = {
-        'keywords': ''
-    }
-
+    res = {}
+    encounter_sets = set()
     keywords = set()
+    card_types = {}
+
     for card in cards:
         if card.get(lotr.CARD_KEYWORDS):
             keywords = keywords.union(
                 lotr.extract_keywords(card[lotr.CARD_KEYWORDS]))
 
+        if card.get(lotr.CARD_ENCOUNTER_SET):
+            encounter_sets.add(card[lotr.CARD_ENCOUNTER_SET])
+
+        if card.get(lotr.CARD_ADDITIONAL_ENCOUNTER_SETS):
+            encounter_sets = encounter_sets.union(
+                [s.strip() for s in
+                 str(card[lotr.CARD_ADDITIONAL_ENCOUNTER_SETS]).split(';')])
+
+        card_types[card[lotr.CARD_TYPE]] = (
+            card_types.get(card[lotr.CARD_TYPE], 0) + card[lotr.CARD_QUANTITY])
+
+    if encounter_sets:
+        res['encounter_sets'] = '*Encounter Sets*: {}\n'.format(
+            ', '.join(sorted(encounter_sets)))
+    else:
+        res['encounter_sets'] = ''
+
     if keywords:
-        res['keywords'] = '*Keywords*\n\n{}\n\n'.format(
-            '\n'.join(sorted(keywords)))
+        res['keywords'] = '*Keywords*: {}\n'.format(
+            ', '.join(sorted(keywords)))
+    else:
+        res['keywords'] = ''
+
+    card_types = sorted(list(card_types.items()), key=lambda t: t[0])
+    card_types = sorted(card_types, key=lambda t: t[1], reverse=True)
+    res['total'] = '*Cards*: {}\n'.format(sum(t[1] for t in card_types))
+    res['card_types'] = '\n'.join('*{}*: {}'.format(
+        t[0], t[1]) for t in card_types)
+
+    card_types = {}
+    threat = 0
+    max_threat = 0
+    shadow = 0
+    surge = 0
+
+    res['encounter_deck'] = ''
+    deck = [card for card in cards if card[CARD_DECK_SECTION] == 'Encounter']
+    for card in deck:
+        card_types[card[lotr.CARD_TYPE]] = (
+            card_types.get(card[lotr.CARD_TYPE], 0) + card[lotr.CARD_QUANTITY])
+
+        if lotr.is_positive_int(card.get(lotr.CARD_THREAT)):
+            threat += int(card[lotr.CARD_THREAT]) * card[lotr.CARD_QUANTITY]
+            max_threat = max(max_threat, int(card[lotr.CARD_THREAT]))
+
+        if card.get(lotr.CARD_SHADOW):
+            shadow += card[lotr.CARD_QUANTITY]
+
+        if card.get(lotr.CARD_KEYWORDS):
+            if 'Surge' in lotr.extract_keywords(card[lotr.CARD_KEYWORDS]):
+                surge += card[lotr.CARD_QUANTITY]
+
+    if not card_types:
+        return res
+
+    card_types = sorted(list(card_types.items()), key=lambda t: t[0])
+    card_types = sorted(card_types, key=lambda t: t[1], reverse=True)
+    total = sum(t[1] for t in card_types)
+    card_types = [(t[0], '{} ({}%)'.format(t[1], round(t[1] * 100 / total)))
+                  for t in card_types]
+    res['encounter_deck'] = '**Encounter Deck**\n*Cards*: {}\n\n{}\n\n'.format(
+        total, '\n'.join('*{}*: {}'.format(t[0], t[1]) for t in card_types))
+
+    if shadow:
+        res['encounter_deck'] += '*Shadow*: {} ({}%)\n'.format(
+            shadow, round(shadow * 100 / total))
+
+    if surge:
+        res['encounter_deck'] += '*Surge*: {} ({}%)\n'.format(
+            surge, round(surge * 100 / total))
+
+    res['encounter_deck'] += '*Threat*: {} (Avg), {} (Max)\n\n'.format(
+        round(threat / total, 1), max_threat)
 
     return res
 
@@ -1268,13 +1338,11 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                         raise FormatError('Incorrect change format: {}'.format(
                             change))
 
-                cards = [row for row in data['data']
-                         if row[lotr.CARD_ID] == change[1]]
-                if len(cards) != 1:
+                if change[1] in data['dict']:
+                    card = data['dict'][change[1]]
+                else:
                     raise DiscordError('Card with ID "{}" not found'
                                        .format(change[1]))
-
-                card = cards[0]
 
                 for diff in change[2]:
                     diff[0] = diff[0].replace(lotr.BACK_PREFIX + lotr.CARD_NAME,
@@ -1865,7 +1933,7 @@ Targets removed.
         quest = lotr.escape_octgn_filename(lotr.escape_filename(quest)).lower()
         set_folders = {lotr.escape_filename(s) for s in data['sets']}
         quests = {}
-        for _, subfolders, _ in os.walk(lotr.OUTPUT_OCTGN_DECKS_PATH):
+        for _, subfolders, _ in os.walk(lotr.OUTPUT_OCTGN_DECKS_PATH):  # pylint: disable=R1702
             for subfolder in subfolders:
                 if subfolder not in set_folders:
                     continue
@@ -1880,15 +1948,21 @@ Targets removed.
                             quest_name = re.sub(r'\.o8d$', '', filename)
                             cards = await read_deck_xml(
                                 os.path.join(path, filename))
-                            quests[quest_name] = get_quest_stat(cards)
+                            if cards:
+                                quests[quest_name] = get_quest_stat(cards)
 
                     break
 
             break
 
         res = ''
-        for quest_name, stat in quests.items():
-            res += '**{}**\n\n{}'.format(quest_name, stat['keywords'])
+
+        for quest_name, stat in sorted(quests.items()):
+            res += f"""**{quest_name}**
+{stat['total']}{stat['encounter_sets']}{stat['keywords']}
+{stat['card_types']}
+
+{stat['encounter_deck']}"""
 
         return res
 
@@ -1909,8 +1983,11 @@ Targets removed.
         elif re.match(
                 r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
                 command):
-            matches = [(card, 1) for card in data['data']
-                       if card[lotr.CARD_ID] == command]
+            if command in data['dict']:
+                matches = [(data['dict'][command], 1)]
+            else:
+                matches = []
+
             num = 1
         else:
             if re.search(r' n:[0-9]+$', command):
