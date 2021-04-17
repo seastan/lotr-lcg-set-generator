@@ -7,7 +7,6 @@ function onEdit(e) {
   var columnHeader = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getRange(1, column).getValue().toString();
   // Check if sheet is a translation sheet
   if (
-    sheetName == 'Snapshot' ||
     sheetName == 'Italian' ||
     sheetName == 'French' ||
     sheetName == 'German' ||
