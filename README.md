@@ -146,8 +146,9 @@ Additionally, if you specified OCTGN destination paths, OCTGN outputs will be co
 - `[bi]` ... `[/bi]`: bold + italic text
 - `[u]` ... `[/u]`: underlined text
 - `[strike]` ... `[/strike]`: strikethrough text
-- `[red]` ... `[/red]`: red text
+- `[red]` ... `[/red]`: red (#8B1C23) text
 - `[lotr X]` ... `[/lotr]`: Vafthrudnir font + text size X (X may be float)
+- `[lotrheader X]` ... `[/lotrheader]`: Lord of the Headers font + text size X (X may be float)
 - `[size X]` ... `[/size]`: text size X (X may be float)
 - `[defaultsize X]`: put it at the beginning of a field, to set default text size X (X may be float)
 - `[img PATH]`: insert image from PATH (PATH may start either with "custom/" or "icons/")

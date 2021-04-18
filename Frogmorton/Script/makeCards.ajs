@@ -1302,12 +1302,14 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 	vXml = vXml.replace(/\[\/u\]/ig, '</u>');
 	vXml = vXml.replace(/\[strike\]/ig, '<del>');
 	vXml = vXml.replace(/\[\/strike\]/ig, '</del>');
-	vXml = vXml.replace(/\[red\]/ig, '<red>');
-	vXml = vXml.replace(/\[\/red\]/ig, '</red>');
+	vXml = vXml.replace(/\[red\]/ig, '<color #8b1c23>');
+	vXml = vXml.replace(/\[\/red\]/ig, '</color>');
 	vXml = vXml.replace(/\[space\]/ig, '<hs>');
 	vXml = vXml.replace(/\[tab\]/ig, '\t');
 	vXml = vXml.replace(/\[lotr ([0-9\.]+)\]/ig, '<lotr $1>');
 	vXml = vXml.replace(/\[\/lotr\]/ig, '</lotr>');
+	vXml = vXml.replace(/\[lotrheader ([0-9\.]+)\]/ig, '<lotrheader $1>');
+	vXml = vXml.replace(/\[\/lotrheader\]/ig, '</lotrheader>');
 	vXml = vXml.replace(/\[size ([0-9\.]+)\]/ig, '</size><size $1>');
 	vXml = vXml.replace(/\[\/size\]/ig, '</size><size ' + defaultFontSize + '>');
 	vXml = vXml.replace(/^\[defaultsize ([0-9\.]+)\]\n*/ig, '</size><size $1>');
@@ -1343,7 +1345,13 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 		return res;
 	}
 
+	function updateLotrHeaderReplacer(match, p1, p2, offset, string) {
+		var res = '</size></family><family "Lord of the Headers"><size ' + p1 + '>' + p2 + '</size></family><family "Times New Roman"><size ' + defaultFontSize + '>';
+		return res;
+	}
+
 	vXml = vXml.replace(/<lotr ([0-9\.]+)>(.*?)<\/lotr>/ig, updateVafthrudnirReplacer);
+	vXml = vXml.replace(/<lotrheader ([0-9\.]+)>(.*?)<\/lotrheader>/ig, updateLotrHeaderReplacer);
 	vXml = vXml.replace(/<size [^>]+><\/size>/g, '');
 	vXml = vXml.replace(/<family [^>]+><\/family>/g, '');
 

@@ -80,6 +80,7 @@ outputs:
 #    - genericpng_pdf_a4_7z
 #    - genericpng_pdf_letter_7z
 #    - drivethrucards_7z
+#    - rules_pdf
   German:
 #    - db
 #    - octgn
@@ -92,6 +93,7 @@ outputs:
 #    - genericpng_pdf_a4_7z
 #    - genericpng_pdf_letter_7z
 #    - drivethrucards_7z
+#    - rules_pdf
   Spanish:
 #    - db
 #    - octgn
@@ -104,6 +106,7 @@ outputs:
 #    - genericpng_pdf_a4_7z
 #    - genericpng_pdf_letter_7z
 #    - drivethrucards_7z
+#    - rules_pdf
   French:
 #    - db
 #    - octgn
@@ -116,6 +119,7 @@ outputs:
 #    - genericpng_pdf_a4_7z
 #    - genericpng_pdf_letter_7z
 #    - drivethrucards_7z
+#    - rules_pdf
   Polish:
 #    - db
 #    - octgn
@@ -128,6 +132,7 @@ outputs:
 #    - genericpng_pdf_a4_7z
 #    - genericpng_pdf_letter_7z
 #    - drivethrucards_7z
+#    - rules_pdf
   Italian:
 #    - db
 #    - octgn
@@ -140,3 +145,4 @@ outputs:
 #    - genericpng_pdf_a4_7z
 #    - genericpng_pdf_letter_7z
 #    - drivethrucards_7z
+#    - rules_pdf

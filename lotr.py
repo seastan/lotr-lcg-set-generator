@@ -402,6 +402,8 @@ def _update_card_text(text):  # pylint: disable=R0915
     text = re.sub(r'\[\/red\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[lotr [^\]]+\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[\/lotr\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[lotrheader [^\]]+\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[\/lotrheader\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[size [^\]]+\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[\/size\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[defaultsize [^\]]+\]', '', text, flags=re.IGNORECASE)
