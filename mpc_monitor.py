@@ -313,6 +313,9 @@ def get_decks(session):
     form_data = init_form_data('btn_pageload_handle', viewstate,
                                viewstategenerator)
     content = send_post(session, SAVED_PROJECTS_URL, form_data)
+    if 'Our system is currently undergoing system upgrade' in content:
+        return ''
+
     if 'My saved projects' not in content:
         raise ResponseError('No saved projects found, content length: {}'
                             .format(len(content)))
@@ -564,6 +567,9 @@ def run():
 
     session = init_session(data['cookies'])
     content = get_decks(session)
+    if not content:
+        logging.info('The site is undergoing system upgrade')
+        return
 
     for deck_name in data.get('decks', {}):
         content_id = data['decks'][deck_name]['content_id']
