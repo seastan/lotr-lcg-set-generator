@@ -802,8 +802,12 @@ def get_quest_stat(cards):  # pylint: disable=R0912,R0915
                 [s.strip() for s in
                  str(card[lotr.CARD_ADDITIONAL_ENCOUNTER_SETS]).split(';')])
 
-        card_types[card[lotr.CARD_TYPE]] = (
-            card_types.get(card[lotr.CARD_TYPE], 0) + card[lotr.CARD_QUANTITY])
+        card_type = card[lotr.CARD_TYPE]
+        if card.get(lotr.CARD_SPHERE) in ('Boon', 'Burden'):
+            card_type = '{} ({})'.format(card_type, card[lotr.CARD_SPHERE])
+
+        card_types[card_type] = (
+            card_types.get(card_type, 0) + card[lotr.CARD_QUANTITY])
 
     if encounter_sets:
         res['encounter_sets'] = '*Encounter Sets*: {}\n'.format(
@@ -832,8 +836,12 @@ def get_quest_stat(cards):  # pylint: disable=R0912,R0915
     res['encounter_deck'] = ''
     deck = [card for card in cards if card[CARD_DECK_SECTION] == 'Encounter']
     for card in deck:
-        card_types[card[lotr.CARD_TYPE]] = (
-            card_types.get(card[lotr.CARD_TYPE], 0) + card[lotr.CARD_QUANTITY])
+        card_type = card[lotr.CARD_TYPE]
+        if card.get(lotr.CARD_SPHERE) in ('Boon', 'Burden'):
+            card_type = '{} ({})'.format(card_type, card[lotr.CARD_SPHERE])
+
+        card_types[card_type] = (
+            card_types.get(card_type, 0) + card[lotr.CARD_QUANTITY])
 
         if lotr.is_positive_int(card.get(lotr.CARD_THREAT)):
             threat += int(card[lotr.CARD_THREAT]) * card[lotr.CARD_QUANTITY]
@@ -1956,13 +1964,15 @@ Targets removed.
             break
 
         res = ''
-
         for quest_name, stat in sorted(quests.items()):
             res += f"""**{quest_name}**
 {stat['total']}{stat['encounter_sets']}{stat['keywords']}
 {stat['card_types']}
 
 {stat['encounter_deck']}"""
+
+        if not res:
+            res = 'no quests found'
 
         return res
 

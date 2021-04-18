@@ -1928,8 +1928,8 @@ def load_external_xml(url, sets=None, encounter_sets=None):  # pylint: disable=R
         row = {}
         encounter_set = _find_properties(card, 'Encounter Set')
         if encounter_set:
-            encounter_set = str(encounter_set[0].attrib['value']).lower()
-            if encounter_sets and encounter_set not in encounter_sets:
+            encounter_set = str(encounter_set[0].attrib['value'])
+            if encounter_sets and encounter_set.lower() not in encounter_sets:
                 continue
         else:
             encounter_set = None
@@ -1962,7 +1962,7 @@ def load_external_xml(url, sets=None, encounter_sets=None):  # pylint: disable=R
         sphere = sphere[0].attrib['value'] if sphere else None
 
         if (not sphere and encounter_set
-                and encounter_set.endswith(' - nightmare')
+                and encounter_set.lower().endswith(' - nightmare')
                 and card_type in ('Encounter Side Quest', 'Enemy', 'Location',
                                   'Objective', 'Quest', 'Ship Enemy',
                                   'Treachery')):
