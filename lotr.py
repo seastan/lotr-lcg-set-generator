@@ -228,6 +228,7 @@ OUTPUT_PREVIEW_IMAGES_PATH = os.path.join('Output', 'PreviewImages')
 OUTPUT_RINGSDB_PATH = os.path.join('Output', 'RingsDB')
 OUTPUT_RINGSDB_IMAGES_PATH = os.path.join('Output', 'RingsDBImages')
 PROJECT_PATH = 'setGenerator.seproject'
+RINGSDB_JSON_PATH = 'ringsdb.json'
 SET_EONS_PATH = 'setEons'
 SET_OCTGN_PATH = 'setOCTGN'
 SHEETS_JSON_PATH = 'sheets.json'
@@ -299,6 +300,11 @@ class GIMPError(Exception):
 
 class ImageMagickError(Exception):
     """ Image Magick error.
+    """
+
+
+class RingsDBError(Exception):
+    """ RingsDB error.
     """
 
 
@@ -5246,3 +5252,64 @@ def copy_octgn_outputs(conf, sets):
 
     logging.info('...Copying OCTGN outputs to the destination folder (%ss)',
                  round(time.time() - timestamp, 3))
+
+
+def update_ringsdb(conf, sets):
+    """ Update test.ringsdb.com.
+    """
+    logging.info('Updating test.ringsdb.com...')
+    timestamp = time.time()
+
+    try:
+        with open(RINGSDB_JSON_PATH, 'r') as fobj:
+            checksums = json.load(fobj)
+    except Exception:  # pylint: disable=W0703
+        checksums = {}
+
+    changes = False
+    sets = [s for s in sets if s[0] in FOUND_SETS]
+    for set_id, set_name in sets:
+        if not SETS[set_id].get(SET_HOB_CODE):
+            continue
+
+        path = os.path.join(OUTPUT_RINGSDB_PATH, escape_filename(set_name),
+                            '{}.csv'.format(escape_filename(set_name)))
+        if not os.path.exists(path):
+            continue
+
+        with open(path, 'br') as fobj:
+            content = fobj.read()
+
+        checksum = hashlib.md5(content).hexdigest()
+        if checksum == checksums.get(set_id):
+            continue
+
+        changes = True
+        checksums[set_id] = checksum
+
+        res = requests.post('{}/admin/csv/upload'.format(conf['ringsdb_url']),
+                            files={'upfile': open(path, 'br')},
+                            data={'code': SETS[set_id][SET_HOB_CODE],
+                                  'name': set_name},
+                            cookies={'PHPSESSID': conf['ringsdb_sessionid']})
+        res = res.content.decode('utf-8')
+        if res != 'Done':
+            raise RingsDBError('Error uploading {} to test.ringsdb.com: {}'
+                               .format(set_name, res))
+
+    if changes:
+        with open(RINGSDB_JSON_PATH, 'w') as fobj:
+            json.dump(checksums, fobj)
+
+    logging.info('...Updating test.ringsdb.com (%ss)',
+                 round(time.time() - timestamp, 3))
+
+
+def prepare_ringsdb():
+    """ Test function (to be removed).
+    """
+    conf = read_conf()
+    download_sheet(conf)
+    extract_data(conf, True, True)
+    sets = get_sets(conf, True, True)
+    return (conf, sets)

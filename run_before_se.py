@@ -13,7 +13,7 @@ def init_logging():
                         format='%(asctime)s %(levelname)s: %(message)s')
 
 
-def main(conf=None):  # pylint: disable=R0912
+def main(conf=None):  # pylint: disable=R0912,R0915
     """ Main function.
     """
     timestamp = time.time()
@@ -73,6 +73,9 @@ def main(conf=None):  # pylint: disable=R0912
 
     if conf['octgn_set_xml'] or conf['octgn_o8d']:
         lotr.copy_octgn_outputs(conf, sets)
+
+    if conf['ringsdb_csv'] and conf['update_ringsdb']:
+        lotr.update_ringsdb(conf, sets)
 
     if changes:
         lotr.create_project()

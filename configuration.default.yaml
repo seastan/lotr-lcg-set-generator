@@ -57,6 +57,15 @@ ringsdb_csv: true
 # Creating JSON files for Hall of Beorn (true or false)
 hallofbeorn_json: true
 
+# Updating test.ringsdb.com
+update_ringsdb: false
+
+# test.ringsdb.com URL
+ringsdb_url: https://test.ringsdb.com
+
+# test.ringsdb.com session ID
+ringsdb_sessionid: 
+
 # List of image outputs
 outputs:
   English:

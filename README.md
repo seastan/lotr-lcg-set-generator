@@ -91,6 +91,9 @@ for details).
   - `octgn_o8d`: creating `.o8d` files for OCTGN (true or false)
   - `ringsdb_csv`: creating CSV files for RingsDB (true or false)
   - `hallofbeorn_json`: creating JSON files for Hall of Beorn (true or false)
+  - `update_ringsdb`: updating test.ringsdb.com (true or false)
+  - `ringsdb_url`: test.ringsdb.com URL
+  - `ringsdb_sessionid`: test.ringsdb.com session ID
   - `outputs`: list of image outputs for each language (if you added or uncommented new outputs, you also need to set `reprocess_all` to `true`)
 
 **Usage**
