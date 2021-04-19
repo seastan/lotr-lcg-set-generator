@@ -40,7 +40,7 @@ def main(conf=None):  # pylint: disable=R0912,R0915
         lotr.save_data_for_bot(conf)
 
     if conf['languages']:
-        lotr.reset_project_folders()
+        lotr.reset_project_folders(conf)
 
     strange_eons = False
     changes = False

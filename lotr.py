@@ -210,6 +210,7 @@ DISCORD_CARD_DATA_PATH = os.path.join(DISCORD_PATH, 'card_data.json')
 DOWNLOAD_PATH = 'Download'
 IMAGES_BACK_PATH = 'imagesBack'
 IMAGES_CUSTOM_PATH = os.path.join(PROJECT_FOLDER, 'imagesCustom')
+IMAGES_ICONS_PATH = os.path.join(PROJECT_FOLDER, 'imagesIcons')
 IMAGES_EONS_PATH = 'imagesEons'
 IMAGES_RAW_PATH = os.path.join(PROJECT_FOLDER, 'imagesRaw')
 IMAGES_ZIP_PATH = '{}/Export/'.format(os.path.split(PROJECT_FOLDER)[-1])
@@ -606,13 +607,14 @@ def read_conf(path=CONFIGURATION_PATH):
     return conf
 
 
-def reset_project_folders():
+def reset_project_folders(conf):
     """ Reset the project folders.
     """
     logging.info('Resetting the project folders...')
     timestamp = time.time()
 
     _clear_folder(IMAGES_CUSTOM_PATH)
+    _clear_folder(IMAGES_ICONS_PATH)
     _clear_folder(IMAGES_RAW_PATH)
     _clear_folder(XML_PATH)
 
@@ -629,6 +631,18 @@ def reset_project_folders():
             _delete_folder(os.path.join(nobleed_folder, subfolder))
 
         break
+
+    input_path = os.path.join(conf['artwork_path'], 'imagesIcons')
+    if os.path.exists(input_path):
+        for _, _, filenames in os.walk(input_path):
+            for filename in filenames:
+                if filename.split('.')[-1] != 'png':
+                    continue
+
+                shutil.copyfile(os.path.join(input_path, filename),
+                                os.path.join(IMAGES_ICONS_PATH, filename))
+
+            break
 
     logging.info('...Resetting the project folders (%ss)',
                  round(time.time() - timestamp, 3))

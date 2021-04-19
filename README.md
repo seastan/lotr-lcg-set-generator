@@ -23,6 +23,8 @@ completely, you will need to download updates to that folder manually.
     <set ID>/custom/<custom image>
     <set ID>/processed/
     <set ID>/processed/<card ID>_<"A" or "B" or "Top" or "Bottom">_<card name and artist, format is not strict>.<"jpg" or "png">
+    imagesIcons/
+    imagesIcons/<icon image>
     ```
 
     For example:
@@ -36,6 +38,9 @@ completely, you will need to download updates to that folder manually.
     8a3273ca-1ccd-4e07-913b-766fcc49fe6f/custom/rules.png
     8a3273ca-1ccd-4e07-913b-766fcc49fe6f/processed/
     8a3273ca-1ccd-4e07-913b-766fcc49fe6f/processed/53dcedb3-3640-4655-a150-9d0dd534a126_A_Reclaim_the_Beacon_Artist_Jan_Pospisil.jpg
+    imagesIcons/
+    imagesIcons/ALeP---Children-of-Eorl.png
+    imagesIcons/Ambush-at-Erelas.png
     ```
 
     Please note that the files in the `processed` subfolder take precedence over the files in the root folder.
