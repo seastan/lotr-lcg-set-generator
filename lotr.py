@@ -155,7 +155,8 @@ SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow'}
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}{}*.jpg"'
 MAGICK_COMMAND_LOW = '"{}" mogrify -resize 600x600 -format jpg "{}{}*.png"'
-MAGICK_COMMAND_PDF = '"{}" convert "{}{}*o.jpg" "{}"'
+MAGICK_COMMAND_MBPRINT_PDF = '"{}" convert "{}{}*o.jpg" "{}"'
+MAGICK_COMMAND_RULES_PDF = '"{}" convert "{}{}*.png" "{}"'
 
 JPG_PREVIEW_MIN_SIZE = 50000
 JPG_300_MIN_SIZE = 100000
@@ -179,6 +180,7 @@ PNG300DB = 'png300DB'
 PNG300NOBLEED = 'png300NoBleed'
 PNG300OCTGN = 'png300OCTGN'
 PNG300PDF = 'png300PDF'
+PNG300RULES = 'png300Rules'
 PNG800BLEED = 'png800Bleed'
 PNG800BLEEDMPC = 'png800BleedMPC'
 PNG800BLEEDGENERIC = 'png800BleedGeneric'
@@ -227,6 +229,7 @@ OUTPUT_PDF_PATH = os.path.join('Output', 'PDF')
 OUTPUT_PREVIEW_IMAGES_PATH = os.path.join('Output', 'PreviewImages')
 OUTPUT_RINGSDB_PATH = os.path.join('Output', 'RingsDB')
 OUTPUT_RINGSDB_IMAGES_PATH = os.path.join('Output', 'RingsDBImages')
+OUTPUT_RULES_PDF_PATH = os.path.join('Output', 'RulesPDF')
 PROJECT_PATH = 'setGenerator.seproject'
 RINGSDB_JSON_PATH = 'ringsdb.json'
 SET_EONS_PATH = 'setEons'
@@ -593,7 +596,8 @@ def read_conf(path=CONFIGURATION_PATH):
 
         conf['nobleed_300'][lang] = ('db' in conf['outputs'][lang]
                                      or 'octgn' in conf['outputs'][lang]
-                                     or 'pdf' in conf['outputs'][lang])
+                                     or 'pdf' in conf['outputs'][lang]
+                                     or 'rules_pdf' in conf['outputs'][lang])
 
         conf['nobleed_800'][lang] = 'genericpng_pdf' in conf['outputs'][lang]
 
@@ -3597,6 +3601,58 @@ def generate_png300_octgn(set_id, set_name, lang, skip_ids):
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
+def generate_png300_rules_pdf(set_id, set_name, lang, skip_ids, card_data):  # pylint: disable=R0914
+    """ Generate images for Rules PDF outputs.
+    """
+    logging.info('[%s, %s] Generating images for Rules PDF outputs...',
+                 set_name, lang)
+    timestamp = time.time()
+
+    output_path = os.path.join(IMAGES_EONS_PATH, PNG300RULES,
+                               '{}.{}'.format(set_id, lang))
+    _create_folder(output_path)
+    _clear_modified_images(output_path, skip_ids)
+
+    input_path = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED,
+                              '{}.{}'.format(set_id, lang))
+    known_keys = set()
+    rules_cards = {c[CARD_ID]:c for c in card_data
+                   if c[CARD_SET] == set_id and
+                   c[CARD_TYPE] == 'Rules' and c[CARD_SPHERE] != 'Back'}
+    for _, _, filenames in os.walk(input_path):
+        filenames = sorted(filenames)
+        for filename in filenames:
+            if filename.split('.')[-1] != 'png':
+                continue
+
+            key = filename[50:88]
+            if key in known_keys:
+                continue
+
+            known_keys.add(key)
+            card_id = filename[50:86]
+            if card_id not in rules_cards:
+                continue
+
+            card = rules_cards[card_id]
+            side = filename[87]
+            if (side == '1' and card[CARD_TEXT] is None and
+                    card[CARD_VICTORY] is None):
+                continue
+
+            if (side == '2' and card[BACK_PREFIX + CARD_TEXT] is None and
+                    card[BACK_PREFIX + CARD_VICTORY] is None):
+                continue
+
+            shutil.copyfile(os.path.join(input_path, filename),
+                            os.path.join(output_path, filename))
+
+        break
+
+    logging.info('[%s, %s] ...Generating images for Rules PDF outputs '
+                 '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
+
+
 def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0912,R0914,R0915
     """ Generate images for PDF outputs.
     """
@@ -4344,6 +4400,40 @@ def generate_octgn(conf, set_id, set_name, lang):
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
+def generate_rules_pdf(conf, set_id, set_name, lang):
+    """ Generate Rules PDF outputs.
+    """
+    logging.info('[%s, %s] Generating Rules PDF outputs...',
+                 set_name, lang)
+    timestamp = time.time()
+
+    input_path = os.path.join(IMAGES_EONS_PATH,
+                              PNG300RULES,
+                              '{}.{}'.format(set_id, lang))
+    for _, _, filenames in os.walk(input_path):
+        if not filenames:
+            logging.error('[%s, %s] No cards found', set_name, lang)
+            logging.info('[%s, %s] ...Generating Rules PDF outputs (%ss)',
+                         set_name, lang, round(time.time() - timestamp, 3))
+            return
+
+        break
+
+    output_path = os.path.join(OUTPUT_RULES_PDF_PATH, '{}.{}'.format(
+        escape_filename(set_name), lang))
+    _create_folder(output_path)
+    pdf_filename = 'Rules.{}.{}.pdf'.format(escape_filename(set_name),
+                                            lang)
+    pdf_path = os.path.join(output_path, pdf_filename)
+    cmd = MAGICK_COMMAND_RULES_PDF.format(conf['magick_path'], input_path,
+                                          os.sep, pdf_path)
+    res = _run_cmd(cmd)
+    logging.info(res)
+
+    logging.info('[%s, %s] ...Generating Rules PDF outputs (%ss)',
+                 set_name, lang, round(time.time() - timestamp, 3))
+
+
 def _collect_pdf_images(input_path):
     """ Collect image filenames for generated PDF.
     """
@@ -4724,7 +4814,6 @@ def _combine_doublesided_rules_cards(set_id, input_path, card_data, service):  #
     selected = []
     for i, row in enumerate(card_data):
         if (row[CARD_TYPE] == 'Rules' and
-                row[CARD_QUANTITY] == 1 and
                 row[BACK_PREFIX + CARD_TEXT] is None and
                 row[BACK_PREFIX + CARD_VICTORY] is None):
             card_number = (str(int(row[CARD_NUMBER])).zfill(3)
@@ -5068,8 +5157,8 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):  # pylint: disabl
         pdf_filename = 'MBPRINT.{}.{}.pdf'.format(escape_filename(set_name),
                                                   lang)
         pdf_path = os.path.join(temp_path, pdf_filename)
-        cmd = MAGICK_COMMAND_PDF.format(conf['magick_path'], temp_path,
-                                        os.sep, pdf_path)
+        cmd = MAGICK_COMMAND_MBPRINT_PDF.format(conf['magick_path'], temp_path,
+                                                os.sep, pdf_path)
         res = _run_cmd(cmd)
         logging.info(res)
 
