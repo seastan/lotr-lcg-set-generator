@@ -103,6 +103,8 @@ List of **!cron** commands:
     'playtest': """
 List of **!playtest** commands:
 
+**!playtest view** - display existing playtesting target
+
 **!playtest new
 <optional description>
 <list of targets>**
@@ -1626,6 +1628,16 @@ New playtesting targets:
         return ''
 
 
+    async def _view_target(self):
+        """ Display existing playtesting target.
+        """
+        async with playtest_lock:
+            with open(PLAYTEST_PATH, 'r') as obj:
+                data = json.load(obj)
+
+        return format_playtest_message(data)
+
+
     async def _complete_target(self, content, num, user, url):
         """ Complete playtesting target.
         """
@@ -1858,10 +1870,20 @@ Targets removed.
                 return
 
             await message.channel.send('done')
+        elif command.lower() == 'view':
+            try:
+                res = await self._view_target()
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await message.channel.send(res)
         elif command.lower().startswith('complete '):
             try:
                 num = re.sub(r'^complete ', '', command, flags=re.IGNORECASE)
-                user = re.sub(r'#.+$', '', str(message.author))
+                user = message.author.display_name
                 error = await self._complete_target(message.content, num, user,
                                                     message.jump_url)
             except Exception as exc:
