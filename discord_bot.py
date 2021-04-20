@@ -150,6 +150,7 @@ List of **!art** commands:
 
 **!art save <artist>** (as a reply to a message with an image attachment) - save the image as a card's artwork for the front side (for example: `!art save Ted Nasmith`)
 **!art saveb <artist>** (as a reply to a message with an image attachment) - save the image as a card's artwork for the back side (for example: `!art saveb John Howe`)
+**!art verify <set name or set code>** - verify artwork for a set (for example: `!art verify Children of Eorl` or `!art verify CoE`)
 **!art help** - display this help message
 """
 }
@@ -2228,6 +2229,115 @@ Targets removed.
         return ''
 
 
+    async def _verify_artwork(self, value):  # pylint: disable=R0912,R0914,R0915
+        """ Verify artwork for a set.
+        """
+        data = await read_card_data()
+
+        set_name = re.sub(r'^alep---', '', lotr.normalized_name(value))
+        matches = [card for card in data['data'] if re.sub(
+            r'^alep---', '',
+            lotr.normalized_name(card[lotr.CARD_SET_NAME])) ==
+                   set_name]
+        if not matches:
+            set_code = value.lower()
+            matches = [card for card in data['data']
+                       if card[lotr.CARD_SET_HOB_CODE].lower() == set_code
+                       and card[lotr.CARD_TYPE] not in ('Presentation',
+                                                        'Rules')]
+            if not matches:
+                return 'no cards found for the set'
+
+        matches.sort(key=lambda card: (card[lotr.ROW_COLUMN]))
+        artwork_destination_path = CONF.get('artwork_destination_path')
+        if not artwork_destination_path:
+            return 'no destination folder specified on the server'
+
+        folder = os.path.join(artwork_destination_path,
+                              matches[0][lotr.CARD_SET])
+
+        file_data = {}
+        duplicate_artwork = []
+        logging.info(folder)
+        if os.path.exists(folder):
+            for _, _, filenames in os.walk(folder):
+                for filename in filenames:
+                    if (not filename.endswith('.png') and
+                            not filename.endswith('.jpg')):
+                        continue
+
+                    parts = '.'.join(filename.split('.')[:-1]).split(
+                        '_Artist_', maxsplit=1)
+                    if len(parts) != 2:
+                        continue
+
+                    file_artist = parts[1].replace('_', ' ')
+                    parts = parts[0].split('_')
+                    if len(parts) < 3:
+                        continue
+
+                    file_id = parts[0]
+                    file_side = parts[1]
+                    if (file_id, file_side) in file_data:
+                        duplicate_artwork.append(filename)
+                    else:
+                        file_data[((file_id, file_side))] = file_artist
+
+                break
+
+        missing_artwork = []
+        different_artist = []
+        no_spreadsheet_artist = []
+        for card in matches:
+            sides = ['A']
+            if (card.get(lotr.BACK_PREFIX + lotr.CARD_NAME) and
+                    card.get(lotr.BACK_PREFIX + lotr.CARD_ARTIST)):
+                sides.append('B')
+
+            for side in sides:
+                artist = (card.get(lotr.CARD_ARTIST, '')
+                          if side == 'A'
+                          else card.get(lotr.BACK_PREFIX + lotr.CARD_ARTIST,
+                                        ''))
+                if (card[lotr.CARD_ID], side) not in file_data:
+                    missing_artwork.append('{} ({}), side {}'.format(
+                        card[lotr.CARD_ID], card[lotr.CARD_NAME], side))
+                elif (file_data[(card[lotr.CARD_ID], side)] !=
+                      lotr.escape_filename(artist)):
+                    if artist:
+                        different_artist.append(
+                            '{} ({}), side {}: {} in spreadsheet and {} '
+                            'on disk'.format(
+                                card[lotr.CARD_ID], card[lotr.CARD_NAME], side,
+                                artist, file_data[(card[lotr.CARD_ID], side)]))
+                    else:
+                        no_spreadsheet_artist.append('{} ({}), side {}'.format(
+                            card[lotr.CARD_ID], card[lotr.CARD_NAME], side))
+
+        res = ''
+        if missing_artwork:
+            res += '\nmissing artwork found:\n{}\n'.format(
+                '\n'.join(missing_artwork))
+
+        if duplicate_artwork:
+            res += '\nduplicate artwork found:\n{}\n'.format(
+                '\n'.join(duplicate_artwork))
+
+        if different_artist:
+            res += '\ndifferent artists found:\n{}\n'.format(
+                '\n'.join(different_artist))
+
+        if no_spreadsheet_artist:
+            res += '\nmissing spreadsheet artists found:\n{}\n'.format(
+                '\n'.join(no_spreadsheet_artist))
+
+        res = res.strip()
+        if not res:
+            res = 'no issues found'
+
+        return res
+
+
     async def _process_art_command(self, message):
         """ Process an art command.
         """
@@ -2258,6 +2368,20 @@ Targets removed.
             await message.channel.send('done')
         elif command.lower() == 'save':
             await message.channel.send('please specify the artist')
+        elif command.lower().startswith('verify '):
+            try:
+                set_name = re.sub(r'^verify ', '', command,
+                                  flags=re.IGNORECASE)
+                res = await self._verify_artwork(set_name)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await self._send_channel(message.channel, res)
+        elif command.lower() == 'verify':
+            await message.channel.send('please specify the set')
         else:
             res = HELP['art']
             await self._send_channel(message.channel, res)
