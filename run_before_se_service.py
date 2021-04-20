@@ -9,7 +9,7 @@ from lotr import read_conf
 from run_before_se_cron import init_logging, run
 
 
-SLEEP_TIME = 60
+SLEEP_TIME = 50
 WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 
 

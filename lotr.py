@@ -5392,6 +5392,7 @@ def update_ringsdb(conf, sets):
         changes = True
         checksums[set_id] = checksum
 
+        logging.info('Uploading %s to %s', set_name, conf['ringsdb_url'])
         res = requests.post('{}/admin/csv/upload'.format(conf['ringsdb_url']),
                             files={'upfile': open(path, 'br')},
                             data={'code': SETS[set_id][SET_HOB_CODE],
