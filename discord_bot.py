@@ -36,6 +36,7 @@ WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 
 CRON_LOG_CMD = './cron_log.sh'
 RCLONE_ART_CMD = './rclone_art.sh'
+RCLONE_FOLDER_CMD = 'rclone lsjson ALePCardImages:/{}/'
 
 CMD_SLEEP_TIME = 2
 IO_SLEEP_TIME = 1
@@ -2238,7 +2239,8 @@ Targets removed.
         matches = [card for card in data['data'] if re.sub(
             r'^alep---', '',
             lotr.normalized_name(card[lotr.CARD_SET_NAME])) ==
-                   set_name]
+                   set_name and card[lotr.CARD_TYPE] not in ('Presentation',
+                                                             'Rules')]
         if not matches:
             set_code = value.lower()
             matches = [card for card in data['data']
@@ -2256,34 +2258,47 @@ Targets removed.
         folder = os.path.join(artwork_destination_path,
                               matches[0][lotr.CARD_SET])
 
+        stdout, stderr = await run_shell(RCLONE_FOLDER_CMD.format(
+            matches[0][lotr.CARD_SET]))
+        try:
+            filenames = {f['Name'] for f in json.loads(stdout)}
+        except Exception:
+            message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
+                                                                     stderr)
+            logging.error(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+            return message
+
         file_data = {}
         duplicate_artwork = []
         logging.info(folder)
         if os.path.exists(folder):
-            for _, _, filenames in os.walk(folder):
-                for filename in filenames:
-                    if (not filename.endswith('.png') and
-                            not filename.endswith('.jpg')):
-                        continue
-
-                    parts = '.'.join(filename.split('.')[:-1]).split(
-                        '_Artist_', maxsplit=1)
-                    if len(parts) != 2:
-                        continue
-
-                    file_artist = parts[1].replace('_', ' ')
-                    parts = parts[0].split('_')
-                    if len(parts) < 3:
-                        continue
-
-                    file_id = parts[0]
-                    file_side = parts[1]
-                    if (file_id, file_side) in file_data:
-                        duplicate_artwork.append(filename)
-                    else:
-                        file_data[((file_id, file_side))] = file_artist
-
+            for _, _, local_filenames in os.walk(folder):
+                filenames = filenames.union(set(local_filenames))
                 break
+
+        filenames = sorted(list(filenames))
+        for filename in filenames:
+            if (not filename.endswith('.png') and
+                    not filename.endswith('.jpg')):
+                continue
+
+            parts = '.'.join(filename.split('.')[:-1]).split(
+                '_Artist_', maxsplit=1)
+            if len(parts) != 2:
+                continue
+
+            file_artist = parts[1].replace('_', ' ')
+            parts = parts[0].split('_')
+            if len(parts) < 3:
+                continue
+
+            file_id = parts[0]
+            file_side = parts[1]
+            if (file_id, file_side) in file_data:
+                duplicate_artwork.append(filename)
+            else:
+                file_data[((file_id, file_side))] = file_artist
 
         missing_artwork = []
         different_artist = []
@@ -2316,19 +2331,19 @@ Targets removed.
 
         res = ''
         if missing_artwork:
-            res += '\nmissing artwork found:\n{}\n'.format(
+            res += '\n**Missing artwork found**:\n{}\n'.format(
                 '\n'.join(missing_artwork))
 
         if duplicate_artwork:
-            res += '\nduplicate artwork found:\n{}\n'.format(
+            res += '\n**Duplicate artwork found**:\n{}\n'.format(
                 '\n'.join(duplicate_artwork))
 
         if different_artist:
-            res += '\ndifferent artists found:\n{}\n'.format(
+            res += '\n**Different spreadsheet artists found**:\n{}\n'.format(
                 '\n'.join(different_artist))
 
         if no_spreadsheet_artist:
-            res += '\nmissing spreadsheet artists found:\n{}\n'.format(
+            res += '\n**Missing spreadsheet artists found**:\n{}\n'.format(
                 '\n'.join(no_spreadsheet_artist))
 
         res = res.strip()
