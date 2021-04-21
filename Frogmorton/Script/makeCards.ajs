@@ -645,18 +645,27 @@ function run(progress, target, filename, icons) {
 					s.set('Artist', ' ');
 				}
 				else if (cardType == 'Rules') {
+					s.set('LRL-Page', translate['Page'][lang]);
+					s.set('LRL-PageOf', '<bs></size><size 3> </size><size 7>/</size><size 3> </size><size 7><bs>');
+
 					if (s.get('OptionRight').search('/') > -1) {
-						s.set('LRL-Page', translate['Page'][lang]);
-						s.set('LRL-PageOf', '<bs></size><size 3> </size><size 7>/</size><size 3> </size><size 7><bs>');
 						s.set('PageNumber', s.get('OptionRight').split('/')[0]);
 						s.set('PageTotal', s.get('OptionRight').split('/')[1]);
 					}
 					else {
+						s.set('PageFrontShow', 'false');
 						s.set('PageNumber', 0);
 						s.set('PageTotal', 0);
 					}
-					if (s.get('OptionRightBack') == '') {
+
+					if (s.get('OptionRightBack').search('/') > -1) {
+						s.set('PageNumberBack', s.get('OptionRightBack').split('/')[0]);
+						s.set('PageTotalBack', s.get('OptionRightBack').split('/')[1]);
+					}
+					else {
 						s.set('PageBackShow', 'false');
+						s.set('PageNumberBack', 0);
+						s.set('PageTotalBack', 0);
 					}
 
 					s.set('Name', '');
