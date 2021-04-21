@@ -149,6 +149,7 @@ List of **!stat** commands:
     'art': """
 List of **!art** commands:
 
+**!art artists <set name or set code>** - display a copy-pasteable list of artist names (for example: `!art artists Children of Eorl` or `!art artists CoE`)
 **!art save <artist>** (as a reply to a message with an image attachment) - save the image as a card's artwork for the front side (for example: `!art save Ted Nasmith`)
 **!art saveb <artist>** (as a reply to a message with an image attachment) - save the image as a card's artwork for the back side (for example: `!art saveb John Howe`)
 **!art verify <set name or set code>** - verify artwork for a set (for example: `!art verify Children of Eorl` or `!art verify CoE`)
@@ -174,6 +175,11 @@ class DiscordError(Exception):
 
 class FormatError(Exception):
     """ Change format error.
+    """
+
+
+class ArtworkFolderError(Exception):
+    """ Artwork folder error.
     """
 
 
@@ -881,6 +887,33 @@ def get_quest_stat(cards):  # pylint: disable=R0912,R0915
         round(threat / total, 1), max_threat)
 
     return res
+
+
+async def get_artwork_files(set_id):
+    """ Get the list of artwork files for the set (both remote and local).
+    """
+    path = CONF.get('artwork_destination_path')
+    if not path:
+        raise ArtworkFolderError('no artwork folder specified on the '
+                                 'server')
+
+    stdout, stderr = await run_shell(RCLONE_FOLDER_CMD.format(set_id))
+    try:
+        filenames = {f['Name'] for f in json.loads(stdout)}
+    except Exception:
+        message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
+                                                                 stderr)
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+        raise ArtworkFolderError(message)
+
+    folder = os.path.join(path, set_id)
+    if os.path.exists(folder):
+        for _, _, local_filenames in os.walk(folder):
+            filenames = filenames.union(set(local_filenames))
+            break
+
+    filenames = sorted(list(filenames))
+    return filenames
 
 
 class MyClient(discord.Client):  # pylint: disable=R0902
@@ -2199,7 +2232,8 @@ Targets removed.
 
         artwork_destination_path = CONF.get('artwork_destination_path')
         if not artwork_destination_path:
-            return 'no destination folder specified on the server'
+            raise ArtworkFolderError('no artwork folder specified on the '
+                                     'server')
 
         content = await attachment.read()
 
@@ -2251,33 +2285,10 @@ Targets removed.
                 return 'no cards found for the set'
 
         matches.sort(key=lambda card: (card[lotr.ROW_COLUMN]))
-        artwork_destination_path = CONF.get('artwork_destination_path')
-        if not artwork_destination_path:
-            return 'no destination folder specified on the server'
-
-        folder = os.path.join(artwork_destination_path,
-                              matches[0][lotr.CARD_SET])
-
-        stdout, stderr = await run_shell(RCLONE_FOLDER_CMD.format(
-            matches[0][lotr.CARD_SET]))
-        try:
-            filenames = {f['Name'] for f in json.loads(stdout)}
-        except Exception:
-            message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
-                                                                     stderr)
-            logging.error(message)
-            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
-            return message
+        filenames = await get_artwork_files(matches[0][lotr.CARD_SET])
 
         file_data = {}
         duplicate_artwork = []
-        logging.info(folder)
-        if os.path.exists(folder):
-            for _, _, local_filenames in os.walk(folder):
-                filenames = filenames.union(set(local_filenames))
-                break
-
-        filenames = sorted(list(filenames))
         for filename in filenames:
             if (not filename.endswith('.png') and
                     not filename.endswith('.jpg')):
@@ -2353,7 +2364,91 @@ Targets removed.
         return res
 
 
-    async def _process_art_command(self, message):
+    async def _artwork_artists(self, value):  # pylint: disable=R0912,R0914
+        """ Display a copy-pasteable list of artist names.
+        """
+        data = await read_card_data()
+
+        set_name = re.sub(r'^alep---', '', lotr.normalized_name(value))
+        matches = [card for card in data['data'] if re.sub(
+            r'^alep---', '',
+            lotr.normalized_name(card[lotr.CARD_SET_NAME])) ==
+                   set_name and card[lotr.CARD_TYPE] not in ('Presentation',
+                                                             'Rules')]
+        if not matches:
+            set_code = value.lower()
+            matches = [card for card in data['data']
+                       if card[lotr.CARD_SET_HOB_CODE].lower() == set_code
+                       and card[lotr.CARD_TYPE] not in ('Presentation',
+                                                        'Rules')]
+            if not matches:
+                return 'no cards found for the set'
+
+        matches.sort(key=lambda card: (card[lotr.ROW_COLUMN]))
+        filenames = await get_artwork_files(matches[0][lotr.CARD_SET])
+
+        file_data = {}
+        for filename in filenames:
+            if (not filename.endswith('.png') and
+                    not filename.endswith('.jpg')):
+                continue
+
+            parts = '.'.join(filename.split('.')[:-1]).split(
+                '_Artist_', maxsplit=1)
+            if len(parts) != 2:
+                continue
+
+            file_artist = parts[1].replace('_', ' ')
+            parts = parts[0].split('_')
+            if len(parts) < 3:
+                continue
+
+            file_id = parts[0]
+            file_side = parts[1]
+            if (file_id, file_side) not in file_data:
+                file_data[((file_id, file_side))] = file_artist
+
+        clusters = []
+        last_cluster = []
+        for card in matches:
+            if not last_cluster:
+                last_cluster.append(card)
+                continue
+
+            if last_cluster[-1][lotr.ROW_COLUMN] != card[lotr.ROW_COLUMN] - 1:
+                clusters.append(last_cluster)
+                last_cluster = []
+
+            last_cluster.append(card)
+
+        if last_cluster:
+            clusters.append(last_cluster)
+
+        res = ''
+        sides = ['A', 'B']
+        for cluster in clusters:
+            artists = {'A': [], 'B': []}
+
+            for card in cluster:
+                for side in sides:
+                    artists[side].append(file_data.get(
+                        (card[lotr.CARD_ID], side), ''))
+
+            for side in sides:
+                if any(artists[side]):
+                    row = cluster[0][lotr.ROW_COLUMN]
+                    while artists[side][0] == '':
+                        row += 1
+                        artists[side].pop(0)
+
+                    res += ('\nPaste into column "Artist" (Side {}), row '
+                            '#**{}**:```\n{}\n```'.format(side, row,
+                                                    '\n'.join(artists[side])))
+
+        return res
+
+
+    async def _process_art_command(self, message):  # pylint: disable=R0912
         """ Process an art command.
         """
         if message.content.lower() == '!art':
@@ -2384,6 +2479,7 @@ Targets removed.
         elif command.lower() == 'save':
             await message.channel.send('please specify the artist')
         elif command.lower().startswith('verify '):
+            await message.channel.send('Please wait...')
             try:
                 set_name = re.sub(r'^verify ', '', command,
                                   flags=re.IGNORECASE)
@@ -2396,6 +2492,21 @@ Targets removed.
 
             await self._send_channel(message.channel, res)
         elif command.lower() == 'verify':
+            await message.channel.send('please specify the set')
+        elif command.lower().startswith('artists '):
+            await message.channel.send('Please wait...')
+            try:
+                set_name = re.sub(r'^artists ', '', command,
+                                  flags=re.IGNORECASE)
+                res = await self._artwork_artists(set_name)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await self._send_channel(message.channel, res)
+        elif command.lower() == 'artists':
             await message.channel.send('please specify the set')
         else:
             res = HELP['art']
