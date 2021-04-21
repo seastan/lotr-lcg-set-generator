@@ -436,6 +436,7 @@ function run(progress, target, filename, icons) {
 						['Adventure', 'Adventure'],
 						['Cycle', 'Adventure'],
 						['CollectionNumberCustom', 'Card Number'],
+						['CollectionNumberCustomOverwrite', 'Printed Card Number'],
 						['CollectionInfo', 'Version']
 					];
 					if (doubleSideTypes.indexOf(cardType) > -1) {
@@ -445,6 +446,7 @@ function run(progress, target, filename, icons) {
 							['FlavourBack', 'BFlavour'],
 							['StoryBack', 'BFlavour'],
 							['OptionRightBack', 'BVictory Points'],
+							['CollectionNumberCustomOverwriteBack', 'BPrinted Card Number'],
 							['ArtistBack', 'BArtist']
 						]);
 					}
@@ -501,6 +503,7 @@ function run(progress, target, filename, icons) {
 						['Adventure', 'Adventure'],
 						['Cycle', 'Adventure'],
 						['CollectionNumberCustom', 'Card Number'],
+						['CollectionNumberCustomOverwrite', 'BPrinted Card Number'],
 						['CollectionInfo', 'Version']
 					];
 				}
@@ -1124,6 +1127,7 @@ function updateVafthrudnir(value, lowerSize, lang) {
 	var upperSize = Math.round(lowerSize * 1.423 * 100) / 100;
 	var res = '';
 	var tag = false;
+	value = value.replace(/\[space\]/ig, ' ');
 	value = updateQuotes(value, lang);
 	for (let i = 0; i < value.length; i++) {
 		let ch = value[i];
