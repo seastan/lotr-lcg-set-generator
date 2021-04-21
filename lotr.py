@@ -1105,9 +1105,11 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_unique = row[CARD_UNIQUE]
         card_type = row[CARD_TYPE]
         card_sphere = row[CARD_SPHERE]
+        card_victory = row[CARD_VICTORY]
         card_unique_back = row[BACK_PREFIX + CARD_UNIQUE]
         card_type_back = row[BACK_PREFIX + CARD_TYPE]
         card_sphere_back = row[BACK_PREFIX + CARD_SPHERE]
+        card_victory_back = row[BACK_PREFIX + CARD_VICTORY]
         card_easy_mode = row[CARD_EASY_MODE]
         card_scratch = row[CARD_SCRATCH]
         scratch = ' (Scratch)' if card_scratch else ''
@@ -1250,6 +1252,37 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+
+        if card_victory is not None and card_type in ('Presentation', 'Rules'):
+            if len(str(card_victory).split('/')) != 2:
+                message = ('Incorrect format for card victory for row '
+                           '#{}{}'.format(i, scratch))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+            elif not (is_positive_int(str(card_victory).split('/')[0]) and
+                      is_positive_int(str(card_victory).split('/')[1])):
+                message = ('Incorrect format for card victory for row '
+                           '#{}{}'.format(i, scratch))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+
+        if (card_victory_back is not None and
+                card_type_back in ('Presentation', 'Rules')):
+            if len(str(card_victory_back).split('/')) != 2:
+                message = ('Incorrect format for card victory back for row '
+                           '#{}{}'.format(i, scratch))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+            elif not (is_positive_int(str(card_victory_back).split('/')[0]) and
+                      is_positive_int(str(card_victory_back).split('/')[1])):
+                message = ('Incorrect format for card victory back for row '
+                           '#{}{}'.format(i, scratch))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
 
         if card_easy_mode is not None and not is_positive_int(card_easy_mode):
             message = ('Incorrect format for removed for easy mode for row '
