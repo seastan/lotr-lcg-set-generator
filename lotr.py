@@ -5442,13 +5442,3 @@ def update_ringsdb(conf, sets):
 
     logging.info('...Updating test.ringsdb.com (%ss)',
                  round(time.time() - timestamp, 3))
-
-
-def prepare_ringsdb():
-    """ Test function (to be removed).
-    """
-    conf = read_conf()
-    download_sheet(conf)
-    extract_data(conf, True, True)
-    sets = get_sets(conf, True, True)
-    return (conf, sets)

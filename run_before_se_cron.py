@@ -105,7 +105,7 @@ def send_discord(message):
             conf = yaml.safe_load(f_conf)
 
         if conf.get('webhook_url'):
-            data = {'content': message}
+            data = {'content': message[:1900]}
             res = requests.post(conf['webhook_url'], json=data)
             res = res.content.decode('utf-8')
             if res != '':
