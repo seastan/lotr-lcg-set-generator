@@ -115,7 +115,7 @@ def send_discord(message):
             return True
     except Exception as exc:
         message = 'Discord message failed: {}: {}'.format(
-            type(exc).__name__, str(exc))
+            type(exc).__name__, str(exc))[:1000]
         logging.exception(message)
         create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
 
@@ -259,7 +259,7 @@ def run(conf=None):  # pylint: disable=R0912
                         set_sanity_check_message('')
                         create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(message))
                 except Exception as exc_new:
-                    logging.exception(str(exc_new))
+                    logging.exception(str(exc_new)[:1000])
 
             rclone()
 
@@ -267,7 +267,7 @@ def run(conf=None):  # pylint: disable=R0912
             rclone_scratch()
 
     except SanityCheckError as exc:
-        message = str(exc)
+        message = str(exc)[:1000]
         logging.error(message)
         if message != get_sanity_check_message():
             try:
@@ -275,15 +275,16 @@ def run(conf=None):  # pylint: disable=R0912
                     set_sanity_check_message(message)
                     create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(message))
             except Exception as exc_new:
-                logging.exception(str(exc_new))
+                logging.exception(str(exc_new)[:1000])
     except Exception as exc:
-        message = 'Script failed: {}: {}'.format(type(exc).__name__, str(exc))
+        message = 'Script failed: {}: {}'.format(
+            type(exc).__name__, str(exc))[:1000]
         logging.exception(message)
         try:
             send_discord(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
         except Exception as exc_new:
-            logging.exception(str(exc_new))
+            logging.exception(str(exc_new)[:1000])
     finally:
         if not sheet_changes and not scratch_changes:
             logging.info('Finished (No Changes): %s', cron_id)
