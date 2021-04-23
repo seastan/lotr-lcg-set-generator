@@ -1091,7 +1091,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
     errors = []
     card_ids = set()
     card_scratch_ids = set()
-    card_set_number_names = set()
+    card_set_numbers = set()
     set_ids = [s[0] for s in sets]
     all_set_ids = list(SETS.keys())
     deck_rules = set()
@@ -1179,14 +1179,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             if not card_scratch:
                 errors.append(message)
         elif set_id is not None and card_number is not None:
-            if (set_id, card_number, card_name) in card_set_number_names:
-                message = ('Duplicate card set, number and name combination '
+            if (set_id, card_number) in card_set_numbers:
+                message = ('Duplicate card set and card number combination '
                            'for row #{}{}'.format(i, scratch))
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)
             else:
-                card_set_number_names.add((set_id, card_number, card_name))
+                card_set_numbers.add((set_id, card_number))
 
         if card_unique is not None and card_unique not in ('1', 1):
             message = 'Incorrect format for unique for row #{}{}'.format(
