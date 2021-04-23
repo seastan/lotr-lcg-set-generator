@@ -2283,7 +2283,8 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
             quest['prefix'] = rules[('prefix', 0)][0] + ' '
 
         cards = [r for r in DATA
-                 if str(r[CARD_SET_NAME] or '').lower() in quest['sets']
+                 if r[CARD_ID]
+                 and str(r[CARD_SET_NAME] or '').lower() in quest['sets']
                  and (not r[CARD_ENCOUNTER_SET] or
                       str(r[CARD_ENCOUNTER_SET]).lower()
                       in quest['encounter sets'])
