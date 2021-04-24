@@ -193,7 +193,7 @@ def main():  # pylint: disable=R0912
 
             if 'db' in conf['outputs'][lang]:
                 tasks.append([generate_db, conf, set_id, set_name, lang,
-                              skip_ids, lotr.DATA])
+                              skip_ids, lotr.translated_data(set_id, lang)])
 
             if 'octgn' in conf['outputs'][lang]:
                 tasks.append([generate_octgn, conf, set_id, set_name, lang,
@@ -201,7 +201,8 @@ def main():  # pylint: disable=R0912
 
             if 'rules_pdf' in conf['outputs'][lang]:
                 tasks.append([generate_rules_pdf, conf, set_id, set_name,
-                              lang, skip_ids, lotr.DATA])
+                              lang, skip_ids,
+                              lotr.translated_data(set_id, lang)])
 
             if 'pdf' in conf['outputs'][lang]:
                 tasks.append([generate_pdf, conf, set_id, set_name, lang,
@@ -213,19 +214,20 @@ def main():  # pylint: disable=R0912
 
             if 'makeplayingcards' in conf['outputs'][lang]:
                 tasks.append([generate_mpc, conf, set_id, set_name, lang,
-                              skip_ids, lotr.DATA])
+                              skip_ids, lotr.translated_data(set_id, lang)])
 
             if 'drivethrucards' in conf['outputs'][lang]:
                 tasks.append([generate_dtc, conf, set_id, set_name, lang,
-                              skip_ids, lotr.DATA])
+                              skip_ids, lotr.translated_data(set_id, lang)])
 
             if 'mbprint' in conf['outputs'][lang]:
                 tasks.append([generate_mbprint, conf, set_id, set_name, lang,
-                              skip_ids, lotr.DATA])
+                              skip_ids, lotr.translated_data(set_id, lang)])
 
             if 'genericpng' in conf['outputs'][lang]:
                 tasks.append([generate_genericpng, conf, set_id, set_name,
-                              lang, skip_ids, lotr.DATA])
+                              lang, skip_ids,
+                              lotr.translated_data(set_id, lang)])
 
     execute_tasks(conf, pre_tasks)
     execute_tasks(conf, tasks)

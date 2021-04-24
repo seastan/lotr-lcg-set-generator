@@ -2892,6 +2892,26 @@ def _add_xml_properties(parent, properties, tab):
             prop.tail = '\n' + tab + '  '
 
 
+def translated_data(set_id, lang):
+    """ Get card data with a few translated columns (only the needed ones).
+    """
+    res = []
+    for row in DATA:
+        if row[CARD_ID] is None:
+            continue
+
+        if row[CARD_SET] != set_id:
+            continue
+
+        row_copy = row.copy()
+        if lang != 'English' and TRANSLATIONS[lang].get(row[CARD_ID]):
+            row_copy[CARD_NAME] = TRANSLATIONS[lang][row[CARD_ID]][CARD_NAME]
+
+        res.append(row_copy)
+
+    return res
+
+
 def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R0915
     """ Generate xml file for Strange Eons.
     """
