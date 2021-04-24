@@ -5500,6 +5500,7 @@ def update_ringsdb(conf, sets):
         if res != 'Done':
             raise RingsDBError('Error uploading {} to test.ringsdb.com: {}'
                                .format(set_name, res[:LOG_LIMIT]))
+
         cookies = session.cookies.get_dict()
         _write_ringsdb_cookies(cookies)
 
