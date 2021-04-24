@@ -26,7 +26,7 @@ import uuid
 import requests
 import yaml
 
-from lotr import SanityCheckError
+from lotr import LOG_LIMIT, SanityCheckError
 from run_before_se import main
 
 
@@ -42,6 +42,7 @@ ERROR_SUBJECT_TEMPLATE = 'LotR ALeP Cron ERROR: {}'
 SANITY_CHECK_SUBJECT_TEMPLATE = 'LotR ALeP Cron CHECK: {}'
 WARNING_SUBJECT_TEMPLATE = 'LotR ALeP Cron WARNING: {}'
 MAIL_QUOTA = 50
+MESSAGE_SLEEP_TIME = 1
 
 
 class DiscordResponseError(Exception):
@@ -105,17 +106,27 @@ def send_discord(message):
             conf = yaml.safe_load(f_conf)
 
         if conf.get('webhook_url'):
-            data = {'content': message[:1900]}
-            res = requests.post(conf['webhook_url'], json=data)
-            res = res.content.decode('utf-8')
-            if res != '':
-                raise DiscordResponseError(
-                    'Non-empty response: {}'.format(res))
+            chunks = []
+            while len(message) > 1900:
+                chunks.append(message[:1900])
+                message = message[1900:]
+
+            chunks.append(message)
+            for i, chunk in enumerate(chunks):
+                if i > 0:
+                    time.sleep(MESSAGE_SLEEP_TIME)
+
+                data = {'content': chunk}
+                res = requests.post(conf['webhook_url'], json=data)
+                res = res.content.decode('utf-8')
+                if res != '':
+                    raise DiscordResponseError(
+                        'Non-empty response: {}'.format(res))
 
             return True
     except Exception as exc:
         message = 'Discord message failed: {}: {}'.format(
-            type(exc).__name__, str(exc))[:1000]
+            type(exc).__name__, str(exc))[:LOG_LIMIT]
         logging.exception(message)
         create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
 
@@ -259,7 +270,7 @@ def run(conf=None):  # pylint: disable=R0912
                         set_sanity_check_message('')
                         create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(message))
                 except Exception as exc_new:
-                    logging.exception(str(exc_new)[:1000])
+                    logging.exception(str(exc_new)[:LOG_LIMIT])
 
             rclone()
 
@@ -267,7 +278,7 @@ def run(conf=None):  # pylint: disable=R0912
             rclone_scratch()
 
     except SanityCheckError as exc:
-        message = str(exc)[:1000]
+        message = str(exc)[:LOG_LIMIT]
         logging.error(message)
         if message != get_sanity_check_message():
             try:
@@ -275,16 +286,16 @@ def run(conf=None):  # pylint: disable=R0912
                     set_sanity_check_message(message)
                     create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(message))
             except Exception as exc_new:
-                logging.exception(str(exc_new)[:1000])
+                logging.exception(str(exc_new)[:LOG_LIMIT])
     except Exception as exc:
         message = 'Script failed: {}: {}'.format(
-            type(exc).__name__, str(exc))[:1000]
+            type(exc).__name__, str(exc))[:LOG_LIMIT]
         logging.exception(message)
         try:
             send_discord(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
         except Exception as exc_new:
-            logging.exception(str(exc_new)[:1000])
+            logging.exception(str(exc_new)[:LOG_LIMIT])
     finally:
         if not sheet_changes and not scratch_changes:
             logging.info('Finished (No Changes): %s', cron_id)

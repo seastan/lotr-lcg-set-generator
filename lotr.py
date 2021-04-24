@@ -234,6 +234,7 @@ OUTPUT_RINGSDB_PATH = os.path.join('Output', 'RingsDB')
 OUTPUT_RINGSDB_IMAGES_PATH = os.path.join('Output', 'RingsDBImages')
 OUTPUT_RULES_PDF_PATH = os.path.join('Output', 'RulesPDF')
 PROJECT_PATH = 'setGenerator.seproject'
+RINGSDB_COOKIES_PATH = 'ringsdb_cookies.json'
 RINGSDB_JSON_PATH = 'ringsdb.json'
 SET_EONS_PATH = 'setEons'
 SET_OCTGN_PATH = 'setOCTGN'
@@ -242,6 +243,7 @@ TEMP_ROOT_PATH = 'Temp'
 URL_CACHE_PATH = 'urlCache'
 XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
 
+LOG_LIMIT = 5000
 URL_TIMEOUT = 15
 URL_RETRIES = 3
 URL_SLEEP = 10
@@ -287,6 +289,7 @@ FOUND_INTERSECTED_SETS = set()
 IMAGE_CACHE = {}
 JSON_CACHE = {}
 XML_CACHE = {}
+RINGSDB_COOKIES = {}
 
 
 class SheetError(Exception):
@@ -330,6 +333,42 @@ class TLSAdapter(requests.adapters.HTTPAdapter):
             block=block,
             ssl_version=ssl.PROTOCOL_TLS,
             ssl_context=ctx)
+
+
+def _read_ringsdb_cookies(conf):
+    """ Read RingsDB cookies (either from a local cache or from a file).
+    """
+    if RINGSDB_COOKIES:
+        return RINGSDB_COOKIES
+
+    data = {}
+    try:
+        with open(RINGSDB_COOKIES_PATH, 'r') as fobj:
+            data = json.load(fobj)
+    except Exception:  # pylint: disable=W0703
+        pass
+
+    if data:
+        RINGSDB_COOKIES.update(data)
+        return data
+
+    if '|' in conf['ringsdb_sessionid']:
+        parts = conf['ringsdb_sessionid'].split('|', 1)
+        data = {'PHPSESSID': parts[0], 'REMEMBERME': parts[1]}
+    else:
+        data = {'PHPSESSID': conf['ringsdb_sessionid']}
+
+    _write_ringsdb_cookies(data)
+    return data
+
+
+def _write_ringsdb_cookies(data):
+    """ Write RingsDB cookies (to a local cache and to a file).
+    """
+    RINGSDB_COOKIES.clear()
+    RINGSDB_COOKIES.update(data)
+    with open(RINGSDB_COOKIES_PATH, 'w') as fobj:
+        json.dump(data, fobj)
 
 
 def normalized_name(value):
@@ -5447,25 +5486,22 @@ def update_ringsdb(conf, sets):
         checksums[set_id] = checksum
 
         logging.info('Uploading %s to %s', set_name, conf['ringsdb_url'])
-        if conf['ringsdb_url'].startswith('http://'):
-            res = requests.post(
-                '{}/admin/csv/upload'.format(conf['ringsdb_url']),
-                files={'upfile': open(path, 'br')},
-                data={'code': SETS[set_id][SET_HOB_CODE], 'name': set_name},
-                cookies={'PHPSESSID': conf['ringsdb_sessionid']})
-        else:
-            session = requests.session()
+        cookies = _read_ringsdb_cookies(conf)
+        session = requests.Session()
+        session.cookies.update(cookies)
+        if conf['ringsdb_url'].startswith('https://'):
             session.mount('https://', TLSAdapter())
-            res = session.post(
-                '{}/admin/csv/upload'.format(conf['ringsdb_url']),
-                files={'upfile': open(path, 'br')},
-                data={'code': SETS[set_id][SET_HOB_CODE], 'name': set_name},
-                cookies={'PHPSESSID': conf['ringsdb_sessionid']})
 
+        res = session.post(
+            '{}/admin/csv/upload'.format(conf['ringsdb_url']),
+            files={'upfile': open(path, 'br')},
+            data={'code': SETS[set_id][SET_HOB_CODE], 'name': set_name})
         res = res.content.decode('utf-8')
         if res != 'Done':
             raise RingsDBError('Error uploading {} to test.ringsdb.com: {}'
-                               .format(set_name, res))
+                               .format(set_name, res[:LOG_LIMIT]))
+        cookies = session.cookies.get_dict()
+        _write_ringsdb_cookies(cookies)
 
     if changes:
         with open(RINGSDB_JSON_PATH, 'w') as fobj:

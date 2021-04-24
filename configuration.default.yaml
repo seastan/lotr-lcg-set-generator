@@ -63,7 +63,7 @@ update_ringsdb: false
 # test.ringsdb.com URL
 ringsdb_url: https://test.ringsdb.com
 
-# test.ringsdb.com session ID
+# test.ringsdb.com session id: <PHPSESSID>|<REMEMBERME>
 ringsdb_sessionid: 
 
 # List of image outputs
