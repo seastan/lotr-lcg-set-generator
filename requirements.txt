@@ -5,3 +5,4 @@ pyyaml
 reportlab
 requests
 unidecode
+urllib3

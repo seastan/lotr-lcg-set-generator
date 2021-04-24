@@ -14,6 +14,7 @@ import math
 import os
 import re
 import shutil
+import ssl
 import subprocess
 import time
 import uuid
@@ -22,6 +23,7 @@ import zipfile
 
 import requests
 import unidecode
+import urllib3
 import yaml
 
 try:
@@ -310,6 +312,24 @@ class ImageMagickError(Exception):
 class RingsDBError(Exception):
     """ RingsDB error.
     """
+
+
+class TLSAdapter(requests.adapters.HTTPAdapter):
+    """ TLS adapter to workaround SSL errors.
+    """
+
+    def init_poolmanager(self, connections, maxsize, block=False,
+                         **pool_kwargs):
+        """ Create and initialize the urllib3 PoolManager.
+        """
+        ctx = ssl.create_default_context()
+        ctx.set_ciphers('DEFAULT@SECLEVEL=1')
+        self.poolmanager = urllib3.poolmanager.PoolManager(
+            num_pools=connections,
+            maxsize=maxsize,
+            block=block,
+            ssl_version=ssl.PROTOCOL_TLS,
+            ssl_context=ctx)
 
 
 def normalized_name(value):
@@ -5427,11 +5447,21 @@ def update_ringsdb(conf, sets):
         checksums[set_id] = checksum
 
         logging.info('Uploading %s to %s', set_name, conf['ringsdb_url'])
-        res = requests.post('{}/admin/csv/upload'.format(conf['ringsdb_url']),
-                            files={'upfile': open(path, 'br')},
-                            data={'code': SETS[set_id][SET_HOB_CODE],
-                                  'name': set_name},
-                            cookies={'PHPSESSID': conf['ringsdb_sessionid']})
+        if conf['ringsdb_url'].startswith('http://'):
+            res = requests.post(
+                '{}/admin/csv/upload'.format(conf['ringsdb_url']),
+                files={'upfile': open(path, 'br')},
+                data={'code': SETS[set_id][SET_HOB_CODE], 'name': set_name},
+                cookies={'PHPSESSID': conf['ringsdb_sessionid']})
+        else:
+            session = requests.session()
+            session.mount('https://', TLSAdapter())
+            res = session.post(
+                '{}/admin/csv/upload'.format(conf['ringsdb_url']),
+                files={'upfile': open(path, 'br')},
+                data={'code': SETS[set_id][SET_HOB_CODE], 'name': set_name},
+                cookies={'PHPSESSID': conf['ringsdb_sessionid']})
+
         res = res.content.decode('utf-8')
         if res != 'Done':
             raise RingsDBError('Error uploading {} to test.ringsdb.com: {}'
