@@ -516,7 +516,9 @@ def _update_octgn_card_text(text):
 def escape_filename(value):
     """ Escape forbidden symbols in a file name.
     """
-    return re.sub(r'[<>:\/\\|?*\'"’“”„«»…–—]', ' ', str(value))
+    value = re.sub(r'[<>:\/\\|?*\'"’“”„«»…–—]', ' ', str(value))
+    value = value.encode('ascii', errors='replace').decode().replace('?', ' ')
+    return value
 
 
 def escape_octgn_filename(value):
