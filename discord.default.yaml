@@ -6,3 +6,6 @@ token:
 
 # Path to card artwork destination folder
 artwork_destination_path: 
+
+# Users to ignore (a comma-separated list)
+ignore_users: 

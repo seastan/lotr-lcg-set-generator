@@ -142,7 +142,8 @@ Some report
     'stat': """
 List of **!stat** commands:
 
-**!stat channels** - number of Discord channels and free channel slots
+**!stat assistants** - display the list of ALeP assistants (all Discord users except for those who have a role)
+**!stat channels** - display the number of Discord channels and free channel slots
 **!stat quest <quest>** - display the quest statistics (for example: `!stat quest The Battle for the Beacon`)
 **!stat help** - display this help message
 """,
@@ -2153,6 +2154,17 @@ Targets removed.
         await self._send_channel(message.channel, res)
 
 
+    def get_users(self):
+        """ Get the list of Discord users.
+        """
+        logging.info(self.guilds[0].members)
+        ignore_users = {u.strip() for u in CONF.get('ignore_users').split(',')}
+        users = [m.display_name for m in self.guilds[0].members
+                 if m.display_name not in ignore_users]
+        users = sorted(list(set(users)), key=str.casefold)
+        return ', '.join(users)
+
+
     async def _process_stat_command(self, message):
         """ Process a stat command.
         """
@@ -2183,6 +2195,16 @@ Targets removed.
                 num = len(list(self.get_all_channels()))
                 res = 'There are {} channels and {} free slots'.format(
                     num, CHANNEL_LIMIT - num)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await self._send_channel(message.channel, res)
+        elif command.lower() == 'assistants':
+            try:
+                res = self.get_users()
             except Exception as exc:
                 logging.exception(str(exc))
                 await message.channel.send(
@@ -2442,8 +2464,8 @@ Targets removed.
                         artists[side].pop(0)
 
                     res += ('\nPaste into column "Artist" (Side {}), row '
-                            '#**{}**:```\n{}\n```'.format(side, row,
-                                                    '\n'.join(artists[side])))
+                            '#**{}**:```\n{}\n```'.format(
+                                side, row, '\n'.join(artists[side])))
 
         return res
 
@@ -2557,4 +2579,7 @@ if __name__ == '__main__':
     os.chdir(WORKING_DIRECTORY)
     init_logging()
     CONF.update(get_discord_configuration())
-    MyClient().run(CONF.get('token'))
+    intents = discord.Intents.default()
+    intents.members = True
+    client = MyClient(intents=intents)
+    client.run(CONF.get('token'))
