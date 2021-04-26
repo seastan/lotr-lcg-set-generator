@@ -340,6 +340,19 @@ def split_result(value):
             chunk = line + '\n'
 
     res.append(chunk)
+
+    for i in range(len(res) - 1):
+        cnt = res[i].count('```')
+        if cnt % 2 == 0:
+            continue
+
+        if res[i].split('```')[-1].startswith('diff'):
+            res[i + 1] = '```diff\n' + res[i + 1]
+        else:
+            res[i + 1] = '```\n' + res[i + 1]
+
+        res[i] += '```\n'
+
     return res
 
 
@@ -1426,9 +1439,9 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                             new_lines[i] = '+ {}'.format(
                                 new_lines[i])
 
-                    diff[1] = '```diff\n{}```'.format(
+                    diff[1] = '```diff\n{}\n```'.format(
                         '\n'.join(old_lines).strip())
-                    diff[2] = '```diff\n{}```'.format(
+                    diff[2] = '```diff\n{}\n```'.format(
                         '\n'.join(new_lines).strip())
 
                 diffs = [
@@ -2260,9 +2273,9 @@ Targets removed.
         content = await attachment.read()
 
         folder = os.path.join(artwork_destination_path, card[lotr.CARD_SET])
-        filename = '{}_{}_{}_{}.{}'.format(card[lotr.CARD_ID], side,
-                                           card[lotr.CARD_NAME], artist,
-                                           filetype)
+        filename = '{}_{}_{}_Artist_{}.{}'.format(card[lotr.CARD_ID], side,
+                                                  card[lotr.CARD_NAME], artist,
+                                                  filetype)
         filename = lotr.escape_filename(filename).replace(' ', '_')
         path = os.path.join(folder, filename)
 
