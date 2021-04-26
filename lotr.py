@@ -2511,7 +2511,7 @@ def _ringsdb_code(row):
     return code
 
 
-def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
+def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914, R0915
     """ Generate CSV file for RingsDB.
     """
     logging.info('[%s] Generating CSV file for RingsDB...', set_name)
@@ -2611,6 +2611,27 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                 'hasErrata': None
                 }
             writer.writerow(csv_row)
+
+            if (csv_row['type'] == 'Ally' and csv_row['isUnique'] == 1 and
+                    csv_row['sphere'] != 'Neutral'):
+                new_row = csv_row.copy()
+                new_row['pack'] = 'Messenger of the King Allies'
+                new_row['type'] = 'Hero'
+                new_row['code'] = '99{}'.format(new_row['code'])
+                new_row['name'] = '(MotK) {}'.format(new_row['name'])
+                new_row['cost'] = None
+                willpower = (new_row['willpower']
+                             if _is_int(new_row['willpower']) else 0)
+                attack = (new_row['attack']
+                          if _is_int(new_row['attack']) else 0)
+                defense = (new_row['defense']
+                           if _is_int(new_row['defense']) else 0)
+                health = (new_row['health']
+                          if _is_int(new_row['health']) else 0)
+                new_row['threat'] = willpower + attack + defense + health
+                new_row['quantity'] = 1
+                new_row['deckLimit'] = 1
+                writer.writerow(new_row)
 
     logging.info('[%s] ...Generating CSV file for RingsDB (%ss)',
                  set_name, round(time.time() - timestamp, 3))
