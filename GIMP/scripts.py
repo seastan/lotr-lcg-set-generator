@@ -352,6 +352,8 @@ def prepare_makeplayingcards(img, drawable, output_folder):
     if clip_size:
         _clip(img, drawable, clip_size, rotation and back_side)
 
+    pdb.gimp_drawable_brightness_contrast(drawable, 0.1, 0.0)
+
     pdb.file_png_save(img, drawable,
                       os.path.join(output_folder, file_name), file_name,
                       0, 9, 1, 0, 0, 1, 1)
