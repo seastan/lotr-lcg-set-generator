@@ -5101,10 +5101,10 @@ def _prepare_mbprint_printing_archive(input_path, obj):
             if filename.endswith('-1o.jpg'):
                 obj.write(os.path.join(input_path, filename),
                           'front/{}'.format(filename))
-            elif filename.endswith('-0o.jpg'):
+            elif filename.endswith('-2o.jpg'):
                 obj.write(os.path.join(input_path, filename),
                           'back_official/{}'.format(filename))
-            elif filename.endswith('-0u.jpg'):
+            elif filename.endswith('-2u.jpg'):
                 obj.write(os.path.join(input_path, filename),
                           'back_unofficial/{}'.format(filename))
 
@@ -5262,21 +5262,6 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):  # pylint: disabl
     _clear_folder(temp_path)
     _prepare_printing_images(input_path, temp_path, 'mbprint')
     _combine_doublesided_rules_cards(set_id, temp_path, card_data, 'mbprint')
-
-    for _, _, filenames in os.walk(temp_path):
-        for filename in filenames:
-            if filename.endswith('-2o.jpg'):
-                os.rename(
-                    os.path.join(temp_path, filename),
-                    os.path.join(temp_path,
-                                 re.sub(r'-2o\.jpg$', '-0o.jpg', filename)))
-            elif filename.endswith('-2u.jpg'):
-                os.rename(
-                    os.path.join(temp_path, filename),
-                    os.path.join(temp_path,
-                                 re.sub(r'-2u\.jpg$', '-0u.jpg', filename)))
-
-        break
 
     if ('mbprint_zip' in conf['outputs'][lang] or
             'mbprint_7z' in conf['outputs'][lang]):
