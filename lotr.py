@@ -4710,7 +4710,8 @@ def generate_genericpng_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0
     output_path = os.path.join(OUTPUT_GENERICPNG_PDF_PATH, '{}.{}'.format(
         escape_filename(set_name), lang))
     temp_path = os.path.join(TEMP_ROOT_PATH,
-                             'generate_mpc.{}.{}'.format(set_id, lang))
+                             'generate_genericpng_pdf.{}.{}'.format(set_id,
+                                                                    lang))
 
     images = _collect_pdf_images(input_path)
     if not images:
