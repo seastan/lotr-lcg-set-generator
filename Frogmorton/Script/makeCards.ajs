@@ -1318,6 +1318,7 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 	vXml = vXml.replace(/\[red\]/ig, '<color #8b1c23>');
 	vXml = vXml.replace(/\[\/red\]/ig, '</color>');
 	vXml = vXml.replace(/\[space\]/ig, '<hs>');
+	vXml = vXml.replace(/\[vspace\]/ig, '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.025 0.025>');
 	vXml = vXml.replace(/\[tab\]/ig, '\t');
 	vXml = vXml.replace(/\[lotr ([0-9\.]+)\]/ig, '<lotr $1>');
 	vXml = vXml.replace(/\[\/lotr\]/ig, '</lotr>');

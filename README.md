@@ -160,6 +160,7 @@ Additionally, if you specified OCTGN destination paths, OCTGN outputs will be co
 - `[img PATH Xin]`: insert image from PATH and set its width to X inches
 - `[img PATH Xin Yin]`: insert image from PATH and set its width to X inches and its height to Y inches
 - `[space]`: horizontal spacing
+- `[vspace]`: vertical spacing
 - `[tab]`: tab symbol
 - `[nobr]`: non-breakable space
 - `[inline]`: put it at the end of the `Keywords` field, to place the keywords on the same line as the first line of text
