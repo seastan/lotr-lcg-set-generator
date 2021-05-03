@@ -35,6 +35,9 @@ VIEWSTATE_REGEX = r'id="__VIEWSTATE" value="([^"]+)"'
 VIEWSTATEGENERATOR_REGEX = r'id="__VIEWSTATEGENERATOR" value="([^"]+)"'
 SESSIONID_REGEX = \
     r'<form method="post" action="\.\/dn_preview_layout\.aspx\?ssid=([^"]+)"'
+NEXT_REGEX = (
+    r'<a href="javascript:__doPostBack\(&#39;([^&]+)&#39;,'
+    r'&#39;([^&]+)&#39;\)" style="[^"]+">Next<\/a>')
 
 DEFAULT_VIEWSTATE = \
     '/wEPDwUJNjAwNDE3MDgyDxYCHhNWYWxpZGF0ZVJlcXVlc3RNb2RlAgFkZKxwlxJ+dQzVGn0L8+0kT3Qk5oie'
@@ -59,6 +62,7 @@ WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 URL_TIMEOUT = 60
 URL_RETRIES = 1
 URL_SLEEP = 1
+NEXT_LIMIT = 10
 
 
 class ConfigurationError(Exception):
@@ -288,11 +292,12 @@ def get_viewstate(session, content=''):
 
 
 def init_form_data(eventtarget, viewstate, viewstategenerator, hidd_type='',  # pylint: disable=R0913
-                   hidd_value='', hidd_project_name='', hidd_product_type=''):
+                   hidd_value='', hidd_project_name='', hidd_product_type='',
+                   eventargument=''):
     """ Init POST data.
     """
     data = {'__EVENTTARGET': eventtarget,
-            '__EVENTARGUMENT': '',
+            '__EVENTARGUMENT': eventargument,
             '__VIEWSTATE': viewstate,
             '__VIEWSTATEGENERATOR': viewstategenerator,
             'hidd_type': hidd_type,
@@ -320,7 +325,24 @@ def get_decks(session):
         raise ResponseError('No saved projects found, content length: {}'
                             .format(len(content)))
 
-    return content
+    full_content = content
+    cnt = 0
+    res = re.search(NEXT_REGEX, content)
+    while res and cnt < NEXT_LIMIT:
+        cnt += 1
+        logging.info('Following Page %s', res.groups()[1])
+        viewstate, viewstategenerator = get_viewstate(session, content)
+        form_data = init_form_data(res.groups()[0], viewstate,
+                                   viewstategenerator,
+                                   eventargument=res.groups()[1])
+        content = send_post(session, SAVED_PROJECTS_URL, form_data)
+        if not content:
+            break
+
+        res = re.search(NEXT_REGEX, content)
+        full_content += content
+
+    return full_content
 
 
 def delete_deck(session, content, deck_id, deck):
