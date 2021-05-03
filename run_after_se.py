@@ -176,7 +176,7 @@ def main():  # pylint: disable=R0912
     pre_tasks = []
     tasks = []
     for set_id, set_name in sets:
-        for lang in conf['languages']:
+        for lang in conf['output_languages']:
             skip_set, skip_ids = lotr.get_skip_info(set_id, set_name, lang)
             if skip_set:
                 logging.info('[%s, %s] No changes since the last run,'

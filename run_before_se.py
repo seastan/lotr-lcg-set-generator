@@ -39,7 +39,7 @@ def main(conf=None):  # pylint: disable=R0912,R0915
     if sheet_changes:
         lotr.save_data_for_bot(conf)
 
-    if conf['languages']:
+    if conf['output_languages']:
         lotr.reset_project_folders(conf)
 
     strange_eons = False
@@ -57,10 +57,13 @@ def main(conf=None):  # pylint: disable=R0912,R0915
         if conf['hallofbeorn_json']:
             lotr.generate_hallofbeorn_json(conf, set_id, set_name)
 
-        if conf['languages']:
+        if conf['spanishdb_csv']:
+            lotr.generate_spanishdb_csv(conf, set_id, set_name)
+
+        if conf['output_languages']:
             lotr.copy_custom_images(conf, set_id, set_name)
 
-        for lang in conf['languages']:
+        for lang in conf['output_languages']:
             strange_eons = True
             lotr.generate_xml(conf, set_id, set_name, lang)
             lotr.update_xml(conf, set_id, set_name, lang)

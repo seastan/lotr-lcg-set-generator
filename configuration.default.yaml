@@ -57,6 +57,9 @@ ringsdb_csv: true
 # Creating JSON files for Hall of Beorn (true or false)
 hallofbeorn_json: true
 
+# Creating CSV files for the Spanish database susurrosdelbosqueviejo.com (true or false)
+spanishdb_csv: false
+
 # Updating test.ringsdb.com
 update_ringsdb: false
 
@@ -79,7 +82,6 @@ outputs:
 #    - genericpng_7z
 #    - genericpng_pdf_a4_7z
 #    - genericpng_pdf_letter_7z
-#    - drivethrucards_7z
 #    - rules_pdf
   German:
 #    - db
@@ -92,7 +94,6 @@ outputs:
 #    - genericpng_7z
 #    - genericpng_pdf_a4_7z
 #    - genericpng_pdf_letter_7z
-#    - drivethrucards_7z
 #    - rules_pdf
   Spanish:
 #    - db
@@ -105,7 +106,6 @@ outputs:
 #    - genericpng_7z
 #    - genericpng_pdf_a4_7z
 #    - genericpng_pdf_letter_7z
-#    - drivethrucards_7z
 #    - rules_pdf
   French:
 #    - db
@@ -118,7 +118,6 @@ outputs:
 #    - genericpng_7z
 #    - genericpng_pdf_a4_7z
 #    - genericpng_pdf_letter_7z
-#    - drivethrucards_7z
 #    - rules_pdf
   Polish:
 #    - db
@@ -131,7 +130,6 @@ outputs:
 #    - genericpng_7z
 #    - genericpng_pdf_a4_7z
 #    - genericpng_pdf_letter_7z
-#    - drivethrucards_7z
 #    - rules_pdf
   Italian:
 #    - db
@@ -144,5 +142,4 @@ outputs:
 #    - genericpng_7z
 #    - genericpng_pdf_a4_7z
 #    - genericpng_pdf_letter_7z
-#    - drivethrucards_7z
 #    - rules_pdf
