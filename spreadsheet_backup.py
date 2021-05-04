@@ -1,6 +1,8 @@
 # pylint: disable=W0703,C0301
 """ Backup Google Spreadsheet.
 
+NOTE: This script heavily relies on my existing smart home environment.
+
 Setup a cron as:
 18 8 * * *  python3 /home/homeassistant/lotr-lcg-set-generator/spreadsheet_backup.py >> /home/homeassistant/.homeassistant/cron.log 2>&1
 """

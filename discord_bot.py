@@ -2,10 +2,16 @@
 # -*- coding: utf8 -*-
 """ Discord bot.
 
+NOTE: This script heavily relies on my existing smart home environment.
+
 You need to install a new dependency:
 pip install discord.py==1.7.0
 
 Create discord.yaml (see discord.default.yaml).
+
+Setup a cron for `check_discord_bot.sh` (see its description).
+
+Start it by running `./restart_discord_bot.sh`.
 """
 import asyncio
 from datetime import datetime
@@ -34,6 +40,7 @@ MAILS_PATH = '/home/homeassistant/.homeassistant/mails'
 PLAYTEST_PATH = os.path.join('Discord', 'playtest.json')
 WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 
+CRON_ERRORS_CMD = './cron_errors.sh'
 CRON_LOG_CMD = './cron_log.sh'
 RCLONE_ART_CMD = './rclone_art.sh'
 RCLONE_FOLDER_CMD = 'rclone lsjson ALePCardImages:/{}/'
@@ -309,22 +316,6 @@ async def run_shell(cmd):
     stdout = stdout.decode('utf-8').strip()
     stderr = stderr.decode('utf-8').strip()
     return (stdout, stderr)
-
-
-async def get_errors():
-    """ Get errors of the last cron execution.
-    """
-    try:
-        proc = await asyncio.create_subprocess_shell(
-            './cron_errors.sh',
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE)
-        stdout, _ = await proc.communicate()
-    except Exception:
-        return ''
-
-    res = stdout.decode('utf-8').strip()
-    return res
 
 
 def split_result(value):
@@ -1606,7 +1597,7 @@ Card "{}" has been updated:
 
             await self._send_channel(message.channel, res)
         elif command.lower() == 'errors':
-            res = await get_errors()
+            res, _ = await run_shell(CRON_ERRORS_CMD)
             if not res:
                 res = 'no cron logs found'
 
