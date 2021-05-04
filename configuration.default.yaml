@@ -57,6 +57,9 @@ ringsdb_csv: true
 # Creating JSON files for Hall of Beorn (true or false)
 hallofbeorn_json: true
 
+# Creating CSV files for the French database sda.cgbuilder.fr (true or false)
+frenchdb_csv: false
+
 # Creating CSV files for the Spanish database susurrosdelbosqueviejo.com (true or false)
 spanishdb_csv: false
 

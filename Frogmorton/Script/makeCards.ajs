@@ -277,6 +277,8 @@ function main(progress, target) {
 	while (xmlFiles.hasNext()) {
 		run(progress, target, xmlFiles.next() + '', icons);
 	}
+	var finishedFile = new File('.', 'makeCards_FINISHED');
+	finishedFile.createNewFile();
 	return;
 }
 

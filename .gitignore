@@ -20,6 +20,7 @@ urlCache/*.cache
 
 configuration.yaml
 discord.yaml
+makeCards_FINISHED
 mpc_monitor.json
 ringsdb.json
 ringsdb_cookies.json

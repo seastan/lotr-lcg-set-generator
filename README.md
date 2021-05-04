@@ -98,6 +98,7 @@ for details).
   - `octgn_o8d`: creating `.o8d` files for OCTGN (true or false)
   - `ringsdb_csv`: creating CSV files for RingsDB (true or false)
   - `hallofbeorn_json`: creating JSON files for Hall of Beorn (true or false)
+  - `frenchdb_csv`: creating CSV files for the French database sda.cgbuilder.fr (true or false)
   - `spanishdb_csv`: creating CSV files for the Spanish database susurrosdelbosqueviejo.com (true or false)
   - `update_ringsdb`: updating test.ringsdb.com (true or false)
   - `ringsdb_url`: test.ringsdb.com URL

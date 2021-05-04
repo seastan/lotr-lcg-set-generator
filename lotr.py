@@ -210,6 +210,7 @@ CONFIGURATION_PATH = 'configuration.yaml'
 DISCORD_PATH = 'Discord'
 DISCORD_CARD_DATA_PATH = os.path.join(DISCORD_PATH, 'card_data.json')
 DOWNLOAD_PATH = 'Download'
+FINISHED_PATH = 'makeCards_FINISHED'
 IMAGES_BACK_PATH = 'imagesBack'
 IMAGES_CUSTOM_PATH = os.path.join(PROJECT_FOLDER, 'imagesCustom')
 IMAGES_ICONS_PATH = os.path.join(PROJECT_FOLDER, 'imagesIcons')
@@ -219,6 +220,7 @@ IMAGES_ZIP_PATH = '{}/Export/'.format(os.path.split(PROJECT_FOLDER)[-1])
 OCTGN_ZIP_PATH = 'a21af4e8-be4b-4cda-a6b6-534f9717391f/Sets'
 OUTPUT_DB_PATH = os.path.join('Output', 'DB')
 OUTPUT_DTC_PATH = os.path.join('Output', 'DriveThruCards')
+OUTPUT_FRENCHDB_PATH = os.path.join('Output', 'FrenchDB')
 OUTPUT_GENERICPNG_PATH = os.path.join('Output', 'GenericPNG')
 OUTPUT_GENERICPNG_PDF_PATH = os.path.join('Output', 'GenericPNGPDF')
 OUTPUT_HALLOFBEORN_PATH = os.path.join('Output', 'HallOfBeorn')
@@ -662,6 +664,9 @@ def read_conf(path=CONFIGURATION_PATH):
     conf['all_languages'] = list(conf['outputs'].keys())
     conf['languages'] = [lang for lang in conf['outputs']
                          if conf['outputs'][lang]]
+    if conf['frenchdb_csv'] and 'French' not in conf['languages']:
+        conf['languages'].append('French')
+
     if conf['spanishdb_csv'] and 'Spanish' not in conf['languages']:
         conf['languages'].append('Spanish')
 
@@ -2916,6 +2921,21 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
                  set_name, round(time.time() - timestamp, 3))
 
 
+def generate_frenchdb_csv(conf, set_id, set_name):
+    """ Generate CSV files for the French database.
+    """
+    logging.info('[%s] Generating CSV files for the French database...',
+                 set_name)
+    timestamp = time.time()
+
+    output_folder = os.path.join(OUTPUT_FRENCHDB_PATH,
+                                 escape_filename(set_name))
+    _create_folder(output_folder)
+
+    logging.info('[%s] ...Generating CSV files for the French database (%ss)',
+                 set_name, round(time.time() - timestamp, 3))
+
+
 def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R0915
     """ Generate CSV files for the Spanish database.
     """
@@ -3837,6 +3857,9 @@ def create_project():
     """
     logging.info('Creating a Strange Eons project archive...')
     timestamp = time.time()
+
+    if os.path.exists(FINISHED_PATH):
+        os.remove(FINISHED_PATH)
 
     with zipfile.ZipFile(PROJECT_PATH, 'w') as zip_obj:
         for root, _, filenames in os.walk(PROJECT_FOLDER):
