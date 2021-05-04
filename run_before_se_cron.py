@@ -1,17 +1,15 @@
 # pylint: disable=W0703,C0301
 """ Cron for LotR ALeP workflow (Part 1, before Strange Eons).
 
+NOTE: It's not run as a cron anymore, see `run_before_se_service.py`.
 NOTE: This script heavily relies on my existing smart home environment.
 
-Create discord.yaml (see discord.default.yaml).
-
-Setup rclone:
+You need to setup rclone:
 
 curl -L https://raw.github.com/pageauc/rclone4pi/master/rclone-install.sh | bash
 rclone config
 
-Setup a cron as:
-*/2 * * * * flock -xn /home/homeassistant/lotr-lcg-set-generator/cron.lock -c 'python3 /home/homeassistant/lotr-lcg-set-generator/run_before_se_cron.py > /dev/null' 2>&1
+Create discord.yaml (see discord.default.yaml).
 """
 from datetime import datetime
 from email.header import Header
