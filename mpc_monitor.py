@@ -5,6 +5,8 @@ NOTE: This script heavily relies on my existing smart home environment.
 
 Create discord.yaml (see discord.default.yaml).
 
+Create  mpc_monitor.json (see mpc_monitor.default.json).
+
 Setup a cron as:
 1-59/2 * * * * flock -xn /home/homeassistant/lotr-lcg-set-generator/mpc_monitor.lock -c 'python3 /home/homeassistant/lotr-lcg-set-generator/mpc_monitor.py > /dev/null' 2>&1
 """
