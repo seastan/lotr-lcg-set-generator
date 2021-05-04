@@ -2,9 +2,10 @@
 
 1. Clone this repo to a local folder (you can click `Code` and then `Download ZIP`).
 
-2. Make sure you already have a cards spreadsheet on Google Sheets.
+2. Make sure there is a spreadsheet on Google Sheets (most likely, it already exists).
 
-    If you don't, upload `Spreadsheet/spreadsheet.xlsx` from this repo, click `Save as Google Sheets`,
+    If it doesn't exist yet (that means you are starting a new project from scratch),
+    upload `Spreadsheet/spreadsheet.xlsx` from this repo, click `Save as Google Sheets`,
     click `Share` and `Change to anyone with the link`.  Click `Script editor` and upload the scripts
     from `Spreadsheet/Code.gs`.  After that, re-run `=SHEETS()` function from `A1` cell of the first `-` tab.
     Add all the sets and cards data.
@@ -14,7 +15,8 @@ This feature is currently hidden on Google Drive UI, but may still be accessed b
 (see https://support.google.com/drive/thread/35817359?hl=en).  If this feature is removed
 completely, you will need to download updates to that folder manually.
 
-    Create this folder if it doesn't exist yet.  It should have the following structure:
+    If it doesn't exist yet (that means you are starting a new project from scratch), create this folder first.
+    It should have the following structure:
 
     ```
     <set ID>/
@@ -70,7 +72,7 @@ for details).
 
   - [skip this step, if you don't use VirtualEnv] `virtualenv env --python=python3.9` (replace `3.9` with your actual Python version)
   - [skip this step, if you don't use VirtualEnv] `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
-  - `pip install -r requirements.txt`
+  - `pip install -r requirements.txt` (if you don't plan to generate images, you may run `pip install -r requirements_cron.txt` instead to skip unneeded dependencies)
 
     If for debugging purposes you plan to use Jupyter notebook, additionally run:
 
