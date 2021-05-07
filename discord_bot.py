@@ -1398,24 +1398,27 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                     diff[0] = diff[0].replace(lotr.BACK_PREFIX + lotr.CARD_NAME,
                                               lotr.CARD_SIDE_B).replace(
                                                   lotr.BACK_PREFIX, '[Back] ')
-                    if not str(diff[1] or '').strip():
+                    diff[1] = str(diff[1]) if diff[1] is not None else ''
+                    diff[2] = str(diff[2]) if diff[2] is not None else ''
+
+                    if not diff[1].strip():
                         diff[1] = '```\n ```'
-                        new_lines = str(diff[2] or '').strip().split('\n')
+                        new_lines = diff[2].strip().split('\n')
                         diff[2] = '```diff\n{}```'.format(
                             '\n'.join('+ {}'.format(r)
                                       for r in new_lines).strip())
                         continue
 
-                    if not str(diff[2] or '').strip():
-                        old_lines = str(diff[1] or '').strip().split('\n')
+                    if not diff[2].strip():
+                        old_lines = diff[1].strip().split('\n')
                         diff[1] = '```diff\n{}```'.format(
                             '\n'.join('- {}'.format(r)
                                       for r in old_lines).strip())
                         diff[2] = '```\n ```'
                         continue
 
-                    old_lines = str(diff[1] or '').strip().split('\n')
-                    new_lines = str(diff[2] or '').strip().split('\n')
+                    old_lines = diff[1].strip().split('\n')
+                    new_lines = diff[2].strip().split('\n')
                     max_length = max(len(old_lines), len(new_lines))
                     for i in range(max_length):
                         if i >= len(old_lines):
