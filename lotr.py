@@ -661,6 +661,14 @@ def read_conf(path=CONFIGURATION_PATH):
     with open(path, 'r') as f_conf:
         conf = yaml.safe_load(f_conf)
 
+    # to be removed
+    if 'frenchdb_csv' not in conf:
+        conf['frenchdb_csv'] = False
+
+    if 'spanishdb_csv' not in conf:
+        conf['spanishdb_csv'] = False
+    # to be removed
+
     conf['all_languages'] = list(conf['outputs'].keys())
     conf['languages'] = [lang for lang in conf['outputs']
                          if conf['outputs'][lang]]
@@ -4818,7 +4826,7 @@ def _make_low_quality(conf, input_path):
                                .format(output_cnt, input_cnt))
 
 
-def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R0912,R0914
+def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R0912,R0914,R0915
     """ Generate DB, Preview and RingsDB image outputs.
     """
     logging.info('[%s, %s] Generating DB, Preview and RingsDB image '
@@ -4843,9 +4851,10 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
             if filename.split('.')[-1] != 'png':
                 continue
 
-            output_filename = '{}-{}{}{}'.format(
+            output_filename = '{}-{}----{}{}{}'.format(
                 filename[:3],
                 re.sub('-+$', '', filename[8:50]),
+                filename[50:86],
                 re.sub('-1$', '', filename[86:88]),
                 filename[88:])
             if output_filename not in known_filenames:
@@ -4902,8 +4911,14 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                 if filename.split('.')[-1] != 'jpg':
                     continue
 
+                if filename.endswith('-2.jpg'):
+                    output_filename = filename.split('----')[0] + '-2.jpg'
+                else:
+                    output_filename = filename.split('----')[0] + '.jpg'
+
                 shutil.copyfile(os.path.join(temp_path, filename),
-                                os.path.join(preview_output_path, filename))
+                                os.path.join(preview_output_path,
+                                             output_filename))
 
             break
 
