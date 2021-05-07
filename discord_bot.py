@@ -2357,7 +2357,8 @@ Targets removed.
                 if (card[lotr.CARD_ID], side) not in file_data:
                     missing_artwork.append('{} ({}), side {}'.format(
                         card[lotr.CARD_ID], card[lotr.CARD_NAME], side))
-                elif (file_data[(card[lotr.CARD_ID], side)] !=
+                elif (lotr.escape_filename(
+                        file_data[(card[lotr.CARD_ID], side)]) !=
                       lotr.escape_filename(artist)):
                     if artist:
                         different_artist.append(
