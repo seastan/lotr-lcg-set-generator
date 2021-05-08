@@ -5,7 +5,12 @@
 NOTE: This script heavily relies on my existing smart home environment.
 
 You need to install a new dependency:
-pip install discord.py==1.7.0
+pip install discord.py==1.7.0 aiohttp
+
+You need to setup rclone:
+
+curl -L https://raw.github.com/pageauc/rclone4pi/master/rclone-install.sh | bash
+rclone config
 
 Create discord.yaml (see discord.default.yaml).
 
@@ -26,6 +31,7 @@ import time
 import uuid
 import xml.etree.ElementTree as ET
 
+import aiohttp
 import discord
 import yaml
 
@@ -43,7 +49,11 @@ WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 CRON_ERRORS_CMD = './cron_errors.sh'
 CRON_LOG_CMD = './cron_log.sh'
 RCLONE_ART_CMD = './rclone_art.sh'
-RCLONE_FOLDER_CMD = 'rclone lsjson ALePCardImages:/{}/'
+RCLONE_ART_FOLDER_CMD = 'rclone lsjson "ALePCardImages:/{}/"'
+RCLONE_RENDERED_FOLDER_CMD = 'rclone lsjson "ALePRenderedImages:/{}/"'
+
+DIRECT_URL_REGEX = r'itemJson: \[[^,]+,"[^"]+","([^"]+)"'
+PREVIEW_URL = 'https://drive.google.com/file/d/{}/preview'
 
 CMD_SLEEP_TIME = 2
 IO_SLEEP_TIME = 1
@@ -57,6 +67,7 @@ MAIL_QUOTA = 50
 
 CHANNEL_LIMIT = 500
 ARCHIVE_CATEGORY = 'Archive'
+CARD_DECK_SECTION = '_Deck Section'
 CRON_CHANNEL = 'cron'
 PLAYTEST_CHANNEL = 'playtesting-checklist'
 UPDATES_CHANNEL = 'spreadsheet-updates'
@@ -64,6 +75,8 @@ GENERAL_CATEGORIES = {
     'Text Channels', 'Division of Labor', 'Player Card Design', 'Printing',
     'Rules', 'Voice Channels', 'Archive'
 }
+
+RENDERED_IMAGES_TTL = 300
 
 EMOJIS = {
     '[leadership]': '<:leadership:822573464601886740>',
@@ -162,15 +175,22 @@ List of **!art** commands:
 **!art saveb <artist>** (as a reply to a message with an image attachment) - save the image as a card's artwork for the back side (for example: `!art saveb John Howe`)
 **!art verify <set name or set code>** - verify artwork for a set (for example: `!art verify Children of Eorl` or `!art verify CoE`)
 **!art help** - display this help message
+""",
+    'image': """
+List of **!image** commands:
+
+**!image set <set name or set code>** - post the last rendered images for all cards from a set (for example: `!image set The Aldburg Plot` or `!image set TAP`)
+**!image card <card name>** - post the last rendered images for the first card matching a given card name (for example: `!image card Gavin`)
+**!image card this** - if in a card channel, post the last rendered images for the card
+**!image help** - display this help message
 """
 }
-
-CARD_DECK_SECTION = '_Deck Section'
 
 CARD_DATA = {}
 CONF = {}
 EXTERNAL_DATA = {}
 EXTERNAL_FILES = set()
+RENDERED_IMAGES = {}
 
 playtest_lock = asyncio.Lock()
 art_lock = asyncio.Lock()
@@ -186,7 +206,7 @@ class FormatError(Exception):
     """
 
 
-class ArtworkFolderError(Exception):
+class RCloneFolderError(Exception):
     """ Artwork folder error.
     """
 
@@ -899,17 +919,17 @@ async def get_artwork_files(set_id):
     """
     path = CONF.get('artwork_destination_path')
     if not path:
-        raise ArtworkFolderError('no artwork folder specified on the '
-                                 'server')
+        raise RCloneFolderError('no artwork folder specified on the '
+                                'server')
 
-    stdout, stderr = await run_shell(RCLONE_FOLDER_CMD.format(set_id))
+    stdout, stderr = await run_shell(RCLONE_ART_FOLDER_CMD.format(set_id))
     try:
         filenames = {f['Name'] for f in json.loads(stdout)}
     except Exception:
         message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
                                                                  stderr)
         create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
-        raise ArtworkFolderError(message)
+        raise RCloneFolderError(message)
 
     folder = os.path.join(path, set_id)
     if os.path.exists(folder):
@@ -919,6 +939,55 @@ async def get_artwork_files(set_id):
 
     filenames = sorted(list(filenames))
     return filenames
+
+
+async def get_rendered_images(set_name):
+    """ Get rendered images for the set.
+    """
+    if set_name not in RENDERED_IMAGES:
+        RENDERED_IMAGES[set_name] = {'data': {}, 'ts': 0}
+
+    if (RENDERED_IMAGES[set_name]['data'] and
+            time.time() - RENDERED_IMAGES_TTL <=
+            RENDERED_IMAGES[set_name]['ts']):
+        return RENDERED_IMAGES[set_name]['data']
+
+    folder = '{}.English'.format(lotr.escape_filename(set_name))
+    stdout, _ = await run_shell(RCLONE_RENDERED_FOLDER_CMD.format(folder))
+    try:
+        images = sorted(json.loads(stdout), key=lambda i: i['Name'])
+    except Exception:
+        return {}
+
+    data = {}
+    for image in images:
+        filename = image['Name']
+        if not filename.endswith('.png') or not '----' in filename:
+            continue
+
+        card_id = filename.split('----')[1][:36]
+        data.setdefault(card_id, []).append({'id': image['ID'],
+                                             'modified': image['ModTime']})
+
+    RENDERED_IMAGES[set_name]['data'] = data
+    RENDERED_IMAGES[set_name]['ts'] = time.time()
+    return data
+
+
+async def get_direct_image_url(image_id):
+    """ Get direct image URL from a Google Drive ID.
+    """
+    preview_url = PREVIEW_URL.format(image_id)
+    async with aiohttp.ClientSession() as session:
+        async with session.get(preview_url) as response:
+            res = await response.text()
+
+    match = re.search(DIRECT_URL_REGEX, res)
+    if not match:
+        return None
+
+    direct_url = match.groups()[0].split('\\u')[0]
+    return direct_url
 
 
 class MyClient(discord.Client):  # pylint: disable=R0902
@@ -2261,8 +2330,8 @@ Targets removed.
 
         artwork_destination_path = CONF.get('artwork_destination_path')
         if not artwork_destination_path:
-            raise ArtworkFolderError('no artwork folder specified on the '
-                                     'server')
+            raise RCloneFolderError('no artwork folder specified on the '
+                                    'server')
 
         content = await attachment.read()
 
@@ -2543,6 +2612,87 @@ Targets removed.
             await self._send_channel(message.channel, res)
 
 
+    async def _post_rendered_set(self, value):
+        """ Post the last rendered images for all cards from a set.
+        """
+        data = await read_card_data()
+
+        set_name = re.sub(r'^alep---', '', lotr.normalized_name(value))
+        matches = [card for card in data['data'] if re.sub(
+            r'^alep---', '',
+            lotr.normalized_name(card[lotr.CARD_SET_NAME])) == set_name]
+        if not matches:
+            set_code = value.lower()
+            matches = [card for card in data['data']
+                       if card[lotr.CARD_SET_HOB_CODE].lower() == set_code]
+
+            if not matches:
+                return 'no cards found for the set'
+
+        set_name = matches[0][lotr.CARD_SET_NAME]
+        images = await get_rendered_images(set_name)
+        if not images:
+            return 'no rendered images found for the set'
+
+        for card in matches:
+            if card[lotr.CARD_ID] not in images:
+                continue
+
+            if not card.get(lotr.CARD_DISCORD_CHANNEL):
+                continue
+
+            channel_name = card[lotr.CARD_DISCORD_CHANNEL]
+            if channel_name not in self.channels:
+                raise DiscordError('Channel "{}" not found'.format(
+                    channel_name))
+
+            channel = self.get_channel(self.channels[channel_name]['id'])
+            for image in images[card[lotr.CARD_ID]]:
+                url = await get_direct_image_url(image['id'])
+                if not url:
+                    await channel.send(
+                        "Can't obtain image URL from Google Drive")
+                    continue
+
+                await channel.send(url)
+                await channel.send(
+                    'Last modified: {}'.format(image['modified'])i)
+                await asyncio.sleep(MESSAGE_SLEEP_TIME)
+
+        return 'done'
+
+
+    async def _process_image_command(self, message):
+        """ Process an image command.
+        """
+        if message.content.lower() == '!image':
+            command = 'help'
+        else:
+            command = re.sub(r'^!image ', '', message.content,
+                             flags=re.IGNORECASE).split('\n')[0]
+
+        logging.info('Received image command: %s', command)
+
+        if command.lower().startswith('set '):
+            await message.channel.send('Please wait...')
+            try:
+                set_name = re.sub(r'^set ', '', command,
+                                  flags=re.IGNORECASE)
+                res = await self._post_rendered_set(set_name)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await self._send_channel(message.channel, res)
+        elif command.lower() == 'set':
+            await message.channel.send('please specify the set')
+        else:
+            res = HELP['image']
+            await self._send_channel(message.channel, res)
+
+
     async def _process_help_command(self, message):
         """ Process a help command.
         """
@@ -2571,6 +2721,9 @@ Targets removed.
             elif (message.content.lower().startswith('!art ') or
                   message.content.lower() == '!art'):
                 await self._process_art_command(message)
+            elif (message.content.lower().startswith('!image ') or
+                  message.content.lower() == '!image'):
+                await self._process_image_command(message)
             elif (message.content.lower().startswith('!stat ') or
                   message.content.lower() == '!stat'):
                 await self._process_stat_command(message)
