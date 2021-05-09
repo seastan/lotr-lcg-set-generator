@@ -76,7 +76,7 @@ GENERAL_CATEGORIES = {
     'Rules', 'Voice Channels', 'Archive'
 }
 
-RENDERED_IMAGES_TTL = 300
+RENDERED_IMAGES_TTL = 900
 
 EMOJIS = {
     '[leadership]': '<:leadership:822573464601886740>',
@@ -181,7 +181,8 @@ List of **!image** commands:
 
 **!image set <set name or set code>** - post the last rendered images for all cards from a set (for example: `!image set The Aldburg Plot` or `!image set TAP`)
 **!image card <card name>** - post the last rendered images for the first card matching a given card name (for example: `!image card Gavin`)
-**!image card this** - if in a card channel, post the last rendered images for the card
+**!image card this** (or **!image this**) - if in a card channel, post the last rendered images for the card
+**!image refresh** - clear the image cache (if you just uploaded new images to the Google Drive)
 **!image help** - display this help message
 """
 }
@@ -457,6 +458,65 @@ def card_match(card_name, card_back_name, search_name):
         return 3
 
     return 0
+
+
+def find_card_matches(data, command, this=False):
+    """ Find all card matches and return the match number.
+    """
+    if this:
+        matches = [(card, 1) for card in data['data']
+                   if card.get(lotr.CARD_DISCORD_CHANNEL, '') == command]
+        num = 1
+    elif re.match(r'^[0-9]+$', command):
+        matches = [(card, 1) for card in data['data']
+                   if card[lotr.ROW_COLUMN] == int(command)]
+        num = 1
+    elif re.match(
+            r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+            command):
+        if command in data['dict']:
+            matches = [(data['dict'][command], 1)]
+        else:
+            matches = []
+
+        num = 1
+    else:
+        if re.search(r' n:[0-9]+$', command):
+            parts = command.split(' ')
+            command = ' '.join(parts[:-1])
+            num = int(parts[-1].replace('n:', ''))
+        else:
+            num = 1
+
+        if re.search(r' s:[a-zA-Z][a-zA-Z0-9]+$', command):
+            parts = command.split(' ')
+            name = ' '.join(parts[:-1])
+            set_code = parts[-1].replace('s:', '').lower()
+        else:
+            name = command
+            set_code = None
+
+        name = lotr.normalized_name(name)
+        matches = [m for m in [
+            (card, card_match(
+                card[lotr.CARD_NORMALIZED_NAME],
+                card.get(lotr.BACK_PREFIX + lotr.CARD_NORMALIZED_NAME, ''),
+                name))
+            for card in data['data']] if m[1] > 0]
+
+        if set_code:
+            matches = [m for m in matches
+                       if m[0][lotr.CARD_SET_HOB_CODE].lower() == set_code]
+
+    matches.sort(key=lambda m: (
+        m[1],
+        m[0][lotr.CARD_TYPE] in ('Rules', 'Presentation'),
+        m[0][lotr.CARD_SET_RINGSDB_CODE],
+        lotr.is_positive_or_zero_int(m[0][lotr.CARD_NUMBER])
+        and int(m[0][lotr.CARD_NUMBER]) or 0,
+        m[0][lotr.CARD_NUMBER]))
+
+    return matches, num
 
 
 def update_text(text):  # pylint: disable=R0915
@@ -955,7 +1015,10 @@ async def get_rendered_images(set_name):
     folder = '{}.English'.format(lotr.escape_filename(set_name))
     stdout, _ = await run_shell(RCLONE_RENDERED_FOLDER_CMD.format(folder))
     try:
-        images = sorted(json.loads(stdout), key=lambda i: i['Name'])
+        images = sorted(json.loads(stdout),
+                        key=lambda i: i['Name']
+                        if i['Name'].endswith('-2.png')
+                        else re.sub(r'\.png$', '-1.png', i['Name']))
     except Exception:
         return {}
 
@@ -966,8 +1029,9 @@ async def get_rendered_images(set_name):
             continue
 
         card_id = filename.split('----')[1][:36]
-        data.setdefault(card_id, []).append({'id': image['ID'],
-                                             'modified': image['ModTime']})
+        data.setdefault(card_id, []).append(
+            {'id': image['ID'],
+             'modified': image['ModTime'].replace('T', ' ').split('.')[0]})
 
     RENDERED_IMAGES[set_name]['data'] = data
     RENDERED_IMAGES[set_name]['ts'] = time.time()
@@ -2115,62 +2179,9 @@ Targets removed.
         """ Get the card information.
         """
         data = await read_card_data()
-
-        if this:
-            matches = [(card, 1) for card in data['data']
-                       if card.get(lotr.CARD_DISCORD_CHANNEL, '') == command]
-            num = 1
-        elif re.match(r'^[0-9]+$', command):
-            matches = [(card, 1) for card in data['data']
-                       if card[lotr.ROW_COLUMN] == int(command)]
-            num = 1
-        elif re.match(
-                r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
-                command):
-            if command in data['dict']:
-                matches = [(data['dict'][command], 1)]
-            else:
-                matches = []
-
-            num = 1
-        else:
-            if re.search(r' n:[0-9]+$', command):
-                parts = command.split(' ')
-                command = ' '.join(parts[:-1])
-                num = int(parts[-1].replace('n:', ''))
-            else:
-                num = 1
-
-            if re.search(r' s:[a-zA-Z][a-zA-Z0-9]+$', command):
-                parts = command.split(' ')
-                name = ' '.join(parts[:-1])
-                set_code = parts[-1].replace('s:', '').lower()
-            else:
-                name = command
-                set_code = None
-
-            name = lotr.normalized_name(name)
-            matches = [m for m in [
-                (card, card_match(
-                    card[lotr.CARD_NORMALIZED_NAME],
-                    card.get(lotr.BACK_PREFIX + lotr.CARD_NORMALIZED_NAME, ''),
-                    name))
-                for card in data['data']] if m[1] > 0]
-
-            if set_code:
-                matches = [m for m in matches
-                           if m[0][lotr.CARD_SET_HOB_CODE].lower() == set_code]
-
+        matches, num = find_card_matches(data, command, this)
         if not matches:
             return 'no cards found'
-
-        matches.sort(key=lambda m: (
-            m[1],
-            m[0][lotr.CARD_TYPE] in ('Rules', 'Presentation'),
-            m[0][lotr.CARD_SET_RINGSDB_CODE],
-            lotr.is_positive_or_zero_int(m[0][lotr.CARD_NUMBER])
-            and int(m[0][lotr.CARD_NUMBER]) or 0,
-            m[0][lotr.CARD_NUMBER]))
 
         ending = '\n...' if len(matches) > 25 else ''
         matches = matches[:25]
@@ -2638,15 +2649,22 @@ Targets removed.
             if card[lotr.CARD_ID] not in images:
                 continue
 
-            if not card.get(lotr.CARD_DISCORD_CHANNEL):
-                continue
+            if card.get(lotr.CARD_DISCORD_CHANNEL):
+                channel_name = card[lotr.CARD_DISCORD_CHANNEL]
+                if channel_name not in self.channels:
+                    raise DiscordError('Channel "{}" not found'.format(
+                        channel_name))
 
-            channel_name = card[lotr.CARD_DISCORD_CHANNEL]
-            if channel_name not in self.channels:
-                raise DiscordError('Channel "{}" not found'.format(
-                    channel_name))
+                channel = self.get_channel(self.channels[channel_name]['id'])
+            else:
+                if (card[lotr.CARD_DISCORD_CATEGORY] not in self.categories or
+                        card[lotr.CARD_DISCORD_CATEGORY]
+                        not in self.general_channels):
+                    continue
 
-            channel = self.get_channel(self.channels[channel_name]['id'])
+                channel = self.get_channel(self.general_channels[
+                    card[lotr.CARD_DISCORD_CATEGORY]]['id'])
+
             for image in images[card[lotr.CARD_ID]]:
                 url = await get_direct_image_url(image['id'])
                 if not url:
@@ -2656,13 +2674,41 @@ Targets removed.
 
                 await channel.send(url)
                 await channel.send(
-                    'Last modified: {}'.format(image['modified'])i)
-                await asyncio.sleep(MESSAGE_SLEEP_TIME)
+                    'Last modified: {} UTC'.format(image['modified']))
+
+            await asyncio.sleep(MESSAGE_SLEEP_TIME)
 
         return 'done'
 
 
-    async def _process_image_command(self, message):
+    async def _post_rendered_card(self, channel, value, this):
+        """ Post the last rendered images for the card.
+        """
+        data = await read_card_data()
+        matches, num = find_card_matches(data, value, this)
+        matches = matches[:25]
+        if not matches or num > len(matches):
+            return 'no cards found'
+
+        card = matches[num - 1][0]
+        set_name = card[lotr.CARD_SET_NAME]
+        images = await get_rendered_images(set_name)
+        if not images or card[lotr.CARD_ID] not in images:
+            return 'no rendered images found for the card'
+
+        for image in images[card[lotr.CARD_ID]]:
+            url = await get_direct_image_url(image['id'])
+            if not url:
+                return "Can't obtain image URL from Google Drive"
+
+            await channel.send(url)
+            await channel.send(
+                'Last modified: {} UTC'.format(image['modified']))
+
+        return None
+
+
+    async def _process_image_command(self, message):  # pylint: disable=R0912
         """ Process an image command.
         """
         if message.content.lower() == '!image':
@@ -2670,6 +2716,9 @@ Targets removed.
         else:
             command = re.sub(r'^!image ', '', message.content,
                              flags=re.IGNORECASE).split('\n')[0]
+
+        if command.lower() == 'this':
+            command = 'card this'
 
         logging.info('Received image command: %s', command)
 
@@ -2688,6 +2737,32 @@ Targets removed.
             await self._send_channel(message.channel, res)
         elif command.lower() == 'set':
             await message.channel.send('please specify the set')
+        elif command.lower().startswith('card '):
+            await message.channel.send('Please wait...')
+            try:
+                card_name = re.sub(r'^card ', '', command,
+                                   flags=re.IGNORECASE)
+                if card_name.lower() == 'this':
+                    card_name = message.channel.name
+                    this = True
+                else:
+                    this = False
+
+                res = await self._post_rendered_card(message.channel,
+                                                     card_name, this)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            if res:
+                await self._send_channel(message.channel, res)
+        elif command.lower() == 'card':
+            await message.channel.send('please specify the card')
+        elif command.lower() == 'refresh':
+            RENDERED_IMAGES.clear()
+            await message.channel.send('done')
         else:
             res = HELP['image']
             await self._send_channel(message.channel, res)
