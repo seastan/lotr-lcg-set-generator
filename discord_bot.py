@@ -5,7 +5,7 @@
 NOTE: This script heavily relies on my existing smart home environment.
 
 You need to install a new dependency:
-pip install discord.py==1.7.0 aiohttp
+pip install discord.py==1.7.0
 
 You need to setup rclone:
 
@@ -31,7 +31,6 @@ import time
 import uuid
 import xml.etree.ElementTree as ET
 
-import aiohttp
 import discord
 import yaml
 
@@ -40,6 +39,7 @@ import lotr
 
 CHANGES_PATH = os.path.join('Discord', 'Changes')
 CONF_PATH = 'discord.yaml'
+IMAGES_PATH = os.path.join('Discord', 'Images')
 LOG_PATH = 'discord_bot.log'
 MAIL_COUNTER_PATH = 'discord_bot.cnt'
 MAILS_PATH = '/home/homeassistant/.homeassistant/mails'
@@ -49,8 +49,9 @@ WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 CRON_ERRORS_CMD = './cron_errors.sh'
 CRON_LOG_CMD = './cron_log.sh'
 RCLONE_ART_CMD = './rclone_art.sh'
-RCLONE_ART_FOLDER_CMD = 'rclone lsjson "ALePCardImages:/{}/"'
-RCLONE_RENDERED_FOLDER_CMD = 'rclone lsjson "ALePRenderedImages:/{}/"'
+RCLONE_ART_FOLDER_CMD = "rclone lsjson 'ALePCardImages:/{}/'"
+RCLONE_COPY_IMAGE_CMD = "rclone copy 'ALePRenderedImages:/{}/{}' '{}/'"
+RCLONE_RENDERED_FOLDER_CMD = "rclone lsjson 'ALePRenderedImages:/{}/'"
 
 DIRECT_URL_REGEX = r'itemJson: \[[^,]+,"[^"]+","([^"]+)"'
 PREVIEW_URL = 'https://drive.google.com/file/d/{}/preview'
@@ -1012,6 +1013,10 @@ async def get_rendered_images(set_name):
             RENDERED_IMAGES[set_name]['ts']):
         return RENDERED_IMAGES[set_name]['data']
 
+    local_path = os.path.join(IMAGES_PATH, lotr.escape_filename(set_name))
+    lotr.clear_folder(local_path)
+    lotr.create_folder(local_path)
+
     folder = '{}.English'.format(lotr.escape_filename(set_name))
     stdout, _ = await run_shell(RCLONE_RENDERED_FOLDER_CMD.format(folder))
     try:
@@ -1030,28 +1035,12 @@ async def get_rendered_images(set_name):
 
         card_id = filename.split('----')[1][:36]
         data.setdefault(card_id, []).append(
-            {'id': image['ID'],
+            {'filename': image['Name'],
              'modified': image['ModTime'].replace('T', ' ').split('.')[0]})
 
     RENDERED_IMAGES[set_name]['data'] = data
     RENDERED_IMAGES[set_name]['ts'] = time.time()
     return data
-
-
-async def get_direct_image_url(image_id):
-    """ Get direct image URL from a Google Drive ID.
-    """
-    preview_url = PREVIEW_URL.format(image_id)
-    async with aiohttp.ClientSession() as session:
-        async with session.get(preview_url) as response:
-            res = await response.text()
-
-    match = re.search(DIRECT_URL_REGEX, res)
-    if not match:
-        return None
-
-    direct_url = match.groups()[0].split('\\u')[0]
-    return direct_url
 
 
 class MyClient(discord.Client):  # pylint: disable=R0902
@@ -2645,6 +2634,7 @@ Targets removed.
         if not images:
             return 'no rendered images found for the set'
 
+        local_path = os.path.join(IMAGES_PATH, lotr.escape_filename(set_name))
         for card in matches:
             if card[lotr.CARD_ID] not in images:
                 continue
@@ -2666,17 +2656,20 @@ Targets removed.
                     card[lotr.CARD_DISCORD_CATEGORY]]['id'])
 
             for image in images[card[lotr.CARD_ID]]:
-                url = await get_direct_image_url(image['id'])
-                if not url:
+                image_path = os.path.join(local_path, image['filename'])
+                if not os.path.exists(image_path):
+                    _, _ = await run_shell(RCLONE_COPY_IMAGE_CMD.format(
+                        '{}.English'.format(lotr.escape_filename(set_name)),
+                        image['filename'], local_path))
+
+                if not os.path.exists(image_path):
                     await channel.send(
-                        "Can't obtain image URL from Google Drive")
+                        "Can't download the image from Google Drive")
                     continue
 
-                await channel.send(url)
+                await channel.send(file=discord.File(image_path))
                 await channel.send(
                     'Last modified: {} UTC'.format(image['modified']))
-
-            await asyncio.sleep(MESSAGE_SLEEP_TIME)
 
         return 'done'
 
@@ -2696,12 +2689,18 @@ Targets removed.
         if not images or card[lotr.CARD_ID] not in images:
             return 'no rendered images found for the card'
 
+        local_path = os.path.join(IMAGES_PATH, lotr.escape_filename(set_name))
         for image in images[card[lotr.CARD_ID]]:
-            url = await get_direct_image_url(image['id'])
-            if not url:
-                return "Can't obtain image URL from Google Drive"
+            image_path = os.path.join(local_path, image['filename'])
+            if not os.path.exists(image_path):
+                _, _ = await run_shell(RCLONE_COPY_IMAGE_CMD.format(
+                    '{}.English'.format(lotr.escape_filename(set_name)),
+                    image['filename'], local_path))
 
-            await channel.send(url)
+            if not os.path.exists(image_path):
+                return "Can't download the image from Google Drive"
+
+            await channel.send(file=discord.File(image_path))
             await channel.send(
                 'Last modified: {} UTC'.format(image['modified']))
 

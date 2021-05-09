@@ -582,7 +582,7 @@ def extract_keywords(value):
     return keywords
 
 
-def _clear_folder(folder):
+def clear_folder(folder):
     """ Clear the folder.
     """
     if not os.path.exists(folder):
@@ -596,7 +596,7 @@ def _clear_folder(folder):
         break
 
 
-def _create_folder(folder):
+def create_folder(folder):
     """ Create the folder if needed.
     """
     if not os.path.exists(folder):
@@ -732,10 +732,10 @@ def reset_project_folders(conf):
     logging.info('Resetting the project folders...')
     timestamp = time.time()
 
-    _clear_folder(IMAGES_CUSTOM_PATH)
-    _clear_folder(IMAGES_ICONS_PATH)
-    _clear_folder(IMAGES_RAW_PATH)
-    _clear_folder(XML_PATH)
+    clear_folder(IMAGES_CUSTOM_PATH)
+    clear_folder(IMAGES_ICONS_PATH)
+    clear_folder(IMAGES_RAW_PATH)
+    clear_folder(XML_PATH)
 
     nobleed_folder = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED)
     for _, subfolders, _ in os.walk(nobleed_folder):
@@ -1794,9 +1794,9 @@ def _copy_octgn_xml(set_id, set_name):
     """ Copy set.xml file to OCTGN output folder.
     """
     output_path = os.path.join(OUTPUT_OCTGN_PATH, escape_filename(set_name))
-    _create_folder(output_path)
+    create_folder(output_path)
     output_path = os.path.join(output_path, set_id)
-    _create_folder(output_path)
+    create_folder(output_path)
     shutil.copyfile(os.path.join(SET_OCTGN_PATH, '{}.xml'.format(set_id)),
                     os.path.join(output_path, OCTGN_SET_XML))
 
@@ -2364,9 +2364,9 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
 
     output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
                                escape_filename(set_name))
-    _clear_folder(output_path)
+    clear_folder(output_path)
     if quests:
-        _create_folder(output_path)
+        create_folder(output_path)
 
     for quest in quests:
         rules_list = [r.strip().split(':', 1)
@@ -2576,7 +2576,7 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
     timestamp = time.time()
 
     output_path = os.path.join(OUTPUT_RINGSDB_PATH, escape_filename(set_name))
-    _create_folder(output_path)
+    create_folder(output_path)
 
     output_path = os.path.join(output_path,
                                '{}.csv'.format(escape_filename(set_name)))
@@ -2704,7 +2704,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
 
     output_path = os.path.join(OUTPUT_HALLOFBEORN_PATH,
                                escape_filename(set_name))
-    _create_folder(output_path)
+    create_folder(output_path)
 
     output_path = os.path.join(output_path,
                                '{}.json'.format(escape_filename(set_name)))
@@ -2938,7 +2938,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):
 
     output_folder = os.path.join(OUTPUT_FRENCHDB_PATH,
                                  escape_filename(set_name))
-    _create_folder(output_folder)
+    create_folder(output_folder)
 
     logging.info('[%s] ...Generating CSV files for the French database (%ss)',
                  set_name, round(time.time() - timestamp, 3))
@@ -2953,7 +2953,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
 
     output_folder = os.path.join(OUTPUT_SPANISHDB_PATH,
                                  escape_filename(set_name))
-    _create_folder(output_folder)
+    create_folder(output_folder)
 
     data = sorted(
         [row for row in DATA if row[CARD_SET] == set_id
@@ -3918,14 +3918,14 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
     temp_path = os.path.join(
         TEMP_ROOT_PATH, 'generate_png300_nobleed.{}.{}'.format(set_id,
                                                                lang))
-    _create_folder(temp_path)
-    _clear_folder(temp_path)
+    create_folder(temp_path)
+    clear_folder(temp_path)
 
     temp_path2 = os.path.join(
         TEMP_ROOT_PATH, 'generate_png300_nobleed2.{}.{}'.format(set_id,
                                                                 lang))
-    _create_folder(temp_path2)
-    _clear_folder(temp_path2)
+    create_folder(temp_path2)
+    clear_folder(temp_path2)
 
     input_cnt = 0
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
@@ -3968,7 +3968,7 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
 
     output_path = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED,
                                '{}.{}'.format(set_id, lang))
-    _create_folder(output_path)
+    create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
 
     for _, _, filenames in os.walk(temp_path2):
@@ -3996,14 +3996,14 @@ def generate_png800_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
     temp_path = os.path.join(
         TEMP_ROOT_PATH, 'generate_png800_nobleed.{}.{}'.format(set_id,
                                                                lang))
-    _create_folder(temp_path)
-    _clear_folder(temp_path)
+    create_folder(temp_path)
+    clear_folder(temp_path)
 
     temp_path2 = os.path.join(
         TEMP_ROOT_PATH, 'generate_png800_nobleed2.{}.{}'.format(set_id,
                                                                 lang))
-    _create_folder(temp_path2)
-    _clear_folder(temp_path2)
+    create_folder(temp_path2)
+    clear_folder(temp_path2)
 
     input_cnt = 0
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
@@ -4046,7 +4046,7 @@ def generate_png800_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
 
     output_path = os.path.join(IMAGES_EONS_PATH, PNG800NOBLEED,
                                '{}.{}'.format(set_id, lang))
-    _create_folder(output_path)
+    create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
 
     for _, _, filenames in os.walk(temp_path2):
@@ -4073,13 +4073,13 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disab
 
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_png300_db.{}.{}'.format(set_id, lang))
-    _create_folder(temp_path)
-    _clear_folder(temp_path)
+    create_folder(temp_path)
+    clear_folder(temp_path)
 
     temp_path2 = os.path.join(TEMP_ROOT_PATH,
                               'generate_png300_db2.{}.{}'.format(set_id, lang))
-    _create_folder(temp_path2)
-    _clear_folder(temp_path2)
+    create_folder(temp_path2)
+    clear_folder(temp_path2)
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED,
                               '{}.{}'.format(set_id, lang))
@@ -4125,7 +4125,7 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disab
 
     output_path = os.path.join(IMAGES_EONS_PATH, PNG300DB,
                                '{}.{}'.format(set_id, lang))
-    _create_folder(output_path)
+    create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
 
     for _, _, filenames in os.walk(temp_path2):
@@ -4151,7 +4151,7 @@ def generate_png300_octgn(set_id, set_name, lang, skip_ids):
 
     output_path = os.path.join(IMAGES_EONS_PATH, PNG300OCTGN,
                                '{}.{}'.format(set_id, lang))
-    _create_folder(output_path)
+    create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED,
@@ -4184,7 +4184,7 @@ def generate_png300_rules_pdf(set_id, set_name, lang, skip_ids, card_data):  # p
 
     output_path = os.path.join(IMAGES_EONS_PATH, PNG300RULES,
                                '{}.{}'.format(set_id, lang))
-    _create_folder(output_path)
+    create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED,
@@ -4236,14 +4236,14 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
 
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_png300_pdf.{}.{}'.format(set_id, lang))
-    _create_folder(temp_path)
-    _clear_folder(temp_path)
+    create_folder(temp_path)
+    clear_folder(temp_path)
 
     temp_path2 = os.path.join(TEMP_ROOT_PATH,
                               'generate_png300_pdf2.{}.{}'.format(set_id,
                                                                   lang))
-    _create_folder(temp_path2)
-    _clear_folder(temp_path2)
+    create_folder(temp_path2)
+    clear_folder(temp_path2)
 
     input_cnt = 0
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
@@ -4285,13 +4285,13 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
         raise GIMPError('Wrong number of output files: {} instead of {}'
                         .format(output_cnt, input_cnt))
 
-    _clear_folder(temp_path)
+    clear_folder(temp_path)
 
     temp_path3 = os.path.join(TEMP_ROOT_PATH,
                               'generate_png300_pdf3.{}.{}'.format(set_id,
                                                                   lang))
-    _create_folder(temp_path3)
-    _clear_folder(temp_path3)
+    create_folder(temp_path3)
+    clear_folder(temp_path3)
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED,
                               '{}.{}'.format(set_id, lang))
@@ -4330,7 +4330,7 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
 
     output_path = os.path.join(IMAGES_EONS_PATH, PNG300PDF,
                                '{}.{}'.format(set_id, lang))
-    _create_folder(output_path)
+    create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
 
     for _, _, filenames in os.walk(temp_path2):
@@ -4364,14 +4364,14 @@ def generate_png800_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
 
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_png800_pdf.{}.{}'.format(set_id, lang))
-    _create_folder(temp_path)
-    _clear_folder(temp_path)
+    create_folder(temp_path)
+    clear_folder(temp_path)
 
     temp_path2 = os.path.join(TEMP_ROOT_PATH,
                               'generate_png800_pdf2.{}.{}'.format(set_id,
                                                                   lang))
-    _create_folder(temp_path2)
-    _clear_folder(temp_path2)
+    create_folder(temp_path2)
+    clear_folder(temp_path2)
 
     input_cnt = 0
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
@@ -4413,13 +4413,13 @@ def generate_png800_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
         raise GIMPError('Wrong number of output files: {} instead of {}'
                         .format(output_cnt, input_cnt))
 
-    _clear_folder(temp_path)
+    clear_folder(temp_path)
 
     temp_path3 = os.path.join(TEMP_ROOT_PATH,
                               'generate_png800_pdf3.{}.{}'.format(set_id,
                                                                   lang))
-    _create_folder(temp_path3)
-    _clear_folder(temp_path3)
+    create_folder(temp_path3)
+    clear_folder(temp_path3)
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG800NOBLEED,
                               '{}.{}'.format(set_id, lang))
@@ -4458,7 +4458,7 @@ def generate_png800_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
 
     output_path = os.path.join(IMAGES_EONS_PATH, PNG800PDF,
                                '{}.{}'.format(set_id, lang))
-    _create_folder(output_path)
+    create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
 
     for _, _, filenames in os.walk(temp_path2):
@@ -4493,14 +4493,14 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_png800_bleedmpc.{}.{}'.format(set_id,
                                                                      lang))
-    _create_folder(temp_path)
-    _clear_folder(temp_path)
+    create_folder(temp_path)
+    clear_folder(temp_path)
 
     temp_path2 = os.path.join(TEMP_ROOT_PATH,
                               'generate_png800_bleedmpc2.{}.{}'.format(set_id,
                                                                        lang))
-    _create_folder(temp_path2)
-    _clear_folder(temp_path2)
+    create_folder(temp_path2)
+    clear_folder(temp_path2)
 
     input_cnt = 0
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
@@ -4543,7 +4543,7 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
 
     output_path = os.path.join(IMAGES_EONS_PATH, PNG800BLEEDMPC,
                                '{}.{}'.format(set_id, lang))
-    _create_folder(output_path)
+    create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
 
     for _, _, filenames in os.walk(temp_path2):
@@ -4570,14 +4570,14 @@ def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint:
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_jpg300_bleeddtc.{}.{}'.format(set_id,
                                                                      lang))
-    _create_folder(temp_path)
-    _clear_folder(temp_path)
+    create_folder(temp_path)
+    clear_folder(temp_path)
 
     temp_path2 = os.path.join(TEMP_ROOT_PATH,
                               'generate_jpg300_bleeddtc2.{}.{}'.format(set_id,
                                                                        lang))
-    _create_folder(temp_path2)
-    _clear_folder(temp_path2)
+    create_folder(temp_path2)
+    clear_folder(temp_path2)
 
     input_cnt = 0
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
@@ -4623,7 +4623,7 @@ def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint:
     output_path = os.path.join(IMAGES_EONS_PATH,
                                JPG300BLEEDDTC,
                                '{}.{}'.format(set_id, lang))
-    _create_folder(output_path)
+    create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
 
     for _, _, filenames in os.walk(temp_path2):
@@ -4650,14 +4650,14 @@ def generate_jpg800_bleedmbprint(conf, set_id, set_name, lang, skip_ids):  # pyl
     temp_path = os.path.join(
         TEMP_ROOT_PATH, 'generate_jpg800_bleedmbprint.{}.{}'.format(set_id,
                                                                     lang))
-    _create_folder(temp_path)
-    _clear_folder(temp_path)
+    create_folder(temp_path)
+    clear_folder(temp_path)
 
     temp_path2 = os.path.join(
         TEMP_ROOT_PATH, 'generate_jpg800_bleedmbprint2.{}.{}'.format(set_id,
                                                                      lang))
-    _create_folder(temp_path2)
-    _clear_folder(temp_path2)
+    create_folder(temp_path2)
+    clear_folder(temp_path2)
 
     input_cnt = 0
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
@@ -4703,7 +4703,7 @@ def generate_jpg800_bleedmbprint(conf, set_id, set_name, lang, skip_ids):  # pyl
     output_path = os.path.join(IMAGES_EONS_PATH,
                                JPG800BLEEDMBPRINT,
                                '{}.{}'.format(set_id, lang))
-    _create_folder(output_path)
+    create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
 
     for _, _, filenames in os.walk(temp_path2):
@@ -4729,14 +4729,14 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
     temp_path = os.path.join(
         TEMP_ROOT_PATH, 'generate_png800_bleedgeneric.{}.{}'.format(set_id,
                                                                     lang))
-    _create_folder(temp_path)
-    _clear_folder(temp_path)
+    create_folder(temp_path)
+    clear_folder(temp_path)
 
     temp_path2 = os.path.join(
         TEMP_ROOT_PATH, 'generate_png800_bleedgeneric2.{}.{}'.format(set_id,
                                                                      lang))
-    _create_folder(temp_path2)
-    _clear_folder(temp_path2)
+    create_folder(temp_path2)
+    clear_folder(temp_path2)
 
     input_cnt = 0
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
@@ -4779,7 +4779,7 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
 
     output_path = os.path.join(IMAGES_EONS_PATH, PNG800BLEEDGENERIC,
                                '{}.{}'.format(set_id, lang))
-    _create_folder(output_path)
+    create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
 
     for _, _, filenames in os.walk(temp_path2):
@@ -4844,8 +4844,8 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
             logging.error('[%s, %s] No cards found', set_name, lang)
             break
 
-        _create_folder(output_path)
-        _clear_folder(output_path)
+        create_folder(output_path)
+        clear_folder(output_path)
         filenames = sorted(filenames)
         for filename in filenames:
             if filename.split('.')[-1] != 'png':
@@ -4887,8 +4887,8 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
         ringsdb_output_path = os.path.join(
             OUTPUT_RINGSDB_IMAGES_PATH, '{}.{}'.format(
                 escape_filename(set_name), lang))
-        _create_folder(ringsdb_output_path)
-        _clear_folder(ringsdb_output_path)
+        create_folder(ringsdb_output_path)
+        clear_folder(ringsdb_output_path)
         for source_filename, target_filename in pairs:
             shutil.copyfile(os.path.join(output_path, source_filename),
                             os.path.join(ringsdb_output_path, target_filename))
@@ -4897,8 +4897,8 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
         preview_output_path = os.path.join(
             OUTPUT_PREVIEW_IMAGES_PATH, '{}.{}'.format(
                 escape_filename(set_name), lang))
-        _create_folder(preview_output_path)
-        _clear_folder(preview_output_path)
+        create_folder(preview_output_path)
+        clear_folder(preview_output_path)
 
         temp_path = os.path.join(TEMP_ROOT_PATH,
                                  'generate_db.{}.{}'.format(set_id, lang))
@@ -4956,7 +4956,7 @@ def generate_octgn(conf, set_id, set_name, lang):
             logging.error('[%s, %s] No cards found', set_name, lang)
             break
 
-        _create_folder(output_path)
+        create_folder(output_path)
         filenames = sorted(filenames)
         with zipfile.ZipFile(pack_path, 'w') as zip_obj:
             for filename in filenames:
@@ -5002,7 +5002,7 @@ def generate_rules_pdf(conf, set_id, set_name, lang):
 
     output_path = os.path.join(OUTPUT_RULES_PDF_PATH, '{}.{}'.format(
         escape_filename(set_name), lang))
-    _create_folder(output_path)
+    create_folder(output_path)
     pdf_filename = 'Rules.{}.{}.pdf'.format(escape_filename(set_name),
                                             lang)
     pdf_path = os.path.join(output_path, pdf_filename)
@@ -5076,7 +5076,7 @@ def generate_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0914
                      set_name, lang, round(time.time() - timestamp, 3))
         return
 
-    _create_folder(output_path)
+    create_folder(output_path)
     pages_raw = []
     for key in images:
         pages_raw.extend([(images[key][i * 6:(i + 1) * 6] + [None] * 6)[:6]
@@ -5151,9 +5151,9 @@ def generate_genericpng_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0
                      set_name, lang, round(time.time() - timestamp, 3))
         return
 
-    _create_folder(temp_path)
-    _clear_folder(temp_path)
-    _create_folder(output_path)
+    create_folder(temp_path)
+    clear_folder(temp_path)
+    create_folder(output_path)
     pages_raw = []
     for key in images:
         pages_raw.extend([(images[key][i * 6:(i + 1) * 6] + [None] * 6)[:6]
@@ -5585,9 +5585,9 @@ def generate_mpc(conf, set_id, set_name, lang, card_data):
 
         break
 
-    _create_folder(output_path)
-    _create_folder(temp_path)
-    _clear_folder(temp_path)
+    create_folder(output_path)
+    create_folder(temp_path)
+    clear_folder(temp_path)
     _prepare_printing_images(input_path, temp_path, 'mpc')
     _make_unique_png(temp_path)
     _combine_doublesided_rules_cards(set_id, temp_path, card_data, 'mpc')
@@ -5639,9 +5639,9 @@ def generate_dtc(conf, set_id, set_name, lang, card_data):
 
         break
 
-    _create_folder(output_path)
-    _create_folder(temp_path)
-    _clear_folder(temp_path)
+    create_folder(output_path)
+    create_folder(temp_path)
+    clear_folder(temp_path)
     _prepare_printing_images(input_path, temp_path, 'dtc')
     _combine_doublesided_rules_cards(set_id, temp_path, card_data, 'dtc')
 
@@ -5690,8 +5690,8 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):  # pylint: disabl
 
         break
 
-    _create_folder(temp_path)
-    _clear_folder(temp_path)
+    create_folder(temp_path)
+    clear_folder(temp_path)
     _prepare_printing_images(input_path, temp_path, 'mbprint')
     _combine_doublesided_rules_cards(set_id, temp_path, card_data, 'mbprint')
 
@@ -5699,7 +5699,7 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):  # pylint: disabl
             'mbprint_7z' in conf['outputs'][lang]):
         output_path = os.path.join(OUTPUT_MBPRINT_PATH, '{}.{}'.format(
             escape_filename(set_name), lang))
-        _create_folder(output_path)
+        create_folder(output_path)
 
         if 'mbprint_zip' in conf['outputs'][lang]:
             with zipfile.ZipFile(
@@ -5731,7 +5731,7 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):  # pylint: disabl
 
         output_path = os.path.join(OUTPUT_MBPRINT_PDF_PATH, '{}.{}'.format(
             escape_filename(set_name), lang))
-        _create_folder(output_path)
+        create_folder(output_path)
 
         if 'mbprint_pdf_zip' in conf['outputs'][lang]:
             with zipfile.ZipFile(
@@ -5776,9 +5776,9 @@ def generate_genericpng(conf, set_id, set_name, lang, card_data):
 
         break
 
-    _create_folder(output_path)
-    _create_folder(temp_path)
-    _clear_folder(temp_path)
+    create_folder(output_path)
+    create_folder(temp_path)
+    clear_folder(temp_path)
     _prepare_printing_images(input_path, temp_path, 'genericpng')
     _combine_doublesided_rules_cards(set_id, temp_path, card_data,
                                      'genericpng')
@@ -5875,8 +5875,8 @@ def copy_octgn_outputs(conf, sets):
     chosen_scratch_sets = {s[0] for s in sets}.intersection(FOUND_SCRATCH_SETS)
 
     temp_path = os.path.join(TEMP_ROOT_PATH, 'copy_octgn_outputs')
-    _create_folder(temp_path)
-    _clear_folder(temp_path)
+    create_folder(temp_path)
+    clear_folder(temp_path)
 
     if (chosen_sets and conf['octgn_set_xml']
             and conf['octgn_set_xml_destination_path']):
