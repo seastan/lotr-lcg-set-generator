@@ -989,6 +989,7 @@ async def get_artwork_files(set_id):
     except Exception:
         message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
                                                                  stderr)
+        logging.error(message)
         create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
         raise RCloneFolderError(message)
 
@@ -1000,6 +1001,16 @@ async def get_artwork_files(set_id):
 
     filenames = sorted(list(filenames))
     return filenames
+
+
+def clear_rendered_images():
+    """ Clear old rendered images from the local disk.
+    """
+    for _, subfolders, _ in os.walk(IMAGES_PATH):
+        for subfolder in subfolders:
+            lotr.delete_folder(os.path.join(IMAGES_PATH, subfolder))
+
+        break
 
 
 async def get_rendered_images(set_name):
@@ -1018,13 +1029,19 @@ async def get_rendered_images(set_name):
     lotr.create_folder(local_path)
 
     folder = '{}.English'.format(lotr.escape_filename(set_name))
-    stdout, _ = await run_shell(RCLONE_RENDERED_FOLDER_CMD.format(folder))
+    stdout, stderr = await run_shell(RCLONE_RENDERED_FOLDER_CMD.format(folder))
     try:
         images = sorted(json.loads(stdout),
                         key=lambda i: i['Name']
                         if i['Name'].endswith('-2.png')
                         else re.sub(r'\.png$', '-1.png', i['Name']))
     except Exception:
+        message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
+                                                                 stderr)
+        logging.error(message)
+        if 'directory not found' not in stderr:
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+
         return {}
 
     data = {}
@@ -1102,6 +1119,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                 'error obtaining Spreadsheet Updates channel: {}'
                 .format(str(exc))))
 
+        clear_rendered_images()
         self.categories, self.channels, self.general_channels = (
             await self._load_channels())
         await self._test_channels()
@@ -2612,7 +2630,7 @@ Targets removed.
             await self._send_channel(message.channel, res)
 
 
-    async def _post_rendered_set(self, value):
+    async def _post_rendered_set(self, value):  # pylint: disable=R0912,R0914
         """ Post the last rendered images for all cards from a set.
         """
         data = await read_card_data()
@@ -2658,14 +2676,20 @@ Targets removed.
             for image in images[card[lotr.CARD_ID]]:
                 image_path = os.path.join(local_path, image['filename'])
                 if not os.path.exists(image_path):
-                    _, _ = await run_shell(RCLONE_COPY_IMAGE_CMD.format(
-                        '{}.English'.format(lotr.escape_filename(set_name)),
-                        image['filename'], local_path))
+                    stdout, stderr = await run_shell(
+                        RCLONE_COPY_IMAGE_CMD.format(
+                            '{}.English'.format(lotr.escape_filename(set_name)),
+                            image['filename'], local_path))
+                    if not os.path.exists(image_path):
+                        if stdout or stderr:
+                            message = ('RClone failed, stdout: {}, stderr: {}'
+                                       .format(stdout, stderr))
+                            logging.error(message)
+                            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
 
-                if not os.path.exists(image_path):
-                    await channel.send(
-                        "Can't download the image from Google Drive")
-                    continue
+                        await channel.send(
+                            "Can't download the image from Google Drive")
+                        continue
 
                 await channel.send(file=discord.File(image_path))
                 await channel.send(
@@ -2674,7 +2698,7 @@ Targets removed.
         return 'done'
 
 
-    async def _post_rendered_card(self, channel, value, this):
+    async def _post_rendered_card(self, channel, value, this):  # pylint: disable=R0914
         """ Post the last rendered images for the card.
         """
         data = await read_card_data()
@@ -2693,12 +2717,18 @@ Targets removed.
         for image in images[card[lotr.CARD_ID]]:
             image_path = os.path.join(local_path, image['filename'])
             if not os.path.exists(image_path):
-                _, _ = await run_shell(RCLONE_COPY_IMAGE_CMD.format(
+                stdout, stderr = await run_shell(RCLONE_COPY_IMAGE_CMD.format(
                     '{}.English'.format(lotr.escape_filename(set_name)),
                     image['filename'], local_path))
 
-            if not os.path.exists(image_path):
-                return "Can't download the image from Google Drive"
+                if not os.path.exists(image_path):
+                    if stdout or stderr:
+                        message = ('RClone failed, stdout: {}, stderr: {}'
+                                   .format(stdout, stderr))
+                        logging.error(message)
+                        create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+
+                    return "Can't download the image from Google Drive"
 
             await channel.send(file=discord.File(image_path))
             await channel.send(

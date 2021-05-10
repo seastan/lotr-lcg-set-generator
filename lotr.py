@@ -603,7 +603,7 @@ def create_folder(folder):
         os.mkdir(folder)
 
 
-def _delete_folder(folder):
+def delete_folder(folder):
     """ Delete the folder.
     """
     if os.path.exists(folder):
@@ -740,14 +740,14 @@ def reset_project_folders(conf):
     nobleed_folder = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED)
     for _, subfolders, _ in os.walk(nobleed_folder):
         for subfolder in subfolders:
-            _delete_folder(os.path.join(nobleed_folder, subfolder))
+            delete_folder(os.path.join(nobleed_folder, subfolder))
 
         break
 
     nobleed_folder = os.path.join(IMAGES_EONS_PATH, PNG800NOBLEED)
     for _, subfolders, _ in os.walk(nobleed_folder):
         for subfolder in subfolders:
-            _delete_folder(os.path.join(nobleed_folder, subfolder))
+            delete_folder(os.path.join(nobleed_folder, subfolder))
 
         break
 
@@ -3978,8 +3978,8 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
 
         break
 
-    _delete_folder(temp_path)
-    _delete_folder(temp_path2)
+    delete_folder(temp_path)
+    delete_folder(temp_path2)
 
     logging.info('[%s, %s] ...Generating PNG 300 dpi images without bleed '
                  'margins (%ss)', set_name, lang,
@@ -4056,8 +4056,8 @@ def generate_png800_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
 
         break
 
-    _delete_folder(temp_path)
-    _delete_folder(temp_path2)
+    delete_folder(temp_path)
+    delete_folder(temp_path2)
 
     logging.info('[%s, %s] ...Generating PNG 800 dpi images without bleed '
                  'margins (%ss)', set_name, lang,
@@ -4135,8 +4135,8 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disab
 
         break
 
-    _delete_folder(temp_path)
-    _delete_folder(temp_path2)
+    delete_folder(temp_path)
+    delete_folder(temp_path2)
 
     logging.info('[%s, %s] ...Generating images for all DB outputs '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
@@ -4347,9 +4347,9 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
 
         break
 
-    _delete_folder(temp_path)
-    _delete_folder(temp_path2)
-    _delete_folder(temp_path3)
+    delete_folder(temp_path)
+    delete_folder(temp_path2)
+    delete_folder(temp_path3)
 
     logging.info('[%s, %s] ...Generating images for PDF outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
@@ -4475,9 +4475,9 @@ def generate_png800_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
 
         break
 
-    _delete_folder(temp_path)
-    _delete_folder(temp_path2)
-    _delete_folder(temp_path3)
+    delete_folder(temp_path)
+    delete_folder(temp_path2)
+    delete_folder(temp_path3)
 
     logging.info('[%s, %s] ...Generating images for generic PNG PDF outputs '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
@@ -4553,8 +4553,8 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
 
         break
 
-    _delete_folder(temp_path)
-    _delete_folder(temp_path2)
+    delete_folder(temp_path)
+    delete_folder(temp_path2)
 
     logging.info('[%s, %s] ...Generating images for MakePlayingCards outputs '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
@@ -4633,8 +4633,8 @@ def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint:
 
         break
 
-    _delete_folder(temp_path)
-    _delete_folder(temp_path2)
+    delete_folder(temp_path)
+    delete_folder(temp_path2)
 
     logging.info('[%s, %s] ...Generating images for DriveThruCards outputs '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
@@ -4713,8 +4713,8 @@ def generate_jpg800_bleedmbprint(conf, set_id, set_name, lang, skip_ids):  # pyl
 
         break
 
-    _delete_folder(temp_path)
-    _delete_folder(temp_path2)
+    delete_folder(temp_path)
+    delete_folder(temp_path2)
 
     logging.info('[%s, %s] ...Generating images for MBPrint outputs '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
@@ -4789,8 +4789,8 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
 
         break
 
-    _delete_folder(temp_path)
-    _delete_folder(temp_path2)
+    delete_folder(temp_path)
+    delete_folder(temp_path2)
 
     logging.info('[%s, %s] ...Generating generic PNG images (%ss)', set_name,
                  lang, round(time.time() - timestamp, 3))
@@ -4902,7 +4902,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
 
         temp_path = os.path.join(TEMP_ROOT_PATH,
                                  'generate_db.{}.{}'.format(set_id, lang))
-        _delete_folder(temp_path)
+        delete_folder(temp_path)
         shutil.copytree(output_path, temp_path)
         _make_low_quality(conf, temp_path)
 
@@ -4922,7 +4922,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
 
             break
 
-        _delete_folder(temp_path)
+        delete_folder(temp_path)
 
     logging.info('[%s, %s] ...Generating DB, Preview and RingsDB image '
                  'outputs (%ss)', set_name, lang,
@@ -4942,7 +4942,7 @@ def generate_octgn(conf, set_id, set_name, lang):
     output_path = os.path.join(OUTPUT_OCTGN_IMAGES_PATH, '{}.{}'.format(
         escape_filename(set_name), lang))
 
-    _delete_folder(temp_path)
+    delete_folder(temp_path)
     shutil.copytree(input_path, temp_path)
     _make_low_quality(conf, temp_path)
 
@@ -4975,7 +4975,7 @@ def generate_octgn(conf, set_id, set_name, lang):
 
         break
 
-    _delete_folder(temp_path)
+    delete_folder(temp_path)
 
     logging.info('[%s, %s] ...Generating OCTGN image outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
@@ -5226,7 +5226,7 @@ def generate_genericpng_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0
                     'w', filters=PY7ZR_FILTERS) as obj:
                 obj.write(pdf_path, pdf_filename)
 
-    _delete_folder(temp_path)
+    delete_folder(temp_path)
     logging.info('[%s, %s] ...Generating generic PNG PDF outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 
@@ -5610,7 +5610,7 @@ def generate_mpc(conf, set_id, set_name, lang, card_data):
             _prepare_mpc_printing_archive(temp_path, obj)
             obj.write('MakePlayingCards.pdf', 'MakePlayingCards.pdf')
 
-    _delete_folder(temp_path)
+    delete_folder(temp_path)
     logging.info('[%s, %s] ...Generating MakePlayingCards outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 
@@ -5663,7 +5663,7 @@ def generate_dtc(conf, set_id, set_name, lang, card_data):
             _prepare_dtc_printing_archive(temp_path, obj)
             obj.write('DriveThruCards.pdf', 'DriveThruCards.pdf')
 
-    _delete_folder(temp_path)
+    delete_folder(temp_path)
     logging.info('[%s, %s] ...Generating DriveThruCards outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 
@@ -5749,7 +5749,7 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):  # pylint: disabl
                     'w', filters=PY7ZR_FILTERS) as obj:
                 obj.write(pdf_path, pdf_filename)
 
-    _delete_folder(temp_path)
+    delete_folder(temp_path)
     logging.info('[%s, %s] ...Generating MBPrint outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 
@@ -5799,7 +5799,7 @@ def generate_genericpng(conf, set_id, set_name, lang, card_data):
                 'w', filters=PY7ZR_FILTERS) as obj:
             _prepare_genericpng_printing_archive(temp_path, obj)
 
-    _delete_folder(temp_path)
+    delete_folder(temp_path)
     logging.info('[%s, %s] ...Generating generic PNG outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 
@@ -5906,7 +5906,7 @@ def copy_octgn_outputs(conf, sets):
             conf['octgn_o8d_scratch_destination_path'],
             chosen_scratch_sets)
 
-    _delete_folder(temp_path)
+    delete_folder(temp_path)
 
     logging.info('...Copying OCTGN outputs to the destination folder (%ss)',
                  round(time.time() - timestamp, 3))
