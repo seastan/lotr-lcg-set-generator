@@ -1114,8 +1114,12 @@ function escapeFileName(value) {
 }
 
 function updateQuotes(value, lang) {
-	if ((lang == 'German') || (lang == 'Polish')) {
+	if (lang == 'Polish') {
 		value = value.replace(/\u201c/g, '\u201e');
+	}
+	else if (lang == 'German') {
+		value = value.replace(/\u201c/g, '\u201e');
+		value = value.replace(/\u201d/g, '\u201c');
 	}
 	else if (lang == 'French') {
 		value = value.replace(/\u201c[ \u00a0]?/g, '\u00ab\u00a0');
