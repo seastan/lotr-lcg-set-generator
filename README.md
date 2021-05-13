@@ -64,11 +64,13 @@ for other platforms look at https://download.imagemagick.org/ImageMagick/downloa
 https://github.com/cjw-network/cjwpublish1411/blob/master/vendor/imagine/imagine/lib/Imagine/resources/Adobe/CMYK/USWebCoatedSWOP.icc
 into the root folder of this repo.
 
-10. Install the latest Python 3 version from https://www.python.org/downloads/.
+10. Install AutoHotkey from https://autohotkey.com/download/.
+
+11. Install the latest Python 3 version from https://www.python.org/downloads/.
 Optionally, install VirtualEnv (see https://help.dreamhost.com/hc/en-us/articles/115000695551-Installing-and-using-virtualenv-with-Python-3
 for details).
 
-11. Go to the root folder of this repo and follow these steps:
+12. Go to the root folder of this repo and follow these steps:
 
   - [skip this step, if you don't use VirtualEnv] `virtualenv env --python=python3.9` (replace `3.9` with your actual Python version)
   - [skip this step, if you don't use VirtualEnv] `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
@@ -78,7 +80,7 @@ for details).
 
   - `pip install jupyter`
 
-12. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
+13. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
   - `sheet_gdid`: Google Sheets ID of the cards spreadsheet
   - `artwork_path`: local path to the artwork folder (don't use for that any existing folder in this repo)
@@ -109,7 +111,7 @@ for details).
 
 To run the workflow, go to the root folder of this repo and follow these steps:
 
-- [skip this step, if you don't use VirtualEnv] `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
+- [skip this step, if you don't use VirtualEnv] `env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
 - Make sure that Strange Eons is closed.
 - `python run_before_se.py` (or `python run_before_se.py <path to a different configuration yaml>` if you want to pass a different configuration file)
 - Pay attention to possible errors in the script output.
@@ -118,9 +120,20 @@ To run the workflow, go to the root folder of this repo and follow these steps:
 - `python run_after_se.py` (or `python run_after_se.py <path to a different configuration yaml>` if you want to pass a different configuration file)
 - Pay attention to possible errors in the script output.
 
+To run the workflow as one script (for example, to be able to setup a cron job), run:
+
+- `run_all.bat`
+
+Please note, this script is for Windows platform only.  It uses AutoHotkey to emulate Strange Eons UI commands
+and is not 100% reliable (it may stuck on the Strange Eons step).  To minimize the risks:
+
+- Never leave Strange Eons open.
+- Never resize Strange Eons window.
+- If the script started, don't even try to touch the keyboard or mouse.
+
 For debugging purposes you can also run these steps using the Jupyter notebook (it doesn't use parallelism):
 
-- [skip this step, if you don't use VirtualEnv] `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
+- [skip this step, if you don't use VirtualEnv] `\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
 - `jupyter notebook`
 - Open `setGenerator.ipynb` in the browser.
 
