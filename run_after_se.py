@@ -231,6 +231,10 @@ def main():  # pylint: disable=R0912
 
     execute_tasks(conf, pre_tasks)
     execute_tasks(conf, tasks)
+
+    if conf['db_destination_path'] and 'db' in conf['outputs']['English']:
+        lotr.copy_db_outputs(conf, sets)
+
     logging.info('Done (%ss)', round(time.time() - timestamp, 3))
 
 

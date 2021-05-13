@@ -662,6 +662,9 @@ def read_conf(path=CONFIGURATION_PATH):
         conf = yaml.safe_load(f_conf)
 
     # to be removed
+    if 'db_destination_path' not in conf:
+        conf['db_destination_path'] = ''
+
     if 'frenchdb_csv' not in conf:
         conf['frenchdb_csv'] = False
 
@@ -2811,6 +2814,9 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
         subtitle = ((row[CARD_ADVENTURE] or '')
                     if card_type in CARD_TYPES_ADVENTURE
                     else row[CARD_ADVENTURE])
+        if subtitle and card_type == 'Hero':
+            subtitle = None
+
         if card_type in ('Presentation', 'Rules'):
             type_name = 'Setup'
         elif card_type == 'Nightmare':
@@ -5909,6 +5915,29 @@ def copy_octgn_outputs(conf, sets):
     delete_folder(temp_path)
 
     logging.info('...Copying OCTGN outputs to the destination folder (%ss)',
+                 round(time.time() - timestamp, 3))
+
+
+def copy_db_outputs(conf, sets):
+    """ Copy DB outputs to the destination folder.
+    """
+    logging.info('Copying DB outputs to the destination folder...')
+    timestamp = time.time()
+
+    chosen_sets = {s[0] for s in sets}.intersection(FOUND_SETS)
+    for set_id, set_name in sets:
+        if set_id not in chosen_sets:
+            continue
+
+        output_path = os.path.join(OUTPUT_DB_PATH, '{}.English'.format(
+            escape_filename(set_name)))
+        destination_path = os.path.join(conf['db_destination_path'],
+                                        '{}.English'.format(
+                                            escape_filename(set_name)))
+
+        shutil.copytree(output_path, destination_path)
+
+    logging.info('...Copying DB outputs to the destination folder (%ss)',
                  round(time.time() - timestamp, 3))
 
 

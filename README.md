@@ -90,6 +90,7 @@ for details).
   - `octgn_set_xml_scratch_destination_path`: path to OCTGN `set.xml` scratch destination folder (may be empty)
   - `octgn_o8d_destination_path`: path to OCTGN `.o8d` destination folder (may be empty)
   - `octgn_o8d_scratch_destination_path`: path to OCTGN `.o8d` scratch destination folder (may be empty)
+  - `db_destination_path`: path to DB destination folder (may be empty)
   - `reprocess_all`: whether to reprocess all cards (`true`) or update only the cards, changed since the previous script run (`false`)
   - `selected_only`: process only "selected" rows (true or false)
   - `exit_if_no_spreadsheet_changes`: stop processing if there are no spreadsheet changes (true or false)
@@ -120,20 +121,20 @@ To run the workflow, go to the root folder of this repo and follow these steps:
 - `python run_after_se.py` (or `python run_after_se.py <path to a different configuration yaml>` if you want to pass a different configuration file)
 - Pay attention to possible errors in the script output.
 
-To run the workflow as one script (for example, to be able to setup a cron job), run:
+To run the workflow as one script (for example, to be able to set up a cron job), run:
 
 - `run_all.bat`
 
-Please note, this script is for Windows platform only.  It uses AutoHotkey to emulate Strange Eons UI commands
-and is not 100% reliable (it may stuck on the Strange Eons step).  To minimize the risks:
+Please note, this script is for the Windows platform only.  It uses AutoHotkey to emulate Strange Eons UI commands
+and is not 100% reliable (it may be stuck on the Strange Eons step).  To minimize the risks:
 
 - Never leave Strange Eons open.
-- Never resize Strange Eons window.
+- Never resize the Strange Eons window.
 - If the script started, don't even try to touch the keyboard or mouse.
 
 For debugging purposes you can also run these steps using the Jupyter notebook (it doesn't use parallelism):
 
-- [skip this step, if you don't use VirtualEnv] `\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
+- [skip this step, if you don't use VirtualEnv] `env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
 - `jupyter notebook`
 - Open `setGenerator.ipynb` in the browser.
 
@@ -263,6 +264,8 @@ List of available sphere values:
 - `Yellow` (`Presentation` only)
 
 Please note, that not all card types and spheres are currently supported by Strange Eons.
+
+To choose the promo template for a hero, put "Promo" into `Adventure` column.
 
 **Special Icons**
 
