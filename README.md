@@ -66,14 +66,14 @@ into the root folder of this repo.
 
 10. Install AutoHotkey from https://autohotkey.com/download/.
 
-11. Install the latest Python 3 version from https://www.python.org/downloads/.
+11. Install the latest Python 3 version from https://www.python.org/downloads/.  The minimum supported version is 3.7.
 Optionally, install VirtualEnv (see https://help.dreamhost.com/hc/en-us/articles/115000695551-Installing-and-using-virtualenv-with-Python-3
 for details).
 
 12. Go to the root folder of this repo and follow these steps:
 
   - [skip this step, if you don't use VirtualEnv] `virtualenv env --python=python3.9` (replace `3.9` with your actual Python version)
-  - [skip this step, if you don't use VirtualEnv] `.\env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
+  - [skip this step, if you don't use VirtualEnv] `env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
   - `pip install -r requirements.txt` (if you don't plan to generate images, you may run `pip install -r requirements_cron.txt` instead to skip unneeded dependencies)
 
     If for debugging purposes you plan to use Jupyter notebook, additionally run:

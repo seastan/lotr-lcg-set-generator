@@ -5934,8 +5934,14 @@ def copy_db_outputs(conf, sets):
         destination_path = os.path.join(conf['db_destination_path'],
                                         '{}.English'.format(
                                             escape_filename(set_name)))
+        create_folder(destination_path)
+        clear_folder(destination_path)
+        for _, _, filenames in os.walk(output_path):
+            for filename in filenames:
+                shutil.copyfile(os.path.join(output_path, filename),
+                                os.path.join(destination_path, filename))
 
-        shutil.copytree(output_path, destination_path)
+            break
 
     logging.info('...Copying DB outputs to the destination folder (%ss)',
                  round(time.time() - timestamp, 3))
