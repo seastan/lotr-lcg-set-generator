@@ -148,8 +148,14 @@ CARD_TYPES_ENCOUNTER_SIZE = {'Enemy', 'Location', 'Objective',
 CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
                         'Objective Hero', 'Objective Location',
                         'Ship Objective', 'Quest'}
+CARD_TYPES_UNIQUE = {'Hero', 'Objective Hero'}
+CARD_TYPES_NON_UNIQUE = {'Campaign', 'Contract', 'Encounter Side Quest',
+                         'Event', 'Nightmare', 'Player Side Quest',
+                         'Presentation', 'Quest', 'Rules', 'Treachery',
+                         'Treasure'}
 SPHERES = {'Baggins', 'Fellowship', 'Leadership', 'Lore', 'Mastery', 'Neutral',
            'Spirit', 'Tactics', 'Boon', 'Burden', 'Nightmare', 'Upgraded'}
+
 SPHERES_CAMPAIGN = {'Setup'}
 SPHERES_RULES = {'Back'}
 SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow'}
@@ -1310,20 +1316,6 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 card_set_numbers.add((set_id, card_number))
 
-        if card_unique is not None and card_unique not in ('1', 1):
-            message = 'Incorrect format for unique for row #{}{}'.format(
-                i, scratch)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-
-        if card_unique_back is not None and card_unique_back not in ('1', 1):
-            message = 'Incorrect format for unique back for row #{}{}'.format(
-                i, scratch)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-
         if card_type is None:
             message = 'No card type for row #{}{}'.format(i, scratch)
             logging.error(message)
@@ -1349,7 +1341,41 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
         elif (card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL
               and card_type_back in CARD_TYPES_DOUBLESIDE_OPTIONAL):
-            message = 'Incorrect card type back for row #{}{}'.format(i, scratch)
+            message = 'Incorrect card type back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+
+        if card_unique is not None and card_unique not in ('1', 1):
+            message = 'Incorrect format for unique for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+
+        if ((card_unique is None and card_type in CARD_TYPES_UNIQUE) or
+                (card_unique in ('1', 1) and
+                 card_type in CARD_TYPES_NON_UNIQUE)):
+            message = 'Incorrect unique value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+
+        if card_unique_back is not None and card_unique_back not in ('1', 1):
+            message = 'Incorrect format for unique back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+
+        if ((card_unique_back is None and
+             card_type_back in CARD_TYPES_UNIQUE) or
+                (card_unique_back in ('1', 1) and
+                 card_type_back in CARD_TYPES_NON_UNIQUE)):
+            message = 'Incorrect unique back value for row #{}{}'.format(
+                i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
