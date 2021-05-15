@@ -658,7 +658,7 @@ def _update_zip_filename(filename):
     return output_filename
 
 
-def read_conf(path=CONFIGURATION_PATH):
+def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
     """ Read project configuration.
     """
     logging.info('Reading project configuration (%s)...', path)
@@ -670,6 +670,12 @@ def read_conf(path=CONFIGURATION_PATH):
     # to be removed
     if 'db_destination_path' not in conf:
         conf['db_destination_path'] = ''
+
+    if 'octgn_image_destination_path' not in conf:
+        conf['octgn_image_destination_path'] = ''
+
+    if 'set_ids_octgn_image_destination' not in conf:
+        conf['set_ids_octgn_image_destination'] = []
 
     if 'frenchdb_csv' not in conf:
         conf['frenchdb_csv'] = False
@@ -5950,11 +5956,7 @@ def copy_db_outputs(conf, sets):
     logging.info('Copying DB outputs to the destination folder...')
     timestamp = time.time()
 
-    chosen_sets = {s[0] for s in sets}.intersection(FOUND_SETS)
-    for set_id, set_name in sets:
-        if set_id not in chosen_sets:
-            continue
-
+    for _, set_name in sets:
         output_path = os.path.join(OUTPUT_DB_PATH, '{}.English'.format(
             escape_filename(set_name)))
         destination_path = os.path.join(conf['db_destination_path'],
@@ -5971,6 +5973,49 @@ def copy_db_outputs(conf, sets):
 
     logging.info('...Copying DB outputs to the destination folder (%ss)',
                  round(time.time() - timestamp, 3))
+
+
+def copy_octgn_image_outputs(conf, sets):
+    """ Copy OCTGN image outputs to the destination folder.
+    """
+    logging.info('Copying OCTGN image outputs to the destination folder...')
+    timestamp = time.time()
+
+    for set_id, set_name in sets:
+        if set_id not in conf['set_ids_octgn_image_destination']:
+            continue
+
+        output_path = os.path.join(
+            OUTPUT_OCTGN_IMAGES_PATH,
+            '{}.English'.format(escape_filename(set_name)))
+        destination_path = os.path.join(conf['octgn_image_destination_path'],
+                                        'a21af4e8-be4b-4cda-a6b6-534f9717391f')
+        create_folder(destination_path)
+        destination_path = os.path.join(destination_path,
+                                        'Sets')
+        create_folder(destination_path)
+        destination_path = os.path.join(destination_path,
+                                        set_id)
+        create_folder(destination_path)
+        destination_path = os.path.join(destination_path,
+                                        'Cards')
+        create_folder(destination_path)
+        clear_folder(destination_path)
+        for _, _, filenames in os.walk(output_path):
+            for filename in filenames:
+                shutil.copyfile(
+                    os.path.join(output_path, filename),
+                    os.path.join(conf['octgn_image_destination_path'],
+                                 filename))
+                with zipfile.ZipFile(os.path.join(
+                        conf['octgn_image_destination_path'],
+                        filename)) as obj:
+                    obj.extractall(conf['octgn_image_destination_path'])
+
+            break
+
+    logging.info('...Copying OCTGN image outputs to the destination folder '
+                 '(%ss)', round(time.time() - timestamp, 3))
 
 
 def update_ringsdb(conf, sets):

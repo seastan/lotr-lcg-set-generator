@@ -235,6 +235,10 @@ def main():  # pylint: disable=R0912
     if conf['db_destination_path'] and 'db' in conf['outputs']['English']:
         lotr.copy_db_outputs(conf, sets)
 
+    if (conf['octgn_image_destination_path'] and
+            'octgn' in conf['outputs']['English']):
+        lotr.copy_octgn_image_outputs(conf, sets)
+
     logging.info('Done (%ss)', round(time.time() - timestamp, 3))
 
 

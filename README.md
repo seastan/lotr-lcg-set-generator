@@ -90,6 +90,7 @@ for details).
   - `octgn_set_xml_scratch_destination_path`: path to OCTGN `set.xml` scratch destination folder (may be empty)
   - `octgn_o8d_destination_path`: path to OCTGN `.o8d` destination folder (may be empty)
   - `octgn_o8d_scratch_destination_path`: path to OCTGN `.o8d` scratch destination folder (may be empty)
+  - `octgn_image_destination_path`: path to OCTGN image destination folder (may be empty)
   - `db_destination_path`: path to DB destination folder (may be empty)
   - `reprocess_all`: whether to reprocess all cards (`true`) or update only the cards, changed since the previous script run (`false`)
   - `selected_only`: process only "selected" rows (true or false)
@@ -97,6 +98,7 @@ for details).
   - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`)
   - `set_ids`: list of set IDs to work on (you can use `all` and `all_scratch` aliases to select all non-scratch and all scratch sets sutomatically)
   - `ignore_set_ids`: list of set IDs to ignore
+  - `set_ids_octgn_image_destination`: list of set IDs to copy to OCTGN image destination
   - `octgn_set_xml`: creating `set.xml` files for OCTGN (true or false)
   - `octgn_o8d`: creating `.o8d` files for OCTGN (true or false)
   - `ringsdb_csv`: creating CSV files for RingsDB (true or false)
@@ -142,9 +144,10 @@ The scripts will generate the following outputs:
 
 - `Output/DB/<set name>.<language>/`: 300 dpi PNG images for general purposes.
 - `Output/DriveThruCards/<set name>.<language>/`: a `7z` archive of 300 dpi CMYK JPG images to be printed on DriveThruCards.com.
+- `Output/FrenchDB/<set name>/`: CSV files for French database sda.cgbuilder.fr.
 - `Output/GenericPNG/<set name>.<language>/`: a `7z` archive of generic 800 dpi PNG images.
 - `Output/GenericPNGPDF/<set name>.<language>/`: `7z` archives of PDF files in `A4` and `letter` format (800 dpi PNG).
-- `Output/HallOfBeorn/<set name>.json`: an output file for Hall of Beorn.
+- `Output/HallOfBeorn/<set name>/<set name>.json`: an output file for Hall of Beorn.
 - `Output/MakePlayingCards/<set name>.<language>/`: a `7z` archive of 800 dpi PNG images to be printed on MakePlayingCards.com.
 - `Output/MBPrint/<set name>.<language>/`: a `7z` archive of 800 dpi CMYK JPG images to be printed on MBPrint.pl.
 - `Output/MBPrintPDF/<set name>.<language>/`: a `7z` archive of a PDF file to be printed on MBPrint.pl (800 dpi CMYK JPG).
@@ -152,9 +155,11 @@ The scripts will generate the following outputs:
 - `Output/OCTGNDecks/<set name>/<deck name>.o8d`: quest decks for OCTGN.
 - `Output/OCTGNImages/<set name>.<language>/<set name>.<language>.o8c`: image packs for OCTGN (600x429 JPG).
 - `Output/PDF/<set name>.<language>/`: PDF files in `A4` and `letter` format for home printing (300 dpi PNG).
-- `Output/RingsDB/<set name>.csv`: an output file for RIngsDB.
 - `Output/PreviewImages/<set name>.<language>/`: 600x429 JPG images for preview purposes.
+- `Output/RingsDB/<set name>/<set name>.csv`: an output file for RIngsDB.
 - `Output/RingsDBImages/<set name>.<language>/`: 300 dpi PNG images for RingsDB (the same as `Output/DB`, but player cards only and differently named).
+- `Output/RulesPDF/<set name>.<language>/Rules.<set name>.<language>.pdf`: a PDF file with all Rules pages (300 dpi PNG).
+- `Output/SpanishDB/<set name>/`: CSV files for Spanish database susurrosdelbosqueviejo.com.
 
 Please note that `Output/DB`, `Output/PreviewImages` and `Output/RingsDBImages` are generated together when `db` output is enabled in the configuration.
 

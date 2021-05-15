@@ -22,6 +22,9 @@ octgn_o8d_destination_path: C:\Google Drive\Playtesting\OCTGN Files\Encounter De
 # Path to OCTGN .o8d scratch destination folder (may be empty)
 octgn_o8d_scratch_destination_path: C:\Google Drive\Playtesting\OCTGN Files\Scratch Encounter Decks
 
+# Path to OCTGN image destination folder (may be empty)
+octgn_image_destination_path: C:\Google Drive\Playtesting\OCTGN Files\ImageDatabase
+
 # Path to DB destination folder (may be empty)
 db_destination_path: C:\Google Drive\RenderedImages
 
@@ -46,6 +49,11 @@ set_ids:
 
 # List of set IDs to ignore
 ignore_set_ids:
+#  - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f  # ALeP - Children of Eorl
+
+# List of set IDs to copy to OCTGN image destination
+set_ids_octgn_image_destination:
+  - all  # all non-scratch sets
 #  - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f  # ALeP - Children of Eorl
 
 # Creating set.xml files for OCTGN (true or false)
