@@ -1,6 +1,7 @@
 """ LotR ALeP workflow (Part 2, after Strange Eons).
 """
 import logging
+import os
 import signal
 import sys
 import time
@@ -238,6 +239,11 @@ def main():  # pylint: disable=R0912
     if (conf['octgn_image_destination_path'] and
             'octgn' in conf['outputs']['English']):
         lotr.copy_octgn_image_outputs(conf, sets)
+
+    if conf['timestamp_path']:
+        with open(os.path.join(conf['timestamp_path'], 'last_image'),
+                  'w') as fobj:
+            fobj.write(lotr.get_last_image_timestamp())
 
     logging.info('Done (%ss)', round(time.time() - timestamp, 3))
 

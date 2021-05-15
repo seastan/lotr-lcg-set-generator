@@ -6,6 +6,7 @@ import codecs
 from collections import OrderedDict
 import copy
 import csv
+from datetime import datetime
 import hashlib
 from io import StringIO
 import json
@@ -224,24 +225,25 @@ IMAGES_EONS_PATH = 'imagesEons'
 IMAGES_RAW_PATH = os.path.join(PROJECT_FOLDER, 'imagesRaw')
 IMAGES_ZIP_PATH = '{}/Export/'.format(os.path.split(PROJECT_FOLDER)[-1])
 OCTGN_ZIP_PATH = 'a21af4e8-be4b-4cda-a6b6-534f9717391f/Sets'
-OUTPUT_DB_PATH = os.path.join('Output', 'DB')
-OUTPUT_DTC_PATH = os.path.join('Output', 'DriveThruCards')
-OUTPUT_FRENCHDB_PATH = os.path.join('Output', 'FrenchDB')
-OUTPUT_GENERICPNG_PATH = os.path.join('Output', 'GenericPNG')
-OUTPUT_GENERICPNG_PDF_PATH = os.path.join('Output', 'GenericPNGPDF')
-OUTPUT_HALLOFBEORN_PATH = os.path.join('Output', 'HallOfBeorn')
-OUTPUT_MBPRINT_PATH = os.path.join('Output', 'MBPrint')
-OUTPUT_MBPRINT_PDF_PATH = os.path.join('Output', 'MBPrintPDF')
-OUTPUT_MPC_PATH = os.path.join('Output', 'MakePlayingCards')
-OUTPUT_OCTGN_PATH = os.path.join('Output', 'OCTGN')
-OUTPUT_OCTGN_DECKS_PATH = os.path.join('Output', 'OCTGNDecks')
-OUTPUT_OCTGN_IMAGES_PATH = os.path.join('Output', 'OCTGNImages')
-OUTPUT_PDF_PATH = os.path.join('Output', 'PDF')
-OUTPUT_PREVIEW_IMAGES_PATH = os.path.join('Output', 'PreviewImages')
-OUTPUT_RINGSDB_PATH = os.path.join('Output', 'RingsDB')
-OUTPUT_RINGSDB_IMAGES_PATH = os.path.join('Output', 'RingsDBImages')
-OUTPUT_RULES_PDF_PATH = os.path.join('Output', 'RulesPDF')
-OUTPUT_SPANISHDB_PATH = os.path.join('Output', 'SpanishDB')
+OUTPUT_PATH = 'Output'
+OUTPUT_DB_PATH = os.path.join(OUTPUT_PATH, 'DB')
+OUTPUT_DTC_PATH = os.path.join(OUTPUT_PATH, 'DriveThruCards')
+OUTPUT_FRENCHDB_PATH = os.path.join(OUTPUT_PATH, 'FrenchDB')
+OUTPUT_GENERICPNG_PATH = os.path.join(OUTPUT_PATH, 'GenericPNG')
+OUTPUT_GENERICPNG_PDF_PATH = os.path.join(OUTPUT_PATH, 'GenericPNGPDF')
+OUTPUT_HALLOFBEORN_PATH = os.path.join(OUTPUT_PATH, 'HallOfBeorn')
+OUTPUT_MBPRINT_PATH = os.path.join(OUTPUT_PATH, 'MBPrint')
+OUTPUT_MBPRINT_PDF_PATH = os.path.join(OUTPUT_PATH, 'MBPrintPDF')
+OUTPUT_MPC_PATH = os.path.join(OUTPUT_PATH, 'MakePlayingCards')
+OUTPUT_OCTGN_PATH = os.path.join(OUTPUT_PATH, 'OCTGN')
+OUTPUT_OCTGN_DECKS_PATH = os.path.join(OUTPUT_PATH, 'OCTGNDecks')
+OUTPUT_OCTGN_IMAGES_PATH = os.path.join(OUTPUT_PATH, 'OCTGNImages')
+OUTPUT_PDF_PATH = os.path.join(OUTPUT_PATH, 'PDF')
+OUTPUT_PREVIEW_IMAGES_PATH = os.path.join(OUTPUT_PATH, 'PreviewImages')
+OUTPUT_RINGSDB_PATH = os.path.join(OUTPUT_PATH, 'RingsDB')
+OUTPUT_RINGSDB_IMAGES_PATH = os.path.join(OUTPUT_PATH, 'RingsDBImages')
+OUTPUT_RULES_PDF_PATH = os.path.join(OUTPUT_PATH, 'RulesPDF')
+OUTPUT_SPANISHDB_PATH = os.path.join(OUTPUT_PATH, 'SpanishDB')
 PROJECT_PATH = 'setGenerator.seproject'
 RINGSDB_COOKIES_PATH = 'ringsdb_cookies.json'
 RINGSDB_JSON_PATH = 'ringsdb.json'
@@ -673,6 +675,9 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
 
     if 'octgn_image_destination_path' not in conf:
         conf['octgn_image_destination_path'] = ''
+
+    if 'timestamp_path' not in conf:
+        conf['timestamp_path'] = ''
 
     if 'set_ids_octgn_image_destination' not in conf:
         conf['set_ids_octgn_image_destination'] = []
@@ -4844,9 +4849,11 @@ def _make_low_quality(conf, input_path):
 
         break
 
-    cmd = MAGICK_COMMAND_LOW.format(conf['magick_path'], input_path, os.sep)
-    res = _run_cmd(cmd)
-    logging.info(res)
+    if input_cnt:
+        cmd = MAGICK_COMMAND_LOW.format(conf['magick_path'], input_path,
+                                        os.sep)
+        res = _run_cmd(cmd)
+        logging.info(res)
 
     output_cnt = 0
     for _, _, filenames in os.walk(input_path):
@@ -4909,7 +4916,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
             ringsdb_cards[card_number] = _ringsdb_code(row)
 
     pairs = []
-    if ringsdb_cards and os.path.exists(output_path):
+    if ringsdb_cards and known_filenames:
         for _, _, filenames in os.walk(output_path):
             for filename in filenames:
                 card_number = filename[:3]
@@ -5279,9 +5286,11 @@ def _make_cmyk(conf, input_path, min_size):
 
         break
 
-    cmd = MAGICK_COMMAND_CMYK.format(conf['magick_path'], input_path, os.sep)
-    res = _run_cmd(cmd)
-    logging.info(res)
+    if input_cnt:
+        cmd = MAGICK_COMMAND_CMYK.format(conf['magick_path'], input_path,
+                                         os.sep)
+        res = _run_cmd(cmd)
+        logging.info(res)
 
     output_cnt = 0
     for _, _, filenames in os.walk(input_path):
@@ -6076,3 +6085,18 @@ def update_ringsdb(conf, sets):
 
     logging.info('...Updating test.ringsdb.com (%ss)',
                  round(time.time() - timestamp, 3))
+
+
+def get_last_image_timestamp():
+    """ Get timestamp of the last generated image output.
+    """
+    max_ts = 0
+    for root, _, filenames in os.walk(OUTPUT_PATH):
+        for filename in filenames:
+            if filename.split('.')[-1] in ('png', 'jpg', 'pdf', 'o8c', '7z'):
+                file_ts = int(os.path.getmtime(os.path.join(root, filename)))
+                if file_ts > max_ts:
+                    max_ts = file_ts
+
+    max_ts = datetime.fromtimestamp(max_ts).strftime('%Y-%m-%d %H:%M:%S')
+    return max_ts

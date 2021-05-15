@@ -28,6 +28,9 @@ octgn_image_destination_path: C:\Google Drive\Playtesting\OCTGN Files\ImageDatab
 # Path to DB destination folder (may be empty)
 db_destination_path: C:\Google Drive\RenderedImages
 
+# Path to timestamp folder (may be empty)
+timestamp_path: C:\Google Drive\Timestamp
+
 # Whether to reprocess all cards (true)
 # or update only the cards, changed since the previous script run (false)
 reprocess_all: true
