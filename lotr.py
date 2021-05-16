@@ -154,8 +154,48 @@ CARD_TYPES_NON_UNIQUE = {'Campaign', 'Contract', 'Encounter Side Quest',
                          'Event', 'Nightmare', 'Player Side Quest',
                          'Presentation', 'Quest', 'Rules', 'Treachery',
                          'Treasure'}
-SPHERES = {'Baggins', 'Fellowship', 'Leadership', 'Lore', 'Mastery', 'Neutral',
-           'Spirit', 'Tactics', 'Boon', 'Burden', 'Nightmare', 'Upgraded'}
+SPHERES = {'Baggins', 'Fellowship', 'Leadership', 'Lore', 'Neutral', 'Spirit',
+           'Tactics', 'Boon', 'Burden', 'Nightmare', 'Upgraded'}
+
+CARD_TYPES_PLAYER_FRENCH = {'Ally', 'Attachment', 'Contract', 'Event', 'Hero',
+                            'Player Side Quest', 'Treasure', 'Campaign',
+                            'Objective Ally', 'Objective Hero',
+                            'Ship Objective'}
+CARD_SUBTYPE_FRENCH_IDS = {
+    'Boon': 0, # T.B.D.
+    'Burden': 0 # T.B.D.
+}
+CARD_TYPE_FRENCH_IDS = {
+    'Ally': 401,
+    'Attachment': 403,
+    'Campaign': 411,
+    'Contract': 418,
+    'Enemy': 404,
+    'Encounter Side Quest': 413,
+    'Event': 402,
+    'Hero': 400,
+    'Location': 405,
+    'Nightmare': 415,
+    'Objective': 407,
+    'Objective Ally': 409,
+    'Objective Hero': 416,
+    'Objective Location': 417,
+    'Player Side Quest': 412,
+    'Quest': 408,
+    'Ship Enemy': 416,
+    'Ship Objective': 414,
+    'Treachery': 406,
+    'Treasure': 410
+}
+SPHERE_FRENCH_IDS = {
+    'Baggins': 306,
+    'Fellowship': 305,
+    'Leadership': 300,
+    'Lore': 301,
+    'Neutral': 304,
+    'Spirit': 302,
+    'Tactics': 303
+}
 
 SPHERES_CAMPAIGN = {'Setup'}
 SPHERES_RULES = {'Back'}
@@ -2982,6 +3022,79 @@ def generate_frenchdb_csv(conf, set_id, set_name):
     output_folder = os.path.join(OUTPUT_FRENCHDB_PATH,
                                  escape_filename(set_name))
     create_folder(output_folder)
+
+    data = sorted(
+        [row for row in DATA if row[CARD_SET] == set_id
+         and row[CARD_TYPE] not in ('Presentation', 'Rules') and
+         (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)
+        ], key=lambda r:
+        str(int(r[CARD_NUMBER])).zfill(3)
+        if is_positive_or_zero_int(r[CARD_NUMBER])
+        else str(r[CARD_NUMBER]))
+
+    output_path = os.path.join(output_folder, 'carte_joueur.csv')
+    with open(output_path, 'w', newline='', encoding='utf-8') as obj:
+        obj.write(codecs.BOM_UTF8.decode('utf-8'))
+        fieldnames = ['id_extension', 'numero_identification', 'id_type_carte',
+                      'id_sous_type_carte', 'id_sphere_influence', 'id_octgn',
+                      'titre', 'cout', 'menace', 'volonte', 'attaque',
+                      'defense', 'point_vie', 'trait', 'texte', 'indic_unique',
+                      'indic_recto_verso', 'nb_normal', 'nb_facile',
+                      'nb_cauchemar']
+        writer = csv.DictWriter(obj, fieldnames=fieldnames)
+        writer.writeheader()
+        for i, row in enumerate(data):
+            if row[CARD_TYPE] not in CARD_TYPES_PLAYER_FRENCH:
+                continue
+
+            tbd = """
+            csv_row = {
+                'id_extension': None,
+                'numero_identification': int(row[CARD_NUMBER])
+                                         if _is_int(row[CARD_NUMBER])
+                                         else 0,
+                'id_type_carte': ,
+                'id_sous_type_carte': ,
+                'id_sphere_influence': ,
+                'id_octgn': ,
+                'titre': ,
+                'cout': ,
+                'menace': ,
+                'volonte': ,
+                'attaque': ,
+                'defense': ,
+                'point_vie': ,
+                'trait': ,
+                'texte': ,
+                'indic_unique': ,
+                'indic_recto_verso': ,
+                'nb_normal': ,
+                'nb_facile': ,
+                'nb_cauchemar': 
+                }
+            writer.writerow(csv_row)
+
+  id_extension int(11) NOT NULL,
+  numero_identification int(11) NOT NULL,
+  id_type_carte int(11) NOT NULL,
+  id_sous_type_carte int(11) DEFAULT NULL,
+  id_sphere_influence int(11) NOT NULL,
+  id_octgn varchar(64) DEFAULT NULL,
+  titre varchar(64) NOT NULL,
+  cout int(11) DEFAULT NULL,
+  menace int(11) DEFAULT NULL,
+  volonte int(11) DEFAULT NULL,
+  attaque int(11) DEFAULT NULL,
+  defense int(11) DEFAULT NULL,
+  point_vie int(11) DEFAULT NULL,
+  trait varchar(64) DEFAULT NULL,
+  texte varchar(2048) NOT NULL,
+  indic_unique int(11) NOT NULL DEFAULT '0',
+  indic_recto_verso int(1) NOT NULL,
+  nb_normal int(11) NOT NULL,
+  nb_facile int(11) NOT NULL,
+  nb_cauchemar int(11) NOT NULL
+    """
 
     logging.info('[%s] ...Generating CSV files for the French database (%ss)',
                  set_name, round(time.time() - timestamp, 3))
