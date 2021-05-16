@@ -1183,8 +1183,8 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
             for row in data:
                 if row[CARD_ID] in TRANSLATIONS[lang]:
                     logging.error(
-                        'Duplicate card ID %s in %s translations, '
-                        'ignoring', row[CARD_ID], lang)
+                        'Duplicate card ID %s for row #%s in %s translations, '
+                        'ignoring', row[CARD_ID], row[ROW_COLUMN], lang)
                 else:
                     TRANSLATIONS[lang][row[CARD_ID]] = row
 
@@ -4947,8 +4947,15 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
 
         temp_path = os.path.join(TEMP_ROOT_PATH,
                                  'generate_db.{}.{}'.format(set_id, lang))
-        delete_folder(temp_path)
-        shutil.copytree(output_path, temp_path)
+        create_folder(temp_path)
+        clear_folder(temp_path)
+        for _, _, filenames in os.walk(output_path):
+            for filename in filenames:
+                shutil.copyfile(os.path.join(output_path, filename),
+                                os.path.join(temp_path, filename))
+
+            break
+
         _make_low_quality(conf, temp_path)
 
         for _, _, filenames in os.walk(temp_path):
@@ -4982,13 +4989,20 @@ def generate_octgn(conf, set_id, set_name, lang):
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300OCTGN,
                               '{}.{}'.format(set_id, lang))
-    temp_path = os.path.join(TEMP_ROOT_PATH,
-                             'generate_octgn.{}.{}'.format(set_id, lang))
     output_path = os.path.join(OUTPUT_OCTGN_IMAGES_PATH, '{}.{}'.format(
         escape_filename(set_name), lang))
 
-    delete_folder(temp_path)
-    shutil.copytree(input_path, temp_path)
+    temp_path = os.path.join(TEMP_ROOT_PATH,
+                             'generate_octgn.{}.{}'.format(set_id, lang))
+    create_folder(temp_path)
+    clear_folder(temp_path)
+    for _, _, filenames in os.walk(input_path):
+        for filename in filenames:
+            shutil.copyfile(os.path.join(input_path, filename),
+                            os.path.join(temp_path, filename))
+
+        break
+
     _make_low_quality(conf, temp_path)
 
     pack_path = os.path.join(output_path,
