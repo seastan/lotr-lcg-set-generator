@@ -3062,7 +3062,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
                  set_name, round(time.time() - timestamp, 3))
 
 
-def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0914
+def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R0915
     """ Generate CSV files for the French database.
     """
     logging.info('[%s] Generating CSV files for the French database...',
@@ -3126,7 +3126,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0914
                     text, text_back)
 
             csv_row = {
-                'id_extension': None,
+                'id_extension': row[CARD_SET_RINGSDB_CODE],
                 'numero_identification': int(row[CARD_NUMBER])
                                          if _is_int(row[CARD_NUMBER])
                                          else 0,
@@ -3153,10 +3153,96 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0914
                 }
             writer.writerow(csv_row)
 
-#            if row[CARD_SPHERE] == 'Setup':
-#                card_type = 'Nightmare'
-#            else:
-#                card_type = row[CARD_TYPE]
+    output_path = os.path.join(output_folder, 'carte_rencontre.csv')
+    with open(output_path, 'w', newline='', encoding='utf-8') as obj:
+        obj.write(codecs.BOM_UTF8.decode('utf-8'))
+        fieldnames = ['id_extension', 'numero_identification', 'id_type_carte',
+                      'id_sous_type_carte', 'id_set_rencontre', 'titre',
+                      'cout_engagement', 'menace', 'attaque', 'defense',
+                      'point_quete', 'point_vie', 'trait', 'texte',
+                      'effet_ombre', 'titre_quete', 'indic_unique',
+                      'indic_recto_verso', 'nb_normal', 'nb_facile',
+                      'nb_cauchemar']
+        writer = csv.DictWriter(obj, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in data:
+            if (row[CARD_TYPE] in CARD_TYPES_PLAYER_FRENCH or
+                    row[CARD_TYPE] == 'Quest'):
+                continue
+
+            french_row = TRANSLATIONS['French'].get(row[CARD_ID], {})
+
+            if row[CARD_SPHERE] == 'Setup':
+                card_type = 'Nightmare'
+            else:
+                card_type = row[CARD_TYPE]
+
+            if row[CARD_TYPE] == 'Contract':
+                sphere = 'Neutral'
+            elif row[CARD_SPHERE] in ('Boon', 'Upgraded'):
+                sphere = None
+            else:
+                sphere = row[CARD_SPHERE]
+
+            if row[CARD_TYPE] == 'Hero':
+                cost = None
+                threat = _handle_int(row[CARD_COST])
+            else:
+                cost = _handle_int(row[CARD_COST])
+                threat = None
+
+            text = _update_french_card_text('{}\n{}'.format(
+                french_row.get(CARD_KEYWORDS) or '',
+                french_row.get(CARD_TEXT) or '')).strip()
+
+            if (french_row.get(CARD_SIDE_B) is not None and
+                    french_row.get(BACK_PREFIX + CARD_TEXT) is not None):
+                text_back = _update_french_card_text('{}\n{}'.format(
+                    french_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
+                    french_row[BACK_PREFIX + CARD_TEXT])).strip()
+                text = '<b>Face A</b><br>{}\n<b>Face B</b><br>{}'.format(
+                    text, text_back)
+
+            if french_row.get(CARD_SHADOW) is not None:
+                shadow = _update_french_card_text(french_row[CARD_SHADOW]
+                                                  ).strip()
+            else:
+                shadow = None
+
+            quantity = (int(row[CARD_QUANTITY])
+                        if _is_int(row[CARD_QUANTITY])
+                        else 0)
+            easy_mode = (int(row[CARD_EASY_MODE])
+                         if _is_int(row[CARD_EASY_MODE])
+                         else 0)
+
+            csv_row = {
+                'id_extension': row[CARD_SET_RINGSDB_CODE],
+                'numero_identification': int(row[CARD_NUMBER])
+                                         if _is_int(row[CARD_NUMBER])
+                                         else 0,
+                'id_type_carte': CARD_TYPE_FRENCH_IDS.get(card_type, 0),
+                'id_sous_type_carte': None,
+                'id_set_rencontre': row[CARD_ENCOUNTER_SET] or '',
+                'titre': french_row.get(CARD_NAME, ''),
+                'cout_engagement': _handle_int(row[CARD_ENGAGEMENT]),
+                'menace': _handle_int(row[CARD_THREAT]),
+                'attaque': _handle_int(row[CARD_ATTACK]),
+                'defense': _handle_int(row[CARD_DEFENSE]),
+                'point_quete': _handle_int(row[CARD_QUEST]),
+                'point_vie': _handle_int(row[CARD_HEALTH]),
+                'trait': french_row.get(CARD_TRAITS),
+                'texte': text,
+                'effet_ombre': shadow,
+                'titre_quete': '',
+                'indic_unique': int(row[CARD_UNIQUE] or 0),
+                'indic_recto_verso': row[CARD_SIDE_B] is not None and 1 or 0,
+                'nb_normal': quantity,
+                'nb_facile': quantity - easy_mode,
+                'nb_cauchemar': 0
+                }
+            writer.writerow(csv_row)
+
 
     logging.info('[%s] ...Generating CSV files for the French database (%ss)',
                  set_name, round(time.time() - timestamp, 3))
