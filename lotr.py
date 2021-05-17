@@ -161,10 +161,6 @@ CARD_TYPES_PLAYER_FRENCH = {'Ally', 'Attachment', 'Contract', 'Event', 'Hero',
                             'Player Side Quest', 'Treasure', 'Campaign',
                             'Objective Ally', 'Objective Hero',
                             'Ship Objective'}
-CARD_SUBTYPE_FRENCH_IDS = {
-    'Boon': 0, # T.B.D.
-    'Burden': 0 # T.B.D.
-}
 CARD_TYPE_FRENCH_IDS = {
     'Ally': 401,
     'Attachment': 403,
@@ -182,12 +178,12 @@ CARD_TYPE_FRENCH_IDS = {
     'Objective Location': 417,
     'Player Side Quest': 412,
     'Quest': 408,
-    'Ship Enemy': 416,
+    'Ship Enemy': 404,
     'Ship Objective': 414,
     'Treachery': 406,
     'Treasure': 410
 }
-SPHERE_FRENCH_IDS = {
+CARD_SPHERE_FRENCH_IDS = {
     'Baggins': 306,
     'Fellowship': 305,
     'Leadership': 300,
@@ -526,6 +522,18 @@ def _update_card_text(text, lang='English', skip_rules=False):  # pylint: disabl
                       r'|Respuesta de Valor|Respuesta|Viaje|Sombra'
                       r'|Resoluci\u00f3n):', '[b]\\1[/b]:', text)
         text = re.sub(r'\b(Condici\u00f3n)\b', '[bi]\\1[/bi]', text)
+    if lang == 'French' and not skip_rules:
+        text = re.sub(r'\b(R\u00e9solution de la qu\u00eate)( \([^\)]+\))?:',
+                      '[b]\\1[/b]\\2:', text)
+        text = re.sub(r'\b(\[Vaillance\] )?(\[Ressource\] |\[Organisation\] |'
+                      r'\[Qu\u00eate\] |\[Voyage\] |\[Rencontre\] |'
+                      r'\[Combat\] |\[Restauration\] )?(Action):',
+                      '[b]\\1\\2\\3[/b]:', text)
+        text = re.sub(r'\b(Une fois r\u00e9v\u00e9l\u00e9e|Mise en place|'
+                      r'Forc\u00e9|\[Vaillance\] R\u00e9ponse|R\u00e9ponse|'
+                      r'Trajet|Ombre|R\u00e9solution):',
+                      '[b]\\1[/b]:', text)
+        text = re.sub(r'\b(Condition)\b', '[bi]\\1[/bi]', text)
     elif lang == 'English' and not skip_rules:
         text = re.sub(r'\b(Quest Resolution)( \([^\)]+\))?:', '[b]\\1[/b]\\2:',
                       text)
@@ -742,6 +750,15 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
                                 if conf['outputs'][lang]]
     conf['nobleed_300'] = {}
     conf['nobleed_800'] = {}
+
+    if not conf['set_ids']:
+        conf['set_ids'] = []
+
+    if not conf['ignore_set_ids']:
+        conf['ignore_set_ids'] = []
+
+    if not conf['set_ids_octgn_image_destination']:
+        conf['set_ids_octgn_image_destination'] = []
 
     for lang in conf['output_languages']:
         conf['outputs'][lang] = set(conf['outputs'][lang])
@@ -1252,8 +1269,7 @@ def get_sets(conf, sheet_changes=True, scratch_changes=True):
         chosen_sets.update(s for s in FOUND_SCRATCH_SETS if s in SETS)
 
     chosen_sets = list(chosen_sets)
-    chosen_sets = [s for s in chosen_sets
-                   if s not in (conf.get('ignore_set_ids') or [])]
+    chosen_sets = [s for s in chosen_sets if s not in conf['ignore_set_ids']]
     chosen_sets = [[SETS[s][SET_ID], SETS[s][SET_NAME]] for s in chosen_sets]
     logging.info('...Getting all sets to work on (%ss)',
                  round(time.time() - timestamp, 3))
@@ -3047,25 +3063,51 @@ def generate_frenchdb_csv(conf, set_id, set_name):
             if row[CARD_TYPE] not in CARD_TYPES_PLAYER_FRENCH:
                 continue
 
+            french_row = TRANSLATIONS['French'].get(row[CARD_ID], {})
+
+            card_type = ('Nightmare'
+                         if row[CARD_SPHERE] == 'Setup'
+                         else row[CARD_TYPE])
+
+            if row[CARD_TYPE] == 'Contract':
+                sphere = 'Neutral'
+            elif row[CARD_SPHERE] in ('Boon', 'Burden', 'Nightmare',
+                                      'Upgraded', 'Setup'):
+                sphere = None
+            else:
+                sphere = row[CARD_SPHERE]
+
+            if row[CARD_TYPE] == 'Hero':
+                cost = None
+                threat = _handle_int(row[CARD_COST])
+            else:
+                cost = _handle_int(row[CARD_COST])
+                threat = None
+
+            text = _update_card_text('{}\n{}'.format(
+                french_row.get(CARD_KEYWORDS) or '',
+                french_row.get(CARD_TEXT) or ''), lang='French').strip()
+
             tbd = """
             csv_row = {
                 'id_extension': None,
                 'numero_identification': int(row[CARD_NUMBER])
                                          if _is_int(row[CARD_NUMBER])
                                          else 0,
-                'id_type_carte': ,
-                'id_sous_type_carte': ,
-                'id_sphere_influence': ,
-                'id_octgn': ,
-                'titre': ,
-                'cout': ,
-                'menace': ,
-                'volonte': ,
-                'attaque': ,
-                'defense': ,
-                'point_vie': ,
-                'trait': ,
-                'texte': ,
+                'id_type_carte': CARD_TYPE_FRENCH_IDS.get(card_type, 0),
+                'id_sous_type_carte': None,
+                'id_sphere_influence': CARD_SPHERE_FRENCH_IDS.get(
+                    card_sphere, 0),
+                'id_octgn': row[CARD_ID],
+                'titre': french_row.get(CARD_NAME, ''),
+                'cout': cost,
+                'menace': threat,
+                'volonte': _handle_int(row[CARD_WILLPOWER]),
+                'attaque': _handle_int(row[CARD_ATTACK]),
+                'defense': _handle_int(row[CARD_DEFENSE]),
+                'point_vie': _handle_int(row[CARD_HEALTH]),
+                'trait': french_row.get(CARD_TRAIT),
+                'texte': text,
                 'indic_unique': ,
                 'indic_recto_verso': ,
                 'nb_normal': ,
@@ -3074,19 +3116,6 @@ def generate_frenchdb_csv(conf, set_id, set_name):
                 }
             writer.writerow(csv_row)
 
-  id_extension int(11) NOT NULL,
-  numero_identification int(11) NOT NULL,
-  id_type_carte int(11) NOT NULL,
-  id_sous_type_carte int(11) DEFAULT NULL,
-  id_sphere_influence int(11) NOT NULL,
-  id_octgn varchar(64) DEFAULT NULL,
-  titre varchar(64) NOT NULL,
-  cout int(11) DEFAULT NULL,
-  menace int(11) DEFAULT NULL,
-  volonte int(11) DEFAULT NULL,
-  attaque int(11) DEFAULT NULL,
-  defense int(11) DEFAULT NULL,
-  point_vie int(11) DEFAULT NULL,
   trait varchar(64) DEFAULT NULL,
   texte varchar(2048) NOT NULL,
   indic_unique int(11) NOT NULL DEFAULT '0',
@@ -3131,11 +3160,9 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
         writer = csv.DictWriter(obj, fieldnames=fieldnames)
         writer.writeheader()
         for i, row in enumerate(data):
-            if row[CARD_TYPE] == 'Campaign':
-                sphere = None
-            elif row[CARD_TYPE] in ('Contract', 'Treasure'):
+            if row[CARD_TYPE] in ('Contract', 'Treasure'):
                 sphere = 'Neutral'
-            elif row[CARD_SPHERE] in ('Nightmare', 'Upgraded'):
+            elif row[CARD_SPHERE] in ('Nightmare', 'Upgraded', 'Setup'):
                 sphere = None
             else:
                 sphere = row[CARD_SPHERE]
