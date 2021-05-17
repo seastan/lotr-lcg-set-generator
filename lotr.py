@@ -611,6 +611,40 @@ def _update_octgn_card_text(text):
     return text
 
 
+def _get_french_icon(name):
+    """ Get the icon for the French database.
+    """
+    return ('<img src="https://sda-src.cgbuilder.fr/images/carte_{}.png" '  # pylint: disable=W1308
+            'alt="{}" />'.format(name, name))
+
+
+def _update_french_card_text(text):
+    """ Update card text for the French database.
+    """
+    text = _update_card_text(text, lang='French')
+    text = text.replace('\n', '<br>')
+
+    text = text.replace('[willpower]', _get_french_icon('volonte'))
+    text = text.replace('[threat]', _get_french_icon('menace'))
+    text = text.replace('[attack]', _get_french_icon('attaque'))
+    text = text.replace('[defense]', _get_french_icon('defense'))
+    text = text.replace('[leadership]', _get_french_icon('commandement'))
+    text = text.replace('[spirit]', _get_french_icon('energie'))
+    text = text.replace('[tactics]', _get_french_icon('tactique'))
+    text = text.replace('[lore]', _get_french_icon('connaissance'))
+    text = text.replace('[baggins]', _get_french_icon('sacquet'))
+    text = text.replace('[fellowship]', _get_french_icon('communaute'))
+    text = text.replace('[unique]', _get_french_icon('unique'))
+    text = text.replace('[sunny]', _get_french_icon('soleil'))
+    text = text.replace('[cloudy]', _get_french_icon('nuage'))
+    text = text.replace('[rainy]', _get_french_icon('pluie'))
+    text = text.replace('[stormy]', _get_french_icon('orage'))
+    text = text.replace('[sailing]', _get_french_icon('gouvernail'))
+    text = text.replace('[eos]', _get_french_icon('oeil'))
+    text = text.replace('[pp]', _get_french_icon('parjoueur'))
+    return text
+
+
 def escape_filename(value):
     """ Escape forbidden symbols in a file name.
     """
@@ -3028,7 +3062,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
                  set_name, round(time.time() - timestamp, 3))
 
 
-def generate_frenchdb_csv(conf, set_id, set_name):
+def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0914
     """ Generate CSV files for the French database.
     """
     logging.info('[%s] Generating CSV files for the French database...',
@@ -3059,20 +3093,15 @@ def generate_frenchdb_csv(conf, set_id, set_name):
                       'nb_cauchemar']
         writer = csv.DictWriter(obj, fieldnames=fieldnames)
         writer.writeheader()
-        for i, row in enumerate(data):
+        for row in data:
             if row[CARD_TYPE] not in CARD_TYPES_PLAYER_FRENCH:
                 continue
 
             french_row = TRANSLATIONS['French'].get(row[CARD_ID], {})
 
-            card_type = ('Nightmare'
-                         if row[CARD_SPHERE] == 'Setup'
-                         else row[CARD_TYPE])
-
             if row[CARD_TYPE] == 'Contract':
                 sphere = 'Neutral'
-            elif row[CARD_SPHERE] in ('Boon', 'Burden', 'Nightmare',
-                                      'Upgraded', 'Setup'):
+            elif row[CARD_SPHERE] in ('Boon', 'Upgraded'):
                 sphere = None
             else:
                 sphere = row[CARD_SPHERE]
@@ -3084,20 +3113,26 @@ def generate_frenchdb_csv(conf, set_id, set_name):
                 cost = _handle_int(row[CARD_COST])
                 threat = None
 
-            text = _update_card_text('{}\n{}'.format(
+            text = _update_french_card_text('{}\n{}'.format(
                 french_row.get(CARD_KEYWORDS) or '',
-                french_row.get(CARD_TEXT) or ''), lang='French').strip()
+                french_row.get(CARD_TEXT) or '')).strip()
 
-            tbd = """
+            if (french_row.get(CARD_SIDE_B) is not None and
+                    french_row.get(BACK_PREFIX + CARD_TEXT) is not None):
+                text_back = _update_french_card_text('{}\n{}'.format(
+                    french_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
+                    french_row[BACK_PREFIX + CARD_TEXT])).strip()
+                text = '<b>Face A</b><br>{}\n<b>Face B</b><br>{}'.format(
+                    text, text_back)
+
             csv_row = {
                 'id_extension': None,
                 'numero_identification': int(row[CARD_NUMBER])
                                          if _is_int(row[CARD_NUMBER])
                                          else 0,
-                'id_type_carte': CARD_TYPE_FRENCH_IDS.get(card_type, 0),
+                'id_type_carte': CARD_TYPE_FRENCH_IDS.get(row[CARD_TYPE], 0),
                 'id_sous_type_carte': None,
-                'id_sphere_influence': CARD_SPHERE_FRENCH_IDS.get(
-                    card_sphere, 0),
+                'id_sphere_influence': CARD_SPHERE_FRENCH_IDS.get(sphere, 0),
                 'id_octgn': row[CARD_ID],
                 'titre': french_row.get(CARD_NAME, ''),
                 'cout': cost,
@@ -3106,24 +3141,22 @@ def generate_frenchdb_csv(conf, set_id, set_name):
                 'attaque': _handle_int(row[CARD_ATTACK]),
                 'defense': _handle_int(row[CARD_DEFENSE]),
                 'point_vie': _handle_int(row[CARD_HEALTH]),
-                'trait': french_row.get(CARD_TRAIT),
+                'trait': french_row.get(CARD_TRAITS),
                 'texte': text,
-                'indic_unique': ,
-                'indic_recto_verso': ,
-                'nb_normal': ,
-                'nb_facile': ,
-                'nb_cauchemar': 
+                'indic_unique': int(row[CARD_UNIQUE] or 0),
+                'indic_recto_verso': row[CARD_SIDE_B] is not None and 1 or 0,
+                'nb_normal': int(row[CARD_QUANTITY])
+                             if _is_int(row[CARD_QUANTITY])
+                             else 0,
+                'nb_facile': 0,
+                'nb_cauchemar': 0
                 }
             writer.writerow(csv_row)
 
-  trait varchar(64) DEFAULT NULL,
-  texte varchar(2048) NOT NULL,
-  indic_unique int(11) NOT NULL DEFAULT '0',
-  indic_recto_verso int(1) NOT NULL,
-  nb_normal int(11) NOT NULL,
-  nb_facile int(11) NOT NULL,
-  nb_cauchemar int(11) NOT NULL
-    """
+#            if row[CARD_SPHERE] == 'Setup':
+#                card_type = 'Nightmare'
+#            else:
+#                card_type = row[CARD_TYPE]
 
     logging.info('[%s] ...Generating CSV files for the French database (%ss)',
                  set_name, round(time.time() - timestamp, 3))
