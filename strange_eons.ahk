@@ -43,5 +43,17 @@ While (!FileExist("makeCards_FINISHED")) {
 Sleep 5000
 Send ^{F4}
 Sleep 1000
+Send {Tab}
+Sleep 1000
+Send {Tab}
+Sleep 1000
+Send {Tab}
+Sleep 1000
+Send {Up}
+Sleep 1000
+Send {Left}
+Sleep 1000
+Send {Up}
+Sleep 1000
 Send !{F4}
 Exit
