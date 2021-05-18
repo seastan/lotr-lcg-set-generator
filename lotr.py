@@ -157,42 +157,6 @@ CARD_TYPES_NON_UNIQUE = {'Campaign', 'Contract', 'Encounter Side Quest',
 SPHERES = {'Baggins', 'Fellowship', 'Leadership', 'Lore', 'Neutral', 'Spirit',
            'Tactics', 'Boon', 'Burden', 'Nightmare', 'Upgraded'}
 
-CARD_TYPES_PLAYER_FRENCH = {'Ally', 'Attachment', 'Contract', 'Event', 'Hero',
-                            'Player Side Quest', 'Treasure', 'Campaign',
-                            'Objective Ally', 'Objective Hero',
-                            'Ship Objective'}
-CARD_TYPE_FRENCH_IDS = {
-    'Ally': 401,
-    'Attachment': 403,
-    'Campaign': 411,
-    'Contract': 418,
-    'Enemy': 404,
-    'Encounter Side Quest': 413,
-    'Event': 402,
-    'Hero': 400,
-    'Location': 405,
-    'Nightmare': 415,
-    'Objective': 407,
-    'Objective Ally': 409,
-    'Objective Hero': 416,
-    'Objective Location': 417,
-    'Player Side Quest': 412,
-    'Quest': 408,
-    'Ship Enemy': 404,
-    'Ship Objective': 414,
-    'Treachery': 406,
-    'Treasure': 410
-}
-CARD_SPHERE_FRENCH_IDS = {
-    'Baggins': 306,
-    'Fellowship': 305,
-    'Leadership': 300,
-    'Lore': 301,
-    'Neutral': 304,
-    'Spirit': 302,
-    'Tactics': 303
-}
-
 SPHERES_CAMPAIGN = {'Setup'}
 SPHERES_RULES = {'Back'}
 SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow'}
@@ -324,6 +288,41 @@ XML_TEMPLATE = """<set>
 </set>
 """
 
+CARD_TYPES_PLAYER_FRENCH = {'Ally', 'Attachment', 'Contract', 'Event', 'Hero',
+                            'Player Side Quest', 'Treasure', 'Campaign',
+                            'Objective Ally', 'Objective Hero',
+                            'Ship Objective'}
+CARD_TYPE_FRENCH_IDS = {
+    'Ally': 401,
+    'Attachment': 403,
+    'Campaign': 411,
+    'Contract': 418,
+    'Enemy': 404,
+    'Encounter Side Quest': 413,
+    'Event': 402,
+    'Hero': 400,
+    'Location': 405,
+    'Nightmare': 415,
+    'Objective': 407,
+    'Objective Ally': 409,
+    'Objective Hero': 416,
+    'Objective Location': 417,
+    'Player Side Quest': 412,
+    'Quest': 408,
+    'Ship Enemy': 404,
+    'Ship Objective': 414,
+    'Treachery': 406,
+    'Treasure': 410
+}
+CARD_SPHERE_FRENCH_IDS = {
+    'Baggins': 306,
+    'Fellowship': 305,
+    'Leadership': 300,
+    'Lore': 301,
+    'Neutral': 304,
+    'Spirit': 302,
+    'Tactics': 303
+}
 SPANISH = {
     'Ally': 'Aliado',
     'Attachment': 'Vinculada',
@@ -3091,7 +3090,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                       'defense', 'point_vie', 'trait', 'texte', 'indic_unique',
                       'indic_recto_verso', 'nb_normal', 'nb_facile',
                       'nb_cauchemar']
-        writer = csv.DictWriter(obj, fieldnames=fieldnames)
+        writer = csv.DictWriter(obj, delimiter=';', fieldnames=fieldnames)
         writer.writeheader()
         for row in data:
             if row[CARD_TYPE] not in CARD_TYPES_PLAYER_FRENCH:
@@ -3163,7 +3162,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                       'effet_ombre', 'titre_quete', 'indic_unique',
                       'indic_recto_verso', 'nb_normal', 'nb_facile',
                       'nb_cauchemar']
-        writer = csv.DictWriter(obj, fieldnames=fieldnames)
+        writer = csv.DictWriter(obj, delimiter=';', fieldnames=fieldnames)
         writer.writeheader()
         for row in data:
             if (row[CARD_TYPE] in CARD_TYPES_PLAYER_FRENCH or
@@ -3176,20 +3175,6 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 card_type = 'Nightmare'
             else:
                 card_type = row[CARD_TYPE]
-
-            if row[CARD_TYPE] == 'Contract':
-                sphere = 'Neutral'
-            elif row[CARD_SPHERE] in ('Boon', 'Upgraded'):
-                sphere = None
-            else:
-                sphere = row[CARD_SPHERE]
-
-            if row[CARD_TYPE] == 'Hero':
-                cost = None
-                threat = _handle_int(row[CARD_COST])
-            else:
-                cost = _handle_int(row[CARD_COST])
-                threat = None
 
             text = _update_french_card_text('{}\n{}'.format(
                 french_row.get(CARD_KEYWORDS) or '',
@@ -3234,7 +3219,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 'trait': french_row.get(CARD_TRAITS),
                 'texte': text,
                 'effet_ombre': shadow,
-                'titre_quete': '',
+                'titre_quete': None,
                 'indic_unique': int(row[CARD_UNIQUE] or 0),
                 'indic_recto_verso': row[CARD_SIDE_B] is not None and 1 or 0,
                 'nb_normal': quantity,
@@ -3243,6 +3228,51 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 }
             writer.writerow(csv_row)
 
+    output_path = os.path.join(output_folder, 'carte_quete.csv')
+    with open(output_path, 'w', newline='', encoding='utf-8') as obj:
+        obj.write(codecs.BOM_UTF8.decode('utf-8'))
+        fieldnames = ['id_extension', 'numero_identification',
+                      'id_set_rencontre', 'titre', 'sequence', 'texteA',
+                      'texteB', 'point_quete', 'nb_normal', 'nb_facile',
+                      'nb_cauchemar']
+
+        writer = csv.DictWriter(obj, delimiter=';', fieldnames=fieldnames)
+        writer.writeheader()
+        for row in data:
+            if row[CARD_TYPE] != 'Quest':
+                continue
+
+            french_row = TRANSLATIONS['French'].get(row[CARD_ID], {})
+
+            text = _update_french_card_text('{}\n{}'.format(
+                french_row.get(CARD_KEYWORDS) or '',
+                french_row.get(CARD_TEXT) or '')).strip()
+
+            text_back = _update_french_card_text('{}\n{}'.format(
+                french_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
+                french_row.get(BACK_PREFIX + CARD_TEXT) or '')).strip()
+
+            quantity = (int(row[CARD_QUANTITY])
+                        if _is_int(row[CARD_QUANTITY])
+                        else 0)
+
+            csv_row = {
+                'id_extension': row[CARD_SET_RINGSDB_CODE],
+                'numero_identification': int(row[CARD_NUMBER])
+                                         if _is_int(row[CARD_NUMBER])
+                                         else 0,
+                'id_set_rencontre': row[CARD_ENCOUNTER_SET] or '',
+                'titre': french_row.get(CARD_NAME, ''),
+                'sequence': '{}{}'.format(_handle_int(row[CARD_COST]),
+                                          row[CARD_ENGAGEMENT]),
+                'texteA': text,
+                'texteB': text_back,
+                'point_quete': _handle_int(row[BACK_PREFIX + CARD_QUEST]),
+                'nb_normal': quantity,
+                'nb_facile': quantity,
+                'nb_cauchemar': 0
+                }
+            writer.writerow(csv_row)
 
     logging.info('[%s] ...Generating CSV files for the French database (%ss)',
                  set_name, round(time.time() - timestamp, 3))
