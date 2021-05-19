@@ -2840,9 +2840,8 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
     json_data = []
     card_data = DATA[:]
     for row in DATA:
-        card_type = row[CARD_TYPE]
         if (row[CARD_SIDE_B] is not None and
-                card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL):
+                row[CARD_TYPE] not in CARD_TYPES_DOUBLESIDE_OPTIONAL):
             new_row = row.copy()
             new_row[CARD_NAME] = new_row[CARD_SIDE_B]
             new_row[CARD_DOUBLESIDE] = 'B'
@@ -3116,12 +3115,12 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 french_row.get(CARD_KEYWORDS) or '',
                 french_row.get(CARD_TEXT) or '')).strip()
 
-            if (french_row.get(CARD_SIDE_B) is not None and
-                    french_row.get(BACK_PREFIX + CARD_TEXT) is not None):
+            if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL and
+                    french_row.get(BACK_PREFIX + CARD_TEXT)):
                 text_back = _update_french_card_text('{}\n{}'.format(
                     french_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
                     french_row[BACK_PREFIX + CARD_TEXT])).strip()
-                text = '<b>Face A</b><br>{}\n<b>Face B</b><br>{}'.format(
+                text = '<b>Face A</b><br>{}<br><b>Face B</b><br>{}'.format(
                     text, text_back)
 
             csv_row = {
@@ -3180,12 +3179,12 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 french_row.get(CARD_KEYWORDS) or '',
                 french_row.get(CARD_TEXT) or '')).strip()
 
-            if (french_row.get(CARD_SIDE_B) is not None and
-                    french_row.get(BACK_PREFIX + CARD_TEXT) is not None):
+            if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL and
+                    french_row.get(BACK_PREFIX + CARD_TEXT)):
                 text_back = _update_french_card_text('{}\n{}'.format(
                     french_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
                     french_row[BACK_PREFIX + CARD_TEXT])).strip()
-                text = '<b>Face A</b><br>{}\n<b>Face B</b><br>{}'.format(
+                text = '<b>Face A</b><br>{}<br><b>Face B</b><br>{}'.format(
                     text, text_back)
 
             if french_row.get(CARD_SHADOW) is not None:
@@ -3244,6 +3243,10 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
 
             french_row = TRANSLATIONS['French'].get(row[CARD_ID], {})
 
+            name = french_row.get(CARD_NAME, '')
+            if french_row.get(CARD_SIDE_B) and french_row[CARD_SIDE_B] != name:
+                name = '{} / {}'.format(name, french_row[CARD_SIDE_B])
+
             text = _update_french_card_text('{}\n{}'.format(
                 french_row.get(CARD_KEYWORDS) or '',
                 french_row.get(CARD_TEXT) or '')).strip()
@@ -3262,7 +3265,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                                          if _is_int(row[CARD_NUMBER])
                                          else 0,
                 'id_set_rencontre': row[CARD_ENCOUNTER_SET] or '',
-                'titre': french_row.get(CARD_NAME, ''),
+                'titre': name,
                 'sequence': '{}{}'.format(_handle_int(row[CARD_COST]),
                                           row[CARD_ENGAGEMENT]),
                 'texteA': text,
@@ -3289,96 +3292,44 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                                  escape_filename(set_name))
     create_folder(output_folder)
 
+    cycle = set_name
+    presentations = [row for row in DATA
+                     if row[CARD_SET] == set_id and
+                     row[CARD_TYPE] == 'Presentation']
+    if presentations:
+        spanish_name = TRANSLATIONS['Spanish'].get(
+            presentations[0][CARD_ID], {}).get(CARD_NAME)
+        if spanish_name:
+            cycle = spanish_name
+
+    data = DATA[:]
+    for row in DATA:
+        if (row[CARD_SIDE_B] is not None and
+                row[CARD_TYPE] not in CARD_TYPES_DOUBLESIDE_OPTIONAL):
+            new_row = row.copy()
+            new_row[CARD_NAME] = new_row[CARD_SIDE_B]
+            new_row[CARD_DOUBLESIDE] = 'B'
+            for key in new_row.keys():
+                if key.startswith(BACK_PREFIX):
+                    new_row[key.replace(BACK_PREFIX, '')] = new_row[key]
+
+            data.append(new_row)
+
     data = sorted(
-        [row for row in DATA if row[CARD_SET] == set_id
+        [row for row in data if row[CARD_SET] == set_id
          and row[CARD_TYPE] not in ('Presentation', 'Rules') and
          (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)
         ], key=lambda r:
-        str(int(r[CARD_NUMBER])).zfill(3)
-        if is_positive_or_zero_int(r[CARD_NUMBER])
-        else str(r[CARD_NUMBER]))
+        (str(int(r[CARD_NUMBER])).zfill(3)
+         if is_positive_or_zero_int(r[CARD_NUMBER])
+         else str(r[CARD_NUMBER]), row.get(CARD_DOUBLESIDE, '')))
 
-    output_path = os.path.join(output_folder,
-                               '{}.csv'.format(escape_filename(set_name)))
+    output_path = os.path.join(output_folder, 'cartasenc.csv')
     with open(output_path, 'w', newline='', encoding='utf-8') as obj:
         obj.write(codecs.BOM_UTF8.decode('utf-8'))
-        fieldnames = ['Num', 'id', 'name', 'cost', 'amenaza', 'voluntad',
-                      'ataque', 'defensa', 'vida', '', 'quest points',
-                      'number', 'encounter set', 'keywords', 'cantidad',
-                      'esfera', 'rasgos', 'tipo', 'enfrentamiento']
-        writer = csv.DictWriter(obj, fieldnames=fieldnames)
-        writer.writeheader()
-        for i, row in enumerate(data):
-            if row[CARD_TYPE] in ('Contract', 'Treasure'):
-                sphere = 'Neutral'
-            elif row[CARD_SPHERE] in ('Nightmare', 'Upgraded', 'Setup'):
-                sphere = None
-            else:
-                sphere = row[CARD_SPHERE]
-
-            if row[BACK_PREFIX + CARD_TYPE] in ('Contract', 'Treasure'):
-                back_sphere = 'Neutral'
-            else:
-                back_sphere = row[BACK_PREFIX + CARD_SPHERE]
-
-            keywords = (row[BACK_PREFIX + CARD_KEYWORDS]
-                        if row[BACK_PREFIX + CARD_KEYWORDS] is not None
-                        else row[CARD_KEYWORDS])
-            if keywords:
-                keywords = '. '.join(extract_keywords(keywords))
-
-            csv_row = {
-                'Num': i + 1,
-                'id': row[CARD_ID],
-                'name': row[CARD_NAME],
-                'cost': _handle_int(row[BACK_PREFIX + CARD_COST])
-                        if row[BACK_PREFIX + CARD_COST] is not None
-                        else _handle_int(row[CARD_COST]),
-                'amenaza': _handle_int(row[BACK_PREFIX + CARD_THREAT])
-                           if row[BACK_PREFIX + CARD_THREAT] is not None
-                           else _handle_int(row[CARD_THREAT]),
-                'voluntad': _handle_int(row[BACK_PREFIX + CARD_WILLPOWER])
-                            if row[BACK_PREFIX + CARD_WILLPOWER] is not None
-                            else _handle_int(row[CARD_WILLPOWER]),
-                'ataque': _handle_int(row[BACK_PREFIX + CARD_ATTACK])
-                          if row[BACK_PREFIX + CARD_ATTACK] is not None
-                          else _handle_int(row[CARD_ATTACK]),
-                'defensa': _handle_int(row[BACK_PREFIX + CARD_DEFENSE])
-                           if row[BACK_PREFIX + CARD_DEFENSE] is not None
-                           else _handle_int(row[CARD_DEFENSE]),
-                'vida': _handle_int(row[BACK_PREFIX + CARD_HEALTH])
-                        if row[BACK_PREFIX + CARD_HEALTH] is not None
-                        else _handle_int(row[CARD_HEALTH]),
-                '': 0,
-                'quest points': _handle_int(row[BACK_PREFIX + CARD_QUEST])
-                                if row[BACK_PREFIX + CARD_QUEST] is not None
-                                else _handle_int(row[CARD_QUEST]),
-                'number': _handle_int(row[CARD_NUMBER]),
-                'encounter set': row[CARD_ENCOUNTER_SET],
-                'keywords': keywords,
-                'cantidad': int(row[CARD_QUANTITY])
-                            if _is_int(row[CARD_QUANTITY])
-                            else 0,
-                'esfera': back_sphere if back_sphere is not None else sphere,
-                'rasgos': row[BACK_PREFIX + CARD_TRAITS]
-                          if row[BACK_PREFIX + CARD_TRAITS] is not None
-                          else row[CARD_TRAITS],
-                'tipo': row[BACK_PREFIX + CARD_TYPE]
-                        if row[BACK_PREFIX + CARD_TYPE] is not None
-                        else row[CARD_TYPE],
-                'enfrentamiento':
-                    _handle_int(row[BACK_PREFIX + CARD_ENGAGEMENT])
-                    if row[BACK_PREFIX + CARD_ENGAGEMENT] is not None
-                    else _handle_int(row[CARD_ENGAGEMENT])
-                }
-            writer.writerow(csv_row)
-
-    output_path = os.path.join(output_folder, 'encuentro.csv')
-    with open(output_path, 'w', newline='', encoding='utf-8') as obj:
-        obj.write(codecs.BOM_UTF8.decode('utf-8'))
-        fieldnames = ['pack_id', 'cycle', 'cycle_id', 'octngId', 'type_id',
-                      'set', 'set_id', 'position', 'code', 'nombre',
-                      'nombre_ing', 'quantity', 'easy_mode', 'tipo',
+        fieldnames = ['id', 'pack_id', 'cycle', 'cycle_id', 'octngId',
+                      'type_id', 'set', 'set_id', 'position', 'code', 'nombre',
+                      'nombreb', 'quantity', 'easy_mode', 'tipo',
                       'enfrentamiento', 'amenaza', 'attack', 'defense',
                       'health', 'mision', 'victory', 'traits', 'text',
                       'sombra']
@@ -3388,13 +3339,19 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
             if row[CARD_TYPE] in CARD_TYPES_PLAYER:
                 continue
 
-            spanish_row = TRANSLATIONS['Spanish'].get(row[CARD_ID], {})
+            spanish_row = TRANSLATIONS['Spanish'].get(row[CARD_ID], {}).copy()
+            if row.get(CARD_DOUBLESIDE):
+                spanish_row[CARD_NAME] = spanish_row.get(CARD_SIDE_B, '')
+                for key in spanish_row.keys():
+                    if key.startswith(BACK_PREFIX):
+                        spanish_row[key.replace(BACK_PREFIX, '')] = (
+                            spanish_row[key])
+
             name = spanish_row.get(CARD_NAME)
             if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL and
-                    row[BACK_PREFIX + CARD_NAME] is not None and
-                    row[BACK_PREFIX + CARD_NAME] != row[CARD_NAME]):
-                name = '{} / {}'.format(name, spanish_row.get(
-                    BACK_PREFIX + CARD_NAME))
+                    spanish_row.get(CARD_SIDE_B) and
+                    spanish_row[CARD_SIDE_B] != name):
+                name = '{} / {}'.format(name, spanish_row[CARD_SIDE_B])
 
             quantity = (int(row[CARD_QUANTITY])
                         if _is_int(row[CARD_QUANTITY])
@@ -3405,9 +3362,13 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
             if row[CARD_TYPE] == 'Quest':
                 quest_points = _handle_int(row[BACK_PREFIX + CARD_QUEST])
                 engagement = _handle_int(row[CARD_COST])
+                threat = '{}-{}'.format(
+                    row[CARD_ENGAGEMENT] or '',
+                    row[BACK_PREFIX + CARD_ENGAGEMENT] or '')
             else:
                 quest_points = _handle_int(row[CARD_QUEST])
                 engagement = _handle_int(row[CARD_ENGAGEMENT])
+                threat = _handle_int(row[CARD_THREAT])
 
             if row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL:
                 victory_points = (
@@ -3440,22 +3401,23 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 shadow = '<p>{}</p>'.format(shadow.replace('\n', '</p><p>'))
 
             csv_row = {
-                'pack_id': None,
-                'cycle': row[CARD_SET_NAME],
-                'cycle_id': row[CARD_SET_RINGSDB_CODE],
+                'id': None,
+                'pack_id': row[CARD_SET_RINGSDB_CODE],
+                'cycle': cycle,
+                'cycle_id': None,
                 'octngId': row[CARD_ID],
                 'type_id': row[CARD_TYPE],
-                'set': row[CARD_ENCOUNTER_SET],
+                'set': spanish_row.get(CARD_ENCOUNTER_SET),
                 'set_id': None,
                 'position': _handle_int(row[CARD_NUMBER]),
                 'code': _ringsdb_code(row),
                 'nombre': name,
-                'nombre_ing': row[CARD_NAME],
+                'nombreb': row[CARD_NAME],
                 'quantity': quantity,
                 'easy_mode': quantity - easy_mode,
                 'tipo': SPANISH.get(row[CARD_TYPE]),
                 'enfrentamiento': engagement,
-                'amenaza': _handle_int(row[CARD_THREAT]),
+                'amenaza': threat,
                 'attack': _handle_int(row[CARD_ATTACK]),
                 'defense': _handle_int(row[CARD_DEFENSE]),
                 'health': _handle_int(row[CARD_HEALTH]),
@@ -3470,7 +3432,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
     output_path = os.path.join(output_folder, 'cards.csv')
     with open(output_path, 'w', newline='', encoding='utf-8') as obj:
         obj.write(codecs.BOM_UTF8.decode('utf-8'))
-        fieldnames = ['pack_id', 'cycle_id', 'type_id', 'sphere_id',
+        fieldnames = ['id', 'pack_id', 'cycle_id', 'type_id', 'sphere_id',
                       'position', 'code', 'name', 'traits', 'text', 'flavor',
                       'is_unique', 'cost', 'threat', 'willpower', 'attack',
                       'defense', 'health', 'victory', 'quest', 'quantity',
@@ -3483,7 +3445,13 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
             if row[CARD_TYPE] not in CARD_TYPES_PLAYER:
                 continue
 
-            spanish_row = TRANSLATIONS['Spanish'].get(row[CARD_ID], {})
+            spanish_row = TRANSLATIONS['Spanish'].get(row[CARD_ID], {}).copy()
+            if row.get(CARD_DOUBLESIDE):
+                spanish_row[CARD_NAME] = spanish_row.get(CARD_SIDE_B, '')
+                for key in spanish_row.keys():
+                    if key.startswith(BACK_PREFIX):
+                        spanish_row[key.replace(BACK_PREFIX, '')] = (
+                            spanish_row[key])
 
             if row[CARD_TYPE] in ('Contract', 'Treasure'):
                 sphere = 'Neutral'
@@ -3503,11 +3471,37 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
             if text:
                 text = '<p>{}</p>'.format(text.replace('\n', '</p><p>'))
 
+            if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL and
+                    spanish_row.get(BACK_PREFIX + CARD_TEXT)):
+                text_back = _update_card_text('{}\n{}'.format(
+                    spanish_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
+                    spanish_row[BACK_PREFIX + CARD_TEXT]),
+                                              lang='Spanish').strip()
+                if text_back:
+                    text_back = '<p>{}</p>'.format(
+                        text_back.replace('\n', '</p><p>'))
+
+                text = ('<p><b>Lado A.</b></p>\n{}\n<p><b>Lado B.</b></p>\n{}'
+                        .format(text, text_back))
+
             flavour = _update_card_text(spanish_row.get(CARD_FLAVOUR) or '',
                                         lang='Spanish',
                                         skip_rules=True).strip()
             if flavour:
                 flavour = '<p>{}</p>'.format(flavour.replace('\n', '</p><p>'))
+
+            if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL and
+                    spanish_row.get(BACK_PREFIX + CARD_FLAVOUR)):
+                flavour_back = _update_card_text(
+                    spanish_row[BACK_PREFIX + CARD_FLAVOUR], lang='Spanish',
+                    skip_rules=True).strip()
+                if flavour_back:
+                    flavour_back = '<p>{}</p>'.format(
+                        flavour_back.replace('\n', '</p><p>'))
+
+                flavour = (
+                    '<p><b>Lado A.</b></p>\n{}\n<p><b>Lado B.</b></p>\n{}'
+                    .format(flavour, flavour_back))
 
             quantity = (int(row[CARD_QUANTITY])
                         if _is_int(row[CARD_QUANTITY])
@@ -3523,8 +3517,9 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 limit = None
 
             csv_row = {
-                'pack_id': None,
-                'cycle_id': row[CARD_SET_RINGSDB_CODE],
+                'id': None,
+                'pack_id': row[CARD_SET_RINGSDB_CODE],
+                'cycle_id': None,
                 'type_id': row[CARD_TYPE],
                 'sphere_id': sphere,
                 'position': _handle_int(row[CARD_NUMBER]),
@@ -3551,72 +3546,6 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 'has_errata': 0
                 }
             writer.writerow(csv_row)
-
-            if row[BACK_PREFIX + CARD_NAME] is not None:
-                if row[BACK_PREFIX + CARD_TYPE] == 'Contract':
-                    card_type = None
-                else:
-                    card_type = row[BACK_PREFIX + CARD_TYPE]
-
-                if row[BACK_PREFIX + CARD_TYPE] == 'Contract':
-                    sphere = None
-                elif row[BACK_PREFIX + CARD_TYPE] == 'Treasure':
-                    sphere = 'Neutral'
-                else:
-                    sphere = row[BACK_PREFIX + CARD_SPHERE]
-
-                if row[BACK_PREFIX + CARD_TYPE] == 'Hero':
-                    cost = None
-                    threat = _handle_int(row[BACK_PREFIX + CARD_COST])
-                else:
-                    cost = _handle_int(row[BACK_PREFIX + CARD_COST])
-                    threat = None
-
-                text = _update_card_text('{}\n{}'.format(
-                    spanish_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
-                    spanish_row.get(BACK_PREFIX + CARD_TEXT) or ''),
-                                         lang='Spanish').strip()
-                if text:
-                    text = '<p>{}</p>'.format(text.replace('\n', '</p><p>'))
-
-                flavour = _update_card_text(
-                    spanish_row.get(BACK_PREFIX + CARD_FLAVOUR) or '',
-                    lang='Spanish', skip_rules=True).strip()
-                if flavour:
-                    flavour = '<p>{}</p>'.format(
-                        flavour.replace('\n', '</p><p>'))
-
-                csv_row = {
-                    'pack_id': None,
-                    'cycle_id': None,
-                    'type_id': card_type,
-                    'sphere_id': sphere,
-                    'position': None,
-                    'code': None,
-                    'name': spanish_row.get(BACK_PREFIX + CARD_NAME),
-                    'traits': spanish_row.get(BACK_PREFIX + CARD_TRAITS),
-                    'text': text,
-                    'flavor': flavour,
-                    'is_unique': int(row[BACK_PREFIX + CARD_UNIQUE] or 0),
-                    'cost': cost,
-                    'threat': threat,
-                    'willpower': _handle_int(row[BACK_PREFIX + CARD_WILLPOWER]),
-                    'attack': _handle_int(row[BACK_PREFIX + CARD_ATTACK]),
-                    'defense': _handle_int(row[BACK_PREFIX + CARD_DEFENSE]),
-                    'health': _handle_int(row[BACK_PREFIX + CARD_HEALTH]),
-                    'victory': _handle_int(
-                        spanish_row.get(BACK_PREFIX + CARD_VICTORY)),
-                    'quest': _handle_int(row[BACK_PREFIX + CARD_QUEST]),
-                    'quantity': None,
-                    'deck_limit': None,
-                    'illustrator': row[BACK_PREFIX + CARD_ARTIST]
-                                   or row[CARD_ARTIST],
-                    'octgnid': None,
-                    'date_creation': None,
-                    'date_update': None,
-                    'has_errata': None
-                    }
-                writer.writerow(csv_row)
 
     logging.info('[%s] ...Generating CSV files for the Spanish database (%ss)',
                  set_name, round(time.time() - timestamp, 3))

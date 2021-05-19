@@ -134,7 +134,6 @@ and is not 100% reliable (it may be stuck on the Strange Eons step).  To minimiz
 - Never leave Strange Eons open.
 - Make sure the Strange Eons window is maximized.
 - Make sure no cards are opened.
-- Make sure all folders at the left are closed.
 - If the script started, don't even try to touch the keyboard or mouse.
 
 For debugging purposes you can also run these steps using the Jupyter notebook (it doesn't use parallelism):
