@@ -757,8 +757,8 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
     if 'octgn_image_destination_path' not in conf:
         conf['octgn_image_destination_path'] = ''
 
-    if 'timestamp_path' not in conf:
-        conf['timestamp_path'] = ''
+    if 'remote_logs_path' not in conf:
+        conf['remote_logs_path'] = ''
 
     if 'set_ids_octgn_image_destination' not in conf:
         conf['set_ids_octgn_image_destination'] = []

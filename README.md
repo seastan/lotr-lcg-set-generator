@@ -92,7 +92,7 @@ for details).
   - `octgn_o8d_scratch_destination_path`: path to OCTGN `.o8d` scratch destination folder (may be empty)
   - `octgn_image_destination_path`: path to OCTGN image destination folder (may be empty)
   - `db_destination_path`: path to DB destination folder (may be empty)
-  - `timestamp_path`: path to timestamp folder (may be empty)
+  - `remote_logs_path`: path to remote logs folder (may be empty)
   - `reprocess_all`: whether to reprocess all cards (`true`) or update only the cards, changed since the previous script run (`false`)
   - `selected_only`: process only "selected" rows (true or false)
   - `exit_if_no_spreadsheet_changes`: stop processing if there are no spreadsheet changes (true or false)
