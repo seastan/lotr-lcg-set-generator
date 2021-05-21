@@ -1,3 +1,7 @@
+If (FileExist("makeCards_FINISHED")) {
+  Exit
+}
+
 Run setGenerator.seproject
 Sleep 10000
 

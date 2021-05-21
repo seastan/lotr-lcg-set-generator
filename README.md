@@ -50,6 +50,9 @@ completely, you will need to download updates to that folder manually.
 4. Install Backup and Sync from Google (if it's not installed yet) and make sure that the folder
 with the artwork is being synced.
 
+    If you plan to automatically upload images to Google Drive (see the configuration below),
+    go to `Preferences` -> `Settings` and uncheck `Show warning when you remove items from a shared folder`.
+
 5. Install Strange Eons and the custom plugin, see https://github.com/seastan/lotr-lcg-se-plugin for details.
 
 6. Install the latest GIMP version from https://www.gimp.org/downloads/.

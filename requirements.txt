@@ -1,8 +1,10 @@
+paramiko
 py7zr
 pylint
 pypng
 pyyaml
 reportlab
 requests
+scp
 unidecode
 urllib3
