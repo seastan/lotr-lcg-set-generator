@@ -227,6 +227,7 @@ IMAGES_ZIP_PATH = '{}/Export/'.format(os.path.split(PROJECT_FOLDER)[-1])
 OCTGN_ZIP_PATH = 'a21af4e8-be4b-4cda-a6b6-534f9717391f/Sets'
 OUTPUT_PATH = 'Output'
 OUTPUT_DB_PATH = os.path.join(OUTPUT_PATH, 'DB')
+OUTPUT_DRAGNCARDS_PATH = os.path.join(OUTPUT_PATH, 'DragnCards')
 OUTPUT_DTC_PATH = os.path.join(OUTPUT_PATH, 'DriveThruCards')
 OUTPUT_FRENCHDB_PATH = os.path.join(OUTPUT_PATH, 'FrenchDB')
 OUTPUT_GENERICPNG_PATH = os.path.join(OUTPUT_PATH, 'GenericPNG')
@@ -244,6 +245,7 @@ OUTPUT_RINGSDB_PATH = os.path.join(OUTPUT_PATH, 'RingsDB')
 OUTPUT_RINGSDB_IMAGES_PATH = os.path.join(OUTPUT_PATH, 'RingsDBImages')
 OUTPUT_RULES_PDF_PATH = os.path.join(OUTPUT_PATH, 'RulesPDF')
 OUTPUT_SPANISHDB_PATH = os.path.join(OUTPUT_PATH, 'SpanishDB')
+OUTPUT_TTS_PATH = os.path.join(OUTPUT_PATH, 'TTS')
 PROJECT_PATH = 'setGenerator.seproject'
 RINGSDB_COOKIES_PATH = 'ringsdb_cookies.json'
 RINGSDB_JSON_PATH = 'ringsdb.json'
@@ -741,7 +743,7 @@ def _update_zip_filename(filename):
     return output_filename
 
 
-def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
+def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912,R0915
     """ Read project configuration.
     """
     logging.info('Reading project configuration (%s)...', path)
@@ -751,17 +753,35 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
         conf = yaml.safe_load(f_conf)
 
     # to be removed
-    if 'db_destination_path' not in conf:
-        conf['db_destination_path'] = ''
-
-    if 'octgn_image_destination_path' not in conf:
-        conf['octgn_image_destination_path'] = ''
+    if 'dragncards_id_rsa_path' not in conf:
+        conf['dragncards_id_rsa_path'] = ''
 
     if 'remote_logs_path' not in conf:
         conf['remote_logs_path'] = ''
 
+    if 'octgn_image_destination_path' not in conf:
+        conf['octgn_image_destination_path'] = ''
+
+    if 'db_destination_path' not in conf:
+        conf['db_destination_path'] = ''
+
+    if 'tts_destination_path' not in conf:
+        conf['tts_destination_path'] = ''
+
+    if 'dragncards_remote_image_path' not in conf:
+        conf['dragncards_remote_image_path'] = ''
+
+    if 'dragncards_remote_json_path' not in conf:
+        conf['dragncards_remote_json_path'] = ''
+
+    if 'dragncards_remote_deck_path' not in conf:
+        conf['dragncards_remote_deck_path'] = ''
+
     if 'set_ids_octgn_image_destination' not in conf:
         conf['set_ids_octgn_image_destination'] = []
+
+    if 'dragncards_json' not in conf:
+        conf['dragncards_json'] = False
 
     if 'frenchdb_csv' not in conf:
         conf['frenchdb_csv'] = False
@@ -823,6 +843,13 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
         if ('genericpng_zip' in conf['outputs'][lang]
                 or 'genericpng_7z' in conf['outputs'][lang]):
             conf['outputs'][lang].add('genericpng')
+
+        if ('tts' in conf['outputs'][lang]
+                and 'db' not in conf['outputs'][lang]):
+            conf['outputs'][lang].add('db')
+
+        if 'tts' in conf['outputs'][lang] and not conf['octgn_o8d']:
+            conf['octgn_o8d'] = True
 
         conf['nobleed_300'][lang] = ('db' in conf['outputs'][lang]
                                      or 'octgn' in conf['outputs'][lang]
@@ -2444,9 +2471,10 @@ def _generate_octgn_o8d_player(conf, set_id, set_name):
 
 
 def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R0915
-    """ Generate .o8d files for OCTGN.
+    """ Generate .o8d files for OCTGN and DragnCards.
     """
-    logging.info('[%s] Generating .o8d files for OCTGN...', set_name)
+    logging.info('[%s] Generating .o8d files for OCTGN and DragnCards...',
+                 set_name)
     timestamp = time.time()
 
     rows = [row for row in DATA
@@ -2676,8 +2704,8 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
 
     _generate_octgn_o8d_player(conf, set_id, set_name)
 
-    logging.info('[%s] ...Generating .o8d files for OCTGN (%ss)',
-                 set_name, round(time.time() - timestamp, 3))
+    logging.info('[%s] ...Generating .o8d files for OCTGN and DragnCards '
+                 '(%ss)', set_name, round(time.time() - timestamp, 3))
 
 
 def _needed_for_ringsdb(card):
@@ -5200,9 +5228,10 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
 
 
 def generate_octgn(conf, set_id, set_name, lang):
-    """ Generate OCTGN image outputs.
+    """ Generate OCTGN and DragnCards image outputs.
     """
-    logging.info('[%s, %s] Generating OCTGN image outputs...', set_name, lang)
+    logging.info('[%s, %s] Generating OCTGN and DragnCards image outputs...',
+                 set_name, lang)
     timestamp = time.time()
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300OCTGN,
@@ -5254,8 +5283,8 @@ def generate_octgn(conf, set_id, set_name, lang):
 
     delete_folder(temp_path)
 
-    logging.info('[%s, %s] ...Generating OCTGN image outputs (%ss)',
-                 set_name, lang, round(time.time() - timestamp, 3))
+    logging.info('[%s, %s] ...Generating OCTGN and DragnCards image outputs '
+                 '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
 def generate_rules_pdf(conf, set_id, set_name, lang):

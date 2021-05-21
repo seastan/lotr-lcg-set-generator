@@ -89,13 +89,18 @@ for details).
   - `artwork_path`: local path to the artwork folder (don't use for that any existing folder in this repo)
   - `gimp_console_path`: path to GIMP console executable
   - `magick_path`: path to ImageMagick executable
+  - `dragncards_id_rsa_path`: path to id_rsa key to upload files to DragnCards
+  - `remote_logs_path`: path to remote logs folder (may be empty)
   - `octgn_set_xml_destination_path`: path to OCTGN `set.xml` destination folder (may be empty)
   - `octgn_set_xml_scratch_destination_path`: path to OCTGN `set.xml` scratch destination folder (may be empty)
   - `octgn_o8d_destination_path`: path to OCTGN `.o8d` destination folder (may be empty)
   - `octgn_o8d_scratch_destination_path`: path to OCTGN `.o8d` scratch destination folder (may be empty)
   - `octgn_image_destination_path`: path to OCTGN image destination folder (may be empty)
   - `db_destination_path`: path to DB destination folder (may be empty)
-  - `remote_logs_path`: path to remote logs folder (may be empty)
+  - `tts_destination_path`: path to TTS destination folder (may be empty)
+  - `dragncards_remote_image_path`: remote DragnCards path to image folder
+  - `dragncards_remote_json_path`: remote DragnCards path to JSON folder
+  - `dragncards_remote_deck_path`: remote DragnCards path to .o8d folder
   - `reprocess_all`: whether to reprocess all cards (`true`) or update only the cards, changed since the previous script run (`false`)
   - `selected_only`: process only "selected" rows (true or false)
   - `exit_if_no_spreadsheet_changes`: stop processing if there are no spreadsheet changes (true or false)
@@ -106,6 +111,7 @@ for details).
   - `octgn_set_xml`: creating `set.xml` files for OCTGN (true or false)
   - `octgn_o8d`: creating `.o8d` files for OCTGN (true or false)
   - `ringsdb_csv`: creating CSV files for RingsDB (true or false)
+  - `dragncards_json`: creating JSON files for DragnCards (true or false)
   - `hallofbeorn_json`: creating JSON files for Hall of Beorn (true or false)
   - `frenchdb_csv`: creating CSV files for the French database sda.cgbuilder.fr (true or false)
   - `spanishdb_csv`: creating CSV files for the Spanish database susurrosdelbosqueviejo.com (true or false)
@@ -147,7 +153,8 @@ For debugging purposes you can also run these steps using the Jupyter notebook (
 
 The scripts will generate the following outputs:
 
-- `Output/DB/<set name>.<language>/`: 300 dpi PNG images for general purposes.
+- `Output/DB/<set name>.<language>/`: 300 dpi PNG images for general purposes (including TTS).
+- `Output/DragnCards/<set name>/<set name>.json`: an output file for DragnCards.
 - `Output/DriveThruCards/<set name>.<language>/`: a `7z` archive of 300 dpi CMYK JPG images to be printed on DriveThruCards.com.
 - `Output/FrenchDB/<set name>/`: CSV files for French database sda.cgbuilder.fr.
 - `Output/GenericPNG/<set name>.<language>/`: a `7z` archive of generic 800 dpi PNG images.
@@ -157,16 +164,19 @@ The scripts will generate the following outputs:
 - `Output/MBPrint/<set name>.<language>/`: a `7z` archive of 800 dpi CMYK JPG images to be printed on MBPrint.pl.
 - `Output/MBPrintPDF/<set name>.<language>/`: a `7z` archive of a PDF file to be printed on MBPrint.pl (800 dpi CMYK JPG).
 - `Output/OCTGN/<set name>/<octgn id>/set.xml`: an output file for OCTGN.
-- `Output/OCTGNDecks/<set name>/<deck name>.o8d`: quest decks for OCTGN.
-- `Output/OCTGNImages/<set name>.<language>/<set name>.<language>.o8c`: image packs for OCTGN (600x429 JPG).
+- `Output/OCTGNDecks/<set name>/<deck name>.o8d`: quest decks for OCTGN and DragnCards.
+- `Output/OCTGNImages/<set name>.<language>/<set name>.<language>.o8c`: image packs for OCTGN and DragnCards (600x429 JPG).
 - `Output/PDF/<set name>.<language>/`: PDF files in `A4` and `letter` format for home printing (300 dpi PNG).
 - `Output/PreviewImages/<set name>.<language>/`: 600x429 JPG images for preview purposes.
 - `Output/RingsDB/<set name>/<set name>.csv`: an output file for RIngsDB.
 - `Output/RingsDBImages/<set name>.<language>/`: 300 dpi PNG images for RingsDB (the same as `Output/DB`, but player cards only and differently named).
 - `Output/RulesPDF/<set name>.<language>/Rules.<set name>.<language>.pdf`: a PDF file with all Rules pages (300 dpi PNG).
 - `Output/SpanishDB/<set name>/`: CSV files for Spanish database susurrosdelbosqueviejo.com.
+- `Output/TTS/<set name>.<language>/`: 300 dpi JPG image sheets for TTS.
 
 Please note that `Output/DB`, `Output/PreviewImages` and `Output/RingsDBImages` are generated together when `db` output is enabled in the configuration.
+
+When `tts` output is enabled in the configuration, `octgn_o8d` and `db` outputs become enabled automatically.
 
 Additionally, if you specified OCTGN destination paths, OCTGN outputs will be copied there.
 

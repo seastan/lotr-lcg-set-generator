@@ -11,6 +11,7 @@ Frogmorton/imagesRaw/*.jpg
 Frogmorton/imagesRaw/*.png
 Frogmorton/XML/*.xml
 imagesEons/*/*/*
+imagesTTS/*/*
 Output/*/*/*
 setEons/*.xml
 setEons/*.xml.old
