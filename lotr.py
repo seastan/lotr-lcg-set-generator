@@ -2897,6 +2897,11 @@ def generate_dragncards_json(conf, set_id, set_name):
         if conf['selected_only'] and row[CARD_ID] not in SELECTED_CARDS:
             continue
 
+        if row[CARD_TYPE] == 'Encounter Side Quest':
+            card_type = 'Side Quest'
+        else:
+            card_type = row[CARD_TYPE]
+
         if row[CARD_TYPE] == 'Rules' and row[CARD_VICTORY]:
             victory = 'Page {}'.format(row[CARD_VICTORY])
         else:
@@ -2906,7 +2911,7 @@ def generate_dragncards_json(conf, set_id, set_name):
             'name': unidecode.unidecode(_to_str(row[CARD_NAME])),
             'printname': _to_str(row[CARD_NAME]),
             'unique': _to_str(_handle_int(row[CARD_UNIQUE])),
-            'type': _to_str(row[CARD_TYPE]),
+            'type': _to_str(card_type),
             'sphere': _to_str(row[CARD_SPHERE]),
             'traits': _to_str(row[CARD_TRAITS]),
             'keywords': _update_dragncards_card_text(_to_str(
@@ -2925,6 +2930,11 @@ def generate_dragncards_json(conf, set_id, set_name):
         }
 
         if row[CARD_SIDE_B]:
+            if row[BACK_PREFIX + CARD_TYPE] == 'Encounter Side Quest':
+                card_type = 'Side Quest'
+            else:
+                card_type = row[BACK_PREFIX + CARD_TYPE]
+
             if row[CARD_TYPE] == 'Rules' and row[BACK_PREFIX + CARD_VICTORY]:
                 victory = 'Page {}'.format(row[BACK_PREFIX + CARD_VICTORY])
             else:
@@ -2934,7 +2944,7 @@ def generate_dragncards_json(conf, set_id, set_name):
                 'name': unidecode.unidecode(_to_str(row[CARD_SIDE_B])),
                 'printname': _to_str(row[CARD_SIDE_B]),
                 'unique': _to_str(_handle_int(row[BACK_PREFIX + CARD_UNIQUE])),
-                'type': _to_str(row[BACK_PREFIX + CARD_TYPE]),
+                'type': _to_str(card_type),
                 'sphere': _to_str(row[BACK_PREFIX + CARD_SPHERE]),
                 'traits': _to_str(row[BACK_PREFIX + CARD_TRAITS]),
                 'keywords': _update_dragncards_card_text(_to_str(
@@ -3000,7 +3010,7 @@ def generate_dragncards_json(conf, set_id, set_name):
         json_data[row[CARD_ID]] = card_data
 
     with open(output_path, 'w', encoding='utf-8') as obj:
-        res = json.dumps(json_data, ensure_ascii=False)
+        res = json.dumps(json_data, ensure_ascii=True)
         obj.write(res)
 
     logging.info('[%s] ...Generating JSON file for DragnCards (%ss)',
