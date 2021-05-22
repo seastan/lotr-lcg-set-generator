@@ -54,6 +54,9 @@ def main(conf=None):  # pylint: disable=R0912,R0915
         if conf['ringsdb_csv']:
             lotr.generate_ringsdb_csv(conf, set_id, set_name)
 
+        if conf['dragncards_json']:
+            lotr.generate_dragncards_json(conf, set_id, set_name)
+
         if conf['hallofbeorn_json']:
             lotr.generate_hallofbeorn_json(conf, set_id, set_name)
 
