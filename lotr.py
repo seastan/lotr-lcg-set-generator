@@ -3010,7 +3010,7 @@ def generate_dragncards_json(conf, set_id, set_name):
         json_data[row[CARD_ID]] = card_data
 
     with open(output_path, 'w', encoding='utf-8') as obj:
-        res = json.dumps(json_data, ensure_ascii=True)
+        res = json.dumps(json_data, ensure_ascii=True, indent=4)
         obj.write(res)
 
     logging.info('[%s] ...Generating JSON file for DragnCards (%ss)',
@@ -3185,7 +3185,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
         if (row[CARD_SIDE_B] is not None and
                 row[BACK_PREFIX + CARD_FLAVOUR] is not None and
                 card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL):
-            flavor_back = _update_card_text(BACK_PREFIX + row[CARD_FLAVOUR],
+            flavor_back = _update_card_text(row[BACK_PREFIX + CARD_FLAVOUR],
                                             skip_rules=True,
                                             fix_linebreaks=False
                                             ).replace('\n', '\r\n').strip()
@@ -3250,7 +3250,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
         json_data.append(json_row)
 
     with open(output_path, 'w', encoding='utf-8') as obj:
-        res = json.dumps(json_data, ensure_ascii=False)
+        res = json.dumps(json_data, ensure_ascii=False, indent=4)
         obj.write(res)
 
     logging.info('[%s] ...Generating JSON file for Hall of Beorn (%ss)',
