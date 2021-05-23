@@ -28,11 +28,13 @@ import urllib3
 import yaml
 
 try:
+    import paramiko
     import png
     import py7zr
     from reportlab.lib.pagesizes import landscape, letter, A4
     from reportlab.lib.units import inch
     from reportlab.pdfgen.canvas import Canvas
+    from scp import SCPClient
 
     PY7ZR_FILTERS = [{'id': py7zr.FILTER_LZMA2,
                       'preset': 9 | py7zr.PRESET_EXTREME}]
@@ -807,6 +809,12 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912,R0915
 
     if 'spanishdb_csv' not in conf:
         conf['spanishdb_csv'] = False
+
+    if 'upload_dragncards' not in conf:
+        conf['upload_dragncards'] = False
+
+    if 'dragncards_hostname' not in conf:
+        conf['dragncards_hostname'] = ''
     # to be removed
 
     conf['all_languages'] = list(conf['outputs'].keys())
@@ -6317,7 +6325,7 @@ def _copy_octgn_set_xml_outputs(temp_path, destination_path, sets):
 
 
 def _copy_octgn_o8d_outputs(temp_path, destination_path, sets):
-    """ Copy OCTGN set.xml files to the destination folder.
+    """ Copy OCTGN .o8d files to the destination folder.
     """
     set_folders = {escape_filename(SETS[s]['Name']) for s in sets}
     archive_path = os.path.join(temp_path, 'copy_octgn_o8d_outputs.zip')
@@ -6461,6 +6469,100 @@ def copy_octgn_image_outputs(conf, sets):
 
     logging.info('...Copying OCTGN image outputs to the destination folder '
                  '(%ss)', round(time.time() - timestamp, 3))
+
+
+def _get_ssh_client(conf):
+    """ Get SCP client.
+    """
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    parts = conf['dragncards_hostname'].split('@')
+    client.connect(parts[1], username=parts[0],
+                   key_filename=conf['dragncards_id_rsa_path'],
+                   timeout=30)
+    return client
+
+
+def upload_dragncards(conf, sets):
+    """ Uploading outputs to DragnCards.
+    """
+    logging.info('Uploading outputs to DragnCards...')
+    timestamp = time.time()
+
+    sets = [s for s in sets if s[0] in FOUND_SETS]
+    client = _get_ssh_client(conf)
+    try:  # pylint: disable=R1702
+        scp_client = SCPClient(client.get_transport())
+        for set_id, set_name in sets:
+            output_path = os.path.join(
+                OUTPUT_OCTGN_IMAGES_PATH,
+                '{}.English'.format(escape_filename(set_name)),
+                '{}.English.o8c'.format(
+                    escape_octgn_filename(escape_filename(set_name))))
+            if (conf['dragncards_remote_image_path'] and
+                    conf['outputs'].get('English') and
+                    'octgn' in conf['outputs']['English'] and
+                    os.path.exists(output_path)):
+                temp_path = os.path.join(
+                    TEMP_ROOT_PATH,
+                    'upload_dragncards_{}'.format(escape_filename(set_name)))
+                create_folder(temp_path)
+                clear_folder(temp_path)
+                with zipfile.ZipFile(output_path) as obj:
+                    obj.extractall(temp_path)
+
+                output_path = os.path.join(
+                    temp_path,
+                    'a21af4e8-be4b-4cda-a6b6-534f9717391f',
+                    'Sets',
+                    set_id,
+                    'Cards')
+                if os.path.exists(output_path):
+                    for _, _, filenames in os.walk(output_path):
+                        for filename in filenames:
+                            scp_client.put(
+                                os.path.join(output_path, filename),
+                                conf['dragncards_remote_image_path'])
+
+                        break
+
+                    logging.info('Uploaded images for %s to DragnCards host',
+                                 set_name)
+
+                delete_folder(temp_path)
+
+            output_path = os.path.join(
+                OUTPUT_DRAGNCARDS_PATH,
+                escape_filename(set_name),
+                '{}.json'.format(escape_filename(set_name)))
+            if (conf['dragncards_remote_json_path'] and
+                    conf['dragncards_json'] and
+                    os.path.exists(output_path)):
+                scp_client.put(output_path,
+                               conf['dragncards_remote_json_path'])
+                logging.info('Uploaded %s to DragnCards host',
+                             '{}.json'.format(escape_filename(set_name)))
+
+            output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
+                                       escape_filename(set_name))
+            if (conf['dragncards_remote_deck_path'] and conf['octgn_o8d'] and
+                    os.path.exists(output_path)):
+                for _, _, filenames in os.walk(output_path):
+                    for filename in filenames:
+                        if filename.startswith('Player-'):
+                            continue
+
+                        scp_client.put(os.path.join(output_path, filename),
+                                       conf['dragncards_remote_deck_path'])
+                        logging.info('Uploaded %s to DragnCards host',
+                                     filename)
+
+                    break
+    finally:
+        client.close()
+
+    logging.info('...Uploading outputs to DragnCards (%ss)',
+                 round(time.time() - timestamp, 3))
 
 
 def update_ringsdb(conf, sets):

@@ -14,8 +14,11 @@ import lotr
 RETRIES = 2
 
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(levelname)s: %(message)s')
+def init_logging():
+    """ Init logging.
+    """
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s %(levelname)s: %(message)s')
 
 
 def retry():
@@ -138,6 +141,7 @@ def initializer():
     """ Ignore CTRL+C in the worker process.
     """
     signal.signal(signal.SIGINT, signal.SIG_IGN)
+    init_logging()
 
 
 def execute_tasks(conf, tasks):
@@ -242,13 +246,18 @@ def main():  # pylint: disable=R0912
             'octgn' in conf['outputs']['English']):
         lotr.copy_octgn_image_outputs(conf, sets)
 
+    if (conf['upload_dragncards'] and conf['dragncards_hostname'] and
+            conf['dragncards_id_rsa_path']):
+        lotr.upload_dragncards(conf, sets)
+
     if conf['remote_logs_path']:
         with open(os.path.join(conf['remote_logs_path'],
-                  'last_generated_image'), 'w') as fobj:
+                               'last_generated_image'), 'w') as fobj:
             fobj.write(lotr.get_last_image_timestamp())
 
     logging.info('Done (%ss)', round(time.time() - timestamp, 3))
 
 
 if __name__ == '__main__':
+    init_logging()
     main()

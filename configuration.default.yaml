@@ -38,13 +38,13 @@ db_destination_path:
 tts_destination_path: 
 
 # Remote DragnCards path to image folder
-dragncards_remote_image_path: webhost@dragncards.com:/var/www/dragncards.com/dragncards/frontend/public/images/cards
+dragncards_remote_image_path: /var/www/dragncards.com/dragncards/frontend/public/images/cards
 
 # Remote DragnCards path to JSON folder
-dragncards_remote_json_path: webhost@dragncards.com:/var/www/dragncards.com/dragncards/frontend/src/cardDB/
+dragncards_remote_json_path: /var/www/dragncards.com/dragncards/frontend/src/cardDB/
 
 # Remote DragnCards path to .o8d folder
-dragncards_remote_deck_path: webhost@dragncards.com:/var/www/dragncards.com/dragncards/frontend/src/decks/
+dragncards_remote_deck_path: /var/www/dragncards.com/dragncards/frontend/src/decks/
 
 # Whether to reprocess all cards (true)
 # or update only the cards, changed since the previous script run (false)
@@ -77,7 +77,7 @@ set_ids_octgn_image_destination:
 # Creating set.xml files for OCTGN (true or false)
 octgn_set_xml: true
 
-# Creating .o8d files for OCTGN (true or false)
+# Creating .o8d files for OCTGN and DragnCards (true or false)
 octgn_o8d: true
 
 # Creating CSV files for RingsDB (true or false)
@@ -94,6 +94,12 @@ frenchdb_csv: false
 
 # Creating CSV files for the Spanish database susurrosdelbosqueviejo.com (true or false)
 spanishdb_csv: false
+
+# Uploading outputs to DragnCards
+upload_dragncards: false
+
+# DragnCards hostname (username@hostname)
+dragncards_hostname: webhost@dragncards.com
 
 # Updating test.ringsdb.com
 update_ringsdb: false
