@@ -2872,7 +2872,7 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                  set_name, round(time.time() - timestamp, 3))
 
 
-def generate_dragncards_json(conf, set_id, set_name):
+def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R0915
     """ Generate JSON file for DragnCards.
     """
     logging.info('[%s] Generating JSON file for DragnCards...', set_name)
@@ -2902,6 +2902,11 @@ def generate_dragncards_json(conf, set_id, set_name):
         else:
             card_type = row[CARD_TYPE]
 
+        if row[CARD_TYPE] == 'Treasure':
+            sphere = 'Neutral'
+        else:
+            sphere = row[CARD_SPHERE]
+
         if row[CARD_TYPE] == 'Rules' and row[CARD_VICTORY]:
             victory = 'Page {}'.format(row[CARD_VICTORY])
         else:
@@ -2912,7 +2917,7 @@ def generate_dragncards_json(conf, set_id, set_name):
             'printname': _to_str(row[CARD_NAME]),
             'unique': _to_str(_handle_int(row[CARD_UNIQUE])),
             'type': _to_str(card_type),
-            'sphere': _to_str(row[CARD_SPHERE]),
+            'sphere': _to_str(sphere),
             'traits': _to_str(row[CARD_TRAITS]),
             'keywords': _update_dragncards_card_text(_to_str(
                 row[CARD_KEYWORDS])),
@@ -2935,7 +2940,13 @@ def generate_dragncards_json(conf, set_id, set_name):
             else:
                 card_type = row[BACK_PREFIX + CARD_TYPE]
 
-            if row[CARD_TYPE] == 'Rules' and row[BACK_PREFIX + CARD_VICTORY]:
+            if row[BACK_PREFIX + CARD_TYPE] == 'Treasure':
+                sphere = 'Neutral'
+            else:
+                sphere = row[BACK_PREFIX + CARD_SPHERE]
+
+            if (row[BACK_PREFIX + CARD_TYPE] == 'Rules' and
+                    row[BACK_PREFIX + CARD_VICTORY]):
                 victory = 'Page {}'.format(row[BACK_PREFIX + CARD_VICTORY])
             else:
                 victory = row[BACK_PREFIX + CARD_VICTORY]
@@ -2945,7 +2956,7 @@ def generate_dragncards_json(conf, set_id, set_name):
                 'printname': _to_str(row[CARD_SIDE_B]),
                 'unique': _to_str(_handle_int(row[BACK_PREFIX + CARD_UNIQUE])),
                 'type': _to_str(card_type),
-                'sphere': _to_str(row[BACK_PREFIX + CARD_SPHERE]),
+                'sphere': _to_str(sphere),
                 'traits': _to_str(row[BACK_PREFIX + CARD_TRAITS]),
                 'keywords': _update_dragncards_card_text(_to_str(
                     row[BACK_PREFIX + CARD_KEYWORDS])),
