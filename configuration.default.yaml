@@ -38,10 +38,10 @@ db_destination_path:
 tts_destination_path: 
 
 # Remote DragnCards path to image folder
-dragncards_remote_image_path: /var/www/dragncards.com/dragncards/frontend/public/images/cards
+dragncards_remote_image_path: /var/www/dragncards.com/dragncards/frontend/public/images/cards/
 
 # Remote DragnCards path to JSON folder
-dragncards_remote_json_path: /var/www/dragncards.com/dragncards/frontend/src/cardDB/
+dragncards_remote_json_path: /var/www/dragncards.com/dragncards/frontend/src/cardDB/ALeP/
 
 # Remote DragnCards path to .o8d folder
 dragncards_remote_deck_path: /var/www/dragncards.com/dragncards/frontend/src/decks/
