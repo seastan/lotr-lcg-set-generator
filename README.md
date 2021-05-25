@@ -1,5 +1,8 @@
 **Setup**
 
+Please note that to generate final image outputs, you must run this workflow on a Windows platform,
+because each platform renders the fonts differently.
+
 1. Clone this repo to a local folder (you can click `Code` and then `Download ZIP`).
 
 2. Make sure there is a spreadsheet on Google Sheets (most likely, it already exists).
@@ -102,6 +105,7 @@ for details).
   - `dragncards_remote_json_path`: remote DragnCards path to JSON folder
   - `dragncards_remote_deck_path`: remote DragnCards path to .o8d folder
   - `reprocess_all`: whether to reprocess all cards (`true`) or update only the cards, changed since the previous script run (`false`)
+  - `reprocess_all_on_error`: whether to reprocess all cards even when reprocess_all=false if the previous script run didn't succeed (true or false)
   - `selected_only`: process only "selected" rows (true or false)
   - `exit_if_no_spreadsheet_changes`: stop processing if there are no spreadsheet changes (true or false)
   - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`)

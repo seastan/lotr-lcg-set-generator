@@ -774,6 +774,9 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912,R0915
         conf = yaml.safe_load(f_conf)
 
     # to be removed
+    if 'reprocess_all_on_error' not in conf:
+        conf['reprocess_all_on_error'] = True
+
     if 'dragncards_id_rsa_path' not in conf:
         conf['dragncards_id_rsa_path'] = ''
 

@@ -72,7 +72,7 @@ nameRegion['Encounter Side Quest'] = '100,42,363,29';
 nameRegion['Enemy'] = '94,327,225,25';
 nameRegion['Event'] = '57,86,26,178';
 nameRegion['Hero'] = '100,327,213,25';
-nameRegion['Location'] = '108,42,197,25';
+nameRegion['Location'] = '108,43,197,25';
 nameRegion['Objective'] = '75,48,263,29';
 nameRegion['Objective Ally'] = '75,48,263,29';
 nameRegion['Player Side Quest'] = '144,44,368,29';
@@ -583,8 +583,10 @@ function run(progress, target, filename, icons) {
 				s.set('Option-pointsize', 5.25);
 				s.set('EncounterSetNumber-pointsize', 4);
 				s.set('Trait-format', '<center><width regular><tracking -0.005><family "Times New Roman"><size 8.25><i><b>');
-				s.set('Flavour-format', '<left></size><size 6.25><i>');
-				s.set('FlavourBack-format', '<left></size><size 6.25><i>');
+				s.set('Flavour-format', '<left></size></family><family "Times New Roman"><size 6.25><i>');
+				s.set('FlavourBack-format', '<left></size></family><family "Times New Roman"><size 6.25><i>');
+				s.set('Flavour-formatEnd', '</i></size></family>');
+				s.set('FlavourBack-formatEnd', '</i></size></family>');
 				s.set('Shadow-format', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
 					'<br><center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.5in>' +
 					'<br><left><image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005></size><size 7.5><i><br>');
@@ -719,10 +721,10 @@ function run(progress, target, filename, icons) {
 					s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size 7>');
 					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.075 0.075>');
 					s.set('Body-lineTightness', 0.2);
-					s.set('Story-format', '<left><size 7><i>');
-					s.set('StoryBack-format', '<left><size 7><i>');
-					s.set('Story-formatEnd', '</i></size>');
-					s.set('StoryBack-formatEnd', '</i></size>');
+					s.set('Story-format', '<left><family "Times New Roman"><size 7><i>');
+					s.set('StoryBack-format', '<left><family "Times New Roman"><size 7><i>');
+					s.set('Story-formatEnd', '</i></size></family>');
+					s.set('StoryBack-formatEnd', '</i></size></family>');
 					s.set('EncounterSet1-portrait-clip-region', '450,213,20,20');
 					s.set('EncounterSet2-portrait-clip-region', '426,213,20,20');
 					s.set('EncounterSet3-portrait-clip-region', '402,213,20,20');
