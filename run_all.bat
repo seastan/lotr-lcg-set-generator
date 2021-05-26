@@ -1,5 +1,7 @@
 if exist env\Scripts\activate.bat call env\Scripts\activate.bat
 timeout /t 1
+wmic process where "commandline like '%%strange_eons.ahk%%' and not commandline like '%%wmic%%'" delete
+timeout /t 1
 python run_before_se_remote.py
 timeout /t 1
 call strange_eons.ahk
