@@ -28,8 +28,10 @@ completely, you will need to download updates to that folder manually.
     <set ID>/custom/<custom image>
     <set ID>/processed/
     <set ID>/processed/<card ID>_<"A" or "B" or "Top" or "Bottom">_<card name and artist, format is not strict>.<"jpg" or "png">
-    imagesIcons/
-    imagesIcons/<icon image>
+    custom/
+    custom/<custom image>
+    icons/
+    icons/<icon image>
     ```
 
     For example:
@@ -40,12 +42,14 @@ completely, you will need to download updates to that folder manually.
     8a3273ca-1ccd-4e07-913b-766fcc49fe6f/53dcedb3-3640-4655-a150-9d0dd534a126_B_Defend_the_Beacon_Artist_Skvor.jpg
     8a3273ca-1ccd-4e07-913b-766fcc49fe6f/9a677840-6c2d-4603-b2bd-c39464663913_A_Squire_of_the_Mark_Artist_Ekaterina_Burmak.png
     8a3273ca-1ccd-4e07-913b-766fcc49fe6f/custom/
-    8a3273ca-1ccd-4e07-913b-766fcc49fe6f/custom/rules.png
+    8a3273ca-1ccd-4e07-913b-766fcc49fe6f/custom/Encounter-Icons-Ambush-at-Erelas.png
     8a3273ca-1ccd-4e07-913b-766fcc49fe6f/processed/
     8a3273ca-1ccd-4e07-913b-766fcc49fe6f/processed/53dcedb3-3640-4655-a150-9d0dd534a126_A_Reclaim_the_Beacon_Artist_Jan_Pospisil.jpg
-    imagesIcons/
-    imagesIcons/ALeP---Children-of-Eorl.png
-    imagesIcons/Ambush-at-Erelas.png
+    custom/
+    custom/Do-Not-Read-the-Following.png
+    icons/
+    icons/ALeP---Children-of-Eorl.png
+    icons/Ambush-at-Erelas.png
     ```
 
     Please note that the files in the `processed` subfolder take precedence over the files in the root folder.
@@ -146,10 +150,11 @@ To run the workflow as one script (for example, to be able to set up a cron job)
 Please note, this script is for the Windows platform only.  It uses AutoHotkey to emulate Strange Eons UI commands
 and is not 100% reliable (it may be stuck on the Strange Eons step).  To minimize the risks:
 
-- Never leave Strange Eons open.
-- Make sure the Strange Eons window is maximized.
-- Make sure no cards are opened.
-- If the script started, don't even try to touch the keyboard or mouse.
+- Don't leave Strange Eons open.
+- Make sure the Strange Eons window was maximized when you closed it.
+- Make sure no cards remained opened when you closed Strange Eons.
+- Make sure the screen is not locked (and doesn't lock automatically).
+- If the script started, don't touch the keyboard or mouse.
 
 For debugging purposes you can also run these steps using the Jupyter notebook (it doesn't use parallelism):
 

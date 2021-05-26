@@ -722,16 +722,6 @@ def delete_folder(folder):
         shutil.rmtree(folder, ignore_errors=True)
 
 
-def _get_artwork_path(conf, set_id):
-    """ Get path to the artwork folder.
-    """
-    artwork_path = os.path.join(conf['artwork_path'], set_id)
-    if not os.path.exists(artwork_path):
-        artwork_path = conf['artwork_path']
-
-    return artwork_path
-
-
 def _find_properties(parent, name):
     """ Find properties with a given name.
     """
@@ -918,7 +908,7 @@ def reset_project_folders(conf):
 
         break
 
-    input_path = os.path.join(conf['artwork_path'], 'imagesIcons')
+    input_path = os.path.join(conf['artwork_path'], 'icons')
     if os.path.exists(input_path):
         for _, _, filenames in os.walk(input_path):
             for filename in filenames:
@@ -3957,25 +3947,27 @@ def _collect_artwork_images(conf, image_path):
         return IMAGE_CACHE[image_path]
 
     images = {}
-    for _, _, filenames in os.walk(image_path):
-        for filename in filenames:
-            if len(filename.split('.')) < 2 or len(filename.split('_')) < 3:
-                continue
+    if os.path.exists(image_path):
+        for _, _, filenames in os.walk(image_path):
+            for filename in filenames:
+                if (len(filename.split('.')) < 2 or
+                        len(filename.split('_')) < 3):
+                    continue
 
-            if filename.split('.')[-1] in ('jpg', 'png'):
-                image_id = '_'.join(filename.split('_')[:2])
-                lang = filename.split('.')[-2]
-                if lang in conf['all_languages']:
-                    image_id = '{}_{}'.format(image_id, lang)
+                if filename.split('.')[-1] in ('jpg', 'png'):
+                    image_id = '_'.join(filename.split('_')[:2])
+                    lang = filename.split('.')[-2]
+                    if lang in conf['all_languages']:
+                        image_id = '{}_{}'.format(image_id, lang)
 
-                if image_id in images:
-                    logging.error('Duplicate image detected: %s, '
-                                  'ignoring', os.path.join(image_path,
-                                                           filename))
-                else:
-                    images[image_id] = os.path.join(image_path, filename)
+                    if image_id in images:
+                        logging.error('Duplicate image detected: %s, '
+                                      'ignoring', os.path.join(image_path,
+                                                               filename))
+                    else:
+                        images[image_id] = os.path.join(image_path, filename)
 
-        break
+            break
 
     IMAGE_CACHE[image_path] = images
     return images
@@ -3988,15 +3980,16 @@ def _collect_custom_images(image_path):
         return IMAGE_CACHE[image_path]
 
     images = {}
-    for _, _, filenames in os.walk(image_path):
-        for filename in filenames:
-            if len(filename.split('.')) < 2:
-                continue
+    if os.path.exists(image_path):
+        for _, _, filenames in os.walk(image_path):
+            for filename in filenames:
+                if len(filename.split('.')) < 2:
+                    continue
 
-            if filename.split('.')[-1] in ('jpg', 'png'):
-                images[filename] = os.path.join(image_path, filename)
+                if filename.split('.')[-1] in ('jpg', 'png'):
+                    images[filename] = os.path.join(image_path, filename)
 
-        break
+            break
 
     IMAGE_CACHE[image_path] = images
     return images
@@ -4035,13 +4028,16 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                  'data...', set_name, lang)
     timestamp = time.time()
 
-    artwork_path = _get_artwork_path(conf, set_id)
+    artwork_path = os.path.join(conf['artwork_path'], set_id)
     images = _collect_artwork_images(conf, artwork_path)
     processed_images = _collect_artwork_images(
         conf, os.path.join(artwork_path, PROCESSED_ARTWORK_FOLDER))
     images = {**images, **processed_images}
     custom_images = _collect_custom_images(
         os.path.join(artwork_path, IMAGES_CUSTOM_FOLDER))
+    common_custom_images = _collect_custom_images(
+        os.path.join(conf['artwork_path'], IMAGES_CUSTOM_FOLDER))
+    custom_images = {**common_custom_images, **custom_images}
     xml_path = os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id, lang))
 
     tree = ET.parse(xml_path)
@@ -4250,7 +4246,21 @@ def copy_custom_images(conf, set_id, set_name):
                  set_name)
     timestamp = time.time()
 
-    images_path = os.path.join(_get_artwork_path(conf, set_id),
+    images_path = os.path.join(conf['artwork_path'], IMAGES_CUSTOM_FOLDER)
+    if os.path.exists(images_path):
+        for _, _, filenames in os.walk(images_path):
+            for filename in filenames:
+                if filename.split('.')[-1] not in ('jpg', 'png'):
+                    continue
+
+                output_filename = '{}_{}'.format(set_id, filename)
+                shutil.copyfile(os.path.join(images_path, filename),
+                                os.path.join(IMAGES_CUSTOM_PATH,
+                                             output_filename))
+
+            break
+
+    images_path = os.path.join(conf['artwork_path'], set_id,
                                IMAGES_CUSTOM_FOLDER)
     if os.path.exists(images_path):
         for _, _, filenames in os.walk(images_path):
@@ -4276,7 +4286,7 @@ def copy_raw_images(conf, set_id, set_name, lang):
                  set_name, lang)
     timestamp = time.time()
 
-    artwork_path = _get_artwork_path(conf, set_id)
+    artwork_path = os.path.join(conf['artwork_path'], set_id)
     processed_artwork_path = os.path.join(artwork_path,
                                           PROCESSED_ARTWORK_FOLDER)
     tree = ET.parse(os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id,
