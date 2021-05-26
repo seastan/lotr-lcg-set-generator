@@ -1,6 +1,7 @@
 """ LotR ALeP workflow (Part 1, before Strange Eons).
 """
 import logging
+import os
 import sys
 import time
 import lotr
@@ -100,5 +101,6 @@ def main(conf=None):  # pylint: disable=R0912,R0915
 
 
 if __name__ == '__main__':
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     init_logging()
     main()

@@ -259,5 +259,6 @@ def main():  # pylint: disable=R0912
 
 
 if __name__ == '__main__':
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     init_logging()
     main()
