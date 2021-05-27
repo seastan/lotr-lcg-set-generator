@@ -754,7 +754,7 @@ def _update_zip_filename(filename):
     return output_filename
 
 
-def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912,R0915
+def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
     """ Read project configuration.
     """
     logging.info('Reading project configuration (%s)...', path)
@@ -762,53 +762,6 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912,R0915
 
     with open(path, 'r') as f_conf:
         conf = yaml.safe_load(f_conf)
-
-    # to be removed
-    if 'reprocess_all_on_error' not in conf:
-        conf['reprocess_all_on_error'] = True
-
-    if 'dragncards_id_rsa_path' not in conf:
-        conf['dragncards_id_rsa_path'] = ''
-
-    if 'remote_logs_path' not in conf:
-        conf['remote_logs_path'] = ''
-
-    if 'octgn_image_destination_path' not in conf:
-        conf['octgn_image_destination_path'] = ''
-
-    if 'db_destination_path' not in conf:
-        conf['db_destination_path'] = ''
-
-    if 'tts_destination_path' not in conf:
-        conf['tts_destination_path'] = ''
-
-    if 'dragncards_remote_image_path' not in conf:
-        conf['dragncards_remote_image_path'] = ''
-
-    if 'dragncards_remote_json_path' not in conf:
-        conf['dragncards_remote_json_path'] = ''
-
-    if 'dragncards_remote_deck_path' not in conf:
-        conf['dragncards_remote_deck_path'] = ''
-
-    if 'set_ids_octgn_image_destination' not in conf:
-        conf['set_ids_octgn_image_destination'] = []
-
-    if 'dragncards_json' not in conf:
-        conf['dragncards_json'] = False
-
-    if 'frenchdb_csv' not in conf:
-        conf['frenchdb_csv'] = False
-
-    if 'spanishdb_csv' not in conf:
-        conf['spanishdb_csv'] = False
-
-    if 'upload_dragncards' not in conf:
-        conf['upload_dragncards'] = False
-
-    if 'dragncards_hostname' not in conf:
-        conf['dragncards_hostname'] = ''
-    # to be removed
 
     conf['all_languages'] = list(conf['outputs'].keys())
     conf['languages'] = [lang for lang in conf['outputs']
