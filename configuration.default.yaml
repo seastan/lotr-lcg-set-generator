@@ -44,7 +44,7 @@ dragncards_remote_image_path: /var/www/dragncards.com/dragncards/frontend/public
 dragncards_remote_json_path: /var/www/dragncards.com/dragncards/frontend/src/cardDB/ALeP/
 
 # Remote DragnCards path to .o8d folder
-dragncards_remote_deck_path: /var/www/dragncards.com/dragncards/frontend/src/decks/
+dragncards_remote_deck_path: /var/www/dragncards.com/dragncards/frontend/src/decks/ALeP/
 
 # Whether to reprocess all cards (true)
 # or update only the cards, changed since the previous script run (false)
