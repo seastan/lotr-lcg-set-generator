@@ -152,10 +152,9 @@ CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
                         'Objective Hero', 'Objective Location',
                         'Ship Objective', 'Quest'}
 CARD_TYPES_UNIQUE = {'Hero', 'Objective Hero'}
-CARD_TYPES_NON_UNIQUE = {'Campaign', 'Contract', 'Encounter Side Quest',
-                         'Event', 'Nightmare', 'Player Side Quest',
-                         'Presentation', 'Quest', 'Rules', 'Treachery',
-                         'Treasure'}
+CARD_TYPES_NON_UNIQUE = {'Campaign', 'Contract', 'Event', 'Nightmare',
+                         'Player Side Quest', 'Presentation', 'Quest', 'Rules',
+                         'Treachery', 'Treasure'}
 SPHERES = {'Baggins', 'Fellowship', 'Leadership', 'Lore', 'Neutral', 'Spirit',
            'Tactics', 'Boon', 'Burden', 'Nightmare', 'Upgraded'}
 

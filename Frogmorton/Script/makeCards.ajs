@@ -13,7 +13,7 @@ var doubleSideTypes = ['Campaign', 'Contract', 'Nightmare', 'Presentation', 'Que
 var landscapeTypes = ['Encounter Side Quest', 'Player Side Quest', 'Quest'];
 var playerTypes = ['Ally', 'Attachment', 'Event', 'Hero', 'Player Side Quest', 'Treasure'];
 var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Side Quest'];
-var nonUniqueTypes = ['Campaign', 'Contract', 'Encounter Side Quest', 'Event', 'Nightmare', 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery'];
+var nonUniqueTypes = ['Campaign', 'Contract', 'Event', 'Nightmare', 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery'];
 
 var portraitRegion = {};
 portraitRegion['Ally'] = '87,0,326,330';
