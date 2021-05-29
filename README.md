@@ -168,6 +168,7 @@ The scripts will generate the following outputs:
 - `Output/DragnCards/<set name>/<set name>.json`: an output file for DragnCards.
 - `Output/DriveThruCards/<set name>.<language>/`: a `7z` archive of 300 dpi CMYK JPG images to be printed on DriveThruCards.com.
 - `Output/FrenchDB/<set name>/`: CSV files for French database sda.cgbuilder.fr.
+- `Output/FrenchDBImages/<set name>.<language>/`: 300 dpi PNG images for French database (the same as `Output/DB`, but differently named).
 - `Output/GenericPNG/<set name>.<language>/`: a `7z` archive of generic 800 dpi PNG images.
 - `Output/GenericPNGPDF/<set name>.<language>/`: `7z` archives of PDF files in `A4` and `letter` format (800 dpi PNG).
 - `Output/HallOfBeorn/<set name>/<set name>.json`: an output file for Hall of Beorn.
@@ -183,9 +184,12 @@ The scripts will generate the following outputs:
 - `Output/RingsDBImages/<set name>.<language>/`: 300 dpi PNG images for RingsDB (the same as `Output/DB`, but player cards only and differently named).
 - `Output/RulesPDF/<set name>.<language>/Rules.<set name>.<language>.pdf`: a PDF file with all Rules pages (300 dpi PNG).
 - `Output/SpanishDB/<set name>/`: CSV files for Spanish database susurrosdelbosqueviejo.com.
+- `Output/SpanishDBImages/<set name>.<language>/`: 300 dpi PNG images for Spanish database (the same as `Output/DB`, but differently named).
 - `Output/TTS/<set name>.<language>/`: 300 dpi JPG image sheets for TTS.
 
-Please note that `Output/DB`, `Output/PreviewImages` and `Output/RingsDBImages` are generated together when `db` output is enabled in the configuration.
+Please note that `Output/DB`, `Output/PreviewImages`, `Output/RingsDBImages` (for English language only),
+`Output/FrenchDBImages` (for French language only) and `Output/SpanishDBImages` (for Spanish language only)
+are generated when `db` output is enabled in the configuration.
 
 When `tts` output is enabled in the configuration, `octgn_o8d` and `db` outputs become enabled automatically.
 

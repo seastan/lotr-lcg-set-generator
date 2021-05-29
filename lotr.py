@@ -155,6 +155,9 @@ CARD_TYPES_UNIQUE = {'Hero', 'Objective Hero'}
 CARD_TYPES_NON_UNIQUE = {'Campaign', 'Contract', 'Event', 'Nightmare',
                          'Player Side Quest', 'Presentation', 'Quest', 'Rules',
                          'Treachery', 'Treasure'}
+CARD_TYPES_ONE_COPY = {'Campaign', 'Contract', 'Encounter Side Quest', 'Hero',
+                       'Nightmare', 'Objective Hero', 'Presentation', 'Quest',
+                       'Rules', 'Treasure'}
 SPHERES = {'Baggins', 'Fellowship', 'Leadership', 'Lore', 'Neutral', 'Spirit',
            'Tactics', 'Boon', 'Burden', 'Nightmare', 'Upgraded'}
 
@@ -231,6 +234,7 @@ OUTPUT_DB_PATH = os.path.join(OUTPUT_PATH, 'DB')
 OUTPUT_DRAGNCARDS_PATH = os.path.join(OUTPUT_PATH, 'DragnCards')
 OUTPUT_DTC_PATH = os.path.join(OUTPUT_PATH, 'DriveThruCards')
 OUTPUT_FRENCHDB_PATH = os.path.join(OUTPUT_PATH, 'FrenchDB')
+OUTPUT_FRENCHDB_IMAGES_PATH = os.path.join(OUTPUT_PATH, 'FrenchDBImages')
 OUTPUT_GENERICPNG_PATH = os.path.join(OUTPUT_PATH, 'GenericPNG')
 OUTPUT_GENERICPNG_PDF_PATH = os.path.join(OUTPUT_PATH, 'GenericPNGPDF')
 OUTPUT_HALLOFBEORN_PATH = os.path.join(OUTPUT_PATH, 'HallOfBeorn')
@@ -246,6 +250,7 @@ OUTPUT_RINGSDB_PATH = os.path.join(OUTPUT_PATH, 'RingsDB')
 OUTPUT_RINGSDB_IMAGES_PATH = os.path.join(OUTPUT_PATH, 'RingsDBImages')
 OUTPUT_RULES_PDF_PATH = os.path.join(OUTPUT_PATH, 'RulesPDF')
 OUTPUT_SPANISHDB_PATH = os.path.join(OUTPUT_PATH, 'SpanishDB')
+OUTPUT_SPANISHDB_IMAGES_PATH = os.path.join(OUTPUT_PATH, 'SpanishDBImages')
 OUTPUT_TTS_PATH = os.path.join(OUTPUT_PATH, 'TTS')
 PROJECT_PATH = 'setGenerator.seproject'
 RINGSDB_COOKIES_PATH = 'ringsdb_cookies.json'
@@ -1396,6 +1401,12 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif not is_positive_int(card_quantity):
             message = ('Incorrect format for card quantity for row '
                        '#{}{}'.format(i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+        elif card_type in CARD_TYPES_ONE_COPY and card_quantity > 1:
+            message = ('Incorrect card quantity for row #{}{}'.format(
+                i, scratch))
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
@@ -5304,35 +5315,6 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
 
         break
 
-    ringsdb_cards = {}
-    for row in card_data:
-        if row[CARD_SET] == set_id and _needed_for_ringsdb(row):
-            card_number = str(_handle_int(row[CARD_NUMBER])).zfill(3)
-            ringsdb_cards[card_number] = _ringsdb_code(row)
-
-    pairs = []
-    if ringsdb_cards and known_filenames:
-        for _, _, filenames in os.walk(output_path):
-            for filename in filenames:
-                card_number = filename[:3]
-                if card_number in ringsdb_cards:
-                    suffix = '-2' if filename.endswith('-2.png') else ''
-                    pairs.append((
-                        filename,
-                        '{}{}.png'.format(ringsdb_cards[card_number], suffix)))
-
-            break
-
-    if pairs:
-        ringsdb_output_path = os.path.join(
-            OUTPUT_RINGSDB_IMAGES_PATH, '{}.{}'.format(
-                escape_filename(set_name), lang))
-        create_folder(ringsdb_output_path)
-        clear_folder(ringsdb_output_path)
-        for source_filename, target_filename in pairs:
-            shutil.copyfile(os.path.join(output_path, source_filename),
-                            os.path.join(ringsdb_output_path, target_filename))
-
     if known_filenames:
         preview_output_path = os.path.join(
             OUTPUT_PREVIEW_IMAGES_PATH, '{}.{}'.format(
@@ -5370,6 +5352,38 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
             break
 
         delete_folder(temp_path)
+
+    if lang == 'English':
+        ringsdb_cards = {}
+        for row in card_data:
+            if row[CARD_SET] == set_id and _needed_for_ringsdb(row):
+                card_number = str(_handle_int(row[CARD_NUMBER])).zfill(3)
+                ringsdb_cards[card_number] = _ringsdb_code(row)
+
+        pairs = []
+        if ringsdb_cards and known_filenames:
+            for _, _, filenames in os.walk(output_path):
+                for filename in filenames:
+                    card_number = filename[:3]
+                    if card_number in ringsdb_cards:
+                        suffix = '-2' if filename.endswith('-2.png') else ''
+                        pairs.append((
+                            filename,
+                            '{}{}.png'.format(ringsdb_cards[card_number],
+                                              suffix)))
+
+                break
+
+        if pairs:
+            ringsdb_output_path = os.path.join(
+                OUTPUT_RINGSDB_IMAGES_PATH, '{}.{}'.format(
+                    escape_filename(set_name), lang))
+            create_folder(ringsdb_output_path)
+            clear_folder(ringsdb_output_path)
+            for source_filename, target_filename in pairs:
+                shutil.copyfile(os.path.join(output_path, source_filename),
+                                os.path.join(ringsdb_output_path,
+                                             target_filename))
 
     logging.info('[%s, %s] ...Generating DB, Preview and RingsDB image '
                  'outputs (%ss)', set_name, lang,
