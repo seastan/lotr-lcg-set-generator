@@ -1,14 +1,9 @@
 if exist env\Scripts\activate.bat call env\Scripts\activate.bat
-timeout /t 1
-wmic process where "commandline like '%%strange_eons.ahk%%' and not commandline like '%%wmic%%'" delete
-timeout /t 1
-python run_before_se_remote.py
-timeout /t 1
-call strange_eons.ahk
-:loop
-timeout /t 5
-tasklist /fi "ImageName eq strangeeons.exe" /fo csv 2>NUL | find /I "strangeeons.exe">NUL
-if "%ERRORLEVEL%"=="0" goto loop
-timeout /t 1
-python run_after_se_remote.py
-timeout /t 60
+
+python save_remote_logs_path.py
+for /f %%i in (remote_logs_path) do set log_path=%%i
+echo log path: %log_path%\run_all.log
+
+echo %date% %time% batch process started > %log_path%\run_all.log
+call run_all_internal.bat >> %log_path%\run_all.log
+echo %date% %time% batch process finished >> %log_path%\run_all.log
