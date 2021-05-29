@@ -18,6 +18,10 @@ def main(conf=None):  # pylint: disable=R0912,R0915
     """ Main function.
     """
     timestamp = time.time()
+
+    if os.path.exists(lotr.PROJECT_CREATED_PATH):
+        os.remove(lotr.PROJECT_CREATED_PATH)
+
     if not conf:
         if len(sys.argv) > 1:
             conf = lotr.read_conf(sys.argv[1])
@@ -89,6 +93,8 @@ def main(conf=None):  # pylint: disable=R0912,R0915
 
     if changes:
         lotr.create_project()
+        with open(lotr.PROJECT_CREATED_PATH, 'w'):
+            pass
     elif strange_eons:
         logging.info('No changes since the last run, skipping creating '
                      'Strange Eons project')

@@ -221,13 +221,13 @@ CONFIGURATION_PATH = 'configuration.yaml'
 DISCORD_PATH = 'Discord'
 DISCORD_CARD_DATA_PATH = os.path.join(DISCORD_PATH, 'card_data.json')
 DOWNLOAD_PATH = 'Download'
-FINISHED_PATH = 'makeCards_FINISHED'
 IMAGES_BACK_PATH = 'imagesBack'
 IMAGES_CUSTOM_PATH = os.path.join(PROJECT_FOLDER, 'imagesCustom')
 IMAGES_ICONS_PATH = os.path.join(PROJECT_FOLDER, 'imagesIcons')
 IMAGES_EONS_PATH = 'imagesEons'
 IMAGES_RAW_PATH = os.path.join(PROJECT_FOLDER, 'imagesRaw')
 IMAGES_ZIP_PATH = '{}/Export/'.format(os.path.split(PROJECT_FOLDER)[-1])
+MAKECARDS_FINISHED_PATH = 'makeCards_FINISHED'
 OCTGN_ZIP_PATH = 'a21af4e8-be4b-4cda-a6b6-534f9717391f/Sets'
 OUTPUT_PATH = 'Output'
 OUTPUT_DB_PATH = os.path.join(OUTPUT_PATH, 'DB')
@@ -253,6 +253,7 @@ OUTPUT_SPANISHDB_PATH = os.path.join(OUTPUT_PATH, 'SpanishDB')
 OUTPUT_SPANISHDB_IMAGES_PATH = os.path.join(OUTPUT_PATH, 'SpanishDBImages')
 OUTPUT_TTS_PATH = os.path.join(OUTPUT_PATH, 'TTS')
 PROJECT_PATH = 'setGenerator.seproject'
+PROJECT_CREATED_PATH = 'setGenerator_CREATED'
 RINGSDB_COOKIES_PATH = 'ringsdb_cookies.json'
 RINGSDB_JSON_PATH = 'ringsdb.json'
 SET_EONS_PATH = 'setEons'
@@ -4353,8 +4354,8 @@ def create_project():
     logging.info('Creating a Strange Eons project archive...')
     timestamp = time.time()
 
-    if os.path.exists(FINISHED_PATH):
-        os.remove(FINISHED_PATH)
+    if os.path.exists(MAKECARDS_FINISHED_PATH):
+        os.remove(MAKECARDS_FINISHED_PATH)
 
     with zipfile.ZipFile(PROJECT_PATH, 'w') as zip_obj:
         for root, _, filenames in os.walk(PROJECT_FOLDER):
