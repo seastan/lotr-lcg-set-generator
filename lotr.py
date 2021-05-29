@@ -2698,12 +2698,33 @@ def _needed_for_ringsdb(card):
     return card_type in CARD_TYPES_PLAYER
 
 
+def _needed_for_frenchdb(card):
+    """ Check whether a card is needed for the French database or not.
+    """
+    return card[CARD_TYPE] not in ('Presentation', 'Rules')
+
+
+def _needed_for_spanishdb(card):
+    """ Check whether a card is needed for the Spanish database or not.
+    """
+    return (card[CARD_TYPE] != 'Presentation' and
+            not (card[CARD_TYPE] == 'Rules' and card[CARD_SPHERE] == 'Back'))
+
+
 def _ringsdb_code(row):
     """ Return the card's RingsDB code.
     """
     card_number = (str(int(row[CARD_NUMBER])).zfill(3)
                    if is_positive_or_zero_int(row[CARD_NUMBER])
                    else '000')
+    code = '{}{}'.format(row[CARD_SET_RINGSDB_CODE], card_number)
+    return code
+
+
+def _spanishdb_code(row):
+    """ Return the card's Spanish database code.
+    """
+    card_number = str(_handle_int(row[CARD_NUMBER])).zfill(3)
     code = '{}{}'.format(row[CARD_SET_RINGSDB_CODE], card_number)
     return code
 
@@ -3246,8 +3267,8 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
 
     data = sorted(
         [row for row in DATA if row[CARD_SET] == set_id
-         and row[CARD_TYPE] not in ('Presentation', 'Rules') and
-         (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)
+         and _needed_for_frenchdb(row)
+         and (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)
         ], key=lambda r:
         str(int(r[CARD_NUMBER])).zfill(3)
         if is_positive_or_zero_int(r[CARD_NUMBER])
@@ -3490,8 +3511,8 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
 
     data = sorted(
         [row for row in data if row[CARD_SET] == set_id
-         and row[CARD_TYPE] not in ('Presentation', 'Rules') and
-         (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)
+         and _needed_for_spanishdb(row)
+         and (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)
         ], key=lambda r:
         (str(int(r[CARD_NUMBER])).zfill(3)
          if is_positive_or_zero_int(r[CARD_NUMBER])
@@ -3509,7 +3530,8 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
         writer = csv.DictWriter(obj, fieldnames=fieldnames)
         writer.writeheader()
         for row in data:
-            if row[CARD_TYPE] in CARD_TYPES_PLAYER:
+            if (row[CARD_TYPE] in CARD_TYPES_PLAYER or
+                    row[CARD_TYPE] == 'Rules'):
                 continue
 
             spanish_row = TRANSLATIONS['Spanish'].get(row[CARD_ID], {}).copy()
@@ -3583,7 +3605,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 'set': spanish_row.get(CARD_ENCOUNTER_SET),
                 'set_id': None,
                 'position': _handle_int(row[CARD_NUMBER]),
-                'code': _ringsdb_code(row),
+                'code': _spanishdb_code(row),
                 'nombre': name,
                 'nombreb': row[CARD_NAME],
                 'quantity': quantity,
@@ -3615,7 +3637,8 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
         writer.writeheader()
         current_date = time.strftime('%d/%m/%Y').lstrip('0').replace('/0', '/')
         for row in data:
-            if row[CARD_TYPE] not in CARD_TYPES_PLAYER:
+            if (row[CARD_TYPE] not in CARD_TYPES_PLAYER
+                    and row[CARD_TYPE] != 'Rules'):
                 continue
 
             spanish_row = TRANSLATIONS['Spanish'].get(row[CARD_ID], {}).copy()
@@ -3641,6 +3664,10 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
             text = _update_card_text('{}\n\n{}'.format(
                 spanish_row.get(CARD_KEYWORDS) or '',
                 spanish_row.get(CARD_TEXT) or ''), lang='Spanish').strip()
+            if (row[CARD_TYPE] == 'Rules' and
+                    spanish_row.get(CARD_VICTORY) is not None):
+                text = '{}\n\nPage {}'.format(text, spanish_row[CARD_VICTORY])
+
             if text:
                 text = '<p>{}</p>'.format(text.replace('\n', '</p><p>'))
 
@@ -3650,6 +3677,12 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                     spanish_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
                     spanish_row[BACK_PREFIX + CARD_TEXT]),
                                               lang='Spanish').strip()
+                if (row[CARD_TYPE] == 'Rules' and
+                        spanish_row.get(BACK_PREFIX + CARD_VICTORY)
+                        is not None):
+                    text_back = '{}\n\nPage {}'.format(
+                        text_back, spanish_row[BACK_PREFIX + CARD_VICTORY])
+
                 if text_back:
                     text_back = '<p>{}</p>'.format(
                         text_back.replace('\n', '</p><p>'))
@@ -3677,6 +3710,11 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                     '<p><b>Lado A.</b></p>\n{}\n<p><b>Lado B.</b></p>\n{}'
                     .format(flavour, flavour_back))
 
+            if row[CARD_TYPE] == 'Rules':
+                victory_points = None
+            else:
+                victory_points = _handle_int(spanish_row.get(CARD_VICTORY))
+
             quantity = (int(row[CARD_QUANTITY])
                         if _is_int(row[CARD_QUANTITY])
                         else 1)
@@ -3697,7 +3735,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 'type_id': row[CARD_TYPE],
                 'sphere_id': sphere,
                 'position': _handle_int(row[CARD_NUMBER]),
-                'code': _ringsdb_code(row),
+                'code': _spanishdb_code(row),
                 'name': spanish_row.get(CARD_NAME),
                 'traits': spanish_row.get(CARD_TRAITS),
                 'text': text,
@@ -3709,7 +3747,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 'attack': _handle_int(row[CARD_ATTACK]),
                 'defense': _handle_int(row[CARD_DEFENSE]),
                 'health': _handle_int(row[CARD_HEALTH]),
-                'victory': _handle_int(spanish_row.get(CARD_VICTORY)),
+                'victory': victory_points,
                 'quest': _handle_int(row[CARD_QUEST]),
                 'quantity': quantity,
                 'deck_limit': limit or quantity,
@@ -5354,23 +5392,22 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
         delete_folder(temp_path)
 
     if lang == 'English':
-        ringsdb_cards = {}
+        cards = {}
         for row in card_data:
             if row[CARD_SET] == set_id and _needed_for_ringsdb(row):
                 card_number = str(_handle_int(row[CARD_NUMBER])).zfill(3)
-                ringsdb_cards[card_number] = _ringsdb_code(row)
+                cards[card_number] = _ringsdb_code(row)
 
         pairs = []
-        if ringsdb_cards and known_filenames:
+        if cards and known_filenames:
             for _, _, filenames in os.walk(output_path):
                 for filename in filenames:
                     card_number = filename[:3]
-                    if card_number in ringsdb_cards:
+                    if card_number in cards:
                         suffix = '-2' if filename.endswith('-2.png') else ''
                         pairs.append((
                             filename,
-                            '{}{}.png'.format(ringsdb_cards[card_number],
-                                              suffix)))
+                            '{}{}.png'.format(cards[card_number], suffix)))
 
                 break
 
@@ -5383,6 +5420,73 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
             for source_filename, target_filename in pairs:
                 shutil.copyfile(os.path.join(output_path, source_filename),
                                 os.path.join(ringsdb_output_path,
+                                             target_filename))
+    elif lang == 'French':  # pylint: disable=R1702
+        cards = {}
+        for row in card_data:
+            if row[CARD_SET] == set_id and _needed_for_frenchdb(row):
+                card_number = str(_handle_int(row[CARD_NUMBER])).zfill(3)
+                cards[card_number] = row[CARD_NUMBER]
+
+        pairs = []
+        if cards and known_filenames:
+            for _, _, filenames in os.walk(output_path):
+                for filename in filenames:
+                    card_number = filename[:3]
+                    if card_number in cards:
+                        if filename.endswith('-2.png'):
+                            suffix = 'B'
+                        elif os.path.exists(
+                                os.path.join(output_path,
+                                             re.sub(r'\.png$', '-2.png', filename))):
+                            suffix = 'A'
+                        else:
+                            suffix = ''
+                        pairs.append((
+                            filename,
+                            '{}{}.png'.format(cards[card_number], suffix)))
+
+                break
+
+        if pairs:
+            frenchdb_output_path = os.path.join(
+                OUTPUT_FRENCHDB_IMAGES_PATH, '{}.{}'.format(
+                    escape_filename(set_name), lang))
+            create_folder(frenchdb_output_path)
+            clear_folder(frenchdb_output_path)
+            for source_filename, target_filename in pairs:
+                shutil.copyfile(os.path.join(output_path, source_filename),
+                                os.path.join(frenchdb_output_path,
+                                             target_filename))
+    elif lang == 'Spanish':
+        cards = {}
+        for row in card_data:
+            if row[CARD_SET] == set_id and _needed_for_spanishdb(row):
+                card_number = str(_handle_int(row[CARD_NUMBER])).zfill(3)
+                cards[card_number] = _spanishdb_code(row)
+
+        pairs = []
+        if cards and known_filenames:
+            for _, _, filenames in os.walk(output_path):
+                for filename in filenames:
+                    card_number = filename[:3]
+                    if card_number in cards:
+                        suffix = '-2' if filename.endswith('-2.png') else ''
+                        pairs.append((
+                            filename,
+                            '{}{}.png'.format(cards[card_number], suffix)))
+
+                break
+
+        if pairs:
+            spanishdb_output_path = os.path.join(
+                OUTPUT_SPANISHDB_IMAGES_PATH, '{}.{}'.format(
+                    escape_filename(set_name), lang))
+            create_folder(spanishdb_output_path)
+            clear_folder(spanishdb_output_path)
+            for source_filename, target_filename in pairs:
+                shutil.copyfile(os.path.join(output_path, source_filename),
+                                os.path.join(spanishdb_output_path,
                                              target_filename))
 
     logging.info('[%s, %s] ...Generating DB, Preview and RingsDB image '
