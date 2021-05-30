@@ -143,7 +143,7 @@ To run the workflow, go to the root folder of this repo and follow these steps:
 - `python run_after_se.py` (or `python run_after_se.py <path to a different configuration yaml>` if you want to pass a different configuration file)
 - Pay attention to possible errors in the script output.
 
-To run the workflow as one script (for example, to be able to set up a cron job), run:
+To run the workflow as one script, run:
 
 - `run_all.bat`
 
@@ -156,7 +156,18 @@ and is not 100% reliable (it may be stuck on the Strange Eons step).  To minimiz
 - Make sure the screen is not locked (and doesn't lock automatically).
 - If the script started, don't touch the keyboard or mouse.
 
-For debugging purposes you can also run these steps using the Jupyter notebook (it doesn't use parallelism):
+If you want to set up a Windows cron job, do the following:
+
+- Run `Task Scheduler`.
+- Click `Create Task`.
+- Set `Name`.
+- Click `Triggers` -> `New`.
+- Set up a schedule and click `OK`.
+- Click `Actions` -> `New`.
+- Click `Browse...`, choose `run_all.bat` and click `OK`.
+- Click `OK`.
+
+For debugging purposes you can also run the steps above using the Jupyter notebook (it doesn't use parallelism):
 
 - [skip this step, if you don't use VirtualEnv] `env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
 - `jupyter notebook`
