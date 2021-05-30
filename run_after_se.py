@@ -250,11 +250,6 @@ def main():  # pylint: disable=R0912
             conf['dragncards_id_rsa_path']):
         lotr.upload_dragncards(conf, sets)
 
-    if conf['remote_logs_path']:
-        with open(os.path.join(conf['remote_logs_path'],
-                               'last_generated_image'), 'w') as fobj:
-            fobj.write(lotr.get_last_image_timestamp())
-
     logging.info('Done (%ss)', round(time.time() - timestamp, 3))
 
 

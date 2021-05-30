@@ -6713,6 +6713,8 @@ def update_ringsdb(conf, sets):
 
 def get_last_image_timestamp():
     """ Get timestamp of the last generated image output.
+
+    NOT USED
     """
     max_ts = 0
     for root, _, filenames in os.walk(OUTPUT_PATH):
