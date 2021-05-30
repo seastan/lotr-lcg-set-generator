@@ -28,10 +28,12 @@ mpc_monitor.json
 remote_logs_path
 ringsdb.json
 ringsdb_cookies.json
+runBeforeSE_STARTED
 sanity_check.txt
 setGenerator.seproject
 setGenerator_CREATED
 sheets.json
+update_STARTED
 USWebCoatedSWOP.icc
 *.cnt
 *.lock

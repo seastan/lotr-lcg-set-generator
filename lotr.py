@@ -256,10 +256,12 @@ PROJECT_PATH = 'setGenerator.seproject'
 PROJECT_CREATED_PATH = 'setGenerator_CREATED'
 RINGSDB_COOKIES_PATH = 'ringsdb_cookies.json'
 RINGSDB_JSON_PATH = 'ringsdb.json'
+RUN_BEFORE_SE_STARTED_PATH = 'runBeforeSE_STARTED'
 SET_EONS_PATH = 'setEons'
 SET_OCTGN_PATH = 'setOCTGN'
 SHEETS_JSON_PATH = 'sheets.json'
 TEMP_ROOT_PATH = 'Temp'
+UPDATE_STARTED_PATH = 'update_STARTED'
 URL_CACHE_PATH = 'urlCache'
 XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
 

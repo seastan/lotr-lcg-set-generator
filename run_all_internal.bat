@@ -32,6 +32,8 @@ if not exist setGenerator_CREATED (
   )
 )
 
-echo %date% %time% started run_after_se_remote.py
-python run_after_se_remote.py
-echo %date% %time% finished run_after_se_remote.py
+if not exist runBeforeSE_STARTED (
+  echo %date% %time% started run_after_se_remote.py
+  python run_after_se_remote.py
+  echo %date% %time% finished run_after_se_remote.py
+)

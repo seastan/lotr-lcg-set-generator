@@ -19,6 +19,10 @@ def main(conf=None):  # pylint: disable=R0912,R0915
     """
     timestamp = time.time()
 
+    if not os.path.exists(lotr.RUN_BEFORE_SE_STARTED_PATH):
+        with open(lotr.RUN_BEFORE_SE_STARTED_PATH, 'w'):
+            pass
+
     if os.path.exists(lotr.PROJECT_CREATED_PATH):
         os.remove(lotr.PROJECT_CREATED_PATH)
 
@@ -27,6 +31,19 @@ def main(conf=None):  # pylint: disable=R0912,R0915
             conf = lotr.read_conf(sys.argv[1])
         else:
             conf = lotr.read_conf()
+
+    if (not conf['reprocess_all'] and conf['reprocess_all_on_error'] and
+            os.path.exists(lotr.UPDATE_STARTED_PATH)):
+        conf['reprocess_all'] = True
+        logging.info('The previous update did not succeed, setting '
+                     '"reprocess_all" to "true"')
+
+    if conf['reprocess_all'] and os.path.exists(lotr.UPDATE_STARTED_PATH):
+        os.remove(lotr.UPDATE_STARTED_PATH)
+
+    if not conf['reprocess_all']:
+        with open(lotr.UPDATE_STARTED_PATH, 'w'):
+            pass
 
     sheet_changes, scratch_changes = lotr.download_sheet(conf)
     if not conf['exit_if_no_spreadsheet_changes']:
@@ -95,12 +112,19 @@ def main(conf=None):  # pylint: disable=R0912,R0915
         lotr.create_project()
         with open(lotr.PROJECT_CREATED_PATH, 'w'):
             pass
-    elif strange_eons:
-        logging.info('No changes since the last run, skipping creating '
-                     'Strange Eons project')
     else:
-        logging.info('No Strange Eons outputs, skipping creating Strange Eons '
-                     'project')
+        if os.path.exists(lotr.UPDATE_STARTED_PATH):
+            os.remove(lotr.UPDATE_STARTED_PATH)
+
+        if strange_eons:
+            logging.info('No changes since the last run, skipping creating '
+                         'Strange Eons project')
+        else:
+            logging.info('No Strange Eons outputs, skipping creating Strange '
+                         'Eons project')
+
+    if os.path.exists(lotr.RUN_BEFORE_SE_STARTED_PATH):
+        os.remove(lotr.RUN_BEFORE_SE_STARTED_PATH)
 
     logging.info('Done (%ss)', round(time.time() - timestamp, 3))
     return (sheet_changes, scratch_changes)
