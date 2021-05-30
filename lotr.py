@@ -4366,12 +4366,9 @@ def create_project():
                  round(time.time() - timestamp, 3))
 
 
-def get_skip_info(set_id, set_name, lang):
+def get_skip_info(set_id, lang):
     """ Get skip information for the set and individual cards.
     """
-    logging.info('[%s, %s] Getting skip information...', set_name, lang)
-    timestamp = time.time()
-
     skip_ids = set()
     tree = ET.parse(os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id,
                                                                    lang)))
@@ -4381,8 +4378,6 @@ def get_skip_info(set_id, set_name, lang):
         if card.attrib.get('skip') == '1':
             skip_ids.add(card.attrib['id'])
 
-    logging.info('[%s, %s] ...Getting skip information (%ss)',
-                 set_name, lang, round(time.time() - timestamp, 3))
     return skip_set, skip_ids
 
 
@@ -6509,6 +6504,8 @@ def copy_db_outputs(conf, sets):
 
             break
 
+        logging.info('Uploaded DB outputs for %s', set_name)
+
     logging.info('...Copying DB outputs to the destination folder (%ss)',
                  round(time.time() - timestamp, 3))
 
@@ -6552,6 +6549,8 @@ def copy_octgn_image_outputs(conf, sets):
 
             break
 
+        logging.info('Uploaded OCTGN image outputs for %s', set_name)
+
     logging.info('...Copying OCTGN image outputs to the destination folder '
                  '(%ss)', round(time.time() - timestamp, 3))
 
@@ -6568,7 +6567,7 @@ def _get_ssh_client(conf):
     return client
 
 
-def upload_dragncards(conf, sets):
+def upload_dragncards(conf, sets, updated_sets):
     """ Uploading outputs to DragnCards.
     """
     logging.info('Uploading outputs to DragnCards...')
@@ -6585,8 +6584,9 @@ def upload_dragncards(conf, sets):
                 '{}.English.o8c'.format(
                     escape_octgn_filename(escape_filename(set_name))))
             if (conf['dragncards_remote_image_path'] and
-                    conf['outputs'].get('English') and
+                    'English' in conf['output_languages'] and
                     'octgn' in conf['outputs']['English'] and
+                    set_id in [s[0] for s in updated_sets] and
                     os.path.exists(output_path)):
                 temp_path = os.path.join(
                     TEMP_ROOT_PATH,

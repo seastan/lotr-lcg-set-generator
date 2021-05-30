@@ -182,7 +182,7 @@ def main():  # pylint: disable=R0912
     tasks = []
     for set_id, set_name in sets:
         for lang in conf['output_languages']:
-            skip_set, skip_ids = lotr.get_skip_info(set_id, set_name, lang)
+            skip_set, skip_ids = lotr.get_skip_info(set_id, lang)
             if skip_set:
                 logging.info('[%s, %s] No changes since the last run,'
                              ' skipping', set_name, lang)
@@ -237,18 +237,28 @@ def main():  # pylint: disable=R0912
     execute_tasks(conf, pre_tasks)
     execute_tasks(conf, tasks)
 
-    if (conf['db_destination_path'] and conf['outputs'].get('English') and
-            'db' in conf['outputs']['English']):
-        lotr.copy_db_outputs(conf, sets)
+    if 'English' in conf['output_languages']:
+        updated_sets = [s for s in sets
+                        if not lotr.get_skip_info(s[0], 'English')[0]]
+    else:
+        updated_sets = []
+
+    if (conf['db_destination_path'] and
+            'English' in conf['output_languages'] and
+            'db' in conf['outputs']['English'] and
+            updated_sets):
+        lotr.copy_db_outputs(conf, updated_sets)
 
     if (conf['octgn_image_destination_path'] and
-            conf['outputs'].get('English') and
-            'octgn' in conf['outputs']['English']):
-        lotr.copy_octgn_image_outputs(conf, sets)
+            'English' in conf['output_languages'] and
+            'octgn' in conf['outputs']['English'] and
+            updated_sets):
+        lotr.copy_octgn_image_outputs(conf, updated_sets)
 
-    if (conf['upload_dragncards'] and conf['dragncards_hostname'] and
+    if (conf['upload_dragncards'] and
+            conf['dragncards_hostname'] and
             conf['dragncards_id_rsa_path']):
-        lotr.upload_dragncards(conf, sets)
+        lotr.upload_dragncards(conf, sets, updated_sets)
 
     logging.info('Done (%ss)', round(time.time() - timestamp, 3))
 
