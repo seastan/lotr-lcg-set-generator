@@ -78,14 +78,67 @@ def rclone_logs():
             stdout, stderr))
 
 
+def parse_logs(folder):
+    """ Parse logs files for today.
+    """
+    res = subprocess.run('./remote_cron_log.sh {}'.format(folder),
+                         capture_output=True, shell=True, check=True)
+    stdout = res.stdout.decode('utf-8').strip()
+    stderr = res.stderr.decode('utf-8').strip()
+    if stderr:
+        logging.error('Parsing logs finished with errors: stdout: %s, '
+                      'stderr: %s', stdout, stderr)
+
+    return stdout
+
+
 def run():
     """ Run the check.
     """
     with open(lotr.CONFIGURATION_PATH, 'r') as f_conf:
         conf = yaml.safe_load(f_conf)
 
-    log_path = conf.get('remote_logs_path', '')
     rclone_logs()
+    res = parse_logs(conf.get('remote_logs_path', ''))
+    parts = res.split('\n', 1)
+    if len(parts) > 1:
+        errors = parts[1]
+    else:
+        errors = ''
+
+    parts = parts[0].split(' ', 1)
+    if len(parts) == 1 or not parts[0].isdigit():
+        message = 'Incorrect parsing logs result: {}'.format(res)
+        logging.error(message)
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message), res)
+        return
+
+    code, description = parts
+    code = int(code)
+    if 0 < code < 10:
+        message = 'Missing remote logs: {}'.format(description)
+        logging.error(message)
+        if errors:
+            logging.info('Log errors: %s', errors)
+
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message), errors)
+    elif 10 < code < 20:
+        message = 'Failure: {}'.format(description)
+        logging.info(message)
+        if errors:
+            logging.info('Log errors: %s', errors)
+
+        create_mail(ALERT_SUBJECT_TEMPLATE.format(message), errors)
+    elif 20 < code < 30:
+        logging.info('Success: %s', description)
+        if errors:
+            logging.info('Log errors: %s', errors)
+            message = 'Success with log errors: {}'.format(errors)
+            create_mail(ALERT_SUBJECT_TEMPLATE.format(message), errors)
+    else:
+        message = 'Incorrect parsing logs result: {}'.format(res)
+        logging.error(message)
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message), res)
 
 
 def main():
