@@ -4,7 +4,7 @@ LogPath := LogPath "\autohotkey.log"
 WriteLog(LogPath, "starting")
 
 If (FileExist("makeCards_FINISHED")) {
-  WriteLog(LogPath, "ERROR makeCards script already finished, exiting")
+  WriteLog(LogPath, "makeCards script already finished, exiting")
   Exit
 }
 

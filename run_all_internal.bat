@@ -14,7 +14,7 @@ python run_before_se_remote.py
 echo %date_correct% %time% finished run_before_se_remote.py
 
 if not exist setGenerator_CREATED (
-  echo %date_correct% %time% ERROR No Strange Eons project created
+  echo %date_correct% %time% No Strange Eons project created
 ) else (
   echo %date_correct% %time% started strange_eons.ahk
   call strange_eons.ahk
