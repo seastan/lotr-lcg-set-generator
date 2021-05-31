@@ -13,7 +13,7 @@ var doubleSideTypes = ['Campaign', 'Contract', 'Nightmare', 'Presentation', 'Que
 var landscapeTypes = ['Encounter Side Quest', 'Player Side Quest', 'Quest'];
 var playerTypes = ['Ally', 'Attachment', 'Event', 'Hero', 'Player Side Quest', 'Treasure'];
 var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Side Quest'];
-var nonUniqueTypes = ['Campaign', 'Contract', 'Event', 'Nightmare', 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery'];
+var nonUniqueTypes = ['Campaign', 'Contract', 'Event', 'Nightmare', 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery', 'Treasure'];
 
 var portraitRegion = {};
 portraitRegion['Ally'] = '87,0,326,330';
@@ -87,7 +87,7 @@ nameRegionUnique['Attachment'] = '132,36,183,25';
 nameRegionUnique['Contract'] = '84,245,245,29';
 nameRegionUnique['Encounter Side Quest'] = '100,39,363,29';
 nameRegionUnique['Enemy'] = '94,325,225,25';
-nameRegionUnique['Event'] = '55,86,26,178';
+nameRegionUnique['Event'] = '57,86,26,178';
 nameRegionUnique['Hero'] = '100,325,213,25';
 nameRegionUnique['Location'] = '108,40,197,25';
 nameRegionUnique['Objective'] = '75,45,263,29';
@@ -96,7 +96,7 @@ nameRegionUnique['Player Side Quest'] = '144,44,368,29';
 nameRegionUnique['Quest'] = '144,44,368,29';
 nameRegionUnique['Ship Enemy'] = '94,325,225,25';
 nameRegionUnique['Ship Objective'] = '75,45,263,29';
-nameRegionUnique['Treachery'] = '53,108,26,164';
+nameRegionUnique['Treachery'] = '55,108,26,164';
 
 var namePointSize = {};
 namePointSize['Ally'] = 6.5;
