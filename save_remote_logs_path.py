@@ -1,3 +1,4 @@
+# pylint: disable=C0103
 """ Save remote logs path into the file.
 """
 import os
@@ -13,6 +14,6 @@ if __name__ == '__main__':
     with open(CONFIGURATION_PATH, 'r') as f_conf:
         conf = yaml.safe_load(f_conf)
 
-    log_path = conf.get('remote_logs_path', '')
+    logs_path = conf.get('remote_logs_path', '')
     with open(LOG_PATH_FILE, 'w') as obj:
-        obj.write(log_path)
+        obj.write(logs_path)

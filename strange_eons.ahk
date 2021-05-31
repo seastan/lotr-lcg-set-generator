@@ -4,7 +4,7 @@ LogPath := LogPath "\autohotkey.log"
 WriteLog(LogPath, "starting")
 
 If (FileExist("makeCards_FINISHED")) {
-  WriteLog(LogPath, "makeCards script already finished, exiting")
+  WriteLog(LogPath, "ERROR makeCards script already finished, exiting")
   Exit
 }
 
@@ -18,7 +18,7 @@ Sleep 10000
 WinGetPos, X, Y, W, H, A
 While (X > 0) {
   If (A_TickCount - StartTime > Timeout) {
-    WriteLog(LogPath, "reached the timeout, exiting")
+    WriteLog(LogPath, "ERROR reached the timeout, exiting")
     Exit
   }
   WriteLog(LogPath, "waiting for no popups (1/3)")
@@ -30,7 +30,7 @@ Sleep 5000
 WinGetPos, X, Y, W, H, A
 While (X > 0) {
   If (A_TickCount - StartTime > Timeout) {
-    WriteLog(LogPath, "reached the timeout, exiting")
+    WriteLog(LogPath, "ERROR reached the timeout, exiting")
     Exit
   }
   WriteLog(LogPath, "waiting for no popups (2/3)")
@@ -42,7 +42,7 @@ Sleep 5000
 WinGetPos, X, Y, W, H, A
 While (X > 0) {
   If (A_TickCount - StartTime > Timeout) {
-    WriteLog(LogPath, "reached the timeout, exiting")
+    WriteLog(LogPath, "ERROR reached the timeout, exiting")
     Exit
   }
   WriteLog(LogPath, "waiting for no popups (3/3)")
@@ -105,7 +105,7 @@ Send {F5}
 
 While (!FileExist("makeCards_FINISHED")) {
   If (A_TickCount - StartTime > Timeout) {
-    WriteLog(LogPath, "reached the timeout, exiting")
+    WriteLog(LogPath, "ERROR reached the timeout, exiting")
     Exit
   }
   WriteLog(LogPath, "waiting for successful script finish")
