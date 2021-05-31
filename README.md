@@ -148,7 +148,7 @@ To run the workflow as one script, run:
 - `run_all.bat`
 
 Please note, this script is for the Windows platform only.  It uses AutoHotkey to emulate Strange Eons UI commands
-and is not 100% reliable (it may be stuck on the Strange Eons step).  To minimize the risks:
+and is not 100% reliable (it may stuck on the Strange Eons step).  To minimize the risks:
 
 - Don't leave Strange Eons open.
 - Make sure the Strange Eons window was maximized when you closed it.
