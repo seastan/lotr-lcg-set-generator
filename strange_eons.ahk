@@ -122,6 +122,5 @@ WriteLog(LogPath, "exiting")
 Exit
 
 WriteLog(LogPath, Text) {
-  FormatTime, CurrentTime
-  FileAppend, % CurrentTime " " Text "`n", %LogPath%
+  FileAppend, % A_YYYY "-" A_MM "-" A_DD " " A_Hour ":" A_Min ":" A_Sec " " Text "`n", %LogPath%
 }
