@@ -1,3 +1,4 @@
+@echo off
 cd /D "%~dp0"
 if exist env\Scripts\activate.bat call env\Scripts\activate.bat
 
