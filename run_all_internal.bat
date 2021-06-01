@@ -13,29 +13,32 @@ echo %date_correct% %time% started run_before_se_remote.py
 python run_before_se_remote.py
 echo %date_correct% %time% finished run_before_se_remote.py
 
+if exist runBeforeSE_STARTED (
+  echo %date_correct% %time% ERROR run_before_se_remote.py didn't finish successfully, exiting
+  exit /b
+)
+
 if not exist setGenerator_CREATED (
   echo %date_correct% %time% No Strange Eons project created
-) else (
-  echo %date_correct% %time% started strange_eons.ahk
-  call strange_eons.ahk
-  echo %date_correct% %time% finished strange_eons.ahk
-
-  if not exist makeCards_FINISHED (
-    echo %date_correct% %time% ERROR makeCards script didn't finish successfully, exiting
-    exit /b
-  )
-
-  echo %date_correct% %time% waiting until Strange Eons is closed
-  :loop
-  timeout /t 5
-  tasklist /fi "ImageName eq strangeeons.exe" /fo csv 2>NUL | find /I "strangeeons.exe">NUL
-  if "%ERRORLEVEL%"=="0" (
-    goto loop
-  )
+  goto after
 )
 
-if not exist runBeforeSE_STARTED (
-  echo %date_correct% %time% started run_after_se_remote.py
-  python run_after_se_remote.py
-  echo %date_correct% %time% finished run_after_se_remote.py
+echo %date_correct% %time% started strange_eons.ahk
+call strange_eons.ahk
+echo %date_correct% %time% finished strange_eons.ahk
+
+if not exist makeCards_FINISHED (
+  echo %date_correct% %time% ERROR makeCards script didn't finish successfully, exiting
+  exit /b
 )
+
+echo %date_correct% %time% waiting until Strange Eons is closed
+:loop
+timeout /t 10
+tasklist /fi "ImageName eq strangeeons.exe" /fo csv 2>NUL | find /I "strangeeons.exe">NUL
+if "%ERRORLEVEL%"=="0" goto loop
+
+:after
+echo %date_correct% %time% started run_after_se_remote.py
+python run_after_se_remote.py
+echo %date_correct% %time% finished run_after_se_remote.py
