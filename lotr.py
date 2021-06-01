@@ -325,6 +325,10 @@ CARD_TYPE_FRENCH_IDS = {
     'Treachery': 406,
     'Treasure': 410
 }
+CARD_SUBTYPE_FRENCH_IDS = {
+    'Boon': 600,
+    'Burden': 601
+}
 CARD_SPHERE_FRENCH_IDS = {
     'Baggins': 306,
     'Fellowship': 305,
@@ -672,6 +676,18 @@ def _update_french_card_text(text):
     text = text.replace('[eos]', _get_french_icon('oeil'))
     text = text.replace('[pp]', _get_french_icon('parjoueur'))
     return text
+
+
+def _update_french_non_int(value):
+    """ Update non-int values like "X" or "-".
+    """
+    if value == 'X':
+        return 99
+
+    if value == '-':
+        return -1
+
+    return value
 
 
 def escape_filename(value):
@@ -3268,14 +3284,27 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                                  escape_filename(set_name))
     create_folder(output_folder)
 
+    data = DATA[:]
+    for row in DATA:
+        if (row[CARD_SIDE_B] is not None and
+                row[CARD_TYPE] not in CARD_TYPES_DOUBLESIDE_OPTIONAL):
+            new_row = row.copy()
+            new_row[CARD_NAME] = new_row[CARD_SIDE_B]
+            new_row[CARD_DOUBLESIDE] = 'B'
+            for key in new_row.keys():
+                if key.startswith(BACK_PREFIX):
+                    new_row[key.replace(BACK_PREFIX, '')] = new_row[key]
+
+            data.append(new_row)
+
     data = sorted(
-        [row for row in DATA if row[CARD_SET] == set_id
+        [row for row in data if row[CARD_SET] == set_id
          and _needed_for_frenchdb(row)
          and (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)
         ], key=lambda r:
-        str(int(r[CARD_NUMBER])).zfill(3)
-        if is_positive_or_zero_int(r[CARD_NUMBER])
-        else str(r[CARD_NUMBER]))
+        (str(int(r[CARD_NUMBER])).zfill(3)
+         if is_positive_or_zero_int(r[CARD_NUMBER])
+         else str(r[CARD_NUMBER]), row.get(CARD_DOUBLESIDE, '')))
 
     output_path = os.path.join(output_folder, 'carte_joueur.csv')
     with open(output_path, 'w', newline='', encoding='utf-8') as obj:
@@ -3292,7 +3321,13 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
             if row[CARD_TYPE] not in CARD_TYPES_PLAYER_FRENCH:
                 continue
 
-            french_row = TRANSLATIONS['French'].get(row[CARD_ID], {})
+            french_row = TRANSLATIONS['French'].get(row[CARD_ID], {}).copy()
+            if row.get(CARD_DOUBLESIDE):
+                french_row[CARD_NAME] = french_row.get(CARD_SIDE_B, '')
+                for key in french_row.keys():
+                    if key.startswith(BACK_PREFIX):
+                        french_row[key.replace(BACK_PREFIX, '')] = (
+                            french_row[key])
 
             if row[CARD_TYPE] == 'Contract':
                 sphere = 'Neutral'
@@ -3303,9 +3338,9 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
 
             if row[CARD_TYPE] == 'Hero':
                 cost = None
-                threat = _handle_int(row[CARD_COST])
+                threat = _update_french_non_int(_handle_int(row[CARD_COST]))
             else:
-                cost = _handle_int(row[CARD_COST])
+                cost = _update_french_non_int(_handle_int(row[CARD_COST]))
                 threat = None
 
             text = _update_french_card_text('{}\n\n{}'.format(
@@ -3320,30 +3355,44 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 text = '<b>Face A</b><br>{}<br><b>Face B</b><br>{}'.format(
                     text, text_back)
 
+            if row[CARD_TYPE] in CARD_TYPES_PLAYER:
+                quantity = 0
+            else:
+                quantity = (int(row[CARD_QUANTITY])
+                            if _is_int(row[CARD_QUANTITY])
+                            else 1)
+
+            easy_mode = (int(row[CARD_EASY_MODE])
+                         if _is_int(row[CARD_EASY_MODE])
+                         else 0)
+
             csv_row = {
                 'id_extension': row[CARD_SET_RINGSDB_CODE],
                 'numero_identification': int(row[CARD_NUMBER])
                                          if _is_int(row[CARD_NUMBER])
                                          else 0,
                 'id_type_carte': CARD_TYPE_FRENCH_IDS.get(row[CARD_TYPE], 0),
-                'id_sous_type_carte': None,
+                'id_sous_type_carte': CARD_SUBTYPE_FRENCH_IDS.get(
+                    row[CARD_SPHERE]),
                 'id_sphere_influence': CARD_SPHERE_FRENCH_IDS.get(sphere, 0),
                 'id_octgn': row[CARD_ID],
                 'titre': french_row.get(CARD_NAME, ''),
                 'cout': cost,
                 'menace': threat,
-                'volonte': _handle_int(row[CARD_WILLPOWER]),
-                'attaque': _handle_int(row[CARD_ATTACK]),
-                'defense': _handle_int(row[CARD_DEFENSE]),
-                'point_vie': _handle_int(row[CARD_HEALTH]),
+                'volonte': _update_french_non_int(
+                    _handle_int(row[CARD_WILLPOWER])),
+                'attaque': _update_french_non_int(
+                    _handle_int(row[CARD_ATTACK])),
+                'defense': _update_french_non_int(
+                    _handle_int(row[CARD_DEFENSE])),
+                'point_vie': _update_french_non_int(
+                    _handle_int(row[CARD_HEALTH])),
                 'trait': french_row.get(CARD_TRAITS),
                 'texte': text,
                 'indic_unique': int(row[CARD_UNIQUE] or 0),
                 'indic_recto_verso': row[CARD_SIDE_B] is not None and 1 or 0,
-                'nb_normal': int(row[CARD_QUANTITY])
-                             if _is_int(row[CARD_QUANTITY])
-                             else 1,
-                'nb_facile': 0,
+                'nb_normal': quantity,
+                'nb_facile': quantity - easy_mode,
                 'nb_cauchemar': 0
                 }
             writer.writerow(csv_row)
@@ -3365,7 +3414,13 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                     row[CARD_TYPE] == 'Quest'):
                 continue
 
-            french_row = TRANSLATIONS['French'].get(row[CARD_ID], {})
+            french_row = TRANSLATIONS['French'].get(row[CARD_ID], {}).copy()
+            if row.get(CARD_DOUBLESIDE):
+                french_row[CARD_NAME] = french_row.get(CARD_SIDE_B, '')
+                for key in french_row.keys():
+                    if key.startswith(BACK_PREFIX):
+                        french_row[key.replace(BACK_PREFIX, '')] = (
+                            french_row[key])
 
             if row[CARD_SPHERE] == 'Setup':
                 card_type = 'Nightmare'
@@ -3403,19 +3458,26 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                                          if _is_int(row[CARD_NUMBER])
                                          else 0,
                 'id_type_carte': CARD_TYPE_FRENCH_IDS.get(card_type, 0),
-                'id_sous_type_carte': None,
+                'id_sous_type_carte': CARD_SUBTYPE_FRENCH_IDS.get(
+                    row[CARD_SPHERE]),
                 'id_set_rencontre': row[CARD_ENCOUNTER_SET] or '',
                 'titre': french_row.get(CARD_NAME, ''),
-                'cout_engagement': _handle_int(row[CARD_ENGAGEMENT]),
-                'menace': _handle_int(row[CARD_THREAT]),
-                'attaque': _handle_int(row[CARD_ATTACK]),
-                'defense': _handle_int(row[CARD_DEFENSE]),
-                'point_quete': _handle_int(row[CARD_QUEST]),
-                'point_vie': _handle_int(row[CARD_HEALTH]),
+                'cout_engagement': _update_french_non_int(
+                    _handle_int(row[CARD_ENGAGEMENT])),
+                'menace': _update_french_non_int(
+                    _handle_int(row[CARD_THREAT])),
+                'attaque': _update_french_non_int(
+                    _handle_int(row[CARD_ATTACK])),
+                'defense': _update_french_non_int(
+                    _handle_int(row[CARD_DEFENSE])),
+                'point_quete': _update_french_non_int(
+                    _handle_int(row[CARD_QUEST])),
+                'point_vie': _update_french_non_int(
+                    _handle_int(row[CARD_HEALTH])),
                 'trait': french_row.get(CARD_TRAITS),
                 'texte': text,
                 'effet_ombre': shadow,
-                'titre_quete': None,
+                'titre_quete': french_row.get(CARD_ADVENTURE),
                 'indic_unique': int(row[CARD_UNIQUE] or 0),
                 'indic_recto_verso': row[CARD_SIDE_B] is not None and 1 or 0,
                 'nb_normal': quantity,
@@ -3463,11 +3525,11 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                                          else 0,
                 'id_set_rencontre': row[CARD_ENCOUNTER_SET] or '',
                 'titre': name,
-                'sequence': '{}{}'.format(_handle_int(row[CARD_COST]),
-                                          row[CARD_ENGAGEMENT]),
+                'sequence': str(_handle_int(row[CARD_COST])),
                 'texteA': text,
                 'texteB': text_back,
-                'point_quete': _handle_int(row[BACK_PREFIX + CARD_QUEST]),
+                'point_quete': _update_french_non_int(
+                    _handle_int(row[BACK_PREFIX + CARD_QUEST])),
                 'nb_normal': quantity,
                 'nb_facile': quantity,
                 'nb_cauchemar': 0
