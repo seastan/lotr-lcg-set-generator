@@ -1044,6 +1044,14 @@ async def get_rendered_images(set_name):
 
         return {}
 
+    card_data = await read_card_data()
+    empty_rules_backs = {
+        row[lotr.CARD_ID] for row in card_data['data']
+        if row[lotr.CARD_SET_NAME] == set_name and
+        row[lotr.CARD_TYPE] == 'Rules' and
+        not row.get(lotr.BACK_PREFIX + lotr.CARD_TEXT) and
+        not row.get(lotr.BACK_PREFIX + lotr.CARD_VICTORY)}
+
     data = {}
     for image in images:
         filename = image['Name']
@@ -1051,6 +1059,9 @@ async def get_rendered_images(set_name):
             continue
 
         card_id = filename.split('----')[1][:36]
+        if filename.endswith('-2.png') and card_id in empty_rules_backs:
+            continue
+
         data.setdefault(card_id, []).append(
             {'filename': image['Name'],
              'modified': image['ModTime'].replace('T', ' ').split('.')[0]})

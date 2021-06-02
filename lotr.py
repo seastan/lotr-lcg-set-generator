@@ -5433,7 +5433,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
         clear_folder(temp_path)
         for _, _, filenames in os.walk(output_path):
             for filename in filenames:
-                if (filename.endswith('-2.png') and
+                if (filename.endswith('-2.png') and '----' in filename and
                         filename.split('----')[1][:36] in empty_rules_backs):
                     continue
 
@@ -5541,6 +5541,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
             for _, _, filenames in os.walk(output_path):
                 for filename in filenames:
                     if (filename.endswith('-2.png') and
+                            '----' in filename and
                             filename.split('----')[1][:36]
                             in empty_rules_backs):
                         continue
