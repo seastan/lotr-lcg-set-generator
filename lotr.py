@@ -5413,6 +5413,13 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
 
         break
 
+    empty_rules_backs = {
+        row[CARD_ID] for row in card_data
+        if row[CARD_SET] == set_id and
+        row[CARD_TYPE] == 'Rules' and
+        row[BACK_PREFIX + CARD_TEXT] is None and
+        row[BACK_PREFIX + CARD_VICTORY] is None}
+
     if known_filenames:
         preview_output_path = os.path.join(
             OUTPUT_PREVIEW_IMAGES_PATH, '{}.{}'.format(
@@ -5426,6 +5433,10 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
         clear_folder(temp_path)
         for _, _, filenames in os.walk(output_path):
             for filename in filenames:
+                if (filename.endswith('-2.png') and
+                        filename.split('----')[1][:36] in empty_rules_backs):
+                    continue
+
                 shutil.copyfile(os.path.join(output_path, filename),
                                 os.path.join(temp_path, filename))
 
@@ -5529,6 +5540,11 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
         if cards and known_filenames:
             for _, _, filenames in os.walk(output_path):
                 for filename in filenames:
+                    if (filename.endswith('-2.png') and
+                            filename.split('----')[1][:36]
+                            in empty_rules_backs):
+                        continue
+
                     card_number = filename[:3]
                     if card_number in cards:
                         suffix = '-2' if filename.endswith('-2.png') else ''
