@@ -28,6 +28,8 @@ mpc_monitor.json
 remote_logs_path
 ringsdb.json
 ringsdb_cookies.json
+run_setup.bat
+run_cleanup.bat
 runBeforeSE_STARTED
 sanity_check.txt
 setGenerator.seproject

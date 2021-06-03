@@ -156,6 +156,14 @@ and is not 100% reliable (it may stuck on the Strange Eons step).  To minimize t
 - Make sure the screen is not locked (and doesn't lock automatically).
 - If the script started, don't touch the keyboard or mouse.
 
+If you need to perform some additional actions before and/or after the script starts (like unlocking your PC),
+you may create two additional batch scripts with your custom code:
+
+- `run_setup.bat`
+- `run_cleanup.bat`
+
+They will be called inside `run_all.bat` automatically.
+
 If you want to set up a Windows cron job, do the following:
 
 - Run `Task Scheduler`.
