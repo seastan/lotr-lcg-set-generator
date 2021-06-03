@@ -1056,6 +1056,9 @@ def _clean_value(value):
         value_old = value
         value = re.sub(r'[“”]([^\[]*)\]', '"\\1]', value)
         value = re.sub(r'’([^\[]*)\]', "'\\1]", value)
+        value = re.sub(r'…([^\[]*)\]', "...\\1]", value)
+        value = re.sub(r'—([^\[]*)\]', "---\\1]", value)
+        value = re.sub(r'–([^\[]*)\]', "--\\1]", value)
         if value == value_old:
             break
 
