@@ -83,19 +83,19 @@ def generate_rules_pdf(conf, set_id, set_name, lang, skip_ids, card_data):  # py
 
 
 @retry()
-def generate_pdf(conf, set_id, set_name, lang, skip_ids):
+def generate_pdf(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: disable=R0913
     """ Generate PDF outputs.
     """
     lotr.generate_png300_pdf(conf, set_id, set_name, lang, skip_ids)
-    lotr.generate_pdf(conf, set_id, set_name, lang)
+    lotr.generate_pdf(conf, set_id, set_name, lang, card_data)
 
 
 @retry()
-def generate_genericpng_pdf(conf, set_id, set_name, lang, skip_ids):
+def generate_genericpng_pdf(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: disable=R0913
     """ Generate generic PNG PDF outputs.
     """
     lotr.generate_png800_pdf(conf, set_id, set_name, lang, skip_ids)
-    lotr.generate_genericpng_pdf(conf, set_id, set_name, lang)
+    lotr.generate_genericpng_pdf(conf, set_id, set_name, lang, card_data)
 
 
 @retry()
@@ -211,11 +211,12 @@ def main():  # pylint: disable=R0912,R0915
 
             if 'pdf' in conf['outputs'][lang]:
                 tasks.append([generate_pdf, conf, set_id, set_name, lang,
-                              skip_ids])
+                              skip_ids, lotr.translated_data(set_id, lang)])
 
             if 'genericpng_pdf' in conf['outputs'][lang]:
                 tasks.append([generate_genericpng_pdf, conf, set_id, set_name,
-                              lang, skip_ids])
+                              lang, skip_ids,
+                              lotr.translated_data(set_id, lang)])
 
             if 'makeplayingcards' in conf['outputs'][lang]:
                 tasks.append([generate_mpc, conf, set_id, set_name, lang,

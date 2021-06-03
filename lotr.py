@@ -113,17 +113,25 @@ CARD_ORIGINAL_NAME = '_Original Name'
 MAX_COLUMN = '_Max Column'
 ROW_COLUMN = '_Row'
 
-DISCORD_IGNORE_FIELDS = {
+DISCORD_IGNORE_COLUMNS = {
     CARD_PANX, CARD_PANY, CARD_SCALE, BACK_PREFIX + CARD_PANX,
     BACK_PREFIX + CARD_PANY, BACK_PREFIX + CARD_SCALE, CARD_SIDE_B,
     CARD_SELECTED, CARD_CHANGED, CARD_SCRATCH
 }
 
-DISCORD_IGNORE_CHANGES_FIELDS = {
+DISCORD_IGNORE_CHANGES_COLUMNS = {
     CARD_SET, CARD_NUMBER, CARD_SET_NAME, CARD_SET_RINGSDB_CODE,
     CARD_SET_HOB_CODE, CARD_SET_LOCKED, CARD_RINGSDB_CODE, CARD_BOT_DISABLED,
     CARD_NORMALIZED_NAME, BACK_PREFIX + CARD_NORMALIZED_NAME,
     CARD_DISCORD_CHANNEL, CARD_DISCORD_CATEGORY, ROW_COLUMN
+}
+
+TRANSLATED_COLUMNS = {
+    CARD_NAME, CARD_TRAITS, CARD_KEYWORDS, CARD_VICTORY, CARD_TEXT,
+    CARD_SHADOW, CARD_FLAVOUR, CARD_SIDE_B, BACK_PREFIX + CARD_TRAITS,
+    BACK_PREFIX + CARD_KEYWORDS, BACK_PREFIX + CARD_VICTORY,
+    BACK_PREFIX + CARD_TEXT, BACK_PREFIX + CARD_SHADOW,
+    BACK_PREFIX + CARD_FLAVOUR, CARD_ADVENTURE
 }
 
 CARD_TYPES = {'Ally', 'Attachment', 'Campaign', 'Contract', 'Enemy',
@@ -1028,7 +1036,7 @@ def _update_discord_category(category):
     return category
 
 
-def _clean_value(value):
+def _clean_value(value):  # pylint: disable=R0915
     """ Clean a value from the spreadsheet.
     """
     value = str(value).strip()
@@ -1085,6 +1093,10 @@ def _clean_value(value):
 
     value = re.sub(r' +(?=\n)', '', value)
     value = re.sub(r' +', ' ', value)
+
+    if len(value) == 1:
+        value = value.upper()
+
     return value
 
 
@@ -1365,6 +1377,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_sphere_back = row[BACK_PREFIX + CARD_SPHERE]
         card_victory_back = row[BACK_PREFIX + CARD_VICTORY]
         card_easy_mode = row[CARD_EASY_MODE]
+        card_adventure = row[CARD_ADVENTURE]
         card_scratch = row[CARD_SCRATCH]
         scratch = ' (Scratch)' if card_scratch else ''
 
@@ -1591,16 +1604,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 if not card_scratch:
                     errors.append(message)
 
-        if (((row[CARD_TYPE] == 'Quest' and row[CARD_ADVENTURE])
-             or row[CARD_TYPE] == 'Nightmare')
+        if (((card_type == 'Quest' and card_adventure) or
+             card_type == 'Nightmare')
                 and row[CARD_DECK_RULES]):
-            quest_id = (row[CARD_SET], row[CARD_ADVENTURE] or row[CARD_NAME])
+            quest_id = (set_id, card_adventure or card_name)
             if quest_id in deck_rules:
                 message = (
                     'Duplicate deck rules for quest {} in row #{}{}'.format(
-                        row[CARD_ADVENTURE] or row[CARD_NAME],
-                        row[ROW_COLUMN],
-                        scratch))
+                        card_adventure or card_name, i, scratch))
                 logging.error(message)
                 if conf['octgn_o8d'] and not card_scratch:
                     errors.append(message)
@@ -1612,8 +1623,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 rules_list = [r.strip().split(':', 1)
                               for r in part.split('\n')]
                 rules_list = [(r[0].lower().strip(),
-                               [i.strip()
-                                for i in r[1].strip().split(';')])
+                               [j.strip()
+                                for j in r[1].strip().split(';')])
                               for r in rules_list if len(r) == 2]
                 rules = {}
                 key_count = {}
@@ -1626,10 +1637,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         message = (
                             'Unknown key "{}" for deck rules for quest {} in '
                             'row #{}{}'.format(
-                                key,
-                                row[CARD_ADVENTURE] or row[CARD_NAME],
-                                row[ROW_COLUMN],
-                                scratch))
+                                key, card_adventure or card_name, i, scratch))
                         logging.error(message)
                         if conf['octgn_o8d'] and not card_scratch:
                             errors.append(message)
@@ -1648,10 +1656,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         message = (
                             'Duplicate key "{}" for deck rules for quest {} '
                             'in row #{}{}'.format(
-                                key,
-                                row[CARD_ADVENTURE] or row[CARD_NAME],
-                                row[ROW_COLUMN],
-                                scratch))
+                                key, card_adventure or card_name, i, scratch))
                         logging.error(message)
                         if conf['octgn_o8d'] and not card_scratch:
                             errors.append(message)
@@ -1661,10 +1666,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     message = (
                         'Duplicate prefix "{}" for deck rules for quest {} '
                         'in row #{}{}'.format(
-                            prefix,
-                            row[CARD_ADVENTURE] or row[CARD_NAME],
-                            row[ROW_COLUMN],
-                            scratch))
+                            prefix, card_adventure or card_name, i, scratch))
                     logging.error(message)
                     if conf['octgn_o8d'] and not card_scratch:
                         errors.append(message)
@@ -1680,16 +1682,37 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     'No card ID %s in %s translations', card_id, lang)
                 continue
 
-            if TRANSLATIONS[lang][card_id][CARD_NAME] is None:
+            if card_type != TRANSLATIONS[lang][card_id].get(CARD_TYPE):
                 logging.error(
-                    'No card name for card ID %s in %s translations, '
-                    'row #%s', card_id, lang,
-                    TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                    'Incorrect card type for card '
+                    'ID %s in %s translations, row #%s', card_id,
+                    lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+            if (card_type_back !=
+                    TRANSLATIONS[lang][card_id].get(BACK_PREFIX + CARD_TYPE)):
+                logging.error(
+                    'Incorrect card type back for card '
+                    'ID %s in %s translations, row #%s', card_id,
+                    lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
             for key, value in TRANSLATIONS[lang][card_id].items():
+                if key not in TRANSLATED_COLUMNS:
+                    continue
+
                 if isinstance(value, str) and '[unmatched quot]' in value:
                     logging.error(
                         'Unmatched quote symbol in %s column for card '
+                        'ID %s in %s translations, row #%s', key, card_id,
+                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+                if not value and row.get(key):
+                    logging.error(
+                        'Missing value for %s column for card '
+                        'ID %s in %s translations, row #%s', key, card_id,
+                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                elif value and not row.get(key):
+                    logging.error(
+                        'Redundant value for %s column for card '
                         'ID %s in %s translations, row #%s', key, card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
@@ -1731,8 +1754,8 @@ def _get_card_diffs(old_card, new_card):
     old_card = old_card.copy()
     new_card = new_card.copy()
     for key in old_card:
-        if (key in DISCORD_IGNORE_CHANGES_FIELDS or
-                key in DISCORD_IGNORE_FIELDS):
+        if (key in DISCORD_IGNORE_CHANGES_COLUMNS or
+                key in DISCORD_IGNORE_COLUMNS):
             continue
 
         if key not in new_card:
@@ -1741,8 +1764,8 @@ def _get_card_diffs(old_card, new_card):
             diffs.append((key, old_card[key], new_card[key]))
 
     for key in new_card:
-        if (key not in DISCORD_IGNORE_CHANGES_FIELDS and
-                key not in DISCORD_IGNORE_FIELDS and key not in old_card):
+        if (key not in DISCORD_IGNORE_CHANGES_COLUMNS and
+                key not in DISCORD_IGNORE_COLUMNS and key not in old_card):
             diffs.append((key, None, new_card[key]))
 
     diffs.sort(key=lambda d:
@@ -1805,7 +1828,7 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
         row[CARD_DISCORD_CATEGORY] = category
 
         for key in list(row.keys()):
-            if key in DISCORD_IGNORE_FIELDS:
+            if key in DISCORD_IGNORE_COLUMNS:
                 del row[key]
 
     data.sort(key=lambda row: (
@@ -3908,13 +3931,6 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
     root.set('language', lang)
     cards = root.findall("./cards")[0]
 
-    translated_columns = {
-        CARD_NAME, CARD_TRAITS, CARD_KEYWORDS, CARD_VICTORY, CARD_TEXT,
-        CARD_SHADOW, CARD_FLAVOUR, CARD_SIDE_B, BACK_PREFIX + CARD_TRAITS,
-        BACK_PREFIX + CARD_KEYWORDS, BACK_PREFIX + CARD_VICTORY,
-        BACK_PREFIX + CARD_TEXT, BACK_PREFIX + CARD_SHADOW,
-        BACK_PREFIX + CARD_FLAVOUR, CARD_ADVENTURE}
-
     chosen_data = []
     for row in DATA:
         if row[CARD_ID] is None:
@@ -3925,7 +3941,7 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
 
         row_copy = row.copy()
         if lang != 'English' and TRANSLATIONS[lang].get(row[CARD_ID]):
-            for key in translated_columns:
+            for key in TRANSLATED_COLUMNS:
                 row_copy[key] = TRANSLATIONS[lang][row[CARD_ID]][key]
 
         chosen_data.append(row_copy)
@@ -5668,16 +5684,24 @@ def generate_rules_pdf(conf, set_id, set_name, lang):
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
-def _collect_pdf_images(input_path):
+def _collect_pdf_images(input_path, set_id, card_data):
     """ Collect image filenames for generated PDF.
     """
     for _, _, filenames in os.walk(input_path):
         if not filenames:
             return {}
 
+        empty_rules_backs = {
+            row[CARD_ID] for row in card_data
+            if row[CARD_SET] == set_id and
+            row[CARD_TYPE] == 'Rules' and
+            row[BACK_PREFIX + CARD_TEXT] is None and
+            row[BACK_PREFIX + CARD_VICTORY] is None}
         images = {'player': [],
                   'encounter': [],
+                  'rules': [],
                   'custom': []}
+
         for filename in filenames:
             parts = filename.split('-')
             if parts[-1] != '1.png':
@@ -5685,7 +5709,9 @@ def _collect_pdf_images(input_path):
 
             back_path = os.path.join(input_path, '{}-2.png'.format(
                 '-'.join(parts[:-1])))
-            if os.path.exists(back_path):
+            if filename[50:86] in empty_rules_backs:
+                back_type = 'rules'
+            elif os.path.exists(back_path):
                 back_type = 'custom'
             else:
                 if parts[2] == 'p':
@@ -5711,7 +5737,7 @@ def _collect_pdf_images(input_path):
     return images
 
 
-def generate_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0914
+def generate_pdf(conf, set_id, set_name, lang, card_data):  # pylint: disable=R0914
     """ Generate PDF outputs.
     """
     logging.info('[%s, %s] Generating PDF outputs...', set_name, lang)
@@ -5722,7 +5748,7 @@ def generate_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0914
     output_path = os.path.join(OUTPUT_PDF_PATH, '{}.{}'.format(
         escape_filename(set_name), lang))
 
-    images = _collect_pdf_images(input_path)
+    images = _collect_pdf_images(input_path, set_id, card_data)
     if not images:
         logging.error('[%s, %s] No cards found', set_name, lang)
         logging.info('[%s, %s] ...Generating PDF outputs (%ss)',
@@ -5782,7 +5808,7 @@ def generate_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0914
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
-def generate_genericpng_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R0915
+def generate_genericpng_pdf(conf, set_id, set_name, lang, card_data):  # pylint: disable=R0912,R0914,R0915
     """ Generate generic PNG PDF outputs.
     """
     logging.info('[%s, %s] Generating generic PNG PDF outputs...', set_name,
@@ -5797,7 +5823,7 @@ def generate_genericpng_pdf(conf, set_id, set_name, lang):  # pylint: disable=R0
                              'generate_genericpng_pdf.{}.{}'.format(set_id,
                                                                     lang))
 
-    images = _collect_pdf_images(input_path)
+    images = _collect_pdf_images(input_path, set_id, card_data)
     if not images:
         logging.error('[%s, %s] No cards found', set_name, lang)
         logging.info('[%s, %s] ...Generating generic PNG PDF outputs (%ss)',
