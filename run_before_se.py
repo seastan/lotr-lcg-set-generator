@@ -33,17 +33,13 @@ def main(conf=None):  # pylint: disable=R0912,R0915
             conf = lotr.read_conf()
 
     if (not conf['reprocess_all'] and conf['reprocess_all_on_error'] and
-            os.path.exists(lotr.UPDATE_STARTED_PATH)):
+            os.path.exists(lotr.PIPELINE_STARTED_PATH)):
         conf['reprocess_all'] = True
         logging.info('The previous update did not succeed, setting '
-                     '"reprocess_all" to "true"')
+                     '"reprocess_all" to "true" for this run')
 
-    if conf['reprocess_all'] and os.path.exists(lotr.UPDATE_STARTED_PATH):
-        os.remove(lotr.UPDATE_STARTED_PATH)
-
-    if not conf['reprocess_all']:
-        with open(lotr.UPDATE_STARTED_PATH, 'w'):
-            pass
+    with open(lotr.PIPELINE_STARTED_PATH, 'w'):
+        pass
 
     sheet_changes, scratch_changes = lotr.download_sheet(conf)
     if not conf['exit_if_no_spreadsheet_changes']:
@@ -113,8 +109,8 @@ def main(conf=None):  # pylint: disable=R0912,R0915
         with open(lotr.PROJECT_CREATED_PATH, 'w'):
             pass
     else:
-        if os.path.exists(lotr.UPDATE_STARTED_PATH):
-            os.remove(lotr.UPDATE_STARTED_PATH)
+        if os.path.exists(lotr.PIPELINE_STARTED_PATH):
+            os.remove(lotr.PIPELINE_STARTED_PATH)
 
         if strange_eons:
             logging.info('No changes since the last run, skipping creating '

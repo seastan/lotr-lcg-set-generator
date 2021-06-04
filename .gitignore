@@ -25,6 +25,7 @@ discord.yaml
 id_rsa
 makeCards_FINISHED
 mpc_monitor.json
+pipeline_STARTED
 remote_logs_path
 ringsdb.json
 ringsdb_cookies.json
@@ -35,7 +36,6 @@ sanity_check.txt
 setGenerator.seproject
 setGenerator_CREATED
 sheets.json
-update_STARTED
 USWebCoatedSWOP.icc
 *.cnt
 *.lock

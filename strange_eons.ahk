@@ -59,48 +59,11 @@ Sleep 1000
 Send {Tab}
 Sleep 1000
 
-WriteLog(LogPath, "collapsing possibly opened folders")
-Send {Down}
-Sleep 1000
-Send {Left}
-Sleep 1000
-Send {PgUp}
-Sleep 1000
-
-Send {Down}
-Sleep 1000
-Send {Down}
-Sleep 1000
-Send {Left}
-Sleep 1000
-Send {PgUp}
-Sleep 1000
-
-Send {Down}
-Sleep 1000
-Send {Down}
-Sleep 1000
-Send {Down}
-Sleep 1000
-Send {Left}
-Sleep 1000
-Send {PgUp}
-
-WriteLog(LogPath, "navigating to the script")
-Send {Down}
-Sleep 1000
-Send {Down}
-Sleep 1000
-Send {Down}
-Sleep 1000
-Send {Right}
-Sleep 1000
-Send {Down}
+WriteLog(LogPath, "running the script")
+Send {End}
 Sleep 1000
 Send {Enter}
 Sleep 1000
-
-WriteLog(LogPath, "running the script")
 Send {F5}
 
 While (!FileExist("makeCards_FINISHED")) {
@@ -109,7 +72,7 @@ While (!FileExist("makeCards_FINISHED")) {
     Exit
   }
   WriteLog(LogPath, "waiting for successful script finish")
-  Sleep 30000
+  Sleep 10000
 }
 Sleep 5000
 

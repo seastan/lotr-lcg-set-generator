@@ -261,8 +261,8 @@ def main():  # pylint: disable=R0912,R0915
             conf['dragncards_id_rsa_path']):
         lotr.upload_dragncards(conf, sets, updated_sets)
 
-    if os.path.exists(lotr.UPDATE_STARTED_PATH):
-        os.remove(lotr.UPDATE_STARTED_PATH)
+    if os.path.exists(lotr.PIPELINE_STARTED_PATH):
+        os.remove(lotr.PIPELINE_STARTED_PATH)
 
     logging.info('Done (%ss)', round(time.time() - timestamp, 3))
 
