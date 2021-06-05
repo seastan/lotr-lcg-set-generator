@@ -70,8 +70,8 @@ def rclone_logs():
     """
     res = subprocess.run('./rclone_logs.sh', capture_output=True, shell=True,
                          check=True)
-    stdout = res.stdout.decode('utf-8').strip()
-    stderr = res.stderr.decode('utf-8').strip()
+    stdout = res.stdout.decode('unicode-escape', errors='ignore').strip()
+    stderr = res.stderr.decode('unicode-escape', errors='ignore').strip()
     logging.info('Rclone finished, stdout: %s, stderr: %s', stdout, stderr)
     if stdout != 'Done':
         raise RCloneError('RClone failed, stdout: {}, stderr: {}'.format(
@@ -83,8 +83,8 @@ def parse_logs(folder):
     """
     res = subprocess.run('./remote_cron_log.sh {}'.format(folder),
                          capture_output=True, shell=True, check=True)
-    stdout = res.stdout.decode('utf-8').strip()
-    stderr = res.stderr.decode('utf-8').strip()
+    stdout = res.stdout.decode('unicode-escape', errors='ignore').strip()
+    stderr = res.stderr.decode('unicode-escape', errors='ignore').strip()
     if stderr:
         logging.error('Parsing logs finished with errors: stdout: %s, '
                       'stderr: %s', stdout, stderr)
