@@ -67,6 +67,7 @@ WARNING_SUBJECT_TEMPLATE = 'LotR Discord Bot WARNING: {}'
 MAIL_QUOTA = 50
 
 CHANNEL_LIMIT = 500
+CHUNK_LIMIT = 1900
 ARCHIVE_CATEGORY = 'Archive'
 CARD_DECK_SECTION = '_Deck Section'
 CRON_CHANNEL = 'cron'
@@ -346,7 +347,7 @@ def split_result(value):
     res = []
     chunk = ''
     for line in value.split('\n'):
-        if len(chunk + line) + 1 <= 1900:
+        if len(chunk + line) + 1 <= CHUNK_LIMIT:
             chunk += line + '\n'
         else:
             res.append(chunk)
@@ -366,6 +367,8 @@ def split_result(value):
 
         res[i] += '```\n'
 
+    res = [chunk.replace('```diff\n```', '').replace('```\n```', '')
+           for chunk in res]
     return res
 
 
