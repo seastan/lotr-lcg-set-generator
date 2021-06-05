@@ -188,6 +188,8 @@ def main():  # pylint: disable=R0912,R0915
                              ' skipping', set_name, lang)
                 continue
 
+            card_data = lotr.translated_data(set_id, lang)
+
             if conf['nobleed_300'][lang]:
                 pre_tasks.append([generate_png300_nobleed, conf, set_id,
                                   set_name, lang, skip_ids])
@@ -198,7 +200,7 @@ def main():  # pylint: disable=R0912,R0915
 
             if 'db' in conf['outputs'][lang]:
                 tasks.append([generate_db, conf, set_id, set_name, lang,
-                              skip_ids, lotr.translated_data(set_id, lang)])
+                              skip_ids, card_data])
 
             if 'octgn' in conf['outputs'][lang]:
                 tasks.append([generate_octgn, conf, set_id, set_name, lang,
@@ -206,34 +208,31 @@ def main():  # pylint: disable=R0912,R0915
 
             if 'rules_pdf' in conf['outputs'][lang]:
                 tasks.append([generate_rules_pdf, conf, set_id, set_name,
-                              lang, skip_ids,
-                              lotr.translated_data(set_id, lang)])
+                              lang, skip_ids, card_data])
 
             if 'pdf' in conf['outputs'][lang]:
                 tasks.append([generate_pdf, conf, set_id, set_name, lang,
-                              skip_ids, lotr.translated_data(set_id, lang)])
+                              skip_ids, card_data])
 
             if 'genericpng_pdf' in conf['outputs'][lang]:
                 tasks.append([generate_genericpng_pdf, conf, set_id, set_name,
-                              lang, skip_ids,
-                              lotr.translated_data(set_id, lang)])
+                              lang, skip_ids, card_data])
 
             if 'makeplayingcards' in conf['outputs'][lang]:
                 tasks.append([generate_mpc, conf, set_id, set_name, lang,
-                              skip_ids, lotr.translated_data(set_id, lang)])
+                              skip_ids, card_data])
 
             if 'drivethrucards' in conf['outputs'][lang]:
                 tasks.append([generate_dtc, conf, set_id, set_name, lang,
-                              skip_ids, lotr.translated_data(set_id, lang)])
+                              skip_ids, card_data])
 
             if 'mbprint' in conf['outputs'][lang]:
                 tasks.append([generate_mbprint, conf, set_id, set_name, lang,
-                              skip_ids, lotr.translated_data(set_id, lang)])
+                              skip_ids, card_data])
 
             if 'genericpng' in conf['outputs'][lang]:
                 tasks.append([generate_genericpng, conf, set_id, set_name,
-                              lang, skip_ids,
-                              lotr.translated_data(set_id, lang)])
+                              lang, skip_ids, card_data])
 
     execute_tasks(conf, pre_tasks)
     execute_tasks(conf, tasks)
