@@ -2716,9 +2716,14 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
             _append_cards(root.findall("./section[@name='Side Quest']")[0],
                           side_quest_cards)
 
-            filename = escape_octgn_filename(
-                '{}{}{}.o8d'.format(mode, quest['prefix'],
-                                    escape_filename(quest['name'])))
+            if mode == EASY_PREFIX and quest['prefix'].startswith('Q'):
+                filename = escape_octgn_filename(
+                    '{}{}{}.o8d'.format('E', quest['prefix'][1:],
+                                        escape_filename(quest['name'])))
+            else:
+                filename = escape_octgn_filename(
+                    '{}{}{}.o8d'.format(mode, quest['prefix'],
+                                        escape_filename(quest['name'])))
             with open(
                     os.path.join(output_path, filename),
                     'w', encoding='utf-8') as obj:
@@ -6743,17 +6748,30 @@ def upload_dragncards(conf, sets, updated_sets):
                                        escape_filename(set_name))
             if (conf['dragncards_remote_deck_path'] and conf['octgn_o8d'] and
                     os.path.exists(output_path)):
+                temp_path = os.path.join(
+                    TEMP_ROOT_PATH,
+                    'upload_dragncards_{}'.format(escape_filename(set_name)))
+                create_folder(temp_path)
+                clear_folder(temp_path)
                 for _, _, filenames in os.walk(output_path):
                     for filename in filenames:
                         if filename.startswith('Player-'):
                             continue
 
-                        scp_client.put(os.path.join(output_path, filename),
+                        new_filename = re.sub(r'\.o8d$', '-Playtest.o8d',
+                                              filename)
+                        shutil.copyfile(os.path.join(output_path, filename),
+                                        os.path.join(temp_path, new_filename))
+
+                        scp_client.put(os.path.join(temp_path, new_filename),
                                        conf['dragncards_remote_deck_path'])
                         logging.info('Uploaded %s to DragnCards host',
                                      filename)
 
                     break
+
+                delete_folder(temp_path)
+
     finally:
         client.close()
 
