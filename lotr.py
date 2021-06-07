@@ -190,6 +190,7 @@ PNG_800_MIN_SIZE = 2000000
 EASY_PREFIX = 'Easy '
 IMAGES_CUSTOM_FOLDER = 'custom'
 OCTGN_SET_XML = 'set.xml'
+PLAYTEST_SUFFIX = '-Playtest'
 PROCESSED_ARTWORK_FOLDER = 'processed'
 PROJECT_FOLDER = 'Frogmorton'
 TEXT_CHUNK_FLAG = b'tEXt'
@@ -3052,7 +3053,8 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
             'cardid': _to_str(row[CARD_ID]),
             'cardnumber': _to_str(_handle_int(row[CARD_NUMBER])),
             'cardquantity': _to_str(_handle_int(row[CARD_QUANTITY])),
-            'cardencounterset': _to_str(row[CARD_ENCOUNTER_SET])
+            'cardencounterset': _to_str(row[CARD_ENCOUNTER_SET]),
+            'playtest': 1
         }
         json_data[row[CARD_ID]] = card_data
 
@@ -6665,7 +6667,6 @@ def upload_dragncards(conf, sets, updated_sets):
     logging.info('Uploading outputs to DragnCards...')
     timestamp = time.time()
 
-    sets = [s for s in sets if s[0] in FOUND_SETS]
     client = _get_ssh_client(conf)
     try:  # pylint: disable=R1702
         scp_client = SCPClient(client.get_transport())
@@ -6735,7 +6736,8 @@ def upload_dragncards(conf, sets, updated_sets):
                         if filename.startswith('Player-'):
                             continue
 
-                        new_filename = re.sub(r'\.o8d$', '-Playtest.o8d',
+                        new_filename = re.sub(r'\.o8d$',
+                                              '{}.o8d'.format(PLAYTEST_SUFFIX),
                                               filename)
                         shutil.copyfile(os.path.join(output_path, filename),
                                         os.path.join(temp_path, new_filename))
