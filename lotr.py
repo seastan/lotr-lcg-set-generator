@@ -3316,26 +3316,13 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
     create_folder(output_folder)
 
     data = DATA[:]
-    for row in DATA:
-        if (row[CARD_SIDE_B] is not None and
-                row[CARD_TYPE] not in CARD_TYPES_DOUBLESIDE_OPTIONAL):
-            new_row = row.copy()
-            new_row[CARD_NAME] = new_row[CARD_SIDE_B]
-            new_row[CARD_DOUBLESIDE] = 'B'
-            for key in new_row.keys():
-                if key.startswith(BACK_PREFIX):
-                    new_row[key.replace(BACK_PREFIX, '')] = new_row[key]
-
-            data.append(new_row)
-
     data = sorted(
         [row for row in data if row[CARD_SET] == set_id
          and _needed_for_frenchdb(row)
          and (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)
-        ], key=lambda r:
-        (str(int(r[CARD_NUMBER])).zfill(3)
-         if is_positive_or_zero_int(r[CARD_NUMBER])
-         else str(r[CARD_NUMBER]), row.get(CARD_DOUBLESIDE, '')))
+        ], key=lambda r: str(int(r[CARD_NUMBER])).zfill(3)
+        if is_positive_or_zero_int(r[CARD_NUMBER])
+        else str(r[CARD_NUMBER]))
 
     output_path = os.path.join(output_folder, 'carte_joueur.csv')
     with open(output_path, 'w', newline='', encoding='utf-8') as obj:
@@ -3353,12 +3340,6 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 continue
 
             french_row = TRANSLATIONS['French'].get(row[CARD_ID], {}).copy()
-            if row.get(CARD_DOUBLESIDE):
-                french_row[CARD_NAME] = french_row.get(CARD_SIDE_B, '')
-                for key in french_row.keys():
-                    if key.startswith(BACK_PREFIX):
-                        french_row[key.replace(BACK_PREFIX, '')] = (
-                            french_row[key])
 
             if row[CARD_TYPE] == 'Contract':
                 sphere = 'Neutral'
@@ -3378,7 +3359,8 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 french_row.get(CARD_KEYWORDS) or '',
                 french_row.get(CARD_TEXT) or '')).strip()
 
-            if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL and
+            if ((row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL or
+                 row[CARD_SIDE_B] is not None) and
                     french_row.get(BACK_PREFIX + CARD_TEXT)):
                 text_back = _update_french_card_text('{}\n\n{}'.format(
                     french_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
@@ -3398,7 +3380,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                          else 0)
 
             csv_row = {
-                'id_extension': row[CARD_SET_RINGSDB_CODE],
+                'id_extension': row[CARD_SET_NAME],
                 'numero_identification': int(row[CARD_NUMBER])
                                          if _is_int(row[CARD_NUMBER])
                                          else 0,
@@ -3446,12 +3428,6 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 continue
 
             french_row = TRANSLATIONS['French'].get(row[CARD_ID], {}).copy()
-            if row.get(CARD_DOUBLESIDE):
-                french_row[CARD_NAME] = french_row.get(CARD_SIDE_B, '')
-                for key in french_row.keys():
-                    if key.startswith(BACK_PREFIX):
-                        french_row[key.replace(BACK_PREFIX, '')] = (
-                            french_row[key])
 
             if row[CARD_SPHERE] == 'Setup':
                 card_type = 'Nightmare'
@@ -3462,7 +3438,8 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 french_row.get(CARD_KEYWORDS) or '',
                 french_row.get(CARD_TEXT) or '')).strip()
 
-            if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL and
+            if ((row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL
+                 or row[CARD_SIDE_B] is not None) and
                     french_row.get(BACK_PREFIX + CARD_TEXT)):
                 text_back = _update_french_card_text('{}\n\n{}'.format(
                     french_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
@@ -3484,7 +3461,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                          else 0)
 
             csv_row = {
-                'id_extension': row[CARD_SET_RINGSDB_CODE],
+                'id_extension': row[CARD_SET_NAME],
                 'numero_identification': int(row[CARD_NUMBER])
                                          if _is_int(row[CARD_NUMBER])
                                          else 0,
@@ -3550,7 +3527,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                         else 1)
 
             csv_row = {
-                'id_extension': row[CARD_SET_RINGSDB_CODE],
+                'id_extension': row[CARD_SET_NAME],
                 'numero_identification': int(row[CARD_NUMBER])
                                          if _is_int(row[CARD_NUMBER])
                                          else 0,
