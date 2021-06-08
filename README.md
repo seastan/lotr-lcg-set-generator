@@ -354,7 +354,7 @@ and separate them using an additional empty line.  For example:
 Each rule is a key-value pair, separated by `:`.  For example:
 
 ```
-Prefix: ALeP-Standalone-01
+Prefix: QA1.5-ALeP
 ```
 
 If you want to set a list of values, separate them by `;`.  For example:
@@ -365,18 +365,19 @@ Setup: Saruman; Grima; Brandywine Gate
 
 Below is a list of all supported rules:
 
-- `Prefix`: Specify a custom filename prefix.  For example: `Prefix: ALeP-Standalone-01` will result
-  in a filename like `ALeP-Standalone-01-The-Scouring-of-the-Shire.o8d`.
-- `Sets`: Specify additional sets to be included.  For example: `Sets: ALeP - Children of Eorl`.
-- `Encounter Sets`: Specify additional encounter sets to be included.  For example:
+- `Prefix`: A **mandatory** filename preifx.  It must start with:
+  `<either "Q" (normal mode) or "N" (nightmare mode)><two capital letters and/or number>.<one or two numbers><end of string, space or dash>`.
+  For example, `Prefix: Q0B.19-Standalone-ALeP` will result in a filename like `Q0B.19-Standalone-ALeP-The-Scouring-of-the-Shire.o8d`.
+- `Sets`: Additional sets to be included.  For example: `Sets: ALeP - Children of Eorl`.
+- `Encounter Sets`: Additional encounter sets to be included.  For example:
   `Encounter Sets: Journey in the Dark`.
-- `External XML`: links to external `set.xml` files (if those cards are not in the spreadsheet).
+- `External XML`: Links to external `set.xml` files (if those cards are not in the spreadsheet).
   For example: `External XML: https://raw.githubusercontent.com/seastan/Lord-of-the-Rings/master/o8g/Sets/The%20Road%20Darkens/set.xml`.
-- `Remove`: list of filters to select cards that need to be removed from the deck.  For example:
+- `Remove`: List of filters to select cards that need to be removed from the deck.  For example:
   `Remove: Type:Campaign` (remove any cards with `Campaign` type from the normal deck).
 - `Second Quest Deck`, `Special`, `Second Special`, `Setup`, `Staging Setup`, and `Active Setup`:
-  list of filters to select cards for that section.  For example: `Setup: Saruman; Grima; Brandywine Gate`.
-- `Player`: list of filters to select cards for `Hero`, `Ally`, `Attachment`, `Event`, and `Side Quest`
+  List of filters to select cards for that section.  For example: `Setup: Saruman; Grima; Brandywine Gate`.
+- `Player`: List of filters to select cards for `Hero`, `Ally`, `Attachment`, `Event`, and `Side Quest`
   sections (exact section is defined automatically).  For example: `Player: Frodo Baggins`.
 
 Order of rules is important.  For example:
@@ -413,13 +414,13 @@ means one copy of each different enemy.
 A few more examples:
 
 ```
-Prefix: ALeP-Standalone-01
+Prefix: Q0B.19-Standalone-ALeP
 Remove: Type:Campaign
 Special: Trait:Sharkey & Type:Treachery
 Setup: Saruman; Grima; Brandywine Gate; Type:Side Quest; 4 One-feather Shirriff
 Player: Frodo Baggins
 
-Prefix: ALeP-Standalone-01-Campaign
+Prefix: Q0C.19-Campaign-ALeP
 External XML: https://raw.githubusercontent.com/seastan/Lord-of-the-Rings/master/o8g/Sets/The%20Road%20Darkens/set.xml
 Sets: The Road Darkens
 Encounter Sets: Journey in the Dark
@@ -431,7 +432,7 @@ Player: Frodo Baggins
 ```
 
 ```
-Prefix: Nightmare-1.5
+Prefix: Prefix: N01.5 Nightmare
 External XML: https://raw.githubusercontent.com/seastan/Lord-of-the-Rings/master/o8g/Sets/Core%20Set/set.xml; https://raw.githubusercontent.com/seastan/Lord-of-the-Rings/master/o8g/Sets/Conflict%20at%20the%20Carrock/set.xml; https://raw.githubusercontent.com/seastan/Lord-of-the-Rings/master/o8g/Sets/Shadows%20of%20Mirkwood%20-%20Nightmare/set.xml
 Sets: Core Set; Conflict at the Carrock; Shadows of Mirkwood - Nightmare
 Encounter Sets: Journey Down the Anduin; Wilderlands; Conflict at the Carrock; Conflict at the Carrock - Nightmare
