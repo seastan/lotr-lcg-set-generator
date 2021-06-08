@@ -239,13 +239,13 @@ Additionally, if you specified OCTGN destination paths, OCTGN outputs will be co
 - `[name]`: actual card name
 - `[lsb]`: [
 - `[rsb]`: ]
-- `[lquot]`: unmatched “
-- `[rquot]`: unmatched ”
+- `[lquot]`: unmatched left quote
+- `[rquot]`: unmatched right quote
 - `[quot]`: "
 - `[apos]`: '
 - `[hyphen]`: -
-- `--`: – (en dash)
-- `---`: — (em dash)
+- `--`: en dash
+- `---`: em dash
 
 Icons:
 
@@ -365,8 +365,8 @@ Setup: Saruman; Grima; Brandywine Gate
 
 Below is a list of all supported rules:
 
-- `Prefix`: A **mandatory** filename preifx.  It must start with:
-  `<either "Q" (normal mode) or "N" (nightmare mode)><two capital letters and/or number>.<one or two numbers><end of string, space or dash>`.
+- `Prefix`: A **mandatory** filename prefix.  It must start with:
+  `<either "Q" (normal mode) or "N" (nightmare mode)><two capital letters and/or numbers>.<one or two numbers><end of string, space or dash>`.
   For example, `Prefix: Q0B.19-Standalone-ALeP` will result in a filename like `Q0B.19-Standalone-ALeP-The-Scouring-of-the-Shire.o8d`.
 - `Sets`: Additional sets to be included.  For example: `Sets: ALeP - Children of Eorl`.
 - `Encounter Sets`: Additional encounter sets to be included.  For example:
@@ -432,7 +432,7 @@ Player: Frodo Baggins
 ```
 
 ```
-Prefix: Prefix: N01.5 Nightmare
+Prefix: N01.5 Nightmare
 External XML: https://raw.githubusercontent.com/seastan/Lord-of-the-Rings/master/o8g/Sets/Core%20Set/set.xml; https://raw.githubusercontent.com/seastan/Lord-of-the-Rings/master/o8g/Sets/Conflict%20at%20the%20Carrock/set.xml; https://raw.githubusercontent.com/seastan/Lord-of-the-Rings/master/o8g/Sets/Shadows%20of%20Mirkwood%20-%20Nightmare/set.xml
 Sets: Core Set; Conflict at the Carrock; Shadows of Mirkwood - Nightmare
 Encounter Sets: Journey Down the Anduin; Wilderlands; Conflict at the Carrock; Conflict at the Carrock - Nightmare
