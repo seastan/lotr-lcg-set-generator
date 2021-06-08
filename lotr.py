@@ -187,6 +187,7 @@ JPG_800CMYK_MIN_SIZE = 4000000
 PNG_300_MIN_SIZE = 200000
 PNG_800_MIN_SIZE = 2000000
 
+DECK_PREFIX_REGEX = r'^[QN][A-Z0-9][A-Z0-9]\.[0-9][0-9]?[\- ]'
 EASY_PREFIX = 'Easy '
 IMAGES_CUSTOM_FOLDER = 'custom'
 OCTGN_SET_XML = 'set.xml'
@@ -1622,6 +1623,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
             prefixes = set()
             for part in str(row[CARD_DECK_RULES]).split('\n\n'):
+                if not part:
+                    continue
+
                 rules_list = [r.strip().split(':', 1)
                               for r in part.split('\n')]
                 rules_list = [(r[0].lower().strip(),
@@ -1664,7 +1668,22 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             errors.append(message)
 
                 prefix = rules.get(('prefix', 0), [''])[0]
-                if prefix in prefixes:
+                if not prefix:
+                    message = (
+                        'No prefix for deck rules for quest {} in row #{}{}'
+                        .format(card_adventure or card_name, i, scratch))
+                    logging.error(message)
+                    if conf['octgn_o8d'] and not card_scratch:
+                        errors.append(message)
+                elif not re.match(DECK_PREFIX_REGEX, prefix + ' '):
+                    message = (
+                        'Incorrect prefix "{}" for deck rules for quest {} '
+                        'in row #{}{}'.format(
+                            prefix, card_adventure or card_name, i, scratch))
+                    logging.error(message)
+                    if conf['octgn_o8d'] and not card_scratch:
+                        errors.append(message)
+                elif prefix in prefixes:
                     message = (
                         'Duplicate prefix "{}" for deck rules for quest {} '
                         'in row #{}{}'.format(
@@ -2510,6 +2529,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
             if row[CARD_SET] == set_id
             and ((row[CARD_TYPE] == 'Quest' and row[CARD_ADVENTURE])
                  or row[CARD_TYPE] == 'Nightmare')
+            and row[CARD_DECK_RULES]
             and (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)]
 
     quests = {}
@@ -2520,7 +2540,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
              'sets': set([str(row[CARD_SET_NAME]).lower()]),
              'encounter sets': set(),
              'prefix': '',
-             'rules': '',
+             'rules': row[CARD_DECK_RULES],
              'modes': ['']})
         if row[CARD_ENCOUNTER_SET]:
             quest['encounter sets'].add(str(row[CARD_ENCOUNTER_SET]).lower())
@@ -2531,9 +2551,6 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                     for r in
                     str(row[CARD_ADDITIONAL_ENCOUNTER_SETS]).split(';')]:
                 quest['encounter sets'].add(encounter_set)
-
-        if row[CARD_DECK_RULES]:
-            quest['rules'] = row[CARD_DECK_RULES]
 
     quests = list(quests.values())
     new_quests = []
@@ -2555,6 +2572,9 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
         create_folder(output_path)
 
     for quest in quests:
+        if not quest['rules']:
+            continue
+
         rules_list = [r.strip().split(':', 1)
                       for r in str(quest['rules']).split('\n')]
         rules_list = [(r[0].lower().strip(),
@@ -2577,15 +2597,22 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
 
             rules[(key, key_count[key])] = value
 
+        if rules.get(('prefix', 0)):
+            quest['prefix'] = rules[('prefix', 0)][0] + ' '
+            quest['prefix'] = quest['prefix'][:6].upper() + quest['prefix'][6:]
+
+        if not quest['prefix']:
+            continue
+
+        if not re.match(DECK_PREFIX_REGEX, quest['prefix']):
+            continue
+
         if rules.get(('sets', 0)):
             quest['sets'].update([str(s).lower() for s in rules[('sets', 0)]])
 
         if rules.get(('encounter sets', 0)):
             quest['encounter sets'].update(
                 [str(s).lower() for s in rules[('encounter sets', 0)]])
-
-        if rules.get(('prefix', 0)):
-            quest['prefix'] = rules[('prefix', 0)][0] + ' '
 
         cards = [r for r in DATA
                  if r[CARD_ID]
