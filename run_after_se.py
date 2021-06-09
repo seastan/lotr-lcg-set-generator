@@ -151,7 +151,7 @@ def execute_tasks(conf, tasks):
         logging.info('No tasks to execute, skipping')
         return
 
-    processes = (max(1, cpu_count() - 1)
+    processes = (min(4, max(1, cpu_count() - 1))
                  if conf['parallelism'] == 'default'
                  else conf['parallelism'])
     processes = min(processes, len(tasks))

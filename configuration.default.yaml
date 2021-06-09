@@ -59,7 +59,7 @@ selected_only: false
 # Stop processing if there are no spreadsheet changes (true or false)
 exit_if_no_spreadsheet_changes: false
 
-# Number of parallel processes to use ("default" means "cpu_count() - 1")
+# Number of parallel processes to use ("default" means "cpu_count() - 1", but not more than 4)
 parallelism: default
 
 # List of set IDs to work on

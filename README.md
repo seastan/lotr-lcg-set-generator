@@ -112,7 +112,7 @@ for details).
   - `reprocess_all_on_error`: whether to reprocess all cards even when reprocess_all=false if the previous script run didn't succeed (true or false)
   - `selected_only`: process only "selected" rows (true or false)
   - `exit_if_no_spreadsheet_changes`: stop processing if there are no spreadsheet changes (true or false)
-  - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`)
+  - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`, but not more than 4)
   - `set_ids`: list of set IDs to work on (you can use `all` and `all_scratch` aliases to select all non-scratch and all scratch sets sutomatically)
   - `ignore_set_ids`: list of set IDs to ignore
   - `set_ids_octgn_image_destination`: list of set IDs to copy to OCTGN image destination
