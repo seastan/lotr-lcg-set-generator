@@ -70,10 +70,10 @@ def _get_pdf_clip_size(drawable):
     """
     if ((drawable.width == 826 and drawable.height == 1126)
             or (drawable.width == 1126 and drawable.height == 826)):
-        size = 0
+        size = 0.5
     elif ((drawable.width == 1650 and drawable.height == 2250)
           or (drawable.width == 2250 and drawable.height == 1650)):
-        size = 0
+        size = 0.5
     elif ((drawable.width == 1652 and drawable.height == 2252)
           or (drawable.width == 2252 and drawable.height == 1652)):
         size = 1
@@ -287,12 +287,15 @@ def prepare_pdf_front(img, drawable, output_folder):
 
     rotation = _get_rotation(drawable)
     margin_size = _get_pdf_margin_size(drawable)
-
     if rotation:
         _rotate(drawable, back_side)
 
     if margin_size:
         _add_margin(img, drawable, margin_size)
+
+    clip_size = _get_pdf_clip_size(drawable)
+    if clip_size:
+        _clip(img, drawable, clip_size, rotation and back_side)
 
     pdb.file_png_save(img, drawable,
                       os.path.join(output_folder, file_name), file_name,
