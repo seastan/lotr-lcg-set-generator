@@ -316,6 +316,12 @@ List of available sphere values:
 - `Red` (`Presentation` only)
 - `Brown` (`Presentation` only)
 - `Yellow` (`Presentation` only)
+- `Nightmare Blue` (`Presentation` only)
+- `Nightmare Green` (`Presentation` only)
+- `Nightmare Purple` (`Presentation` only)
+- `Nightmare Red` (`Presentation` only)
+- `Nightmare Brown` (`Presentation` only)
+- `Nightmare Yellow` (`Presentation` only)
 
 Please note, that not all card types and spheres are currently supported by Strange Eons.
 

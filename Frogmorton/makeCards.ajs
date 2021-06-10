@@ -391,21 +391,21 @@ function run(progress, target, filename, icons) {
 					cardType = card['Type'] + '';
 					cardSphere = card['Sphere'] + '';
 
-					if ((cardSphere == 'Boon') && (['Ally', 'Hero', 'Objective Hero', 'Objective Location', 'Player Side Quest', 'Ship Objective'].indexOf(cardType) > -1)) {
-						Console.err.println('\nERROR: ' + cardType + " doesn't support Boon subtype yet.");
-						card['Sphere'] = 'Neutral';
-					}
-					else if ((cardSphere == 'Burden') && (['Encounter Side Quest', 'Enemy', 'Location', 'Ship Enemy'].indexOf(cardType) > -1)) {
+					if ((cardSphere == 'Burden') && (cardType == 'Enemy')) {
 						Console.err.println('\nERROR: ' + cardType + " doesn't support Burden subtype yet.");
 						card['Sphere'] = '';
 					}
-					else if ((cardSphere == 'Nightmare') && (['Encounter Side Quest', 'Objective', 'Ship Enemy', 'Presentation'].indexOf(cardType) > -1)) {
+					else if ((cardSphere == 'Nightmare') && (['Encounter Side Quest', 'Objective', 'Ship Enemy'].indexOf(cardType) > -1)) {
 						Console.err.println('\nERROR: ' + cardType + " doesn't support Nightmare template yet.");
 						card['Sphere'] = '';
 					}
 					else if (cardSphere == 'Upgraded') {
 						Console.err.println('\nERROR: ' + cardSphere + " template is not supported yet.");
 						card['Sphere'] = '';
+					}
+					else if (['Nightmare Blue', 'Nightmare Green', 'Nightmare Purple', 'Nightmare Red', 'Nightmare Brown', 'Nightmare Yellow'].indexOf(cardSphere) > -1) {
+						Console.err.println('\nERROR: ' + cardSphere + " template is not supported yet.");
+						card['Sphere'] = cardSphere.replace(/Nightmare /, '');;
 					}
 
 					keywords = card['Keywords'];
@@ -458,21 +458,21 @@ function run(progress, target, filename, icons) {
 					cardType = card['BType'] + '';
 					cardSphere = card['BSphere'] + '';
 
-					if ((cardSphere == 'Boon') && (['Ally', 'Hero', 'Objective Hero', 'Player Side Quest', 'Ship Objective'].indexOf(cardType) > -1)) {
-						Console.err.println('\nERROR: ' + cardType + " doesn't support Boon subtype yet.");
-						card['BSphere'] = 'Neutral';
-					}
-					else if ((cardSphere == 'Burden') && (['Encounter Side Quest', 'Enemy', 'Location', 'Ship Enemy'].indexOf(cardType) > -1)) {
+					if ((cardSphere == 'Burden') && (cardType == 'Enemy')) {
 						Console.err.println('\nERROR: ' + cardType + " doesn't support Burden subtype yet.");
 						card['BSphere'] = '';
 					}
-					else if ((cardSphere == 'Nightmare') && (['Encounter Side Quest', 'Objective', 'Ship Enemy', 'Presentation'].indexOf(cardType) > -1)) {
+					else if ((cardSphere == 'Nightmare') && (['Encounter Side Quest', 'Objective', 'Ship Enemy'].indexOf(cardType) > -1)) {
 						Console.err.println('\nERROR: ' + cardType + " doesn't support Nightmare template yet.");
 						card['BSphere'] = '';
 					}
 					else if (cardSphere == 'Upgraded') {
 						Console.err.println('\nERROR: ' + cardSphere + " template is not supported yet.");
-						card['Sphere'] = '';
+						card['BSphere'] = '';
+					}
+					else if (['Nightmare Blue', 'Nightmare Green', 'Nightmare Purple', 'Nightmare Red', 'Nightmare Brown', 'Nightmare Yellow'].indexOf(cardSphere) > -1) {
+						Console.err.println('\nERROR: ' + cardSphere + " template is not supported yet.");
+						card['BSphere'] = cardSphere.replace(/Nightmare /, '');;
 					}
 
 					keywords = card['BKeywords'];

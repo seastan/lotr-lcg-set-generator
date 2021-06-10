@@ -147,11 +147,15 @@ CARD_TYPES_DOUBLESIDE_OPTIONAL = {'Campaign', 'Contract', 'Nightmare',
 CARD_TYPES_PLAYER = {'Ally', 'Attachment', 'Contract', 'Event', 'Hero',
                      'Player Side Quest', 'Treasure'}
 CARD_TYPES_PLAYER_DECK = {'Ally', 'Attachment', 'Event', 'Player Side Quest'}
+CARD_TYPES_PLAYER_SPHERE = {'Ally', 'Attachment', 'Event', 'Hero',
+                            'Player Side Quest'}
 CARD_TYPES_ENCOUNTER_SET = {'Campaign', 'Enemy', 'Encounter Side Quest',
                             'Location', 'Nightmare', 'Objective',
                             'Objective Ally', 'Objective Hero',
                             'Objective Location', 'Quest', 'Ship Enemy',
                             'Ship Objective', 'Treachery'}
+CARD_TYPES_NO_ENCOUNTER_SET = {'Ally', 'Attachment', 'Contract', 'Event',
+                               'Hero', 'Player Side Quest', 'Treasure'}
 CARD_TYPES_ENCOUNTER_SIZE = {'Enemy', 'Location', 'Objective',
                              'Objective Ally', 'Objective Hero',
                              'Objective Location', 'Ship Enemy',
@@ -166,12 +170,22 @@ CARD_TYPES_NON_UNIQUE = {'Campaign', 'Contract', 'Event', 'Nightmare',
 CARD_TYPES_ONE_COPY = {'Campaign', 'Contract', 'Encounter Side Quest', 'Hero',
                        'Nightmare', 'Objective Hero', 'Presentation', 'Quest',
                        'Rules', 'Treasure'}
-SPHERES = {'Baggins', 'Fellowship', 'Leadership', 'Lore', 'Neutral', 'Spirit',
-           'Tactics', 'Boon', 'Burden', 'Nightmare', 'Upgraded'}
+CARD_TYPES_THREE_COPIES = {'Ally', 'Attachment', 'Event', 'Player Side Quest'}
+CARD_TYPES_BOON = {'Attachment', 'Event', 'Objective Ally'}
+CARD_TYPES_BURDEN = {'Enemy', 'Objective', 'Treachery'}
+CARD_TYPES_NIGHTMARE = {'Encounter Side Quest', 'Enemy', 'Location',
+                        'Objective', 'Ship Enemy', 'Treachery', 'Quest'}
 
+SPHERES = set()
 SPHERES_CAMPAIGN = {'Setup'}
+SPHERES_PLAYER = {'Baggins', 'Fellowship', 'Leadership', 'Lore', 'Neutral',
+                  'Spirit', 'Tactics'}
+SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow',
+                        'Nightmare Blue', 'Nightmare Green',
+                        'Nightmare Purple', 'Nightmare Red', 'Nightmare Brown',
+                        'Nightmare Yellow'}
 SPHERES_RULES = {'Back'}
-SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow'}
+SPHERES_SHIP_OBJECTIVE = {'Upgraded'}
 
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}{}*.jpg"'
@@ -187,7 +201,6 @@ JPG_800CMYK_MIN_SIZE = 4000000
 PNG_300_MIN_SIZE = 200000
 PNG_800_MIN_SIZE = 2000000
 
-DECK_PREFIX_REGEX = r'^[QN][A-Z0-9][A-Z0-9]\.[0-9][0-9]?[\- ]'
 EASY_PREFIX = 'Easy '
 IMAGES_CUSTOM_FOLDER = 'custom'
 OCTGN_SET_XML = 'set.xml'
@@ -195,6 +208,9 @@ PLAYTEST_SUFFIX = '-Playtest'
 PROCESSED_ARTWORK_FOLDER = 'processed'
 PROJECT_FOLDER = 'Frogmorton'
 TEXT_CHUNK_FLAG = b'tEXt'
+
+DECK_PREFIX_REGEX = r'^[QN][A-Z0-9][A-Z0-9]\.[0-9][0-9]?[\- ]'
+UUID_REGEX = r'^[0-9a-h]{8}-[0-9a-h]{4}-[0-9a-h]{4}-[0-9a-h]{4}-[0-9a-h]{12}$'
 
 JPG300BLEEDDTC = 'jpg300BleedDTC'
 JPG800BLEEDMBPRINT = 'jpg800BleedMBPrint'
@@ -1371,6 +1387,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_id = row[CARD_ID]
         card_number = row[CARD_NUMBER]
         card_quantity = row[CARD_QUANTITY]
+        card_encounter_set = row[CARD_ENCOUNTER_SET]
         card_name = row[CARD_NAME]
         card_unique = row[CARD_UNIQUE]
         card_type = row[CARD_TYPE]
@@ -1407,13 +1424,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
-        elif card_id in card_ids:
+        elif card_id in card_ids or card_id in card_scratch_ids:
             message = 'Duplicate card ID for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
-        elif card_id in card_scratch_ids:
-            message = 'Duplicate card ID for row #{}{}'.format(i, scratch)
+        elif not re.match(UUID_REGEX, card_id):
+            message = 'Incorrect card ID format for row #{}{}'.format(
+                i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
@@ -1431,6 +1449,22 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+        elif len(_handle_int_str(card_number)) > 3:
+            message = 'Card number is too long for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+
+        if set_id is not None and card_number is not None:
+            if (set_id, card_number) in card_set_numbers:
+                message = ('Duplicate card set and card number combination '
+                           'for row #{}{}'.format(i, scratch))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+            else:
+                card_set_numbers.add((set_id, card_number))
 
         if card_quantity is None:
             message = 'No card quantity for row #{}{}'.format(i, scratch)
@@ -1443,7 +1477,13 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
-        elif card_type in CARD_TYPES_ONE_COPY and card_quantity > 1:
+        elif card_type in CARD_TYPES_ONE_COPY and card_quantity != 1:
+            message = ('Incorrect card quantity for row #{}{}'.format(
+                i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+        elif card_type in CARD_TYPES_THREE_COPIES and card_quantity != 3:
             message = ('Incorrect card quantity for row #{}{}'.format(
                 i, scratch))
             logging.error(message)
@@ -1455,42 +1495,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
-        elif set_id is not None and card_number is not None:
-            if (set_id, card_number) in card_set_numbers:
-                message = ('Duplicate card set and card number combination '
-                           'for row #{}{}'.format(i, scratch))
-                logging.error(message)
-                if not card_scratch:
-                    errors.append(message)
-            else:
-                card_set_numbers.add((set_id, card_number))
 
-        if card_type is None:
-            message = 'No card type for row #{}{}'.format(i, scratch)
+        if (card_encounter_set is None and
+                card_type in CARD_TYPES_ENCOUNTER_SET):
+            message = 'No encounter set for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
-        elif card_type not in CARD_TYPES:
-            message = 'Unknown card type for row #{}{}'.format(i, scratch)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-
-        if card_type_back is not None and card_type_back not in CARD_TYPES:
-            message = 'Unknown card type back for row #{}{}'.format(i, scratch)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-        elif (card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL
-              and card_type_back is not None and card_type_back != card_type):
-            message = 'Incorrect card type back for row #{}{}'.format(
-                i, scratch)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-        elif (card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL
-              and card_type_back in CARD_TYPES_DOUBLESIDE_OPTIONAL):
-            message = 'Incorrect card type back for row #{}{}'.format(
+        elif (card_encounter_set is not None and
+              card_type in CARD_TYPES_NO_ENCOUNTER_SET):
+            message = 'Redundant encounter set for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -1529,26 +1543,102 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             if not card_scratch:
                 errors.append(message)
 
+        if card_type is None:
+            message = 'No card type for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+        elif card_type not in CARD_TYPES:
+            message = 'Unknown card type for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+
+        if card_type_back is not None and card_type_back not in CARD_TYPES:
+            message = 'Unknown card type back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+        elif (card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL
+              and card_type_back is not None and card_type_back != card_type):
+            message = 'Incorrect card type back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+        elif (card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL
+              and card_type_back in CARD_TYPES_DOUBLESIDE_OPTIONAL):
+            message = 'Incorrect card type back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+
         if card_type == 'Campaign':
             spheres = SPHERES_CAMPAIGN
         elif card_type == 'Rules':
             spheres = SPHERES_RULES
         elif card_type == 'Presentation':
             spheres = SPHERES_PRESENTATION
+        elif card_type == 'Ship Objective':
+            spheres = SPHERES_SHIP_OBJECTIVE
+        elif card_type in CARD_TYPES_PLAYER_SPHERE:
+            spheres = SPHERES_PLAYER
         else:
             spheres = SPHERES
 
-        if (card_sphere is not None and card_sphere not in spheres):
+        if card_type in CARD_TYPES_BOON:
+            spheres.add('Boon')
+
+        if card_type in CARD_TYPES_BURDEN:
+            spheres.add('Burden')
+
+        if card_type in CARD_TYPES_NIGHTMARE:
+            spheres.add('Nightmare')
+
+        if (card_sphere is None and
+                (card_type in CARD_TYPES_PLAYER_SPHERE or
+                 card_type == 'Presentation')):
+            message = 'Missing sphere for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+        elif card_sphere is not None and card_sphere not in spheres:
             message = 'Unknown sphere for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
 
-        if (card_sphere_back is not None and card_sphere_back not in spheres):
-            message = 'Unknown sphere back for row #{}{}'.format(i, scratch)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
+        if card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL:
+            if card_type_back == 'Ship Objective':
+                spheres_back = SPHERES_SHIP_OBJECTIVE
+            elif card_type_back in CARD_TYPES_PLAYER_SPHERE:
+                spheres_back = SPHERES_PLAYER
+            else:
+                spheres_back = SPHERES
+
+            if card_type_back in CARD_TYPES_BOON:
+                spheres_back.add('Boon')
+
+            if card_type_back in CARD_TYPES_BURDEN:
+                spheres_back.add('Burden')
+
+            if card_type_back in CARD_TYPES_NIGHTMARE:
+                spheres_back.add('Nightmare')
+
+            if (card_sphere_back is None and
+                    card_type_back in CARD_TYPES_PLAYER_SPHERE):
+                message = 'Missing sphere back for row #{}{}'.format(i, scratch)
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+            elif (card_sphere_back is not None and
+                  card_sphere_back not in spheres_back):
+                message = 'Unknown sphere back for row #{}{}'.format(
+                    i, scratch)
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
 
         if card_victory is not None and card_type in ('Presentation', 'Rules'):
             if len(str(card_victory).split('/')) != 2:
