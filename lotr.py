@@ -5991,6 +5991,12 @@ def generate_genericpng_pdf(conf, set_id, set_name, lang, card_data):  # pylint:
 
     card_width = 2.75 * inch
     card_height = 3.75 * inch
+    mark_length = 0.2 * inch
+
+    top_image = os.path.join(IMAGES_PDF_PATH, 'top_marks.png')
+    bottom_image = os.path.join(IMAGES_PDF_PATH, 'bottom_marks.png')
+    left_image = os.path.join(IMAGES_PDF_PATH, 'left_marks.png')
+    right_image = os.path.join(IMAGES_PDF_PATH, 'right_marks.png')
 
     for page_format in formats:
         pdf_filename = '800dpi.{}.{}.{}.pdf'.format(
@@ -6000,7 +6006,22 @@ def generate_genericpng_pdf(conf, set_id, set_name, lang, card_data):  # pylint:
         width, height = landscape(formats[page_format][0])
         width_margin = (width - 3 * card_width) / 2
         height_margin = (height - 2 * card_height) / 2
-        for page in pages:
+        for num, page in enumerate(pages):
+            if num % 2 == 0:
+                canvas.drawImage(
+                    top_image, width_margin, height_margin - mark_length,
+                    3 * card_width, mark_length, anchor='sw')
+                canvas.drawImage(
+                    bottom_image, width_margin,
+                    height_margin + 2 * card_height, 3 * card_width,
+                    mark_length, anchor='sw')
+                canvas.drawImage(
+                    left_image, width_margin - mark_length, height_margin,
+                    mark_length, 2 * card_height, anchor='sw')
+                canvas.drawImage(
+                    right_image, width_margin + 3 * card_width, height_margin,
+                    mark_length, 2 * card_height, anchor='sw')
+
             for i, card in enumerate(page):
                 if card:
                     width_pos = (
