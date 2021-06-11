@@ -825,7 +825,7 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
     conf['output_languages'] = [lang for lang in conf['outputs']
                                 if conf['outputs'][lang]]
     conf['nobleed_300'] = {}
-    conf['nobleed_800'] = {}
+    conf['nobleed_800'] = {}  # not used at the moment
 
     if not conf['set_ids']:
         conf['set_ids'] = []
@@ -876,10 +876,9 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
 
         conf['nobleed_300'][lang] = ('db' in conf['outputs'][lang]
                                      or 'octgn' in conf['outputs'][lang]
-                                     or 'pdf' in conf['outputs'][lang]
                                      or 'rules_pdf' in conf['outputs'][lang])
 
-        conf['nobleed_800'][lang] = 'genericpng_pdf' in conf['outputs'][lang]
+        conf['nobleed_800'][lang] = False
 
     logging.info('...Reading project configuration (%ss)',
                  round(time.time() - timestamp, 3))
@@ -4187,7 +4186,9 @@ def _collect_custom_images(image_path):
 def _set_outputs(conf, lang, root):
     """ Set required outputs for Strange Eons.
     """
-    if conf['nobleed_300'][lang] or 'drivethrucards' in conf['outputs'][lang]:
+    if (conf['nobleed_300'][lang]
+            or 'drivethrucards' in conf['outputs'][lang]
+            or 'pdf' in conf['outputs'][lang]):
         root.set('png300Bleed', '1')
 
     if ('makeplayingcards' in conf['outputs'][lang]
@@ -4657,6 +4658,8 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
 
 def generate_png800_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
     """ Generate PNG 800 dpi images without bleed margins.
+
+    NOT USED AT THE MOMENT
     """
     logging.info('[%s, %s] Generating PNG 800 dpi images without bleed '
                  'margins...', set_name, lang)
@@ -4962,17 +4965,22 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
     create_folder(temp_path3)
     clear_folder(temp_path3)
 
-    input_path = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED,
-                              '{}.{}'.format(set_id, lang))
     input_cnt = 0
-    for _, _, filenames in os.walk(input_path):
-        for filename in filenames:
-            if filename.endswith('-1.png'):
+    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+        filelist = [f for f in zip_obj.namelist()
+                    if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
+                                                  PNG300BLEED))
+                    and f.split('.')[-1] == 'png'
+                    and f.split('.')[-2] == lang
+                    and f.split('.')[-3] == set_id]
+        for filename in filelist:
+            output_filename = _update_zip_filename(filename)
+            if output_filename.endswith('-1.png'):
                 input_cnt += 1
-                shutil.copyfile(os.path.join(input_path, filename),
-                                os.path.join(temp_path, filename))
-
-        break
+                with zip_obj.open(filename) as zip_file:
+                    with open(os.path.join(temp_path, output_filename),
+                              'wb') as output_file:
+                        shutil.copyfileobj(zip_file, output_file)
 
     cmd = GIMP_COMMAND.format(
         conf['gimp_console_path'],
@@ -5090,17 +5098,22 @@ def generate_png800_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
     create_folder(temp_path3)
     clear_folder(temp_path3)
 
-    input_path = os.path.join(IMAGES_EONS_PATH, PNG800NOBLEED,
-                              '{}.{}'.format(set_id, lang))
     input_cnt = 0
-    for _, _, filenames in os.walk(input_path):
-        for filename in filenames:
-            if filename.endswith('-1.png'):
+    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+        filelist = [f for f in zip_obj.namelist()
+                    if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
+                                                  PNG800BLEED))
+                    and f.split('.')[-1] == 'png'
+                    and f.split('.')[-2] == lang
+                    and f.split('.')[-3] == set_id]
+        for filename in filelist:
+            output_filename = _update_zip_filename(filename)
+            if output_filename.endswith('-1.png'):
                 input_cnt += 1
-                shutil.copyfile(os.path.join(input_path, filename),
-                                os.path.join(temp_path, filename))
-
-        break
+                with zip_obj.open(filename) as zip_file:
+                    with open(os.path.join(temp_path, output_filename),
+                              'wb') as output_file:
+                        shutil.copyfileobj(zip_file, output_file)
 
     cmd = GIMP_COMMAND.format(
         conf['gimp_console_path'],
@@ -5899,12 +5912,12 @@ def generate_pdf(conf, set_id, set_name, lang, card_data):  # pylint: disable=R0
         for num, page in enumerate(pages):
             if num % 2 == 0:
                 canvas.drawImage(
-                    top_image, width_margin, height_margin - mark_length,
-                    3 * card_width, mark_length, anchor='sw')
-                canvas.drawImage(
-                    bottom_image, width_margin,
+                    top_image, width_margin,
                     height_margin + 2 * card_height, 3 * card_width,
                     mark_length, anchor='sw')
+                canvas.drawImage(
+                    bottom_image, width_margin, height_margin - mark_length,
+                    3 * card_width, mark_length, anchor='sw')
                 canvas.drawImage(
                     left_image, width_margin - mark_length, height_margin,
                     mark_length, 2 * card_height, anchor='sw')
@@ -6009,12 +6022,12 @@ def generate_genericpng_pdf(conf, set_id, set_name, lang, card_data):  # pylint:
         for num, page in enumerate(pages):
             if num % 2 == 0:
                 canvas.drawImage(
-                    top_image, width_margin, height_margin - mark_length,
-                    3 * card_width, mark_length, anchor='sw')
-                canvas.drawImage(
-                    bottom_image, width_margin,
+                    top_image, width_margin,
                     height_margin + 2 * card_height, 3 * card_width,
                     mark_length, anchor='sw')
+                canvas.drawImage(
+                    bottom_image, width_margin, height_margin - mark_length,
+                    3 * card_width, mark_length, anchor='sw')
                 canvas.drawImage(
                     left_image, width_margin - mark_length, height_margin,
                     mark_length, 2 * card_height, anchor='sw')
@@ -6982,7 +6995,7 @@ def update_ringsdb(conf, sets):
 def get_last_image_timestamp():
     """ Get timestamp of the last generated image output.
 
-    NOT USED
+    NOT USED AT THE MOMENT
     """
     max_ts = 0
     for root, _, filenames in os.walk(OUTPUT_PATH):

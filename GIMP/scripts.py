@@ -269,8 +269,8 @@ def prepare_db_output(img, drawable, output_folder):
     pdb.gimp_undo_push_group_end(img)
 
 
-def prepare_pdf_front(img, drawable, output_folder):
-    """ Prepare a front image for PDF document.
+def prepare_pdf_front_old(img, drawable, output_folder):
+    """ Prepare a front image for PDF document. [OLD VERSION]
     """
     gimp.progress_init('Prepare a front image for PDF document...')
     pdb.gimp_undo_push_group_start(img)
@@ -294,6 +294,37 @@ def prepare_pdf_front(img, drawable, output_folder):
         _add_margin(img, drawable, margin_size)
 
     clip_size = _get_pdf_clip_size(drawable)
+    if clip_size:
+        _clip(img, drawable, clip_size, rotation and back_side)
+
+    pdb.file_png_save(img, drawable,
+                      os.path.join(output_folder, file_name), file_name,
+                      0, 9, 1, 0, 0, 1, 1)
+    pdb.gimp_undo_push_group_end(img)
+
+
+def prepare_pdf_front(img, drawable, output_folder):
+    """ Prepare a front image for PDF document. [NEW VERSION]
+    """
+    gimp.progress_init('Prepare a front image for PDF document...')
+    pdb.gimp_undo_push_group_start(img)
+
+    try:
+        file_name, back_side = _get_filename_backside(img)
+    except Exception:  # pylint: disable=W0703
+        pdb.gimp_undo_push_group_end(img)
+        return
+
+    if back_side:
+        pdb.gimp_undo_push_group_end(img)
+        return
+
+    rotation = _get_rotation(drawable)
+    clip_size = _get_pdf_clip_size(drawable)
+
+    if rotation:
+        _rotate(drawable, back_side)
+
     if clip_size:
         _clip(img, drawable, clip_size, rotation and back_side)
 
