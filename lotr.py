@@ -291,6 +291,7 @@ TEMP_ROOT_PATH = 'Temp'
 PIPELINE_STARTED_PATH = 'pipeline_STARTED'
 URL_CACHE_PATH = 'urlCache'
 XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
+XML_ZIP_PATH = '{}/XML/'.format(os.path.split(PROJECT_FOLDER)[-1])
 
 LOG_LIMIT = 5000
 URL_TIMEOUT = 15
@@ -4572,6 +4573,24 @@ def get_skip_info(set_id, lang):
             skip_ids.add(card.attrib['id'])
 
     return skip_set, skip_ids
+
+
+def get_actual_sets():
+    """ Get actual sets from the Strange Eons project.
+    """
+    res = set()
+    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+        filelist = [f for f in zip_obj.namelist()
+                    if f.startswith(XML_ZIP_PATH)
+                    and f.split('.')[-1] == 'xml']
+        for filename in filelist:
+            parts = filename.split('/')[-1].split('.')
+            if len(parts) != 3:
+                continue
+
+            res.add((parts[0], parts[1]))
+
+    return res
 
 
 def _run_cmd(cmd):

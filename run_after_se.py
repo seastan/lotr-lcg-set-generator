@@ -177,6 +177,10 @@ def main():  # pylint: disable=R0912,R0915
 
     lotr.extract_data(conf)
     sets = lotr.get_sets(conf)
+    if os.path.exists(lotr.PROJECT_PATH):
+        actual_sets = lotr.get_actual_sets()
+    else:
+        actual_sets = []
 
     pre_tasks = []
     tasks = []
@@ -186,6 +190,11 @@ def main():  # pylint: disable=R0912,R0915
             if skip_set:
                 logging.info('[%s, %s] No changes since the last run,'
                              ' skipping', set_name, lang)
+                continue
+
+            if (set_id, lang) not in actual_sets:
+                logging.error('[%s, %s] Not found in the project file,'
+                              ' skipping', set_name, lang)
                 continue
 
             card_data = lotr.translated_data(set_id, lang)
@@ -239,7 +248,8 @@ def main():  # pylint: disable=R0912,R0915
 
     if 'English' in conf['output_languages']:
         updated_sets = [s for s in sets
-                        if not lotr.get_skip_info(s[0], 'English')[0]]
+                        if (s[0], 'English') in actual_sets
+                        and not lotr.get_skip_info(s[0], 'English')[0]]
     else:
         updated_sets = []
 
