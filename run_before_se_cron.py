@@ -137,10 +137,10 @@ def is_non_ascii(value):
     return not all(ord(c) < 128 for c in value)
 
 
-def create_mail(subject, body=''):
+def create_mail(subject, body='', skip_check=False):
     """ Create mail file.
     """
-    if not check_mail_counter():
+    if not skip_check and not check_mail_counter():
         return
 
     increment_mail_counter()
@@ -199,7 +199,7 @@ def check_mail_counter():
         message = 'Mail quota exceeded: {}/{}'.format(data['value'] + 1,
                                                       MAIL_QUOTA)
         logging.warning(message)
-        create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
+        create_mail(WARNING_SUBJECT_TEMPLATE.format(message), skip_check=True)
         return False
 
     return True

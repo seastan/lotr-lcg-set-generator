@@ -109,10 +109,10 @@ def is_non_ascii(value):
     return not all(ord(c) < 128 for c in value)
 
 
-def create_mail(subject, body=''):
+def create_mail(subject, body='', skip_check=False):
     """ Create mail file.
     """
-    if not check_mail_counter():
+    if not skip_check and not check_mail_counter():
         return
 
     increment_mail_counter()
@@ -171,7 +171,7 @@ def check_mail_counter():
         message = 'Mail quota exceeded: {}/{}'.format(data['value'] + 1,
                                                       MAIL_QUOTA)
         logging.warning(message)
-        create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
+        create_mail(WARNING_SUBJECT_TEMPLATE.format(message), skip_check=True)
         return False
 
     return True
@@ -532,11 +532,11 @@ Attempting to fix it automatically...
 (depending on the error, some steps may be already done)
 1. Open https://www.makeplayingcards.com/design/dn_temporary_designes.aspx and login into ALeP account (if needed)
 2. Find {actual_deck_name} deck in the list, click Save As, type "Corrupted" and click Save
-3. Ater page refresh, click Delete near {actual_deck_name} deck
+3. Ater the page refreshed, click Delete near {actual_deck_name} deck
 4. Find {deck_name} Backup deck in the list, click Save As, type "{deck_name}" and click Save
 5. Find {deck_name} deck in the list again, right click on the checkbox and copy its ID (after "chk_")
 6. Construct a URL https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id=<ID>
-7. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/4960180109813771074 and login into ALeP account (if needed)
+7. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/6592070748291624930 and login into ALeP account (if needed)
 8. Switch to Compose view and update the link to that URL
 """
         create_mail(ERROR_SUBJECT_TEMPLATE.format(message), body)
@@ -545,11 +545,11 @@ Do the following:
 (depending on the error, some steps may be already done)
 1. Open https://www.makeplayingcards.com/design/dn_temporary_designes.aspx and login into ALeP account (if needed)
 2. Find **{actual_deck_name}** deck in the list, click *Save As*, type "Corrupted" and click *Save*
-3. Ater page refresh, click *Delete* near **{actual_deck_name}** deck
+3. Ater the page refreshed, click *Delete* near **{actual_deck_name}** deck
 4. Find **{deck_name} Backup** deck in the list, click *Save As*, type "{deck_name}" and click *Save*
 5. Find **{deck_name}** deck in the list again, right click on the checkbox and copy its ID (after "chk_")
 6. Construct a URL https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id=<ID>
-7. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/4960180109813771074 and login into ALeP account (if needed)
+7. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/6592070748291624930 and login into ALeP account (if needed)
 8. Switch to Compose view and update the link to that URL
 {DISCORD_USERS}"""
         send_discord(discord_message)
@@ -559,14 +559,14 @@ Do the following:
                    'New deck ID: {}'.format(deck_name, new_deck_id))
         logging.info(message)
         body = f"""Do the following:
-1. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/4960180109813771074 and login into ALeP account (if needed)
+1. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/6592070748291624930 and login into ALeP account (if needed)
 2. Switch to Compose view and update the link to:
 https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id={new_deck_id}
 """
         create_mail(ALERT_SUBJECT_TEMPLATE.format(message), body)
         discord_message = f"""Attempt to fix deck **{deck_name}** automatically succeeded!
 Do the following:
-1. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/4960180109813771074 and login into ALeP account (if needed)
+1. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/6592070748291624930 and login into ALeP account (if needed)
 2. Switch to Compose view and update the link to:
 https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id={new_deck_id}
 {DISCORD_USERS}"""
