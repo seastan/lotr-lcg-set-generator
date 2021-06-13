@@ -391,21 +391,37 @@ function run(progress, target, filename, icons) {
 					cardType = card['Type'] + '';
 					cardSphere = card['Sphere'] + '';
 
+					if (cardType == 'Objective Hero') {
+						Console.err.println('\nERROR: ' + cardType + " type is not supported yet.");
+						cardType = 'Objective Ally';
+						card['Type'] = cardType;
+					}
+					else if (cardType == 'Objective Location') {
+						Console.err.println('\nERROR: ' + cardType + " type is not supported yet.");
+						cardType = 'Location';
+						card['Type'] = cardType;
+						card['Threat'] = '-';
+					}
+
 					if ((cardSphere == 'Burden') && (cardType == 'Enemy')) {
 						Console.err.println('\nERROR: ' + cardType + " doesn't support Burden subtype yet.");
-						card['Sphere'] = '';
+						cardSphere = '';
+						card['Sphere'] = cardSphere;
 					}
 					else if ((cardSphere == 'Nightmare') && (['Encounter Side Quest', 'Objective', 'Ship Enemy'].indexOf(cardType) > -1)) {
 						Console.err.println('\nERROR: ' + cardType + " doesn't support Nightmare template yet.");
-						card['Sphere'] = '';
+						cardSphere = '';
+						card['Sphere'] = cardSphere;
 					}
 					else if (cardSphere == 'Upgraded') {
 						Console.err.println('\nERROR: ' + cardSphere + " template is not supported yet.");
-						card['Sphere'] = '';
+						cardSphere = '';
+						card['Sphere'] = cardSphere;
 					}
 					else if (['Nightmare Blue', 'Nightmare Green', 'Nightmare Purple', 'Nightmare Red', 'Nightmare Brown', 'Nightmare Yellow'].indexOf(cardSphere) > -1) {
 						Console.err.println('\nERROR: ' + cardSphere + " template is not supported yet.");
-						card['Sphere'] = cardSphere.replace(/Nightmare /, '');;
+						cardSphere = cardSphere.replace(/Nightmare /, '')
+						card['Sphere'] = cardSphere;
 					}
 
 					keywords = card['Keywords'];
@@ -458,21 +474,37 @@ function run(progress, target, filename, icons) {
 					cardType = card['BType'] + '';
 					cardSphere = card['BSphere'] + '';
 
+					if (cardType == 'Objective Hero') {
+						Console.err.println('\nERROR: ' + cardType + " type is not supported yet.");
+						cardType = 'Objective Ally';
+						card['BType'] = cardType;
+					}
+					else if (cardType == 'Objective Location') {
+						Console.err.println('\nERROR: ' + cardType + " type is not supported yet.");
+						cardType = 'Location';
+						card['BType'] = cardType;
+						card['BThreat'] = '-';
+					}
+
 					if ((cardSphere == 'Burden') && (cardType == 'Enemy')) {
 						Console.err.println('\nERROR: ' + cardType + " doesn't support Burden subtype yet.");
-						card['BSphere'] = '';
+						cardSphere = '';
+						card['BSphere'] = cardSphere;
 					}
 					else if ((cardSphere == 'Nightmare') && (['Encounter Side Quest', 'Objective', 'Ship Enemy'].indexOf(cardType) > -1)) {
 						Console.err.println('\nERROR: ' + cardType + " doesn't support Nightmare template yet.");
-						card['BSphere'] = '';
+						cardSphere = '';
+						card['BSphere'] = cardSphere;
 					}
 					else if (cardSphere == 'Upgraded') {
 						Console.err.println('\nERROR: ' + cardSphere + " template is not supported yet.");
-						card['BSphere'] = '';
+						cardSphere = '';
+						card['BSphere'] = cardSphere;
 					}
 					else if (['Nightmare Blue', 'Nightmare Green', 'Nightmare Purple', 'Nightmare Red', 'Nightmare Brown', 'Nightmare Yellow'].indexOf(cardSphere) > -1) {
 						Console.err.println('\nERROR: ' + cardSphere + " template is not supported yet.");
-						card['BSphere'] = cardSphere.replace(/Nightmare /, '');;
+						cardSphere = cardSphere.replace(/Nightmare /, '');
+						card['BSphere'] = cardSphere;
 					}
 
 					keywords = card['BKeywords'];
@@ -508,11 +540,6 @@ function run(progress, target, filename, icons) {
 						['CollectionNumberCustomOverwrite', 'BPrinted Card Number'],
 						['CollectionInfo', 'Version']
 					];
-				}
-
-				if (['Objective Hero', 'Objective Location'].indexOf(cardType) > -1) {
-					Console.err.println('\nERROR: ' + cardType + " type is not supported yet.");
-					continue;
 				}
 
 				progress.status = cardName;

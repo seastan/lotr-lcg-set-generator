@@ -155,11 +155,11 @@ CARD_TYPES_ENCOUNTER_SET = {'Campaign', 'Enemy', 'Encounter Side Quest',
                             'Objective Location', 'Quest', 'Ship Enemy',
                             'Ship Objective', 'Treachery'}
 CARD_TYPES_NO_ENCOUNTER_SET = {'Ally', 'Attachment', 'Contract', 'Event',
-                               'Hero', 'Player Side Quest', 'Treasure'}
+                               'Hero', 'Player Side Quest'}
 CARD_TYPES_ENCOUNTER_SIZE = {'Enemy', 'Location', 'Objective',
                              'Objective Ally', 'Objective Hero',
                              'Objective Location', 'Ship Enemy',
-                             'Ship Objective', 'Treachery'}
+                             'Ship Objective', 'Treachery', 'Treasure'}
 CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
                         'Objective Hero', 'Objective Location',
                         'Ship Objective', 'Quest'}
@@ -1380,7 +1380,11 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
     set_ids = [s[0] for s in sets]
     all_set_ids = list(SETS.keys())
     deck_rules = set()
-    for row in DATA:  # pylint: disable=R1702
+    card_data = DATA[:]
+    card_data = sorted(card_data, key=lambda row: (row[CARD_SCRATCH] or 0,
+                                                   row[ROW_COLUMN]))
+
+    for row in card_data:  # pylint: disable=R1702
         i = row[ROW_COLUMN]
         set_id = row[CARD_SET]
         card_id = row[CARD_ID]
