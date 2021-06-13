@@ -4,7 +4,8 @@
         "<Deck Name 1>": {
             "content_id": "<Content ID>",
             "backup_id": "<Backup Deck ID>",
-            "deck_id": "<Current Deck ID>"
+            "deck_id": "<Current Deck ID>",
+            "failed_content_ids": []
         }
     }
 }

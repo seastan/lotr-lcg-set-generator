@@ -1482,7 +1482,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
-        elif card_type in CARD_TYPES_THREE_COPIES and card_quantity != 3:
+        elif (card_type in CARD_TYPES_THREE_COPIES and
+              card_quantity not in (1, 3)):
             message = ('Incorrect card quantity for row #{}{}'.format(
                 i, scratch))
             logging.error(message)
