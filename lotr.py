@@ -160,6 +160,11 @@ CARD_TYPES_ENCOUNTER_SIZE = {'Enemy', 'Location', 'Objective',
                              'Objective Ally', 'Objective Hero',
                              'Objective Location', 'Ship Enemy',
                              'Ship Objective', 'Treachery', 'Treasure'}
+CARD_TYPES_TRAITS = {'Ally', 'Enemy', 'Hero', 'Location', 'Objective Ally',
+                     'Objective Hero', 'Objective Location', 'Ship Enemy',
+                     'Ship Objective', 'Treasure'}
+CARD_TYPES_NO_TRAITS = {'Campaign', 'Contract', 'Nightmare', 'Presentation',
+                        'Quest', 'Rules'}
 CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
                         'Objective Hero', 'Objective Location',
                         'Ship Objective', 'Quest'}
@@ -1368,7 +1373,7 @@ def get_sets(conf, sheet_changes=True, scratch_changes=True):
 
 
 def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
-    """ Perform a sanity check of the spreadsheet.
+    """ Perform a sanity check of the spreadsheet and return "healthy" sets.
     """
     logging.info('Performing a sanity check of the spreadsheet...')
     logging.info('')
@@ -1378,8 +1383,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
     card_ids = set()
     card_scratch_ids = set()
     card_set_numbers = set()
-    set_ids = [s[0] for s in sets]
-    all_set_ids = list(SETS.keys())
+    set_ids = {s[0] for s in sets}
+    all_set_ids = set(SETS.keys())
+    broken_set_ids = set()
     deck_rules = set()
     card_data = DATA[:]
     card_data = sorted(card_data, key=lambda row: (row[CARD_SCRATCH] or 0,
@@ -1396,10 +1402,12 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_unique = row[CARD_UNIQUE]
         card_type = row[CARD_TYPE]
         card_sphere = row[CARD_SPHERE]
+        card_traits = row[CARD_TRAITS]
         card_victory = row[CARD_VICTORY]
         card_unique_back = row[BACK_PREFIX + CARD_UNIQUE]
         card_type_back = row[BACK_PREFIX + CARD_TYPE]
         card_sphere_back = row[BACK_PREFIX + CARD_SPHERE]
+        card_traits_back = row[BACK_PREFIX + CARD_TRAITS]
         card_victory_back = row[BACK_PREFIX + CARD_VICTORY]
         card_easy_mode = row[CARD_EASY_MODE]
         card_adventure = row[CARD_ADVENTURE]
@@ -1428,17 +1436,23 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
         elif card_id in card_ids or card_id in card_scratch_ids:
             message = 'Duplicate card ID for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
         elif not re.match(UUID_REGEX, card_id):
             message = 'Incorrect card ID format for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if card_scratch:
             card_scratch_ids.add(card_id)
@@ -1453,12 +1467,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
         elif len(_handle_int_str(card_number)) > 3:
             message = 'Card number is too long for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if set_id is not None and card_number is not None:
             if (set_id, card_number) in card_set_numbers:
@@ -1467,6 +1485,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
             else:
                 card_set_numbers.add((set_id, card_number))
 
@@ -1475,12 +1495,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
         elif not is_positive_int(card_quantity):
             message = ('Incorrect format for card quantity for row '
                        '#{}{}'.format(i, scratch))
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
         elif ((card_type in CARD_TYPES_ONE_COPY or card_sphere == 'Boon') and
               card_quantity != 1):
             message = ('Incorrect card quantity for row #{}{}'.format(
@@ -1488,6 +1512,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
         elif (card_type in CARD_TYPES_THREE_COPIES and
               card_quantity not in (1, 3)):
             message = ('Incorrect card quantity for row #{}{}'.format(
@@ -1495,12 +1521,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if card_name is None:
             message = 'No card name for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if (card_encounter_set is None and
                 card_type in CARD_TYPES_ENCOUNTER_SET):
@@ -1508,6 +1538,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
         elif (card_encounter_set is not None and
               card_type in CARD_TYPES_NO_ENCOUNTER_SET):
             message = 'Redundant encounter set for row #{}{}'.format(
@@ -1515,6 +1547,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if card_unique is not None and card_unique not in ('1', 1):
             message = 'Incorrect format for unique for row #{}{}'.format(
@@ -1522,6 +1556,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if ((card_unique is None and card_type in CARD_TYPES_UNIQUE) or
                 (card_unique in ('1', 1) and
@@ -1531,6 +1567,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if card_unique_back is not None and card_unique_back not in ('1', 1):
             message = 'Incorrect format for unique back for row #{}{}'.format(
@@ -1538,6 +1576,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if ((card_unique_back is None and
              card_type_back in CARD_TYPES_UNIQUE) or
@@ -1548,23 +1588,31 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if card_type is None:
             message = 'No card type for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
         elif card_type not in CARD_TYPES:
             message = 'Unknown card type for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if card_type_back is not None and card_type_back not in CARD_TYPES:
             message = 'Unknown card type back for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
         elif (card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL
               and card_type_back is not None and card_type_back != card_type):
             message = 'Incorrect card type back for row #{}{}'.format(
@@ -1572,6 +1620,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
         elif (card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL
               and card_type_back in CARD_TYPES_DOUBLESIDE_OPTIONAL):
             message = 'Incorrect card type back for row #{}{}'.format(
@@ -1579,6 +1629,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if card_type == 'Campaign':
             spheres = SPHERES_CAMPAIGN
@@ -1609,11 +1661,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
         elif card_sphere is not None and card_sphere not in spheres:
             message = 'Unknown sphere for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL:
             if card_type_back == 'Ship Objective':
@@ -1638,6 +1694,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
             elif (card_sphere_back is not None and
                   card_sphere_back not in spheres_back):
                 message = 'Unknown sphere back for row #{}{}'.format(
@@ -1645,6 +1703,57 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
+
+        if card_traits is None and card_type in CARD_TYPES_TRAITS:
+            message = 'No traits for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_traits is not None and card_type in CARD_TYPES_NO_TRAITS:
+            message = 'Redundant traits for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_traits is not None and not card_traits.endswith('.'):
+            message = 'Missing period in traits for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_traits_back is None and card_type_back in CARD_TYPES_TRAITS:
+            message = 'No traits back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_traits_back is not None and
+              card_type_back in CARD_TYPES_NO_TRAITS):
+            message = 'Redundant traits back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_traits_back is not None and not card_traits_back.endswith('.'):
+            message = 'Missing period in traits back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if card_victory is not None and card_type in ('Presentation', 'Rules'):
             if len(str(card_victory).split('/')) != 2:
@@ -1653,6 +1762,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
             elif not (is_positive_int(str(card_victory).split('/')[0]) and
                       is_positive_int(str(card_victory).split('/')[1])):
                 message = ('Incorrect format for card victory for row '
@@ -1660,6 +1771,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
 
         if (card_victory_back is not None and
                 card_type_back in ('Presentation', 'Rules')):
@@ -1669,6 +1782,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
             elif not (is_positive_int(str(card_victory_back).split('/')[0]) and
                       is_positive_int(str(card_victory_back).split('/')[1])):
                 message = ('Incorrect format for card victory back for row '
@@ -1676,6 +1791,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
 
         if card_easy_mode is not None and not is_positive_int(card_easy_mode):
             message = ('Incorrect format for removed for easy mode for row '
@@ -1683,12 +1800,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
         elif card_easy_mode is not None and card_easy_mode > card_quantity:
             message = ('Removed for easy mode is greater than card quantity '
                        'for row #{}{}'.format(i, scratch))
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         for key, value in row.items():
             if isinstance(value, str) and '[unmatched quot]' in value:
@@ -1697,12 +1818,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
             elif value == '#REF!':
                 message = ('Reference error in {} column for row '
                            '#{}{}'.format(key, i, scratch))
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
 
         if (((card_type == 'Quest' and card_adventure) or
              card_type == 'Nightmare')
@@ -1713,8 +1838,11 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     'Duplicate deck rules for quest {} in row #{}{}'.format(
                         card_adventure or card_name, i, scratch))
                 logging.error(message)
-                if conf['octgn_o8d'] and not card_scratch:
-                    errors.append(message)
+                if conf['octgn_o8d']:
+                    if not card_scratch:
+                        errors.append(message)
+                    else:
+                        broken_set_ids.add(set_id)
             else:
                 deck_rules.add(quest_id)
 
@@ -1742,8 +1870,11 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             'row #{}{}'.format(
                                 key, card_adventure or card_name, i, scratch))
                         logging.error(message)
-                        if conf['octgn_o8d'] and not card_scratch:
-                            errors.append(message)
+                        if conf['octgn_o8d']:
+                            if not card_scratch:
+                                errors.append(message)
+                            else:
+                                broken_set_ids.add(set_id)
 
                         continue
 
@@ -1761,8 +1892,11 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             'in row #{}{}'.format(
                                 key, card_adventure or card_name, i, scratch))
                         logging.error(message)
-                        if conf['octgn_o8d'] and not card_scratch:
-                            errors.append(message)
+                        if conf['octgn_o8d']:
+                            if not card_scratch:
+                                errors.append(message)
+                            else:
+                                broken_set_ids.add(set_id)
 
                 prefix = rules.get(('prefix', 0), [''])[0]
                 if not prefix:
@@ -1770,24 +1904,33 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         'No prefix for deck rules for quest {} in row #{}{}'
                         .format(card_adventure or card_name, i, scratch))
                     logging.error(message)
-                    if conf['octgn_o8d'] and not card_scratch:
-                        errors.append(message)
+                    if conf['octgn_o8d']:
+                        if not card_scratch:
+                            errors.append(message)
+                        else:
+                            broken_set_ids.add(set_id)
                 elif not re.match(DECK_PREFIX_REGEX, prefix + ' '):
                     message = (
                         'Incorrect prefix "{}" for deck rules for quest {} '
                         'in row #{}{}'.format(
                             prefix, card_adventure or card_name, i, scratch))
                     logging.error(message)
-                    if conf['octgn_o8d'] and not card_scratch:
-                        errors.append(message)
+                    if conf['octgn_o8d']:
+                        if not card_scratch:
+                            errors.append(message)
+                        else:
+                            broken_set_ids.add(set_id)
                 elif prefix in prefixes:
                     message = (
                         'Duplicate prefix "{}" for deck rules for quest {} '
                         'in row #{}{}'.format(
                             prefix, card_adventure or card_name, i, scratch))
                     logging.error(message)
-                    if conf['octgn_o8d'] and not card_scratch:
-                        errors.append(message)
+                    if conf['octgn_o8d']:
+                        if not card_scratch:
+                            errors.append(message)
+                        else:
+                            broken_set_ids.add(set_id)
                 else:
                     prefixes.add(prefix)
 
@@ -1839,8 +1982,10 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         raise SanityCheckError('Sanity check failed: {}.'.format(
             '. '.join(errors)))
 
+    sets = [s for s in sets if s[0] not in broken_set_ids]
     logging.info('...Performing a sanity check of the spreadsheet (%ss)',
                  round(time.time() - timestamp, 3))
+    return sets
 
 
 def _has_discord_channel(card):

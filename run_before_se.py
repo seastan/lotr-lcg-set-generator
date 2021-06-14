@@ -53,7 +53,7 @@ def main(conf=None):  # pylint: disable=R0912,R0915
 
     lotr.extract_data(conf, sheet_changes, scratch_changes)
     sets = lotr.get_sets(conf, sheet_changes, scratch_changes)
-    lotr.sanity_check(conf, sets)
+    sets = lotr.sanity_check(conf, sets)
     if sheet_changes:
         lotr.save_data_for_bot(conf)
 
