@@ -46,9 +46,13 @@ bodyRegion['Ship Objective'] = '65,355,283,137';
 bodyRegion['Treachery'] = '65,356,283,135';
 bodyRegion['Treasure'] = '57,347,299,144';  // T.B.D.
 
-bodyRegion['Encounter Side Quest'] = '51,249,461,114';
-bodyRegion['Player Side Quest'] = '51,251,461,114';
-bodyRegion['Quest'] = '51,249,461,114';
+bodyRegion['Encounter Side Quest'] = '51,269,461,94';
+bodyRegion['Player Side Quest'] = '51,271,461,94';
+
+var bodyNoTraitRegion = {};
+bodyNoTraitRegion['Encounter Side Quest'] = '51,249,461,114';
+bodyNoTraitRegion['Player Side Quest'] = '51,251,461,114';
+bodyNoTraitRegion['Quest'] = '51,249,461,114';
 
 var traitRegion = {};
 traitRegion['Ally'] = '57,358,299,20';
@@ -63,6 +67,9 @@ traitRegion['Ship Enemy'] = '57,357,299,20';
 traitRegion['Ship Objective'] = '65,335,283,20';
 traitRegion['Treachery'] = '65,336,283,20';
 traitRegion['Treasure'] = '85,327,243,20';  // T.B.D.
+
+traitRegion['Encounter Side Quest'] = '51,249,461,20';
+traitRegion['Player Side Quest'] = '51,251,461,20';
 
 var nameRegion = {};
 nameRegion['Ally'] = '100,329,213,25';
@@ -390,6 +397,7 @@ function run(progress, target, filename, icons) {
 					cardName = card['Name'];
 					cardType = card['Type'] + '';
 					cardSphere = card['Sphere'] + '';
+					cardTrait = card['Traits'];
 
 					if (cardType == 'Objective Hero') {
 						Console.err.println('\nERROR: ' + cardType + " type is not supported yet.");
@@ -473,6 +481,7 @@ function run(progress, target, filename, icons) {
 					cardName = card['BName'];
 					cardType = card['BType'] + '';
 					cardSphere = card['BSphere'] + '';
+					cardTrait = card['BTraits'];
 
 					if (cardType == 'Objective Hero') {
 						Console.err.println('\nERROR: ' + cardType + " type is not supported yet.");
@@ -758,8 +767,20 @@ function run(progress, target, filename, icons) {
 					s.set('EncounterSet4-portrait-clip-region', '378,213,20,20');
 					s.set('EncounterSet5-portrait-clip-region', '354,213,20,20');
 
-					if (cardType in bodyRegion) {
-						s.set('Body-region', bodyRegion[cardType]);
+					if (cardTrait) {
+						s.set('TraitOut', 'true');
+						if (cardType in bodyRegion) {
+							s.set('TraitOut-Body-region', bodyRegion[cardType]);
+						}
+
+						if (cardType in traitRegion) {
+							s.set('TraitOut-Trait-region', traitRegion[cardType]);
+						}
+					}
+					else {
+						if (cardType in bodyNoTraitRegion) {
+							s.set('Body-region', bodyNoTraitRegion[cardType]);
+						}
 					}
 				}
 				else {
