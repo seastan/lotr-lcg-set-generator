@@ -5837,7 +5837,9 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
     elif lang == 'Spanish':
         cards = {}
         for row in card_data:
-            if row[CARD_SET] == set_id and _needed_for_spanishdb(row):
+            if (row[CARD_SET] == set_id and
+                    (_needed_for_spanishdb(row) or
+                     row[CARD_TYPE] == 'Presentation')):
                 card_number = str(_handle_int(row[CARD_NUMBER])).zfill(3)
                 cards[card_number] = _spanishdb_code(row)
 
