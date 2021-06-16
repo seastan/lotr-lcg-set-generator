@@ -131,10 +131,10 @@ def generate_genericpng(conf, set_id, set_name, lang, skip_ids, card_data):  # p
 
 
 @retry()
-def generate_tts(conf, set_id, set_name, lang, card_data):
+def generate_tts(set_name, lang, card_dict):
     """ Generate TTS outputs.
     """
-    lotr.generate_tts(conf, set_id, set_name, lang, card_data)
+    lotr.generate_tts(set_name, lang, card_dict)
 
 
 def run(args):
@@ -206,6 +206,7 @@ def main():  # pylint: disable=R0912,R0915
                 continue
 
             card_data = lotr.translated_data(set_id, lang)
+            card_dict = lotr.full_card_dict()
 
             if conf['nobleed_300'][lang]:
                 pre_tasks.append([generate_png300_nobleed, conf, set_id,
@@ -252,8 +253,7 @@ def main():  # pylint: disable=R0912,R0915
                               lang, skip_ids, card_data])
 
             if 'tts' in conf['outputs'][lang]:
-                post_tasks.append([generate_tts, conf, set_id, set_name,
-                                   lang, card_data])
+                post_tasks.append([generate_tts, set_name, lang, card_dict])
 
     execute_tasks(conf, pre_tasks)
     execute_tasks(conf, tasks)

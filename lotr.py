@@ -140,6 +140,7 @@ CARD_TYPES = {'Ally', 'Attachment', 'Campaign', 'Contract', 'Enemy',
               'Objective Location', 'Player Side Quest', 'Presentation',
               'Quest', 'Rules', 'Ship Enemy', 'Ship Objective', 'Treachery',
               'Treasure'}
+CARD_TYPES_LANDSCAPE = {'Encounter Side Quest', 'Player Side Quest', 'Quest'}
 CARD_TYPES_DOUBLESIDE_MANDATORY = {'Campaign', 'Nightmare', 'Presentation',
                                    'Quest', 'Rules'}
 CARD_TYPES_DOUBLESIDE_OPTIONAL = {'Campaign', 'Contract', 'Nightmare',
@@ -252,11 +253,11 @@ CONFIGURATION_PATH = 'configuration.yaml'
 DISCORD_PATH = 'Discord'
 DISCORD_CARD_DATA_PATH = os.path.join(DISCORD_PATH, 'card_data.json')
 DOWNLOAD_PATH = 'Download'
-IMAGES_PDF_PATH = 'imagesPDF'
 IMAGES_BACK_PATH = 'imagesBack'
 IMAGES_CUSTOM_PATH = os.path.join(PROJECT_FOLDER, 'imagesCustom')
 IMAGES_ICONS_PATH = os.path.join(PROJECT_FOLDER, 'imagesIcons')
 IMAGES_EONS_PATH = 'imagesEons'
+IMAGES_OTHER_PATH = 'imagesOther'
 IMAGES_RAW_PATH = os.path.join(PROJECT_FOLDER, 'imagesRaw')
 IMAGES_TTS_PATH = 'imagesTTS'
 IMAGES_ZIP_PATH = '{}/Export/'.format(os.path.split(PROJECT_FOLDER)[-1])
@@ -298,6 +299,9 @@ PIPELINE_STARTED_PATH = 'pipeline_STARTED'
 URL_CACHE_PATH = 'urlCache'
 XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
 XML_ZIP_PATH = '{}/XML/'.format(os.path.split(PROJECT_FOLDER)[-1])
+
+TTS_COLUMNS = 10
+TTS_SHEET_SIZE = 69
 
 LOG_LIMIT = 5000
 URL_TIMEOUT = 15
@@ -5681,20 +5685,93 @@ def _make_low_quality(conf, input_path):
                                .format(output_cnt, input_cnt))
 
 
-def _generate_tts_sheet(deck_path, output_path, image_path, card_data):
+def full_card_dict():
+    """ Get card dictionary with both spreadsheet and external data.
+    """
+    card_dict = {}
+    for _, _, filenames in os.walk(URL_CACHE_PATH):
+        for filename in filenames:
+            if filename.endswith('.cache'):
+                data = load_external_xml(re.sub(r'\.cache$', '', filename))
+                card_dict.update({r[CARD_ID]:r for r in data})
+
+        break
+
+    card_dict.update({r[CARD_ID]:r for r in DATA})
+    return card_dict
+
+
+def _generate_tts_sheet(deck_path, output_path, image_path, card_dict):  # pylint: disable=R0912,R0914
     """ Generate TTS sheet forthe deck.
     """
     deck_name = re.sub(r'\.o8d$', '', os.path.split(deck_path)[-1])
-    logging.info(deck_name)
+    is_player = deck_name.startswith('Player-')
 
     tree = ET.parse(deck_path)
     root = tree.getroot()
 
-#    for card in root[0]:
-#        card_type = _find_properties(card, 'Type')
+    cards = {'portrait': [],
+             'landscape': []}
+    for section in root:
+        for card_element in section:
+            card = {}
+            card['id'] = card_element.attrib.get('id')
+            if card['id'] not in card_dict:
+                logging.error('Card %s not found in the card list (deck "%s")',
+                              card['id'], deck_name)
+                continue
+
+            card['front'] = os.path.join(
+                image_path, '{}.png'.format(card['id']))
+            if not os.path.exists(card['front']):
+                logging.error(
+                    'Card %s not found in the image cache (deck "%s")',
+                    card['id'], deck_name)
+                continue
+
+            back_path = os.path.join(image_path, '{}-2.png'.format(card['id']))
+            if os.path.exists(back_path):
+                card['back'] = back_path
+            elif card_dict[card['id']][CARD_TYPE] in CARD_TYPES_PLAYER:
+                card['back'] = os.path.join(
+                    image_path, 'playerBackOfficialTTS.png')
+            else:
+                card['back'] = os.path.join(
+                    image_path, 'encounterBackOfficialTTS.png')
+
+            quantity = card_element.attrib.get('qty') if not is_player else 1
+            if card_dict[card['id']][CARD_TYPE] in CARD_TYPES_LANDSCAPE:
+                for _ in range(int(quantity)):
+                    cards['landscape'].append(card)
+            else:
+                for _ in range(int(quantity)):
+                    cards['portrait'].append(card)
+
+    for orientation in ('portrait', 'landscape'):
+        chunks = [
+            cards[orientation][i * TTS_SHEET_SIZE:(i + 1) * TTS_SHEET_SIZE]
+            for i in range(
+                (len(cards[orientation]) + TTS_SHEET_SIZE - 1) //
+                TTS_SHEET_SIZE)]
+        for i, chunk in enumerate(chunks):
+            for side in ('front', 'back'):
+                num = len(chunk)
+                rows = math.ceil(num / TTS_COLUMNS)
+                name = '{}_{}_{}_{}_{}_{}_{}_{}'.format(
+                    deck_name, orientation, side, TTS_COLUMNS, rows, num,
+                    i + 1, len(chunks))
+                shutil.copyfile(
+                    os.path.join(IMAGES_OTHER_PATH, 'tts_template.jpg'),
+                    os.path.join(output_path, '{}.jpg'.format(name)))
+                with open(os.path.join(output_path, '{}.json'.format(name)),
+                          'w') as fobj:
+                    res = json.dumps(
+                        [{'id': c['id'], 'path': c[side]} for c in chunk],
+                        indent=4)
+                    fobj.write(res)
 
 
-def generate_tts(conf, set_id, set_name, lang, card_data):
+def generate_tts(set_name, lang, card_dict):
     """ Generate TTS outputs.
     """
     logging.info('[%s, %s] Generating TTS outputs...', set_name, lang)
@@ -5702,14 +5779,18 @@ def generate_tts(conf, set_id, set_name, lang, card_data):
 
     output_path = os.path.join(OUTPUT_TTS_PATH, '{}.{}'.format(
         escape_filename(set_name), lang))
+    create_folder(output_path)
+    clear_folder(output_path)
+
     decks_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
                               escape_filename(set_name))
     image_path = os.path.join(IMAGES_TTS_PATH, lang)
 
+
     for _, _, filenames in os.walk(decks_path):
         for filename in filenames:
-            _generate_tts_sheet(os.path.join(decks_path, filename), output_path,
-                                image_path, card_data)
+            _generate_tts_sheet(os.path.join(decks_path, filename),
+                                output_path, image_path, card_dict)
 
         break
 
@@ -5765,6 +5846,13 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                     os.path.join(tts_path, filename.split('----')[1]))
 
             break
+
+        shutil.copyfile(
+            os.path.join(IMAGES_BACK_PATH, 'encounterBackOfficialTTS.png'),
+            os.path.join(tts_path, 'encounterBackOfficialTTS.png'))
+        shutil.copyfile(
+            os.path.join(IMAGES_BACK_PATH, 'playerBackOfficialTTS.png'),
+            os.path.join(tts_path, 'playerBackOfficialTTS.png'))
 
     empty_rules_backs = {
         row[CARD_ID] for row in card_data
@@ -6116,10 +6204,10 @@ def generate_pdf(conf, set_id, set_name, lang, card_data):  # pylint: disable=R0
     card_height = 3.75 * inch
     mark_length = 0.2 * inch
 
-    top_image = os.path.join(IMAGES_PDF_PATH, 'top_marks.png')
-    bottom_image = os.path.join(IMAGES_PDF_PATH, 'bottom_marks.png')
-    left_image = os.path.join(IMAGES_PDF_PATH, 'left_marks.png')
-    right_image = os.path.join(IMAGES_PDF_PATH, 'right_marks.png')
+    top_image = os.path.join(IMAGES_OTHER_PATH, 'top_marks.png')
+    bottom_image = os.path.join(IMAGES_OTHER_PATH, 'bottom_marks.png')
+    left_image = os.path.join(IMAGES_OTHER_PATH, 'left_marks.png')
+    right_image = os.path.join(IMAGES_OTHER_PATH, 'right_marks.png')
 
     for page_format in formats:
         canvas = Canvas(
@@ -6226,10 +6314,10 @@ def generate_genericpng_pdf(conf, set_id, set_name, lang, card_data):  # pylint:
     card_height = 3.75 * inch
     mark_length = 0.2 * inch
 
-    top_image = os.path.join(IMAGES_PDF_PATH, 'top_marks.png')
-    bottom_image = os.path.join(IMAGES_PDF_PATH, 'bottom_marks.png')
-    left_image = os.path.join(IMAGES_PDF_PATH, 'left_marks.png')
-    right_image = os.path.join(IMAGES_PDF_PATH, 'right_marks.png')
+    top_image = os.path.join(IMAGES_OTHER_PATH, 'top_marks.png')
+    bottom_image = os.path.join(IMAGES_OTHER_PATH, 'bottom_marks.png')
+    left_image = os.path.join(IMAGES_OTHER_PATH, 'left_marks.png')
+    right_image = os.path.join(IMAGES_OTHER_PATH, 'right_marks.png')
 
     for page_format in formats:
         pdf_filename = '800dpi.{}.{}.{}.pdf'.format(
