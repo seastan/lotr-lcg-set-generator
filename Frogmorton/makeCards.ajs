@@ -618,7 +618,6 @@ function run(progress, target, filename, icons) {
 				s.set('Adventure-pointsize', 5.25);
 				s.set('Option-pointsize', 5.25);
 				s.set('EncounterSetNumber-pointsize', 4);
-				s.set('Trait-format', '<center><width regular><tracking -0.005><family "Times New Roman"><size 8.25><i><b>');
 				s.set('Flavour-format', '<left></size></family><family "Times New Roman"><size 6.25><i>');
 				s.set('FlavourBack-format', '<left></size></family><family "Times New Roman"><size 6.25><i>');
 				s.set('Flavour-formatEnd', '</i></size></family>');
@@ -755,6 +754,7 @@ function run(progress, target, filename, icons) {
 					s.set('Body-pointsize', 7);
 					s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size 7>');
 					s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size 7>');
+					s.set('Trait-format', '<center><width regular><tracking -0.005><family "Times New Roman"><size 7.75><i><b>');
 					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.075 0.075>');
 					s.set('Body-lineTightness', 0.2);
 					s.set('Story-format', '<left><family "Times New Roman"><size 7><i>');
@@ -788,6 +788,7 @@ function run(progress, target, filename, icons) {
 					s.set('Body-pointsize', 7.5);
 					s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
 					s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
+					s.set('Trait-format', '<center><width regular><tracking -0.005><family "Times New Roman"><size 8.25><i><b>');
 					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.075 0.075>');
 					s.set('Body-lineTightness', 0.2);
 					s.set('TraitOut', 'true');
