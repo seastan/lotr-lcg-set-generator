@@ -258,6 +258,7 @@ IMAGES_CUSTOM_PATH = os.path.join(PROJECT_FOLDER, 'imagesCustom')
 IMAGES_ICONS_PATH = os.path.join(PROJECT_FOLDER, 'imagesIcons')
 IMAGES_EONS_PATH = 'imagesEons'
 IMAGES_RAW_PATH = os.path.join(PROJECT_FOLDER, 'imagesRaw')
+IMAGES_TTS_PATH = 'imagesTTS'
 IMAGES_ZIP_PATH = '{}/Export/'.format(os.path.split(PROJECT_FOLDER)[-1])
 MAKECARDS_FINISHED_PATH = 'makeCards_FINISHED'
 OCTGN_ZIP_PATH = 'a21af4e8-be4b-4cda-a6b6-534f9717391f/Sets'
@@ -5680,6 +5681,42 @@ def _make_low_quality(conf, input_path):
                                .format(output_cnt, input_cnt))
 
 
+def _generate_tts_sheet(deck_path, output_path, image_path, card_data):
+    """ Generate TTS sheet forthe deck.
+    """
+    deck_name = re.sub(r'\.o8d$', '', os.path.split(deck_path)[-1])
+    logging.info(deck_name)
+
+    tree = ET.parse(deck_path)
+    root = tree.getroot()
+
+#    for card in root[0]:
+#        card_type = _find_properties(card, 'Type')
+
+
+def generate_tts(conf, set_id, set_name, lang, card_data):
+    """ Generate TTS outputs.
+    """
+    logging.info('[%s, %s] Generating TTS outputs...', set_name, lang)
+    timestamp = time.time()
+
+    output_path = os.path.join(OUTPUT_TTS_PATH, '{}.{}'.format(
+        escape_filename(set_name), lang))
+    decks_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
+                              escape_filename(set_name))
+    image_path = os.path.join(IMAGES_TTS_PATH, lang)
+
+    for _, _, filenames in os.walk(decks_path):
+        for filename in filenames:
+            _generate_tts_sheet(os.path.join(decks_path, filename), output_path,
+                                image_path, card_data)
+
+        break
+
+    logging.info('[%s, %s] ...Generating TTS outputs (%ss)', set_name, lang,
+                 round(time.time() - timestamp, 3))
+
+
 def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R0912,R0914,R0915
     """ Generate DB, Preview and RingsDB image outputs.
     """
@@ -5717,6 +5754,17 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                                 os.path.join(output_path, output_filename))
 
         break
+
+    if 'tts' in conf['outputs'][lang] and known_filenames:
+        tts_path = os.path.join(IMAGES_TTS_PATH, lang)
+        create_folder(tts_path)
+        for _, _, filenames in os.walk(output_path):
+            for filename in filenames:
+                shutil.copyfile(
+                    os.path.join(output_path, filename),
+                    os.path.join(tts_path, filename.split('----')[1]))
+
+            break
 
     empty_rules_backs = {
         row[CARD_ID] for row in card_data

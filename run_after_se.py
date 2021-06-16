@@ -130,6 +130,13 @@ def generate_genericpng(conf, set_id, set_name, lang, skip_ids, card_data):  # p
     lotr.generate_genericpng(conf, set_id, set_name, lang, card_data)
 
 
+@retry()
+def generate_tts(conf, set_id, set_name, lang, card_data):
+    """ Generate TTS outputs.
+    """
+    lotr.generate_tts(conf, set_id, set_name, lang, card_data)
+
+
 def run(args):
     """ Run the function.
     """
@@ -184,6 +191,7 @@ def main():  # pylint: disable=R0912,R0915
 
     pre_tasks = []
     tasks = []
+    post_tasks = []
     for set_id, set_name in sets:
         for lang in conf['output_languages']:
             skip_set, skip_ids = lotr.get_skip_info(set_id, lang)
@@ -243,8 +251,13 @@ def main():  # pylint: disable=R0912,R0915
                 tasks.append([generate_genericpng, conf, set_id, set_name,
                               lang, skip_ids, card_data])
 
+            if 'tts' in conf['outputs'][lang]:
+                post_tasks.append([generate_tts, conf, set_id, set_name,
+                                   lang, card_data])
+
     execute_tasks(conf, pre_tasks)
     execute_tasks(conf, tasks)
+    execute_tasks(conf, post_tasks)
 
     if 'English' in conf['output_languages']:
         updated_sets = [s for s in sets
