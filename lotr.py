@@ -7114,7 +7114,7 @@ def copy_db_outputs(conf, sets):
 
             break
 
-        logging.info('Uploaded DB outputs for %s', set_name)
+        logging.info('Copied DB outputs for %s', set_name)
 
     logging.info('...Copying DB outputs to the destination folder (%ss)',
                  round(time.time() - timestamp, 3))
@@ -7159,10 +7159,37 @@ def copy_octgn_image_outputs(conf, sets):
 
             break
 
-        logging.info('Uploaded OCTGN image outputs for %s', set_name)
+        logging.info('Copied OCTGN image outputs for %s', set_name)
 
     logging.info('...Copying OCTGN image outputs to the destination folder '
                  '(%ss)', round(time.time() - timestamp, 3))
+
+
+def copy_tts_outputs(conf, sets):
+    """ Copy TTS outputs to the destination folder.
+    """
+    logging.info('Copying TTS outputs to the destination folder...')
+    timestamp = time.time()
+
+    for _, set_name in sets:
+        output_path = os.path.join(OUTPUT_TTS_PATH, '{}.English'.format(
+            escape_filename(set_name)))
+        destination_path = os.path.join(conf['tts_destination_path'],
+                                        '{}.English'.format(
+                                            escape_filename(set_name)))
+        create_folder(destination_path)
+        clear_folder(destination_path)
+        for _, _, filenames in os.walk(output_path):
+            for filename in filenames:
+                shutil.copyfile(os.path.join(output_path, filename),
+                                os.path.join(destination_path, filename))
+
+            break
+
+        logging.info('Copied TTS outputs for %s', set_name)
+
+    logging.info('...Copying TTS outputs to the destination folder (%ss)',
+                 round(time.time() - timestamp, 3))
 
 
 def _get_ssh_client(conf):

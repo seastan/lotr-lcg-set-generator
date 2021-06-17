@@ -279,6 +279,12 @@ def main():  # pylint: disable=R0912,R0915
             updated_sets):
         lotr.copy_octgn_image_outputs(conf, updated_sets)
 
+    if (conf['tts_destination_path'] and
+            'English' in conf['output_languages'] and
+            'tts' in conf['outputs']['English'] and
+            updated_sets):
+        lotr.copy_tts_outputs(conf, updated_sets)
+
     if (conf['upload_dragncards'] and
             conf['dragncards_hostname'] and
             conf['dragncards_id_rsa_path']):
