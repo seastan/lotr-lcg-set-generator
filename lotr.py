@@ -5701,8 +5701,8 @@ def full_card_dict():
     return card_dict
 
 
-def _generate_tts_sheet(deck_path, output_path, image_path, card_dict):  # pylint: disable=R0912,R0914
-    """ Generate TTS sheet forthe deck.
+def _generate_tts_sheets(deck_path, output_path, image_path, card_dict):  # pylint: disable=R0912,R0914
+    """ Generate TTS sheets for the deck.
     """
     deck_name = re.sub(r'\.o8d$', '', os.path.split(deck_path)[-1])
     is_player = deck_name.startswith('Player-')
@@ -5747,6 +5747,7 @@ def _generate_tts_sheet(deck_path, output_path, image_path, card_dict):  # pylin
                 for _ in range(int(quantity)):
                     cards['portrait'].append(card)
 
+    cnt = 0
     for orientation in ('portrait', 'landscape'):
         chunks = [
             cards[orientation][i * TTS_SHEET_SIZE:(i + 1) * TTS_SHEET_SIZE]
@@ -5760,6 +5761,7 @@ def _generate_tts_sheet(deck_path, output_path, image_path, card_dict):  # pylin
                 name = '{}_{}_{}_{}_{}_{}_{}_{}'.format(
                     deck_name, orientation, side, TTS_COLUMNS, rows, num,
                     i + 1, len(chunks))
+                cnt += 1
                 shutil.copyfile(
                     os.path.join(IMAGES_OTHER_PATH, 'tts_template.jpg'),
                     os.path.join(output_path, '{}.jpg'.format(name)))
@@ -5770,8 +5772,10 @@ def _generate_tts_sheet(deck_path, output_path, image_path, card_dict):  # pylin
                         indent=4)
                     fobj.write(res)
 
+    return cnt
 
-def generate_tts(set_name, lang, card_dict):
+
+def generate_tts(conf, set_id, set_name, lang, card_dict):  # pylint: disable=R0914
     """ Generate TTS outputs.
     """
     logging.info('[%s, %s] Generating TTS outputs...', set_name, lang)
@@ -5785,14 +5789,44 @@ def generate_tts(set_name, lang, card_dict):
     decks_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
                               escape_filename(set_name))
     image_path = os.path.join(IMAGES_TTS_PATH, lang)
+    temp_path = os.path.join(TEMP_ROOT_PATH,
+                             'generate_tts.{}.{}'.format(set_id, lang))
+    create_folder(temp_path)
+    clear_folder(temp_path)
 
-
+    input_cnt = 0
     for _, _, filenames in os.walk(decks_path):
         for filename in filenames:
-            _generate_tts_sheet(os.path.join(decks_path, filename),
-                                output_path, image_path, card_dict)
+            cnt = _generate_tts_sheets(os.path.join(decks_path, filename),
+                                       temp_path, image_path, card_dict)
+            input_cnt += cnt
 
         break
+
+    cmd = GIMP_COMMAND.format(
+        conf['gimp_console_path'],
+        'python-prepare-tts-folder',
+        temp_path.replace('\\', '\\\\'),
+        output_path.replace('\\', '\\\\'))
+    res = _run_cmd(cmd)
+    logging.info('[%s, %s] %s', set_name, lang, res)
+
+    output_cnt = 0
+    for _, _, filenames in os.walk(output_path):
+        for filename in filenames:
+            output_cnt += 1
+            if os.path.getsize(os.path.join(output_path, filename)
+                               ) < JPG_300_MIN_SIZE:
+                raise GIMPError('GIMP failed for {}'.format(
+                    os.path.join(output_path, filename)))
+
+        break
+
+    if output_cnt != input_cnt:
+        raise GIMPError('Wrong number of output files: {} instead of {}'
+                        .format(output_cnt, input_cnt))
+
+    delete_folder(temp_path)
 
     logging.info('[%s, %s] ...Generating TTS outputs (%ss)', set_name, lang,
                  round(time.time() - timestamp, 3))

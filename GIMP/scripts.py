@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 """ Custom GIMP plugin(s).
 """
+import json
 import math
 import os
+import re
+
 from gimpfu import (gimp, pdb, register, main, PF_IMAGE, PF_DRAWABLE,
                     PF_DIRNAME, ROTATE_90, ROTATE_270)
 
@@ -491,6 +494,67 @@ def prepare_generic_png(img, drawable, output_folder):
     pdb.gimp_undo_push_group_end(img)
 
 
+def prepare_tts(img, _, output_folder):  # pylint: disable=R0914
+    """ Prepare a TTS sheet image.
+    """
+    gimp.progress_init('Prepare a TTS sheet image...')
+    pdb.gimp_undo_push_group_start(img)
+
+    try:
+        file_name, _ = _get_filename_backside(img, 'jpg')
+    except Exception:  # pylint: disable=W0703
+        pdb.gimp_undo_push_group_end(img)
+        return
+
+    parts = file_name.split('_')
+    num = int(parts[-3])
+    rows = int(parts[-4])
+    columns = int(parts[-5])
+    new_width = columns * 750
+    new_height = rows * 1050
+    pdb.gimp_image_scale(img, new_width, new_height)
+
+    json_path = re.sub(r'\.jpg$', '.json', pdb.gimp_image_get_filename(img))
+    try:
+        with open(json_path, 'r') as fobj:
+            cards = json.load(fobj)
+    except Exception:  # pylint: disable=W0703
+        pdb.gimp_undo_push_group_end(img)
+        return
+
+    cards = [c['path'] for c in cards]
+    if len(cards) != num:
+        pdb.gimp_undo_push_group_end(img)
+        return
+
+    card_rows = [cards[i * columns:(i + 1) * columns]
+                 for i in range((len(cards) + columns - 1) // columns)]
+    if len(card_rows) != rows:
+        pdb.gimp_undo_push_group_end(img)
+        return
+
+    for i, card_row in enumerate(card_rows):
+        for j, card_path in enumerate(card_row):
+            if not os.path.exists(card_path):
+                pdb.gimp_undo_push_group_end(img)
+                return
+
+            card_layer = pdb.gimp_file_load_layer(img, card_path)
+            pdb.gimp_image_insert_layer(img, card_layer, None, -1)
+            rotation = _get_rotation(card_layer)
+            if rotation:
+                back_side = card_path.endswith('-2.png')
+                _rotate(card_layer, back_side)
+
+            pdb.gimp_layer_set_offsets(card_layer, j * 750, i * 1050)
+            pdb.gimp_image_merge_down(img, card_layer, 1)
+
+    pdb.file_jpeg_save(img, img.layers[0],
+                       os.path.join(output_folder, file_name), file_name,
+                       1, 0, 1, 0, '', 2, 1, 0, 0)
+    pdb.gimp_undo_push_group_end(img)
+
+
 def cut_bleed_margins_folder(input_folder, output_folder):
     """ Cut bleed margins from a folder of images.
     """
@@ -561,6 +625,14 @@ def prepare_generic_png_folder(input_folder, output_folder):
     gimp.progress_init(
         'Prepare a folder of generic PNG images...')
     _iterate_folder(input_folder, output_folder, prepare_generic_png)
+
+
+def prepare_tts_folder(input_folder, output_folder):
+    """ Prepare a folder of TTS sheet images.
+    """
+    gimp.progress_init(
+        'Prepare a folder of TTS sheet images...')
+    _iterate_folder(input_folder, output_folder, prepare_tts)
 
 
 register(
@@ -876,6 +948,41 @@ register(
     ],
     [],
     prepare_generic_png_folder,
+    menu='<Image>/Filters')
+
+register(
+    'python_prepare_tts',
+    'Prepare a TTS sheet image',
+    'Combine individual images into a TTS sheet.',
+    'A.R.',
+    'A.R.',
+    '2020',
+    'Prepare TTS',
+    '*',
+    [
+        (PF_IMAGE, 'image', 'Input image', None),
+        (PF_DRAWABLE, 'drawable', 'Input drawable', None),
+        (PF_DIRNAME, 'output_folder', 'Output folder', None)
+    ],
+    [],
+    prepare_tts,
+    menu='<Image>/Filters')
+
+register(
+    'python_prepare_tts_folder',
+    'Prepare a folder of TTS sheet images',
+    'Combine individual images into TTS sheets.',
+    'A.R.',
+    'A.R.',
+    '2020',
+    'Prepare TTS Folder',
+    '*',
+    [
+        (PF_DIRNAME, 'input_folder', 'Input folder', None),
+        (PF_DIRNAME, 'output_folder', 'Output folder', None)
+    ],
+    [],
+    prepare_tts_folder,
     menu='<Image>/Filters')
 
 
