@@ -166,6 +166,8 @@ CARD_TYPES_TRAITS = {'Ally', 'Enemy', 'Hero', 'Location', 'Objective Ally',
                      'Ship Objective', 'Treasure'}
 CARD_TYPES_NO_TRAITS = {'Campaign', 'Contract', 'Nightmare', 'Presentation',
                         'Quest', 'Rules'}
+CARD_TYPES_NO_KEYWORDS = {'Campaign', 'Contract', 'Nightmare', 'Presentation',
+                          'Rules'}
 CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
                         'Objective Hero', 'Objective Location',
                         'Ship Objective', 'Quest'}
@@ -1408,11 +1410,13 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_type = row[CARD_TYPE]
         card_sphere = row[CARD_SPHERE]
         card_traits = row[CARD_TRAITS]
+        card_keywords = row[CARD_KEYWORDS]
         card_victory = row[CARD_VICTORY]
         card_unique_back = row[BACK_PREFIX + CARD_UNIQUE]
         card_type_back = row[BACK_PREFIX + CARD_TYPE]
         card_sphere_back = row[BACK_PREFIX + CARD_SPHERE]
         card_traits_back = row[BACK_PREFIX + CARD_TRAITS]
+        card_keywords_back = row[BACK_PREFIX + CARD_KEYWORDS]
         card_victory_back = row[BACK_PREFIX + CARD_VICTORY]
         card_easy_mode = row[CARD_EASY_MODE]
         card_adventure = row[CARD_ADVENTURE]
@@ -1753,6 +1757,45 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         if card_traits_back is not None and not card_traits_back.endswith('.'):
             message = 'Missing period in traits back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_keywords is not None and card_type in CARD_TYPES_NO_KEYWORDS:
+            message = 'Redundant keywords for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_keywords is not None and not
+                (card_keywords.endswith('.') or
+                 card_keywords.endswith('.[inline]'))):
+            message = 'Missing period in keywords for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_keywords_back is not None and
+                card_type_back in CARD_TYPES_NO_KEYWORDS):
+            message = 'Redundant keywords back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_keywords_back is not None and not
+                (card_keywords_back.endswith('.') or
+                 card_keywords_back.endswith('.[inline]'))):
+            message = 'Missing period in keywords back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
