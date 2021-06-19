@@ -543,8 +543,7 @@ def prepare_tts(img, _, output_folder):  # pylint: disable=R0914
             pdb.gimp_image_insert_layer(img, card_layer, None, -1)
             rotation = _get_rotation(card_layer)
             if rotation:
-                back_side = card_path.endswith('-2.png')
-                _rotate(card_layer, back_side)
+                _rotate(card_layer, True)
 
             pdb.gimp_layer_set_offsets(card_layer, j * 750, i * 1050)
             pdb.gimp_image_merge_down(img, card_layer, 1)

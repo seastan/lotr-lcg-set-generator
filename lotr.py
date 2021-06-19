@@ -579,21 +579,24 @@ def _update_card_text(text, lang='English', skip_rules=False,  # pylint: disable
                       r'| de Misi\u00f3n| de Viaje| de Encuentro| de Combate'
                       r'| de Recuperaci\u00f3n)?( de Valor)?:',
                       '[b]\\1\\2\\3[/b]:', text)
-        text = re.sub(r'\b(Al ser revelada|Preparaci\u00f3n|Obligado'
-                      r'|Respuesta de Valor|Respuesta|Viaje|Sombra'
-                      r'|Resoluci\u00f3n):', '[b]\\1[/b]:', text)
+        text = re.sub(r'\b(Al ser revelada|Obligado|Respuesta de Valor'
+                      r'|Respuesta|Viaje|Sombra|Resoluci\u00f3n):',
+                      '[b]\\1[/b]:', text)
+        text = re.sub(r'\b(Preparaci\u00f3n)( \([^\)]+\))?:', '[b]\\1[/b]\\2:',
+                      text)
         text = re.sub(r'\b(Condici\u00f3n)\b', '[bi]\\1[/bi]', text)
     if lang == 'French' and not skip_rules:
         text = re.sub(r'\b(R\u00e9solution de la qu\u00eate)( \([^\)]+\))?:',
                       '[b]\\1[/b]\\2:', text)
-        text = re.sub(r'\b(\[Vaillance\] )?(\[Ressource\] |\[Organisation\] |'
-                      r'\[Qu\u00eate\] |\[Voyage\] |\[Rencontre\] |'
-                      r'\[Combat\] |\[Restauration\] )?(Action):',
+        text = re.sub(r'\b(\[Vaillance\] )?(\[Ressource\] |\[Organisation\] '
+                      r'|\[Qu\u00eate\] |\[Voyage\] |\[Rencontre\] '
+                      r'|\[Combat\] |\[Restauration\] )?(Action):',
                       '[b]\\1\\2\\3[/b]:', text)
-        text = re.sub(r'\b(Une fois r\u00e9v\u00e9l\u00e9e|Mise en place|'
-                      r'Forc\u00e9|\[Vaillance\] R\u00e9ponse|R\u00e9ponse|'
-                      r'Trajet|Ombre|R\u00e9solution):',
-                      '[b]\\1[/b]:', text)
+        text = re.sub(r'\b(Une fois r\u00e9v\u00e9l\u00e9e|Forc\u00e9'
+                      r'|\[Vaillance\] R\u00e9ponse|R\u00e9ponse|Trajet'
+                      r'|Ombre|R\u00e9solution):', '[b]\\1[/b]:', text)
+        text = re.sub(r'\b(Mise en place)( \([^\)]+\))?:', '[b]\\1[/b]\\2:',
+                      text)
         text = re.sub(r'\b(Condition)\b', '[bi]\\1[/bi]', text)
     elif lang == 'English' and not skip_rules:
         text = re.sub(r'\b(Quest Resolution)( \([^\)]+\))?:', '[b]\\1[/b]\\2:',
@@ -601,8 +604,9 @@ def _update_card_text(text, lang='English', skip_rules=False,  # pylint: disable
         text = re.sub(r'\b(Valour )?(Resource |Planning |Quest |Travel '
                       r'|Encounter |Combat |Refresh )?(Action):',
                       '[b]\\1\\2\\3[/b]:', text)
-        text = re.sub(r'\b(When Revealed|Setup|Forced|Valour Response|Response'
+        text = re.sub(r'\b(When Revealed|Forced|Valour Response|Response'
                       r'|Travel|Shadow|Resolution):', '[b]\\1[/b]:', text)
+        text = re.sub(r'\b(Setup)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', text)
         text = re.sub(r'\b(Condition)\b', '[bi]\\1[/bi]', text)
 
     text = re.sub(r'\[center\]', '', text, flags=re.IGNORECASE)
@@ -2448,10 +2452,9 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
             card_size = 'PlayerQuestCard'
         elif card_type in ('Encounter Side Quest', 'Quest'):
             card_size = 'QuestCard'
-        elif (card_type in CARD_TYPES_ENCOUNTER_SIZE or 'Encounter' in (
-                row[CARD_KEYWORDS] and
-                [k.strip() for k in str(row[CARD_KEYWORDS]).split('.')]
-                or [])):
+        elif (card_type in CARD_TYPES_ENCOUNTER_SIZE or
+              'Encounter' in (row[CARD_KEYWORDS] or ''
+                              ).replace('. ', '.').split('.')):
             card_size = 'EncounterCard'
         else:
             card_size = None
@@ -5775,7 +5778,9 @@ def _generate_tts_sheets(deck_path, output_path, image_path, card_dict):  # pyli
             back_path = os.path.join(image_path, '{}-2.png'.format(card['id']))
             if os.path.exists(back_path):
                 card['back'] = back_path
-            elif card_dict[card['id']][CARD_TYPE] in CARD_TYPES_PLAYER:
+            elif (card_dict[card['id']][CARD_TYPE] in CARD_TYPES_PLAYER and
+                  'Encounter' not in (card_dict[card['id']][CARD_KEYWORDS] or ''
+                                      ).replace('. ', '.').split('.')):
                 card['back'] = os.path.join(
                     image_path, 'playerBackOfficialTTS.png')
             else:
@@ -5923,13 +5928,6 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                     os.path.join(tts_path, filename.split('----')[1]))
 
             break
-
-        shutil.copyfile(
-            os.path.join(IMAGES_BACK_PATH, 'encounterBackOfficialTTS.png'),
-            os.path.join(tts_path, 'encounterBackOfficialTTS.png'))
-        shutil.copyfile(
-            os.path.join(IMAGES_BACK_PATH, 'playerBackOfficialTTS.png'),
-            os.path.join(tts_path, 'playerBackOfficialTTS.png'))
 
     empty_rules_backs = {
         row[CARD_ID] for row in card_data

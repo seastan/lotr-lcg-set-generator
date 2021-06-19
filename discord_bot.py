@@ -530,8 +530,9 @@ def update_text(text):  # pylint: disable=R0915
                   text)
     text = re.sub(r'\b(Valour )?(Resource |Planning |Quest |Travel |Encounter '
                   r'|Combat |Refresh )?(Action):', '[b]\\1\\2\\3[/b]:', text)
-    text = re.sub(r'\b(When Revealed|Setup|Forced|Valour Response|Response'
-                  r'|Travel|Shadow|Resolution):', '[b]\\1[/b]:', text)
+    text = re.sub(r'\b(When Revealed|Forced|Valour Response|Response|Travel'
+                  r'|Shadow|Resolution):', '[b]\\1[/b]:', text)
+    text = re.sub(r'\b(Setup)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', text)
     text = re.sub(r'\b(Condition)\b', '[bi]\\1[/bi]', text)
 
     def _fix_bi_in_b(match):

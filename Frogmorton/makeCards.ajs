@@ -11,7 +11,7 @@ importClass(org.w3c.dom.NodeList);
 
 var doubleSideTypes = ['Campaign', 'Contract', 'Nightmare', 'Presentation', 'Quest', 'Rules'];
 var landscapeTypes = ['Encounter Side Quest', 'Player Side Quest', 'Quest'];
-var playerTypes = ['Ally', 'Attachment', 'Event', 'Hero', 'Player Side Quest', 'Treasure'];
+var playerTypes = ['Ally', 'Attachment', 'Contract', 'Event', 'Hero', 'Player Side Quest', 'Treasure'];
 var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Side Quest'];
 var nonUniqueTypes = ['Campaign', 'Contract', 'Event', 'Nightmare', 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery', 'Treasure'];
 
@@ -1266,37 +1266,43 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 		if (lang == 'English') {
 			vXml = vXml.replace(/\b(Quest Resolution)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			vXml = vXml.replace(/\b(Valour )?(Resource |Planning |Quest |Travel |Encounter |Combat |Refresh )?(Action):/g, '[b]$1$2$3[/b]:');
-			vXml = vXml.replace(/\b(When Revealed|Setup|Forced|Valour Response|Response|Travel|Shadow|Resolution):/g, '[b]$1[/b]:');
+			vXml = vXml.replace(/\b(When Revealed|Forced|Valour Response|Response|Travel|Shadow|Resolution):/g, '[b]$1[/b]:');
+			vXml = vXml.replace(/\b(Setup)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			vXml = vXml.replace(/\b(Condition)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'French') {
 			vXml = vXml.replace(/\b(R\u00e9solution de la qu\u00eate)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			vXml = vXml.replace(/\b(\[Vaillance\] )?(\[Ressource\] |\[Organisation\] |\[Qu\u00eate\] |\[Voyage\] |\[Rencontre\] |\[Combat\] |\[Restauration\] )?(Action):/g, '[b]$1$2$3[/b]:');
-			vXml = vXml.replace(/\b(Une fois r\u00e9v\u00e9l\u00e9e|Mise en place|Forc\u00e9|\[Vaillance\] R\u00e9ponse|R\u00e9ponse|Trajet|Ombre|R\u00e9solution):/g, '[b]$1[/b]:');
+			vXml = vXml.replace(/\b(Une fois r\u00e9v\u00e9l\u00e9e|Forc\u00e9|\[Vaillance\] R\u00e9ponse|R\u00e9ponse|Trajet|Ombre|R\u00e9solution):/g, '[b]$1[/b]:');
+			vXml = vXml.replace(/\b(Mise en place)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			vXml = vXml.replace(/\b(Condition)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'German') {
 			vXml = vXml.replace(/\b(Abenteuer bestehen)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			vXml = vXml.replace(/\b(Ehrenvolle )?(Ressourcenaktion|Planungsaktion|Abenteueraktion|Reiseaktion|Begegnungsaktion|Kampfaktion|Auffrischungsaktion|Aktion):/g, '[b]$1$2[/b]:');
-			vXml = vXml.replace(/\b(Wenn aufgedeckt|Vorbereitung|Erzwungen|Ehrenvolle Reaktion|Reaktion|Reise|Schatten|Aufl\u00f6sung):/g, '[b]$1[/b]:');
+			vXml = vXml.replace(/\b(Wenn aufgedeckt|Erzwungen|Ehrenvolle Reaktion|Reaktion|Reise|Schatten|Aufl\u00f6sung):/g, '[b]$1[/b]:');
+			vXml = vXml.replace(/\b(Vorbereitung)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			vXml = vXml.replace(/\b(Zustand)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'Spanish') {
 			vXml = vXml.replace(/\b(Resoluci\u00f3n de la misi\u00f3n)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			vXml = vXml.replace(/\b(Acci\u00f3n)( de Recursos| de Planificaci\u00f3n| de Misi\u00f3n| de Viaje| de Encuentro| de Combate| de Recuperaci\u00f3n)?( de Valor)?:/g, '[b]$1$2$3[/b]:');
-			vXml = vXml.replace(/\b(Al ser revelada|Preparaci\u00f3n|Obligado|Respuesta de Valor|Respuesta|Viaje|Sombra|Resoluci\u00f3n):/g, '[b]$1[/b]:');
+			vXml = vXml.replace(/\b(Al ser revelada|Obligado|Respuesta de Valor|Respuesta|Viaje|Sombra|Resoluci\u00f3n):/g, '[b]$1[/b]:');
+			vXml = vXml.replace(/\b(Preparaci\u00f3n)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			vXml = vXml.replace(/\b(Condici\u00f3n)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'Polish') {
 			vXml = vXml.replace(/\b(Rozpatrzenie wyprawy)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			vXml = vXml.replace(/\b(Akcja)( Zasob\u00f3w| Planowania| Wyprawy| Podr\u00f3\u017cy| Spotka\u0144| Walki| Odpoczynku)?( M\u0119stwa)?:/g, '[b]$1$2$3[/b]:');
-			vXml = vXml.replace(/\b(Po odkryciu|Przygotowanie|Wymuszony|Odpowied\u017a M\u0119stwa|Odpowied\u017a|Podr\u00f3\u017c|Cie\u0144|Nast\u0119pstwa):/g, '[b]$1[/b]:');
+			vXml = vXml.replace(/\b(Po odkryciu|Wymuszony|Odpowied\u017a M\u0119stwa|Odpowied\u017a|Podr\u00f3\u017c|Cie\u0144|Nast\u0119pstwa):/g, '[b]$1[/b]:');
+			vXml = vXml.replace(/\b(Przygotowanie)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			vXml = vXml.replace(/\b(Stan)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'Italian') {
 			vXml = vXml.replace(/\b(Risoluzione della Ricerca)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			vXml = vXml.replace(/\b(Azione)( Valorosa)?( di Risorse| di Pianificazione| di Ricerca| di Viaggio| di Incontri| di Combattimento| di Riordino)?:/g, '[b]$1$2$3[/b]:');
-			vXml = vXml.replace(/\b(Quando Rivelata|Preparazione|Obbligato|Risposta Valorosa|Risposta|Viaggio|Ombra|Risoluzione):/g, '[b]$1[/b]:');
+			vXml = vXml.replace(/\b(Quando Rivelata|Obbligato|Risposta Valorosa|Risposta|Viaggio|Ombra|Risoluzione):/g, '[b]$1[/b]:');
+			vXml = vXml.replace(/\b(Preparazione)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			vXml = vXml.replace(/\b(Condizione)\b/g, '[bi]$1[/bi]');
 		}
 	}
