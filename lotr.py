@@ -91,6 +91,7 @@ CARD_EASY_MODE = 'Removed for Easy Mode'
 CARD_ADDITIONAL_ENCOUNTER_SETS = 'Additional Encounter Sets'
 CARD_ADVENTURE = 'Adventure'
 CARD_ICON = 'Collection Icon'
+CARD_BACK = 'Card Back'
 CARD_VERSION = 'Version'
 CARD_DECK_RULES = 'Deck Rules'
 CARD_SELECTED = 'Selected'
@@ -4272,7 +4273,7 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                      CARD_SHADOW, CARD_FLAVOUR, CARD_PRINTED_NUMBER,
                      CARD_ARTIST, CARD_PANX, CARD_PANY, CARD_SCALE,
                      CARD_EASY_MODE, CARD_ADDITIONAL_ENCOUNTER_SETS,
-                     CARD_ADVENTURE, CARD_ICON, CARD_VERSION):
+                     CARD_ADVENTURE, CARD_ICON, CARD_BACK, CARD_VERSION):
             value = _get_xml_property_value(row, name, card_type)
             if value != '':
                 properties.append((name, value))

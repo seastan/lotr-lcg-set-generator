@@ -720,6 +720,16 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
     if additional_sets != '':
         additional_sets = ' (+{})'.format(additional_sets).replace(';', ',')
 
+    custom_back = card.get(lotr.CARD_BACK, '')
+    if custom_back:
+        card_custom_back = '**{} Card Back**\n'.format(custom_back)
+    elif (card_type in lotr.CARD_TYPES_PLAYER and
+          'Encounter' in
+          card.get(lotr.CARD_KEYWORDS, '').replace('. ', '.').split('.')):
+        card_custom_back = '**Encounter Card Back**\n'
+    else:
+        card_custom_back = ''
+
     card_encounter_set = (
         '' if encounter_set == ''
         else '*Encounter Set*: {}{}\n'.format(encounter_set, additional_sets))
@@ -775,7 +785,7 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
     res = f"""{res_a}{res_b}
 
 {card_set}{card_icon}, {card_number}{card_version} {card_quantity}
-{card_encounter_set}{card_adventure}{card_id}
+{card_encounter_set}{card_adventure}{card_custom_back}{card_id}
 
 {card_deck_rules}{ringsdb_url}{row_url}
 {channel_url}"""
