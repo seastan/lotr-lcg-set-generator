@@ -176,6 +176,7 @@ CARD_TYPES_UNIQUE = {'Hero', 'Objective Hero'}
 CARD_TYPES_NON_UNIQUE = {'Campaign', 'Contract', 'Event', 'Nightmare',
                          'Player Side Quest', 'Presentation', 'Quest', 'Rules',
                          'Treachery', 'Treasure'}
+CARD_TYPES_DECK_RULES = {'Nightmare', 'Quest'}
 CARD_TYPES_ONE_COPY = {'Campaign', 'Contract', 'Encounter Side Quest', 'Hero',
                        'Nightmare', 'Objective Hero', 'Presentation', 'Quest',
                        'Rules', 'Treasure'}
@@ -1425,6 +1426,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_victory_back = row[BACK_PREFIX + CARD_VICTORY]
         card_easy_mode = row[CARD_EASY_MODE]
         card_adventure = row[CARD_ADVENTURE]
+        card_deck_rules = row[CARD_DECK_RULES]
         card_scratch = row[CARD_SCRATCH]
         scratch = ' (Scratch)' if card_scratch else ''
 
@@ -1882,9 +1884,17 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 else:
                     broken_set_ids.add(set_id)
 
-        if (((card_type == 'Quest' and card_adventure) or
-             card_type == 'Nightmare')
-                and row[CARD_DECK_RULES]):
+        if (card_deck_rules is not None and
+                card_type not in CARD_TYPES_DECK_RULES):
+            message = 'Redundant deck rules for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_deck_rules is not None and
+              ((card_type == 'Quest' and card_adventure) or
+               card_type == 'Nightmare')):
             quest_id = (set_id, card_adventure or card_name)
             if quest_id in deck_rules:
                 message = (
@@ -1900,7 +1910,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 deck_rules.add(quest_id)
 
             prefixes = set()
-            for part in str(row[CARD_DECK_RULES]).split('\n\n'):
+            for part in str(card_deck_rules).split('\n\n'):
                 if not part:
                     continue
 
@@ -3342,9 +3352,9 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
             }
         else:
             if ((row[CARD_TYPE] in CARD_TYPES_PLAYER and
-                     'Encounter' not in (row[CARD_KEYWORDS] or ''
-                                         ).replace('. ', '.').split('.') and
-                     row[CARD_BACK] != 'Encounter') or
+                 'Encounter' not in (row[CARD_KEYWORDS] or ''
+                                     ).replace('. ', '.').split('.') and
+                 row[CARD_BACK] != 'Encounter') or
                     row[CARD_BACK] == 'Player'):
                 default_name = 'player'
             else:
