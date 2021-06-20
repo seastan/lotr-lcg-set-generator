@@ -5755,69 +5755,77 @@ def _generate_tts_sheets(deck_path, output_path, image_path, card_dict):  # pyli
 
     tree = ET.parse(deck_path)
     root = tree.getroot()
-
-    cards = {'portrait': [],
-             'landscape': []}
+    cards = {'portrait': {'front_player': [],
+                          'front_encounter': [],
+                          'front_custom': [],
+                          'back_custom': []},
+             'landscape': {'front_player': [],
+                           'front_encounter': [],
+                           'front_custom': [],
+                           'back_custom': []}}
     for section in root:
         for card_element in section:
-            card = {}
-            card['id'] = card_element.attrib.get('id')
-            if card['id'] not in card_dict:
+            card_id = card_element.attrib.get('id')
+            if card_id not in card_dict:
                 logging.error('Card %s not found in the card list (deck "%s")',
-                              card['id'], deck_name)
+                              card_id, deck_name)
                 continue
 
-            card['front'] = os.path.join(
-                image_path, '{}.png'.format(card['id']))
-            if not os.path.exists(card['front']):
+            card_path = os.path.join(image_path, '{}.png'.format(card_id))
+            if not os.path.exists(card_path):
                 logging.error(
                     'Card %s not found in the image cache (deck "%s")',
-                    card['id'], deck_name)
+                    card_id, deck_name)
                 continue
 
-            back_path = os.path.join(image_path, '{}-2.png'.format(card['id']))
-            if os.path.exists(back_path):
-                card['back'] = back_path
-            elif (card_dict[card['id']][CARD_TYPE] in CARD_TYPES_PLAYER and
-                  'Encounter' not in (card_dict[card['id']][CARD_KEYWORDS] or ''
-                                      ).replace('. ', '.').split('.')):
-                card['back'] = os.path.join(
-                    image_path, 'playerBackOfficialTTS.png')
-            else:
-                card['back'] = os.path.join(
-                    image_path, 'encounterBackOfficialTTS.png')
-
             quantity = card_element.attrib.get('qty') if not is_player else 1
-            if card_dict[card['id']][CARD_TYPE] in CARD_TYPES_LANDSCAPE:
+            if card_dict[card_id][CARD_TYPE] in CARD_TYPES_LANDSCAPE:
+                orientation = 'landscape'
+            else:
+                orientation = 'portrait'
+
+            back_path = os.path.join(image_path, '{}-2.png'.format(card_id))
+            if os.path.exists(back_path):
                 for _ in range(int(quantity)):
-                    cards['landscape'].append(card)
+                    cards[orientation]['front_custom'].append(
+                        {'id': card_id, 'path': card_path})
+                    cards[orientation]['back_custom'].append(
+                        {'id': card_id, 'path': back_path})
+            elif (card_dict[card_id][CARD_TYPE] in CARD_TYPES_PLAYER and
+                  'Encounter' not in (card_dict[card_id][CARD_KEYWORDS] or ''
+                                      ).replace('. ', '.').split('.')):
+                for _ in range(int(quantity)):
+                    cards[orientation]['front_player'].append(
+                        {'id': card_id, 'path': card_path})
             else:
                 for _ in range(int(quantity)):
-                    cards['portrait'].append(card)
+                    cards[orientation]['front_encounter'].append(
+                        {'id': card_id, 'path': card_path})
 
     cnt = 0
     for orientation in ('portrait', 'landscape'):
-        chunks = [
-            cards[orientation][i * TTS_SHEET_SIZE:(i + 1) * TTS_SHEET_SIZE]
-            for i in range(
-                (len(cards[orientation]) + TTS_SHEET_SIZE - 1) //
-                TTS_SHEET_SIZE)]
-        for i, chunk in enumerate(chunks):
-            for side in ('front', 'back'):
+        for side in ('front_player', 'front_encounter', 'front_custom',
+                     'back_custom'):
+            chunks = [
+                cards[orientation][side][
+                    i * TTS_SHEET_SIZE:(i + 1) * TTS_SHEET_SIZE]
+                for i in range(
+                    (len(cards[orientation][side]) + TTS_SHEET_SIZE - 1) //
+                    TTS_SHEET_SIZE)]
+            total_chunks = len(chunks)
+            for i, chunk in enumerate(chunks):
                 num = len(chunk)
                 rows = math.ceil(num / TTS_COLUMNS)
                 name = '{}_{}_{}_{}_{}_{}_{}_{}'.format(
                     deck_name, orientation, side, TTS_COLUMNS, rows, num,
-                    i + 1, len(chunks))
+                    i + 1, total_chunks)
                 cnt += 1
                 shutil.copyfile(
                     os.path.join(IMAGES_OTHER_PATH, 'tts_template.jpg'),
                     os.path.join(output_path, '{}.jpg'.format(name)))
                 with open(os.path.join(output_path, '{}.json'.format(name)),
                           'w') as fobj:
-                    res = json.dumps(
-                        [{'id': c['id'], 'path': c[side]} for c in chunk],
-                        indent=4)
+                    res = json.dumps(chunk, indent=4)
                     fobj.write(res)
 
     return cnt
