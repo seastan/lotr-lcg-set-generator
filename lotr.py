@@ -2453,9 +2453,11 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
             card_size = 'PlayerQuestCard'
         elif card_type in ('Encounter Side Quest', 'Quest'):
             card_size = 'QuestCard'
-        elif (card_type in CARD_TYPES_ENCOUNTER_SIZE or
-              'Encounter' in (row[CARD_KEYWORDS] or ''
-                              ).replace('. ', '.').split('.')):
+        elif ((card_type in CARD_TYPES_ENCOUNTER_SIZE or
+               'Encounter' in (row[CARD_KEYWORDS] or ''
+                              ).replace('. ', '.').split('.') or
+               row[CARD_BACK] == 'Encounter') and
+              row[CARD_BACK] != 'Player'):
             card_size = 'EncounterCard'
         else:
             card_size = None
@@ -3339,7 +3341,11 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
                     row[BACK_PREFIX + CARD_SHADOW]))
             }
         else:
-            if row[CARD_TYPE] in CARD_TYPES_PLAYER:
+            if ((row[CARD_TYPE] in CARD_TYPES_PLAYER and
+                     'Encounter' not in (row[CARD_KEYWORDS] or ''
+                                         ).replace('. ', '.').split('.') and
+                     row[CARD_BACK] != 'Encounter') or
+                    row[CARD_BACK] == 'Player'):
                 default_name = 'player'
             else:
                 default_name = 'encounter'
@@ -5792,9 +5798,11 @@ def _generate_tts_sheets(deck_path, output_path, image_path, card_dict):  # pyli
                         {'id': card_id, 'path': card_path})
                     cards[orientation]['back_custom'].append(
                         {'id': card_id, 'path': back_path})
-            elif (card_dict[card_id][CARD_TYPE] in CARD_TYPES_PLAYER and
-                  'Encounter' not in (card_dict[card_id][CARD_KEYWORDS] or ''
-                                      ).replace('. ', '.').split('.')):
+            elif ((card_dict[card_id][CARD_TYPE] in CARD_TYPES_PLAYER and
+                   'Encounter' not in (card_dict[card_id][CARD_KEYWORDS] or ''
+                                      ).replace('. ', '.').split('.') and
+                   card_dict[card_id][CARD_BACK] != 'Encounter') or
+                  card_dict[card_id][CARD_BACK] == 'Player'):
                 for _ in range(int(quantity)):
                     cards[orientation]['front_player'].append(
                         {'id': card_id, 'path': card_path})
