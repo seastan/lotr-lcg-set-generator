@@ -428,7 +428,7 @@ function run(progress, target, filename, icons) {
 					}
 					else if (['Nightmare Blue', 'Nightmare Green', 'Nightmare Purple', 'Nightmare Red', 'Nightmare Brown', 'Nightmare Yellow'].indexOf(cardSphere) > -1) {
 						Console.err.println('\nERROR: ' + cardSphere + " template is not supported yet.");
-						cardSphere = cardSphere.replace(/Nightmare /, '')
+						cardSphere = cardSphere.replace(/Nightmare /, '');
 						card['Sphere'] = cardSphere;
 					}
 
