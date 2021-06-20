@@ -126,8 +126,6 @@ List of **!cron** commands:
     'playtest': """
 List of **!playtest** commands:
 
-**!playtest view** - display existing playtesting target
-
 **!playtest new
 <optional description>
 <list of targets>**
@@ -153,12 +151,10 @@ Mark a given target as completed by you, for example:
 !playtest complete 5
 Some report
 ```
+**!playtest view** - display existing playtesting target
 **!playtest remove <target or list of targets separated by space>** - remove a given target or a list of targets (for example: `!playtest remove 11 12`)
-
 **!playtest update <target or list of targets separated by space> <player>** - mark a given target or a list of targets as completed by a given player (for example: `!playtest update 7 Shellin`)
-
 **!playtest random <number>** - generate a random number from 1 to a given number (for example: `!playtest random 10`)
-
 **!playtest help** - display this help message
 """,
     'stat': """
@@ -182,7 +178,7 @@ List of **!art** commands:
 List of **!image** commands:
 
 **!image set <set name or set code>** - post the last rendered images for all cards from a set (for example: `!image set The Aldburg Plot` or `!image set TAP`)
-**!image card <card name>** - post the last rendered images for the first card matching a given card name (for example: `!image card Gavin`)
+**!image card <card name>** (or **!image <card name>**) - post the last rendered images for the first card matching a given card name (for example: `!image card Gavin`)
 **!image card this** (or **!image this**) - if in a card channel, post the last rendered images for the card
 **!image refresh** - clear the image cache (if you just uploaded new images to the Google Drive)
 **!image help** - display this help message
@@ -2761,9 +2757,6 @@ Targets removed.
             command = re.sub(r'^!image ', '', message.content,
                              flags=re.IGNORECASE).split('\n')[0]
 
-        if command.lower() == 'this':
-            command = 'card this'
-
         logging.info('Received image command: %s', command)
 
         if command.lower().startswith('set '):
@@ -2781,7 +2774,15 @@ Targets removed.
             await self._send_channel(message.channel, res)
         elif command.lower() == 'set':
             await message.channel.send('please specify the set')
-        elif command.lower().startswith('card '):
+        elif command.lower() == 'refresh':
+            RENDERED_IMAGES.clear()
+            await message.channel.send('done')
+        elif command.lower() == 'card':
+            await message.channel.send('please specify the card')
+        elif command.lower() == 'help':
+            res = HELP['image']
+            await self._send_channel(message.channel, res)
+        else:
             await message.channel.send('Please wait...')
             try:
                 card_name = re.sub(r'^card ', '', command,
@@ -2802,14 +2803,6 @@ Targets removed.
 
             if res:
                 await self._send_channel(message.channel, res)
-        elif command.lower() == 'card':
-            await message.channel.send('please specify the card')
-        elif command.lower() == 'refresh':
-            RENDERED_IMAGES.clear()
-            await message.channel.send('done')
-        else:
-            res = HELP['image']
-            await self._send_channel(message.channel, res)
 
 
     async def _process_help_command(self, message):
@@ -2817,7 +2810,9 @@ Targets removed.
         """
         logging.info('Received help command')
 
-        res = ''.join(HELP[key] for key in sorted(HELP.keys()))
+        help_keys = sorted([key for key in HELP if key != 'playtest'])
+        help_keys.append('playtest')
+        res = ''.join(HELP[key] for key in help_keys)
         await self._send_channel(message.channel, res)
 
 
