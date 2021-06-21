@@ -162,7 +162,7 @@ or restarting Backup and Sync from Google), you may create two additional batch 
 - `run_setup.bat`
 - `run_cleanup.bat`
 
-They will be called inside `run_all.bat` automatically.
+They will be called inside `run_all.bat` automatically.  See `run_cleanup.bat.example` as an example.
 
 If you want to set up a Windows cron job, do the following:
 
