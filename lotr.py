@@ -588,16 +588,16 @@ def _update_card_text(text, lang='English', skip_rules=False,  # pylint: disable
                       text)
         text = re.sub(r'\b(Condici\u00f3n)\b', '[bi]\\1[/bi]', text)
     if lang == 'French' and not skip_rules:
-        text = re.sub(r'\b(R\u00e9solution de la qu\u00eate)( \([^\)]+\))?:',
-                      '[b]\\1[/b]\\2:', text)
-        text = re.sub(r'\b(\[Vaillance\] )?(\[Ressource\] |\[Organisation\] '
+        text = re.sub(r'\b(R\u00e9solution de la qu\u00eate)( \([^\)]+\))? ?:',
+                      '[b]\\1[/b]\\2 :', text)
+        text = re.sub(r'(\[Vaillance\] )?(\[Ressource\] |\[Organisation\] '
                       r'|\[Qu\u00eate\] |\[Voyage\] |\[Rencontre\] '
-                      r'|\[Combat\] |\[Restauration\] )?(Action):',
-                      '[b]\\1\\2\\3[/b]:', text)
+                      r'|\[Combat\] |\[Restauration\] )?\b(Action) ?:',
+                      '[b]\\1\\2\\3[/b] :', text)
         text = re.sub(r'\b(Une fois r\u00e9v\u00e9l\u00e9e|Forc\u00e9'
                       r'|\[Vaillance\] R\u00e9ponse|R\u00e9ponse|Trajet'
-                      r'|Ombre|R\u00e9solution):', '[b]\\1[/b]:', text)
-        text = re.sub(r'\b(Mise en place)( \([^\)]+\))?:', '[b]\\1[/b]\\2:',
+                      r'|Ombre|R\u00e9solution) ?:', '[b]\\1[/b] :', text)
+        text = re.sub(r'\b(Mise en place)( \([^\)]+\))? ?:', '[b]\\1[/b]\\2 :',
                       text)
         text = re.sub(r'\b(Condition)\b', '[bi]\\1[/bi]', text)
     elif lang == 'English' and not skip_rules:
@@ -1418,6 +1418,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_traits = row[CARD_TRAITS]
         card_keywords = row[CARD_KEYWORDS]
         card_victory = row[CARD_VICTORY]
+        card_name_back = row[BACK_PREFIX + CARD_NAME]
         card_unique_back = row[BACK_PREFIX + CARD_UNIQUE]
         card_type_back = row[BACK_PREFIX + CARD_TYPE]
         card_sphere_back = row[BACK_PREFIX + CARD_SPHERE]
@@ -1426,6 +1427,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_victory_back = row[BACK_PREFIX + CARD_VICTORY]
         card_easy_mode = row[CARD_EASY_MODE]
         card_adventure = row[CARD_ADVENTURE]
+        card_back = row[CARD_BACK]
         card_deck_rules = row[CARD_DECK_RULES]
         card_scratch = row[CARD_SCRATCH]
         scratch = ' (Scratch)' if card_scratch else ''
@@ -1860,6 +1862,25 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif card_easy_mode is not None and card_easy_mode > card_quantity:
             message = ('Removed for easy mode is greater than card quantity '
                        'for row #{}{}'.format(i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_back is not None and
+                (card_type in CARD_TYPES_DOUBLESIDE_MANDATORY or
+                 card_name_back is not None)):
+            message = 'Redundant custom card back value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_back not in (None, 'Encounter', 'Player'):
+            message = 'Incorrect custom card back value for row #{}{}'.format(
+                i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)

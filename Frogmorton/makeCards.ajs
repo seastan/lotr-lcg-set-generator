@@ -1166,7 +1166,7 @@ function escapeFileName(value) {
 	return value.replace(/[<>:\/\\|?*'"\u2013\u2014\u2026\u2019\u201c\u201d\u201e\u00ab\u00bb]/g, ' ');
 }
 
-function updateQuotes(value, lang) {
+function updatePunctuation(value, lang) {
 	if (lang == 'Polish') {
 		value = value.replace(/\u201c/g, '\u201e');
 	}
@@ -1177,6 +1177,7 @@ function updateQuotes(value, lang) {
 	else if (lang == 'French') {
 		value = value.replace(/\u201c[ \u00a0]?/g, '\u00ab\u00a0');
 		value = value.replace(/[ \u00a0]?\u201d/g, '\u00a0\u00bb');
+		value = value.replace(/[ \u00a0]?([:;?!])/g, '\u00a0$1');
 	}
 
 	return value;
@@ -1187,7 +1188,7 @@ function updateVafthrudnir(value, lowerSize, lang) {
 	var res = '';
 	var tag = false;
 	value = value.replace(/\[space\]/ig, ' ');
-	value = updateQuotes(value, lang);
+	value = updatePunctuation(value, lang);
 	for (let i = 0; i < value.length; i++) {
 		let ch = value[i];
 		if (ch == '<') {
@@ -1273,10 +1274,10 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 			vXml = vXml.replace(/\b(Condition)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'French') {
-			vXml = vXml.replace(/\b(R\u00e9solution de la qu\u00eate)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
-			vXml = vXml.replace(/\b(\[Vaillance\] )?(\[Ressource\] |\[Organisation\] |\[Qu\u00eate\] |\[Voyage\] |\[Rencontre\] |\[Combat\] |\[Restauration\] )?(Action):/g, '[b]$1$2$3[/b]:');
-			vXml = vXml.replace(/\b(Une fois r\u00e9v\u00e9l\u00e9e|Forc\u00e9|\[Vaillance\] R\u00e9ponse|R\u00e9ponse|Trajet|Ombre|R\u00e9solution):/g, '[b]$1[/b]:');
-			vXml = vXml.replace(/\b(Mise en place)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+			vXml = vXml.replace(/\b(R\u00e9solution de la qu\u00eate)( \([^\)]+\))? ?:/g, '[b]$1[/b]$2 :');
+			vXml = vXml.replace(/(\[Vaillance\] )?(\[Ressource\] |\[Organisation\] |\[Qu\u00eate\] |\[Voyage\] |\[Rencontre\] |\[Combat\] |\[Restauration\] )?\b(Action) ?:/g, '[b]$1$2$3[/b] :');
+			vXml = vXml.replace(/\b(Une fois r\u00e9v\u00e9l\u00e9e|Forc\u00e9|\[Vaillance\] R\u00e9ponse|R\u00e9ponse|Trajet|Ombre|R\u00e9solution) ?:/g, '[b]$1[/b] :');
+			vXml = vXml.replace(/\b(Mise en place)( \([^\)]+\))? ?:/g, '[b]$1[/b]$2 :');
 			vXml = vXml.replace(/\b(Condition)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'German') {
@@ -1447,7 +1448,7 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 	vXml = vXml.replace(/<size [^>]+><\/size>/g, '');
 	vXml = vXml.replace(/<family [^>]+><\/family>/g, '');
 
-	vXml = updateQuotes(vXml, lang);
+	vXml = updatePunctuation(vXml, lang);
 	if ((['Traits', 'BTraits'].indexOf(nXml + '') > -1) && (lang == 'Spanish')) {
 		vXml = vXml.replace(/\. /g, ' \u2022 ');
 		vXml = vXml.replace(/\.$/g, '');
