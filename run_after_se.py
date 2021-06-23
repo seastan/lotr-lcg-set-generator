@@ -131,10 +131,10 @@ def generate_genericpng(conf, set_id, set_name, lang, skip_ids, card_data):  # p
 
 
 @retry()
-def generate_tts(conf, set_id, set_name, lang, card_dict):
+def generate_tts(conf, set_id, set_name, lang, card_dict, scratch):  # pylint: disable=R0913
     """ Generate TTS outputs.
     """
-    lotr.generate_tts(conf, set_id, set_name, lang, card_dict)
+    lotr.generate_tts(conf, set_id, set_name, lang, card_dict, scratch)
 
 
 def run(args):
@@ -173,7 +173,7 @@ def execute_tasks(conf, tasks):
             raise KeyboardInterrupt
 
 
-def main():  # pylint: disable=R0912,R0915
+def main():  # pylint: disable=R0912,R0914,R0915
     """ Main function.
     """
     timestamp = time.time()
@@ -207,6 +207,7 @@ def main():  # pylint: disable=R0912,R0915
 
             card_data = lotr.translated_data(set_id, lang)
             card_dict = lotr.full_card_dict()
+            scratch = set_id in lotr.FOUND_SCRATCH_SETS
 
             if conf['nobleed_300'][lang]:
                 pre_tasks.append([generate_png300_nobleed, conf, set_id,
@@ -254,7 +255,7 @@ def main():  # pylint: disable=R0912,R0915
 
             if 'tts' in conf['outputs'][lang]:
                 post_tasks.append([generate_tts, conf, set_id, set_name, lang,
-                                   card_dict])
+                                   card_dict, scratch])
 
     execute_tasks(conf, pre_tasks)
     execute_tasks(conf, tasks)

@@ -5785,11 +5785,13 @@ def full_card_dict():
     return card_dict
 
 
-def _generate_tts_sheets(deck_path, output_path, image_path, card_dict):  # pylint: disable=R0912,R0914
+def _generate_tts_sheets(deck_path, output_path, image_path, card_dict,  # pylint: disable=R0912,R0914
+                         scratch):
     """ Generate TTS sheets for the deck.
     """
     deck_name = re.sub(r'\.o8d$', '', os.path.split(deck_path)[-1])
     is_player = deck_name.startswith('Player-')
+    scratch = ' (Scratch)' if scratch else ''
 
     tree = ET.parse(deck_path)
     root = tree.getroot()
@@ -5805,15 +5807,15 @@ def _generate_tts_sheets(deck_path, output_path, image_path, card_dict):  # pyli
         for card_element in section:
             card_id = card_element.attrib.get('id')
             if card_id not in card_dict:
-                logging.error('Card %s not found in the card list (deck "%s")',
-                              card_id, deck_name)
+                logging.error('Card %s not found in the card list (deck "%s")'
+                              '%s', card_id, deck_name, scratch)
                 continue
 
             card_path = os.path.join(image_path, '{}.png'.format(card_id))
             if not os.path.exists(card_path):
                 logging.error(
-                    'Card %s not found in the image cache (deck "%s")',
-                    card_id, deck_name)
+                    'Card %s not found in the image cache (deck "%s")%s',
+                    card_id, deck_name, scratch)
                 continue
 
             quantity = card_element.attrib.get('qty') if not is_player else 1
@@ -5871,7 +5873,7 @@ def _generate_tts_sheets(deck_path, output_path, image_path, card_dict):  # pyli
     return cnt
 
 
-def generate_tts(conf, set_id, set_name, lang, card_dict):  # pylint: disable=R0914
+def generate_tts(conf, set_id, set_name, lang, card_dict, scratch):  # pylint: disable=R0913,R0914
     """ Generate TTS outputs.
     """
     logging.info('[%s, %s] Generating TTS outputs...', set_name, lang)
@@ -5894,7 +5896,8 @@ def generate_tts(conf, set_id, set_name, lang, card_dict):  # pylint: disable=R0
     for _, _, filenames in os.walk(decks_path):
         for filename in filenames:
             cnt = _generate_tts_sheets(os.path.join(decks_path, filename),
-                                       temp_path, image_path, card_dict)
+                                       temp_path, image_path, card_dict,
+                                       scratch)
             input_cnt += cnt
 
         break
