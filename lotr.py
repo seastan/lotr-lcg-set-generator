@@ -758,7 +758,8 @@ def extract_keywords(value):
     keywords = [re.sub(r' ([0-9]+)\[pp\]$', ' \\1 Per Player', k, re.I)
                 for k in keywords]
     keywords = [k for k in keywords if re.match(
-                r'^[a-z]+(?: -?[0-9X]+(?: Per Player)?)?(?: \([^\)]+\))?$',
+                r'^([a-z\u00c0-\u017e]+ )?[a-z\u00c0-\u017e]+'
+                r'(?: -?[0-9X]+(?: Per Player)?)?(?: \([^\)]+\))?$',
                 k, re.I)]
     return keywords
 
@@ -3425,18 +3426,20 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
                  set_name, round(time.time() - timestamp, 3))
 
 
-def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R0915
+def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R0915
     """ Generate JSON file for Hall of Beorn.
     """
-    logging.info('[%s] Generating JSON file for Hall of Beorn...', set_name)
+    logging.info('[%s, %s] Generating JSON file for Hall of Beorn...',
+                 set_name, lang)
     timestamp = time.time()
 
     output_path = os.path.join(OUTPUT_HALLOFBEORN_PATH,
-                               escape_filename(set_name))
+                               '{}.{}'.format(escape_filename(set_name), lang))
     create_folder(output_path)
+    output_path = os.path.join(
+        output_path,
+        '{}.{}.json'.format(escape_filename(set_name), lang))
 
-    output_path = os.path.join(output_path,
-                               '{}.json'.format(escape_filename(set_name)))
     json_data = []
     card_data = DATA[:]
     for row in DATA:
@@ -3457,6 +3460,17 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
 
         if conf['selected_only'] and row[CARD_ID] not in SELECTED_CARDS:
             continue
+
+        if lang == 'English':
+            translated_row = row
+        else:
+            translated_row = TRANSLATIONS[lang].get(row[CARD_ID], {}).copy()
+            if row.get(CARD_DOUBLESIDE):
+                translated_row[CARD_NAME] = translated_row.get(CARD_SIDE_B, '')
+                for key in translated_row.keys():
+                    if key.startswith(BACK_PREFIX):
+                        translated_row[key.replace(BACK_PREFIX, '')] = (
+                            translated_row[key])
 
         card_type = row[CARD_TYPE]
         if card_type in CARD_TYPES_PLAYER_DECK:
@@ -3521,24 +3535,42 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
         else:
             card_side = None
 
-        if (row[CARD_SIDE_B] is not None and
-                row[CARD_SIDE_B] != row[CARD_NAME] and
+        if (translated_row.get(CARD_SIDE_B) is not None and
+                translated_row[CARD_SIDE_B] !=
+                translated_row.get(CARD_NAME, '') and
                 card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL):
-            opposite_title = row[CARD_SIDE_B]
+            opposite_title = translated_row[CARD_SIDE_B]
         else:
             opposite_title = None
 
-        keywords = extract_keywords(row[CARD_KEYWORDS])
+        keywords = extract_keywords(translated_row.get(CARD_KEYWORDS))
+        keywords_original = extract_keywords(row.get(CARD_KEYWORDS))
+        if len(keywords) != len(keywords_original):
+            logging.error('Different number of keywords in %s translation for '
+                          'card ID %s', lang, row[CARD_ID])
+            logging.error('English: %s', keywords_original)
+            logging.error('Translated: %s', keywords)
+
         traits = [t.strip() for t in
-                  str(row[CARD_TRAITS] or '').split('.') if t != '']
+                  str(translated_row.get(CARD_TRAITS) or '').split('.')
+                  if t != '']
+        traits_original = [t.strip() for t in
+                           str(row.get(CARD_TRAITS) or '').split('.')
+                           if t != '']
+        if len(traits) != len(traits_original):
+            logging.error('Different number of traits in %s translation for '
+                          'card ID %s', lang, row[CARD_ID])
+            logging.error('English: %s', traits_original)
+            logging.error('Translated: %s', traits)
+
         position = (int(row[CARD_NUMBER])
                     if is_positive_or_zero_int(row[CARD_NUMBER]) else 0)
         encounter_set = ((row[CARD_ENCOUNTER_SET] or '')
                          if card_type in CARD_TYPES_ENCOUNTER_SET
                          else row[CARD_ENCOUNTER_SET])
-        subtitle = ((row[CARD_ADVENTURE] or '')
+        subtitle = ((translated_row.get(CARD_ADVENTURE) or '')
                     if card_type in CARD_TYPES_ADVENTURE
-                    else row[CARD_ADVENTURE])
+                    else translated_row.get(CARD_ADVENTURE))
         if subtitle and card_type == 'Hero':
             subtitle = None
 
@@ -3553,10 +3585,11 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
             victory_points = None
         elif card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL:
             victory_points = (
-                _handle_int_str(row[CARD_VICTORY])
-                or _handle_int_str(row[BACK_PREFIX + CARD_VICTORY]))
+                _handle_int_str(translated_row.get(CARD_VICTORY))
+                or _handle_int_str(translated_row.get(
+                    BACK_PREFIX + CARD_VICTORY)))
         else:
-            victory_points = _handle_int_str(row[CARD_VICTORY])
+            victory_points = _handle_int_str(translated_row.get(CARD_VICTORY))
 
         additional_encounter_sets = [
             s.strip() for s in str(row[CARD_ADDITIONAL_ENCOUNTER_SETS] or ''
@@ -3566,37 +3599,42 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
         fix_linebreaks = card_type not in ('Presentation', 'Rules')
 
         text = _update_card_text('{}\n\n{}'.format(
-            row[CARD_KEYWORDS] or '',
-            row[CARD_TEXT] or ''
+            translated_row.get(CARD_KEYWORDS) or '',
+            translated_row.get(CARD_TEXT) or ''
             ), fix_linebreaks=fix_linebreaks).replace('\n', '\r\n').strip()
         if (card_type in ('Presentation', 'Rules') and
-                row[CARD_VICTORY] is not None):
-            text = '{}\r\n\r\nPage {}'.format(text, row[CARD_VICTORY])
+                translated_row.get(CARD_VICTORY) is not None):
+            text = '{}\r\n\r\nPage {}'.format(text,
+                                              translated_row[CARD_VICTORY])
 
-        if (row[CARD_SIDE_B] is not None and
-                (row[BACK_PREFIX + CARD_TEXT] is not None or
+        if (translated_row.get(CARD_SIDE_B) is not None and
+                (translated_row.get(BACK_PREFIX + CARD_TEXT) is not None or
                  (card_type in ('Presentation', 'Rules')
-                  and row[BACK_PREFIX + CARD_VICTORY] is not None)) and
+                  and translated_row.get(BACK_PREFIX + CARD_VICTORY)
+                  is not None)) and
                 card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL):
-            text_back = _update_card_text(row[BACK_PREFIX + CARD_TEXT] or '',
-                                          fix_linebreaks=fix_linebreaks
-                                          ).replace('\n', '\r\n').strip()
+            text_back = _update_card_text(
+                translated_row.get(BACK_PREFIX + CARD_TEXT) or '',
+                fix_linebreaks=fix_linebreaks
+                ).replace('\n', '\r\n').strip()
             if (card_type in ('Presentation', 'Rules') and
-                    row[BACK_PREFIX + CARD_VICTORY] is not None):
+                    translated_row.get(BACK_PREFIX + CARD_VICTORY) is not None):
                 text_back = '{}\r\n\r\nPage {}'.format(
-                    text_back, row[BACK_PREFIX + CARD_VICTORY])
+                    text_back, translated_row[BACK_PREFIX + CARD_VICTORY])
             text = '<b>Side A</b> {} <b>Side B</b> {}'.format(text, text_back)
 
-        flavor = (_update_card_text(row[CARD_FLAVOUR] or '', skip_rules=True,
+        flavor = (_update_card_text(translated_row.get(CARD_FLAVOUR) or '',
+                                    skip_rules=True,
                                     fix_linebreaks=False
                                     ).replace('\n', '\r\n').strip())
-        if (row[CARD_SIDE_B] is not None and
-                row[BACK_PREFIX + CARD_FLAVOUR] is not None and
+        if (translated_row.get(CARD_SIDE_B) is not None and
+                translated_row.get(BACK_PREFIX + CARD_FLAVOUR) is not None and
                 card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL):
-            flavor_back = _update_card_text(row[BACK_PREFIX + CARD_FLAVOUR],
-                                            skip_rules=True,
-                                            fix_linebreaks=False
-                                            ).replace('\n', '\r\n').strip()
+            flavor_back = _update_card_text(
+                translated_row[BACK_PREFIX + CARD_FLAVOUR],
+                skip_rules=True,
+                fix_linebreaks=False
+                ).replace('\n', '\r\n').strip()
             flavor = 'Side A: {} Side B: {}'.format(flavor, flavor_back)
 
         quantity = (int(row[CARD_QUANTITY])
@@ -3613,7 +3651,8 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
             'is_official': False,
             'is_unique': bool(row[CARD_UNIQUE]),
             'keywords': keywords,
-            'name': row[CARD_NAME],
+            'keywords_original': keywords_original,
+            'name': translated_row.get(CARD_NAME, ''),
             'octgnid': row[CARD_ID],
             'pack_code': row[CARD_SET_HOB_CODE],
             'pack_name': set_name,
@@ -3623,6 +3662,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
             'sphere_name': sphere,
             'text': text,
             'traits': traits,
+            'traits_original': traits_original,
             'type_code': str(type_name).lower().replace(' ', '-'),
             'type_name': type_name,
             'url': '',
@@ -3639,8 +3679,8 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
             'opposite_title': opposite_title,
             'quest_points': quest_points,
             'quest_stage': quest_stage,
-            'shadow_text': row[CARD_SHADOW] is not None and
-                           _update_card_text(row[CARD_SHADOW]
+            'shadow_text': translated_row.get(CARD_SHADOW) is not None and
+                           _update_card_text(translated_row[CARD_SHADOW]
                                              ).replace('\n', '\r\n').strip()
                            or None,
             'stage_letter': stage_letter,
@@ -3661,8 +3701,8 @@ def generate_hallofbeorn_json(conf, set_id, set_name):  # pylint: disable=R0912,
         res = json.dumps(json_data, ensure_ascii=False, indent=4)
         obj.write(res)
 
-    logging.info('[%s] ...Generating JSON file for Hall of Beorn (%ss)',
-                 set_name, round(time.time() - timestamp, 3))
+    logging.info('[%s, %s] ...Generating JSON file for Hall of Beorn (%ss)',
+                 set_name, lang, round(time.time() - timestamp, 3))
 
 
 def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R0915
