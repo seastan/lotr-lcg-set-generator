@@ -2693,6 +2693,13 @@ def load_external_xml(url, sets=None, encounter_sets=None):  # pylint: disable=R
         unique = _find_properties(card, 'Unique')
         unique = 1 if unique else None
 
+        if not card.attrib.get('size'):
+            row[CARD_BACK] = 'Player'
+        elif card.attrib.get('size') == 'EncounterCard':
+            row[CARD_BACK] = 'Encounter'
+        else:
+            row[CARD_BACK] = None
+
         row[CARD_ENCOUNTER_SET] = encounter_set
         row[CARD_ID] = card.attrib['id']
         row[CARD_NUMBER] = card_number
