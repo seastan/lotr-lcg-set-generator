@@ -639,7 +639,7 @@ def _update_card_text(text, lang='English', skip_rules=False,  # pylint: disable
     text = re.sub(r'\[vspace\]', ' ', text, flags=re.IGNORECASE)
     text = re.sub(r'\[tab\]', '    ', text, flags=re.IGNORECASE)
     text = re.sub(r'\[nobr\]', ' ', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[inline\]\n', ' ', text, flags=re.IGNORECASE)
+    text = re.sub(r'\[inline\]\n+', ' ', text, flags=re.IGNORECASE)
     text = re.sub(r'\[inline\]', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\[lsb\]', '[', text, flags=re.IGNORECASE)
     text = re.sub(r'\[rsb\]', ']', text, flags=re.IGNORECASE)
@@ -757,11 +757,14 @@ def extract_keywords(value):
                 '[inline]', '').split('.') if k != '']
     keywords = [re.sub(r' ([0-9]+)\[pp\]$', ' \\1 Per Player', k, re.I)
                 for k in keywords]
-    keywords = [k for k in keywords if re.match(
-                r'^([a-z\u00c0-\u017e]+ )?[a-z\u00c0-\u017e]+'
-                r'(?: -?[0-9X]+(?: Per Player)?)?(?: \([^\)]+\))?$',
-                k, re.I)]
     return keywords
+
+
+def _extract_traits(value):
+    """ Extract all traits from the string.
+    """
+    traits = [t.strip() for t in str(value or '').split('.') if t != '']
+    return traits
 
 
 def clear_folder(folder):
@@ -1792,6 +1795,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif (card_keywords is not None and
+              card_keywords.replace('[inline]', '').replace('.', '').replace(
+                  ' ', '') == ''):
+            message = 'Incorrect keywords for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if (card_keywords_back is not None and
                 card_type_back in CARD_TYPES_NO_KEYWORDS):
@@ -1806,6 +1819,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 (card_keywords_back.endswith('.') or
                  card_keywords_back.endswith('.[inline]'))):
             message = 'Missing period in keywords back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_keywords_back is not None and
+              card_keywords_back.replace('[inline]', '').replace(
+                  '.', '').replace(' ', '') == ''):
+            message = 'Incorrect keywords back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2040,6 +2063,47 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     'Incorrect card type back for card '
                     'ID %s in %s translations, row #%s', card_id,
                     lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+            if card_keywords:
+                keywords_translated = extract_keywords(
+                    TRANSLATIONS[lang][card_id].get(CARD_KEYWORDS))
+                keywords_original = extract_keywords(card_keywords)
+                if len(keywords_translated) != len(keywords_original):
+                    logging.error(
+                        'Incorrect number of keywords for card '
+                        'ID %s in %s translations, row #%s', card_id,
+                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+            if card_keywords_back:
+                keywords_translated = extract_keywords(
+                    TRANSLATIONS[lang][card_id].get(
+                        BACK_PREFIX + CARD_KEYWORDS))
+                keywords_original = extract_keywords(card_keywords_back)
+                if len(keywords_translated) != len(keywords_original):
+                    logging.error(
+                        'Incorrect number of keywords back for card '
+                        'ID %s in %s translations, row #%s', card_id,
+                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+            if card_traits:
+                traits_translated = _extract_traits(
+                    TRANSLATIONS[lang][card_id].get(CARD_TRAITS))
+                traits_original = _extract_traits(card_traits)
+                if len(traits_translated) != len(traits_original):
+                    logging.error(
+                        'Incorrect number of traits for card '
+                        'ID %s in %s translations, row #%s', card_id,
+                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+            if card_traits_back:
+                traits_translated = _extract_traits(
+                    TRANSLATIONS[lang][card_id].get(BACK_PREFIX + CARD_TRAITS))
+                traits_original = _extract_traits(card_traits_back)
+                if len(traits_translated) != len(traits_original):
+                    logging.error(
+                        'Incorrect number of traits back for card '
+                        'ID %s in %s translations, row #%s', card_id,
+                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
             for key, value in TRANSLATIONS[lang][card_id].items():
                 if key not in TRANSLATED_COLUMNS:
@@ -2733,7 +2797,8 @@ def _update_card_for_rules(card):
                           for t in str(card[CARD_TRAITS]).split('.') if t]
                          if card[CARD_TRAITS] else [])
     card[CARD_KEYWORDS] = ([k.lower().strip()
-                            for k in str(card[CARD_KEYWORDS]).split('.') if k]
+                            for k in str(card[CARD_KEYWORDS]).replace(
+                                '[inline]', '').split('.') if k]
                            if card[CARD_KEYWORDS] else [])
     card[CARD_UNIQUE] = '1' if card[CARD_UNIQUE] else '0'
     return card
@@ -3552,24 +3617,8 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
 
         keywords = extract_keywords(translated_row.get(CARD_KEYWORDS))
         keywords_original = extract_keywords(row.get(CARD_KEYWORDS))
-        if len(keywords) != len(keywords_original):
-            logging.error('Different number of keywords in %s translation for '
-                          'card ID %s', lang, row[CARD_ID])
-            logging.error('English: %s', keywords_original)
-            logging.error('Translated: %s', keywords)
-
-        traits = [t.strip() for t in
-                  str(translated_row.get(CARD_TRAITS) or '').split('.')
-                  if t != '']
-        traits_original = [t.strip() for t in
-                           str(row.get(CARD_TRAITS) or '').split('.')
-                           if t != '']
-        if len(traits) != len(traits_original):
-            logging.error('Different number of traits in %s translation for '
-                          'card ID %s', lang, row[CARD_ID])
-            logging.error('English: %s', traits_original)
-            logging.error('Translated: %s', traits)
-
+        traits = _extract_traits(translated_row.get(CARD_TRAITS))
+        traits_original = _extract_traits(row.get(CARD_TRAITS))
         position = (int(row[CARD_NUMBER])
                     if is_positive_or_zero_int(row[CARD_NUMBER]) else 0)
         encounter_set = ((row[CARD_ENCOUNTER_SET] or '')
