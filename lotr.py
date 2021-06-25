@@ -6147,8 +6147,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
 
         if pairs:
             ringsdb_output_path = os.path.join(
-                OUTPUT_RINGSDB_IMAGES_PATH, '{}.{}'.format(
-                    escape_filename(set_name), lang))
+                OUTPUT_RINGSDB_IMAGES_PATH, escape_filename(set_name))
             create_folder(ringsdb_output_path)
             clear_folder(ringsdb_output_path)
             for source_filename, target_filename in pairs:
