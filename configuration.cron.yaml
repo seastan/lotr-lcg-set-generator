@@ -71,7 +71,6 @@ set_ids:
 # List of set IDs to ignore
 ignore_set_ids:
   - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f  # ALeP - Children of Eorl
-  - 806149fc-e8ca-4feb-b0ab-7874449a4c23  # AR Scratch Set
 
 # List of set IDs to copy to OCTGN image destination
 set_ids_octgn_image_destination:
@@ -103,7 +102,7 @@ spanishdb_csv: false
 upload_dragncards: false
 
 # DragnCards hostname (username@hostname)
-dragncards_hostname: webhost@dragncards.com
+dragncards_hostname: ***
 
 # Updating test.ringsdb.com
 update_ringsdb: true

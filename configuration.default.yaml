@@ -102,7 +102,7 @@ spanishdb_csv: false
 upload_dragncards: false
 
 # DragnCards hostname (username@hostname)
-dragncards_hostname: webhost@dragncards.com
+dragncards_hostname: ***
 
 # Updating test.ringsdb.com
 update_ringsdb: false
