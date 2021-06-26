@@ -3,4 +3,5 @@ if "%ERRORLEVEL%"=="1" (
   cd /D "C:\Program Files\Google\Drive\"
   start /B googledrivesync.exe
   cd /D "%~dp0"
+  timeout /t 300
 )

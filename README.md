@@ -162,7 +162,7 @@ or restarting Backup and Sync from Google), you may create two additional batch 
 - `run_setup.bat`
 - `run_cleanup.bat`
 
-They will be called inside `run_all.bat` automatically.  See `run_cleanup.bat.example` as an example.
+They will be called inside `run_all.bat` automatically.  See `run_setup.bat.example` as an example.
 
 If you want to set up a Windows cron job, do the following:
 
@@ -200,7 +200,7 @@ The scripts will generate the following outputs:
 - `Output/PDF/<set name>.<language>/`: PDF files in `A4` and `letter` format for home printing (300 dpi PNG).
 - `Output/PreviewImages/<set name>.<language>/`: 600x429 JPG images for preview purposes.
 - `Output/RingsDB/<set name>/<set name>.csv`: an output file for RIngsDB.
-- `Output/RingsDBImages/<set name>.<language>/`: 300 dpi PNG images for RingsDB (the same as `Output/DB`, but player cards only and differently named).
+- `Output/RingsDBImages/<set name>/`: 300 dpi PNG images for RingsDB (the same as `Output/DB`, but player cards only and differently named).
 - `Output/RulesPDF/<set name>.<language>/Rules.<set name>.<language>.pdf`: a PDF file with all Rules pages (300 dpi PNG).
 - `Output/SpanishDB/<set name>/`: CSV files for Spanish database susurrosdelbosqueviejo.com.
 - `Output/SpanishDBImages/<set name>.<language>/`: 300 dpi PNG images for Spanish database (the same as `Output/DB`, but differently named).
