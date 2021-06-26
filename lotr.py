@@ -4766,6 +4766,31 @@ def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0914
     return (new_file_hash, old_file_hash)
 
 
+def verify_images(conf):
+    """ Verify images from Google Drive.
+    """
+    logging.info('Verifying image from Google Drive...')
+    logging.info('')
+    timestamp = time.time()
+
+    if os.path.exists(conf['artwork_path']):
+        for root, _, filenames in os.walk(conf['artwork_path']):
+            if root == os.path.join(conf['artwork_path'], '_Scratch'):
+                continue
+
+            for filename in filenames:
+                if (filename.endswith(' (1).png') or
+                        filename.endswith(' (1).jpg') or
+                        filename.endswith(' (2).png') or
+                        filename.endswith(' (2).jpg')):
+                    logging.error('Google Drive sync issues with file %s',
+                                  os.path.join(root, filename))
+
+    logging.info('')
+    logging.info('...Verifying images from Google Drive (%ss)',
+                 round(time.time() - timestamp, 3))
+
+
 def copy_custom_images(conf, set_id, set_name):
     """ Copy custom image files into the project folder.
     """

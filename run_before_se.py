@@ -58,6 +58,7 @@ def main(conf=None):  # pylint: disable=R0912,R0915
         lotr.save_data_for_bot(conf)
 
     if conf['output_languages']:
+        lotr.verify_images(conf)
         lotr.reset_project_folders(conf)
 
     strange_eons = False
