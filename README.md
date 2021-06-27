@@ -152,7 +152,6 @@ and is not 100% reliable (it may stuck on the Strange Eons step).  To minimize t
 
 - Don't leave Strange Eons open.
 - Make sure the Strange Eons window was maximized when you closed it.
-- Make sure no cards remained opened when you closed Strange Eons.
 - Make sure the screen is not locked (and doesn't lock automatically).
 - If the script started, don't touch the keyboard or mouse.
 
