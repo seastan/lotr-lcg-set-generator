@@ -11,31 +11,31 @@ gimp_console_path: C:\Program Files\GIMP 2\bin\gimp-console-2.10.exe
 magick_path: C:\Program Files\ImageMagick-7.0.10-Q16-HDRI\magick.exe
 
 # Path to id_rsa key to upload files to DragnCards
-dragncards_id_rsa_path: 
+dragncards_id_rsa_path:
 
 # Path to remote logs folder (may be empty)
-remote_logs_path: 
+remote_logs_path:
 
 # Path to OCTGN set.xml destination folder (may be empty)
-octgn_set_xml_destination_path: 
+octgn_set_xml_destination_path:
 
 # Path to OCTGN set.xml scratch destination folder (may be empty)
-octgn_set_xml_scratch_destination_path: 
+octgn_set_xml_scratch_destination_path:
 
 # Path to OCTGN .o8d destination folder (may be empty)
-octgn_o8d_destination_path: 
+octgn_o8d_destination_path:
 
 # Path to OCTGN .o8d scratch destination folder (may be empty)
-octgn_o8d_scratch_destination_path: 
+octgn_o8d_scratch_destination_path:
 
 # Path to OCTGN image destination folder (may be empty)
-octgn_image_destination_path: 
+octgn_image_destination_path:
 
 # Path to DB destination folder (may be empty)
-db_destination_path: 
+db_destination_path:
 
 # Path to TTS destination folder (may be empty)
-tts_destination_path: 
+tts_destination_path:
 
 # Remote DragnCards path to image folder
 dragncards_remote_image_path: /var/www/dragncards.com/dragncards/frontend/public/images/cards/
@@ -111,7 +111,7 @@ update_ringsdb: false
 ringsdb_url: https://test.ringsdb.com
 
 # test.ringsdb.com session id: <PHPSESSID>|<REMEMBERME>
-ringsdb_sessionid: 
+ringsdb_sessionid:
 
 # List of image outputs
 outputs:

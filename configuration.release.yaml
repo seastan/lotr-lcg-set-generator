@@ -11,10 +11,10 @@ gimp_console_path: C:\Program Files\GIMP 2\bin\gimp-console-2.10.exe
 magick_path: C:\Program Files\ImageMagick-7.0.10-Q16-HDRI\magick.exe
 
 # Path to id_rsa key to upload files to DragnCards
-dragncards_id_rsa_path: id_rsa
+dragncards_id_rsa_path:
 
 # Path to remote logs folder (may be empty)
-remote_logs_path: C:\Google Drive\A Long-extended Party\Logs
+remote_logs_path:
 
 # Path to OCTGN set.xml destination folder (may be empty)
 octgn_set_xml_destination_path:
@@ -29,13 +29,13 @@ octgn_o8d_destination_path:
 octgn_o8d_scratch_destination_path:
 
 # Path to OCTGN image destination folder (may be empty)
-octgn_image_destination_path: C:\Google Drive\A Long-extended Party\Playtesting\OCTGN Files\ImageDatabase
+octgn_image_destination_path:
 
 # Path to DB destination folder (may be empty)
-db_destination_path: C:\Google Drive\A Long-extended Party\RenderedImages
+db_destination_path:
 
 # Path to TTS destination folder (may be empty)
-tts_destination_path: C:\Google Drive\A Long-extended Party\TTS
+tts_destination_path:
 
 # Remote DragnCards path to image folder
 dragncards_remote_image_path: /var/www/dragncards.com/dragncards/frontend/public/images/cards/
@@ -48,7 +48,7 @@ dragncards_remote_deck_path: /var/www/dragncards.com/Lord-of-the-Rings/o8g/Decks
 
 # Whether to reprocess all cards (true)
 # or update only the cards, changed since the previous script run (false)
-reprocess_all: false
+reprocess_all: true
 
 # Whether to reprocess all cards even when reprocess_all=false if the previous script run didn't succeed (true or false)
 reprocess_all_on_error: true
@@ -64,13 +64,13 @@ parallelism: default
 
 # List of set IDs to work on
 set_ids:
-  - all  # all non-scratch sets
-  - all_scratch  # all scratch sets
-#  - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f  # ALeP - Children of Eorl
+#  - all  # all non-scratch sets
+#  - all_scratch  # all scratch sets
+  - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f  # ALeP - Children of Eorl
 
 # List of set IDs to ignore
 ignore_set_ids:
-  - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f  # ALeP - Children of Eorl
+#  - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f  # ALeP - Children of Eorl
 
 # List of set IDs to copy to OCTGN image destination
 set_ids_octgn_image_destination:
@@ -78,19 +78,19 @@ set_ids_octgn_image_destination:
 #  - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f  # ALeP - Children of Eorl
 
 # Creating set.xml files for OCTGN (true or false)
-octgn_set_xml: false
+octgn_set_xml: true
 
 # Creating .o8d files for OCTGN and DragnCards (true or false)
 octgn_o8d: true
 
 # Creating CSV files for RingsDB (true or false)
-ringsdb_csv: false
+ringsdb_csv: true
 
 # Creating JSON files for DragnCards (true or false)
 dragncards_json: true
 
 # Creating JSON files for Hall of Beorn (true or false)
-hallofbeorn_json: false
+hallofbeorn_json: true
 
 # Creating CSV files for the French database sda.cgbuilder.fr (true or false)
 frenchdb_csv: false
@@ -99,7 +99,7 @@ frenchdb_csv: false
 spanishdb_csv: false
 
 # Uploading outputs to DragnCards
-upload_dragncards: true
+upload_dragncards: false
 
 # DragnCards hostname (username@hostname)
 dragncards_hostname: ***
@@ -118,15 +118,15 @@ outputs:
   English:
     - db
     - octgn
-#    - pdf_a4
-#    - pdf_letter
-#    - mbprint_7z
-#    - mbprint_pdf_7z
-#    - makeplayingcards_7z
-#    - genericpng_7z
-#    - genericpng_pdf_a4_7z
-#    - genericpng_pdf_letter_7z
-#    - rules_pdf
+    - pdf_a4
+    - pdf_letter
+    - mbprint_7z
+    - mbprint_pdf_7z
+    - makeplayingcards_7z
+    - genericpng_7z
+    - genericpng_pdf_a4_7z
+    - genericpng_pdf_letter_7z
+    - rules_pdf
     - tts
   German:
 #    - db
