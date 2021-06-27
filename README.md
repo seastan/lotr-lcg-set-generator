@@ -241,6 +241,8 @@ Additionally, if you specified OCTGN destination paths, OCTGN outputs will be co
 - `[rsb]`: ]
 - `[lquot]`: unmatched left quote
 - `[rquot]`: unmatched right quote
+- `[lfquot]`: unmatched French left quote
+- `[rrquot]`: unmatched French right quote
 - `[quot]`: "
 - `[apos]`: '
 - `[hyphen]`: -

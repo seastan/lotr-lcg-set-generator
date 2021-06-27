@@ -1100,6 +1100,8 @@ def _clean_value(value):  # pylint: disable=R0915
     value = value.replace('"', '[unmatched quot]')
     value = re.sub(r'\[lquot\]', '“', value, flags=re.IGNORECASE)
     value = re.sub(r'\[rquot\]', '”', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[lfquot\]', '«', value, flags=re.IGNORECASE)
+    value = re.sub(r'\[rfquot\]', '»', value, flags=re.IGNORECASE)
     value = re.sub(r'\[quot\]', '"', value, flags=re.IGNORECASE)
     value = re.sub(r'\[apos\]', "'", value, flags=re.IGNORECASE)
     while True:
