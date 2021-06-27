@@ -171,6 +171,7 @@ List of **!art** commands:
 **!art artists <set name or set code>** - display a copy-pasteable list of artist names (for example: `!art artists Children of Eorl` or `!art artists CoE`)
 **!art save <artist>** (as a reply to a message with an image attachment) - save the image as a card's artwork for the front side (for example: `!art save Ted Nasmith`)
 **!art saveb <artist>** (as a reply to a message with an image attachment) - save the image as a card's artwork for the back side (for example: `!art saveb John Howe`)
+**!art savescr** (as a reply to a message with an image attachment) - save the image to the scratch folder
 **!art verify <set name or set code>** - verify artwork for a set (for example: `!art verify Children of Eorl` or `!art verify CoE`)
 **!art help** - display this help message
 """,
@@ -2333,7 +2334,7 @@ Targets removed.
 
 
     async def _save_artwork(self, message, side, artist):  # pylint: disable=R0911,R0914
-        """ Save an artwork image.
+        """ Save an artwork image for the card.
         """
         data = await read_card_data()
 
@@ -2392,6 +2393,42 @@ Targets removed.
                         os.remove(os.path.join(folder, filename))
 
                 break
+
+            with open(path, 'wb') as f_obj:
+                f_obj.write(content)
+
+            self.rclone_art = True
+
+        return ''
+
+
+    async def _save_scratch_artwork(self, message):
+        """ Save an artwork image to the scratch folder.
+        """
+        if (not message.reference or not message.reference.resolved
+                or not message.reference.resolved.attachments):
+            return 'please reply to a message with an image attachment'
+
+        attachment = message.reference.resolved.attachments[0]
+        if (attachment.content_type not in ('image/png', 'image/jpeg') and
+                not attachment.filename.lower().split('.')[-1] in
+                ('png', 'jpg', 'jpeg')):
+            return 'attachment must be either JPG ot PNG image'
+
+        artwork_destination_path = CONF.get('artwork_destination_path')
+        if not artwork_destination_path:
+            raise RCloneFolderError('no artwork folder specified on the '
+                                    'server')
+
+        content = await attachment.read()
+
+        folder = os.path.join(artwork_destination_path, '_Scratch')
+        filename = lotr.escape_filename(attachment.filename).replace(' ', '_')
+        path = os.path.join(folder, filename)
+
+        async with art_lock:
+            if not os.path.exists(folder):
+                os.mkdir(folder)
 
             with open(path, 'wb') as f_obj:
                 f_obj.write(content)
@@ -2586,7 +2623,7 @@ Targets removed.
         return res
 
 
-    async def _process_art_command(self, message):  # pylint: disable=R0912
+    async def _process_art_command(self, message):  # pylint: disable=R0912,R0915
         """ Process an art command.
         """
         if message.content.lower() == '!art':
@@ -2616,6 +2653,20 @@ Targets removed.
             await message.channel.send('done')
         elif command.lower() == 'save':
             await message.channel.send('please specify the artist')
+        elif command.lower() == 'savescr':
+            try:
+                error = await self._save_scratch_artwork(message)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            if error:
+                await message.channel.send(error)
+                return
+
+            await message.channel.send('done')
         elif command.lower().startswith('verify '):
             await message.channel.send('Please wait...')
             try:
