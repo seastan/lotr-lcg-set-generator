@@ -1081,6 +1081,8 @@ def _clean_value(value):  # pylint: disable=R0915
     """ Clean a value from the spreadsheet.
     """
     value = str(value).strip()
+    value = value.replace('\r\n', '\n')
+    value = value.replace('\r', '\n')
     value = value.replace('`', "'")
     value = value.replace('\xa0', ' ')
     value = value.replace('...', '…')
