@@ -130,18 +130,28 @@ for details).
   - `ringsdb_sessionid`: test.ringsdb.com session ID
   - `outputs`: list of image outputs for each language (if you added or uncommented new outputs, you also need to set `reprocess_all` to `true`)
 
+Also, see `configuration.release.yaml` for another configuration example.
+
 **Usage**
 
 To run the workflow, go to the root folder of this repo and follow these steps:
 
-- [skip this step, if you don't use VirtualEnv] `env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
+- [skip this step, if you don't use VirtualEnv] `env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux).
 - Make sure that Strange Eons is closed.
-- `python run_before_se.py` (or `python run_before_se.py <path to a different configuration yaml>` if you want to pass a different configuration file)
+- `python run_before_se.py`.
 - Pay attention to possible errors in the script output.
-- Open `setGenerator.seproject`and run `Script/makeCards` script by double clicking it.
+- Open `setGenerator.seproject`and run `makeCards` script by double clicking it.
   Once completed, close Strange Eons and wait until it finished packing the project.
-- `python run_after_se.py` (or `python run_after_se.py <path to a different configuration yaml>` if you want to pass a different configuration file)
+- `python run_after_se.py`.
 - Pay attention to possible errors in the script output.
+
+For debugging purposes you can also run the steps above using the Jupyter notebook (it doesn't use parallelism):
+
+- [skip this step, if you don't use VirtualEnv] `env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
+- `jupyter notebook`
+- Open `setGenerator.ipynb` in the browser.
+
+**Automatic Pipeline**
 
 To run the workflow as one script, run:
 
@@ -161,7 +171,9 @@ or restarting Backup and Sync from Google), you may create two additional batch 
 - `run_setup.bat`
 - `run_cleanup.bat`
 
-They will be called inside `run_all.bat` automatically.  See `run_setup.bat.example` as an example.
+They will be called inside `run_all.bat` automatically.  See `run_setup.bat.example` for an example.
+
+Also, see `configuration.nightly.yaml` for a configuration example.
 
 If you want to set up a Windows cron job, do the following:
 
@@ -174,11 +186,13 @@ If you want to set up a Windows cron job, do the following:
 - Click `Browse...`, choose `run_all.bat` and click `OK`.
 - Click `OK`.
 
-For debugging purposes you can also run the steps above using the Jupyter notebook (it doesn't use parallelism):
+**Cron Job Pipeline**
 
-- [skip this step, if you don't use VirtualEnv] `env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
-- `jupyter notebook`
-- Open `setGenerator.ipynb` in the browser.
+See `configuration.cron.yaml` for a configuration example.
+
+T.B.D.
+
+**Outputs**
 
 The scripts will generate the following outputs:
 

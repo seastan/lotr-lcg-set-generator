@@ -58,8 +58,7 @@ DISCORD_CONF_PATH = 'discord.yaml'
 INTERNET_SENSOR_PATH = '/home/homeassistant/.homeassistant/internet_state'
 LOG_PATH = 'mpc_monitor.log'
 MAIL_COUNTER_PATH = 'mpc_monitor.cnt'
-MAILS_PATH = '/home/homeassistant/.homeassistant/mails'
-WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
+MAILS_PATH = 'mails'
 
 URL_TIMEOUT = 60
 URL_RETRIES = 1
@@ -123,8 +122,9 @@ def create_mail(subject, body='', skip_check=False):
     if is_non_ascii(subject):
         subject = Header(subject, 'utf8').encode()
 
-    with open('{}/{}_{}'.format(MAILS_PATH, int(time.time()), uuid.uuid4()),
-              'w') as fobj:
+    path = os.path.join(MAILS_PATH,
+                        '{}_{}'.format(int(time.time()), uuid.uuid4()))
+    with open(path, 'w') as fobj:
         json.dump({'subject': subject, 'body': body, 'html': False}, fobj)
 
 
@@ -211,7 +211,7 @@ def send_discord(message):
         message = 'Discord message failed: {}: {}'.format(
             type(exc).__name__, str(exc))
         logging.exception(message)
-        create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
 
     return False
 
@@ -426,7 +426,7 @@ Attempting to rename it automatically..."""
         message = ('Attempt to rename deck {} automatically failed: {}: {}'
                    .format(actual_deck_name, type(exc).__name__, str(exc)))
         logging.exception(message)
-        create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
         discord_message = f"""Attempt to rename deck **{actual_deck_name}** automatically failed!
 {DISCORD_USERS}"""
         send_discord(discord_message)
@@ -668,7 +668,7 @@ def main():
         message = 'Script failed: {}: {}'.format(type(exc).__name__, str(exc))
         logging.exception(message)
         try:
-            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
         except Exception as exc_new:
             logging.exception(str(exc_new))
     finally:
@@ -676,6 +676,6 @@ def main():
 
 
 if __name__ == '__main__':
-    os.chdir(WORKING_DIRECTORY)
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     init_logging()
     main()

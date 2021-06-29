@@ -12,6 +12,8 @@ Frogmorton/imagesRaw/*.png
 Frogmorton/XML/*.xml
 imagesEons/*/*/*
 imagesTTS/*/*
+internet_state
+mails
 Output/*/*/*
 setEons/*.xml
 setEons/*.xml.old

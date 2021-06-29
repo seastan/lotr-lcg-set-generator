@@ -28,8 +28,7 @@ ALERT_SUBJECT_TEMPLATE = 'LotR Remote Pipeline Monitor ALERT: {}'
 ERROR_SUBJECT_TEMPLATE = 'LotR Remote Pipeline Monitor ERROR: {}'
 
 LOG_PATH = 'monitor_remote_pipeline.log'
-MAILS_PATH = '/home/homeassistant/.homeassistant/mails'
-WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
+MAILS_PATH = 'mails'
 
 
 class RCloneError(Exception):
@@ -60,8 +59,9 @@ def create_mail(subject, body=''):
     if is_non_ascii(subject):
         subject = Header(subject, 'utf8').encode()
 
-    with open('{}/{}_{}'.format(MAILS_PATH, int(time.time()), uuid.uuid4()),
-              'w') as fobj:
+    path = os.path.join(MAILS_PATH,
+                        '{}_{}'.format(int(time.time()), uuid.uuid4()))
+    with open(path, 'w') as fobj:
         json.dump({'subject': subject, 'body': body, 'html': False}, fobj)
 
 
@@ -110,7 +110,7 @@ def run():
     if len(parts) == 1 or not parts[0].isdigit():
         message = 'Incorrect parsing logs result: {}'.format(res)
         logging.error(message)
-        create_mail(ERROR_SUBJECT_TEMPLATE.format(message), res)
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
         return
 
     code, description = parts
@@ -138,7 +138,7 @@ def run():
     else:
         message = 'Incorrect parsing logs result: {}'.format(res)
         logging.error(message)
-        create_mail(ERROR_SUBJECT_TEMPLATE.format(message), res)
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
 
 
 def main():
@@ -151,7 +151,7 @@ def main():
         message = 'Script failed: {}: {}'.format(type(exc).__name__, str(exc))
         logging.exception(message)
         try:
-            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
         except Exception as exc_new:
             logging.exception(str(exc_new))
     finally:
@@ -159,6 +159,6 @@ def main():
 
 
 if __name__ == '__main__':
-    os.chdir(WORKING_DIRECTORY)
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     init_logging()
     main()

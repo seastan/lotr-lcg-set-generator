@@ -32,9 +32,8 @@ DISCORD_CONF_PATH = 'discord.yaml'
 INTERNET_SENSOR_PATH = '/home/homeassistant/.homeassistant/internet_state'
 LOG_PATH = 'cron.log'
 MAIL_COUNTER_PATH = 'cron.cnt'
-MAILS_PATH = '/home/homeassistant/.homeassistant/mails'
+MAILS_PATH = 'mails'
 SANITY_CHECK_PATH = 'sanity_check.txt'
-WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 
 ERROR_SUBJECT_TEMPLATE = 'LotR ALeP Cron ERROR: {}'
 SANITY_CHECK_SUBJECT_TEMPLATE = 'LotR ALeP Cron CHECK: {}'
@@ -126,7 +125,7 @@ def send_discord(message):
         message = 'Discord message failed: {}: {}'.format(
             type(exc).__name__, str(exc))[:LOG_LIMIT]
         logging.exception(message)
-        create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
 
     return False
 
@@ -151,8 +150,9 @@ def create_mail(subject, body='', skip_check=False):
     if is_non_ascii(subject):
         subject = Header(subject, 'utf8').encode()
 
-    with open('{}/{}_{}'.format(MAILS_PATH, int(time.time()), uuid.uuid4()),
-              'w') as fobj:
+    path = os.path.join(MAILS_PATH,
+                        '{}_{}'.format(int(time.time()), uuid.uuid4()))
+    with open(path, 'w') as fobj:
         json.dump({'subject': subject, 'body': body, 'html': False}, fobj)
 
 
@@ -291,7 +291,7 @@ def run(conf=None):  # pylint: disable=R0912
         logging.exception(message)
         try:
             send_discord(message)
-            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
         except Exception as exc_new:
             logging.exception(str(exc_new)[:LOG_LIMIT])
     finally:
@@ -304,6 +304,6 @@ def run(conf=None):  # pylint: disable=R0912
 
 
 if __name__ == '__main__':
-    os.chdir(WORKING_DIRECTORY)
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     init_logging()
     run()

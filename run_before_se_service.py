@@ -17,11 +17,10 @@ from run_before_se_cron import init_logging, run
 
 
 SLEEP_TIME = 50
-WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 
 
 if __name__ == '__main__':
-    os.chdir(WORKING_DIRECTORY)
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     init_logging()
     conf = read_conf() # pylint: disable=C0103
     while True:

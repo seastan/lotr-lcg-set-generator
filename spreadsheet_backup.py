@@ -18,7 +18,7 @@ import requests
 
 BACKUP_PATH = '/home/homeassistant/.homeassistant/lotr'
 ERROR_SUBJECT = 'LotR ALeP Spreadsheet Backup Error'
-MAILS_PATH = '/home/homeassistant/.homeassistant/mails'
+MAILS_PATH = 'mails'
 SHEET_GDID = '16NnATw8C5iZ6gGTs5ZWmZmgrbbEoWJAc4PKBp72DGis'
 
 MAX_FILES = 10
@@ -27,8 +27,9 @@ MAX_FILES = 10
 def create_mail(subject, body=''):
     """ Create mail file.
     """
-    with open('{}/{}_{}'.format(MAILS_PATH, int(time.time()), uuid.uuid4()),
-              'w') as fobj:
+    path = os.path.join(MAILS_PATH,
+                        '{}_{}'.format(int(time.time()), uuid.uuid4()))
+    with open(path, 'w') as fobj:
         json.dump({'subject': subject, 'body': body, 'html': True}, fobj)
 
 
@@ -64,4 +65,6 @@ if __name__ == '__main__':
     try:
         main()
     except Exception as exc:
-        create_mail(ERROR_SUBJECT, '{}'.format(exc))
+        create_mail(ERROR_SUBJECT,
+                    'Script failed: {}: {}'.format(type(exc).__name__,
+                                                   str(exc)))

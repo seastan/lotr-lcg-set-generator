@@ -42,9 +42,8 @@ CONF_PATH = 'discord.yaml'
 IMAGES_PATH = os.path.join('Discord', 'Images')
 LOG_PATH = 'discord_bot.log'
 MAIL_COUNTER_PATH = 'discord_bot.cnt'
-MAILS_PATH = '/home/homeassistant/.homeassistant/mails'
+MAILS_PATH = 'mails'
 PLAYTEST_PATH = os.path.join('Discord', 'playtest.json')
-WORKING_DIRECTORY = '/home/homeassistant/lotr-lcg-set-generator/'
 
 CRON_ERRORS_CMD = './cron_errors.sh'
 CRON_LOG_CMD = './cron_log.sh'
@@ -238,8 +237,9 @@ def create_mail(subject, body='', skip_check=False):
     if is_non_ascii(subject):
         subject = Header(subject, 'utf8').encode()
 
-    with open('{}/{}_{}'.format(MAILS_PATH, int(time.time()), uuid.uuid4()),
-              'w') as fobj:
+    path = os.path.join(MAILS_PATH,
+                        '{}_{}'.format(int(time.time()), uuid.uuid4()))
+    with open(path, 'w') as fobj:
         json.dump({'subject': subject, 'body': body, 'html': False}, fobj)
 
 
@@ -315,9 +315,10 @@ def get_discord_configuration():
 
         return conf
     except Exception as exc:
-        logging.exception(str(exc))
-        create_mail(ERROR_SUBJECT_TEMPLATE.format(
-            'error obtaining Discord configuration: {}'.format(str(exc))))
+        message = 'Error obtaining Discord configuration: {}: {}'.format(
+            type(exc).__name__, str(exc))
+        logging.exception(message)
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
         return {}
 
 
@@ -1001,7 +1002,7 @@ async def get_artwork_files(set_id):
         message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
                                                                  stderr)
         logging.error(message)
-        create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
         raise RCloneFolderError(message)
 
     folder = os.path.join(path, set_id)
@@ -1051,7 +1052,7 @@ async def get_rendered_images(set_name):
                                                                  stderr)
         logging.error(message)
         if 'directory not found' not in stderr:
-            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
 
         return {}
 
@@ -1236,7 +1237,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                         logging.exception(str(exc))
                         message = 'error processing {}: {}'.format(
                             filename, str(exc))
-                        create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+                        create_mail(ERROR_SUBJECT_TEMPLATE.format(message),
+                                    message)
                         if self.cron_channel:
                             await self._send_channel(self.cron_channel,
                                                      message)
@@ -1248,10 +1250,10 @@ class MyClient(discord.Client):  # pylint: disable=R0902
 
                 break
         except Exception as exc:
-            logging.exception(str(exc))
-            create_mail(ERROR_SUBJECT_TEMPLATE.format(
-                'unexpected error during watching for changes: {}'
-                .format(str(exc))))
+            message = ('Unexpected error during watching for changes: {}: {}'
+                       .format(type(exc).__name__, str(exc)))
+            logging.exception(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
 
 
     async def _rclone_art(self):
@@ -1264,7 +1266,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
             message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
                                                                      stderr)
             logging.error(message)
-            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
             return
 
         artwork_destination_path = CONF.get('artwork_destination_path')
@@ -2757,7 +2759,8 @@ Targets removed.
                             message = ('RClone failed, stdout: {}, stderr: {}'
                                        .format(stdout, stderr))
                             logging.error(message)
-                            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+                            create_mail(ERROR_SUBJECT_TEMPLATE.format(message),
+                                        message)
 
                         await channel.send(
                             "Can't download the image from Google Drive")
@@ -2798,7 +2801,8 @@ Targets removed.
                         message = ('RClone failed, stdout: {}, stderr: {}'
                                    .format(stdout, stderr))
                         logging.error(message)
-                        create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+                        create_mail(ERROR_SUBJECT_TEMPLATE.format(message),
+                                    message)
 
                     return "Can't download the image from Google Drive"
 
@@ -2905,14 +2909,14 @@ Targets removed.
             elif message.content.lower().startswith('!help'):
                 await self._process_help_command(message)
         except Exception as exc:
-            logging.exception(str(exc))
-            create_mail(ERROR_SUBJECT_TEMPLATE.format(
-                'unexpected error during processing a message: {}'
-                .format(str(exc))))
+            message = ('Unexpected error during  processing a message: {}: {}'
+                       .format(type(exc).__name__, str(exc)))
+            logging.exception(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
 
 
 if __name__ == '__main__':
-    os.chdir(WORKING_DIRECTORY)
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     init_logging()
     CONF.update(get_discord_configuration())
     intents = discord.Intents.default()

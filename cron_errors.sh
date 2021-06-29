@@ -1,2 +1,3 @@
 #!/bin/sh
-/home/homeassistant/lotr-lcg-set-generator/cron_log.sh | egrep ' ERROR: | INFO: Started: '
+cd "$(dirname "$0")"
+./cron_log.sh | egrep ' ERROR: | INFO: Started: '
