@@ -949,7 +949,7 @@ def reset_project_folders(conf):
                  round(time.time() - timestamp, 3))
 
 
-def _get_content(url):
+def get_content(url):
     """ Get URL content.
     """
     for i in range(URL_RETRIES):
@@ -999,7 +999,7 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
         url = (
             'https://docs.google.com/spreadsheets/d/{}/export?format=csv'
             .format(conf['sheet_gdid']))
-        res = _get_content(url).decode('utf-8')
+        res = get_content(url).decode('utf-8')
         if not res or '<html' in res:
             raise SheetError("Can't download the Google Sheet")
 
@@ -1026,7 +1026,7 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
         url = (
             'https://docs.google.com/spreadsheets/d/{}/export?format=csv&gid={}'
             .format(conf['sheet_gdid'], SHEET_IDS[sheet]))
-        res = _get_content(url).decode('utf-8')
+        res = get_content(url).decode('utf-8')
         if not res or '<html' in res:
             raise SheetError("Can't download {} from the Google Sheet"
                              .format(sheet))
@@ -2684,7 +2684,7 @@ def load_external_xml(url, sets=None, encounter_sets=None):  # pylint: disable=R
             XML_CACHE[url] = content
             root = ET.fromstring(content)
         else:
-            content = _get_content(url)
+            content = get_content(url)
             if not content or not b'<?xml' in content:
                 logging.error("Can't download XML from %s, ignoring", url)
                 return res

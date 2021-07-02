@@ -462,6 +462,10 @@ Setup: Unique:1 & Trait:Troll; 4 Sacked!
 Staging Setup: The Carrock
 ```
 
+**Standalone Scrips**
+
+- `hallofbeorn_stat.py`: Collect various statistics from Hall of Beorn and put outputs into `Output/Scripts` folder.
+
 **GIMP Plugins**
 
 You may use GIMP plugins separately.  See the description of each of them in `GIMP/scripts.py`.

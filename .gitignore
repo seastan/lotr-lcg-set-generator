@@ -15,6 +15,7 @@ imagesTTS/*/*
 internet_state
 mails
 Output/*/*/*
+Output/Scripts/*.csv
 setEons/*.xml
 setEons/*.xml.old
 setOCTGN/*.xml
