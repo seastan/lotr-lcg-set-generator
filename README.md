@@ -462,7 +462,7 @@ Setup: Unique:1 & Trait:Troll; 4 Sacked!
 Staging Setup: The Carrock
 ```
 
-**Standalone Scrips**
+**Standalone Scripts**
 
 - `hallofbeorn_stat.py`: Collect various statistics from Hall of Beorn and put outputs into `Output/Scripts` folder.
 
