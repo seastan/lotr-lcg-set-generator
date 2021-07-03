@@ -403,6 +403,14 @@ SPANISH = {
     'Treachery': 'Traici\u00f3n',
     'Treasure': 'Tesoro'
 }
+RESTRICTED_TRANSLATION = {
+    'English': 'Restricted',
+    'French': 'Restreint',
+    'German': 'Eingeschränkt',
+    'Italian': 'Limitato',
+    'Polish': 'Ograniczenie',
+    'Spanish': 'Restringido'
+}
 
 CARD_COLUMNS = {}
 SHEET_IDS = {}
@@ -2751,6 +2759,14 @@ def load_external_xml(url, sets=None, encounter_sets=None):  # pylint: disable=R
         keywords = _find_properties(card, 'Keywords')
         keywords = keywords[0].attrib['value'] if keywords else None
 
+        text = _find_properties(card, 'Text')
+        text = text[0].attrib['value'] if text else ''
+        if ' Restricted.' in text or '\nRestricted.' in text:
+            if keywords:
+                keywords = 'Restricted. {}'.format(keywords)
+            else:
+                keywords = 'Restricted.'
+
         card_number = _find_properties(card, 'Card Number')
         card_number = (
             int(card_number[0].attrib['value'])
@@ -3621,6 +3637,13 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
 
         keywords = extract_keywords(translated_row.get(CARD_KEYWORDS))
         keywords_original = extract_keywords(row.get(CARD_KEYWORDS))
+
+        if (row.get(CARD_TEXT) and
+                (' Restricted.' in row[CARD_TEXT] or
+                 '\nRestricted.' in row[CARD_TEXT])):
+            keywords_original.append('Restricted')
+            keywords.append(RESTRICTED_TRANSLATION[lang])
+
         traits = _extract_traits(translated_row.get(CARD_TRAITS))
         traits_original = _extract_traits(row.get(CARD_TRAITS))
         position = (int(row[CARD_NUMBER])

@@ -902,6 +902,11 @@ def get_quest_stat(cards):  # pylint: disable=R0912,R0915
             keywords = keywords.union(
                 lotr.extract_keywords(card[lotr.CARD_KEYWORDS]))
 
+        if (card.get(lotr.CARD_TEXT) and
+                (' Restricted.' in card[lotr.CARD_TEXT] or
+                 '\nRestricted.' in card[lotr.CARD_TEXT])):
+            keywords.add('Restricted')
+
         if card.get(lotr.CARD_ENCOUNTER_SET):
             encounter_sets.add(card[lotr.CARD_ENCOUNTER_SET])
 
