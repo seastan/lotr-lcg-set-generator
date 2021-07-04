@@ -9,7 +9,7 @@ curl -L https://raw.github.com/pageauc/rclone4pi/master/rclone-install.sh | bash
 rclone config
 
 Setup a cron as:
-6 6 * * *  python3 /home/homeassistant/lotr-lcg-set-generator/monitor_remote_pipeline.py >> /home/homeassistant/.homeassistant/cron.log 2>&1
+6 6 * * *  python3 <path>/monitor_remote_pipeline.py >> <path>/cron.log 2>&1
 """
 from email.header import Header
 import json

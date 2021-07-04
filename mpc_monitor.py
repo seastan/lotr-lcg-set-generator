@@ -8,7 +8,7 @@ Create discord.yaml (see discord.default.yaml).
 Create  mpc_monitor.json (see mpc_monitor.default.json).
 
 Setup a cron as:
-1-59/2 * * * * flock -xn /home/homeassistant/lotr-lcg-set-generator/mpc_monitor.lock -c 'python3 /home/homeassistant/lotr-lcg-set-generator/mpc_monitor.py > /dev/null' 2>&1
+1-59/2 * * * * flock -xn <path>/mpc_monitor.lock -c 'python3 <path>/mpc_monitor.py > /dev/null' 2>&1
 """
 from datetime import datetime
 from email.header import Header
@@ -55,7 +55,7 @@ MAIL_QUOTA = 50
 
 CONF_PATH = 'mpc_monitor.json'
 DISCORD_CONF_PATH = 'discord.yaml'
-INTERNET_SENSOR_PATH = '/home/homeassistant/.homeassistant/internet_state'
+INTERNET_SENSOR_PATH = 'internet_state'
 LOG_PATH = 'mpc_monitor.log'
 MAIL_COUNTER_PATH = 'mpc_monitor.cnt'
 MAILS_PATH = 'mails'
@@ -91,10 +91,13 @@ def init_logging():
 def internet_state():
     """ Check external internet sensor.
     """
+    if not os.path.exists(INTERNET_SENSOR_PATH):
+        return True
+
     try:
         with open(INTERNET_SENSOR_PATH, 'r') as obj:
-            value = obj.read().strip()
-            return value != 'off'
+            value = obj.read()
+            return value.strip() != 'off'
     except Exception as exc:
         message = str(exc)
         logging.warning(message)

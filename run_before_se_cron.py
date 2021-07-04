@@ -29,8 +29,8 @@ from run_before_se import main
 
 
 DISCORD_CONF_PATH = 'discord.yaml'
-INTERNET_SENSOR_PATH = '/home/homeassistant/.homeassistant/internet_state'
-LOG_PATH = 'cron.log'
+INTERNET_SENSOR_PATH = 'internet_state'
+LOG_PATH = 'run_before_se.log'
 MAIL_COUNTER_PATH = 'cron.cnt'
 MAILS_PATH = 'mails'
 SANITY_CHECK_PATH = 'sanity_check.txt'
@@ -62,10 +62,13 @@ def init_logging():
 def internet_state():
     """ Check external internet sensor.
     """
+    if not os.path.exists(INTERNET_SENSOR_PATH):
+        return True
+
     try:
         with open(INTERNET_SENSOR_PATH, 'r') as obj:
-            value = obj.read().strip()
-            return value != 'off'
+            value = obj.read()
+            return value.strip() != 'off'
     except Exception as exc:
         message = str(exc)
         logging.warning(message)
