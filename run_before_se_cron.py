@@ -2,14 +2,6 @@
 """ Cron for LotR ALeP workflow (Part 1, before Strange Eons).
 
 NOTE: It's not run as a cron anymore, see `run_before_se_service.py`.
-NOTE: This script heavily relies on my existing smart home environment.
-
-You need to setup rclone:
-
-curl -L https://raw.github.com/pageauc/rclone4pi/master/rclone-install.sh | bash
-rclone config
-
-Create discord.yaml (see discord.default.yaml).
 """
 from datetime import datetime
 from email.header import Header

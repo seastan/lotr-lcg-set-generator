@@ -1,14 +1,5 @@
 # pylint: disable=W0703,C0301
 """ Monitor MakePlayingCards shared URLs.
-
-NOTE: This script heavily relies on my existing smart home environment.
-
-Create discord.yaml (see discord.default.yaml).
-
-Create  mpc_monitor.json (see mpc_monitor.default.json).
-
-Setup a cron as:
-1-59/2 * * * * flock -xn <path>/mpc_monitor.lock -c 'python3 <path>/mpc_monitor.py > /dev/null' 2>&1
 """
 from datetime import datetime
 from email.header import Header

@@ -1,22 +1,6 @@
 # pylint: disable=C0103,C0302,W0703
 # -*- coding: utf8 -*-
 """ Discord bot.
-
-NOTE: This script heavily relies on my existing smart home environment.
-
-You need to install a new dependency:
-pip install discord.py==1.7.0
-
-You need to setup rclone:
-
-curl -L https://raw.github.com/pageauc/rclone4pi/master/rclone-install.sh | bash
-rclone config
-
-Create discord.yaml (see discord.default.yaml).
-
-Setup a cron for `check_discord_bot.sh` (see its description).
-
-Start it by running `./restart_discord_bot.sh`.
 """
 import asyncio
 from datetime import datetime

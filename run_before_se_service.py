@@ -1,13 +1,6 @@
 """ Service for LotR ALeP workflow (Part 1, before Strange Eons).
 
-A wrapper around `run_before_se_cron.py` - see its description and deployment
-instructions.
-
-Setup a cron for `check_run_before_se_service.sh` (see its description).
-
-Additionally, see `remind_art_backup.sh` and `spreadsheet_backup.py`.
-
-Start it by running `./restart_run_before_se_service.sh`.
+A wrapper around `run_before_se_cron.py`.
 """
 import os
 import time

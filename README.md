@@ -84,7 +84,7 @@ for details).
 
   - [skip this step, if you don't use VirtualEnv] `virtualenv env --python=python3.9` (replace `3.9` with your actual Python version)
   - [skip this step, if you don't use VirtualEnv] `env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
-  - `pip install -r requirements.txt` (if you don't plan to generate images, you may run `pip install -r requirements_cron.txt` instead to skip unneeded dependencies)
+  - `pip install -r requirements.txt` (if you don't plan to generate images - for example, for **Cron Job Pipeline** below - you may run `pip install -r requirements_minimal.txt` instead to skip unneeded dependencies)
 
     If for debugging purposes you plan to use Jupyter notebook, additionally run:
 
@@ -190,7 +190,48 @@ If you want to set up a Windows cron job, do the following:
 
 See `configuration.cron.yaml` for a configuration example.
 
-T.B.D.
+Additional steps:
+
+1. Install additional dependency:
+
+  - `pip install discord.py==1.7.0`
+
+2. Create `discord.yaml` (see `discord.default.yaml`).
+
+3. Create  `mpc_monitor.json` (see `mpc_monitor.default.json`).
+
+4. Setup rclone:
+
+  - `curl -L https://raw.github.com/pageauc/rclone4pi/master/rclone-install.sh | bash`
+  - `rclone config`
+
+    You will need to setup the following remotes:
+
+  - `ALePCardImages` (points to `A Long-extended Party/CardImages`)
+  - `ALePLogs` (points to `A Long-extended Party/Logs`)
+  - `ALePOCTGN` (points to `A Long-extended Party/Playtesting/OCTGN Files`)
+  - `ALePRenderedImages` (points to `A Long-extended Party/RenderedImages`)
+
+5. Setup crons:
+
+  - `* * * * *    <path>/check_discord_bot.sh >> <path>/cron.log 2>&1`
+  - `* * * * *    <path>/check_run_before_se_service.sh >> <path>/cron.log 2>&1`
+  - `6 6 * * *    python3 <path>/monitor_remote_pipeline.py >> <path>/cron.log 2>&1`
+  - `*/10 * * * * <path>/monitor_ringsdb.sh >> <path>/cron.log 2>&1`
+  - `5,15,25,35,45,55 * * * * <path>/monitor_testringsdb.sh >> <path>/cron.log 2>&1`
+  - `1-59/2 * * * * flock -xn <path>/mpc_monitor.lock -c 'python3 <path>/mpc_monitor.py > /dev/null' 2>&1`
+  - `7 0 * * *    <path>/rclone_backup.sh >> <path>/cron.log 2>&1`
+  - `27 * * * *   <path>/rclone_discord.sh >> <path>/cron.log 2>&1`
+  - `0 8 * * 1    <path>/remind_backup.sh >> <path>/cron.log 2>&1`
+  - `18 8 * * *   python3 <path>/spreadsheet_backup.py <backup folder> >> <path>/cron.log 2>&1`
+
+    Replace `<path>` with the absolute path to the root folder.  `cron.log` may be located either in the root folder
+    or in some external folder (if you already have other crons).  Set `<backup folder>` to your actual backup folder.
+
+If you want to manually restart the scripts, run:
+
+- `./restart_discord_bot.sh`
+- `./restart_run_before_se_service.sh`
 
 **Outputs**
 
