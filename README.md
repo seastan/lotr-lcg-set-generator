@@ -407,7 +407,7 @@ By default, the deck includes all cards, which share both the set and encounter 
 "parent" `Quest` or `Nightmare` card (including encounter sets from `Additional Encounter Sets` column).
 All `Quest`, `Nightmare`, and `Campaign` cards are put into `Quest` section, all `Rules`
 cards are put into `Setup` section and all encounter cards are put into `Encounter` section.
-Filename of the deck is the same as `Adventure` value (`Quest` cards) or `Name` value (`Nightmare` cards)
+The filename of the deck is the same as `Adventure` value (`Quest` cards) or `Name` value (`Nightmare` cards)
 with all spaces replaced with `-`.  Easy mode version is generated automatically if any card included
 in the deck has a different quantity for the normal and easy modes.
 
