@@ -198,7 +198,7 @@ Additional steps:
 
 2. Create `discord.yaml` (see `discord.default.yaml`).
 
-3. Create  `mpc_monitor.json` (see `mpc_monitor.default.json`).
+3. Create `mpc_monitor.json` (see `mpc_monitor.default.json`).
 
 4. Setup rclone:
 
@@ -227,6 +227,18 @@ Additional steps:
 
     Replace `<path>` with the absolute path to the root folder.  `cron.log` may be located either in the root folder
     or in some external folder (if you already have other crons).  Set `<backup folder>` to your actual backup folder.
+
+6. The pipeline relies on an external service to send emails and it's your responsibility to implement it :)
+
+    In the root folder either create `mails` subfolder or a symlink to some external folder.  That external service
+    should expect in this folder JSON files in the following format:
+
+    {"subject": <email subject>, "body": <email body>, "html": <true (html) or false (text)>}
+
+7. Optionally, you may introduce an Internet sensor to be notified when Internet is not available (so the scripts
+that depend on Internet connectivity won't spam with redundant error messages).  If in the root folder there is a file
+called `internet_state` (it may be a symlink) and it contains `off` then the scripts will assume that there is no
+Internet connectivity.
 
 If you want to manually restart the scripts, run:
 

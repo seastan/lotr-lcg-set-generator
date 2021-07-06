@@ -1,10 +1,5 @@
 # pylint: disable=W0703,C0301
 """ Backup Google Spreadsheet.
-
-NOTE: This script heavily relies on my existing smart home environment.
-
-Setup a cron as:
-18 8 * * *  python3 <path>/spreadsheet_backup.py <backup folder> >> <path>/cron.log 2>&1
 """
 from datetime import datetime
 import hashlib
