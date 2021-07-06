@@ -140,7 +140,7 @@ To run the workflow, go to the root folder of this repo and follow these steps:
 - Make sure that Strange Eons is closed.
 - `python run_before_se.py`.
 - Pay attention to possible errors in the script output.
-- Open `setGenerator.seproject`and run `makeCards` script by double clicking it.
+- Open `setGenerator.seproject` and run `makeCards` script by double-clicking it.
   Once completed, close Strange Eons and wait until it finished packing the project.
 - `python run_after_se.py`.
 - Pay attention to possible errors in the script output.
@@ -158,7 +158,7 @@ To run the workflow as one script, run:
 - `run_all.bat`
 
 Please note, this script is for the Windows platform only.  It uses AutoHotkey to emulate Strange Eons UI commands
-and is not 100% reliable (it may stuck on the Strange Eons step).  To minimize the risks:
+and is not 100% reliable (it may be stuck on the Strange Eons step).  To minimize the risks:
 
 - Don't leave Strange Eons open.
 - Make sure the Strange Eons window was maximized when you closed it.
@@ -205,7 +205,7 @@ Additional steps:
   - `curl -L https://raw.github.com/pageauc/rclone4pi/master/rclone-install.sh | bash`
   - `rclone config`
 
-    You will need to setup the following remotes:
+    You will need to set up the following remotes:
 
   - `ALePCardImages` (points to `A Long-extended Party/CardImages`)
   - `ALePLogs` (points to `A Long-extended Party/Logs`)
@@ -233,9 +233,9 @@ Additional steps:
     In the root folder either create `mails` subfolder or a symlink to some external folder.  That external service
     should expect in this folder JSON files in the following format:
 
-    {"subject": <email subject>, "body": <email body>, "html": <true (html) or false (text)>}
+    {"subject": `<email subject>`, "body": `<email body>`, "html": `<true (html) or false (text)>`}
 
-7. Optionally, you may introduce an Internet sensor to be notified when Internet is not available (so the scripts
+7. Optionally, you may introduce an Internet sensor to be notified when the Internet is not available (so the scripts
 that depend on Internet connectivity won't spam with redundant error messages).  If in the root folder there is a file
 called `internet_state` (it may be a symlink) and it contains `off` then the scripts will assume that there is no
 Internet connectivity.
