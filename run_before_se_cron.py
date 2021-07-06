@@ -16,7 +16,7 @@ import uuid
 import requests
 import yaml
 
-from lotr import LOG_LIMIT, SanityCheckError
+from lotr import LOG_LIMIT, SanityCheckError, read_conf
 from run_before_se import main
 
 
@@ -214,11 +214,14 @@ def increment_mail_counter():
         pass
 
 
-def rclone():
+def rclone(conf):
     """ Sync folders to Google Drive.
     """
-    res = subprocess.run('./rclone.sh', capture_output=True, shell=True,
-                         check=True)
+    res = subprocess.run(
+        './rclone_octgn.sh "{}" "{}"'.format(
+            conf['octgn_set_xml_destination_path'],
+            conf['octgn_o8d_destination_path']),
+        capture_output=True, shell=True, check=True)
     stdout = res.stdout.decode('utf-8').strip()
     stderr = res.stderr.decode('utf-8').strip()
     logging.info('Rclone finished, stdout: %s, stderr: %s', stdout, stderr)
@@ -227,11 +230,14 @@ def rclone():
             stdout, stderr))
 
 
-def rclone_scratch():
+def rclone_scratch(conf):
     """ Sync scratch folders to Google Drive.
     """
-    res = subprocess.run('./rclone_scratch.sh', capture_output=True,
-                         shell=True, check=True)
+    res = subprocess.run(
+        './rclone_octgn_scratch.sh "{}" "{}"'.format(
+            conf['octgn_set_xml_scratch_destination_path'],
+            conf['octgn_o8d_scratch_destination_path']),
+        capture_output=True, shell=True, check=True)
     stdout = res.stdout.decode('utf-8').strip()
     stderr = res.stderr.decode('utf-8').strip()
     logging.info('Rclone Scratch finished, stdout: %s, stderr: %s',
@@ -246,6 +252,10 @@ def run(conf=None):  # pylint: disable=R0912
     """
     cron_id = uuid.uuid4()
     logging.info('Started: %s', cron_id)
+
+    if not conf:
+        conf = read_conf()
+
     sheet_changes = True
     scratch_changes = True
     try:  # pylint: disable=R1702
@@ -265,10 +275,10 @@ def run(conf=None):  # pylint: disable=R0912
                 except Exception as exc_new:
                     logging.exception(str(exc_new)[:LOG_LIMIT])
 
-            rclone()
+            rclone(conf)
 
         if scratch_changes:
-            rclone_scratch()
+            rclone_scratch(conf)
 
     except SanityCheckError as exc:
         message = str(exc)[:LOG_LIMIT]
