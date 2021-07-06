@@ -233,7 +233,7 @@ Additional steps:
     In the root folder either create `mails` subfolder or a symlink to some external folder.  That external service
     should expect in this folder JSON files in the following format:
 
-    {"subject": `<email subject>`, "body": `<email body>`, "html": `<true (html) or false (text)>`}
+    {"subject": "`<email subject>`", "body": "`<email body>`", "html": `<true (html) or false (text)>`}
 
 7. Optionally, you may introduce an Internet sensor to be notified when the Internet is not available (so the scripts
 that depend on Internet connectivity won't spam with redundant error messages).  If in the root folder there is a file
