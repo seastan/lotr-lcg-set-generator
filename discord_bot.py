@@ -1210,6 +1210,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
         try:
             for _, _, filenames in os.walk(CHANGES_PATH):
                 filenames.sort()
+                logging.info('Processing files: %s', filenames)
                 for filename in filenames:
                     if (not filename.endswith('.json') or
                             filename.startswith('__')):
