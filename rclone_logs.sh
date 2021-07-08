@@ -1,3 +1,3 @@
 #!/bin/sh
-rclone copy "ALePLogs:/" "/home/homeassistant/Drive/Logs"
+rclone copy "ALePLogs:/" "$1"
 echo "Done"

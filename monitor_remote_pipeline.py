@@ -55,11 +55,12 @@ def create_mail(subject, body=''):
         json.dump({'subject': subject, 'body': body, 'html': False}, fobj)
 
 
-def rclone_logs():
+def rclone_logs(conf):
     """ Sync logs folder from Google Drive.
     """
-    res = subprocess.run('./rclone_logs.sh', capture_output=True, shell=True,
-                         check=True)
+    res = subprocess.run(
+        './rclone_logs.sh "{}"'.format(CONF.get('remote_logs_path')),
+        capture_output=True, shell=True, check=True)
     stdout = res.stdout.decode('unicode-escape', errors='ignore').strip()
     stderr = res.stderr.decode('unicode-escape', errors='ignore').strip()
     logging.info('Rclone finished, stdout: %s, stderr: %s', stdout, stderr)
@@ -88,7 +89,7 @@ def run():
     with open(lotr.CONFIGURATION_PATH, 'r') as f_conf:
         conf = yaml.safe_load(f_conf)
 
-    rclone_logs()
+    rclone_logs(conf)
     res = parse_logs(conf.get('remote_logs_path', ''))
     parts = res.split('\n', 1)
     if len(parts) > 1:

@@ -1,3 +1,3 @@
 #!/bin/sh
-rclone copy "/home/homeassistant/Drive/CardImages" "ALePCardImages:/"
+rclone copy "$1" "ALePCardImages:/"
 echo "Done"
