@@ -867,6 +867,9 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
     if not conf['set_ids_octgn_image_destination']:
         conf['set_ids_octgn_image_destination'] = []
 
+    if not 'offline_mode' in conf:
+        conf['offline_mode'] = False
+
     for lang in conf['output_languages']:
         conf['outputs'][lang] = set(conf['outputs'][lang])
 
@@ -974,6 +977,28 @@ def get_content(url):
     return res
 
 
+def _get_cached_content(url):
+    """ Find URL's content in the cache first.
+    """
+    path = os.path.join(URL_CACHE_PATH, '{}.cache'.format(
+        re.sub(r'[^A-Za-z0-9_\.\-]', '', url)))
+    if os.path.exists(path):
+        with open(path, 'br') as obj:
+            content = obj.read()
+            return content
+
+    return None
+
+
+def _save_content(url, content):
+    """ Save URL's content into cache.
+    """
+    path = os.path.join(URL_CACHE_PATH, '{}.cache'.format(
+        re.sub(r'[^A-Za-z0-9_\.\-]', '', url)))
+    with open(path, 'bw') as obj:
+        obj.write(content)
+
+
 def _fix_csv_value(value):
     """ Extract a single value.
     """
@@ -1001,21 +1026,33 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
     for lang in set(conf['languages']).difference(set(['English'])):
         sheets.append(lang)
 
+    if conf['offline_mode']:
+        logging.info('SWITCHING TO OFFLINE MODE')
+
     if [sheet for sheet in sheets if sheet not in SHEET_IDS]:
         logging.info('Obtaining sheet IDs')
         SHEET_IDS.clear()
         url = (
             'https://docs.google.com/spreadsheets/d/{}/export?format=csv'
             .format(conf['sheet_gdid']))
-        res = get_content(url).decode('utf-8')
-        if not res or '<html' in res:
-            raise SheetError("Can't download the Google Sheet")
+        res = _get_cached_content(url) if conf['offline_mode'] else None
+        if res:
+            res = res.decode('utf-8')
+            SHEET_IDS.update(dict(row for row in csv.reader(res.splitlines())))
+        else:
+            res_raw = get_content(url)
+            res = res_raw.decode('utf-8')
+            if not res or '<html' in res:
+                raise SheetError("Can't download the Google Sheet")
 
-        try:
-            SHEET_IDS.update(dict(row for row in
-                                  csv.reader(res.splitlines())))
-        except ValueError:
-            raise SheetError("Can't download the Google Sheet")
+            try:
+                SHEET_IDS.update(dict(row for row in
+                                      csv.reader(res.splitlines())))
+            except ValueError:
+                raise SheetError("Can't download the Google Sheet")
+
+            if conf['offline_mode']:
+                _save_content(url, res_raw)
 
         missing_sheets = [sheet for sheet in sheets
                           if sheet not in SHEET_IDS]
@@ -1034,16 +1071,25 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
         url = (
             'https://docs.google.com/spreadsheets/d/{}/export?format=csv&gid={}'
             .format(conf['sheet_gdid'], SHEET_IDS[sheet]))
-        res = get_content(url).decode('utf-8')
-        if not res or '<html' in res:
-            raise SheetError("Can't download {} from the Google Sheet"
-                             .format(sheet))
-
-        try:
+        res = _get_cached_content(url) if conf['offline_mode'] else None
+        if res:
+            res = res.decode('utf-8')
             data = list(csv.reader(StringIO(res)))
-        except Exception:  # pylint: disable=W0703
-            raise SheetError("Can't download {} from the Google Sheet"
-                             .format(sheet))
+        else:
+            res_raw = get_content(url)
+            res = res_raw.decode('utf-8')
+            if not res or '<html' in res:
+                raise SheetError("Can't download {} from the Google Sheet"
+                                 .format(sheet))
+
+            try:
+                data = list(csv.reader(StringIO(res)))
+            except Exception:  # pylint: disable=W0703
+                raise SheetError("Can't download {} from the Google Sheet"
+                                 .format(sheet))
+
+            if conf['offline_mode']:
+                _save_content(url, res_raw)
 
         none_index = data[0].index('')
         data = [row[:none_index] for row in data]
@@ -2655,28 +2701,6 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
     _copy_octgn_xml(set_id, set_name)
     logging.info('[%s] ...Generating set.xml file for OCTGN (%ss)',
                  set_name, round(time.time() - timestamp, 3))
-
-
-def _get_cached_content(url):
-    """ Find URL's content in the cache first.
-    """
-    path = os.path.join(URL_CACHE_PATH, '{}.cache'.format(
-        re.sub(r'[^A-Za-z0-9_\.\-]', '', url)))
-    if os.path.exists(path):
-        with open(path, 'br') as obj:
-            content = obj.read()
-            return content
-
-    return None
-
-
-def _save_content(url, content):
-    """ Save URL's content into cache.
-    """
-    path = os.path.join(URL_CACHE_PATH, '{}.cache'.format(
-        re.sub(r'[^A-Za-z0-9_\.\-]', '', url)))
-    with open(path, 'bw') as obj:
-        obj.write(content)
 
 
 def load_external_xml(url, sets=None, encounter_sets=None):  # pylint: disable=R0912,R0914,R0915

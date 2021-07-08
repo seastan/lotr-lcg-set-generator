@@ -130,6 +130,10 @@ for details).
   - `ringsdb_sessionid`: test.ringsdb.com session ID
   - `outputs`: list of image outputs for each language (if you added or uncommented new outputs, you also need to set `reprocess_all` to `true`)
 
+For debugging purposes, you may add an additional value:
+
+  - `offline_mode`: use a cached spreadsheet when possible (true or false)
+
 Also, see `configuration.release.yaml` for another configuration example.
 
 **Usage**
