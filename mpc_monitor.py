@@ -193,12 +193,22 @@ def send_discord(message):
             conf = yaml.safe_load(f_conf)
 
         if conf.get('webhook_url'):
-            data = {'content': message}
-            res = requests.post(conf['webhook_url'], json=data)
-            res = res.content.decode('utf-8')
-            if res != '':
-                raise DiscordResponseError(
-                    'Non-empty response: {}'.format(res))
+            chunks = []
+            while len(message) > 1900:
+                chunks.append(message[:1900])
+                message = message[1900:]
+
+            chunks.append(message)
+            for i, chunk in enumerate(chunks):
+                if i > 0:
+                    time.sleep(1)
+
+                data = {'content': chunk}
+                res = requests.post(conf['webhook_url'], json=data)
+                res = res.content.decode('utf-8')
+                if res != '':
+                    raise DiscordResponseError(
+                        'Non-empty response: {}'.format(res))
 
             return True
     except Exception as exc:

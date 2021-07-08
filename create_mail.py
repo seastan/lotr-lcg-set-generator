@@ -1,12 +1,20 @@
 """ Create mail file from the script arguments.
 """
+from email.header import Header
 import json
 import os.path
+import re
 import sys
 import time
 import uuid
 
 MAILS_PATH = 'mails'
+
+
+def is_non_ascii(value):
+    """ Check whether the string is ASCII only or not.
+    """
+    return not all(ord(c) < 128 for c in value)
 
 
 def create_mail(subject, body='', html='false'):
@@ -17,12 +25,15 @@ def create_mail(subject, body='', html='false'):
             body = fobj.read()
 
     if subject or body:
-        if len(subject) > 255:
-            body = '{}\n{}'.format(subject, body)
-            subject = subject[:255]
+        subject = re.sub(r'\s+', ' ', subject)
+        if len(subject) > 200:
+            subject = subject[:200] + '...'
+
+        if is_non_ascii(subject):
+            subject = Header(subject, 'utf8').encode()
 
         if len(body) > 10 * 1000 * 1000:
-            body = body[10 * 1000 * 1000]
+            body = body[:10 * 1000 * 1000]
 
         html = html.lower() == 'true'
         path = os.path.join(MAILS_PATH,

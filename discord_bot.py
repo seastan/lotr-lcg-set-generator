@@ -41,7 +41,6 @@ PREVIEW_URL = 'https://drive.google.com/file/d/{}/preview'
 
 CMD_SLEEP_TIME = 2
 IO_SLEEP_TIME = 1
-MESSAGE_SLEEP_TIME = 1
 RCLONE_ART_SLEEP_TIME = 300
 WATCH_SLEEP_TIME = 5
 
@@ -1727,7 +1726,7 @@ Card "{}" has been updated:
     async def _send_channel(self, channel, content):
         for i, chunk in enumerate(split_result(content)):
             if i > 0:
-                await asyncio.sleep(MESSAGE_SLEEP_TIME)
+                await asyncio.sleep(1)
 
             await channel.send(chunk)
 

@@ -31,7 +31,6 @@ ERROR_SUBJECT_TEMPLATE = 'LotR ALeP Cron ERROR: {}'
 SANITY_CHECK_SUBJECT_TEMPLATE = 'LotR ALeP Cron CHECK: {}'
 WARNING_SUBJECT_TEMPLATE = 'LotR ALeP Cron WARNING: {}'
 MAIL_QUOTA = 50
-MESSAGE_SLEEP_TIME = 1
 
 
 class DiscordResponseError(Exception):
@@ -106,7 +105,7 @@ def send_discord(message):
             chunks.append(message)
             for i, chunk in enumerate(chunks):
                 if i > 0:
-                    time.sleep(MESSAGE_SLEEP_TIME)
+                    time.sleep(1)
 
                 data = {'content': chunk}
                 res = requests.post(conf['webhook_url'], json=data)
@@ -118,7 +117,7 @@ def send_discord(message):
             return True
     except Exception as exc:
         message = 'Discord message failed: {}: {}'.format(
-            type(exc).__name__, str(exc))[:LOG_LIMIT]
+            type(exc).__name__, str(exc))
         logging.exception(message)
         create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
 

@@ -2,9 +2,11 @@
 """ Backup Google Spreadsheet.
 """
 from datetime import datetime
+from email.header import Header
 import hashlib
 import json
 import os
+import re
 import sys
 import time
 import uuid
@@ -19,9 +21,22 @@ SHEET_GDID = '16NnATw8C5iZ6gGTs5ZWmZmgrbbEoWJAc4PKBp72DGis'
 MAX_FILES = 10
 
 
+def is_non_ascii(value):
+    """ Check whether the string is ASCII only or not.
+    """
+    return not all(ord(c) < 128 for c in value)
+
+
 def create_mail(subject, body=''):
     """ Create mail file.
     """
+    subject = re.sub(r'\s+', ' ', subject)
+    if len(subject) > 200:
+        subject = subject[:200] + '...'
+
+    if is_non_ascii(subject):
+        subject = Header(subject, 'utf8').encode()
+
     path = os.path.join(MAILS_PATH,
                         '{}_{}'.format(int(time.time()), uuid.uuid4()))
     with open(path, 'w') as fobj:

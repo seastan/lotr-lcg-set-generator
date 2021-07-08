@@ -11,12 +11,12 @@ import time
 import uuid
 
 import yaml
-import lotr
 
 
 ALERT_SUBJECT_TEMPLATE = 'LotR Remote Pipeline Monitor ALERT: {}'
 ERROR_SUBJECT_TEMPLATE = 'LotR Remote Pipeline Monitor ERROR: {}'
 
+CONFIGURATION_PATH = 'configuration.yaml'
 LOG_PATH = 'monitor_remote_pipeline.log'
 MAILS_PATH = 'mails'
 
@@ -59,7 +59,7 @@ def rclone_logs(conf):
     """ Sync logs folder from Google Drive.
     """
     res = subprocess.run(
-        './rclone_logs.sh "{}"'.format(CONF.get('remote_logs_path')),
+        './rclone_logs.sh "{}"'.format(conf.get('remote_logs_path')),
         capture_output=True, shell=True, check=True)
     stdout = res.stdout.decode('unicode-escape', errors='ignore').strip()
     stderr = res.stderr.decode('unicode-escape', errors='ignore').strip()
@@ -86,7 +86,7 @@ def parse_logs(folder):
 def run():
     """ Run the check.
     """
-    with open(lotr.CONFIGURATION_PATH, 'r') as f_conf:
+    with open(CONFIGURATION_PATH, 'r') as f_conf:
         conf = yaml.safe_load(f_conf)
 
     rclone_logs(conf)
