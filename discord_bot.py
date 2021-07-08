@@ -1210,12 +1210,13 @@ class MyClient(discord.Client):  # pylint: disable=R0902
         try:
             for _, _, filenames in os.walk(CHANGES_PATH):
                 filenames.sort()
+                filenames = [f for f in filenames if f.endswith('.json')
+                             and not f.startswith('__')]
+                if not filenames:
+                    break
+
                 logging.info('Processing files: %s', filenames)
                 for filename in filenames:
-                    if (not filename.endswith('.json') or
-                            filename.startswith('__')):
-                        continue
-
                     path = os.path.join(CHANGES_PATH, filename)
                     try:
                         data = await read_json_data(path)
