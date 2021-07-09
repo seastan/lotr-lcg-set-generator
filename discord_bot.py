@@ -314,8 +314,11 @@ async def run_shell(cmd):
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE)
         stdout, stderr = await proc.communicate()
-    except Exception:
-        return ''
+    except Exception as exc:
+        message = 'Error running shell command "{}": {}: {}'.format(
+            cmd, type(exc).__name__, str(exc))
+        logging.exception(message)
+        return ('', message)
 
     stdout = stdout.decode('utf-8').strip()
     stderr = stderr.decode('utf-8').strip()
@@ -1252,7 +1255,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
 
         self.rclone_art = False
         stdout, stderr = await run_shell(
-            RCLONE_ART_CMD.format(CONF.get('artwork_path')))
+            RCLONE_ART_CMD.format(CONF.get('artwork_destination_path')))
         if stdout != 'Done':
             message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
                                                                      stderr)
