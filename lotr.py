@@ -4524,6 +4524,7 @@ def _collect_artwork_images(conf, image_path):
 
     images = {}
     if os.path.exists(image_path):
+        sorted_filenames = []
         for _, _, filenames in os.walk(image_path):
             for filename in filenames:
                 if (len(filename.split('.')) < 2 or
@@ -4531,19 +4532,28 @@ def _collect_artwork_images(conf, image_path):
                     continue
 
                 if filename.split('.')[-1] in ('jpg', 'png'):
-                    image_id = '_'.join(filename.split('_')[:2])
-                    lang = filename.split('.')[-2]
-                    if lang in conf['all_languages']:
-                        image_id = '{}_{}'.format(image_id, lang)
-
-                    if image_id in images:
-                        logging.error('Duplicate image detected: %s, '
-                                      'ignoring', os.path.join(image_path,
-                                                               filename))
-                    else:
-                        images[image_id] = os.path.join(image_path, filename)
+                    sorted_filenames.append((
+                        filename,
+                        int(os.path.getmtime(
+                            os.path.join(image_path, filename)))))
 
             break
+
+        sorted_filenames.sort(key=lambda f: (f[1], f[0]), reverse=True)
+        sorted_filenames = [f[0] for f in sorted_filenames]
+        logging.info(sorted_filenames)
+
+        for filename in sorted_filenames:
+            image_id = '_'.join(filename.split('_')[:2])
+            lang = filename.split('.')[-2]
+            if lang in conf['all_languages']:
+                image_id = '{}_{}'.format(image_id, lang)
+
+            if image_id in images:
+                logging.error('Duplicate image detected: %s, '
+                              'ignoring', os.path.join(image_path, filename))
+            else:
+                images[image_id] = os.path.join(image_path, filename)
 
     IMAGE_CACHE[image_path] = images
     return images
