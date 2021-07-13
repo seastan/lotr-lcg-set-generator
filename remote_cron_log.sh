@@ -1,5 +1,5 @@
-#!/bin/sh
-FOLDER=$1
+#!/bin/bash
+FOLDER="$1"
 if [ ! -d "$FOLDER" ]; then
   echo "1 No logs folder found"
   exit

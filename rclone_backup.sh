@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 DATE=$(date +%Y-%m-%d)
 rclone copy "$1/Set Folders" "ALePOCTGN:/Backup/$DATE/Set Folders"
 rclone copy "$1/Encounter Decks" "ALePOCTGN:/Backup/$DATE/Encounter Decks"

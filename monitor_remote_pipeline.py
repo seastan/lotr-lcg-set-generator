@@ -9,6 +9,7 @@ import re
 import subprocess
 import time
 import uuid
+import warnings
 
 import yaml
 
@@ -19,6 +20,9 @@ ERROR_SUBJECT_TEMPLATE = 'LotR Remote Pipeline Monitor ERROR: {}'
 CONFIGURATION_PATH = 'configuration.yaml'
 LOG_PATH = 'monitor_remote_pipeline.log'
 MAILS_PATH = 'mails'
+
+
+warnings.filterwarnings('ignore', category=DeprecationWarning)
 
 
 class RCloneError(Exception):
