@@ -1083,6 +1083,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
     playtest_channel = None
     updates_channel = None
     rclone_art = False
+    started = False
     categories = {}
     channels = {}
     general_channels = {}
@@ -1092,6 +1093,10 @@ class MyClient(discord.Client):  # pylint: disable=R0902
         """ Invoked when the client is ready.
         """
         logging.info('Logged in as %s (%s)', self.user.name, self.user.id)
+        if self.started:
+            return
+
+        self.started = True
         try:
             self.archive_category = self.get_channel(
                 [c for c in self.get_all_channels()
@@ -1197,12 +1202,14 @@ class MyClient(discord.Client):  # pylint: disable=R0902
 
 
     async def _watch_changes_schedule(self):
+        logging.info('Starting watch changes schedule')
         while True:
             await self._watch_changes()
             await asyncio.sleep(WATCH_SLEEP_TIME)
 
 
     async def _rclone_art_schedule(self):
+        logging.info('Starting rclone art schedule')
         while True:
             await self._rclone_art()
             await asyncio.sleep(RCLONE_ART_SLEEP_TIME)
@@ -1261,6 +1268,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                                                                      stderr)
             logging.error(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
+            self.rclone_art = True
             return
 
         artwork_destination_path = CONF.get('artwork_destination_path')
