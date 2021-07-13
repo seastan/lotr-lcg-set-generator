@@ -988,7 +988,9 @@ async def get_artwork_files(set_id):
 
     stdout, stderr = await run_shell(RCLONE_ART_FOLDER_CMD.format(set_id))
     try:
-        filenames = {f['Name'] for f in json.loads(stdout)}
+        filenames = [(f['Name'], f['ModTime']) for f in json.loads(stdout)]
+        filenames.sort(key=lambda f: (f[1], f[0]), reverse=True)
+        filenames = [f[0] for f in filenames]
     except Exception:
         message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
                                                                  stderr)
@@ -998,11 +1000,21 @@ async def get_artwork_files(set_id):
 
     folder = os.path.join(path, set_id)
     if os.path.exists(folder):
+        sorted_filenames = []
         for _, _, local_filenames in os.walk(folder):
-            filenames = filenames.union(set(local_filenames))
+            for filename in local_filenames:
+                sorted_filenames.append((
+                    filename,
+                    int(os.path.getmtime(
+                        os.path.join(folder, filename)))))
+
             break
 
-    filenames = sorted(list(filenames))
+        sorted_filenames.sort(key=lambda f: (f[1], f[0]), reverse=True)
+        sorted_filenames = [f[0] for f in sorted_filenames]
+        for filename in sorted_filenames:
+            filenames.insert(0, filename)
+
     return filenames
 
 

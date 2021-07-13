@@ -4541,7 +4541,6 @@ def _collect_artwork_images(conf, image_path):
 
         sorted_filenames.sort(key=lambda f: (f[1], f[0]), reverse=True)
         sorted_filenames = [f[0] for f in sorted_filenames]
-        logging.info(sorted_filenames)
 
         for filename in sorted_filenames:
             image_id = '_'.join(filename.split('_')[:2])
