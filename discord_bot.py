@@ -153,7 +153,7 @@ List of **!art** commands:
 **!art artists <set name or set code>** - display a copy-pasteable list of artist names (for example: `!art artists Children of Eorl` or `!art artists CoE`)
 **!art save <artist>** (as a reply to a message with an image attachment) - save the image as a card's artwork for the front side (for example: `!art save Ted Nasmith`)
 **!art saveb <artist>** (as a reply to a message with an image attachment) - save the image as a card's artwork for the back side (for example: `!art saveb John Howe`)
-**!art savescr** (as a reply to a message with an image attachment) - save the image to the scratch folder
+**!art savescr** (or **!art savescr <artist>**) (as a reply to a message with an image attachment) - save the image to the scratch folder
 **!art verify <set name or set code>** - verify artwork for a set (for example: `!art verify Children of Eorl` or `!art verify CoE`)
 **!art help** - display this help message
 """,
@@ -2380,10 +2380,13 @@ Targets removed.
         content = await attachment.read()
 
         folder = os.path.join(artwork_destination_path, card[lotr.CARD_SET])
-        filename = '{}_{}_{}_Artist_{}.{}'.format(card[lotr.CARD_ID], side,
-                                                  card[lotr.CARD_NAME], artist,
-                                                  filetype)
-        filename = lotr.escape_filename(filename).replace(' ', '_')
+        filename = '{}_{}_{}_Artist_{}.{}'.format(
+            card[lotr.CARD_ID],
+            side,
+            lotr.escape_filename(card[lotr.CARD_NAME]),
+            artist,
+            filetype)
+        filename = filename.replace(' ', '_')
         path = os.path.join(folder, filename)
 
         async with art_lock:
@@ -2406,7 +2409,7 @@ Targets removed.
         return ''
 
 
-    async def _save_scratch_artwork(self, message):
+    async def _save_scratch_artwork(self, message, artist=None):
         """ Save an artwork image to the scratch folder.
         """
         if (not message.reference or not message.reference.resolved
@@ -2427,7 +2430,14 @@ Targets removed.
         content = await attachment.read()
 
         folder = os.path.join(artwork_destination_path, '_Scratch')
-        filename = lotr.escape_filename(attachment.filename).replace(' ', '_')
+        if artist:
+            filename = '{}_{}'.format(
+                artist, lotr.escape_filename(attachment.filename))
+            filename = filename.replace(' ', '_')
+        else:
+            filename = lotr.escape_filename(attachment.filename).replace(
+                ' ', '_')
+
         path = os.path.join(folder, filename)
 
         async with art_lock:
@@ -2627,7 +2637,7 @@ Targets removed.
         return res
 
 
-    async def _process_art_command(self, message):  # pylint: disable=R0912,R0915
+    async def _process_art_command(self, message):  # pylint: disable=R0911,R0912,R0915
         """ Process an art command.
         """
         if message.content.lower() == '!art':
@@ -2660,6 +2670,21 @@ Targets removed.
         elif command.lower() == 'savescr':
             try:
                 error = await self._save_scratch_artwork(message)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            if error:
+                await message.channel.send(error)
+                return
+
+            await message.channel.send('done')
+        elif command.lower().startswith('savescr '):
+            try:
+                artist = re.sub(r'^savescr ', '', command, flags=re.IGNORECASE)
+                error = await self._save_scratch_artwork(message, artist)
             except Exception as exc:
                 logging.exception(str(exc))
                 await message.channel.send(
