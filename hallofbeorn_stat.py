@@ -113,11 +113,71 @@ def collect_traits(data):
             writer.writerow(csv_row)
 
 
+def transform_keyword(value):
+    """ Transform a keyword value if needed.
+    """
+    value = re.sub(r' [0-9X]$', ' N', value)
+    return value
+
+
+def collect_keywords(data):
+    """ Collect keywords statistics from Hall of Beorn.
+    """
+    data = filter_data(data)
+    keywords = [
+        item for sublist in [
+            [(transform_keyword(t.strip()),
+              'Character' if c['type_name'] in ('Hero', 'Ally')
+              else c['type_name'],
+              c['sphere_name']
+              ) for t in c['keywords'].split('.') if t.strip()]
+            for c in data if c.get('keywords')
+            and c['type_name'] in ('Hero', 'Ally', 'Attachment', 'Event')]
+        for item in sublist]
+    keywords = list(zip(Counter(keywords).keys(), Counter(keywords).values()))
+
+    res = {}
+    for row in keywords:
+        keyword = res.setdefault(
+            row[0][0],
+            {'Total': 0, 'Character': 0, 'Attachment': 0, 'Event': 0,
+             'Leadership': 0, 'Lore': 0, 'Spirit': 0, 'Tactics': 0,
+             'Neutral': 0})
+        keyword[row[0][1]] += row[1]
+        keyword[row[0][2]] += row[1]
+        keyword['Total'] += row[1]
+
+    res = sorted(list(res.items()), key=lambda i: (-i[1]['Total'], i[0]))
+
+    file_path = os.path.join(OUTPUT_PATH, 'keywords.csv')
+    with open(file_path, 'w', newline='', encoding='utf-8') as obj:
+        obj.write(codecs.BOM_UTF8.decode('utf-8'))
+        fieldnames = ['Keyword', 'Total', 'Character', 'Attachment', 'Event',
+                      'Leadership', 'Lore', 'Spirit', 'Tactics', 'Neutral']
+        writer = csv.DictWriter(obj, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in res:
+            csv_row = {
+                'Keyword': row[0],
+                'Total': row[1]['Total'],
+                'Character': row[1]['Character'] or '',
+                'Attachment': row[1]['Attachment'] or '',
+                'Event': row[1]['Event'] or '',
+                'Leadership': row[1]['Leadership'] or '',
+                'Lore': row[1]['Lore'] or '',
+                'Spirit': row[1]['Spirit'] or '',
+                'Tactics': row[1]['Tactics'] or '',
+                'Neutral': row[1]['Neutral'] or ''
+                }
+            writer.writerow(csv_row)
+
+
 def main():
     """ Main function.
     """
     data = get_data()
     collect_traits(data)
+    collect_keywords(data)
     print('Done')
 
 
