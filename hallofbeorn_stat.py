@@ -61,8 +61,7 @@ def collect_traits(data):
     traits = [
         item for sublist in [
             [(t.strip(),
-              'Character' if c['type_name'] in ('Hero', 'Ally')
-              else c['type_name'],
+              c['type_name'],
               c['sphere_name']
               ) for t in c['traits'].split('.') if t.strip()]
             for c in data if c['traits']
@@ -74,7 +73,7 @@ def collect_traits(data):
     for row in traits:
         trait = res.setdefault(
             row[0][0],
-            {'Total': 0, 'Character': 0, 'Attachment': 0, 'Event': 0,
+            {'Total': 0, 'Hero': 0, 'Ally': 0, 'Attachment': 0, 'Event': 0,
              'Leadership': 0, 'Lore': 0, 'Spirit': 0, 'Tactics': 0,
              'Neutral': 0})
         trait[row[0][1]] += row[1]
@@ -90,7 +89,7 @@ def collect_traits(data):
     file_path = os.path.join(OUTPUT_PATH, 'traits.csv')
     with open(file_path, 'w', newline='', encoding='utf-8') as obj:
         obj.write(codecs.BOM_UTF8.decode('utf-8'))
-        fieldnames = ['Trait', 'Total', 'Character', 'Attachment', 'Event',
+        fieldnames = ['Trait', 'Total', 'Hero', 'Ally', 'Attachment', 'Event',
                       'Leadership', 'Lore', 'Spirit', 'Tactics', 'Neutral',
                       'Mentions', 'Mentioned on Cards']
         writer = csv.DictWriter(obj, fieldnames=fieldnames)
@@ -99,7 +98,8 @@ def collect_traits(data):
             csv_row = {
                 'Trait': row[0],
                 'Total': row[1]['Total'],
-                'Character': row[1]['Character'] or '',
+                'Hero': row[1]['Hero'] or '',
+                'Ally': row[1]['Ally'] or '',
                 'Attachment': row[1]['Attachment'] or '',
                 'Event': row[1]['Event'] or '',
                 'Leadership': row[1]['Leadership'] or '',
@@ -127,8 +127,7 @@ def collect_keywords(data):
     keywords = [
         item for sublist in [
             [(transform_keyword(t.strip()),
-              'Character' if c['type_name'] in ('Hero', 'Ally')
-              else c['type_name'],
+              c['type_name'],
               c['sphere_name']
               ) for t in c['keywords'].split('.') if t.strip()]
             for c in data if c.get('keywords')
@@ -140,7 +139,7 @@ def collect_keywords(data):
     for row in keywords:
         keyword = res.setdefault(
             row[0][0],
-            {'Total': 0, 'Character': 0, 'Attachment': 0, 'Event': 0,
+            {'Total': 0, 'Hero': 0, 'Ally': 0, 'Attachment': 0, 'Event': 0,
              'Leadership': 0, 'Lore': 0, 'Spirit': 0, 'Tactics': 0,
              'Neutral': 0})
         keyword[row[0][1]] += row[1]
@@ -152,7 +151,7 @@ def collect_keywords(data):
     file_path = os.path.join(OUTPUT_PATH, 'keywords.csv')
     with open(file_path, 'w', newline='', encoding='utf-8') as obj:
         obj.write(codecs.BOM_UTF8.decode('utf-8'))
-        fieldnames = ['Keyword', 'Total', 'Character', 'Attachment', 'Event',
+        fieldnames = ['Keyword', 'Total', 'Hero', 'Ally', 'Attachment', 'Event',
                       'Leadership', 'Lore', 'Spirit', 'Tactics', 'Neutral']
         writer = csv.DictWriter(obj, fieldnames=fieldnames)
         writer.writeheader()
@@ -160,7 +159,8 @@ def collect_keywords(data):
             csv_row = {
                 'Keyword': row[0],
                 'Total': row[1]['Total'],
-                'Character': row[1]['Character'] or '',
+                'Hero': row[1]['Hero'] or '',
+                'Ally': row[1]['Ally'] or '',
                 'Attachment': row[1]['Attachment'] or '',
                 'Event': row[1]['Event'] or '',
                 'Leadership': row[1]['Leadership'] or '',
