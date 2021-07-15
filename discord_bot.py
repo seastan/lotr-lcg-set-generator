@@ -698,6 +698,8 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
     adventure = card.get(lotr.CARD_ADVENTURE, '')
     if adventure == '':
         card_adventure = ''
+    elif card_type == 'Hero' and adventure == 'Promo':
+        card_adventure = '**Promo**\n'
     elif card_type == 'Campaign':
         card_adventure = '*Campaign*: {}\n'.format(adventure)
     else:
@@ -725,7 +727,6 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
     card_set = re.sub(r'^ALeP - ', '', card[lotr.CARD_SET_NAME])
     card_id = '*id:* {}'.format(card[lotr.CARD_ID])
 
-    card_number = '**#{}**'.format(card[lotr.CARD_NUMBER])
     if (card.get(lotr.CARD_PRINTED_NUMBER) or
             card.get(lotr.BACK_PREFIX + lotr.CARD_PRINTED_NUMBER)):
         if res_b:
@@ -734,12 +735,16 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
             back_number = (card.get(lotr.BACK_PREFIX +
                                     lotr.CARD_PRINTED_NUMBER) or
                            card[lotr.CARD_NUMBER])
-            card_number = '{} *({}/{})*'.format(card_number, front_number,
-                                                back_number)
+            card_number = '**#{}/{}** *({})*'.format(front_number,
+                                                     back_number,
+                                                     card[lotr.CARD_NUMBER])
         else:
             front_number = (card.get(lotr.CARD_PRINTED_NUMBER) or
                             card[lotr.CARD_NUMBER])
-            card_number = '{} *({})*'.format(card_number, front_number)
+            card_number = '**#{}** *({})*'.format(front_number,
+                                                  card[lotr.CARD_NUMBER])
+    else:
+        card_number = '**#{}**'.format(card[lotr.CARD_NUMBER])
 
     icon = card.get(lotr.CARD_ICON, '')
     card_icon = '' if icon == '' else ' ({})'.format(icon)
