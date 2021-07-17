@@ -176,6 +176,17 @@ CARD_TYPES_UNIQUE = {'Hero', 'Objective Hero'}
 CARD_TYPES_NON_UNIQUE = {'Campaign', 'Contract', 'Event', 'Nightmare',
                          'Player Side Quest', 'Presentation', 'Quest', 'Rules',
                          'Treachery', 'Treasure'}
+CARD_TYPES_COST = ['Hero', 'Ally', 'Attachment', 'Event', 'Player Side Quest',
+                   'Treasure', 'Quest']
+CARD_TYPES_ENGAGEMENT = ['Enemy', 'Ship Enemy', 'Quest']
+CARD_TYPES_THREAT = ['Enemy', 'Location', 'Ship Enemy']
+CARD_TYPES_WILLPOWER = ['Ally', 'Hero', 'Objective Ally', 'Objective Hero',
+                        'Ship Objective']
+CARD_TYPES_COMBAT = ['Ally', 'Enemy', 'Hero', 'Objective Ally', 'Objective Hero',
+                     'Ship Enemy', 'Ship Objective']
+CARD_TYPES_QUEST = ['Encounter Side Quest', 'Location', 'Objective Location',
+                    'Player Side Quest']
+CARD_TYPES_QUEST_BACK = ['Quest']
 CARD_TYPES_DECK_RULES = {'Nightmare', 'Quest'}
 CARD_TYPES_ONE_COPY = {'Campaign', 'Contract', 'Encounter Side Quest', 'Hero',
                        'Nightmare', 'Objective Hero', 'Presentation', 'Quest',
@@ -1473,20 +1484,39 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_number = row[CARD_NUMBER]
         card_quantity = row[CARD_QUANTITY]
         card_encounter_set = row[CARD_ENCOUNTER_SET]
+
         card_name = row[CARD_NAME]
         card_unique = row[CARD_UNIQUE]
         card_type = row[CARD_TYPE]
         card_sphere = row[CARD_SPHERE]
         card_traits = row[CARD_TRAITS]
         card_keywords = row[CARD_KEYWORDS]
+        card_cost = row[CARD_COST]
+        card_engagement = row[CARD_ENGAGEMENT]
+        card_threat = row[CARD_THREAT]
+        card_willpower = row[CARD_WILLPOWER]
+        card_attack = row[CARD_ATTACK]
+        card_defense = row[CARD_DEFENSE]
+        card_health = row[CARD_HEALTH]
+        card_quest = row[CARD_QUEST]
         card_victory = row[CARD_VICTORY]
+
         card_name_back = row[BACK_PREFIX + CARD_NAME]
         card_unique_back = row[BACK_PREFIX + CARD_UNIQUE]
         card_type_back = row[BACK_PREFIX + CARD_TYPE]
         card_sphere_back = row[BACK_PREFIX + CARD_SPHERE]
         card_traits_back = row[BACK_PREFIX + CARD_TRAITS]
         card_keywords_back = row[BACK_PREFIX + CARD_KEYWORDS]
+        card_cost_back = row[BACK_PREFIX + CARD_COST]
+        card_engagement_back = row[BACK_PREFIX + CARD_ENGAGEMENT]
+        card_threat_back = row[BACK_PREFIX + CARD_THREAT]
+        card_willpower_back = row[BACK_PREFIX + CARD_WILLPOWER]
+        card_attack_back = row[BACK_PREFIX + CARD_ATTACK]
+        card_defense_back = row[BACK_PREFIX + CARD_DEFENSE]
+        card_health_back = row[BACK_PREFIX + CARD_HEALTH]
+        card_quest_back = row[BACK_PREFIX + CARD_QUEST]
         card_victory_back = row[BACK_PREFIX + CARD_VICTORY]
+
         card_easy_mode = row[CARD_EASY_MODE]
         card_adventure = row[CARD_ADVENTURE]
         card_back = row[CARD_BACK]
@@ -1887,6 +1917,514 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
               card_keywords_back.replace('[inline]', '').replace(
                   '.', '').replace(' ', '') == ''):
             message = 'Incorrect keywords back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_cost is None and card_type in CARD_TYPES_COST:
+            message = 'No cost for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_cost is not None and card_type not in CARD_TYPES_COST:
+            message = 'Redundant cost for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_type == 'Hero' and
+              not re.match('^[1-9]?[0-9]$', str(card_cost))):
+            message = 'Incorrect cost value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_type == 'Quest' and not re.match('^[1-9]$', str(card_cost)):
+            message = 'Incorrect cost value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_type not in ('Hero', 'Quest') and card_cost is not None and
+              not re.match('^[1-9]?[0-9]$', str(card_cost)) and
+              card_cost != '-' and card_cost != 'X'):
+            message = 'Incorrect cost value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_type not in ('Hero', 'Quest') and card_cost is not None and
+              ('Encounter' in (card_keywords or '').replace(
+                  '. ', '.').split('.') or card_back == 'Encounter') and
+              card_cost != '-'):
+            message = 'Incorrect cost value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_cost_back is None and card_type_back in CARD_TYPES_COST:
+            message = 'No cost back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_cost_back is not None and
+              card_type_back not in CARD_TYPES_COST):
+            message = 'Redundant cost back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_type_back == 'Hero' and
+              not re.match('^[1-9]?[0-9]$', str(card_cost_back))):
+            message = 'Incorrect cost back value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_type_back == 'Quest' and
+              not re.match('^[1-9]$', str(card_cost_back))):
+            message = 'Incorrect cost back value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_type_back not in ('Hero', 'Quest') and
+              card_cost_back is not None and
+              not re.match('^[1-9]?[0-9]$', str(card_cost_back)) and
+              card_cost_back != '-' and card_cost_back != 'X'):
+            message = 'Incorrect cost back value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_type_back not in ('Hero', 'Quest') and
+              card_cost_back is not None and
+              'Encounter' in (card_keywords_back or '').replace(
+                  '. ', '.').split('.') and
+              card_cost_back != '-'):
+            message = 'Incorrect cost back value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_engagement is None and card_type in CARD_TYPES_ENGAGEMENT:
+            message = 'No engagement cost for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_engagement is not None and
+              card_type not in CARD_TYPES_ENGAGEMENT):
+            message = 'Redundant engagement cost for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_type == 'Quest' and
+              not re.match('^[A-Z]$', str(card_engagement))):
+            message = 'Incorrect engagement cost value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_type != 'Quest' and card_engagement is not None and
+              not re.match('^[1-9]?[0-9]$', str(card_engagement)) and
+              card_engagement != '-' and card_engagement != 'X'):
+            message = 'Incorrect engagement cost value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_engagement_back is None and
+                card_type_back in CARD_TYPES_ENGAGEMENT):
+            message = 'No engagement cost back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_engagement_back is not None and
+              card_type_back not in CARD_TYPES_ENGAGEMENT):
+            message = 'Redundant engagement cost back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_type_back == 'Quest' and
+              not re.match('^[A-Z]$', str(card_engagement_back))):
+            message = 'Incorrect engagement back value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_type_back != 'Quest' and
+              card_engagement_back is not None and
+              not re.match('^[1-9]?[0-9]$', str(card_engagement_back)) and
+              card_engagement_back != '-' and card_engagement_back != 'X'):
+            message = (
+                'Incorrect engagement cost back value for row #{}{}'.format(
+                    i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_threat is None and card_type in CARD_TYPES_THREAT:
+            message = 'No threat for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_threat is not None and card_type not in CARD_TYPES_THREAT:
+            message = 'Redundant threat for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_threat is not None and
+              not re.match('^[1-9]?[0-9]$', str(card_threat)) and
+              card_threat != '-' and card_threat != 'X'):
+            message = 'Incorrect threat value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_threat_back is None and card_type_back in CARD_TYPES_THREAT:
+            message = 'No threat back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_threat_back is not None and
+              card_type_back not in CARD_TYPES_THREAT):
+            message = 'Redundant threat back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_threat_back is not None and
+              not re.match('^[1-9]?[0-9]$', str(card_threat_back)) and
+              card_threat_back != '-' and card_threat_back != 'X'):
+            message = 'Incorrect threat back value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_willpower is None and card_type in CARD_TYPES_WILLPOWER:
+            message = 'No willpower for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_willpower is not None and
+              card_type not in CARD_TYPES_WILLPOWER):
+            message = 'Redundant willpower for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_willpower is not None and
+              not re.match('^[1-9]?[0-9]$', str(card_willpower)) and
+              card_willpower != '-' and card_willpower != 'X'):
+            message = 'Incorrect willpower value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_willpower_back is None and
+                card_type_back in CARD_TYPES_WILLPOWER):
+            message = 'No willpower back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_willpower_back is not None and
+              card_type_back not in CARD_TYPES_WILLPOWER):
+            message = 'Redundant willpower back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_willpower_back is not None and
+              not re.match('^[1-9]?[0-9]$', str(card_willpower_back)) and
+              card_willpower_back != '-' and card_willpower_back != 'X'):
+            message = 'Incorrect willpower back value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_attack is None and card_type in CARD_TYPES_COMBAT:
+            message = 'No attack for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_attack is not None and
+              card_type not in CARD_TYPES_COMBAT):
+            message = 'Redundant attack for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_attack is not None and
+              not re.match('^[1-9]?[0-9]$', str(card_attack)) and
+              card_attack != '-' and card_attack != 'X'):
+            message = 'Incorrect attack value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_attack_back is None and
+                card_type_back in CARD_TYPES_COMBAT):
+            message = 'No attack back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_attack_back is not None and
+              card_type_back not in CARD_TYPES_COMBAT):
+            message = 'Redundant attack back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_attack_back is not None and
+              not re.match('^[1-9]?[0-9]$', str(card_attack_back)) and
+              card_attack_back != '-' and card_attack_back != 'X'):
+            message = 'Incorrect attack back value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_defense is None and card_type in CARD_TYPES_COMBAT:
+            message = 'No defense for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_defense is not None and
+              card_type not in CARD_TYPES_COMBAT):
+            message = 'Redundant defense for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_defense is not None and
+              not re.match('^[1-9]?[0-9]$', str(card_defense)) and
+              card_defense != '-' and card_defense != 'X'):
+            message = 'Incorrect defense value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_defense_back is None and
+                card_type_back in CARD_TYPES_COMBAT):
+            message = 'No defense back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_defense_back is not None and
+              card_type_back not in CARD_TYPES_COMBAT):
+            message = 'Redundant defense back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_defense_back is not None and
+              not re.match('^[1-9]?[0-9]$', str(card_defense_back)) and
+              card_defense_back != '-' and card_defense_back != 'X'):
+            message = 'Incorrect defense back value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_health is None and card_type in CARD_TYPES_COMBAT:
+            message = 'No health for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_health is not None and
+              card_type not in CARD_TYPES_COMBAT):
+            message = 'Redundant health for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_health is not None and
+              not re.match('^[1-9]?[0-9]$', str(card_health)) and
+              card_health != '-' and card_health != 'X'):
+            message = 'Incorrect health value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_health_back is None and
+                card_type_back in CARD_TYPES_COMBAT):
+            message = 'No health back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_health_back is not None and
+              card_type_back not in CARD_TYPES_COMBAT):
+            message = 'Redundant health back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_health_back is not None and
+              not re.match('^[1-9]?[0-9]$', str(card_health_back)) and
+              card_health_back != '-' and card_health_back != 'X'):
+            message = 'Incorrect health back value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_quest is None and card_type in CARD_TYPES_QUEST:
+            message = 'No quest points for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_quest is not None and card_type not in CARD_TYPES_QUEST:
+            message = 'Redundant quest points for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_quest is not None and
+              not re.match('^[1-9]?[0-9]$', str(card_quest)) and
+              card_quest != '-' and card_quest != 'X'):
+            message = 'Incorrect quest points value for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_quest_back is None and (
+                card_type_back in CARD_TYPES_QUEST
+                or card_type in CARD_TYPES_QUEST_BACK)):
+            message = 'No quest points back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_quest_back is not None and
+              card_type_back not in CARD_TYPES_QUEST and
+              card_type not in CARD_TYPES_QUEST_BACK):
+            message = 'Redundant quest points back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_quest_back is not None and
+              not re.match('^[1-9]?[0-9]$', str(card_quest_back)) and
+              card_quest_back != '-' and card_quest_back != 'X'):
+            message = 'Incorrect quest points back value for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
