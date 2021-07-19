@@ -174,6 +174,22 @@ EXTERNAL_DATA = {}
 EXTERNAL_FILES = set()
 RENDERED_IMAGES = {}
 
+
+def _incremental_id():
+    """ A closure to get a unique incremental ID.
+    """
+    data = [0]
+
+    def _inside():
+        data[0] += 1
+        return data[0]
+
+    return _inside
+
+
+incremental_id = _incremental_id()
+watch_changes_lock = asyncio.Lock()
+rclone_art_lock = asyncio.Lock()
 playtest_lock = asyncio.Lock()
 art_lock = asyncio.Lock()
 
@@ -1095,12 +1111,13 @@ class MyClient(discord.Client):  # pylint: disable=R0902
     """ My bot class.
     """
 
+    watch_changes_schedule_id = None
+    rclone_art_schedule_id = None
     archive_category = None
     cron_channel = None
     playtest_channel = None
     updates_channel = None
     rclone_art = False
-    started = False
     categories = {}
     channels = {}
     general_channels = {}
@@ -1110,10 +1127,6 @@ class MyClient(discord.Client):  # pylint: disable=R0902
         """ Invoked when the client is ready.
         """
         logging.info('Logged in as %s (%s)', self.user.name, self.user.id)
-        if self.started:
-            return
-
-        self.started = True
         try:
             self.archive_category = self.get_channel(
                 [c for c in self.get_all_channels()
@@ -1159,6 +1172,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
         self.categories, self.channels, self.general_channels = (
             await self._load_channels())
         await self._test_channels()
+
         self.loop.create_task(self._watch_changes_schedule())
         self.loop.create_task(self._rclone_art_schedule())
         read_external_data()
@@ -1219,16 +1233,45 @@ class MyClient(discord.Client):  # pylint: disable=R0902
 
 
     async def _watch_changes_schedule(self):
-        logging.info('Starting watch changes schedule')
+        logging.info('Starting watch changes schedule...')
+        my_id = incremental_id()
         while True:
-            await self._watch_changes()
+            async with watch_changes_lock:
+                if (not self.watch_changes_schedule_id or
+                        self.watch_changes_schedule_id < my_id):
+                    self.watch_changes_schedule_id = my_id
+                    logging.info('Acquiring watch changes schedule id: %s',
+                                 my_id)
+                elif self.watch_changes_schedule_id > my_id:
+                    logging.info(
+                        'Detected a new watch changes schedule id: %s, '
+                        'exiting with the old id: %s',
+                        self.watch_changes_schedule_id, my_id)
+                    break
+
+                await self._watch_changes()
+
             await asyncio.sleep(WATCH_SLEEP_TIME)
 
 
     async def _rclone_art_schedule(self):
-        logging.info('Starting rclone art schedule')
+        logging.info('Starting rclone art schedule...')
+        my_id = incremental_id()
         while True:
-            await self._rclone_art()
+            async with rclone_art_lock:
+                if (not self.rclone_art_schedule_id or
+                        self.rclone_art_schedule_id < my_id):
+                    self.rclone_art_schedule_id = my_id
+                    logging.info('Acquiring rclone art schedule id: %s', my_id)
+                elif self.rclone_art_schedule_id > my_id:
+                    logging.info(
+                        'Detected a new rclone art schedule id: %s, '
+                        'exiting with the old id: %s',
+                        self.rclone_art_schedule_id, my_id)
+                    break
+
+                await self._rclone_art()
+
             await asyncio.sleep(RCLONE_ART_SLEEP_TIME)
 
 
