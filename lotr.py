@@ -151,6 +151,10 @@ CARD_TYPES_PLAYER = {'Ally', 'Attachment', 'Contract', 'Event', 'Hero',
 CARD_TYPES_PLAYER_DECK = {'Ally', 'Attachment', 'Event', 'Player Side Quest'}
 CARD_TYPES_PLAYER_SPHERE = {'Ally', 'Attachment', 'Event', 'Hero',
                             'Player Side Quest'}
+CARD_TYPES_ENCOUNTER_SIZE = {'Enemy', 'Location', 'Objective',
+                             'Objective Ally', 'Objective Hero',
+                             'Objective Location', 'Ship Enemy',
+                             'Ship Objective', 'Treachery', 'Treasure'}
 CARD_TYPES_ENCOUNTER_SET = {'Campaign', 'Encounter Side Quest', 'Enemy',
                             'Location', 'Nightmare', 'Objective',
                             'Objective Ally', 'Objective Hero',
@@ -158,10 +162,10 @@ CARD_TYPES_ENCOUNTER_SET = {'Campaign', 'Encounter Side Quest', 'Enemy',
                             'Ship Objective', 'Treachery'}
 CARD_TYPES_NO_ENCOUNTER_SET = {'Ally', 'Attachment', 'Contract', 'Event',
                                'Hero', 'Player Side Quest'}
-CARD_TYPES_ENCOUNTER_SIZE = {'Enemy', 'Location', 'Objective',
-                             'Objective Ally', 'Objective Hero',
-                             'Objective Location', 'Ship Enemy',
-                             'Ship Objective', 'Treachery', 'Treasure'}
+CARD_TYPES_UNIQUE = {'Hero', 'Objective Hero'}
+CARD_TYPES_NON_UNIQUE = {'Campaign', 'Contract', 'Event', 'Nightmare',
+                         'Player Side Quest', 'Presentation', 'Quest', 'Rules',
+                         'Treachery', 'Treasure'}
 CARD_TYPES_TRAITS = {'Ally', 'Enemy', 'Hero', 'Location', 'Objective Ally',
                      'Objective Hero', 'Objective Location', 'Ship Enemy',
                      'Ship Objective', 'Treasure'}
@@ -169,13 +173,6 @@ CARD_TYPES_NO_TRAITS = {'Campaign', 'Contract', 'Nightmare', 'Presentation',
                         'Quest', 'Rules'}
 CARD_TYPES_NO_KEYWORDS = {'Campaign', 'Contract', 'Nightmare', 'Presentation',
                           'Rules'}
-CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
-                        'Objective Hero', 'Objective Location',
-                        'Ship Objective', 'Quest'}
-CARD_TYPES_UNIQUE = {'Hero', 'Objective Hero'}
-CARD_TYPES_NON_UNIQUE = {'Campaign', 'Contract', 'Event', 'Nightmare',
-                         'Player Side Quest', 'Presentation', 'Quest', 'Rules',
-                         'Treachery', 'Treasure'}
 CARD_TYPES_COST = {'Hero', 'Ally', 'Attachment', 'Event', 'Player Side Quest',
                    'Treasure', 'Quest'}
 CARD_TYPES_ENGAGEMENT = {'Enemy', 'Ship Enemy', 'Quest'}
@@ -192,6 +189,12 @@ CARD_TYPES_VICTORY = {'Ally', 'Attachment', 'Encounter Side Quest', 'Enemy',
                       'Objective Location', 'Player Side Quest', 'Ship Enemy',
                       'Ship Objective', 'Treachery', 'Treasure'}
 CARD_TYPES_VICTORY_BACK = {'Quest'}
+CARD_TYPES_SPECIAL_ICON = {'Enemy', 'Location', 'Objective', 'Objective Ally',
+                           'Objective Location', 'Ship Enemy', 'Ship Objective',
+                           'Treachery'}
+CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
+                        'Objective Hero', 'Objective Location',
+                        'Ship Objective', 'Quest'}
 CARD_TYPES_DECK_RULES = {'Nightmare', 'Quest'}
 CARD_TYPES_ONE_COPY = {'Campaign', 'Contract', 'Encounter Side Quest', 'Hero',
                        'Nightmare', 'Objective Hero', 'Presentation', 'Quest',
@@ -212,6 +215,8 @@ SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow',
                         'Nightmare Yellow'}
 SPHERES_RULES = {'Back'}
 SPHERES_SHIP_OBJECTIVE = {'Upgraded'}
+SPECIAL_ICONS = {'eye of sauron', 'eye of sauronx2', 'eye of sauronx3',
+                 'sailing', 'sailingx2'}
 
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}{}*.jpg"'
@@ -1505,6 +1510,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_health = row[CARD_HEALTH]
         card_quest = row[CARD_QUEST]
         card_victory = row[CARD_VICTORY]
+        card_special_icon = row[CARD_SPECIAL_ICON]
 
         card_name_back = row[BACK_PREFIX + CARD_NAME]
         card_unique_back = row[BACK_PREFIX + CARD_UNIQUE]
@@ -1521,6 +1527,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_health_back = row[BACK_PREFIX + CARD_HEALTH]
         card_quest_back = row[BACK_PREFIX + CARD_QUEST]
         card_victory_back = row[BACK_PREFIX + CARD_VICTORY]
+        card_special_icon_back = row[BACK_PREFIX + CARD_SPECIAL_ICON]
 
         card_easy_mode = row[CARD_EASY_MODE]
         card_adventure = row[CARD_ADVENTURE]
@@ -1673,10 +1680,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-
-        if ((card_unique is None and card_type in CARD_TYPES_UNIQUE) or
-                (card_unique in ('1', 1) and
-                 card_type in CARD_TYPES_NON_UNIQUE)):
+        elif ((card_unique is None and card_type in CARD_TYPES_UNIQUE) or
+              (card_unique in ('1', 1) and
+               card_type in CARD_TYPES_NON_UNIQUE)):
             message = 'Incorrect unique value for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -1693,11 +1699,10 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-
-        if ((card_unique_back is None and
-             card_type_back in CARD_TYPES_UNIQUE) or
-                (card_unique_back in ('1', 1) and
-                 card_type_back in CARD_TYPES_NON_UNIQUE)):
+        elif ((card_unique_back is None and
+               card_type_back in CARD_TYPES_UNIQUE) or
+              (card_unique_back in ('1', 1) and
+               card_type_back in CARD_TYPES_NON_UNIQUE)):
             message = 'Incorrect unique back value for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -1835,8 +1840,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-
-        if card_traits is not None and not card_traits.endswith('.'):
+        elif card_traits is not None and not card_traits.endswith('.'):
             message = 'Missing period in traits for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -1860,8 +1864,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-
-        if card_traits_back is not None and not card_traits_back.endswith('.'):
+        elif (card_traits_back is not None and
+              not card_traits_back.endswith('.')):
             message = 'Missing period in traits back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -1877,10 +1881,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-
-        if (card_keywords is not None and not
-                (card_keywords.endswith('.') or
-                 card_keywords.endswith('.[inline]'))):
+        elif (card_keywords is not None and not
+              (card_keywords.endswith('.') or
+               card_keywords.endswith('.[inline]'))):
             message = 'Missing period in keywords for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -1907,10 +1910,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-
-        if (card_keywords_back is not None and not
-                (card_keywords_back.endswith('.') or
-                 card_keywords_back.endswith('.[inline]'))):
+        elif (card_keywords_back is not None and not
+              (card_keywords_back.endswith('.') or
+               card_keywords_back.endswith('.[inline]'))):
             message = 'Missing period in keywords back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -2486,6 +2488,44 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
               card_type_back not in CARD_TYPES_VICTORY and
               card_type not in CARD_TYPES_VICTORY_BACK):
             message = 'Redundant victory points back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_special_icon is not None and
+                card_special_icon.lower() not in SPECIAL_ICONS):
+            message = 'Incorrect format for special icon for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_special_icon is not None and
+              card_type not in CARD_TYPES_SPECIAL_ICON):
+            message = 'Redundant special icon for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_special_icon_back is not None and
+                card_special_icon_back.lower() not in SPECIAL_ICONS):
+            message = ('Incorrect format for special icon back for row #{}{}'
+                       .format(i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_special_icon_back is not None and
+              card_type_back not in CARD_TYPES_SPECIAL_ICON):
+            message = 'Redundant special icon back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
