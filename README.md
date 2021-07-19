@@ -402,7 +402,10 @@ To choose the promo template for a hero, put "Promo" into `Adventure` column.
 **Special Icons**
 
 - `Eye Of Sauron`
+- `Eye Of Sauronx2`
+- `Eye Of Sauronx3`
 - `Sailing`
+- `Sailingx2`
 
 **Deck Rules**
 

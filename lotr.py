@@ -135,9 +135,9 @@ TRANSLATED_COLUMNS = {
     BACK_PREFIX + CARD_FLAVOUR, CARD_ADVENTURE
 }
 
-CARD_TYPES = {'Ally', 'Attachment', 'Campaign', 'Contract', 'Enemy',
-              'Encounter Side Quest', 'Event', 'Hero', 'Location', 'Nightmare',
-              'Objective', 'Objective Ally', 'Objective Hero',
+CARD_TYPES = {'Ally', 'Attachment', 'Campaign', 'Contract',
+              'Encounter Side Quest', 'Enemy', 'Event', 'Hero', 'Location',
+              'Nightmare', 'Objective', 'Objective Ally', 'Objective Hero',
               'Objective Location', 'Player Side Quest', 'Presentation',
               'Quest', 'Rules', 'Ship Enemy', 'Ship Objective', 'Treachery',
               'Treasure'}
@@ -151,7 +151,7 @@ CARD_TYPES_PLAYER = {'Ally', 'Attachment', 'Contract', 'Event', 'Hero',
 CARD_TYPES_PLAYER_DECK = {'Ally', 'Attachment', 'Event', 'Player Side Quest'}
 CARD_TYPES_PLAYER_SPHERE = {'Ally', 'Attachment', 'Event', 'Hero',
                             'Player Side Quest'}
-CARD_TYPES_ENCOUNTER_SET = {'Campaign', 'Enemy', 'Encounter Side Quest',
+CARD_TYPES_ENCOUNTER_SET = {'Campaign', 'Encounter Side Quest', 'Enemy',
                             'Location', 'Nightmare', 'Objective',
                             'Objective Ally', 'Objective Hero',
                             'Objective Location', 'Quest', 'Ship Enemy',
@@ -176,17 +176,22 @@ CARD_TYPES_UNIQUE = {'Hero', 'Objective Hero'}
 CARD_TYPES_NON_UNIQUE = {'Campaign', 'Contract', 'Event', 'Nightmare',
                          'Player Side Quest', 'Presentation', 'Quest', 'Rules',
                          'Treachery', 'Treasure'}
-CARD_TYPES_COST = ['Hero', 'Ally', 'Attachment', 'Event', 'Player Side Quest',
-                   'Treasure', 'Quest']
-CARD_TYPES_ENGAGEMENT = ['Enemy', 'Ship Enemy', 'Quest']
-CARD_TYPES_THREAT = ['Enemy', 'Location', 'Ship Enemy']
-CARD_TYPES_WILLPOWER = ['Ally', 'Hero', 'Objective Ally', 'Objective Hero',
-                        'Ship Objective']
-CARD_TYPES_COMBAT = ['Ally', 'Enemy', 'Hero', 'Objective Ally', 'Objective Hero',
-                     'Ship Enemy', 'Ship Objective']
-CARD_TYPES_QUEST = ['Encounter Side Quest', 'Location', 'Objective Location',
-                    'Player Side Quest']
-CARD_TYPES_QUEST_BACK = ['Quest']
+CARD_TYPES_COST = {'Hero', 'Ally', 'Attachment', 'Event', 'Player Side Quest',
+                   'Treasure', 'Quest'}
+CARD_TYPES_ENGAGEMENT = {'Enemy', 'Ship Enemy', 'Quest'}
+CARD_TYPES_THREAT = {'Enemy', 'Location', 'Ship Enemy'}
+CARD_TYPES_WILLPOWER = {'Ally', 'Hero', 'Objective Ally', 'Objective Hero',
+                        'Ship Objective'}
+CARD_TYPES_COMBAT = {'Ally', 'Enemy', 'Hero', 'Objective Ally', 'Objective Hero',
+                     'Ship Enemy', 'Ship Objective'}
+CARD_TYPES_QUEST = {'Encounter Side Quest', 'Location', 'Objective Location',
+                    'Player Side Quest'}
+CARD_TYPES_QUEST_BACK = {'Quest'}
+CARD_TYPES_VICTORY = {'Ally', 'Attachment', 'Encounter Side Quest', 'Enemy',
+                      'Event', 'Location', 'Objective', 'Objective Ally',
+                      'Objective Location', 'Player Side Quest', 'Ship Enemy',
+                      'Ship Objective', 'Treachery', 'Treasure'}
+CARD_TYPES_VICTORY_BACK = {'Quest'}
 CARD_TYPES_DECK_RULES = {'Nightmare', 'Quest'}
 CARD_TYPES_ONE_COPY = {'Campaign', 'Contract', 'Encounter Side Quest', 'Hero',
                        'Nightmare', 'Objective Hero', 'Presentation', 'Quest',
@@ -2434,7 +2439,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         if card_victory is not None and card_type in ('Presentation', 'Rules'):
             if len(str(card_victory).split('/')) != 2:
-                message = ('Incorrect format for card victory for row '
+                message = ('Incorrect format for victory points for row '
                            '#{}{}'.format(i, scratch))
                 logging.error(message)
                 if not card_scratch:
@@ -2443,18 +2448,25 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     broken_set_ids.add(set_id)
             elif not (is_positive_int(str(card_victory).split('/')[0]) and
                       is_positive_int(str(card_victory).split('/')[1])):
-                message = ('Incorrect format for card victory for row '
+                message = ('Incorrect format for victory points for row '
                            '#{}{}'.format(i, scratch))
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)
                 else:
                     broken_set_ids.add(set_id)
+        elif card_victory is not None and card_type not in CARD_TYPES_VICTORY:
+            message = 'Redundant victory points for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
-        if (card_victory_back is not None and
-                card_type_back in ('Presentation', 'Rules')):
+        if card_victory_back is not None and card_type_back == 'Rules':
             if len(str(card_victory_back).split('/')) != 2:
-                message = ('Incorrect format for card victory back for row '
+                message = ('Incorrect format for victory points back for row '
                            '#{}{}'.format(i, scratch))
                 logging.error(message)
                 if not card_scratch:
@@ -2463,13 +2475,23 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     broken_set_ids.add(set_id)
             elif not (is_positive_int(str(card_victory_back).split('/')[0]) and
                       is_positive_int(str(card_victory_back).split('/')[1])):
-                message = ('Incorrect format for card victory back for row '
+                message = ('Incorrect format for victory points back for row '
                            '#{}{}'.format(i, scratch))
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)
                 else:
                     broken_set_ids.add(set_id)
+        elif (card_victory_back is not None and
+              card_type_back not in CARD_TYPES_VICTORY and
+              card_type not in CARD_TYPES_VICTORY_BACK):
+            message = 'Redundant victory points back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if card_easy_mode is not None and not is_positive_int(card_easy_mode):
             message = ('Incorrect format for removed for easy mode for row '
