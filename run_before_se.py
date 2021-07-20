@@ -83,7 +83,7 @@ def main(conf=None):  # pylint: disable=R0912,R0915
             lotr.generate_spanishdb_csv(conf, set_id, set_name)
 
         if conf['hallofbeorn_json']:
-            for lang in set(conf['output_languages'] + ['English']):
+            for lang in (conf['output_languages'] or ['English']):
                 lotr.generate_hallofbeorn_json(conf, set_id, set_name, lang)
 
         if conf['output_languages']:

@@ -2097,8 +2097,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_type_back == 'Quest' and
               not re.match('^[A-Z]$', str(card_engagement_back))):
-            message = 'Incorrect engagement back value for row #{}{}'.format(
-                i, scratch)
+            message = ('Incorrect engagement cost back value for row #{}{}'
+                       .format(i, scratch))
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
