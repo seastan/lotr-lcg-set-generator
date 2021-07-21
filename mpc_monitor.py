@@ -558,8 +558,8 @@ Attempting to fix it automatically...
 3. Find {deck_name} Backup deck in the list, click Save As, type "{deck_name}" and click Save
 4. Find {deck_name} deck in the list again, right click on the checkbox and copy its ID (after "chk_")
 5. Construct a URL https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id=<ID>
-6. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/6592070748291624930 and login into ALeP account (if needed)
-7. Switch to Compose view (if needed) and update the link to that URL
+6. Open https://wordpress.com/page/alongextendedparty.com/37 and login into ALeP account (if needed)
+7. Update the link to that URL
 """
         create_mail(ERROR_SUBJECT_TEMPLATE.format(message), body)
         discord_message = f"""Attempt to fix deck **{deck_name}** automatically failed!
@@ -570,8 +570,8 @@ Do the following:
 3. Find **{deck_name} Backup** deck in the list, click *Save As*, type "{deck_name}" and click *Save*
 4. Find **{deck_name}** deck in the list again, right click on the checkbox and copy its ID (after "chk_")
 5. Construct a URL https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id=<ID>
-6. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/6592070748291624930 and login into ALeP account (if needed)
-7. Switch to Compose view (if needed) and update the link to that URL
+6. Open https://wordpress.com/page/alongextendedparty.com/37 and login into ALeP account (if needed)
+7. Update the link to that URL
 {DISCORD_USERS}"""
         send_discord(discord_message)
         return '', ''
@@ -580,15 +580,15 @@ Do the following:
                    'New deck ID: {}'.format(deck_name, new_deck_id))
         logging.info(message)
         body = f"""Do the following:
-1. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/6592070748291624930 and login into ALeP account (if needed)
-2. Switch to Compose view (if needed) and update the link to:
+1. Open https://wordpress.com/page/alongextendedparty.com/37 and login into ALeP account (if needed)
+2. Update the link to:
 https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id={new_deck_id}
 """
         create_mail(ALERT_SUBJECT_TEMPLATE.format(message), body)
         discord_message = f"""Attempt to fix deck **{deck_name}** automatically succeeded!
 Do the following:
-1. Open https://www.blogger.com/u/6/blog/page/edit/2051510818249539805/6592070748291624930 and login into ALeP account (if needed)
-2. Switch to Compose view (if needed) and update the link to:
+1. Open https://wordpress.com/page/alongextendedparty.com/37 and login into ALeP account (if needed)
+2. Update the link to:
 https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id={new_deck_id}
 {DISCORD_USERS}"""
         send_discord(discord_message)
