@@ -67,11 +67,11 @@ def generate_db(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: d
 
 
 @retry()
-def generate_octgn(conf, set_id, set_name, lang, skip_ids):
+def generate_octgn(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: disable=R0913
     """ Generate OCTGN outputs.
     """
     lotr.generate_png300_octgn(set_id, set_name, lang, skip_ids)
-    lotr.generate_octgn(conf, set_id, set_name, lang)
+    lotr.generate_octgn(conf, set_id, set_name, lang, card_data)
 
 
 @retry()
@@ -223,7 +223,7 @@ def main():  # pylint: disable=R0912,R0914,R0915
 
             if 'octgn' in conf['outputs'][lang]:
                 tasks.append([generate_octgn, conf, set_id, set_name, lang,
-                              skip_ids])
+                              skip_ids, card_data])
 
             if 'rules_pdf' in conf['outputs'][lang]:
                 tasks.append([generate_rules_pdf, conf, set_id, set_name,

@@ -998,11 +998,11 @@ def get_content(url):
     return res
 
 
-def _get_cached_content(url):
+def _get_cached_content(url, content_type):
     """ Find URL's content in the cache first.
     """
-    path = os.path.join(URL_CACHE_PATH, '{}.cache'.format(
-        re.sub(r'[^A-Za-z0-9_\.\-]', '', url)))
+    path = os.path.join(URL_CACHE_PATH, '{}.{}.cache'.format(
+        re.sub(r'[^A-Za-z0-9_\.\-]', '', url), content_type))
     if os.path.exists(path):
         with open(path, 'br') as obj:
             content = obj.read()
@@ -1011,11 +1011,11 @@ def _get_cached_content(url):
     return None
 
 
-def _save_content(url, content):
+def _save_content(url, content, content_type):
     """ Save URL's content into cache.
     """
-    path = os.path.join(URL_CACHE_PATH, '{}.cache'.format(
-        re.sub(r'[^A-Za-z0-9_\.\-]', '', url)))
+    path = os.path.join(URL_CACHE_PATH, '{}.{}.cache'.format(
+        re.sub(r'[^A-Za-z0-9_\.\-]', '', url), content_type))
     with open(path, 'bw') as obj:
         obj.write(content)
 
@@ -1056,7 +1056,7 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
         url = (
             'https://docs.google.com/spreadsheets/d/{}/export?format=csv'
             .format(conf['sheet_gdid']))
-        res = _get_cached_content(url) if conf['offline_mode'] else None
+        res = _get_cached_content(url, 'csv') if conf['offline_mode'] else None
         if res:
             res = res.decode('utf-8')
             SHEET_IDS.update(dict(row for row in csv.reader(res.splitlines())))
@@ -1073,7 +1073,7 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
                 raise SheetError("Can't download the Google Sheet")
 
             if conf['offline_mode']:
-                _save_content(url, res_raw)
+                _save_content(url, res_raw, 'csv')
 
         missing_sheets = [sheet for sheet in sheets
                           if sheet not in SHEET_IDS]
@@ -1092,7 +1092,7 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
         url = (
             'https://docs.google.com/spreadsheets/d/{}/export?format=csv&gid={}'
             .format(conf['sheet_gdid'], SHEET_IDS[sheet]))
-        res = _get_cached_content(url) if conf['offline_mode'] else None
+        res = _get_cached_content(url, 'csv') if conf['offline_mode'] else None
         if res:
             res = res.decode('utf-8')
             data = list(csv.reader(StringIO(res)))
@@ -1110,7 +1110,7 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
                                  .format(sheet))
 
             if conf['offline_mode']:
-                _save_content(url, res_raw)
+                _save_content(url, res_raw, 'csv')
 
         none_index = data[0].index('')
         data = [row[:none_index] for row in data]
@@ -3165,6 +3165,20 @@ def _add_set_xml_properties(parent, properties, fix_linebreaks, tab):
             prop.tail = '\n' + tab + '  '
 
 
+def _needed_for_octgn(card):
+    """ Check whether a card is needed for OCTGN or not.
+    """
+    return card[CARD_ADVENTURE] != 'Promo'
+
+
+def _needed_for_dragncards(card):
+    """ Check whether a card is needed for DragnCards or not.
+    """
+    return (card[CARD_ADVENTURE] != 'Promo' and
+            card[CARD_TYPE] != 'Presentation' and
+            not (card[CARD_TYPE] == 'Rules' and card[CARD_SPHERE] == 'Back'))
+
+
 def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R0915
     """ Generate set.xml file for OCTGN.
     """
@@ -3181,13 +3195,11 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
 
     chosen_data = []
     for row in DATA:
-        if row[CARD_ID] is None:
-            continue
-
-        if row[CARD_SET] != set_id:
-            continue
-
-        if conf['selected_only'] and row[CARD_ID] not in SELECTED_CARDS:
+        if (row[CARD_ID] is None
+                or row[CARD_SET] != set_id
+                or not _needed_for_octgn(row)
+                or (conf['selected_only']
+                    and row[CARD_ID] not in SELECTED_CARDS)):
             continue
 
         chosen_data.append(row)
@@ -3311,7 +3323,7 @@ def load_external_xml(url, sets=None, encounter_sets=None):  # pylint: disable=R
         content = XML_CACHE[url]
         root = ET.fromstring(content)
     else:
-        content = _get_cached_content(url)
+        content = _get_cached_content(url, 'xml')
         if content:
             XML_CACHE[url] = content
             root = ET.fromstring(content)
@@ -3328,7 +3340,7 @@ def load_external_xml(url, sets=None, encounter_sets=None):  # pylint: disable=R
                 return res
 
             XML_CACHE[url] = content
-            _save_content(url, content)
+            _save_content(url, content, 'xml')
 
     set_name = str(root.attrib['name']).lower()
     if sets and set_name not in sets:
@@ -3538,7 +3550,9 @@ def _generate_octgn_o8d_player(conf, set_id, set_name):
     """ Generate .o8d file with player cards for OCTGN.
     """
     rows = [row for row in DATA
-            if row[CARD_SET] == set_id
+            if row[CARD_ID] is not None
+            and _needed_for_octgn(row)
+            and row[CARD_SET] == set_id
             and row[CARD_TYPE] in CARD_TYPES_PLAYER
             and (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)]
     if not rows:
@@ -3550,6 +3564,7 @@ def _generate_octgn_o8d_player(conf, set_id, set_name):
 
     output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
                                escape_filename(set_name))
+    create_folder(output_path)
     filename = escape_octgn_filename(
         'Player-{}.o8d'.format(escape_filename(set_name)))
     with open(
@@ -3659,7 +3674,8 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                 [str(s).lower() for s in rules[('encounter sets', 0)]])
 
         cards = [r for r in DATA
-                 if r[CARD_ID]
+                 if r[CARD_ID] is not None
+                 and _needed_for_octgn(r)
                  and str(r[CARD_SET_NAME] or '').lower() in quest['sets']
                  and (not r[CARD_ENCOUNTER_SET] or
                       str(r[CARD_ENCOUNTER_SET]).lower()
@@ -3817,21 +3833,25 @@ def _needed_for_ringsdb(card):
     """ Check whether a card is needed for RingsDB or not.
     """
     card_type = ('Treasure' if card.get(CARD_SPHERE) == 'Boon'
-                 else card[CARD_TYPE])
-    return card_type in CARD_TYPES_PLAYER
+                 else card.get(CARD_TYPE))
+    return (card_type in CARD_TYPES_PLAYER and
+            card.get(CARD_ADVENTURE) != 'Promo')
 
 
 def _needed_for_frenchdb(card):
     """ Check whether a card is needed for the French database or not.
     """
-    return card[CARD_TYPE] not in ('Presentation', 'Rules')
+    return (card[CARD_TYPE] not in ('Presentation', 'Rules') and
+            card[CARD_ADVENTURE] != 'Promo')
 
 
 def _needed_for_spanishdb(card):
     """ Check whether a card is needed for the Spanish database or not.
     """
     return (card[CARD_TYPE] != 'Presentation' and
-            not (card[CARD_TYPE] == 'Rules' and card[CARD_SPHERE] == 'Back'))
+            not (card[CARD_TYPE] == 'Rules' and
+                 card[CARD_SPHERE] == 'Back') and
+            card[CARD_ADVENTURE] != 'Promo')
 
 
 def _ringsdb_code(row):
@@ -3873,7 +3893,8 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
         writer = csv.DictWriter(obj, fieldnames=fieldnames)
         writer.writeheader()
         for row in DATA:
-            if (row[CARD_SET] != set_id
+            if (row[CARD_ID] is None
+                    or row[CARD_SET] != set_id
                     or not _needed_for_ringsdb(row)
                     or (conf['selected_only']
                         and row[CARD_ID] not in SELECTED_CARDS)):
@@ -3996,14 +4017,11 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
 
     json_data = {}
     for row in DATA:
-        if row[CARD_SET] != set_id:
-            continue
-
-        if (row[CARD_TYPE] == 'Presentation' or
-                (row[CARD_TYPE] == 'Rules' and row[CARD_SPHERE] == 'Back')):
-            continue
-
-        if conf['selected_only'] and row[CARD_ID] not in SELECTED_CARDS:
+        if (row[CARD_ID] is None
+                or row[CARD_SET] != set_id
+                or not _needed_for_dragncards(row)
+                or (conf['selected_only']
+                    and row[CARD_ID] not in SELECTED_CARDS)):
             continue
 
         if row[CARD_TYPE] == 'Encounter Side Quest':
@@ -4270,8 +4288,17 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
 
         traits = _extract_traits(translated_row.get(CARD_TRAITS))
         traits_original = _extract_traits(row.get(CARD_TRAITS))
-        position = (int(row[CARD_NUMBER])
-                    if is_positive_or_zero_int(row[CARD_NUMBER]) else 0)
+
+        card_number = (int(row[CARD_NUMBER])
+                       if is_positive_or_zero_int(row[CARD_NUMBER]) else 0)
+        code = '{}{}'.format(row[CARD_SET_RINGSDB_CODE],
+                             str(card_number).zfill(3))
+        position = (row[CARD_PRINTED_NUMBER]
+                    if row[CARD_PRINTED_NUMBER] and
+                    card_type == 'Hero' and
+                    row[CARD_ADVENTURE] == 'Promo'
+                    else card_number)
+
         encounter_set = ((row[CARD_ENCOUNTER_SET] or '')
                          if card_type in CARD_TYPES_ENCOUNTER_SET
                          else row[CARD_ENCOUNTER_SET])
@@ -4348,8 +4375,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
                     if _is_int(row[CARD_QUANTITY]) else 1)
 
         json_row = {
-            'code': '{}{}'.format(row[CARD_SET_RINGSDB_CODE],
-                                  str(position).zfill(3)),
+            'code': code,
             'deck_limit': limit or quantity,
             'flavor': flavor,
             'has_errata': False,
@@ -6556,8 +6582,8 @@ def full_card_dict():
     card_dict = {}
     for _, _, filenames in os.walk(URL_CACHE_PATH):
         for filename in filenames:
-            if filename.endswith('.cache'):
-                data = load_external_xml(re.sub(r'\.cache$', '', filename))
+            if filename.endswith('.xml.cache'):
+                data = load_external_xml(re.sub(r'\.xml.cache$', '', filename))
                 card_dict.update({r[CARD_ID]:r for r in data})
 
         break
@@ -6920,7 +6946,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                  round(time.time() - timestamp, 3))
 
 
-def generate_octgn(conf, set_id, set_name, lang):
+def generate_octgn(conf, set_id, set_name, lang, card_data):  # pylint: disable=R0914
     """ Generate OCTGN and DragnCards image outputs.
     """
     logging.info('[%s, %s] Generating OCTGN and DragnCards image outputs...',
@@ -6936,8 +6962,16 @@ def generate_octgn(conf, set_id, set_name, lang):
                              'generate_octgn.{}.{}'.format(set_id, lang))
     create_folder(temp_path)
     clear_folder(temp_path)
+
+    card_ids = {row[CARD_ID] for row in card_data
+                if row[CARD_SET] == set_id
+                and _needed_for_octgn(row)}
+
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
+            if filename[50:86] not in card_ids:
+                continue
+
             shutil.copyfile(os.path.join(input_path, filename),
                             os.path.join(temp_path, filename))
 
