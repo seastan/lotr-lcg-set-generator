@@ -4294,7 +4294,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
         code = '{}{}'.format(row[CARD_SET_RINGSDB_CODE],
                              str(card_number).zfill(3))
         position = (row[CARD_PRINTED_NUMBER]
-                    if row[CARD_PRINTED_NUMBER] and
+                    if row[CARD_PRINTED_NUMBER] is not None and
                     card_type == 'Hero' and
                     row[CARD_ADVENTURE] == 'Promo'
                     else card_number)
@@ -4324,6 +4324,17 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
                     BACK_PREFIX + CARD_VICTORY)))
         else:
             victory_points = _handle_int_str(translated_row.get(CARD_VICTORY))
+
+        tokens = []
+        if row[CARD_SPECIAL_ICON] is not None:
+            tokens.append(row[CARD_SPECIAL_ICON])
+
+        if victory_points is not None and not _is_int(victory_points):
+            tokens.append(victory_points)
+            victory_points = None
+
+        if not tokens:
+            tokens = None
 
         additional_encounter_sets = [
             s.strip() for s in str(row[CARD_ADDITIONAL_ENCOUNTER_SETS] or ''
@@ -4425,6 +4436,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
             'threat': threat,
             'threat_strength': _handle_int_str(row[CARD_THREAT]),
             'victory_points': victory_points,
+            'tokens': tokens,
             'willpower': _handle_int_str(row[CARD_WILLPOWER])
             }
         json_row = {k:v for k, v in json_row.items() if v is not None}
