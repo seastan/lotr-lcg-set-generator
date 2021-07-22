@@ -27,6 +27,7 @@ configuration.yaml
 discord.yaml
 id_rsa
 makeCards_FINISHED
+monitor_discord_changes_TRIGGERED
 mpc_monitor.json
 pipeline_STARTED
 remote_logs_path
