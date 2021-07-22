@@ -250,6 +250,10 @@ If you want to manually restart the scripts, run:
 - `./restart_discord_bot.sh`
 - `./restart_run_before_se_service.sh`
 
+If you want to add a new MakePlayingCards deck to monitoring, run:
+
+- `./mpc_add.sh "<deck name>"`
+
 **Outputs**
 
 The scripts will generate the following outputs:

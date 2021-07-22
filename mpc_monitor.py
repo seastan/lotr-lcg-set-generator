@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import re
+import sys
 import time
 import uuid
 
@@ -367,7 +368,7 @@ def delete_deck(session, content, deck_id, deck):
 
 
 def clone_deck(session, content, deck_id, new_deck_name):
-    """ Delete the deck.
+    """ Clone the deck.
     """
     viewstate, viewstategenerator = get_viewstate(session, content)
     form_data = init_form_data('btn_submit', viewstate, viewstategenerator,
@@ -595,8 +596,82 @@ https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id={new_deck_id}
         return content, new_deck_id
 
 
-def run():
-    """ Run the check.
+def add_deck(deck_name):
+    """ Add new deck to monitoring.
+    """
+    try:
+        with open(CONF_PATH, 'r') as fobj:
+            data = json.load(fobj)
+    except Exception:
+        logging.error('No configuration found')
+        return
+
+    if 'decks' in data and deck_name in data['decks']:
+        logging.info('Deck %s already added to monitoring', deck_name)
+        return
+
+    if not data.get('cookies'):
+        logging.error('No cookies found')
+        return
+
+    logging.info('Adding deck %s to monitoring...', deck_name)
+    session = init_session(data['cookies'])
+    content = get_decks(session)
+    if not content:
+        logging.info('The site is undergoing system upgrade')
+        return
+
+    regex = DECK_REGEX.format(re.escape(deck_name))
+    match = re.search(regex, content)
+    if not match:
+        logging.error('Deck %s not found, content length: %s',
+                      deck_name, len(content))
+        return
+
+    deck_id = match.groups()[0]
+    content_id = match.groups()[1]
+
+    backup_name = '{} Backup'.format(deck_name)
+    regex = DECK_REGEX.format(re.escape(backup_name))
+    match = re.search(regex, content)
+    if match:
+        logging.info('Deck %s already exists', backup_name)
+    else:
+        content = clone_deck(session, content, deck_id, backup_name)
+        match = re.search(regex, content)
+        if match:
+            logging.info('Created deck %s', backup_name)
+        else:
+            logging.error('Deck %s not found, content length: %s',
+                          backup_name, len(content))
+            return
+
+    backup_id = match.groups()[0]
+    if 'decks' not in data:
+        data['decks'] = {}
+
+    data['decks'][deck_name] = {
+        'content_id': content_id,
+        'backup_id': backup_id,
+        'deck_id': deck_id,
+        'failed_content_ids': []
+    }
+    data['cookies'] = session.cookies.get_dict()
+    with open(CONF_PATH, 'w') as fobj:
+        json.dump(data, fobj, indent=4)
+
+    deck_url = (
+        'https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id={}'
+        .format(deck_id))
+    message = 'Deck {} successfully added to monitoring, URL: {}'.format(
+        deck_name, deck_url)
+    logging.info(message)
+    print(message)
+    print('See {} for details'.format(LOG_PATH))
+
+
+def monitor():
+    """ Run the monitoring checks.
     """
     try:
         with open(CONF_PATH, 'r') as fobj:
@@ -667,7 +742,10 @@ def main():
             logging.warning('Internet is not available right now, exiting')
             return
 
-        run()
+        if len(sys.argv) > 1:
+            add_deck(sys.argv[1])
+        else:
+            monitor()
     except Exception as exc:
         message = 'Script failed: {}: {}'.format(type(exc).__name__, str(exc))
         logging.exception(message)
