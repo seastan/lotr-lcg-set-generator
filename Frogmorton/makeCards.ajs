@@ -363,21 +363,6 @@ function run(progress, target, filename, icons) {
 		if (!card['Artist']) {
 			card['Artist'] = 'Unknown Artist';
 		}
-		if (card['BName'] && !card['BArtist']) {
-			card['BArtist'] = card['Artist'];
-		}
-		if (card['BName'] && card['Artwork'] && !card['BArtwork']) {
-			card['BArtwork'] = card['Artwork'];
-			if (card['PanX']) {
-				card['BPanX'] = card['PanX'];
-			}
-			if (card['PanY']) {
-				card['BPanY'] = card['PanY'];
-			}
-			if (card['Scale']) {
-				card['BScale'] = card['Scale'];
-			}
-		}
 
 		let playerCopies = false;
 		if (playerCopyTypes.indexOf(card['Type'] + '') > -1 && card['Quantity'] == 3) {
