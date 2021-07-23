@@ -2589,7 +2589,9 @@ Targets removed.
         for card in matches:
             sides = ['A']
             if (card.get(lotr.BACK_PREFIX + lotr.CARD_NAME) and
-                    card.get(lotr.BACK_PREFIX + lotr.CARD_ARTIST)):
+                    (card.get(lotr.BACK_PREFIX + lotr.CARD_ARTIST) or
+                     card.get(lotr.CARD_TYPE) not in
+                     lotr.CARD_TYPES_DOUBLESIDE_OPTIONAL)):
                 sides.append('B')
 
             for side in sides:
@@ -2610,8 +2612,10 @@ Targets removed.
                                 card[lotr.CARD_ID], card[lotr.CARD_NAME], side,
                                 artist, file_data[(card[lotr.CARD_ID], side)]))
                     else:
-                        no_spreadsheet_artist.append('{} ({}), side {}'.format(
-                            card[lotr.CARD_ID], card[lotr.CARD_NAME], side))
+                        no_spreadsheet_artist.append(
+                            '{} ({}), side {}: {} on disk'.format(
+                                card[lotr.CARD_ID], card[lotr.CARD_NAME], side,
+                                file_data[(card[lotr.CARD_ID], side)]))
 
         res = ''
         if missing_artwork:
