@@ -198,7 +198,7 @@ Additional steps:
 
 1. Install additional dependency:
 
-  - `pip install discord.py==1.7.0`
+  - `pip install discord.py==1.7.3 aiohttp`
 
 2. Create `discord.yaml` (see `discord.default.yaml`).
 
@@ -227,7 +227,7 @@ Additional steps:
   - `7 0 * * *    <path>/rclone_backup.sh "<local A Long-extended Party/Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
   - `27 * * * *   <path>/rclone_discord.sh >> <path>/cron.log 2>&1`
   - `0 8 * * 1    <path>/remind_backup.sh >> <path>/cron.log 2>&1`
-  - `*/2 * * * * <path>/monitor_discord_changes.sh.sh >> <path>/cron.log 2>&1`
+  - `*/2 * * * * <path>/monitor_discord_changes.sh >> <path>/cron.log 2>&1`
   - `18 8 * * *   python3 <path>/spreadsheet_backup.py <backup folder> >> <path>/cron.log 2>&1`
 
     Replace `<path>` with the absolute path to the root folder.  `cron.log` may be located either in the root folder

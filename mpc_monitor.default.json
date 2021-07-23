@@ -1,4 +1,5 @@
 {
+    "wordpress_token": "<wordpress token>",
     "cookies": "<dictionary of cookies>",
     "decks": {
         "<Deck Name 1>": {

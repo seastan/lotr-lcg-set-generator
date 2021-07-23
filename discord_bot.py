@@ -15,6 +15,7 @@ import time
 import uuid
 import xml.etree.ElementTree as ET
 
+import aiohttp
 import discord
 import yaml
 
@@ -1105,6 +1106,21 @@ async def get_rendered_images(set_name):
     RENDERED_IMAGES[set_name]['data'] = data
     RENDERED_IMAGES[set_name]['ts'] = time.time()
     return data
+
+
+async def get_attachment_content(message):
+    """ Get attachment content from the message.
+    """
+    if message.reference.resolved.attachments:
+        attachment = message.reference.resolved.attachments[0]
+        content = await attachment.read()
+    else:
+        url = message.reference.resolved.embeds[0].url
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as res:
+                content = await res.read()
+
+    return content
 
 
 class MyClient(discord.Client):  # pylint: disable=R0902
@@ -2397,7 +2413,7 @@ Targets removed.
             await self._send_channel(message.channel, res)
 
 
-    async def _save_artwork(self, message, side, artist):  # pylint: disable=R0911,R0914
+    async def _save_artwork(self, message, side, artist):  # pylint: disable=R0911,R0912,R0914
         """ Save an artwork image for the card.
         """
         data = await read_card_data()
@@ -2416,29 +2432,35 @@ Targets removed.
         if side == 'B' and not card.get(lotr.BACK_PREFIX + lotr.CARD_NAME):
             return 'no side B found for the card'
 
-        if (not message.reference or not message.reference.resolved
-                or not message.reference.resolved.attachments):
-            return 'please reply to a message with an image attachment'
-
-        attachment = message.reference.resolved.attachments[0]
-        if (attachment.content_type not in ('image/png', 'image/jpeg') and
-                not attachment.filename.lower().split('.')[-1] in
-                ('png', 'jpg', 'jpeg')):
-            return 'attachment must be either JPG ot PNG image'
-
-        if (attachment.content_type == 'image/png' or
-                attachment.filename.lower().split('.')[-1] == 'png'):
-            filetype = 'png'
-        else:
-            filetype = 'jpg'
-
         artwork_destination_path = CONF.get('artwork_destination_path')
         if not artwork_destination_path:
             raise RCloneFolderError('no artwork folder specified on the '
                                     'server')
 
-        content = await attachment.read()
+        if not message.reference or not message.reference.resolved:
+            return 'please reply to a message with an image attachment'
 
+        if not (message.reference.resolved.attachments or
+                message.reference.resolved.embeds):
+            return 'please reply to a message with an image attachment'
+
+        if message.reference.resolved.attachments:
+            attachment = message.reference.resolved.attachments[0]
+            if (attachment.content_type == 'image/png' or
+                    attachment.filename.lower().endswith('png')):
+                filetype = 'png'
+            else:
+                filetype = 'jpg'
+        else:
+            url = message.reference.resolved.embeds[0].url
+            filename = re.sub(r'\/$', '', url.split('#')[0].split('?')[0]
+                             ).split('/')[-1].lower()
+            if filename.endswith('png'):
+                filetype = 'png'
+            else:
+                filetype = 'jpg'
+
+        content = await get_attachment_content(message)
         folder = os.path.join(artwork_destination_path, card[lotr.CARD_SET])
         filename = '{}_{}_{}_Artist_{}.{}'.format(
             card[lotr.CARD_ID],
@@ -2472,32 +2494,34 @@ Targets removed.
     async def _save_scratch_artwork(self, message, artist=None):
         """ Save an artwork image to the scratch folder.
         """
-        if (not message.reference or not message.reference.resolved
-                or not message.reference.resolved.attachments):
-            return 'please reply to a message with an image attachment'
-
-        attachment = message.reference.resolved.attachments[0]
-        if (attachment.content_type not in ('image/png', 'image/jpeg') and
-                not attachment.filename.lower().split('.')[-1] in
-                ('png', 'jpg', 'jpeg')):
-            return 'attachment must be either JPG ot PNG image'
-
         artwork_destination_path = CONF.get('artwork_destination_path')
         if not artwork_destination_path:
             raise RCloneFolderError('no artwork folder specified on the '
                                     'server')
 
-        content = await attachment.read()
+        if not message.reference or not message.reference.resolved:
+            return 'please reply to a message with an image attachment'
 
-        folder = os.path.join(artwork_destination_path, '_Scratch')
-        if artist:
-            filename = '{}_{}'.format(
-                artist, lotr.escape_filename(attachment.filename))
-            filename = filename.replace(' ', '_')
+        if not (message.reference.resolved.attachments or
+                message.reference.resolved.embeds):
+            return 'please reply to a message with an image attachment'
+
+        if message.reference.resolved.attachments:
+            attachment = message.reference.resolved.attachments[0]
+            filename = attachment.filename
         else:
-            filename = lotr.escape_filename(attachment.filename).replace(
-                ' ', '_')
+            url = message.reference.resolved.embeds[0].url
+            filename = re.sub(r'\/$', '', url.split('#')[0].split('?')[0]
+                             ).split('/')[-1]
 
+        filename = lotr.escape_filename(filename)
+        if artist:
+            filename = '{}_{}'.format(artist, filename)
+
+        filename = filename.replace(' ', '_')
+
+        content = await get_attachment_content(message)
+        folder = os.path.join(artwork_destination_path, '_Scratch')
         path = os.path.join(folder, filename)
 
         async with art_lock:
