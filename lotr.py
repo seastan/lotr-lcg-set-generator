@@ -3753,11 +3753,19 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
             setup_cards.extend(default_setup_cards)
 
             for section in (
-                    quest_cards, second_quest_cards, encounter_cards,
-                    special_cards, second_special_cards, setup_cards,
-                    staging_setup_cards, active_setup_cards,
+                    encounter_cards, special_cards, second_special_cards,
+                    setup_cards, staging_setup_cards, active_setup_cards,
                     chosen_player_cards):
                 section.sort(key=lambda card: (
+                    card[CARD_SET_NAME],
+                    is_positive_or_zero_int(card[CARD_NUMBER])
+                    and int(card[CARD_NUMBER]) or 0,
+                    card[CARD_NUMBER],
+                    card[CARD_NAME]))
+
+            for section in (quest_cards, second_quest_cards):
+                section.sort(key=lambda card: (
+                    card[CARD_TYPE],
                     card[CARD_SET_NAME],
                     is_positive_or_zero_int(card[CARD_NUMBER])
                     and int(card[CARD_NUMBER]) or 0,
