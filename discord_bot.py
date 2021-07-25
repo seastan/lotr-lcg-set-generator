@@ -2619,20 +2619,20 @@ Targets removed.
 
         res = ''
         if missing_artwork:
-            res += '\n**Missing artwork found**:\n{}\n'.format(
+            res += '\n**Missing artwork found**:```\n{}```'.format(
                 '\n'.join(missing_artwork))
 
         if duplicate_artwork:
-            res += '\n**Duplicate artwork found**:\n{}\n'.format(
+            res += '\n**Duplicate artwork found**:```\n{}```'.format(
                 '\n'.join(duplicate_artwork))
 
         if different_artist:
-            res += '\n**Different spreadsheet artists found**:\n{}\n'.format(
-                '\n'.join(different_artist))
+            res += ('\n**Different spreadsheet artists found**:```\n{}```'
+                    .format('\n'.join(different_artist)))
 
         if no_spreadsheet_artist:
-            res += '\n**Missing spreadsheet artists found**:\n{}\n'.format(
-                '\n'.join(no_spreadsheet_artist))
+            res += ('\n**Missing spreadsheet artists found**:```\n{}```'
+                    .format('\n'.join(no_spreadsheet_artist)))
 
         res = res.strip()
         if not res:
