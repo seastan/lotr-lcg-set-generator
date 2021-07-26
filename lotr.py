@@ -85,6 +85,7 @@ CARD_PRINTED_NUMBER = 'Printed Card Number'
 CARD_ARTIST = 'Artist'
 CARD_PANX = 'PanX'
 CARD_PANY = 'PanY'
+CARD_PORTRAIT_SHADOW = 'Portrait Shadow'
 CARD_SCALE = 'Scale'
 CARD_SIDE_B = 'Side B'
 CARD_EASY_MODE = 'Removed for Easy Mode'
@@ -115,8 +116,9 @@ MAX_COLUMN = '_Max Column'
 ROW_COLUMN = '_Row'
 
 DISCORD_IGNORE_COLUMNS = {
-    CARD_PANX, CARD_PANY, CARD_SCALE, BACK_PREFIX + CARD_PANX,
-    BACK_PREFIX + CARD_PANY, BACK_PREFIX + CARD_SCALE, CARD_SIDE_B,
+    CARD_PANX, CARD_PANY, CARD_PORTRAIT_SHADOW, CARD_SCALE,
+    BACK_PREFIX + CARD_PANX, BACK_PREFIX + CARD_PANY,
+    BACK_PREFIX + CARD_PORTRAIT_SHADOW, BACK_PREFIX + CARD_SCALE, CARD_SIDE_B,
     CARD_SELECTED, CARD_CHANGED, CARD_SCRATCH
 }
 
@@ -5101,9 +5103,10 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                      CARD_WILLPOWER, CARD_ATTACK, CARD_DEFENSE, CARD_HEALTH,
                      CARD_QUEST, CARD_VICTORY, CARD_SPECIAL_ICON, CARD_TEXT,
                      CARD_SHADOW, CARD_FLAVOUR, CARD_PRINTED_NUMBER,
-                     CARD_ARTIST, CARD_PANX, CARD_PANY, CARD_SCALE,
-                     CARD_EASY_MODE, CARD_ADDITIONAL_ENCOUNTER_SETS,
-                     CARD_ADVENTURE, CARD_ICON, CARD_BACK, CARD_VERSION):
+                     CARD_ARTIST, CARD_PANX, CARD_PANY, CARD_PORTRAIT_SHADOW,
+                     CARD_SCALE, CARD_EASY_MODE,
+                     CARD_ADDITIONAL_ENCOUNTER_SETS, CARD_ADVENTURE, CARD_ICON,
+                     CARD_BACK, CARD_VERSION):
             value = _get_xml_property_value(row, name, card_type)
             if value != '':
                 properties.append((name, value))
@@ -5140,8 +5143,10 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                          CARD_DEFENSE, CARD_HEALTH, CARD_QUEST, CARD_VICTORY,
                          CARD_SPECIAL_ICON, CARD_TEXT, CARD_SHADOW,
                          CARD_FLAVOUR, CARD_PRINTED_NUMBER, CARD_ARTIST,
-                         CARD_PANX, CARD_PANY, CARD_SCALE):
-                value = _get_xml_property_value(row, BACK_PREFIX + name, card_type)
+                         CARD_PANX, CARD_PANY, CARD_PORTRAIT_SHADOW,
+                         CARD_SCALE):
+                value = _get_xml_property_value(row, BACK_PREFIX + name,
+                                                card_type)
                 if value != '':
                     properties.append((name, value))
 
