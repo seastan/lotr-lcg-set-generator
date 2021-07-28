@@ -2353,10 +2353,10 @@ Targets removed.
     def get_users(self):
         """ Get the list of Discord users.
         """
-        logging.info(self.guilds[0].members)
         ignore_users = {u.strip() for u in CONF.get('ignore_users').split(',')}
         users = [m.display_name for m in self.guilds[0].members
                  if m.display_name not in ignore_users]
+        users = [re.sub(r'[^\u0000-\uffff]+', '', u).strip() for u in users]
         users = sorted(list(set(users)), key=str.casefold)
         return ', '.join(users)
 
