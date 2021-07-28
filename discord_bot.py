@@ -145,7 +145,7 @@ List of **!stat** commands:
 
 **!stat assistants** - display the list of ALeP assistants (all Discord users except for those who have a role)
 **!stat channels** - display the number of Discord channels and free channel slots
-**!stat quest <quest>** - display the quest statistics (for example: `!stat quest The Battle for the Beacon`)
+**!stat quest <quest name or set name or set code>** - display the quest statistics (for example: `!stat quest The Battle for the Beacon` or `!stat quest Children of Eorl` or `!stat quest TAP`)
 **!stat help** - display this help message
 """,
     'art': """
