@@ -3015,8 +3015,11 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
             channel_changes.append(('rename', (diff[0][0], diff[1][0])))
 
     set_names = [SETS[set_id][SET_NAME] for set_id in FOUND_SETS]
+    set_codes = {SETS[set_id][SET_HOB_CODE].lower():SETS[set_id][SET_NAME]
+                 for set_id in FOUND_SETS}
     output = {'url': url,
               'sets': set_names,
+              'set_codes': set_codes,
               'data': data}
     with open(DISCORD_CARD_DATA_PATH, 'w', encoding='utf-8') as obj:
         res = json.dumps(output, ensure_ascii=False)
@@ -6608,7 +6611,8 @@ def full_card_dict():
     for _, _, filenames in os.walk(URL_CACHE_PATH):
         for filename in filenames:
             if filename.endswith('.xml.cache'):
-                data = load_external_xml(re.sub(r'\.xml.cache$', '', filename))
+                data = load_external_xml(re.sub(r'\.xml\.cache$', '',
+                                                filename))
                 card_dict.update({r[CARD_ID]:r for r in data})
 
         break

@@ -430,7 +430,7 @@ def read_external_data():
     new_files = set()
     for _, _, filenames in os.walk(lotr.URL_CACHE_PATH):
         for filename in filenames:
-            if filename.endswith('.cache'):
+            if filename.endswith('.xml.cache'):
                 new_files.add(filename)
 
         break
@@ -438,7 +438,7 @@ def read_external_data():
     new_files = new_files.difference(EXTERNAL_FILES)
     for new_file in new_files:
         EXTERNAL_FILES.add(new_file)
-        data = lotr.load_external_xml(re.sub(r'\.cache$', '', new_file))
+        data = lotr.load_external_xml(re.sub(r'\.xml\.cache$', '', new_file))
         EXTERNAL_DATA.update({r[lotr.CARD_ID]:r for r in data})
 
     return EXTERNAL_DATA
@@ -2245,7 +2245,11 @@ Targets removed.
         """ Get statistics for all found quests.
         """
         data = await read_card_data()
-        quest = lotr.escape_octgn_filename(lotr.escape_filename(quest)).lower()
+        if quest.lower() in data['set_codes']:
+            quest = data['set_codes'][quest.lower()].replace('ALeP - ', '')
+
+        quest_folder = lotr.escape_filename(quest).lower()
+        quest_file = lotr.escape_octgn_filename(quest_folder)
         set_folders = {lotr.escape_filename(s) for s in data['sets']}
         quests = {}
         for _, subfolders, _ in os.walk(lotr.OUTPUT_OCTGN_DECKS_PATH):  # pylint: disable=R1702
@@ -2256,10 +2260,12 @@ Targets removed.
                 path = os.path.join(lotr.OUTPUT_OCTGN_DECKS_PATH, subfolder)
                 for _, _, filenames in os.walk(path):
                     for filename in filenames:
-                        if (filename.endswith('.o8d') and
-                                not filename.startswith('Player-') and
-                                ('-{}-'.format(quest) in filename.lower() or
-                                 '-{}.'.format(quest) in filename.lower())):
+                        if ((filename.endswith('.o8d') and
+                             not filename.startswith('Player-') and
+                             ('-{}-'.format(quest_file) in filename.lower() or
+                              '-{}.'.format(quest_file) in filename.lower()))
+                                or (quest_folder ==
+                                    subfolder.replace('ALeP - ', '').lower())):
                             quest_name = re.sub(r'\.o8d$', '', filename)
                             cards = await read_deck_xml(
                                 os.path.join(path, filename))
@@ -2276,11 +2282,14 @@ Targets removed.
 {stat['total']}{stat['encounter_sets']}{stat['keywords']}
 {stat['card_types']}
 
-{stat['encounter_deck']}"""
+{stat['encounter_deck']}
+"""
 
         if not res:
             res = 'no quests found'
 
+        res = res.strip()
+        res = re.sub(r'\n(?=\n)', '\n` `', res)
         return res
 
 
