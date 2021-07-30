@@ -299,6 +299,7 @@ OUTPUT_FRENCHDB_IMAGES_PATH = os.path.join(OUTPUT_PATH, 'FrenchDBImages')
 OUTPUT_GENERICPNG_PATH = os.path.join(OUTPUT_PATH, 'GenericPNG')
 OUTPUT_GENERICPNG_PDF_PATH = os.path.join(OUTPUT_PATH, 'GenericPNGPDF')
 OUTPUT_HALLOFBEORN_PATH = os.path.join(OUTPUT_PATH, 'HallOfBeorn')
+OUTPUT_HALLOFBEORN_IMAGES_PATH = os.path.join(OUTPUT_PATH, 'HallOfBeornImages')
 OUTPUT_MBPRINT_PATH = os.path.join(OUTPUT_PATH, 'MBPrint')
 OUTPUT_MBPRINT_PDF_PATH = os.path.join(OUTPUT_PATH, 'MBPrintPDF')
 OUTPUT_MPC_PATH = os.path.join(OUTPUT_PATH, 'MakePlayingCards')
@@ -363,6 +364,14 @@ XML_TEMPLATE = """<set>
   <cards />
 </set>
 """
+
+CARD_TYPE_SUFFIX_HALLOFBEORN = {
+    'Campaign': 'Setup',
+    'Contract': 'Side',
+    'Nightmare': 'Setup',
+    'Presentation': 'Setup',
+    'Rules': 'Setup'
+}
 
 CARD_TYPES_PLAYER_FRENCH = {'Ally', 'Attachment', 'Contract', 'Event', 'Hero',
                             'Player Side Quest', 'Treasure', 'Campaign',
@@ -770,8 +779,9 @@ def _update_french_non_int(value):
 def escape_filename(value):
     """ Escape forbidden symbols in a file name.
     """
-    value = re.sub(r'[<>:\/\\|?*\'"’“”„«»…–—]', ' ', str(value))
+    value = re.sub(r'[<>:\/\\|?*\'"’“”„«»…–—¡¿]', ' ', str(value))
     value = value.encode('ascii', errors='replace').decode().replace('?', ' ')
+    value = value.strip()
     return value
 
 
@@ -779,6 +789,18 @@ def escape_octgn_filename(value):
     """ Replace spaces in a file name for OCTGN.
     """
     return value.replace(' ', '-')
+
+
+def _escape_hallofbeorn_filename(value):
+    """ Escape forbidden symbols in a Hall of Beorn file name.
+    """
+    value = re.sub(r'[.,!<>:\/\\|?*"“”„«»…¡¿]', '', str(value))
+    value = (value.replace(' - ', '-').replace('’', "'").replace('_', '-')
+             .replace('–', '-').replace('—', '-').replace('&', 'and'))
+    value = value.strip()
+    value = value.replace(' ', '-')
+    value = re.sub(r'(png|jpg)$', '.\\1', value)
+    return value
 
 
 def extract_keywords(value):
@@ -6816,6 +6838,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
 
             break
 
+    card_dict = {row[CARD_ID]:row for row in card_data}
     empty_rules_backs = {
         row[CARD_ID] for row in card_data
         if row[CARD_SET] == set_id and
@@ -6864,6 +6887,83 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
             break
 
         delete_folder(temp_path)
+
+    if known_filenames:
+        hallofbeorn_output_path = os.path.join(
+            OUTPUT_HALLOFBEORN_IMAGES_PATH, '{}.{}'.format(
+                escape_filename(set_name), lang))
+        create_folder(hallofbeorn_output_path)
+        clear_folder(hallofbeorn_output_path)
+
+        known_output_filenames = set()
+        for _, _, filenames in os.walk(output_path):
+            for filename in filenames:
+                if '----' not in filename:
+                    continue
+
+                card_id = filename.split('----')[1][:36]
+                if filename.endswith('-2.png'):
+                    card_type = card_dict[card_id][BACK_PREFIX + CARD_TYPE]
+                    if card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL:
+                        card_name = card_dict[card_id][CARD_NAME]
+                        side = (
+                            card_dict[card_id][BACK_PREFIX + CARD_ENGAGEMENT]
+                            or '' if card_type == 'Quest' else 'B')
+                    else:
+                        card_name = card_dict[card_id][BACK_PREFIX + CARD_NAME]
+                        side = ''
+                elif (os.path.exists(os.path.join(
+                        output_path, re.sub(r'\.png$', '-2.png', filename)))
+                      and card_id not in empty_rules_backs):
+                    card_type = card_dict[card_id][CARD_TYPE]
+                    card_name = card_dict[card_id][CARD_NAME]
+                    if card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL:
+                        side = (card_dict[card_id][CARD_ENGAGEMENT] or ''
+                                if card_type == 'Quest' else 'A')
+                    else:
+                        side = ''
+                else:
+                    card_type = card_dict[card_id][CARD_TYPE]
+                    card_name = card_dict[card_id][CARD_NAME]
+                    side = ''
+
+                if side == 'B' and card_id in empty_rules_backs:
+                    continue
+
+                if card_type == 'Quest':
+                    if filename.endswith('-2.png'):
+                        card_suffix = (
+                            card_dict[card_id][BACK_PREFIX + CARD_COST] or '')
+                    else:
+                        card_suffix = card_dict[card_id][CARD_COST] or ''
+                else:
+                    card_suffix = CARD_TYPE_SUFFIX_HALLOFBEORN.get(card_type,
+                                                                   '')
+
+                if card_suffix and side:
+                    output_filename = '{}-{}{}.png'.format(
+                        card_name, card_suffix, side)
+                else:
+                    output_filename = '{}.png'.format(card_name)
+
+                output_filename = _escape_hallofbeorn_filename(output_filename)
+                while output_filename in known_output_filenames:
+                    match = re.search(r'\-([0-9]+)\.png$', output_filename)
+                    if match:
+                        num = int(match.groups()[0]) + 1
+                        output_filename = re.sub(
+                            r'\-[0-9]+\.png$', '-{}.png'.format(num),
+                            output_filename)
+                    else:
+                        output_filename = re.sub(r'\.png$', '-2.png',
+                                                 output_filename)
+
+                known_output_filenames.add(output_filename)
+                shutil.copyfile(os.path.join(output_path, filename),
+                                os.path.join(hallofbeorn_output_path,
+                                             output_filename))
+
+            break
 
     if lang == 'English':
         cards = {}

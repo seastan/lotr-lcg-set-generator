@@ -266,6 +266,7 @@ The scripts will generate the following outputs:
 - `Output/GenericPNG/<set name>.<language>/`: a `7z` archive of generic 800 dpi PNG images.
 - `Output/GenericPNGPDF/<set name>.<language>/`: `7z` archives of PDF files in `A4` and `letter` format (800 dpi PNG).
 - `Output/HallOfBeorn/<set name>.<language>/<set name>.json`: an output file for Hall of Beorn.
+- `Output/HallOfBeornImages/<set name>.<language>/`: 300 dpi PNG images for Hall of Beorn (the same as `Output/DB`, but differently named).
 - `Output/MakePlayingCards/<set name>.<language>/`: a `7z` archive of 800 dpi PNG images to be printed on MakePlayingCards.com.
 - `Output/MBPrint/<set name>.<language>/`: a `7z` archive of 800 dpi CMYK JPG images to be printed on MBPrint.pl.
 - `Output/MBPrintPDF/<set name>.<language>/`: a `7z` archive of a PDF file to be printed on MBPrint.pl (800 dpi CMYK JPG).
@@ -281,13 +282,11 @@ The scripts will generate the following outputs:
 - `Output/SpanishDBImages/<set name>.<language>/`: 300 dpi PNG images for Spanish database (the same as `Output/DB`, but differently named).
 - `Output/TTS/<set name>.<language>/`: 300 dpi JPG image sheets for TTS.
 
-Please note that `Output/DB`, `Output/PreviewImages`, `Output/RingsDBImages` (for English language only),
+Please note that `Output/DB`, `Output/HallOfBeornImages`, `Output/PreviewImages`, `Output/RingsDBImages` (for English language only),
 `Output/FrenchDBImages` (for French language only) and `Output/SpanishDBImages` (for Spanish language only)
 are generated when `db` output is enabled in the configuration.
 
 When `tts` output is enabled in the configuration, `octgn_o8d` and `db` outputs become enabled automatically.
-
-Additionally, if you specified OCTGN destination paths, OCTGN outputs will be copied there.
 
 **Supported Tags**
 
