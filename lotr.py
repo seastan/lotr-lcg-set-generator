@@ -8287,19 +8287,6 @@ def upload_dragncards(conf, sets, updated_sets):
 
                 delete_folder(temp_path)
 
-            output_path = os.path.join(
-                OUTPUT_DRAGNCARDS_PATH,
-                escape_filename(set_name),
-                '{}.json'.format(escape_octgn_filename(
-                    escape_filename(set_name))))
-            if (conf['dragncards_remote_json_path'] and
-                    conf['dragncards_json'] and
-                    os.path.exists(output_path)):
-                scp_client.put(output_path,
-                               conf['dragncards_remote_json_path'])
-                logging.info('Uploaded %s to DragnCards host',
-                             '{}.json'.format(escape_filename(set_name)))
-
             output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
                                        escape_filename(set_name))
             if (conf['dragncards_remote_deck_path'] and conf['octgn_o8d'] and
@@ -8329,6 +8316,18 @@ def upload_dragncards(conf, sets, updated_sets):
 
                 delete_folder(temp_path)
 
+            output_path = os.path.join(
+                OUTPUT_DRAGNCARDS_PATH,
+                escape_filename(set_name),
+                '{}.json'.format(escape_octgn_filename(
+                    escape_filename(set_name))))
+            if (conf['dragncards_remote_json_path'] and
+                    conf['dragncards_json'] and
+                    os.path.exists(output_path)):
+                scp_client.put(output_path,
+                               conf['dragncards_remote_json_path'])
+                logging.info('Uploaded %s to DragnCards host',
+                             '{}.json'.format(escape_filename(set_name)))
     finally:
         client.close()
 
