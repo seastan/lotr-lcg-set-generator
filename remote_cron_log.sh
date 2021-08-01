@@ -6,7 +6,7 @@ if [ ! -d "$FOLDER" ]; then
 fi
 
 DATE=$(date '+%Y-%m-%d')
-ERRORS=`grep -s "$DATE" "$FOLDER"/* | grep ERROR | grep -v "echo $DATE" | grep -v "(Scratch)"`
+ERRORS=`grep -s "$DATE" "$FOLDER"/* | grep ERROR | grep -v "echo $DATE" | grep -v "(Scratch)" | sed -e "s/\\\\\\\\/\\\\\\\\\\\\\\\\/g"`
 
 BEFORE_LOG_PATH="$FOLDER/run_before_se_remote.log"
 if [ ! -f "$BEFORE_LOG_PATH" ]; then
