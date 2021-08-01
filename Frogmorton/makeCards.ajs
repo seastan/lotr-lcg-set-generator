@@ -1416,7 +1416,7 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 	vXml = vXml.replace(/<lsb>/ig, '[');
 	vXml = vXml.replace(/<rsb>/ig, ']');
 
-	vXml = vXml.replace(/([^:;,.?!\u2026]) (<uni>|<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<bag>|<fel>|<mas>|<hon>|<hof>|<hb>|<hw>|<sai>|<eos>|<per>|<pp>)/g, '$1\u00a0$2');
+	vXml = vXml.replace(/([^:;,.?!\u2026]) ((?:<\/b>)?(?:<\/i>)?(?:<\/size>)?(?:<\/family>)?(?:<size [^>]+>)?)(<uni>|<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<bag>|<fel>|<mas>|<hon>|<hof>|<hb>|<hw>|<sai>|<eos>|<per>|<pp>)/g, '$1\u00a0$2$3');
 	vXml = vXml.replace(/([0-9]+) /g, '$1\u00a0');
 	vXml = vXml.replace(/ ([0-9]+)([:;,.?!\u2026])/g, '\u00a0$1$2');
 	vXml = vXml.replace(/(^|[ \n"\u201c\u201d\(])([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,4})([:;,.?!"\u2026\u201c\u201d\)]*) (["\u201c\u201d\(]*)([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,4})([:;,.?!"\u2026\u201c\u201d\)]+)(\n|$)/g, '$1$2$3\u00a0$4$5$6$7');
