@@ -441,6 +441,7 @@ RESTRICTED_TRANSLATION = {
     'German': 'Eingeschränkt',
     'Italian': 'Limitato',
     'Polish': 'Ograniczenie',
+    'Portuguese': 'Restrito',
     'Spanish': 'Restringido'
 }
 

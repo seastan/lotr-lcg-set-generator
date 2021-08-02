@@ -11,7 +11,8 @@ function onEdit(e) {
     sheetName == 'French' ||
     sheetName == 'German' ||
     sheetName == 'Spanish' ||
-    sheetName == 'Polish'
+    sheetName == 'Polish' ||
+    sheetName == 'Portuguese'
   ) {
     if (columnHeader == 'Updated') {
       // Check if the checkbox was changed to TRUE
