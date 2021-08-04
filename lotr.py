@@ -2631,7 +2631,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif card_deck_rules is not None and
+        elif (card_deck_rules is not None and
               ((card_type == 'Quest' and card_adventure) or
                card_type == 'Nightmare')):
             quest_id = (set_id, card_adventure or card_name)
