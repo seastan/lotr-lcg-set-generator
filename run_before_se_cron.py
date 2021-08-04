@@ -23,7 +23,7 @@ from run_before_se import main
 DISCORD_CONF_PATH = 'discord.yaml'
 INTERNET_SENSOR_PATH = 'internet_state'
 LOG_PATH = 'run_before_se.log'
-MAIL_COUNTER_PATH = 'cron.cnt'
+MAIL_COUNTER_PATH = 'run_before_se.cnt'
 MAILS_PATH = 'mails'
 SANITY_CHECK_PATH = 'sanity_check.txt'
 
