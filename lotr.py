@@ -54,6 +54,7 @@ SET_RINGSDB_CODE = 'RingsDB Code'
 SET_HOB_CODE = 'HoB Code'
 SET_DISCORD_PREFIX = 'Discord Prefix'
 SET_COPYRIGHT = 'Copyright'
+SET_CHANGED = 'Changed'
 SET_LOCKED = 'Locked'
 
 BACK_PREFIX = 'Back_'
@@ -2630,7 +2631,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_deck_rules is not None and
+        elif card_deck_rules is not None and
               ((card_type == 'Quest' and card_adventure) or
                card_type == 'Nightmare')):
             quest_id = (set_id, card_adventure or card_name)
@@ -5567,7 +5568,7 @@ def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0914
             if row[CARD_SET] != set_id:
                 continue
 
-            if row[CARD_CHANGED]:
+            if row[CARD_CHANGED] or SETS[set_id].get(SET_CHANGED):
                 changed_cards.add(row[CARD_ID])
 
         if changed_cards:
