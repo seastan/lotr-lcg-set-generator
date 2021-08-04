@@ -236,6 +236,7 @@ PNG_800_MIN_SIZE = 2000000
 
 EASY_PREFIX = 'Easy '
 IMAGES_CUSTOM_FOLDER = 'custom'
+IMAGES_ICONS_FOLDER = 'icons'
 OCTGN_SET_XML = 'set.xml'
 PLAYTEST_SUFFIX = '-Playtest'
 PROCESSED_ARTWORK_FOLDER = 'processed'
@@ -804,6 +805,15 @@ def _escape_hallofbeorn_filename(value):
     return value
 
 
+def _escape_icon_filename(value):
+    """ Escape forbidden symbols in an icon file name.
+    """
+    value = re.sub(r'[<>:\/\\|?*\'"’“”„«»…–—¡¿]', ' ', str(value))
+    value = value.strip()
+    value = value.replace(' ', '-')
+    return value
+
+
 def extract_keywords(value):
     """ Extract all keywords from the string.
     """
@@ -990,7 +1000,7 @@ def reset_project_folders(conf):
 
         break
 
-    input_path = os.path.join(conf['artwork_path'], 'icons')
+    input_path = os.path.join(conf['artwork_path'], IMAGES_ICONS_FOLDER)
     if os.path.exists(input_path):
         for _, _, filenames in os.walk(input_path):
             for filename in filenames:
@@ -5302,6 +5312,8 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
     common_custom_images = _collect_custom_images(
         os.path.join(conf['artwork_path'], IMAGES_CUSTOM_FOLDER))
     custom_images = {**common_custom_images, **custom_images}
+    icon_images = _collect_custom_images(os.path.join(conf['artwork_path'],
+                                                      IMAGES_ICONS_FOLDER))
     xml_path = os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id, lang))
 
     tree = ET.parse(xml_path)
@@ -5316,14 +5328,20 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
         card_sphere = _find_properties(card, 'Sphere')
         card_sphere = card_sphere and card_sphere[0].attrib['value']
         encounter_set = _find_properties(card, 'Encounter Set')
+        if encounter_set:
+            encounter_set = encounter_set[0].attrib['value']
+
+        properties = [p for p in card]  # pylint: disable=R1721
+        if properties:
+            properties[-1].tail = '{}  '.format(properties[-1].tail)
 
         if (card_type not in ('Campaign', 'Nightmare', 'Quest', 'Rules',
                               'Treasure')
                 and card_sphere not in ('Boon', 'Burden') and encounter_set):
-            encounter_set = encounter_set[0].attrib['value']
             encounter_cards[card.attrib['id']] = encounter_set
             prop = _get_property(card, 'Encounter Set Number')
             prop.set('value', str(encounter_sets.get(encounter_set, 0) + 1))
+            prop.tail = '\n      '
             quantity = int(
                 _find_properties(card, 'Quantity')[0].attrib['value'])
             encounter_sets[encounter_set] = (
@@ -5333,10 +5351,13 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
         if filename:
             prop = _get_property(card, 'Artwork')
             prop.set('value', os.path.split(filename)[-1])
+            prop.tail = '\n      '
             prop = _get_property(card, 'Artwork Size')
             prop.set('value', str(os.path.getsize(filename)))
+            prop.tail = '\n      '
             prop = _get_property(card, 'Artwork Modified')
             prop.set('value', str(int(os.path.getmtime(filename))))
+            prop.tail = '\n      '
 
             artist = _find_properties(card, 'Artist')
             if not artist and '_Artist_' in os.path.split(filename)[-1]:
@@ -5345,6 +5366,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                     '_Artist_'.join(
                         os.path.split(filename)[-1].split('_Artist_')[1:]
                         ).split('.')[:-1]).replace('_', ' '))
+                prop.tail = '\n      '
 
         if card_type == 'Presentation':
             filename = images.get('{}_{}_{}'.format(
@@ -5355,10 +5377,13 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
             if filename:
                 prop = _get_property(card, 'ArtworkTop')
                 prop.set('value', os.path.split(filename)[-1])
+                prop.tail = '\n      '
                 prop = _get_property(card, 'ArtworkTop Size')
                 prop.set('value', str(os.path.getsize(filename)))
+                prop.tail = '\n      '
                 prop = _get_property(card, 'ArtworkTop Modified')
                 prop.set('value', str(int(os.path.getmtime(filename))))
+                prop.tail = '\n      '
 
             filename = images.get('{}_{}_{}'.format(
                 card.attrib['id'], 'Bottom', lang))
@@ -5368,11 +5393,13 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
             if filename:
                 prop = _get_property(card, 'ArtworkBottom')
                 prop.set('value', os.path.split(filename)[-1])
+                prop.tail = '\n      '
                 prop = _get_property(card, 'ArtworkBottom Size')
                 prop.set('value', str(os.path.getsize(filename)))
+                prop.tail = '\n      '
                 prop = _get_property(card, 'ArtworkBottom Modified')
                 prop.set('value', str(int(os.path.getmtime(filename))))
-
+                prop.tail = '\n      '
 
         alternate = [a for a in card if a.attrib.get('type') == 'B']
         if alternate:
@@ -5380,12 +5407,19 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
 
         filename = images.get('{}_{}'.format(card.attrib['id'], 'B'))
         if alternate and filename:
+            properties = [p for p in alternate]  # pylint: disable=R1721
+            if properties:
+                properties[-1].tail = '{}  '.format(properties[-1].tail)
+
             prop = _get_property(alternate, 'Artwork')
             prop.set('value', os.path.split(filename)[-1])
+            prop.tail = '\n        '
             prop = _get_property(alternate, 'Artwork Size')
             prop.set('value', str(os.path.getsize(filename)))
+            prop.tail = '\n        '
             prop = _get_property(alternate, 'Artwork Modified')
             prop.set('value', str(int(os.path.getmtime(filename))))
+            prop.tail = '\n        '
 
             artist = _find_properties(alternate, 'Artist')
             if not artist and '_Artist_' in os.path.split(filename)[-1]:
@@ -5394,6 +5428,10 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                     '_Artist_'.join(
                         os.path.split(filename)[-1].split('_Artist_')[1:]
                         ).split('.')[:-1]).replace('_', ' '))
+                prop.tail = '\n        '
+
+            properties = [p for p in alternate]  # pylint: disable=R1721
+            properties[-1].tail = re.sub(r'  $', '', properties[-1].tail)
 
         try:
             text = _find_properties(card, 'Text')[0].attrib['value']
@@ -5414,19 +5452,68 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
         if res:
             referred_custom_images.extend(res.groups())
 
+        image_counter = 0
         for image in referred_custom_images:
             if image in custom_images:
-                prop = _get_property(card, 'Custom Image')
+                prop = _get_property(card,
+                                     'Custom Image_{}'.format(image_counter))
+                image_counter += 1
                 prop.set('value', '{}|{}|{}'.format(
                     image,
                     os.path.getsize(custom_images[image]),
                     int(os.path.getmtime(custom_images[image]))))
+                prop.tail = '\n      '
+
+        if card_type in ('Presentation', 'Rules'):
+            continue
+
+        target_icon_images = []
+        collection_icon = _find_properties(card, 'Collection Icon')
+        if collection_icon:
+            collection_icon = collection_icon[0].attrib['value']
+            target_icon_images.append(collection_icon)
+            target_icon_images.append('{}_stroke'.format(collection_icon))
+        else:
+            set_icon = root.attrib.get('icon')
+            if set_icon:
+                target_icon_images.append(set_icon)
+                target_icon_images.append('{}_stroke'.format(set_icon))
+            else:
+                target_icon_images.append(set_name)
+                target_icon_images.append('{}_stroke'.format(set_name))
+
+        if encounter_set and card_sphere != 'Boon':
+            target_icon_images.append(encounter_set)
+
+        additional_sets = _find_properties(card, 'Additional Encounter Sets')
+        if additional_sets:
+            additional_sets = additional_sets[0].attrib['value']
+            for additional_set in additional_sets.split(';'):
+                target_icon_images.append(additional_set.strip())
+
+        target_icon_images = [_escape_icon_filename('{}.png'.format(i))
+                              for i in target_icon_images]
+        image_counter = 0
+        for image in target_icon_images:
+            if image in icon_images:
+                prop = _get_property(card, 'Icon_{}'.format(image_counter))
+                image_counter += 1
+                prop.set('value', '{}|{}|{}'.format(
+                    image,
+                    os.path.getsize(icon_images[image]),
+                    int(os.path.getmtime(icon_images[image]))))
+                prop.tail = '\n      '
 
     for card in root[0]:
         if card.attrib['id'] in encounter_cards:
             prop = _get_property(card, 'Encounter Set Total')
             prop.set('value', str(
                 encounter_sets[encounter_cards[card.attrib['id']]]))
+            prop.tail = '\n      '
+
+        properties = [p for p in card]  # pylint: disable=R1721
+        if properties:
+            properties[-1].tail = re.sub(r'  $', '', properties[-1].tail)
 
     if conf['selected_only']:
         cards = list(root[0])
@@ -6791,10 +6878,10 @@ def generate_tts(conf, set_id, set_name, lang, card_dict, scratch):  # pylint: d
 
 
 def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R0912,R0914,R0915
-    """ Generate DB, Preview and RingsDB image outputs.
+    """ Generate DB, Preview, Hall of Beorn and RingsDB image outputs.
     """
-    logging.info('[%s, %s] Generating DB, Preview and RingsDB image '
-                 'outputs...', set_name, lang)
+    logging.info('[%s, %s] Generating DB, Preview, Hall of Beorn and RingsDB '
+                 'image outputs...', set_name, lang)
     timestamp = time.time()
 
     input_path = os.path.join(IMAGES_EONS_PATH, PNG300DB,
@@ -7071,8 +7158,8 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                                 os.path.join(spanishdb_output_path,
                                              target_filename))
 
-    logging.info('[%s, %s] ...Generating DB, Preview and RingsDB image '
-                 'outputs (%ss)', set_name, lang,
+    logging.info('[%s, %s] ...Generating DB, Preview, Hall of Beorn and '
+                 'RingsDB image outputs (%ss)', set_name, lang,
                  round(time.time() - timestamp, 3))
 
 
