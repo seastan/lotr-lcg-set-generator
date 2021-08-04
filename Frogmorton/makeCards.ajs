@@ -18,6 +18,7 @@ var nonUniqueTypes = ['Campaign', 'Contract', 'Event', 'Nightmare', 'Player Side
 var portraitRegion = {};
 portraitRegion['Ally'] = '87,0,326,330';
 portraitRegion['Attachment'] = '40,50,333,280';
+portraitRegion['Campaign'] = '0,0,413,245';
 portraitRegion['Contract'] = '0,0,413,315';
 portraitRegion['Encounter Side Quest'] = '0,0,563,413';
 portraitRegion['Enemy'] = '87,0,326,330';
@@ -35,6 +36,7 @@ portraitRegion['Treachery'] = '60,0,353,330';
 var bodyRegion = {};
 bodyRegion['Ally'] = '57,378,299,114';
 bodyRegion['Attachment'] = '57,347,299,144';
+bodyRegion['Campaign'] = '56,277,301,211';
 bodyRegion['Enemy'] = '57,377,299,114';
 bodyRegion['Event'] = '65,351,283,140';
 bodyRegion['Hero'] = '57,377,299,114';
@@ -53,6 +55,9 @@ var bodyNoTraitRegion = {};
 bodyNoTraitRegion['Encounter Side Quest'] = '51,249,461,114';
 bodyNoTraitRegion['Player Side Quest'] = '51,251,461,114';
 bodyNoTraitRegion['Quest'] = '51,249,461,114';
+
+var bodyBackRegion = {};
+bodyBackRegion['Campaign'] = '64,60,285,443';
 
 var traitRegion = {};
 traitRegion['Ally'] = '57,358,299,20';
@@ -74,6 +79,7 @@ traitRegion['Player Side Quest'] = '51,251,461,20';
 var nameRegion = {};
 nameRegion['Ally'] = '100,329,213,25';
 nameRegion['Attachment'] = '132,38,183,25';
+nameRegion['Campaign'] = '108,43,197,25';
 nameRegion['Contract'] = '84,245,245,29';
 nameRegion['Encounter Side Quest'] = '100,42,363,29';
 nameRegion['Enemy'] = '94,327,225,25';
@@ -91,6 +97,7 @@ nameRegion['Treachery'] = '55,108,26,164';
 var nameRegionUnique = {};
 nameRegionUnique['Ally'] = '100,326,213,25';
 nameRegionUnique['Attachment'] = '132,36,183,25';
+nameRegionUnique['Campaign'] = '108,43,197,25';
 nameRegionUnique['Contract'] = '84,245,245,29';
 nameRegionUnique['Encounter Side Quest'] = '100,39,363,29';
 nameRegionUnique['Enemy'] = '94,325,225,25';
@@ -108,6 +115,7 @@ nameRegionUnique['Treachery'] = '55,108,26,164';
 var namePointSize = {};
 namePointSize['Ally'] = 6.5;
 namePointSize['Attachment'] = 6.5;
+namePointSize['Campaign'] = 6.5;
 namePointSize['Contract'] = 7.5;
 namePointSize['Encounter Side Quest'] = 7.5;
 namePointSize['Enemy'] = 6.5;
@@ -121,6 +129,9 @@ namePointSize['Quest'] = 7.5;
 namePointSize['Ship Enemy'] = 6.5;
 namePointSize['Ship Objective'] = 7.5;
 namePointSize['Treachery'] = 6.5;
+
+var subtypeRegion = {};
+subtypeRegion['Attachment'] = '146,301,124,20';
 
 var hitPointsRegion = {};
 hitPointsRegion['Ally'] = '66,269,58,40';
@@ -169,6 +180,9 @@ adventureRegion['Objective Ally'] = '67,83,276,15';
 adventureRegion['Quest'] = '190,78,275,15';
 adventureRegion['Ship Objective'] = '67,83,276,15';
 
+var cycleRegion = {};
+cycleRegion['Campaign'] = '68,243,274,32';
+
 var resourceCostRegion = {};
 resourceCostRegion['Ally'] = '67,41,56,37';
 resourceCostRegion['Attachment'] = '38,43,56,37';
@@ -176,6 +190,7 @@ resourceCostRegion['Event'] = '37,38,56,37';
 resourceCostRegion['Player Side Quest'] = '43,44,56,37';
 
 var encounterPortraitRegion = {};
+encounterPortraitRegion['Campaign'] = '319,190,43,43';
 encounterPortraitRegion['Enemy'] = '321,266,43,43';
 encounterPortraitRegion['Encounter Side Quest'] = '478,187,43,43';
 encounterPortraitRegion['Location'] = '319,266,43,43';
@@ -204,6 +219,7 @@ optionBodyShape['Quest'] = '0,0,350,0,64';
 var optionRightDecorationRegion = {};
 optionRightDecorationRegion['Ally'] = '298,503,72,18';
 optionRightDecorationRegion['Attachment'] = '300,503,72,18';
+optionRightDecorationRegion['Campaign'] = '301,503,72,18';
 optionRightDecorationRegion['Encounter Side Quest'] = '452,347,72,18';
 optionRightDecorationRegion['Enemy'] = '301,503,72,18';
 optionRightDecorationRegion['Event'] = '298,503,72,18';
@@ -220,6 +236,7 @@ optionRightDecorationRegion['Treachery'] = '301,503,72,18';
 var optionRightRegion = {};
 optionRightRegion['Ally'] = '305,504,59,20';
 optionRightRegion['Attachment'] = '307,504,59,20';
+optionRightRegion['Campaign'] = '308,504,59,20';
 optionRightRegion['Encounter Side Quest'] = '459,348,59,20';
 optionRightRegion['Enemy'] = '308,504,59,20';
 optionRightRegion['Event'] = '305,504,59,20';
@@ -596,11 +613,13 @@ function run(progress, target, filename, icons) {
 				s.set('Name-style', 'FAMILY: {"Vafthrudnir"}');
 				s.set('Type-style', 'FAMILY: {"Vafthrudnir"}');
 				s.set('Adventure-style', 'FAMILY: {"Vafthrudnir"}');
+				s.set('Cycle-style', 'FAMILY: {"Vafthrudnir"}');
 				s.set('Option-style', 'WIDTH: SEMICONDENSED; FAMILY: {"Vafthrudnir"}');
 				s.set('EncounterSetNumber-style', 'WEIGHT: BOLD; FAMILY: {"Times New Roman"}');
 				s.set('Bottom-style', 'WEIGHT: BOLD; WIDTH: SEMICONDENSED; FAMILY: {"Times New Roman"}');
 				s.set('Type-pointsize', 7.25);
 				s.set('Adventure-pointsize', 5.25);
+				s.set('Cycle-pointsize', 5.6);
 				s.set('Option-pointsize', 5.25);
 				s.set('EncounterSetNumber-pointsize', 4);
 				s.set('Flavour-format', '<left></size></family><family "Times New Roman"><size 6.25><i>');
@@ -778,12 +797,23 @@ function run(progress, target, filename, icons) {
 					s.set('Body-lineTightness', 0.2);
 					s.set('TraitOut', 'true');
 
-					if (cardType in bodyRegion) {
-						s.set('TraitOut-Body-region', bodyRegion[cardType]);
-					}
+					if (cardType == 'Campaign') {
+						if (cardType in bodyRegion) {
+							s.set('Body-region', bodyRegion[cardType]);
+						}
 
-					if (cardType in traitRegion) {
-						s.set('TraitOut-Trait-region', traitRegion[cardType]);
+						if (cardType in bodyBackRegion) {
+							s.set('BodyBack-region', bodyBackRegion[cardType]);
+						}
+					}
+					else {
+						if (cardType in bodyRegion) {
+							s.set('TraitOut-Body-region', bodyRegion[cardType]);
+						}
+
+						if (cardType in traitRegion) {
+							s.set('TraitOut-Trait-region', traitRegion[cardType]);
+						}
 					}
 				}
 
@@ -850,13 +880,13 @@ function run(progress, target, filename, icons) {
 					else {
 						selectedIcon = card['Set'];
 					}
-					let iconName = fixSpecialSymbols(selectedIcon).replace(/ /g, '-') + '_stroke';
+					let iconName = escapeIconFileName(selectedIcon) + '_stroke';
 					if (icons.indexOf(iconName) > -1) {
 						s.set('Collection', 'Custom');
 						s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
 					}
 					else {
-						let iconName = fixSpecialSymbols(selectedIcon).replace(/ /g, '-');
+						let iconName = escapeIconFileName(selectedIcon);
 						if (icons.indexOf(iconName) > -1) {
 							s.set('Collection', 'Custom');
 							s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
@@ -889,6 +919,10 @@ function run(progress, target, filename, icons) {
 					s.set('Name-pointsize', Math.round(namePointSize[cardType] * 1.734 * 100) / 100);
 				}
 
+				if (cardType in subtypeRegion) {
+					s.set('Subtype-region', subtypeRegion[cardType]);
+				}
+
 				if (cardType in hitPointsRegion) {
 					s.set('HitPoints-region', hitPointsRegion[cardType]);
 				}
@@ -915,6 +949,10 @@ function run(progress, target, filename, icons) {
 
 				if (cardType in adventureRegion) {
 					s.set('Adventure-region', adventureRegion[cardType]);
+				}
+
+				if (cardType in cycleRegion) {
+					s.set('Cycle-region', cycleRegion[cardType]);
 				}
 
 				if (cardType in resourceCostRegion) {
@@ -1004,7 +1042,7 @@ function run(progress, target, filename, icons) {
 				}
 
 				if (card['Encounter Set']) {
-					let iconName = fixSpecialSymbols(card['Encounter Set']).replace(/ /g, '-');
+					let iconName = escapeIconFileName(card['Encounter Set']);
 					if (icons.indexOf(iconName) > -1) {
 						s.set('EncounterSet', 'Custom');
 						s.set('EncounterSet-external-path', 'project:imagesIcons/' + iconName + '.png');
@@ -1016,7 +1054,7 @@ function run(progress, target, filename, icons) {
 				if (card['Additional Encounter Sets']) {
 					let encounterSets = card['Additional Encounter Sets'].split(';');
 					for (let k = 0; k < encounterSets.length; k++) {
-						let iconName = fixSpecialSymbols(encounterSets[k].trim()).replace(/ /g, '-');
+						let iconName = escapeIconFileName(encounterSets[k].trim());
 						if (icons.indexOf(iconName) > -1) {
 							s.set('EncounterSet' + (k + 1), 'Custom');
 							s.set('EncounterSet' + (k + 1) + '-external-path',
@@ -1127,16 +1165,6 @@ function exportCard(card, fname, setID, lang, simple_back, png300Bleed, png800Bl
 	}
 }
 
-function fixSpecialSymbols(value) {
-	value = value + '';
-	value = value.replace(/\u00c2/g, 'A');
-	value = value.replace(/\u00e2/g, 'a');
-	value = value.replace(/[\u00da\u00db]/g, 'U');
-	value = value.replace(/[\u00fa\u00fb]/g, 'u');
-	value = value.replace(/[,\(\)'"\u2013\u2014\u2026\u2019\u201c\u201d\u201e\u00ab\u00bb]/g, '');
-	return value;
-}
-
 function capitalizeWord(value) {
 	return value.charAt(0).toUpperCase() + value.slice(1);
 }
@@ -1149,7 +1177,12 @@ function capitalizeText(value) {
 }
 
 function convertIconName(value) {
-	value = fixSpecialSymbols(value);
+	value = value + '';
+	value = value.replace(/\u00c2/g, 'A');
+	value = value.replace(/\u00e2/g, 'a');
+	value = value.replace(/[\u00da\u00db]/g, 'U');
+	value = value.replace(/[\u00fa\u00fb]/g, 'u');
+	value = value.replace(/[,\(\)'"\u2013\u2014\u2026\u2019\u201c\u201d\u201e\u00ab\u00bb]/g, '');
 	value = capitalizeText(value);
 	value = value.replace(/[\-\u2013\u2014 ]/g, '');
 	return value;
@@ -1159,6 +1192,12 @@ function escapeFileName(value) {
 	value += '';
 	value = value.replace(/[<>:\/\\|?*'"\u2013\u2014\u2026\u2019\u201c\u201d\u201e\u00ab\u00bb\u00bf\u00a1]/g, ' ');
 	value = value.trim();
+	return value;
+}
+
+function escapeIconFileName(value) {
+	value = escapeFileName(value);
+	value = value.replace(/ /g, '-');
 	return value;
 }
 
