@@ -251,41 +251,41 @@ optionRightRegion['Ship Objective'] = '297,503,59,20';
 optionRightRegion['Treachery'] = '308,504,59,20';
 
 var translate = {};
-translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado', 'Polish': 'Sprzymierzeniec', 'Italian': 'Alleato'};
+translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado', 'Polish': 'Sprzymierzeniec', 'Italian': 'Alleato', 'Portuguese': ''};
 translate['Attachment'] = {'English': 'Attachment', 'French': 'Attachement', 'German': 'Verst\u00e4rkung', 'Spanish': 'Vinculada', 'Polish': 'Dodatek',
-	'Italian': 'Aggregato'};
-translate['Boon'] = {'English': 'Boon', 'French': 'Avantage', 'German': 'Gunst', 'Spanish': 'Ayuda', 'Polish': '\u0141aska', 'Italian': 'Vantaggio'};
-translate['Burden'] = {'English': 'Burden', 'French': 'Fardeau', 'German': 'B\u00fcrde', 'Spanish': 'Carga', 'Polish': 'Brzemi\u0119', 'Italian': 'Svantaggio'};
-translate['Campaign'] = {'English': 'Campaign', 'French': 'Campagne', 'German': 'Kampagne', 'Spanish': 'Campa\u00f1a', 'Polish': 'Kampania', 'Italian': 'Campagna'};
-translate['Contract'] = {'English': 'Contract', 'French': 'Contrat', 'German': 'Abkommen', 'Spanish': 'Contrato', 'Polish': 'Kontrakt', 'Italian': 'Contratto'};
+	'Italian': 'Aggregato', 'Portuguese': ''};
+translate['Boon'] = {'English': 'Boon', 'French': 'Avantage', 'German': 'Gunst', 'Spanish': 'Ayuda', 'Polish': '\u0141aska', 'Italian': 'Vantaggio', 'Portuguese': ''};
+translate['Burden'] = {'English': 'Burden', 'French': 'Fardeau', 'German': 'B\u00fcrde', 'Spanish': 'Carga', 'Polish': 'Brzemi\u0119', 'Italian': 'Svantaggio', 'Portuguese': ''};
+translate['Campaign'] = {'English': 'Campaign', 'French': 'Campagne', 'German': 'Kampagne', 'Spanish': 'Campa\u00f1a', 'Polish': 'Kampania', 'Italian': 'Campagna', 'Portuguese': ''};
+translate['Contract'] = {'English': 'Contract', 'French': 'Contrat', 'German': 'Abkommen', 'Spanish': 'Contrato', 'Polish': 'Kontrakt', 'Italian': 'Contratto', 'Portuguese': ''};
 translate['Encounter Side Quest'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria',
-	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria'};
-translate['Enemy'] = {'English': 'Enemy', 'French': 'Ennemi', 'German': 'Gegner', 'Spanish': 'Enemigo', 'Polish': 'Wr\u00f3g', 'Italian': 'Nemico'};
-translate['Event'] = {'English': 'Event', 'French': '\u00c9v\u00e9nement', 'German': 'Ereignis', 'Spanish': 'Evento', 'Polish': 'Wydarzenie', 'Italian': 'Evento'};
-translate['Hero'] = {'English': 'Hero', 'French': 'H\u00e9ros', 'German': 'Held', 'Spanish': 'H\u00e9roe', 'Polish': 'Bohater', 'Italian': 'Eroe'};
-translate['Location'] = {'English': 'Location', 'French': 'Lieu', 'German': 'Ort', 'Spanish': 'Lugar', 'Polish': 'Obszar', 'Italian': 'Luogo'};
-translate['Nightmare'] = {'English': 'Setup', 'French': 'Pr\u00e9paration', 'German': 'Vorbereitung', 'Spanish': 'Preparaci\u00f3n', 'Polish': 'Przygotowanie', 'Italian': 'Preparazione'};
-translate['Objective'] = {'English': 'Objective', 'French': 'Objectif', 'German': 'Ziel', 'Spanish': 'Objetivo', 'Polish': 'Cel', 'Italian': 'Obiettivo'};
+	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria', 'Portuguese': ''};
+translate['Enemy'] = {'English': 'Enemy', 'French': 'Ennemi', 'German': 'Gegner', 'Spanish': 'Enemigo', 'Polish': 'Wr\u00f3g', 'Italian': 'Nemico', 'Portuguese': ''};
+translate['Event'] = {'English': 'Event', 'French': '\u00c9v\u00e9nement', 'German': 'Ereignis', 'Spanish': 'Evento', 'Polish': 'Wydarzenie', 'Italian': 'Evento', 'Portuguese': ''};
+translate['Hero'] = {'English': 'Hero', 'French': 'H\u00e9ros', 'German': 'Held', 'Spanish': 'H\u00e9roe', 'Polish': 'Bohater', 'Italian': 'Eroe', 'Portuguese': ''};
+translate['Location'] = {'English': 'Location', 'French': 'Lieu', 'German': 'Ort', 'Spanish': 'Lugar', 'Polish': 'Obszar', 'Italian': 'Luogo', 'Portuguese': ''};
+translate['Nightmare'] = {'English': 'Setup', 'French': 'Pr\u00e9paration', 'German': 'Vorbereitung', 'Spanish': 'Preparaci\u00f3n', 'Polish': 'Przygotowanie', 'Italian': 'Preparazione', 'Portuguese': ''};
+translate['Objective'] = {'English': 'Objective', 'French': 'Objectif', 'German': 'Ziel', 'Spanish': 'Objetivo', 'Polish': 'Cel', 'Italian': 'Obiettivo', 'Portuguese': ''};
 translate['Objective Ally'] = {'English': 'Objective-Ally', 'French': 'Objectif-Alli\u00e9', 'German': 'Ziel-Verb\u00fcndeter', 'Spanish': 'Objetivo-Aliado',
-	'Polish': 'Cel-Sprzymierzeniec', 'Italian': 'Obiettivo-Alleato'};
-translate['Objective Hero'] = {'English': 'Objective-Hero', 'French': 'Objectif-H\u00e9ros', 'German': 'Ziel-Held', 'Spanish': 'H\u00e9roe-Objetivo', 'Polish': 'Cel-Bohater', 'Italian': 'Eroe-Obiettivo'};
-translate['Objective Location'] = {'English': 'Objective-Location', 'French': 'Objectif-Lieu', 'German': 'Ziel-Ort', 'Spanish': 'Lugar-Objetivo', 'Polish': 'Cel-Obszar', 'Italian': 'Luogo-Obiettivo'};
+	'Polish': 'Cel-Sprzymierzeniec', 'Italian': 'Obiettivo-Alleato', 'Portuguese': ''};
+translate['Objective Hero'] = {'English': 'Objective-Hero', 'French': 'Objectif-H\u00e9ros', 'German': 'Ziel-Held', 'Spanish': 'H\u00e9roe-Objetivo', 'Polish': 'Cel-Bohater', 'Italian': 'Eroe-Obiettivo', 'Portuguese': ''};
+translate['Objective Location'] = {'English': 'Objective-Location', 'French': 'Objectif-Lieu', 'German': 'Ziel-Ort', 'Spanish': 'Lugar-Objetivo', 'Polish': 'Cel-Obszar', 'Italian': 'Luogo-Obiettivo', 'Portuguese': ''};
 translate['Player Side Quest'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria',
-	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria'};
-translate['Quest'] = {'English': 'Quest', 'French': 'Qu\u00eate', 'German': 'Abenteuer', 'Spanish': 'Misi\u00f3n', 'Polish': 'Wyprawa', 'Italian': 'Ricerca'};
-translate['Setup'] = {'English': 'Setup', 'French': 'Pr\u00e9paration', 'German': 'Vorbereitung', 'Spanish': 'Preparaci\u00f3n', 'Polish': 'Przygotowanie', 'Italian': 'Preparazione'};
-translate['Ship Enemy'] = {'English': 'Ship-Enemy', 'French': 'Navire-Ennemi', 'German': 'Schiff-Gegner', 'Spanish': 'Barco-Enemigo', 'Polish': 'Statek-Wr\u00f3g', 'Italian': 'Nave-Nemico'};
-translate['Ship Objective'] = {'English': 'Ship-Objective', 'French': 'Navire-Objectif', 'German': 'Schiff-Ziel', 'Spanish': 'Barco-Objetivo', 'Polish': 'Statek-Cel', 'Italian': 'Nave-Obiettivo'};
-translate['Treachery'] = {'English': 'Treachery', 'French': 'Tra\u00eetrise', 'German': 'Verrat', 'Spanish': 'Traici\u00f3n', 'Polish': 'Podst\u0119p', 'Italian': 'Perfidia'};
-translate['Treasure'] = {'English': 'Treasure', 'French': 'Tr\u00e9sor', 'German': 'Schatz', 'Spanish': 'Tesoro', 'Polish': 'Skarb', 'Italian': 'Tesoro'};
+	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria', 'Portuguese': ''};
+translate['Quest'] = {'English': 'Quest', 'French': 'Qu\u00eate', 'German': 'Abenteuer', 'Spanish': 'Misi\u00f3n', 'Polish': 'Wyprawa', 'Italian': 'Ricerca', 'Portuguese': ''};
+translate['Setup'] = {'English': 'Setup', 'French': 'Pr\u00e9paration', 'German': 'Vorbereitung', 'Spanish': 'Preparaci\u00f3n', 'Polish': 'Przygotowanie', 'Italian': 'Preparazione', 'Portuguese': ''};
+translate['Ship Enemy'] = {'English': 'Ship-Enemy', 'French': 'Navire-Ennemi', 'German': 'Schiff-Gegner', 'Spanish': 'Barco-Enemigo', 'Polish': 'Statek-Wr\u00f3g', 'Italian': 'Nave-Nemico', 'Portuguese': ''};
+translate['Ship Objective'] = {'English': 'Ship-Objective', 'French': 'Navire-Objectif', 'German': 'Schiff-Ziel', 'Spanish': 'Barco-Objetivo', 'Polish': 'Statek-Cel', 'Italian': 'Nave-Obiettivo', 'Portuguese': ''};
+translate['Treachery'] = {'English': 'Treachery', 'French': 'Tra\u00eetrise', 'German': 'Verrat', 'Spanish': 'Traici\u00f3n', 'Polish': 'Podst\u0119p', 'Italian': 'Perfidia', 'Portuguese': ''};
+translate['Treasure'] = {'English': 'Treasure', 'French': 'Tr\u00e9sor', 'German': 'Schatz', 'Spanish': 'Tesoro', 'Polish': 'Skarb', 'Italian': 'Tesoro', 'Portuguese': ''};
 translate['Encounter Keyword'] = {'English': 'Encounter', 'French': 'Rencontre', 'German': 'Begegnung', 'Spanish': 'Encuentro', 'Polish': 'Spotkanie',
-	'Italian': 'Incontro'};
-translate['Illustrator'] = {'English': 'Illus.', 'French': 'Illus.', 'German': 'Illus.', 'Spanish': 'Ilus.', 'Polish': 'Illus.', 'Italian': 'Illus.'};
+	'Italian': 'Incontro', 'Portuguese': ''};
+translate['Illustrator'] = {'English': 'Illus.', 'French': 'Illus.', 'German': 'Illus.', 'Spanish': 'Ilus.', 'Polish': 'Illus.', 'Italian': 'Illus.', 'Portuguese': ''};
 translate['Unknown Artist'] = {'English': 'Unknown Artist', 'French': 'Artiste inconnu', 'German': 'Unbekannter K\u00fcnstler', 'Spanish': 'Artista desconocido',
-	'Polish': 'Artysta nieznany', 'Italian': 'Artista sconosciuto'};
-translate['Victory'] = {'English': 'Victory', 'French': 'Victoire', 'German': 'Sieg', 'Spanish': 'Victoria', 'Polish': 'Zwyci\u0119stwo', 'Italian': 'Vittoria'};
-translate['Page'] = {'English': 'Page', 'French': 'Page', 'German': 'Seite', 'Spanish': 'P\u00e1gina', 'Polish': 'Strona', 'Italian': 'Pagina'};
-translate['Side'] = {'English': 'Side', 'French': 'Face', 'German': 'Seite', 'Spanish': 'Lado', 'Polish': 'Strona', 'Italian': 'Lato'};
+	'Polish': 'Artysta nieznany', 'Italian': 'Artista sconosciuto', 'Portuguese': ''};
+translate['Victory'] = {'English': 'Victory', 'French': 'Victoire', 'German': 'Sieg', 'Spanish': 'Victoria', 'Polish': 'Zwyci\u0119stwo', 'Italian': 'Vittoria', 'Portuguese': ''};
+translate['Page'] = {'English': 'Page', 'French': 'Page', 'German': 'Seite', 'Spanish': 'P\u00e1gina', 'Polish': 'Strona', 'Italian': 'Pagina', 'Portuguese': ''};
+translate['Side'] = {'English': 'Side', 'French': 'Face', 'German': 'Seite', 'Spanish': 'Lado', 'Polish': 'Strona', 'Italian': 'Lato', 'Portuguese': ''};
 
 Thread.busyWindow(main, 'Updating cards...', true);
 
@@ -1300,7 +1300,7 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 	}
 	else if (nXml == 'Adventure') {
 		if (cardType == 'Campaign') {
-			return updateVafthrudnir(vXml, 6.5, lang);
+			return updateVafthrudnir(vXml, 5.6, lang);
 		}
 		else {
 			return updateVafthrudnir(vXml, 3.69, lang);
@@ -1349,6 +1349,13 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 			vXml = vXml.replace(/\b(Quando Rivelata|Obbligato|Risposta Valorosa|Risposta|Viaggio|Ombra|Risoluzione):/g, '[b]$1[/b]:');
 			vXml = vXml.replace(/\b(Preparazione)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			vXml = vXml.replace(/\b(Condizione)\b/g, '[bi]$1[/bi]');
+		}
+		else if (lang == 'Portuguese') {
+			vXml = vXml.replace(/\b(Resoluci\u00f3n de la misi\u00f3n)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+			vXml = vXml.replace(/\b(Acci\u00f3n)( de Recursos| de Planificaci\u00f3n| de Misi\u00f3n| de Viaje| de Encuentro| de Combate| de Recuperaci\u00f3n)?( de Valor)?:/g, '[b]$1$2$3[/b]:');
+			vXml = vXml.replace(/\b(Al ser revelada|Obligado|Respuesta de Valor|Respuesta|Viaje|Sombra|Resoluci\u00f3n):/g, '[b]$1[/b]:');
+			vXml = vXml.replace(/\b(Preparaci\u00f3n)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+			vXml = vXml.replace(/\b(Condici\u00f3n)\b/g, '[bi]$1[/bi]');
 		}
 	}
 
