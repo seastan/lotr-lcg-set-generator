@@ -809,7 +809,7 @@ def _escape_hallofbeorn_filename(value):
 def _escape_icon_filename(value):
     """ Escape forbidden symbols in an icon file name.
     """
-    value = re.sub(r'[<>:\/\\|?*\'"’“”„«»…–—¡¿]', ' ', str(value))
+    value = re.sub(r'[<>:\/\\|?*\'"’“”„«»…–—¡¿]', '', str(value))
     value = value.strip()
     value = value.replace(' ', '-')
     return value
