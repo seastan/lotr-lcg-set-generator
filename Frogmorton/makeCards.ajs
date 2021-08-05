@@ -301,7 +301,7 @@ translate['Encounter Keyword'] = {'English': 'Encounter', 'French': 'Rencontre',
 translate['Illustrator'] = {'English': 'Illus.', 'French': 'Illus.', 'German': 'Illus.', 'Spanish': 'Ilus.', 'Polish': 'Illus.', 'Italian': 'Illus.',
 	'Portuguese': 'Ilust.'};
 translate['Unknown Artist'] = {'English': 'Unknown Artist', 'French': 'Artiste inconnu', 'German': 'Unbekannter K\u00fcnstler', 'Spanish': 'Artista desconocido',
-	'Polish': 'Artysta nieznany', 'Italian': 'Artista sconosciuto', 'Portuguese': 'Artista desconhecido'};
+	'Polish': 'Artysta nieznany', 'Italian': 'Artista sconosciuto', 'Portuguese': 'Artista Desconhecido'};
 translate['Victory'] = {'English': 'Victory', 'French': 'Victoire', 'German': 'Sieg', 'Spanish': 'Victoria', 'Polish': 'Zwyci\u0119stwo', 'Italian': 'Vittoria',
 	'Portuguese': 'Vit\u00f3ria'};
 translate['Page'] = {'English': 'Page', 'French': 'Page', 'German': 'Seite', 'Spanish': 'P\u00e1gina', 'Polish': 'Strona', 'Italian': 'Pagina',
@@ -1376,7 +1376,7 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 		else if (lang == 'Portuguese') {
 			vXml = vXml.replace(/\b(Resolu\u00e7\u00e3o da Miss\u00e3o)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			vXml = vXml.replace(/\b(A\u00e7\u00e3o)( Valorosa)?( de Recursos| de Planejamento| de Miss\u00e3o| de Viagem| de Encontro| de Combate| de Renova\u00e7\u00e3o)?:/g, '[b]$1$2$3[/b]:');
-			vXml = vXml.replace(/\b(Quando Revelado|For\u00e7ado|Resposta Valorosa|Resposta|Viagem|Sombra|Resolu\u00e7\u00e3o):/g, '[b]$1[/b]:');
+			vXml = vXml.replace(/\b(Efeito Revelado|Efeito For\u00e7ado|Resposta Valorosa|Resposta|Viagem|Efeito Sombrio|Resolu\u00e7\u00e3o):/g, '[b]$1[/b]:');
 			vXml = vXml.replace(/\b(Prepara\u00e7\u00e3o)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			vXml = vXml.replace(/\b(Condi\u00e7\u00e3o)\b/g, '[bi]$1[/bi]');
 		}

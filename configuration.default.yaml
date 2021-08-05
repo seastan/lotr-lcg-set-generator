@@ -193,3 +193,16 @@ outputs:
 #    - genericpng_pdf_letter_7z
 #    - rules_pdf
 #    - tts
+  Portuguese:
+#    - db
+#    - octgn
+#    - pdf_a4
+#    - pdf_letter
+#    - mbprint_7z
+#    - mbprint_pdf_7z
+#    - makeplayingcards_7z
+#    - genericpng_7z
+#    - genericpng_pdf_a4_7z
+#    - genericpng_pdf_letter_7z
+#    - rules_pdf
+#    - tts
