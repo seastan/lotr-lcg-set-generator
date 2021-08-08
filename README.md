@@ -226,7 +226,8 @@ Additional steps:
   - `1-59/2 * * * * flock -xn <path>/mpc_monitor.lock -c 'python3 <path>/mpc_monitor.py > /dev/null' 2>&1`
   - `7 0 * * *    <path>/rclone_backup.sh "<local A Long-extended Party/Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
   - `0 8 * * 1    <path>/remind_backup.sh >> <path>/cron.log 2>&1`
-  - `*/2 * * * * <path>/monitor_discord_changes.sh >> <path>/cron.log 2>&1`
+  - `5 8 1 * *    <path>/remind_backup_monthly.sh >> <path>/cron.log 2>&1`
+  - `*/2 * * * *  <path>/monitor_discord_changes.sh >> <path>/cron.log 2>&1`
   - `18 8 * * *   python3 <path>/spreadsheet_backup.py <backup folder> >> <path>/cron.log 2>&1`
 
     Replace `<path>` with the absolute path to the root folder.  `cron.log` may be located either in the root folder
