@@ -212,6 +212,7 @@ Additional steps:
     You will need to set up the following remotes:
 
   - `ALePCardImages` (points to `A Long-extended Party/CardImages`)
+  - `ALePLinksBackup` (points to `A Long-extended Party/Links Backup`)
   - `ALePLogs` (points to `A Long-extended Party/Logs`)
   - `ALePOCTGN` (points to `A Long-extended Party/Playtesting/OCTGN Files`)
   - `ALePRenderedImages` (points to `A Long-extended Party/RenderedImages`)
@@ -228,7 +229,8 @@ Additional steps:
   - `0 8 * * 1    <path>/remind_backup.sh >> <path>/cron.log 2>&1`
   - `5 8 1 * *    <path>/remind_backup_monthly.sh >> <path>/cron.log 2>&1`
   - `*/2 * * * *  <path>/monitor_discord_changes.sh >> <path>/cron.log 2>&1`
-  - `18 8 * * *   python3 <path>/spreadsheet_backup.py <backup folder> >> <path>/cron.log 2>&1`
+  - `19 8 * * *   <path>/links_backup.sh "<local A Long-extended Party/Links Backup path>" >> <path>/cron.log 2>&1`
+  - `7 1 * * *    <path>/configutation_backup.sh "<path to a local configuration backup folder>" >> <path>/cron.log 2>&1`
 
     Replace `<path>` with the absolute path to the root folder.  `cron.log` may be located either in the root folder
     or in some external folder (if you already have other crons).  Set `<backup folder>` to your actual backup folder.
