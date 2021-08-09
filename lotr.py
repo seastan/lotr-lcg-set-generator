@@ -192,6 +192,18 @@ CARD_TYPES_VICTORY = {'Ally', 'Attachment', 'Encounter Side Quest', 'Enemy',
                       'Objective Location', 'Player Side Quest', 'Ship Enemy',
                       'Ship Objective', 'Treachery', 'Treasure'}
 CARD_TYPES_VICTORY_BACK = {'Quest'}
+CARD_TYPES_TEXT = {'Attachment', 'Campaign', 'Contract',
+                   'Encounter Side Quest', 'Event', 'Hero', 'Location',
+                   'Nightmare', 'Objective', 'Objective Ally',
+                   'Objective Hero', 'Objective Location', 'Player Side Quest',
+                   'Presentation', 'Rules', 'Ship Enemy', 'Ship Objective',
+                   'Treasure'}
+CARD_TYPES_TEXT_BACK = {'Attachment', 'Campaign', 'Encounter Side Quest',
+                        'Event', 'Hero', 'Location', 'Nightmare', 'Objective',
+                        'Objective Ally', 'Objective Hero',
+                        'Objective Location', 'Player Side Quest', 'Quest',
+                        'Ship Enemy', 'Ship Objective', 'Treasure'}
+CARD_TYPES_NO_TEXT_BACK = {'Presentation'}
 CARD_TYPES_SPECIAL_ICON = {'Enemy', 'Location', 'Objective', 'Objective Ally',
                            'Objective Location', 'Ship Enemy', 'Ship Objective',
                            'Treachery'}
@@ -1546,6 +1558,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_health = row[CARD_HEALTH]
         card_quest = row[CARD_QUEST]
         card_victory = row[CARD_VICTORY]
+        card_text = row[CARD_TEXT]
         card_special_icon = row[CARD_SPECIAL_ICON]
 
         card_name_back = row[BACK_PREFIX + CARD_NAME]
@@ -1563,6 +1576,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_health_back = row[BACK_PREFIX + CARD_HEALTH]
         card_quest_back = row[BACK_PREFIX + CARD_QUEST]
         card_victory_back = row[BACK_PREFIX + CARD_VICTORY]
+        card_text_back = row[BACK_PREFIX + CARD_TEXT]
         card_special_icon_back = row[BACK_PREFIX + CARD_SPECIAL_ICON]
 
         card_easy_mode = row[CARD_EASY_MODE]
@@ -1691,7 +1705,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
 
         if (card_encounter_set is None and
-                card_type in CARD_TYPES_ENCOUNTER_SET):
+                (card_type in CARD_TYPES_ENCOUNTER_SET or
+                 card_type_back in CARD_TYPES_ENCOUNTER_SET)):
             message = 'No encounter set for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -1699,7 +1714,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_encounter_set is not None and
-              card_type in CARD_TYPES_NO_ENCOUNTER_SET):
+              card_type in CARD_TYPES_NO_ENCOUNTER_SET and
+              (card_type_back in CARD_TYPES_NO_ENCOUNTER_SET or
+               card_type_back is None)):
             message = 'Redundant encounter set for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -2524,6 +2541,32 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
               card_type_back not in CARD_TYPES_VICTORY and
               card_type not in CARD_TYPES_VICTORY_BACK):
             message = 'Redundant victory points back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_text is None and card_type in CARD_TYPES_TEXT:
+            message = 'No text for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_text_back is None and
+                card_type_back in CARD_TYPES_TEXT_BACK):
+            message = 'No text back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_text_back is not None and
+              card_type_back in CARD_TYPES_NO_TEXT_BACK):
+            message = 'Redundant text back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
