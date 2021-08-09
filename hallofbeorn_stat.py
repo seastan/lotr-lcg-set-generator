@@ -6,12 +6,35 @@ import csv
 import json
 import os
 import re
+import time
+
+import requests
 import unidecode
-from lotr import get_content
 
 
 HALLOFBEORN_URL = 'http://hallofbeorn.com/Export/Cards?setType=ALL_SETS'
 OUTPUT_PATH = os.path.join('Output', 'Scripts')
+
+URL_TIMEOUT = 15
+URL_RETRIES = 3
+URL_SLEEP = 10
+
+
+def get_content(url):
+    """ Get URL content.
+    """
+    for i in range(URL_RETRIES):
+        try:
+            req = requests.get(url, timeout=URL_TIMEOUT)
+            res = req.content
+            break
+        except Exception:  # pylint: disable=W0703
+            if i < URL_RETRIES - 1:
+                time.sleep(URL_SLEEP)
+            else:
+                raise
+
+    return res
 
 
 def get_data():
