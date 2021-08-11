@@ -213,6 +213,10 @@ CARD_TYPES_NO_FLAVOUR_BACK = {'Nightmare', 'Presentation', 'Rules'}
 CARD_TYPES_NO_PRINTED_NUMBER = {'Presentation', 'Rules'}
 CARD_TYPES_NO_PRINTED_NUMBER_BACK = {'Campaign', 'Nightmare',
                                      'Presentation', 'Rules'}
+CARD_TYPES_NO_ARTIST = {'Presentation', 'Rules'}
+CARD_TYPES_NO_ARTIST_BACK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
+CARD_TYPES_NO_ARTWORK = {'Rules'}
+CARD_TYPES_NO_ARTWORK_BACK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
 CARD_TYPES_SPECIAL_ICON = {'Enemy', 'Location', 'Objective', 'Objective Ally',
                            'Objective Location', 'Ship Enemy',
                            'Ship Objective', 'Treachery'}
@@ -1275,6 +1279,9 @@ def _clean_value(value):  # pylint: disable=R0915
     if len(value) == 1:
         value = value.upper()
 
+    if value == '':
+        value = None
+
     return value
 
 
@@ -1571,6 +1578,11 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_shadow = row[CARD_SHADOW]
         card_flavour = row[CARD_FLAVOUR]
         card_printed_number = row[CARD_PRINTED_NUMBER]
+        card_artist = row[CARD_ARTIST]
+        card_panx = row[CARD_PANX]
+        card_pany = row[CARD_PANY]
+        card_portrait_shadow = row[CARD_PORTRAIT_SHADOW]
+        card_scale = row[CARD_SCALE]
         card_special_icon = row[CARD_SPECIAL_ICON]
 
         card_name_back = row[BACK_PREFIX + CARD_NAME]
@@ -1592,6 +1604,11 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_shadow_back = row[BACK_PREFIX + CARD_SHADOW]
         card_flavour_back = row[BACK_PREFIX + CARD_FLAVOUR]
         card_printed_number_back = row[BACK_PREFIX + CARD_PRINTED_NUMBER]
+        card_artist_back = row[BACK_PREFIX + CARD_ARTIST]
+        card_panx_back = row[BACK_PREFIX + CARD_PANX]
+        card_pany_back = row[BACK_PREFIX + CARD_PANY]
+        card_portrait_shadow_back = row[BACK_PREFIX + CARD_PORTRAIT_SHADOW]
+        card_scale_back = row[BACK_PREFIX + CARD_SCALE]
         card_special_icon_back = row[BACK_PREFIX + CARD_SPECIAL_ICON]
 
         card_easy_mode = row[CARD_EASY_MODE]
@@ -2641,6 +2658,140 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         if (card_printed_number_back is not None and
                 card_type_back in CARD_TYPES_NO_PRINTED_NUMBER_BACK):
             message = 'Redundant printed number back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_artist is not None and
+                card_type in CARD_TYPES_NO_ARTIST):
+            message = 'Redundant artist for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_artist_back is not None and
+                card_type_back in CARD_TYPES_NO_ARTIST_BACK):
+            message = 'Redundant artist back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_panx is not None and
+                card_type in CARD_TYPES_NO_ARTWORK):
+            message = 'Redundant panx for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_panx is None and
+              (card_pany is not None or card_scale is not None)):
+            message = 'Missing panx for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_panx_back is not None and
+                card_type_back in CARD_TYPES_NO_ARTWORK_BACK):
+            message = 'Redundant panx back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_panx_back is None and
+              (card_pany_back is not None or card_scale_back is not None)):
+            message = 'Missing panx back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_pany is not None and
+                card_type in CARD_TYPES_NO_ARTWORK):
+            message = 'Redundant pany for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_pany is None and
+              (card_panx is not None or card_scale is not None)):
+            message = 'Missing pany for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_pany_back is not None and
+                card_type_back in CARD_TYPES_NO_ARTWORK_BACK):
+            message = 'Redundant pany back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_pany_back is None and
+              (card_panx_back is not None or card_scale_back is not None)):
+            message = 'Missing pany back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_scale is not None and
+                card_type in CARD_TYPES_NO_ARTWORK):
+            message = 'Redundant scale for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_scale is None and
+              (card_panx is not None or card_pany is not None)):
+            message = 'Missing scale for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_scale_back is not None and
+                card_type_back in CARD_TYPES_NO_ARTWORK_BACK):
+            message = 'Redundant scale back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_scale_back is None and
+              (card_panx_back is not None or card_pany_back is not None)):
+            message = 'Missing scale back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
