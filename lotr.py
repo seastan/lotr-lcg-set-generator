@@ -210,9 +210,12 @@ CARD_TYPES_SHADOW = {'Enemy', 'Location', 'Objective', 'Objective Ally',
 CARD_TYPES_SHADOW_ENCOUNTER = {'Ally', 'Attachment', 'Event'}
 CARD_TYPES_NO_FLAVOUR = {'Presentation', 'Rules'}
 CARD_TYPES_NO_FLAVOUR_BACK = {'Nightmare', 'Presentation', 'Rules'}
+CARD_TYPES_NO_PRINTED_NUMBER = {'Presentation', 'Rules'}
+CARD_TYPES_NO_PRINTED_NUMBER_BACK = {'Campaign', 'Nightmare',
+                                     'Presentation', 'Rules'}
 CARD_TYPES_SPECIAL_ICON = {'Enemy', 'Location', 'Objective', 'Objective Ally',
-                           'Objective Location', 'Ship Enemy', 'Ship Objective',
-                           'Treachery'}
+                           'Objective Location', 'Ship Enemy',
+                           'Ship Objective', 'Treachery'}
 CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
                         'Objective Hero', 'Objective Location',
                         'Ship Objective', 'Quest'}
@@ -1567,6 +1570,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_text = row[CARD_TEXT]
         card_shadow = row[CARD_SHADOW]
         card_flavour = row[CARD_FLAVOUR]
+        card_printed_number = row[CARD_PRINTED_NUMBER]
         card_special_icon = row[CARD_SPECIAL_ICON]
 
         card_name_back = row[BACK_PREFIX + CARD_NAME]
@@ -1587,6 +1591,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_text_back = row[BACK_PREFIX + CARD_TEXT]
         card_shadow_back = row[BACK_PREFIX + CARD_SHADOW]
         card_flavour_back = row[BACK_PREFIX + CARD_FLAVOUR]
+        card_printed_number_back = row[BACK_PREFIX + CARD_PRINTED_NUMBER]
         card_special_icon_back = row[BACK_PREFIX + CARD_SPECIAL_ICON]
 
         card_easy_mode = row[CARD_EASY_MODE]
@@ -2616,6 +2621,26 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         if (card_flavour_back is not None and
                 card_type_back in CARD_TYPES_NO_FLAVOUR_BACK):
             message = 'Redundant flavour back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_printed_number is not None and
+                card_type in CARD_TYPES_NO_PRINTED_NUMBER):
+            message = 'Redundant printed number for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_printed_number_back is not None and
+                card_type_back in CARD_TYPES_NO_PRINTED_NUMBER_BACK):
+            message = 'Redundant printed number back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
