@@ -204,6 +204,10 @@ CARD_TYPES_TEXT_BACK = {'Attachment', 'Campaign', 'Encounter Side Quest',
                         'Objective Location', 'Player Side Quest', 'Quest',
                         'Ship Enemy', 'Ship Objective', 'Treasure'}
 CARD_TYPES_NO_TEXT_BACK = {'Presentation'}
+CARD_TYPES_SHADOW = {'Enemy', 'Location', 'Objective', 'Objective Ally',
+                     'Objective Hero', 'Objective Location', 'Ship Enemy',
+                     'Ship Objective', 'Treachery'}
+CARD_TYPES_SHADOW_ENCOUNTER = {'Ally', 'Attachment', 'Event'}
 CARD_TYPES_NO_FLAVOUR = {'Presentation', 'Rules'}
 CARD_TYPES_NO_FLAVOUR_BACK = {'Nightmare', 'Presentation', 'Rules'}
 CARD_TYPES_SPECIAL_ICON = {'Enemy', 'Location', 'Objective', 'Objective Ally',
@@ -1561,6 +1565,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_quest = row[CARD_QUEST]
         card_victory = row[CARD_VICTORY]
         card_text = row[CARD_TEXT]
+        card_shadow = row[CARD_SHADOW]
         card_flavour = row[CARD_FLAVOUR]
         card_special_icon = row[CARD_SPECIAL_ICON]
 
@@ -1580,6 +1585,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_quest_back = row[BACK_PREFIX + CARD_QUEST]
         card_victory_back = row[BACK_PREFIX + CARD_VICTORY]
         card_text_back = row[BACK_PREFIX + CARD_TEXT]
+        card_shadow_back = row[BACK_PREFIX + CARD_SHADOW]
         card_flavour_back = row[BACK_PREFIX + CARD_FLAVOUR]
         card_special_icon_back = row[BACK_PREFIX + CARD_SPECIAL_ICON]
 
@@ -2571,6 +2577,27 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_text_back is not None and
               card_type_back in CARD_TYPES_NO_TEXT_BACK):
             message = 'Redundant text back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_shadow is not None and card_type not in CARD_TYPES_SHADOW and
+                not (card_type in CARD_TYPES_SHADOW_ENCOUNTER and
+                     ('Encounter' in
+                      (card_keywords or '').replace('. ', '.').split('.') or
+                      card_back == 'Encounter'))):
+            message = 'Redundant shadow for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_shadow_back is not None:
+            message = 'Redundant shadow back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
