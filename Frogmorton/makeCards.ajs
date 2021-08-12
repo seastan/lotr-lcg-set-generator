@@ -455,6 +455,10 @@ function run(progress, target, filename, icons) {
 						card['Sphere'] = cardSphere;
 					}
 
+					if ((cardType == 'Hero') && (card['Adventure'] + '' == 'Promo')) {
+						card['Sphere'] = 'Promo' + card['Sphere'];
+					}
+
 					keywords = card['Keywords'];
 					suffix = '';
 					mapping = [
@@ -537,6 +541,10 @@ function run(progress, target, filename, icons) {
 						Console.err.println('\nERROR: ' + cardSphere + " template is not supported yet.");
 						cardSphere = cardSphere.replace(/Nightmare /, '');
 						card['BSphere'] = cardSphere;
+					}
+
+					if ((cardType == 'Hero') && (card['Adventure'] + '' == 'Promo')) {
+						card['BSphere'] = 'Promo' + card['BSphere'];
 					}
 
 					keywords = card['BKeywords'];
