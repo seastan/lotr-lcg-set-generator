@@ -11,7 +11,7 @@ importClass(org.w3c.dom.NodeList);
 
 var doubleSideTypes = ['Campaign', 'Contract', 'Nightmare', 'Presentation', 'Quest', 'Rules'];
 var landscapeTypes = ['Encounter Side Quest', 'Player Side Quest', 'Quest'];
-var playerTypes = ['Ally', 'Attachment', 'Contract', 'Event', 'Hero', 'Player Side Quest', 'Treasure'];
+var playerTypes = ['Ally', 'Attachment', 'Contract', 'Event', 'Hero', 'Hero Promo', 'Player Side Quest', 'Treasure'];
 var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Side Quest'];
 var nonUniqueTypes = ['Campaign', 'Contract', 'Event', 'Nightmare', 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery', 'Treasure'];
 
@@ -24,6 +24,7 @@ portraitRegion['Encounter Side Quest'] = '0,0,563,413';
 portraitRegion['Enemy'] = '87,0,326,330';
 portraitRegion['Event'] = '60,0,353,330';
 portraitRegion['Hero'] = '87,0,326,330';
+portraitRegion['Hero Promo'] = '0,0,413,563';
 portraitRegion['Location'] = '0,60,413,268';
 portraitRegion['Objective'] = '0,69,413,300';
 portraitRegion['Objective Ally'] = '78,81,335,268';
@@ -40,6 +41,7 @@ bodyRegion['Campaign'] = '56,277,301,211';
 bodyRegion['Enemy'] = '57,377,299,114';
 bodyRegion['Event'] = '65,351,283,140';
 bodyRegion['Hero'] = '57,377,299,114';
+bodyRegion['Hero Promo'] = '78,467,259,40';
 bodyRegion['Location'] = '56,346,301,142';
 bodyRegion['Objective'] = '65,355,283,137';
 bodyRegion['Objective Ally'] = '65,355,283,137';
@@ -65,6 +67,7 @@ traitRegion['Attachment'] = '85,327,243,20';
 traitRegion['Enemy'] = '57,357,299,20';
 traitRegion['Event'] = '78,331,257,20';
 traitRegion['Hero'] = '57,357,299,20';
+traitRegion['Hero Promo'] = '93,449,160,14';
 traitRegion['Location'] = '56,326,301,20';
 traitRegion['Objective'] = '65,335,283,20';
 traitRegion['Objective Ally'] = '65,335,283,20';
@@ -85,6 +88,7 @@ nameRegion['Encounter Side Quest'] = '100,42,363,29';
 nameRegion['Enemy'] = '94,327,225,25';
 nameRegion['Event'] = '57,86,26,178';
 nameRegion['Hero'] = '100,327,213,25';
+nameRegion['Hero Promo'] = '103,418,206,25';
 nameRegion['Location'] = '108,43,197,25';
 nameRegion['Objective'] = '75,48,263,29';
 nameRegion['Objective Ally'] = '75,48,263,29';
@@ -103,6 +107,7 @@ nameRegionUnique['Encounter Side Quest'] = '100,39,363,29';
 nameRegionUnique['Enemy'] = '94,325,225,25';
 nameRegionUnique['Event'] = '57,86,26,178';
 nameRegionUnique['Hero'] = '100,325,213,25';
+nameRegionUnique['Hero Promo'] = '103,416,206,25';
 nameRegionUnique['Location'] = '108,40,197,25';
 nameRegionUnique['Objective'] = '75,45,263,29';
 nameRegionUnique['Objective Ally'] = '75,45,263,29';
@@ -121,6 +126,7 @@ namePointSize['Encounter Side Quest'] = 7.5;
 namePointSize['Enemy'] = 6.5;
 namePointSize['Event'] = 6.5;
 namePointSize['Hero'] = 6.5;
+namePointSize['Hero Promo'] = 6.5;
 namePointSize['Location'] = 6.5;
 namePointSize['Objective'] = 7.5;
 namePointSize['Objective Ally'] = 7.5;
@@ -137,6 +143,7 @@ var hitPointsRegion = {};
 hitPointsRegion['Ally'] = '66,269,58,40';
 hitPointsRegion['Enemy'] = '64,269,58,40';
 hitPointsRegion['Hero'] = '64,269,58,40';
+hitPointsRegion['Hero Promo'] = '46,408,58,40';
 hitPointsRegion['Objective Ally'] = '61,272,58,40';
 hitPointsRegion['Ship Enemy'] = '64,269,58,40';
 hitPointsRegion['Ship Objective'] = '61,272,58,40';
@@ -145,6 +152,7 @@ var attackRegion = {};
 attackRegion['Ally'] = '70,157,26,16';
 attackRegion['Enemy'] = '68,156,26,16';
 attackRegion['Hero'] = '68,157,26,16';
+attackRegion['Hero Promo'] = '42,128,26,16';
 attackRegion['Objective Ally'] = '65,159,26,16';
 attackRegion['Ship Enemy'] = '68,156,26,16';
 attackRegion['Ship Objective'] = '65,159,26,16';
@@ -153,6 +161,7 @@ var defenseRegion = {};
 defenseRegion['Ally'] = '70,200,26,16';
 defenseRegion['Enemy'] = '68,199,26,16';
 defenseRegion['Hero'] = '68,200,26,16';
+defenseRegion['Hero Promo'] = '42,166,26,16';
 defenseRegion['Objective Ally'] = '65,203,26,16';
 defenseRegion['Ship Enemy'] = '68,199,26,16';
 defenseRegion['Ship Objective'] = '65,203,26,16';
@@ -160,6 +169,7 @@ defenseRegion['Ship Objective'] = '65,203,26,16';
 var willpowerRegion = {};
 willpowerRegion['Ally'] = '70,117,26,16';
 willpowerRegion['Hero'] = '68,117,26,16';
+willpowerRegion['Hero Promo'] = '42,94,26,16';
 willpowerRegion['Objective Ally'] = '65,113,26,16';
 willpowerRegion['Ship Objective'] = '65,113,26,16';
 
@@ -167,6 +177,14 @@ var threatRegion = {};
 threatRegion['Enemy'] = '68,115,26,16';
 threatRegion['Location'] = '54,92,26,16';
 threatRegion['Ship Enemy'] = '68,115,26,16';
+
+var threatCostRegion = {};
+threatCostRegion['Hero'] = '75,50,36,25';
+threatCostRegion['Hero Promo'] = '50,48,33,23';
+
+var threatCostTint = {};
+threatCostTint['Hero'] = '200.0,0.7,0.7';
+threatCostTint['Hero Promo'] = '0.0,0.0,0.95';
 
 var progressRegion = {};
 progressRegion['Encounter Side Quest'] = '52,202,35,24';
@@ -182,6 +200,10 @@ adventureRegion['Ship Objective'] = '67,83,276,15';
 
 var cycleRegion = {};
 cycleRegion['Campaign'] = '68,243,274,32';
+
+var sphereBodyShape = {};
+sphereBodyShape['Hero'] = '0,0,472,40,0';
+sphereBodyShape['Hero Promo'] = '0,0,0,0,0';
 
 var resourceCostRegion = {};
 resourceCostRegion['Ally'] = '67,41,56,37';
@@ -269,6 +291,8 @@ translate['Enemy'] = {'English': 'Enemy', 'French': 'Ennemi', 'German': 'Gegner'
 translate['Event'] = {'English': 'Event', 'French': '\u00c9v\u00e9nement', 'German': 'Ereignis', 'Spanish': 'Evento', 'Polish': 'Wydarzenie', 'Italian': 'Evento',
 	'Portuguese': 'Evento'};
 translate['Hero'] = {'English': 'Hero', 'French': 'H\u00e9ros', 'German': 'Held', 'Spanish': 'H\u00e9roe', 'Polish': 'Bohater', 'Italian': 'Eroe',
+	'Portuguese': 'Her\u00f3i'};
+translate['Hero Promo'] = {'English': 'Hero', 'French': 'H\u00e9ros', 'German': 'Held', 'Spanish': 'H\u00e9roe', 'Polish': 'Bohater', 'Italian': 'Eroe',
 	'Portuguese': 'Her\u00f3i'};
 translate['Location'] = {'English': 'Location', 'French': 'Lieu', 'German': 'Ort', 'Spanish': 'Lugar', 'Polish': 'Obszar', 'Italian': 'Luogo',
 	'Portuguese': 'Localiza\u00e7\u00e3o'};
@@ -456,6 +480,7 @@ function run(progress, target, filename, icons) {
 					}
 
 					if ((cardType == 'Hero') && (card['Adventure'] + '' == 'Promo')) {
+						cardType = 'Hero Promo';
 						card['Sphere'] = 'Promo' + card['Sphere'];
 					}
 
@@ -544,6 +569,7 @@ function run(progress, target, filename, icons) {
 					}
 
 					if ((cardType == 'Hero') && (card['Adventure'] + '' == 'Promo')) {
+						cardType = 'Hero Promo';
 						card['BSphere'] = 'Promo' + card['BSphere'];
 					}
 
@@ -646,41 +672,20 @@ function run(progress, target, filename, icons) {
 				s.set('Option-style', 'WIDTH: SEMICONDENSED; FAMILY: {"Vafthrudnir"}');
 				s.set('EncounterSetNumber-style', 'WEIGHT: BOLD; FAMILY: {"Times New Roman"}');
 				s.set('Bottom-style', 'WEIGHT: BOLD; WIDTH: SEMICONDENSED; FAMILY: {"Times New Roman"}');
-				s.set('Type-pointsize', 7.25);
 				s.set('Adventure-pointsize', 5.25);
 				s.set('Cycle-pointsize', 5.6);
-				s.set('Option-pointsize', 5.25);
 				s.set('EncounterSetNumber-pointsize', 4);
-				s.set('Flavour-format', '<left></size></family><family "Times New Roman"><size 6.25><i>');
-				s.set('FlavourBack-format', '<left></size></family><family "Times New Roman"><size 6.25><i>');
 				s.set('Flavour-formatEnd', '</i></size></family>');
 				s.set('FlavourBack-formatEnd', '</i></size></family>');
 				s.set('Shadow-format', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
 					'<br><center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.5in>' +
 					'<br><left><image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005></size><size 7.5><i><br>');
 				s.set('Engagement-region', '76,48,36,25');
-				s.set('ThreatCost-region', '75,50,36,25');
-				s.set('Type-region', '136,504,141,20');
 				s.set('Engagement-tint', '32.0,1.0,0.9');
 				s.set('Progress-tint', '32.0,1.0,0.9');
 				s.set('HitPoints-tint', '0.0,0.8,1.0');
-				s.set('Sphere-Body-shape', '0,0,472,40,0');
 				s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
 				s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
-				if (landscapeTypes.indexOf(cardType) > -1) {
-					s.set('Artist-region', '130,375,100,15');
-					s.set('Copyright-region', '225,375,124,15');
-					s.set('Collection-portrait-clip-region', '391,376,12,12');
-					s.set('CollectionNumber-region', '403,375,18,15');
-					s.set('CollectionInfo-region', '419,375,20,15');
-				}
-				else {
-					s.set('Artist-region', '63,527,100,15');
-					s.set('Copyright-region', '158,527,124,15');
-					s.set('Collection-portrait-clip-region', '322,528,12,12');
-					s.set('CollectionNumber-region', '334,527,18,15');
-					s.set('CollectionInfo-region', '350,527,20,15');
-				}
 
 				if (cardType == 'Presentation') {
 					if (s.get('OptionRight').search('/') > -1) {
@@ -716,6 +721,7 @@ function run(progress, target, filename, icons) {
 					s.set('Name-region', '50,420,313,113');
 					s.set('PageIn-region', '48,488,317,15');
 					s.set('PageIn-format', '<right><bottom><family "Times New Roman"><size 7><b>');
+					s.set('CollectionInfo-region', '350,527,20,15');
 					s.set('LRL-IllustratorShort', ' ');
 					s.set('Artist', ' ');
 				}
@@ -760,6 +766,7 @@ function run(progress, target, filename, icons) {
 					s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
 					s.set('PageIn-region', '48,488,317,15');
 					s.set('PageIn-format', '<right><bottom><family "Times New Roman"><size 7><b>');
+					s.set('CollectionInfo-region', '350,527,20,15');
 				}
 				else if (cardType == 'Contract') {
 					s.set('Body-style', 'FOREGROUND: #000000; WIDTH: REGULAR; TRACKING: -0.005; FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5');
@@ -769,11 +776,21 @@ function run(progress, target, filename, icons) {
 					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.075 0.075>');
 					s.set('Body-lineTightness', 0.2);
 					s.set('Body-region', '65,313,283,176');
+					s.set('Flavour-format', '<left></size></family><family "Times New Roman"><size 6.25><i>');
+					s.set('FlavourBack-format', '<left></size></family><family "Times New Roman"><size 6.25><i>');
 					s.set('Side-region', '0,279,413,17');
 					s.set('Side-style', 'FAMILY: {"Vafthrudnir"}');
 					s.set('Side-pointsize', 3.52);
+					s.set('Type-pointsize', 7.25);
+					s.set('Type-region', '136,504,141,20');
 					s.set('SideA', updateVafthrudnir(translate['Side'][lang].toUpperCase() + ' A', 3.515, lang));
 					s.set('SideB', updateVafthrudnir(translate['Side'][lang].toUpperCase() + ' B', 3.515, lang));
+					s.set('Option-pointsize', 5.25);
+					s.set('Artist-region', '63,527,100,15');
+					s.set('Copyright-region', '158,527,124,15');
+					s.set('Collection-portrait-clip-region', '322,528,12,12');
+					s.set('CollectionNumber-region', '334,527,18,15');
+					s.set('CollectionInfo-region', '350,527,20,15');
 
 					if (card['BName']) {
 						s.set('Template', 'DoubleSided');
@@ -782,11 +799,46 @@ function run(progress, target, filename, icons) {
 						s.set('Template', 'Neutral');
 					}
 				}
+				else if (cardType == 'Hero Promo') {
+					s.set('Body-style', 'FOREGROUND: #000000; WIDTH: REGULAR; TRACKING: -0.005; FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 5.9');
+					s.set('Body-pointsize', 5.9);
+					s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size 5.9>');
+					s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size 5.9>');
+					s.set('Flavour-format', '<left></size></family><family "Times New Roman"><size 4.9><i>');
+					s.set('FlavourBack-format', '<left></size></family><family "Times New Roman"><size 4.9><i>');
+					s.set('Trait-format', '<center><width regular><tracking -0.005><family "Times New Roman"><size 6.5><i><b>');
+					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.075 0.075>');
+					s.set('Body-lineTightness', 0.2);
+					s.set('Type-pointsize', 3.625);
+					s.set('Type-region', '285,448,32,10');
+					s.set('TraitOut', 'true');
+					s.set('Option-pointsize', 4.1);
+					s.set('Artist-region', '79,510,88,12');
+					s.set('Copyright-region', '161,510,124,12');
+					s.set('Collection-portrait-clip-region', '305,511,9,9');
+					s.set('CollectionNumber-region', '314,510,18,12');
+					s.set('CollectionInfo-region', '326,510,20,12');
+					s.set('Bottom-colour', '#F0000000');
+					s.set('Bottom-pointsize', 3.5);
+					s.set('Bottom-stroke', 'Custom');
+					s.set('Bottom-stroke-colour', '#00000000');
+					s.set('Bottom-stroke-width', 1);
+
+					if (cardType in bodyRegion) {
+						s.set('TraitOut-Body-region', bodyRegion[cardType]);
+					}
+
+					if (cardType in traitRegion) {
+						s.set('TraitOut-Trait-region', traitRegion[cardType]);
+					}
+				}
 				else if (landscapeTypes.indexOf(cardType) > -1) {
 					s.set('Body-style', 'FOREGROUND: #000000; WIDTH: REGULAR; TRACKING: -0.005; FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7');
 					s.set('Body-pointsize', 7);
 					s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size 7>');
 					s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size 7>');
+					s.set('Flavour-format', '<left></size></family><family "Times New Roman"><size 6.25><i>');
+					s.set('FlavourBack-format', '<left></size></family><family "Times New Roman"><size 6.25><i>');
 					s.set('Trait-format', '<center><width regular><tracking -0.005><family "Times New Roman"><size 7.75><i><b>');
 					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.075 0.075>');
 					s.set('Body-lineTightness', 0.2);
@@ -799,6 +851,12 @@ function run(progress, target, filename, icons) {
 					s.set('EncounterSet3-portrait-clip-region', '402,213,20,20');
 					s.set('EncounterSet4-portrait-clip-region', '378,213,20,20');
 					s.set('EncounterSet5-portrait-clip-region', '354,213,20,20');
+					s.set('Option-pointsize', 5.25);
+					s.set('Artist-region', '130,375,100,15');
+					s.set('Copyright-region', '225,375,124,15');
+					s.set('Collection-portrait-clip-region', '391,376,12,12');
+					s.set('CollectionNumber-region', '403,375,18,15');
+					s.set('CollectionInfo-region', '419,375,20,15');
 
 					if (cardTrait) {
 						s.set('TraitOut', 'true');
@@ -821,10 +879,20 @@ function run(progress, target, filename, icons) {
 					s.set('Body-pointsize', 7.5);
 					s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
 					s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
+					s.set('Flavour-format', '<left></size></family><family "Times New Roman"><size 6.25><i>');
+					s.set('FlavourBack-format', '<left></size></family><family "Times New Roman"><size 6.25><i>');
 					s.set('Trait-format', '<center><width regular><tracking -0.005><family "Times New Roman"><size 8.25><i><b>');
 					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.075 0.075>');
 					s.set('Body-lineTightness', 0.2);
+					s.set('Type-pointsize', 7.25);
+					s.set('Type-region', '136,504,141,20');
 					s.set('TraitOut', 'true');
+					s.set('Option-pointsize', 5.25);
+					s.set('Artist-region', '63,527,100,15');
+					s.set('Copyright-region', '158,527,124,15');
+					s.set('Collection-portrait-clip-region', '322,528,12,12');
+					s.set('CollectionNumber-region', '334,527,18,15');
+					s.set('CollectionInfo-region', '350,527,20,15');
 
 					if (cardType == 'Campaign') {
 						if (cardType in bodyRegion) {
@@ -972,6 +1040,14 @@ function run(progress, target, filename, icons) {
 					s.set('Threat-region', threatRegion[cardType]);
 				}
 
+				if (cardType in threatCostRegion) {
+					s.set('ThreatCost-region', threatCostRegion[cardType]);
+				}
+
+				if (cardType in threatCostTint) {
+					s.set('ThreatCost-tint', threatCostTint[cardType]);
+				}
+
 				if (cardType in progressRegion) {
 					s.set('Progress-region', progressRegion[cardType]);
 				}
@@ -982,6 +1058,10 @@ function run(progress, target, filename, icons) {
 
 				if (cardType in cycleRegion) {
 					s.set('Cycle-region', cycleRegion[cardType]);
+				}
+
+				if (cardType in sphereBodyShape) {
+					s.set('Sphere-Body-shape', sphereBodyShape[cardType]);
 				}
 
 				if (cardType in resourceCostRegion) {
@@ -1315,7 +1395,7 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 		else {
 			lowerSize = 6.5;
 		}
-		if ((['Ally', 'Hero'].indexOf(cardType) > -1) && (vXml.length > 10) &&
+		if ((['Ally', 'Hero', 'Hero Promo'].indexOf(cardType) > -1) && (vXml.length > 10) &&
 			vXml.match(/^[\u00c0\u00c1\u00c2\u00c3\u00c4\u00c8\u00c9\u00ca\u00cb\u00cc\u00cd\u00ce\u00cf\u00d1\u00d2\u00d3\u00d4\u00d5\u00d6\u00d9\u00da\u00db\u00dc\u0106\u0108\u0143\u015a\u0179\u017b]/)) {
 			lowerSize = lowerSize * 0.8;
 			fixHeight = true;
