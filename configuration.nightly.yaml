@@ -38,7 +38,7 @@ db_destination_path: C:\Google Drive\A Long-extended Party\RenderedImages
 tts_destination_path: C:\Google Drive\A Long-extended Party\TTS
 
 # Remote DragnCards path to image folder
-dragncards_remote_image_path: /var/www/dragncards.com/dragncards/frontend/public/images/cards/
+dragncards_remote_image_path: /var/www/dragncards.com/dragncards/frontend/public/images/cards/English/
 
 # Remote DragnCards path to JSON folder
 dragncards_remote_json_path: /var/www/dragncards.com/dragncards/frontend/src/cardDB/ALeP/
