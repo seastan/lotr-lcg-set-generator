@@ -1729,14 +1729,6 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if card_name is None:
-            message = 'No card name for row #{}{}'.format(i, scratch)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-
         if (card_encounter_set is None and
                 (card_type in CARD_TYPES_ENCOUNTER_SET or
                  card_type_back in CARD_TYPES_ENCOUNTER_SET)):
@@ -1752,6 +1744,30 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                card_type_back is None)):
             message = 'Redundant encounter set for row #{}{}'.format(
                 i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_name is None:
+            message = 'No card name for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_name_back is not None and card_type_back is None:
+            message = 'Redundant card name back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_name_back is None and card_type_back is not None:
+            message = 'No card name back for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
@@ -1777,7 +1793,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if card_unique_back is not None and card_unique_back not in ('1', 1):
+        if card_unique_back is not None and card_type_back is None:
+            message = 'Redundant unique back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_unique_back is not None and card_unique_back not in ('1', 1):
             message = 'Incorrect format for unique back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -1863,7 +1887,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         if (card_sphere is None and
                 (card_type in CARD_TYPES_PLAYER_SPHERE or
                  card_type == 'Presentation')):
-            message = 'Missing sphere for row #{}{}'.format(i, scratch)
+            message = 'No sphere for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
@@ -1894,9 +1918,17 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             if card_type_back in CARD_TYPES_NIGHTMARE:
                 spheres_back.add('Nightmare')
 
-            if (card_sphere_back is None and
-                    card_type_back in CARD_TYPES_PLAYER_SPHERE):
-                message = 'Missing sphere back for row #{}{}'.format(i, scratch)
+            if card_sphere_back is not None and card_type_back is None:
+                message = 'Redundant sphere back for row #{}{}'.format(
+                    i, scratch)
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
+            elif (card_sphere_back is None and
+                  card_type_back in CARD_TYPES_PLAYER_SPHERE):
+                message = 'No sphere back for row #{}{}'.format(i, scratch)
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)
@@ -1935,7 +1967,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if card_traits_back is None and card_type_back in CARD_TYPES_TRAITS:
+        if card_traits_back is not None and card_type_back is None:
+            message = 'Redundant traits back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_traits_back is None and card_type_back in CARD_TYPES_TRAITS:
             message = 'No traits back for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -1988,9 +2027,18 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_keywords_back is not None and
-                card_type_back in CARD_TYPES_NO_KEYWORDS):
-            message = 'Redundant keywords back for row #{}{}'.format(i, scratch)
+        if card_keywords_back is not None and card_type_back is None:
+            message = 'Redundant keywords back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_keywords_back is not None and
+              card_type_back in CARD_TYPES_NO_KEYWORDS):
+            message = 'Redundant keywords back for row #{}{}'.format(
+                i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
@@ -2070,7 +2118,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if card_cost_back is None and card_type_back in CARD_TYPES_COST:
+        if card_cost_back is not None and card_type_back is None:
+            message = 'Redundant cost back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_cost_back is None and card_type_back in CARD_TYPES_COST:
             message = 'No cost back for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2163,8 +2218,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_engagement_back is None and
-                card_type_back in CARD_TYPES_ENGAGEMENT):
+        if card_engagement_back is not None and card_type_back is None:
+            message = 'Redundant engagement cost back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_engagement_back is None and
+              card_type_back in CARD_TYPES_ENGAGEMENT):
             message = 'No engagement cost back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -2228,7 +2291,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if card_threat_back is None and card_type_back in CARD_TYPES_THREAT:
+        if card_threat_back is not None and card_type_back is None:
+            message = 'Redundant threat back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_threat_back is None and card_type_back in CARD_TYPES_THREAT:
             message = 'No threat back for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2280,8 +2350,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_willpower_back is None and
-                card_type_back in CARD_TYPES_WILLPOWER):
+        if card_willpower_back is not None and card_type_back is None:
+            message = 'Redundant willpower back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_willpower_back is None and
+              card_type_back in CARD_TYPES_WILLPOWER):
             message = 'No willpower back for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2334,8 +2412,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_attack_back is None and
-                card_type_back in CARD_TYPES_COMBAT):
+        if card_attack_back is not None and card_type_back is None:
+            message = 'Redundant attack back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_attack_back is None and
+              card_type_back in CARD_TYPES_COMBAT):
             message = 'No attack back for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2388,8 +2473,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_defense_back is None and
-                card_type_back in CARD_TYPES_COMBAT):
+        if card_defense_back is not None and card_type_back is None:
+            message = 'Redundant defense back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_defense_back is None and
+              card_type_back in CARD_TYPES_COMBAT):
             message = 'No defense back for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2442,8 +2534,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_health_back is None and
-                card_type_back in CARD_TYPES_COMBAT):
+        if card_health_back is not None and card_type_back is None:
+            message = 'Redundant health back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_health_back is None and
+              card_type_back in CARD_TYPES_COMBAT):
             message = 'No health back for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2495,7 +2594,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_quest_back is None and (
+        if card_quest_back is not None and card_type_back is None:
+            message = 'Redundant quest points back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_quest_back is None and (
                 card_type_back in CARD_TYPES_QUEST
                 or card_type in CARD_TYPES_QUEST_BACK)):
             message = 'No quest points back for row #{}{}'.format(i, scratch)
@@ -2552,7 +2659,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if card_victory_back is not None and card_type_back == 'Rules':
+        if card_victory_back is not None and card_type_back is None:
+            message = 'Redundant victory points back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_victory_back is not None and card_type_back == 'Rules':
             if len(str(card_victory_back).split('/')) != 2:
                 message = ('Incorrect format for victory points back for row '
                            '#{}{}'.format(i, scratch))
@@ -2581,6 +2696,33 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
+        if card_special_icon_back is not None and card_type_back is None:
+            message = 'Redundant special icon back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_special_icon_back is not None and
+              card_special_icon_back.lower() not in SPECIAL_ICONS):
+            message = ('Incorrect format for special icon back for row #{}{}'
+                       .format(i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_special_icon_back is not None and
+              card_type_back not in CARD_TYPES_SPECIAL_ICON):
+            message = 'Redundant special icon back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
         if card_text is None and card_type in CARD_TYPES_TEXT:
             message = 'No text for row #{}{}'.format(i, scratch)
             logging.error(message)
@@ -2589,8 +2731,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_text_back is None and
-                card_type_back in CARD_TYPES_TEXT_BACK):
+        if card_text_back is not None and card_type_back is None:
+            message = 'Redundant text back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_text_back is None and
+              card_type_back in CARD_TYPES_TEXT_BACK):
             message = 'No text back for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2619,7 +2768,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if card_shadow_back is not None:
+        if card_shadow_back is not None and card_type_back is None:
+            message = 'Redundant shadow back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_shadow_back is not None:
             message = 'Redundant shadow back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -2636,8 +2792,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_flavour_back is not None and
-                card_type_back in CARD_TYPES_NO_FLAVOUR_BACK):
+        if card_flavour_back is not None and card_type_back is None:
+            message = 'Redundant flavour back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_flavour_back is not None and
+              card_type_back in CARD_TYPES_NO_FLAVOUR_BACK):
             message = 'Redundant flavour back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -2656,8 +2819,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_printed_number_back is not None and
-                card_type_back in CARD_TYPES_NO_PRINTED_NUMBER_BACK):
+        if card_printed_number_back is not None and card_type_back is None:
+            message = 'Redundant printed number back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_printed_number_back is not None and
+              card_type_back in CARD_TYPES_NO_PRINTED_NUMBER_BACK):
             message = 'Redundant printed number back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -2676,8 +2847,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_artist_back is not None and
-                card_type_back in CARD_TYPES_NO_ARTIST_BACK):
+        if card_artist_back is not None and card_type_back is None:
+            message = 'Redundant artist back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_artist_back is not None and
+              card_type_back in CARD_TYPES_NO_ARTIST_BACK):
             message = 'Redundant artist back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -2697,7 +2875,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_panx is None and
               (card_pany is not None or card_scale is not None)):
-            message = 'Missing panx for row #{}{}'.format(
+            message = 'No panx for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2705,8 +2883,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_panx_back is not None and
-                card_type_back in CARD_TYPES_NO_ARTWORK_BACK):
+        if card_panx_back is not None and card_type_back is None:
+            message = 'Redundant panx back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_panx_back is not None and
+              card_type_back in CARD_TYPES_NO_ARTWORK_BACK):
             message = 'Redundant panx back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -2716,7 +2901,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_panx_back is None and
               (card_pany_back is not None or card_scale_back is not None)):
-            message = 'Missing panx back for row #{}{}'.format(
+            message = 'No panx back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2735,7 +2920,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_pany is None and
               (card_panx is not None or card_scale is not None)):
-            message = 'Missing pany for row #{}{}'.format(
+            message = 'No pany for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2743,8 +2928,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_pany_back is not None and
-                card_type_back in CARD_TYPES_NO_ARTWORK_BACK):
+        if card_pany_back is not None and card_type_back is None:
+            message = 'Redundant pany back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_pany_back is not None and
+              card_type_back in CARD_TYPES_NO_ARTWORK_BACK):
             message = 'Redundant pany back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -2754,7 +2946,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_pany_back is None and
               (card_panx_back is not None or card_scale_back is not None)):
-            message = 'Missing pany back for row #{}{}'.format(
+            message = 'No pany back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2773,7 +2965,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_scale is None and
               (card_panx is not None or card_pany is not None)):
-            message = 'Missing scale for row #{}{}'.format(
+            message = 'No scale for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2781,8 +2973,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_scale_back is not None and
-                card_type_back in CARD_TYPES_NO_ARTWORK_BACK):
+        if card_scale_back is not None and card_type_back is None:
+            message = 'Redundant scale back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_scale_back is not None and
+              card_type_back in CARD_TYPES_NO_ARTWORK_BACK):
             message = 'Redundant scale back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -2792,7 +2991,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_scale_back is None and
               (card_panx_back is not None or card_pany_back is not None)):
-            message = 'Missing scale back for row #{}{}'.format(
+            message = 'No scale back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2819,25 +3018,6 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_special_icon_back is not None and
-                card_special_icon_back.lower() not in SPECIAL_ICONS):
-            message = ('Incorrect format for special icon back for row #{}{}'
-                       .format(i, scratch))
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-        elif (card_special_icon_back is not None and
-              card_type_back not in CARD_TYPES_SPECIAL_ICON):
-            message = 'Redundant special icon back for row #{}{}'.format(
-                i, scratch)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-
         if card_easy_mode is not None and not is_positive_int(card_easy_mode):
             message = ('Incorrect format for removed for easy mode for row '
                        '#{}{}'.format(i, scratch))
@@ -2857,7 +3037,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         if (card_back is not None and
                 (card_type in CARD_TYPES_DOUBLESIDE_MANDATORY or
-                 card_name_back is not None)):
+                 card_type_back is not None)):
             message = 'Redundant custom card back value for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
