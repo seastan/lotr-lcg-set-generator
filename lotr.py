@@ -3013,19 +3013,6 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     'No card ID %s in %s translations', card_id, lang)
                 continue
 
-            if card_type != TRANSLATIONS[lang][card_id].get(CARD_TYPE):
-                logging.error(
-                    'Incorrect card type for card '
-                    'ID %s in %s translations, row #%s', card_id,
-                    lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
-
-            if (card_type_back !=
-                    TRANSLATIONS[lang][card_id].get(BACK_PREFIX + CARD_TYPE)):
-                logging.error(
-                    'Incorrect card type back for card '
-                    'ID %s in %s translations, row #%s', card_id,
-                    lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
-
             if card_keywords:
                 keywords_translated = extract_keywords(
                     TRANSLATIONS[lang][card_id].get(CARD_KEYWORDS))
