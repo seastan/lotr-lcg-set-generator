@@ -318,7 +318,7 @@ When `tts` output is enabled in the configuration, `octgn_o8d` and `db` outputs 
 - `[lquot]`: unmatched left quote
 - `[rquot]`: unmatched right quote
 - `[lfquot]`: unmatched French left quote
-- `[rrquot]`: unmatched French right quote
+- `[rfquot]`: unmatched French right quote
 - `[quot]`: "
 - `[apos]`: '
 - `[hyphen]`: -
