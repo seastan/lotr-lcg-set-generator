@@ -1157,6 +1157,7 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
         if res:
             res = res.decode('utf-8')
             data = list(csv.reader(StringIO(res)))
+            none_index = data[0].index('')
         else:
             res_raw = get_content(url)
             res = res_raw.decode('utf-8')
@@ -1166,6 +1167,7 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
 
             try:
                 data = list(csv.reader(StringIO(res)))
+                none_index = data[0].index('')
             except Exception:  # pylint: disable=W0703
                 raise SheetError("Can't download {} from the Google Sheet"
                                  .format(sheet))
@@ -1173,7 +1175,6 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
             if conf['offline_mode']:
                 _save_content(url, res_raw, 'csv')
 
-        none_index = data[0].index('')
         data = [row[:none_index] for row in data]
         data = [[_fix_csv_value(v) for v in row] for row in data]
         while not any(data[-1]):
