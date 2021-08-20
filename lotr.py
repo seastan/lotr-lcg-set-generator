@@ -220,6 +220,10 @@ CARD_TYPES_NO_ARTIST = {'Presentation', 'Rules'}
 CARD_TYPES_NO_ARTIST_BACK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
 CARD_TYPES_NO_ARTWORK = {'Rules'}
 CARD_TYPES_NO_ARTWORK_BACK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
+CARD_TYPES_EASY_MODE = {'Encounter Side Quest', 'Enemy', 'Location',
+                        'Objective', 'Objective Ally', 'Objective Hero',
+                        'Objective Location', 'Ship Enemy', 'Ship Objective',
+                        'Treachery'}
 CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
                         'Objective Hero', 'Objective Location',
                         'Ship Objective', 'Quest'}
@@ -3131,7 +3135,17 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if card_easy_mode is not None and not is_positive_int(card_easy_mode):
+        if (card_easy_mode is not None and
+                card_type not in CARD_TYPES_EASY_MODE):
+            message = 'Redundant removed for easy mode for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_easy_mode is not None and
+              not is_positive_int(card_easy_mode)):
             message = ('Incorrect format for removed for easy mode for row '
                        '#{}{}'.format(i, scratch))
             logging.error(message)
@@ -3139,7 +3153,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif card_easy_mode is not None and card_easy_mode > card_quantity:
+        elif (card_easy_mode is not None and
+              is_positive_int(card_quantity) and
+              int(card_easy_mode) > int(card_quantity)):
             message = ('Removed for easy mode is greater than card quantity '
                        'for row #{}{}'.format(i, scratch))
             logging.error(message)
