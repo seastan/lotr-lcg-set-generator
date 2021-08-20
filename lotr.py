@@ -192,6 +192,9 @@ CARD_TYPES_VICTORY = {'Ally', 'Attachment', 'Encounter Side Quest', 'Enemy',
                       'Objective Location', 'Player Side Quest', 'Ship Enemy',
                       'Ship Objective', 'Treachery', 'Treasure'}
 CARD_TYPES_VICTORY_BACK = {'Quest'}
+CARD_TYPES_SPECIAL_ICON = {'Enemy', 'Location', 'Objective', 'Objective Ally',
+                           'Objective Location', 'Ship Enemy',
+                           'Ship Objective', 'Treachery'}
 CARD_TYPES_TEXT = {'Attachment', 'Campaign', 'Contract',
                    'Encounter Side Quest', 'Event', 'Hero', 'Location',
                    'Nightmare', 'Objective', 'Objective Ally',
@@ -217,9 +220,6 @@ CARD_TYPES_NO_ARTIST = {'Presentation', 'Rules'}
 CARD_TYPES_NO_ARTIST_BACK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
 CARD_TYPES_NO_ARTWORK = {'Rules'}
 CARD_TYPES_NO_ARTWORK_BACK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
-CARD_TYPES_SPECIAL_ICON = {'Enemy', 'Location', 'Objective', 'Objective Ally',
-                           'Objective Location', 'Ship Enemy',
-                           'Ship Objective', 'Treachery'}
 CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
                         'Objective Hero', 'Objective Location',
                         'Ship Objective', 'Quest'}
@@ -609,6 +609,26 @@ def _is_int(value):
             return True
 
         return False
+    except (TypeError, ValueError):
+        return False
+
+
+def _is_float(value):
+    """ Check whether a value is a float or not.
+    """
+    try:
+        value = float(value)
+        return True
+    except (TypeError, ValueError):
+        return False
+
+
+def _is_positive_float(value):
+    """ Check whether a value is a positive float or not.
+    """
+    try:
+        value = float(value)
+        return value > 0
     except (TypeError, ValueError):
         return False
 
@@ -2696,6 +2716,25 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
+        if (card_special_icon is not None and
+                card_special_icon.lower() not in SPECIAL_ICONS):
+            message = 'Incorrect format for special icon for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_special_icon is not None and
+              card_type not in CARD_TYPES_SPECIAL_ICON):
+            message = 'Redundant special icon for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
         if card_special_icon_back is not None and card_type_back is None:
             message = 'Redundant special icon back for row #{}{}'.format(
                 i, scratch)
@@ -2882,6 +2921,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif card_panx is not None and not _is_float(card_panx):
+            message = 'Incorrect format for panx for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if card_panx_back is not None and card_type_back is None:
             message = 'Redundant panx back for row #{}{}'.format(i, scratch)
@@ -2908,6 +2955,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif card_panx_back is not None and not _is_float(card_panx_back):
+            message = 'Incorrect format for panx back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if (card_pany is not None and
                 card_type in CARD_TYPES_NO_ARTWORK):
@@ -2921,6 +2976,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_pany is None and
               (card_panx is not None or card_scale is not None)):
             message = 'No pany for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_pany is not None and not _is_float(card_pany):
+            message = 'Incorrect format for pany for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2953,6 +3016,58 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif card_pany_back is not None and not _is_float(card_pany_back):
+            message = 'Incorrect format for pany back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_portrait_shadow is not None and
+                card_type not in CARD_TYPES_LANDSCAPE):
+            message = 'Redundant portrait shadow for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_portrait_shadow not in (None, 'Black'):
+            message = ('Incorrect format for portrait shadow for row #{}{}'
+                       .format(i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_portrait_shadow_back is not None and card_type_back is None:
+            message = 'Redundant portrait shadow back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        if (card_portrait_shadow_back is not None and
+                card_type_back not in CARD_TYPES_LANDSCAPE):
+            message = 'Redundant portrait shadow back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_portrait_shadow_back not in (None, 'Black'):
+            message = ('Incorrect format for portrait shadow back for row '
+                       '#{}{}'.format(i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if (card_scale is not None and
                 card_type in CARD_TYPES_NO_ARTWORK):
@@ -2966,6 +3081,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_scale is None and
               (card_panx is not None or card_pany is not None)):
             message = 'No scale for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_scale is not None and not _is_positive_float(card_scale):
+            message = 'Incorrect format for scale for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2998,19 +3121,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-
-        if (card_special_icon is not None and
-                card_special_icon.lower() not in SPECIAL_ICONS):
-            message = 'Incorrect format for special icon for row #{}{}'.format(
-                i, scratch)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-        elif (card_special_icon is not None and
-              card_type not in CARD_TYPES_SPECIAL_ICON):
-            message = 'Redundant special icon for row #{}{}'.format(
+        elif (card_scale_back is not None and
+              not _is_positive_float(card_scale_back)):
+            message = 'Incorrect format for scale back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:

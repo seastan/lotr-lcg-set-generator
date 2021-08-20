@@ -1095,10 +1095,10 @@ function run(progress, target, filename, icons) {
 				}
 
 				if (side == 'front') {
-					if (card['Portrait Shadow'] == 'Black') {
-						s.set('PortraitShadow', 'Black');
+					if (card['Portrait Shadow']) {
+						s.set('PortraitShadow', card['Portrait Shadow']);
 						if (cardType == 'Quest') {
-							s.set('PortraitBackShadow', 'Black');
+							s.set('PortraitBackShadow', card['Portrait Shadow']);
 						}
 					}
 					if (card['Artwork']) {
@@ -1136,8 +1136,8 @@ function run(progress, target, filename, icons) {
 					}
 				}
 				else {
-					if (card['BPortrait Shadow'] == 'Black') {
-						s.set('PortraitShadow', 'Black');
+					if (card['BPortrait Shadow']) {
+						s.set('PortraitShadow', card['BPortrait Shadow']);
 					}
 					if (card['BArtwork']) {
 						s.set('Portrait-external-path', 'project:imagesRaw/' + card['BArtwork']);
