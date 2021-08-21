@@ -1373,6 +1373,12 @@ def _update_data(data):
                 row[CARD_TYPE] == 'Rules'):
             row[CARD_QUANTITY] = 1
 
+        if row[CARD_TYPE] == 'Side Quest':
+            row[CARD_TYPE] = 'Encounter Side Quest'
+
+        if row[BACK_PREFIX + CARD_TYPE] == 'Side Quest':
+            row[BACK_PREFIX + CARD_TYPE] = 'Encounter Side Quest'
+
         if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_MANDATORY and
                 row[BACK_PREFIX + CARD_TYPE] is None):
             row[BACK_PREFIX + CARD_TYPE] = row[CARD_TYPE]
@@ -1380,12 +1386,6 @@ def _update_data(data):
         if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_MANDATORY and
                 row[CARD_SIDE_B] is None):
             row[CARD_SIDE_B] = row[CARD_NAME]
-
-        if row[CARD_TYPE] == 'Side Quest':
-            row[CARD_TYPE] = 'Encounter Side Quest'
-
-        if row[BACK_PREFIX + CARD_TYPE] == 'Side Quest':
-            row[BACK_PREFIX + CARD_TYPE] = 'Encounter Side Quest'
 
         row[BACK_PREFIX + CARD_NAME] = row[CARD_SIDE_B]
 
@@ -1519,6 +1519,8 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
         and int(row[CARD_NUMBER]) or 0,
         str(row[CARD_NUMBER]),
         str(row[CARD_NAME])))
+    card_types = {row[CARD_ID]: (row[CARD_TYPE], row[BACK_PREFIX + CARD_TYPE])
+                  for row in DATA}
 
     for lang in conf['languages']:
         if lang == 'English':
@@ -1528,11 +1530,15 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
         data = _read_sheet_json(lang)
         if data:
             data = _transform_to_dict(data)
+            _clean_data(data)
             for row in data:
                 row[CARD_SCRATCH] = None
+                if row[CARD_ID] in card_types:
+                    row[CARD_TYPE] = card_types[row[CARD_ID]][0]
+                    row[BACK_PREFIX + CARD_TYPE] = card_types[row[CARD_ID]][1]
 
-            _clean_data(data)
             _update_data(data)
+
             for row in data:
                 if row[CARD_ID] in TRANSLATIONS[lang]:
                     logging.error(
