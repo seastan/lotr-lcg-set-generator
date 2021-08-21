@@ -152,8 +152,6 @@ CARD_TYPES_DOUBLESIDE_OPTIONAL = {'Campaign', 'Contract', 'Nightmare',
 CARD_TYPES_PLAYER = {'Ally', 'Attachment', 'Contract', 'Event', 'Hero',
                      'Player Side Quest', 'Treasure'}
 CARD_TYPES_PLAYER_DECK = {'Ally', 'Attachment', 'Event', 'Player Side Quest'}
-CARD_TYPES_PLAYER_SPHERE = {'Ally', 'Attachment', 'Event', 'Hero',
-                            'Player Side Quest'}
 CARD_TYPES_ENCOUNTER_SIZE = {'Enemy', 'Location', 'Objective',
                              'Objective Ally', 'Objective Hero',
                              'Objective Location', 'Ship Enemy',
@@ -169,6 +167,8 @@ CARD_TYPES_UNIQUE = {'Hero', 'Objective Hero'}
 CARD_TYPES_NON_UNIQUE = {'Campaign', 'Contract', 'Event', 'Nightmare',
                          'Player Side Quest', 'Presentation', 'Quest', 'Rules',
                          'Treachery', 'Treasure'}
+CARD_TYPES_PLAYER_SPHERE = {'Ally', 'Attachment', 'Event', 'Hero',
+                            'Player Side Quest'}
 CARD_TYPES_TRAITS = {'Ally', 'Enemy', 'Hero', 'Location', 'Objective Ally',
                      'Objective Hero', 'Objective Location', 'Ship Enemy',
                      'Ship Objective', 'Treasure'}
@@ -224,9 +224,14 @@ CARD_TYPES_EASY_MODE = {'Encounter Side Quest', 'Enemy', 'Location',
                         'Objective', 'Objective Ally', 'Objective Hero',
                         'Objective Location', 'Ship Enemy', 'Ship Objective',
                         'Treachery'}
-CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
+CARD_TYPES_ADDITIONAL_ENCOUNTER_SETS = {'Quest'}
+CARD_TYPES_ADVENTURE = {'Campaign', 'Hero', 'Objective', 'Objective Ally',
                         'Objective Hero', 'Objective Location',
-                        'Ship Objective', 'Quest'}
+                        'Quest', 'Ship Objective'}
+CARD_TYPES_SUBTITLE = {'Campaign', 'Objective', 'Objective Ally',
+                       'Objective Hero', 'Objective Location',
+                       'Ship Objective', 'Quest'}
+CARD_TYPES_NO_ICON = {'Presentation', 'Rules'}
 CARD_TYPES_DECK_RULES = {'Nightmare', 'Quest'}
 CARD_TYPES_ONE_COPY = {'Campaign', 'Contract', 'Encounter Side Quest', 'Hero',
                        'Nightmare', 'Objective Hero', 'Presentation', 'Quest',
@@ -868,7 +873,7 @@ def extract_keywords(value):
     """ Extract all keywords from the string.
     """
     keywords = [k.strip() for k in str(value or '').replace(
-                '[inline]', '').split('.') if k != '']
+                '[inline]', '').split('.') if k.strip() != '']
     keywords = [re.sub(r' ([0-9]+)\[pp\]$', ' \\1 Per Player', k, re.I)
                 for k in keywords]
     return keywords
@@ -877,7 +882,8 @@ def extract_keywords(value):
 def _extract_traits(value):
     """ Extract all traits from the string.
     """
-    traits = [t.strip() for t in str(value or '').split('.') if t != '']
+    traits = [t.strip() for t in str(value or '').split('.')
+              if t.strip() != '']
     return traits
 
 
@@ -1637,7 +1643,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_special_icon_back = row[BACK_PREFIX + CARD_SPECIAL_ICON]
 
         card_easy_mode = row[CARD_EASY_MODE]
+        card_additional_encounter_sets = row[CARD_ADDITIONAL_ENCOUNTER_SETS]
         card_adventure = row[CARD_ADVENTURE]
+        card_icon = row[CARD_ICON]
         card_back = row[CARD_BACK]
         card_deck_rules = row[CARD_DECK_RULES]
         card_scratch = row[CARD_SCRATCH]
@@ -1990,6 +1998,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif (card_traits is not None and
+              card_traits.replace('.', '').replace(' ', '') == ''):
+            message = 'Incorrect traits for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if card_traits_back is not None and card_type_back is None:
             message = 'Redundant traits back for row #{}{}'.format(i, scratch)
@@ -2016,6 +2033,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_traits_back is not None and
               not card_traits_back.endswith('.')):
             message = 'Missing period in traits back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_traits_back is not None and
+              card_traits_back.replace('.', '').replace(' ', '') == ''):
+            message = 'Incorrect traits back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -3136,7 +3162,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
 
         if (card_easy_mode is not None and
-                card_type not in CARD_TYPES_EASY_MODE):
+                card_type not in CARD_TYPES_EASY_MODE and
+                (card_type_back not in CARD_TYPES_EASY_MODE or
+                 card_type_back is None)):
             message = 'Redundant removed for easy mode for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -3158,6 +3186,47 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
               int(card_easy_mode) > int(card_quantity)):
             message = ('Removed for easy mode is greater than card quantity '
                        'for row #{}{}'.format(i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_additional_encounter_sets is not None and
+                card_type not in CARD_TYPES_ADDITIONAL_ENCOUNTER_SETS):
+            message = ('Redundant additional encounter sets for row #{}{}'
+                       .format(i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_adventure is not None and
+                card_type not in CARD_TYPES_ADVENTURE and
+                (card_type_back not in CARD_TYPES_ADVENTURE or
+                 card_type_back is None)):
+            message = 'Redundant adventure for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_adventure is None and
+              (card_type in CARD_TYPES_SUBTITLE or
+               card_type_back in CARD_TYPES_SUBTITLE)):
+            message = 'No adventure for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_icon is not None and card_type in CARD_TYPES_NO_ICON:
+            message = 'Redundant collection icon for row #{}{}'.format(
+                i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
@@ -3323,47 +3392,6 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     'No card ID %s in %s translations', card_id, lang)
                 continue
 
-            if card_keywords:
-                keywords_translated = extract_keywords(
-                    TRANSLATIONS[lang][card_id].get(CARD_KEYWORDS))
-                keywords_original = extract_keywords(card_keywords)
-                if len(keywords_translated) != len(keywords_original):
-                    logging.error(
-                        'Incorrect number of keywords for card '
-                        'ID %s in %s translations, row #%s', card_id,
-                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
-
-            if card_keywords_back:
-                keywords_translated = extract_keywords(
-                    TRANSLATIONS[lang][card_id].get(
-                        BACK_PREFIX + CARD_KEYWORDS))
-                keywords_original = extract_keywords(card_keywords_back)
-                if len(keywords_translated) != len(keywords_original):
-                    logging.error(
-                        'Incorrect number of keywords back for card '
-                        'ID %s in %s translations, row #%s', card_id,
-                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
-
-            if card_traits:
-                traits_translated = _extract_traits(
-                    TRANSLATIONS[lang][card_id].get(CARD_TRAITS))
-                traits_original = _extract_traits(card_traits)
-                if len(traits_translated) != len(traits_original):
-                    logging.error(
-                        'Incorrect number of traits for card '
-                        'ID %s in %s translations, row #%s', card_id,
-                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
-
-            if card_traits_back:
-                traits_translated = _extract_traits(
-                    TRANSLATIONS[lang][card_id].get(BACK_PREFIX + CARD_TRAITS))
-                traits_original = _extract_traits(card_traits_back)
-                if len(traits_translated) != len(traits_original):
-                    logging.error(
-                        'Incorrect number of traits back for card '
-                        'ID %s in %s translations, row #%s', card_id,
-                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
-
             for key, value in TRANSLATIONS[lang][card_id].items():
                 if key not in TRANSLATED_COLUMNS:
                     continue
@@ -3371,18 +3399,83 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 if isinstance(value, str) and '[unmatched quot]' in value:
                     logging.error(
                         'Unmatched quote symbol in %s column for card '
-                        'ID %s in %s translations, row #%s', key, card_id,
+                        'ID %s in %s translations, row #%s',
+                        key.replace('Back_', 'Back '), card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                 if not value and row.get(key):
                     logging.error(
                         'Missing value for %s column for card '
-                        'ID %s in %s translations, row #%s', key, card_id,
+                        'ID %s in %s translations, row #%s',
+                        key.replace('Back_', 'Back '), card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
                 elif value and not row.get(key):
                     logging.error(
                         'Redundant value for %s column for card '
-                        'ID %s in %s translations, row #%s', key, card_id,
+                        'ID %s in %s translations, row #%s',
+                        key.replace('Back_', 'Back '), card_id,
+                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+            if card_traits is not None:
+                card_traits_tr = TRANSLATIONS[lang][card_id].get(
+                    CARD_TRAITS, '')
+                if (len(_extract_traits(card_traits_tr)) !=
+                        len(_extract_traits(card_traits))):
+                    logging.error(
+                        'Incorrect number of traits for card '
+                        'ID %s in %s translations, row #%s', card_id,
+                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                elif not card_traits_tr.endswith('.'):
+                    logging.error(
+                        'Missing period in traits for card '
+                        'ID %s in %s translations, row #%s', card_id,
+                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+            if card_traits_back is not None:
+                card_traits_back_tr = TRANSLATIONS[lang][card_id].get(
+                    BACK_PREFIX + CARD_TRAITS, '')
+                if (len(_extract_traits(card_traits_back_tr)) !=
+                        len(_extract_traits(card_traits_back))):
+                    logging.error(
+                        'Incorrect number of traits back for card '
+                        'ID %s in %s translations, row #%s', card_id,
+                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                elif not card_traits_back_tr.endswith('.'):
+                    logging.error(
+                        'Missing period in traits back for card '
+                        'ID %s in %s translations, row #%s', card_id,
+                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+            if card_keywords is not None:
+                card_keywords_tr = TRANSLATIONS[lang][card_id].get(
+                    CARD_KEYWORDS, '')
+                if (len(extract_keywords(card_keywords_tr)) !=
+                        len(extract_keywords(card_keywords))):
+                    logging.error(
+                        'Incorrect number of keywords for card '
+                        'ID %s in %s translations, row #%s', card_id,
+                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                elif not (card_keywords_tr.endswith('.') or
+                          card_keywords_tr.endswith('.[inline]')):
+                    logging.error(
+                        'Missing period in keywords for card '
+                        'ID %s in %s translations, row #%s', card_id,
+                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+            if card_keywords_back is not None:
+                card_keywords_back_tr = TRANSLATIONS[lang][card_id].get(
+                    BACK_PREFIX + CARD_KEYWORDS, '')
+                if (len(extract_keywords(card_keywords_back_tr)) !=
+                        len(extract_keywords(card_keywords_back))):
+                    logging.error(
+                        'Incorrect number of keywords back for card '
+                        'ID %s in %s translations, row #%s', card_id,
+                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                elif not (card_keywords_back_tr.endswith('.') or
+                          card_keywords_back_tr.endswith('.[inline]')):
+                    logging.error(
+                        'Missing period in keywords back for card '
+                        'ID %s in %s translations, row #%s', card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
     logging.info('')
@@ -4915,7 +5008,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
                          if card_type in CARD_TYPES_ENCOUNTER_SET
                          else row[CARD_ENCOUNTER_SET])
         subtitle = ((translated_row.get(CARD_ADVENTURE) or '')
-                    if card_type in CARD_TYPES_ADVENTURE
+                    if card_type in CARD_TYPES_SUBTITLE
                     else translated_row.get(CARD_ADVENTURE))
         if subtitle and card_type == 'Hero':
             subtitle = None
