@@ -1321,7 +1321,16 @@ def _clean_data(data):
     """
     for row in data:
         card_name = str(row.get(CARD_NAME) or '').strip()
+        if len(card_name) == 1:
+            card_name = card_name.upper()
+
         card_name_back = str(row.get(CARD_SIDE_B) or '').strip()
+        if len(card_name_back) == 1:
+            card_name_back = card_name_back.upper()
+
+        if not card_name_back:
+            card_name_back = card_name
+
         for key, value in row.items():
             if isinstance(value, str):
                 if key.startswith(BACK_PREFIX):
@@ -3408,6 +3417,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 if key not in TRANSLATED_COLUMNS:
                     continue
 
+                if key == CARD_ADVENTURE and card_type == 'Hero':
+                    continue
+
                 if isinstance(value, str) and '[unmatched quot]' in value:
                     logging.error(
                         'Unmatched quote symbol in %s column for card '
@@ -3489,6 +3501,26 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         'Missing period in keywords back for card '
                         'ID %s in %s translations, row #%s', card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+            if (card_victory is not None and
+                    (is_positive_or_zero_int(card_victory) or
+                     card_type in ('Presentation', 'Rules')) and
+                    card_victory !=
+                    TRANSLATIONS[lang][card_id].get(CARD_VICTORY, '')):
+                logging.error(
+                    'Incorrect victory points for card '
+                    'ID %s in %s translations, row #%s', card_id,
+                    lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+            if (card_victory_back is not None and
+                    (is_positive_or_zero_int(card_victory_back) or
+                     card_type == 'Rules') and
+                    card_victory_back != TRANSLATIONS[lang][card_id].get(
+                        BACK_PREFIX + CARD_VICTORY, '')):
+                logging.error(
+                    'Incorrect victory points back for card '
+                    'ID %s in %s translations, row #%s', card_id,
+                    lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
     logging.info('')
     if errors:
@@ -5788,6 +5820,9 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
         row_copy = row.copy()
         if lang != 'English' and TRANSLATIONS[lang].get(row[CARD_ID]):
             for key in TRANSLATED_COLUMNS:
+                if key == CARD_ADVENTURE and row[CARD_TYPE] == 'Hero':
+                    continue
+
                 row_copy[key] = TRANSLATIONS[lang][row[CARD_ID]][key]
 
         chosen_data.append(row_copy)
