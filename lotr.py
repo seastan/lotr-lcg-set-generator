@@ -3223,6 +3223,18 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif (((card_type == 'Hero' and
+                card_type_back not in CARD_TYPES_SUBTITLE) or
+               (card_type_back == 'Hero' and
+                card_type not in CARD_TYPES_SUBTITLE)) and
+              card_adventure not in (None, 'Promo')):
+            message = 'Incorrect format for adventure for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if card_icon is not None and card_type in CARD_TYPES_NO_ICON:
             message = 'Redundant collection icon for row #{}{}'.format(
@@ -5068,7 +5080,8 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
                 fix_linebreaks=fix_linebreaks
                 ).replace('\n', '\r\n').strip()
             if (card_type in ('Presentation', 'Rules') and
-                    translated_row.get(BACK_PREFIX + CARD_VICTORY) is not None):
+                    translated_row.get(BACK_PREFIX + CARD_VICTORY)
+                    is not None):
                 text_back = '{}\r\n\r\nPage {}'.format(
                     text_back, translated_row[BACK_PREFIX + CARD_VICTORY])
             text = '<b>Side A</b> {} <b>Side B</b> {}'.format(text, text_back)
