@@ -1476,7 +1476,35 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
     if data:
         data = _transform_to_dict(data)
         _clean_sets(data)
-        SETS.update({s[SET_ID]: s for s in data})
+        set_names = set()
+        for row in data:
+            if row[SET_ID] is None:
+                logging.error('No set ID for row #%s, skipping',
+                              row[ROW_COLUMN])
+                continue
+
+            if row[SET_ID] in SETS:
+                logging.error('Duplicate set ID for row #%s, skipping',
+                              row[ROW_COLUMN])
+                continue
+
+            if row[SET_NAME] is None:
+                logging.error('No set name for row #%s, skipping',
+                              row[ROW_COLUMN])
+                continue
+
+            if row[SET_NAME] in set_names:
+                logging.error('Duplicate set name for row #%s, skipping',
+                              row[ROW_COLUMN])
+                continue
+
+            if (row[SET_RINGSDB_CODE] is not None and
+                    not is_positive_or_zero_int(row[SET_RINGSDB_CODE])):
+                logging.error('Incorrect set ringsdb code for row #%s',
+                              row[ROW_COLUMN])
+
+            SETS[row[SET_ID]] = row
+            set_names.add(row[SET_NAME])
 
     if sheet_changes:
         data = _read_sheet_json(CARD_SHEET)
@@ -1501,26 +1529,27 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
             DATA.extend(data)
 
     DATA[:] = [row for row in DATA if not _skip_row(row)]
+    _clean_data(DATA)
 
     SELECTED_CARDS.update({row[CARD_ID] for row in DATA if row[CARD_SELECTED]})
     FOUND_SETS.update({row[CARD_SET] for row in DATA
-                       if row[CARD_SET] and not row[CARD_SCRATCH]})
-    scratch_sets = {row[CARD_SET] for row in DATA if row[CARD_SET]
-                    and row[CARD_SCRATCH]}
+                       if row[CARD_SET] and not row[CARD_SCRATCH] and
+                       row[CARD_SET] in SETS})
+    scratch_sets = {row[CARD_SET] for row in DATA
+                    if row[CARD_SET] and row[CARD_SCRATCH] and
+                    row[CARD_SET] in SETS}
     FOUND_INTERSECTED_SETS.update(FOUND_SETS.intersection(scratch_sets))
     FOUND_SCRATCH_SETS.update(scratch_sets.difference(FOUND_INTERSECTED_SETS))
 
-    _clean_data(DATA)
     _update_data(DATA)
-
+    card_types = {row[CARD_ID]: (row[CARD_TYPE], row[BACK_PREFIX + CARD_TYPE])
+                  for row in DATA}
     DATA[:] = sorted(DATA, key=lambda row: (
         row[CARD_SET_RINGSDB_CODE],
         is_positive_or_zero_int(row[CARD_NUMBER])
         and int(row[CARD_NUMBER]) or 0,
         str(row[CARD_NUMBER]),
         str(row[CARD_NAME])))
-    card_types = {row[CARD_ID]: (row[CARD_TYPE], row[BACK_PREFIX + CARD_TYPE])
-                  for row in DATA}
 
     for lang in conf['languages']:
         if lang == 'English':
@@ -1565,10 +1594,10 @@ def get_sets(conf, sheet_changes=True, scratch_changes=True):
             chosen_sets.add(row[SET_ID])
 
     if 'all' in conf['set_ids'] and sheet_changes:
-        chosen_sets.update(s for s in FOUND_SETS if s in SETS)
+        chosen_sets.update(s for s in FOUND_SETS)
 
     if 'all_scratch' in conf['set_ids'] and scratch_changes:
-        chosen_sets.update(s for s in FOUND_SCRATCH_SETS if s in SETS)
+        chosen_sets.update(s for s in FOUND_SCRATCH_SETS)
 
     chosen_sets = list(chosen_sets)
     chosen_sets = [s for s in chosen_sets if s not in conf['ignore_set_ids']]
@@ -3937,7 +3966,7 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
     root = ET.fromstring(SET_XML_TEMPLATE)
     root.set('name', str(set_name))
     root.set('id', str(set_id))
-    root.set('version', str(SETS[set_id][SET_VERSION]))
+    root.set('version', str(SETS[set_id][SET_VERSION] or 0))
     cards = root.findall("./cards")[0]
 
     chosen_data = []
