@@ -19,9 +19,8 @@ def main(conf=None):  # pylint: disable=R0912,R0915
     """
     timestamp = time.time()
 
-    if not os.path.exists(lotr.RUN_BEFORE_SE_STARTED_PATH):
-        with open(lotr.RUN_BEFORE_SE_STARTED_PATH, 'w'):
-            pass
+    with open(lotr.RUN_BEFORE_SE_STARTED_PATH, 'w'):
+        pass
 
     if os.path.exists(lotr.PROJECT_CREATED_PATH):
         os.remove(lotr.PROJECT_CREATED_PATH)
@@ -38,18 +37,21 @@ def main(conf=None):  # pylint: disable=R0912,R0915
         logging.info('The previous update did not succeed, setting '
                      '"reprocess_all" to "true" for this run')
 
-    with open(lotr.PIPELINE_STARTED_PATH, 'w'):
-        pass
-
     sheet_changes, scratch_changes = lotr.download_sheet(conf)
     if not conf['exit_if_no_spreadsheet_changes']:
         sheet_changes = True
         scratch_changes = True
 
     if not sheet_changes and not scratch_changes:
+        if os.path.exists(lotr.RUN_BEFORE_SE_STARTED_PATH):
+            os.remove(lotr.RUN_BEFORE_SE_STARTED_PATH)
+
         logging.info('No spreadsheet changes, exiting')
         logging.info('Done (%ss)', round(time.time() - timestamp, 3))
         return (sheet_changes, scratch_changes)
+
+    with open(lotr.PIPELINE_STARTED_PATH, 'w'):
+        pass
 
     lotr.extract_data(conf, sheet_changes, scratch_changes)
     sets = lotr.get_sets(conf, sheet_changes, scratch_changes)

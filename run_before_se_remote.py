@@ -2,6 +2,7 @@
 """
 import logging
 import os
+import time
 import uuid
 
 import yaml
@@ -11,6 +12,7 @@ import run_before_se
 
 
 LOG_FILE = 'run_before_se_remote.log'
+RETRY_SLEEP_TIME = 300
 
 
 def init_logging():
@@ -33,9 +35,17 @@ def run():
     try:
         run_before_se.main()
     except Exception as exc:  # pylint: disable=W0703
-        message = 'Script failed: {}: {}'.format(
+        message = 'Script failed, retrying: {}: {}'.format(
             type(exc).__name__, str(exc))[:LOG_LIMIT]
         logging.exception(message)
+        time.sleep(RETRY_SLEEP_TIME)
+
+        try:
+            run_before_se.main()
+        except Exception as exc:  # pylint: disable=W0703
+            message = 'Script failed, exiting: {}: {}'.format(
+                type(exc).__name__, str(exc))[:LOG_LIMIT]
+            logging.exception(message)
     finally:
         logging.info('Finished: %s', execution_id)
         logging.info('')
