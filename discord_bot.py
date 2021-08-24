@@ -1040,6 +1040,26 @@ async def get_artwork_files(set_id):
     return filenames
 
 
+def format_diffs(old_value, new_value):
+    """ Format differences.
+    """
+    old_lines = old_value.strip().split('\n')
+    new_lines = new_value.strip().split('\n')
+    max_length = max(len(old_lines), len(new_lines))
+    for i in range(max_length):
+        if i >= len(old_lines):
+            new_lines[i] = '+ {}'.format(new_lines[i])
+        elif i >= len(new_lines):
+            old_lines[i] = '- {}'.format(old_lines[i])
+        elif old_lines[i] != new_lines[i]:
+            old_lines[i] = '- {}'.format(old_lines[i])
+            new_lines[i] = '+ {}'.format(new_lines[i])
+
+    old_value = '\n'.join(old_lines).strip() or ' '
+    new_value = '\n'.join(new_lines).strip() or ' '
+    return old_value, new_value
+
+
 def clear_rendered_images():
     """ Clear old rendered images from the local disk.
     """
@@ -1642,43 +1662,9 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                                                   lotr.BACK_PREFIX, '[Back] ')
                     diff[1] = str(diff[1]) if diff[1] is not None else ''
                     diff[2] = str(diff[2]) if diff[2] is not None else ''
-
-                    if not diff[1].strip():
-                        diff[1] = '```\n ```'
-                        new_lines = diff[2].strip().split('\n')
-                        diff[2] = '```diff\n{}```'.format(
-                            '\n'.join('+ {}'.format(r)
-                                      for r in new_lines).strip())
-                        continue
-
-                    if not diff[2].strip():
-                        old_lines = diff[1].strip().split('\n')
-                        diff[1] = '```diff\n{}```'.format(
-                            '\n'.join('- {}'.format(r)
-                                      for r in old_lines).strip())
-                        diff[2] = '```\n ```'
-                        continue
-
-                    old_lines = diff[1].strip().split('\n')
-                    new_lines = diff[2].strip().split('\n')
-                    max_length = max(len(old_lines), len(new_lines))
-                    for i in range(max_length):
-                        if i >= len(old_lines):
-                            new_lines[i] = '+ {}'.format(
-                                new_lines[i])
-                        elif i >= len(new_lines):
-                            old_lines[i] = '- {}'.format(
-                                old_lines[i])
-                        elif old_lines[i] != new_lines[i]:
-                            old_lines[i] = '- {}'.format(
-                                old_lines[i])
-                            new_lines[i] = '+ {}'.format(
-                                new_lines[i])
-
-                    diff[1] = '```diff\n{}\n```'.format(
-                        '\n'.join(old_lines).strip())
-                    diff[2] = '```diff\n{}\n```'.format(
-                        '\n'.join(new_lines).strip())
+                    diff[1], diff[2] = format_diffs(diff[1], diff[2])
+                    diff[1] = '```diff\n{}\n```'.format(diff[1])
+                    diff[2] = '```diff\n{}\n```'.format(diff[2])
 
                 diffs = [
                     '**{}**\n\xa0\xa0\xa0\xa0\xa0OLD\n{}\xa0\xa0\xa0\xa0\xa0NEW\n{}'
