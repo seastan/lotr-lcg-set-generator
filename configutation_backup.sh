@@ -9,4 +9,5 @@ fi
 
 cp configuration.yaml "$FOLDER"
 cp discord.yaml "$FOLDER"
+cp links_backup.json "$FOLDER"
 cp mpc_monitor.json "$FOLDER"

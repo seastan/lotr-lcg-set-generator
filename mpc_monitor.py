@@ -677,10 +677,7 @@ def monitor():
         with open(CONF_PATH, 'r') as fobj:
             data = json.load(fobj)
     except Exception:
-        message = 'No configuration found'
-        logging.error(message)
-        create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
-        return
+        raise ConfigurationError('No configuration found')
 
     if not data.get('cookies'):
         raise ConfigurationError('No cookies found')

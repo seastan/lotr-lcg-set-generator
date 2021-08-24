@@ -26,6 +26,7 @@ urlCache/*.cache
 configuration.yaml
 discord.yaml
 id_rsa
+links_backup.json
 makeCards_FINISHED
 monitor_discord_changes_TRIGGERED
 mpc_monitor.json

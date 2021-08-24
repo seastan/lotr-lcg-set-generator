@@ -14,14 +14,15 @@ import uuid
 import requests
 
 
+CONF_PATH = 'links_backup.json'
 ERROR_SUBJECT = 'LotR ALeP Links Backup Error'
 MAILS_PATH = 'mails'
-DOCS = {'faq': '10vofbe-ih_m_gDSPPCDvVIH3Pa_IxZKsj-iYZnpnssI'}
-SHEETS = {'master': '16NnATw8C5iZ6gGTs5ZWmZmgrbbEoWJAc4PKBp72DGis',
-          'player_card': '1_Vm_EqnwL9sCd-0H_lk6CS4HmmKNRSA8J7As3Fu7_NM',
-          'encounter_card': '14tIyb3vDTLYj7oKDp3DT77DKrtp8x02QG9qYQGDbd0c'}
-
 MAX_FILES = 5
+
+
+class ConfigurationError(Exception):
+    """ Configuration error.
+    """
 
 
 def is_non_ascii(value):
@@ -46,7 +47,7 @@ def create_mail(subject, body=''):
         json.dump({'subject': subject, 'body': body, 'html': True}, fobj)
 
 
-def backup_doc(backup_path, name):
+def backup_doc(backup_path, name, doc_id):
     """ Backup a Google Doc.
     """
     filenames = sorted([os.path.join(backup_path, f)
@@ -57,7 +58,7 @@ def backup_doc(backup_path, name):
                      else '')
 
     url = ('https://docs.google.com/document/u/0/export?format=docx&id={}'
-           .format(DOCS[name]))
+           .format(doc_id))
     content = requests.get(url).content
     new_checksum = hashlib.md5(content).hexdigest()
     if new_checksum == last_checksum:
@@ -77,7 +78,7 @@ def backup_doc(backup_path, name):
         os.remove(filename)
 
 
-def backup_sheet(backup_path, name):
+def backup_sheet(backup_path, name, sheet_id):
     """ Backup a Google Sheet.
     """
     filenames = sorted([os.path.join(backup_path, f)
@@ -88,7 +89,7 @@ def backup_sheet(backup_path, name):
                      else '')
 
     url = ('https://docs.google.com/spreadsheets/d/{}/export?format=xlsx'
-           .format(SHEETS[name]))
+           .format(sheet_id))
     content = requests.get(url).content
     new_checksum = hashlib.md5(content).hexdigest()
     if new_checksum == last_checksum:
@@ -111,11 +112,17 @@ def backup_sheet(backup_path, name):
 def main(backup_path):
     """ Main function.
     """
-    for name in DOCS:
-        backup_doc(backup_path, name)
+    try:
+        with open(CONF_PATH, 'r') as fobj:
+            data = json.load(fobj)
+    except Exception:
+        raise ConfigurationError('No configuration found')
 
-    for name in SHEETS:
-        backup_sheet(backup_path, name)
+    for name in data['docs']:
+        backup_doc(backup_path, name, data['docs'][name])
+
+    for name in data['sheets']:
+        backup_sheet(backup_path, name, data['sheets'][name])
 
 
 if __name__ == '__main__':

@@ -202,7 +202,8 @@ Additional steps:
 
 2. Create `discord.yaml` (see `discord.default.yaml`).
 
-3. Create `mpc_monitor.json` (see `mpc_monitor.default.json`).
+3. Create `mpc_monitor.json` (see `mpc_monitor.default.json`) and `links_backup.json`
+(see `links_backup.default.json`).
 
 4. Setup rclone:
 
