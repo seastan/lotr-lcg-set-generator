@@ -202,8 +202,8 @@ Additional steps:
 
 2. Create `discord.yaml` (see `discord.default.yaml`).
 
-3. Create `mpc_monitor.json` (see `mpc_monitor.default.json`) and `links_backup.json`
-(see `links_backup.default.json`).
+3. Create `mpc_monitor.json` (see `mpc_monitor.default.json`) and `scheduled_backup.json`
+(see `scheduled_backup.default.json`).
 
 4. Setup rclone:
 
@@ -230,7 +230,7 @@ Additional steps:
   - `0 8 * * 1    <path>/remind_backup.sh >> <path>/cron.log 2>&1`
   - `5 8 1 * *    <path>/remind_backup_monthly.sh >> <path>/cron.log 2>&1`
   - `*/2 * * * *  <path>/monitor_discord_changes.sh >> <path>/cron.log 2>&1`
-  - `19 8 * * *   <path>/links_backup.sh "<local A Long-extended Party/Links Backup path>" >> <path>/cron.log 2>&1`
+  - `19 8 * * *   <path>/scheduled_backup.sh "<local A Long-extended Party/Links Backup path>" >> <path>/cron.log 2>&1`
   - `7 1 * * *    <path>/configutation_backup.sh "<path to a local configuration backup folder>" >> <path>/cron.log 2>&1`
 
     Replace `<path>` with the absolute path to the root folder.  `cron.log` may be located either in the root folder

@@ -26,7 +26,6 @@ urlCache/*.cache
 configuration.yaml
 discord.yaml
 id_rsa
-links_backup.json
 makeCards_FINISHED
 monitor_discord_changes_TRIGGERED
 mpc_monitor.json
@@ -38,6 +37,7 @@ run_setup.bat
 run_cleanup.bat
 runBeforeSE_STARTED
 sanity_check.txt
+scheduled_backup.json
 setGenerator.seproject
 setGenerator_CREATED
 sheets.json
