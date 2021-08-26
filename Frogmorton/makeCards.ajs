@@ -41,7 +41,7 @@ bodyRegion['Campaign'] = '56,277,301,211';
 bodyRegion['Enemy'] = '57,377,299,114';
 bodyRegion['Event'] = '65,351,283,140';
 bodyRegion['Hero'] = '57,377,299,114';
-bodyRegion['Hero Promo'] = '78,467,259,40';
+bodyRegion['Hero Promo'] = '78,467,259,45';
 bodyRegion['Location'] = '56,346,301,142';
 bodyRegion['Objective'] = '65,355,283,137';
 bodyRegion['Objective Ally'] = '65,355,283,137';
@@ -812,7 +812,14 @@ function run(progress, target, filename, icons) {
 					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.075 0.075>');
 					s.set('Body-lineTightness', 0.2);
 					s.set('Type-pointsize', 3.625);
-					s.set('Type-region', '285,448,32,10');
+
+					if (translate[cardType][lang].length > 4) {
+						s.set('Type-region', '279,448,39,15');
+					}
+					else {
+						s.set('Type-region', '285,448,32,15');
+					}
+
 					s.set('TraitOut', 'true');
 					s.set('Option-pointsize', 4.1);
 					s.set('Artist-region', '79,510,88,12');
@@ -827,7 +834,12 @@ function run(progress, target, filename, icons) {
 					s.set('Bottom-stroke-width', 1);
 
 					if (cardType in bodyRegion) {
-						s.set('TraitOut-Body-region', bodyRegion[cardType]);
+						if (lang == 'German') {
+							s.set('TraitOut-Body-region', '73,467,269,45');
+						}
+						else {
+							s.set('TraitOut-Body-region', bodyRegion[cardType]);
+						}
 					}
 
 					if (cardType in traitRegion) {
