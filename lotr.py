@@ -7795,12 +7795,16 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
 
             break
 
-    if lang == 'English':
+    if lang == 'English':  # pylint: disable=R1702
         cards = {}
         for row in card_data:
             if row[CARD_SET] == set_id and _needed_for_ringsdb(row):
                 card_number = str(_handle_int(row[CARD_NUMBER])).zfill(3)
-                cards[card_number] = _ringsdb_code(row)
+                code = _ringsdb_code(row)
+                cards[card_number] = [code]
+                if (row[CARD_TYPE] == 'Ally' and row[CARD_UNIQUE] and
+                        row[CARD_SPHERE] != 'Neutral'):
+                    cards[card_number].append('99{}'.format(code))
 
         pairs = []
         if cards and known_filenames:
@@ -7809,9 +7813,9 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                     card_number = filename[:3]
                     if card_number in cards:
                         suffix = '-2' if filename.endswith('-2.png') else ''
-                        pairs.append((
-                            filename,
-                            '{}{}.png'.format(cards[card_number], suffix)))
+                        for code in cards[card_number]:
+                            pairs.append((filename, '{}{}.png'.format(
+                                code, suffix)))
 
                 break
 
