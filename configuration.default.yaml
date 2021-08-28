@@ -104,13 +104,13 @@ upload_dragncards: false
 # DragnCards hostname (username@hostname)
 dragncards_hostname: ***
 
-# Updating test.ringsdb.com
+# Updating ringsdb.com
 update_ringsdb: false
 
-# test.ringsdb.com URL
-ringsdb_url: https://test.ringsdb.com
+# ringsdb.com URL
+ringsdb_url:
 
-# test.ringsdb.com session id: <PHPSESSID>|<REMEMBERME>
+# ringsdb.com session id: <PHPSESSID>|<REMEMBERME>
 ringsdb_sessionid:
 
 # List of image outputs

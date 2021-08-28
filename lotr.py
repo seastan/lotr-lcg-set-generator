@@ -9170,9 +9170,9 @@ def upload_dragncards(conf, sets, updated_sets):
 
 
 def update_ringsdb(conf, sets):
-    """ Update test.ringsdb.com.
+    """ Update ringsdb.com.
     """
-    logging.info('Updating test.ringsdb.com...')
+    logging.info('Updating ringsdb.com...')
     timestamp = time.time()
 
     try:
@@ -9215,7 +9215,7 @@ def update_ringsdb(conf, sets):
             data={'code': SETS[set_id][SET_HOB_CODE], 'name': set_name})
         res = res.content.decode('utf-8')
         if res != 'Done':
-            raise RingsDBError('Error uploading {} to test.ringsdb.com: {}'
+            raise RingsDBError('Error uploading {} to ringsdb.com: {}'
                                .format(set_name, res[:LOG_LIMIT]))
 
         cookies = session.cookies.get_dict()
@@ -9225,7 +9225,7 @@ def update_ringsdb(conf, sets):
         with open(RINGSDB_JSON_PATH, 'w') as fobj:
             json.dump(checksums, fobj)
 
-    logging.info('...Updating test.ringsdb.com (%ss)',
+    logging.info('...Updating ringsdb.com (%ss)',
                  round(time.time() - timestamp, 3))
 
 

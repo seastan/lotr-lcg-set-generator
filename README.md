@@ -125,9 +125,9 @@ for details).
   - `spanishdb_csv`: creating CSV files for the Spanish database susurrosdelbosqueviejo.com (true or false)
   - `upload_dragncards`: uploading outputs to DragnCards (true or false)
   - `dragncards_hostname`: DragnCards hostname (username@hostname)
-  - `update_ringsdb`: updating test.ringsdb.com (true or false)
-  - `ringsdb_url`: test.ringsdb.com URL
-  - `ringsdb_sessionid`: test.ringsdb.com session ID
+  - `update_ringsdb`: updating ringsdb.com (true or false)
+  - `ringsdb_url`: ringsdb.com URL
+  - `ringsdb_sessionid`: ringsdb.com session ID
   - `outputs`: list of image outputs for each language (if you added or uncommented new outputs, you also need to set `reprocess_all` to `true`)
 
 For debugging purposes, you may add an additional value:

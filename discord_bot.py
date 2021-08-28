@@ -783,8 +783,8 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
                        else '*Deck Rules*:\n```{}```\n'.format(deck_rules))
 
     if card.get(lotr.CARD_RINGSDB_CODE):
-        ringsdb_url = '<https://test.ringsdb.com/card/{}>\n'.format(
-            card[lotr.CARD_RINGSDB_CODE])
+        ringsdb_url = '<{}/card/{}>\n'.format(
+            CONF.get('ringsdb_url'), card[lotr.CARD_RINGSDB_CODE])
     else:
         ringsdb_url = ''
 
