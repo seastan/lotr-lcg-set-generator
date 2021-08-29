@@ -1,6 +1,9 @@
 # Discord Webhook URL
 webhook_url: 
 
+# ringsdb.com URL
+ringsdb_url: 
+
 # Discord token
 token: 
 
