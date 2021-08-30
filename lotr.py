@@ -1508,7 +1508,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
             SETS[row[SET_ID]] = row
             set_names.add(row[SET_NAME])
 
-    if sheet_changes:
+    if sheet_changes or scratch_changes:
         data = _read_sheet_json(CARD_SHEET)
         if data:
             CARD_COLUMNS.update(_extract_column_names(data[0]))
