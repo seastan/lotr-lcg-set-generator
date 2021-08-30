@@ -3786,8 +3786,9 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
             channel_changes.append(('rename', (diff[0][0], diff[1][0])))
 
     set_names = [SETS[set_id][SET_NAME] for set_id in FOUND_SETS]
-    set_codes = {SETS[set_id][SET_HOB_CODE].lower():SETS[set_id][SET_NAME]
-                 for set_id in FOUND_SETS}
+    set_codes = {
+        (SETS[set_id][SET_HOB_CODE] or '').lower():SETS[set_id][SET_NAME]
+        for set_id in FOUND_SETS}
     output = {'url': url,
               'sets': set_names,
               'set_codes': set_codes,
