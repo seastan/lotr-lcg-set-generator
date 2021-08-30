@@ -195,17 +195,19 @@ CARD_TYPES_VICTORY_BACK = {'Quest'}
 CARD_TYPES_SPECIAL_ICON = {'Enemy', 'Location', 'Objective', 'Objective Ally',
                            'Objective Location', 'Ship Enemy',
                            'Ship Objective', 'Treachery'}
-CARD_TYPES_TEXT = {'Attachment', 'Campaign', 'Contract',
-                   'Encounter Side Quest', 'Event', 'Hero', 'Location',
-                   'Nightmare', 'Objective', 'Objective Ally',
-                   'Objective Hero', 'Objective Location', 'Player Side Quest',
-                   'Presentation', 'Rules', 'Ship Enemy', 'Ship Objective',
-                   'Treasure'}
-CARD_TYPES_TEXT_BACK = {'Attachment', 'Campaign', 'Encounter Side Quest',
-                        'Event', 'Hero', 'Location', 'Nightmare', 'Objective',
-                        'Objective Ally', 'Objective Hero',
-                        'Objective Location', 'Player Side Quest', 'Quest',
-                        'Ship Enemy', 'Ship Objective', 'Treasure'}
+CARD_TYPES_TEXT = {}
+#CARD_TYPES_TEXT = {'Attachment', 'Campaign', 'Contract',
+#                   'Encounter Side Quest', 'Event', 'Hero', 'Location',
+#                   'Nightmare', 'Objective', 'Objective Ally',
+#                   'Objective Hero', 'Objective Location', 'Player Side Quest',
+#                   'Presentation', 'Rules', 'Ship Enemy', 'Ship Objective',
+#                   'Treasure'}
+CARD_TYPES_TEXT_BACK = {}
+#CARD_TYPES_TEXT_BACK = {'Attachment', 'Campaign', 'Encounter Side Quest',
+#                        'Event', 'Hero', 'Location', 'Nightmare', 'Objective',
+#                        'Objective Ally', 'Objective Hero',
+#                        'Objective Location', 'Player Side Quest', 'Quest',
+#                        'Ship Enemy', 'Ship Objective', 'Treasure'}
 CARD_TYPES_NO_TEXT_BACK = {'Presentation'}
 CARD_TYPES_SHADOW = {'Enemy', 'Location', 'Objective', 'Objective Ally',
                      'Objective Hero', 'Objective Location', 'Ship Enemy',
