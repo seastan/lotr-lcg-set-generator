@@ -232,7 +232,7 @@ CARD_TYPES_ADVENTURE = {'Campaign', 'Hero', 'Objective', 'Objective Ally',
                         'Quest', 'Ship Objective'}
 CARD_TYPES_SUBTITLE = {'Campaign', 'Objective', 'Objective Ally',
                        'Objective Hero', 'Objective Location',
-                       'Ship Objective', 'Quest'}
+                       'Quest', 'Ship Objective'}
 CARD_TYPES_NO_ICON = {'Presentation', 'Rules'}
 CARD_TYPES_DECK_RULES = {'Nightmare', 'Quest'}
 CARD_TYPES_ONE_COPY = {'Campaign', 'Contract', 'Encounter Side Quest', 'Hero',
@@ -3337,8 +3337,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_deck_rules is not None and
-              ((card_type == 'Quest' and card_adventure) or
-               card_type == 'Nightmare')):
+                card_type in CARD_TYPES_DECK_RULES):
             quest_id = (set_id, card_adventure or card_name)
             if quest_id in deck_rules:
                 message = (
@@ -4365,8 +4364,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
 
     rows = [row for row in DATA
             if row[CARD_SET] == set_id
-            and ((row[CARD_TYPE] == 'Quest' and row[CARD_ADVENTURE])
-                 or row[CARD_TYPE] == 'Nightmare')
+            and row[CARD_TYPE] in CARD_TYPES_DECK_RULES
             and row[CARD_DECK_RULES]
             and (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)]
 
@@ -4394,6 +4392,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
     new_quests = []
     for quest in quests:
         parts = str(quest['rules']).split('\n\n')
+        parts = [part for part in parts if part]
         if len(parts) > 1:
             quest['rules'] = parts.pop(0)
             for part in parts:
@@ -4410,9 +4409,6 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
         create_folder(output_path)
 
     for quest in quests:
-        if not quest['rules']:
-            continue
-
         rules_list = [r.strip().split(':', 1)
                       for r in str(quest['rules']).split('\n')]
         rules_list = [(r[0].lower().strip(),
