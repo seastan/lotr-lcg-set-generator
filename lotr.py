@@ -3337,7 +3337,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_deck_rules is not None and
-                card_type in CARD_TYPES_DECK_RULES):
+              card_type in CARD_TYPES_DECK_RULES):
             quest_id = (set_id, card_adventure or card_name)
             if quest_id in deck_rules:
                 message = (
@@ -4435,10 +4435,8 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
             quest['prefix'] = rules[('prefix', 0)][0] + ' '
             quest['prefix'] = quest['prefix'][:6].upper() + quest['prefix'][6:]
 
-        if not quest['prefix']:
-            continue
-
-        if not re.match(DECK_PREFIX_REGEX, quest['prefix']):
+        if (not quest['prefix'] or
+                not re.match(DECK_PREFIX_REGEX, quest['prefix'])):
             continue
 
         if rules.get(('sets', 0)):
@@ -4541,6 +4539,7 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
             for section in (quest_cards, second_quest_cards):
                 section.sort(key=lambda card: (
                     card[CARD_TYPE],
+                    card[CARD_COST],
                     card[CARD_SET_NAME],
                     is_positive_or_zero_int(card[CARD_NUMBER])
                     and int(card[CARD_NUMBER]) or 0,
