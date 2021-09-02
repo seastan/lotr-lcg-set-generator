@@ -4117,10 +4117,15 @@ def load_external_xml(url, sets=None, encounter_sets=None):  # pylint: disable=R
                 logging.error("Can't download XML from %s, ignoring", url)
                 return res
 
+            if not root.attrib.get('name'):
+                logging.error("Can't find the set name in XML from %s, "
+                              "ignoring", url)
+                return res
+
             XML_CACHE[url] = content
             _save_content(url, content, 'xml')
 
-    set_name = str(root.attrib['name']).lower()
+    set_name = str(root.attrib.get('name', '')).lower()
     if sets and set_name not in sets:
         return res
 
@@ -4191,6 +4196,9 @@ def load_external_xml(url, sets=None, encounter_sets=None):  # pylint: disable=R
         unique = _find_properties(card, 'Unique')
         unique = 1 if unique else None
 
+        cost = _find_properties(card, 'Cost')
+        cost = _handle_int(cost[0].attrib['value']) if cost else None
+
         if not card.attrib.get('size'):
             row[CARD_BACK] = 'Player'
         elif card.attrib.get('size') == 'EncounterCard':
@@ -4209,6 +4217,7 @@ def load_external_xml(url, sets=None, encounter_sets=None):  # pylint: disable=R
         row[CARD_QUANTITY] = int(quantity[0].attrib['value'])
         row[CARD_SET_NAME] = set_name
         row[CARD_UNIQUE] = unique
+        row[CARD_COST] = cost
         row[CARD_EASY_MODE] = None
         res.append(row)
 
