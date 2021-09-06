@@ -3352,93 +3352,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 deck_rules.add(quest_id)
 
-            prefixes = set()
-            for part in str(card_deck_rules).split('\n\n'):
-                if not part:
-                    continue
-
-                rules_list = [r.strip().split(':', 1)
-                              for r in part.split('\n')]
-                rules_list = [(r[0].lower().strip(),
-                               [j.strip()
-                                for j in r[1].strip().split(';')])
-                              for r in rules_list if len(r) == 2]
-                rules = {}
-                key_count = {}
-                for key, value in rules_list:
-                    if key not in (
-                            'sets', 'encounter sets', 'prefix', 'external xml',
-                            'remove', 'second quest deck', 'special',
-                            'second special', 'setup', 'active setup',
-                            'staging setup', 'player'):
-                        message = (
-                            'Unknown key "{}" for deck rules for quest {} in '
-                            'row #{}{}'.format(
-                                key, card_adventure or card_name, i, scratch))
-                        logging.error(message)
-                        if conf['octgn_o8d']:
-                            if not card_scratch:
-                                errors.append(message)
-                            else:
-                                broken_set_ids.add(set_id)
-
-                        continue
-
-                    if key not in key_count:
-                        key_count[key] = 0
+            deck_rules_errors = _generate_octgn_o8d_quest(row)[1]
+            for error in deck_rules_errors:
+                message = '{} in deck rules in row #{}{}'.format(
+                    error, i, scratch)
+                logging.error(message)
+                if conf['octgn_o8d']:
+                    if not card_scratch:
+                        errors.append(message)
                     else:
-                        key_count[key] += 1
-
-                    rules[(key, key_count[key])] = value
-
-                for key in ('sets', 'encounter sets', 'prefix', 'external xml'):
-                    if key_count.get(key, 0) > 0:
-                        message = (
-                            'Duplicate key "{}" for deck rules for quest {} '
-                            'in row #{}{}'.format(
-                                key, card_adventure or card_name, i, scratch))
-                        logging.error(message)
-                        if conf['octgn_o8d']:
-                            if not card_scratch:
-                                errors.append(message)
-                            else:
-                                broken_set_ids.add(set_id)
-
-                prefix = rules.get(('prefix', 0), [''])[0]
-                if not prefix:
-                    message = (
-                        'No prefix for deck rules for quest {} in row #{}{}'
-                        .format(card_adventure or card_name, i, scratch))
-                    logging.error(message)
-                    if conf['octgn_o8d']:
-                        if not card_scratch:
-                            errors.append(message)
-                        else:
-                            broken_set_ids.add(set_id)
-                elif not re.match(DECK_PREFIX_REGEX, prefix + ' '):
-                    message = (
-                        'Incorrect prefix "{}" for deck rules for quest {} '
-                        'in row #{}{}'.format(
-                            prefix, card_adventure or card_name, i, scratch))
-                    logging.error(message)
-                    if conf['octgn_o8d']:
-                        if not card_scratch:
-                            errors.append(message)
-                        else:
-                            broken_set_ids.add(set_id)
-                elif prefix in prefixes:
-                    message = (
-                        'Duplicate prefix "{}" for deck rules for quest {} '
-                        'in row #{}{}'.format(
-                            prefix, card_adventure or card_name, i, scratch))
-                    logging.error(message)
-                    if conf['octgn_o8d']:
-                        if not card_scratch:
-                            errors.append(message)
-                        else:
-                            broken_set_ids.add(set_id)
-                else:
-                    prefixes.add(prefix)
+                        broken_set_ids.add(set_id)
 
         for lang in conf['languages']:
             if lang == 'English':
@@ -4364,89 +4287,93 @@ def _generate_octgn_o8d_player(conf, set_id, set_name):
         obj.write(res)
 
 
-def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R0915
-    """ Generate .o8d files for OCTGN and DragnCards.
+def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
+    """ Generate .o8d file for the quest(s).
     """
-    logging.info('[%s] Generating .o8d files for OCTGN and DragnCards...',
-                 set_name)
-    timestamp = time.time()
+    errors = []
+    files = []
 
-    rows = [row for row in DATA
-            if row[CARD_SET] == set_id
-            and row[CARD_TYPE] in CARD_TYPES_DECK_RULES
-            and row[CARD_DECK_RULES]
-            and (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)]
-
-    quests = {}
-    for row in rows:
-        quest = quests.setdefault(
-            row[CARD_ADVENTURE] or row[CARD_NAME],
-            {'name': row[CARD_ADVENTURE] or row[CARD_NAME],
+    quests = []
+    quest = {'name': row[CARD_ADVENTURE] or row[CARD_NAME],
              'sets': set([str(row[CARD_SET_NAME]).lower()]),
              'encounter sets': set(),
              'prefix': '',
              'rules': row[CARD_DECK_RULES],
-             'modes': ['']})
-        if row[CARD_ENCOUNTER_SET]:
-            quest['encounter sets'].add(str(row[CARD_ENCOUNTER_SET]).lower())
+             'modes': ['']}
+    if row[CARD_ENCOUNTER_SET]:
+        quest['encounter sets'].add(str(row[CARD_ENCOUNTER_SET]).lower())
 
-        if row[CARD_ADDITIONAL_ENCOUNTER_SETS]:
-            for encounter_set in [
-                    r.lower().strip()
-                    for r in
-                    str(row[CARD_ADDITIONAL_ENCOUNTER_SETS]).split(';')]:
-                quest['encounter sets'].add(encounter_set)
+    if row[CARD_ADDITIONAL_ENCOUNTER_SETS]:
+        for encounter_set in [
+                r.lower().strip()
+                for r in
+                str(row[CARD_ADDITIONAL_ENCOUNTER_SETS]).split(';')]:
+            quest['encounter sets'].add(encounter_set)
 
-    quests = list(quests.values())
-    new_quests = []
+    quests.append(quest)
+    parts = str(quest['rules']).split('\n\n')
+    parts = [part for part in parts if part]
+    if len(parts) > 1:
+        quest['rules'] = parts.pop(0)
+        for part in parts:
+            new_quest = copy.deepcopy(quest)
+            new_quest['rules'] = part
+            quests.append(new_quest)
+
+    prefixes = set()
     for quest in quests:
-        parts = str(quest['rules']).split('\n\n')
-        parts = [part for part in parts if part]
-        if len(parts) > 1:
-            quest['rules'] = parts.pop(0)
-            for part in parts:
-                new_quest = copy.deepcopy(quest)
-                new_quest['rules'] = part
-                new_quests.append(new_quest)
-
-    quests.extend(new_quests)
-
-    output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
-                               escape_filename(set_name))
-    clear_folder(output_path)
-    if quests:
-        create_folder(output_path)
-
-    for quest in quests:
-        rules_list = [r.strip().split(':', 1)
+        rules_list = [r.split(':', 1)
                       for r in str(quest['rules']).split('\n')]
-        rules_list = [(r[0].lower().strip(),
-                       [i.strip() for i in r[1].strip().split(';')])
+        incorrect_rules = [':'.join(r) for r in rules_list if len(r) != 2]
+        for item in incorrect_rules:
+            errors.append('Incorrect rule "{}"'.format(item))
+
+        rules_list = [(r[0].strip(),
+                       [i.strip() for i in r[1].strip().split(';')
+                        if i.strip()])
                       for r in rules_list if len(r) == 2]
         rules = OrderedDict()
         key_count = {}
         for key, value in rules_list:
-            if key not in (
+            if key.lower() not in (
                     'sets', 'encounter sets', 'prefix', 'external xml',
                     'remove', 'second quest deck', 'special',
                     'second special', 'setup', 'active setup',
                     'staging setup', 'player'):
+                errors.append('Unknown key "{}"'.format(key))
                 continue
 
-            if key not in key_count:
-                key_count[key] = 0
+            if key.lower() not in key_count:
+                key_count[key.lower()] = 0
             else:
-                key_count[key] += 1
+                key_count[key.lower()] += 1
 
-            rules[(key, key_count[key])] = value
+            if (key.lower() in ('sets', 'encounter sets', 'prefix',
+                                'external xml') and
+                    key_count.get(key.lower(), 0) > 0):
+                errors.append('Duplicate key "{}"'.format(key))
+
+            rules[(key.lower(), key_count[key.lower()])] = value
 
         if rules.get(('prefix', 0)):
             quest['prefix'] = rules[('prefix', 0)][0] + ' '
             quest['prefix'] = quest['prefix'][:6].upper() + quest['prefix'][6:]
 
-        if (not quest['prefix'] or
-                not re.match(DECK_PREFIX_REGEX, quest['prefix'])):
+        if not quest['prefix']:
+            errors.append('No prefix')
             continue
+
+        if not re.match(DECK_PREFIX_REGEX, quest['prefix']):
+            errors.append('Incorrect prefix "{}"'
+                          .format(rules.get(('prefix', 0), [''])[0]))
+            continue
+
+        if quest['prefix'] in prefixes:
+            errors.append('Duplicate prefix "{}"'
+                          .format(rules.get(('prefix', 0), [''])[0]))
+            continue
+
+        prefixes.add(quest['prefix'])
 
         if rules.get(('sets', 0)):
             quest['sets'].update([str(s).lower() for s in rules[('sets', 0)]])
@@ -4466,9 +4393,29 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                       (r.get(CARD_TEXT) or '') not in ('', 'T.B.D.') or
                       (r.get(BACK_PREFIX + CARD_TEXT) or '')
                       not in ('', 'T.B.D.'))]
+
         for url in rules.get(('external xml', 0), []):
-            cards.extend(load_external_xml(url, quest['sets'],
-                                           quest['encounter sets']))
+            res = load_external_xml(url, quest['sets'],
+                                    quest['encounter sets'])
+            if res:
+                cards.extend(res)
+            else:
+                errors.append('URL {} doesn\'t match any cards'.format(url))
+
+        redundant_sets = [
+            s for s in rules.get(('sets', 0), [])
+            if str(s).lower() not in [str(c[CARD_SET_NAME] or '').lower()
+                                      for c in cards]]
+        for item in redundant_sets:
+            errors.append('Set "{}" doesn\'t match any cards'.format(item))
+
+        redundant_encounter_sets = [
+            s for s in rules.get(('encounter sets', 0), [])
+            if str(s).lower() not in [str(c[CARD_ENCOUNTER_SET] or '').lower()
+                                      for c in cards]]
+        for item in redundant_encounter_sets:
+            errors.append('Encounter set "{}" doesn\'t match any cards'
+                          .format(item))
 
         if [c for c in cards if c[CARD_EASY_MODE]]:
             quest['modes'].append(EASY_PREFIX)
@@ -4539,6 +4486,8 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                     setup_cards, staging_setup_cards, active_setup_cards,
                     chosen_player_cards):
                 section.sort(key=lambda card: (
+                    card[CARD_TYPE] not in ('presentation', 'rules'),
+                    card[CARD_TYPE],
                     card[CARD_SET_NAME],
                     is_positive_or_zero_int(card[CARD_NUMBER])
                     and int(card[CARD_NUMBER]) or 0,
@@ -4547,8 +4496,9 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
 
             for section in (quest_cards, second_quest_cards):
                 section.sort(key=lambda card: (
+                    card[CARD_TYPE] not in ('campaign', 'nightmare'),
                     card[CARD_TYPE],
-                    card[CARD_COST],
+                    card[CARD_COST] or 0,
                     card[CARD_SET_NAME],
                     is_positive_or_zero_int(card[CARD_NUMBER])
                     and int(card[CARD_NUMBER]) or 0,
@@ -4604,15 +4554,44 @@ def generate_octgn_o8d(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R
                 filename = escape_octgn_filename(
                     '{}{}{}.o8d'.format(mode, quest['prefix'],
                                         escape_filename(quest['name'])))
-            with open(
-                    os.path.join(output_path, filename),
-                    'w', encoding='utf-8') as obj:
-                res = ET.tostring(root, encoding='utf-8').decode('utf-8')
-                res = res.replace('<notes />', '<notes><![CDATA[]]></notes>')
-                obj.write(
-                    '<?xml version="1.0" encoding="utf-8" standalone="yes"?>')
-                obj.write('\n')
-                obj.write(res)
+
+            res = ET.tostring(root, encoding='utf-8').decode('utf-8')
+            res = res.replace('<notes />', '<notes><![CDATA[]]></notes>')
+            files.append((filename, res))
+
+    return (files, errors)
+
+
+def generate_octgn_o8d(conf, set_id, set_name):
+    """ Generate .o8d files for OCTGN and DragnCards.
+    """
+    logging.info('[%s] Generating .o8d files for OCTGN and DragnCards...',
+                 set_name)
+    timestamp = time.time()
+
+    files = []
+    rows = [row for row in DATA
+            if row[CARD_SET] == set_id
+            and row[CARD_TYPE] in CARD_TYPES_DECK_RULES
+            and row[CARD_DECK_RULES]
+            and (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)]
+    for row in rows:
+        files.extend(_generate_octgn_o8d_quest(row)[0])
+
+    output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
+                               escape_filename(set_name))
+    clear_folder(output_path)
+    if files:
+        create_folder(output_path)
+
+    for filename, res in files:
+        with open(
+                os.path.join(output_path, filename),
+                'w', encoding='utf-8') as obj:
+            obj.write(
+                '<?xml version="1.0" encoding="utf-8" standalone="yes"?>')
+            obj.write('\n')
+            obj.write(res)
 
     _generate_octgn_o8d_player(conf, set_id, set_name)
 
