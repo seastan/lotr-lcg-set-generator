@@ -4239,21 +4239,37 @@ def _test_rule(card, rule):  # pylint: disable=R0911,R0912
     return qty
 
 
-def _apply_rules(source_cards, target_cards, rules):
+def _apply_rules(source_cards, target_cards, rules, rule_type):
     """ Apply deck rules.
     """
+    errors = []
     if not rules:
-        return
+        errors.append('No "{}" rules specified'.format(rule_type.title()))
+        return errors
 
-    rules = [str(r).lower() for r in rules]
-    for card in source_cards:
-        for rule in rules:
-            qty = _test_rule(card, rule)
+    for rule in rules:
+        total_qty = 0
+        for card in source_cards:
+            qty = _test_rule(card, str(rule).lower())
             if qty > 0:
+                total_qty += qty
                 card_copy = card.copy()
                 card[CARD_QUANTITY] -= qty
                 card_copy[CARD_QUANTITY] = qty
                 target_cards.append(card_copy)
+                res = re.match(r'^([0-9]+) ', str(rule).lower())
+                if res:
+                    target_qty = int(res.groups()[0])
+                    if qty < target_qty:
+                        errors.append(
+                            'Rule "{}:{}" matches only {} not {} cards'.
+                            format(rule_type.title(), rule, qty, target_qty))
+
+        if not total_qty:
+            errors.append('Rule "{}:{}" doesn\'t match any cards'
+                          .format(rule_type.title(), rule))
+
+    return errors
 
 
 def _generate_octgn_o8d_player(conf, set_id, set_name):
@@ -4421,6 +4437,7 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
             quest['modes'].append(EASY_PREFIX)
 
         for mode in quest['modes']:
+            mode_errors = []
             other_cards = []
             quest_cards = []
             second_quest_cards = []
@@ -4457,27 +4474,33 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
 
             for (key, _), value in rules.items():
                 if key == 'remove':
-                    _apply_rules(other_cards, removed_cards, value)
-                    _apply_rules(quest_cards, removed_cards, value)
-                    _apply_rules(default_setup_cards, removed_cards, value)
-                    _apply_rules(encounter_cards, removed_cards, value)
+                    mode_errors.extend(_apply_rules(
+                        quest_cards + default_setup_cards + encounter_cards +
+                        other_cards, removed_cards, value, key))
                 elif key == 'second quest deck':
-                    _apply_rules(quest_cards, second_quest_cards, value)
+                    mode_errors.extend(_apply_rules(
+                        quest_cards, second_quest_cards, value, key))
                 elif key == 'special':
-                    _apply_rules(encounter_cards, special_cards, value)
-                    _apply_rules(other_cards, special_cards, value)
+                    mode_errors.extend(_apply_rules(
+                        encounter_cards + other_cards, special_cards, value,
+                        key))
                 elif key == 'second special':
-                    _apply_rules(encounter_cards, second_special_cards, value)
-                    _apply_rules(other_cards, second_special_cards, value)
+                    mode_errors.extend(_apply_rules(
+                        encounter_cards + other_cards, second_special_cards,
+                        value, key))
                 elif key == 'setup':
-                    _apply_rules(encounter_cards, setup_cards, value)
-                    _apply_rules(other_cards, setup_cards, value)
+                    mode_errors.extend(_apply_rules(
+                        encounter_cards + other_cards, setup_cards, value,
+                        key))
                 elif key == 'staging setup':
-                    _apply_rules(encounter_cards, staging_setup_cards, value)
+                    mode_errors.extend(_apply_rules(
+                        encounter_cards, staging_setup_cards, value, key))
                 elif key == 'active setup':
-                    _apply_rules(encounter_cards, active_setup_cards, value)
+                    mode_errors.extend(_apply_rules(
+                        encounter_cards, active_setup_cards, value, key))
                 elif key == 'player':
-                    _apply_rules(other_cards, chosen_player_cards, value)
+                    mode_errors.extend(_apply_rules(
+                        other_cards, chosen_player_cards, value, key))
 
             setup_cards.extend(default_setup_cards)
 
@@ -4516,6 +4539,11 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                     event_cards.append(card)
                 elif card[CARD_TYPE] == 'player side quest':
                     side_quest_cards.append(card)
+                else:
+                    mode_errors.append(
+                        'Card "{}" with type "{}" can\'t be added to the deck'
+                        .format(card[CARD_ORIGINAL_NAME],
+                                card[CARD_TYPE].title()))
 
             root = ET.fromstring(O8D_TEMPLATE)
             _append_cards(root.findall("./section[@name='Quest']")[0],
@@ -4558,6 +4586,12 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
             res = ET.tostring(root, encoding='utf-8').decode('utf-8')
             res = res.replace('<notes />', '<notes><![CDATA[]]></notes>')
             files.append((filename, res))
+
+            if mode == EASY_PREFIX:
+                mode_errors = ['{} in easy mode'.format(e)
+                               for e in mode_errors]
+
+            errors.extend(mode_errors)
 
     return (files, errors)
 
