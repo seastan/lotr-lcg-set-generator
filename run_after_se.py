@@ -193,7 +193,11 @@ def main():  # pylint: disable=R0912,R0914,R0915
     tasks = []
     post_tasks = []
     for set_id, set_name in sets:
+        scratch = set_id in lotr.FOUND_SCRATCH_SETS
         for lang in conf['output_languages']:
+            if scratch and lang != 'English':
+                continue
+
             skip_set, skip_ids = lotr.get_skip_info(set_id, lang)
             if skip_set:
                 logging.info('[%s, %s] No changes since the last run,'
@@ -207,7 +211,6 @@ def main():  # pylint: disable=R0912,R0914,R0915
 
             card_data = lotr.translated_data(set_id, lang)
             card_dict = lotr.full_card_dict()
-            scratch = set_id in lotr.FOUND_SCRATCH_SETS
 
             if conf['nobleed_300'][lang]:
                 pre_tasks.append([generate_png300_nobleed, conf, set_id,

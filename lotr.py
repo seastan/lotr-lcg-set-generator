@@ -3364,7 +3364,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         broken_set_ids.add(set_id)
 
         for lang in conf['languages']:
-            if lang == 'English':
+            if lang == 'English' or card_scratch:
                 continue
 
             if not TRANSLATIONS[lang].get(card_id):

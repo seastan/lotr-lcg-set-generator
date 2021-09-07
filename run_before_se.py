@@ -66,6 +66,7 @@ def main(conf=None):  # pylint: disable=R0912,R0915
     strange_eons = False
     changes = False
     for set_id, set_name in sets:
+        scratch = set_id in lotr.FOUND_SCRATCH_SETS
         if conf['octgn_set_xml']:
             lotr.generate_octgn_set_xml(conf, set_id, set_name)
 
@@ -86,12 +87,18 @@ def main(conf=None):  # pylint: disable=R0912,R0915
 
         if conf['hallofbeorn_json']:
             for lang in (conf['output_languages'] or ['English']):
+                if scratch and lang != 'English':
+                    continue
+
                 lotr.generate_hallofbeorn_json(conf, set_id, set_name, lang)
 
         if conf['output_languages']:
             lotr.copy_custom_images(conf, set_id, set_name)
 
         for lang in conf['output_languages']:
+            if scratch and lang != 'English':
+                continue
+
             strange_eons = True
             lotr.generate_xml(conf, set_id, set_name, lang)
             lotr.update_xml(conf, set_id, set_name, lang)
