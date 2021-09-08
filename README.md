@@ -3,7 +3,28 @@
 Please note that to generate final image outputs, you must run this workflow on a Windows platform,
 because each platform renders the fonts differently.
 
-1. Clone this repo to a local folder (you can click `Code` and then `Download ZIP`).
+1. Clone this repo to a new local folder.  The easiest way is to click `Code` and then `Download ZIP`.
+At the same time, the preferable way is to use Git.
+
+    You can install the Git client from https://git-scm.com/downloads
+    (default settings should be fine).  On GitHub UI click `Code`, then click `HTTPS` and copy the URL.
+    Run `Git CMD`, navigate to the folder, and run the following command (don't forget the period in the end):
+
+    ```
+    git clone <copied URL> .
+    ```
+
+    For example:
+
+    ```
+    git clone https://github.com/seastan/lotr-lcg-set-generator.git .
+    ```
+
+    Later, when you want to update the code, run `Git CMD`, navigate to the folder and run the following command:
+
+    ```
+    git pull
+    ```
 
 2. Make sure there is a spreadsheet on Google Sheets (most likely, it already exists).
 
