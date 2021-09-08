@@ -132,10 +132,10 @@ DISCORD_IGNORE_CHANGES_COLUMNS = {
 
 TRANSLATED_COLUMNS = {
     CARD_NAME, CARD_TRAITS, CARD_KEYWORDS, CARD_VICTORY, CARD_TEXT,
-    CARD_SHADOW, CARD_FLAVOUR, CARD_SIDE_B, BACK_PREFIX + CARD_TRAITS,
-    BACK_PREFIX + CARD_KEYWORDS, BACK_PREFIX + CARD_VICTORY,
-    BACK_PREFIX + CARD_TEXT, BACK_PREFIX + CARD_SHADOW,
-    BACK_PREFIX + CARD_FLAVOUR, CARD_ADVENTURE
+    CARD_SHADOW, CARD_FLAVOUR, BACK_PREFIX + CARD_NAME,
+    BACK_PREFIX + CARD_TRAITS, BACK_PREFIX + CARD_KEYWORDS,
+    BACK_PREFIX + CARD_VICTORY, BACK_PREFIX + CARD_TEXT,
+    BACK_PREFIX + CARD_SHADOW, BACK_PREFIX + CARD_FLAVOUR, CARD_ADVENTURE
 }
 
 CARD_TYPES = {'Ally', 'Attachment', 'Campaign', 'Contract',
@@ -3944,7 +3944,7 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 properties.append((name, value))
 
         side_b = (card_type in CARD_TYPES_DOUBLESIDE_MANDATORY
-                  or row[CARD_SIDE_B])
+                  or row[BACK_PREFIX + CARD_NAME])
         if card_type in ('Campaign', 'Nightmare'):
             properties.append((CARD_ENGAGEMENT, 'A'))
         elif card_type == 'Contract' and side_b:
@@ -3960,10 +3960,10 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
 
         if side_b:
             if (card_type in CARD_TYPES_DOUBLESIDE_MANDATORY
-                    and not row[CARD_SIDE_B]):
+                    and not row[BACK_PREFIX + CARD_NAME]):
                 alternate_name = row[CARD_NAME]
             else:
-                alternate_name = row[CARD_SIDE_B]
+                alternate_name = row[BACK_PREFIX + CARD_NAME]
 
             alternate = ET.SubElement(card, 'alternate')
             alternate.set('name',
@@ -4737,7 +4737,7 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                 row[CARD_KEYWORDS] or '',
                 row[CARD_TEXT] or '')).strip()
 
-            if (row[CARD_SIDE_B] is not None and
+            if (row[BACK_PREFIX + CARD_NAME] is not None and
                     row[BACK_PREFIX + CARD_TEXT] is not None):
                 text_back = _update_card_text('{}\n\n{}'.format(
                     row[BACK_PREFIX + CARD_KEYWORDS] or '',
@@ -4747,7 +4747,7 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
 
             flavor = _update_card_text(row[CARD_FLAVOUR] or '',
                                        skip_rules=True, fix_linebreaks=False)
-            if (row[CARD_SIDE_B] is not None and
+            if (row[BACK_PREFIX + CARD_NAME] is not None and
                     row[BACK_PREFIX + CARD_FLAVOUR] is not None):
                 flavor_back = _update_card_text(
                     row[BACK_PREFIX + CARD_FLAVOUR], skip_rules=True,
@@ -4866,7 +4866,7 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
             'shadow': _update_dragncards_card_text(_to_str(row[CARD_SHADOW]))
         }
 
-        if row[CARD_SIDE_B]:
+        if row[BACK_PREFIX + CARD_NAME]:
             if row[BACK_PREFIX + CARD_TYPE] == 'Encounter Side Quest':
                 card_type = 'Side Quest'
             else:
@@ -4884,8 +4884,9 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
                 victory = row[BACK_PREFIX + CARD_VICTORY]
 
             side_b = {
-                'name': unidecode.unidecode(_to_str(row[CARD_SIDE_B])),
-                'printname': _to_str(row[CARD_SIDE_B]),
+                'name': unidecode.unidecode(_to_str(
+                    row[BACK_PREFIX + CARD_NAME])),
+                'printname': _to_str(row[BACK_PREFIX + CARD_NAME]),
                 'unique': _to_str(_handle_int(row[BACK_PREFIX + CARD_UNIQUE])),
                 'type': _to_str(card_type),
                 'sphere': _to_str(sphere),
@@ -4982,10 +4983,10 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
     json_data = []
     card_data = DATA[:]
     for row in DATA:
-        if (row[CARD_SIDE_B] is not None and
+        if (row[BACK_PREFIX + CARD_NAME] is not None and
                 row[CARD_TYPE] not in CARD_TYPES_DOUBLESIDE_OPTIONAL):
             new_row = row.copy()
-            new_row[CARD_NAME] = new_row[CARD_SIDE_B]
+            new_row[CARD_NAME] = new_row[BACK_PREFIX + CARD_NAME]
             new_row[CARD_DOUBLESIDE] = 'B'
             for key in new_row.keys():
                 if key.startswith(BACK_PREFIX):
@@ -5005,7 +5006,8 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
         else:
             translated_row = TRANSLATIONS[lang].get(row[CARD_ID], {}).copy()
             if row.get(CARD_DOUBLESIDE):
-                translated_row[CARD_NAME] = translated_row.get(CARD_SIDE_B, '')
+                translated_row[CARD_NAME] = translated_row.get(
+                    BACK_PREFIX + CARD_NAME, '')
                 for key in translated_row.keys():
                     if key.startswith(BACK_PREFIX):
                         translated_row[key.replace(BACK_PREFIX, '')] = (
@@ -5068,17 +5070,17 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
 
         if row.get(CARD_DOUBLESIDE) is not None:
             card_side = row[CARD_DOUBLESIDE]
-        elif (row[CARD_SIDE_B] is not None and
+        elif (row[BACK_PREFIX + CARD_NAME] is not None and
               card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL):
             card_side = 'A'
         else:
             card_side = None
 
-        if (translated_row.get(CARD_SIDE_B) is not None and
-                translated_row[CARD_SIDE_B] !=
+        if (translated_row.get(BACK_PREFIX + CARD_NAME) is not None and
+                translated_row[BACK_PREFIX + CARD_NAME] !=
                 translated_row.get(CARD_NAME, '') and
                 card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL):
-            opposite_title = translated_row[CARD_SIDE_B]
+            opposite_title = translated_row[BACK_PREFIX + CARD_NAME]
         else:
             opposite_title = None
 
@@ -5157,7 +5159,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
             text = '{}\r\n\r\nPage {}'.format(text,
                                               translated_row[CARD_VICTORY])
 
-        if (translated_row.get(CARD_SIDE_B) is not None and
+        if (translated_row.get(BACK_PREFIX + CARD_NAME) is not None and
                 (translated_row.get(BACK_PREFIX + CARD_TEXT) is not None or
                  (card_type in ('Presentation', 'Rules')
                   and translated_row.get(BACK_PREFIX + CARD_VICTORY)
@@ -5178,7 +5180,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
                                     skip_rules=True,
                                     fix_linebreaks=False
                                     ).replace('\n', '\r\n').strip())
-        if (translated_row.get(CARD_SIDE_B) is not None and
+        if (translated_row.get(BACK_PREFIX + CARD_NAME) is not None and
                 translated_row.get(BACK_PREFIX + CARD_FLAVOUR) is not None and
                 card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL):
             flavor_back = _update_card_text(
@@ -5312,7 +5314,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 french_row.get(CARD_TEXT) or '')).strip()
 
             if ((row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL or
-                 row[CARD_SIDE_B] is not None) and
+                 row[BACK_PREFIX + CARD_NAME] is not None) and
                     french_row.get(BACK_PREFIX + CARD_TEXT)):
                 text_back = _update_french_card_text('{}\n\n{}'.format(
                     french_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
@@ -5355,7 +5357,8 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 'trait': french_row.get(CARD_TRAITS),
                 'texte': text,
                 'indic_unique': int(row[CARD_UNIQUE] or 0),
-                'indic_recto_verso': row[CARD_SIDE_B] is not None and 1 or 0,
+                'indic_recto_verso': row[BACK_PREFIX + CARD_NAME] is not None
+                                     and 1 or 0,
                 'nb_normal': quantity,
                 'nb_facile': quantity - easy_mode,
                 'nb_cauchemar': 0
@@ -5391,7 +5394,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 french_row.get(CARD_TEXT) or '')).strip()
 
             if ((row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL
-                 or row[CARD_SIDE_B] is not None) and
+                 or row[BACK_PREFIX + CARD_NAME] is not None) and
                     french_row.get(BACK_PREFIX + CARD_TEXT)):
                 text_back = _update_french_card_text('{}\n\n{}'.format(
                     french_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
@@ -5439,7 +5442,8 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 'effet_ombre': shadow,
                 'titre_quete': french_row.get(CARD_ADVENTURE),
                 'indic_unique': int(row[CARD_UNIQUE] or 0),
-                'indic_recto_verso': row[CARD_SIDE_B] is not None and 1 or 0,
+                'indic_recto_verso': row[BACK_PREFIX + CARD_NAME] is not None
+                                     and 1 or 0,
                 'nb_normal': quantity,
                 'nb_facile': quantity - easy_mode,
                 'nb_cauchemar': 0
@@ -5463,8 +5467,10 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
             french_row = TRANSLATIONS['French'].get(row[CARD_ID], {})
 
             name = french_row.get(CARD_NAME, '')
-            if french_row.get(CARD_SIDE_B) and french_row[CARD_SIDE_B] != name:
-                name = '{} / {}'.format(name, french_row[CARD_SIDE_B])
+            if (french_row.get(BACK_PREFIX + CARD_NAME) and
+                    french_row[BACK_PREFIX + CARD_NAME] != name):
+                name = '{} / {}'.format(name,
+                                        french_row[BACK_PREFIX + CARD_NAME])
 
             text = _update_french_card_text('{}\n\n{}'.format(
                 french_row.get(CARD_KEYWORDS) or '',
@@ -5523,10 +5529,10 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
 
     data = DATA[:]
     for row in DATA:
-        if (row[CARD_SIDE_B] is not None and
+        if (row[BACK_PREFIX + CARD_NAME] is not None and
                 row[CARD_TYPE] not in CARD_TYPES_DOUBLESIDE_OPTIONAL):
             new_row = row.copy()
-            new_row[CARD_NAME] = new_row[CARD_SIDE_B]
+            new_row[CARD_NAME] = new_row[BACK_PREFIX + CARD_NAME]
             new_row[CARD_DOUBLESIDE] = 'B'
             for key in new_row.keys():
                 if key.startswith(BACK_PREFIX):
@@ -5561,7 +5567,8 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
 
             spanish_row = TRANSLATIONS['Spanish'].get(row[CARD_ID], {}).copy()
             if row.get(CARD_DOUBLESIDE):
-                spanish_row[CARD_NAME] = spanish_row.get(CARD_SIDE_B, '')
+                spanish_row[CARD_NAME] = spanish_row.get(
+                    BACK_PREFIX + CARD_NAME, '')
                 for key in spanish_row.keys():
                     if key.startswith(BACK_PREFIX):
                         spanish_row[key.replace(BACK_PREFIX, '')] = (
@@ -5569,9 +5576,10 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
 
             name = spanish_row.get(CARD_NAME)
             if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL and
-                    spanish_row.get(CARD_SIDE_B) and
-                    spanish_row[CARD_SIDE_B] != name):
-                name = '{} / {}'.format(name, spanish_row[CARD_SIDE_B])
+                    spanish_row.get(BACK_PREFIX + CARD_NAME) and
+                    spanish_row[BACK_PREFIX + CARD_NAME] != name):
+                name = '{} / {}'.format(name,
+                                        spanish_row[BACK_PREFIX + CARD_NAME])
 
             quantity = (int(row[CARD_QUANTITY])
                         if _is_int(row[CARD_QUANTITY])
@@ -5668,7 +5676,8 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
 
             spanish_row = TRANSLATIONS['Spanish'].get(row[CARD_ID], {}).copy()
             if row.get(CARD_DOUBLESIDE):
-                spanish_row[CARD_NAME] = spanish_row.get(CARD_SIDE_B, '')
+                spanish_row[CARD_NAME] = spanish_row.get(
+                    BACK_PREFIX + CARD_NAME, '')
                 for key in spanish_row.keys():
                     if key.startswith(BACK_PREFIX):
                         spanish_row[key.replace(BACK_PREFIX, '')] = (
@@ -5842,6 +5851,8 @@ def translated_data(set_id, lang):
         row_copy = row.copy()
         if lang != 'English' and TRANSLATIONS[lang].get(row[CARD_ID]):
             row_copy[CARD_NAME] = TRANSLATIONS[lang][row[CARD_ID]][CARD_NAME]
+            row_copy[BACK_PREFIX + CARD_NAME] = (
+                TRANSLATIONS[lang][row[CARD_ID]][BACK_PREFIX + CARD_NAME])
 
         res.append(row_copy)
 
@@ -5916,7 +5927,8 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
         properties.append(('Set Copyright', SETS[set_id][SET_COPYRIGHT] or ''))
 
         side_b = (card_type != 'Presentation' and (
-            card_type in CARD_TYPES_DOUBLESIDE_MANDATORY or row[CARD_SIDE_B]))
+            card_type in CARD_TYPES_DOUBLESIDE_MANDATORY or
+            row[BACK_PREFIX + CARD_NAME]))
         if properties:
             if side_b:
                 properties.append(('', ''))
@@ -5925,10 +5937,10 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
 
         if side_b:
             if (card_type in CARD_TYPES_DOUBLESIDE_MANDATORY
-                    and not row[CARD_SIDE_B]):
+                    and not row[BACK_PREFIX + CARD_NAME]):
                 alternate_name = row[CARD_NAME]
             else:
-                alternate_name = row[CARD_SIDE_B]
+                alternate_name = row[BACK_PREFIX + CARD_NAME]
 
             alternate = ET.SubElement(card, 'alternate')
             alternate.set('name', alternate_name or '')
