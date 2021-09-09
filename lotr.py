@@ -1342,6 +1342,10 @@ def _clean_data(data):
                     value = value.replace('[name]', card_name)
 
                 value = _clean_value(value)
+                if key != CARD_DECK_RULES:
+                    value = re.sub(r'\[([^\W\d_a-z][^\]]+)\]', "[bi]\\1[/bi]",
+                                   value)
+
                 row[key] = value
 
 

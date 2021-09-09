@@ -342,6 +342,9 @@ When `tts` output is enabled in the configuration, `octgn_o8d` and `db` outputs 
 - `[quot]`: "
 - `[apos]`: '
 - `[hyphen]`: -
+
+- `[Trait]`: an alias for `[bi]Trait[/bi]` (please note that "Trait" must be capitalized and can't match capitalized versions of the icons below)
+
 - `--`: en dash
 - `---`: em dash
 
