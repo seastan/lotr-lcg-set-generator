@@ -75,8 +75,7 @@ completely, you will need to download updates to that folder manually.
 
     Please note that the files in the `processed` subfolder take precedence over the files in the root folder.
 
-4. Install Backup and Sync from Google (if it's not installed yet) and make sure that the folder
-with the artwork is being synced.
+4. Install Google Drive (if it's not installed yet) and make sure that the folder with the artwork is being synced.
 
     If you plan to automatically upload images to Google Drive (see the configuration below),
     go to `Preferences` -> `Settings` and uncheck `Show warning when you remove items from a shared folder`.
@@ -191,7 +190,7 @@ and is not 100% reliable (it may be stuck on the Strange Eons step).  To minimiz
 - If the script started, don't touch the keyboard or mouse.
 
 If you need to perform some additional actions before and/or after the script starts (like unlocking your PC
-or restarting Backup and Sync from Google), you may create two additional batch scripts with your custom code:
+or restarting Google Drive), you may create two additional batch scripts with your custom code:
 
 - `run_setup.bat`
 - `run_cleanup.bat`
