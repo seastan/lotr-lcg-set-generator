@@ -1336,10 +1336,11 @@ def _clean_data(data):
 
         for key, value in row.items():
             if isinstance(value, str):
-                if key.startswith(BACK_PREFIX):
-                    value = value.replace('[name]', card_name_back)
-                else:
-                    value = value.replace('[name]', card_name)
+                if key != CARD_DECK_RULES:
+                    if key.startswith(BACK_PREFIX):
+                        value = value.replace('[name]', card_name_back)
+                    else:
+                        value = value.replace('[name]', card_name)
 
                 value = _clean_value(value)
                 if key != CARD_DECK_RULES:
