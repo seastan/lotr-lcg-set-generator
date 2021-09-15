@@ -195,7 +195,7 @@ or restarting Google Drive), you may create two additional batch scripts with yo
 - `run_setup.bat`
 - `run_cleanup.bat`
 
-They will be called inside `run_all.bat` automatically.  See `run_setup.bat.example` for an example.
+They will be called inside `run_all.bat` automatically.
 
 Also, see `configuration.nightly.yaml` for a configuration example.
 
@@ -311,6 +311,8 @@ When `tts` output is enabled in the configuration, `octgn_o8d` and `db` outputs 
 
 **Supported Tags**
 
+Please note that all tags are case-sensitive.
+
 - `[center]` ... `[/center]`: center alignment
 - `[right]` ... `[/right]`: right alignment
 - `[b]` ... `[/b]`: bold text
@@ -341,9 +343,7 @@ When `tts` output is enabled in the configuration, `octgn_o8d` and `db` outputs 
 - `[quot]`: "
 - `[apos]`: '
 - `[hyphen]`: -
-
-- `[Trait]`: an alias for `[bi]Trait[/bi]` (please note that "Trait" must be capitalized and can't match capitalized versions of the icons below)
-
+- `[Trait]`: an alias for `[bi]Trait[/bi]` (please note that "Trait" must be capitalized)
 - `--`: en dash
 - `---`: em dash
 

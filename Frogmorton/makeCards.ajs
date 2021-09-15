@@ -1354,7 +1354,7 @@ function updateVafthrudnir(value, lowerSize, lang) {
 	var upperSize = Math.round(lowerSize * 1.423 * 100) / 100;
 	var res = '';
 	var tag = false;
-	value = value.replace(/\[space\]/ig, ' ');
+	value = value.replace(/\[space\]/g, ' ');
 	value = updatePunctuation(value, lang);
 	for (let i = 0; i < value.length; i++) {
 		let ch = value[i];
@@ -1396,9 +1396,9 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 	vXml += '';
 	vXml = vXml.replace(/ +(?=\n|$)/g, '');
 	vXml = vXml.replace(/\n+$/g, '');
-	vXml = vXml.replace(/\[nobr\]/ig, '\u00a0');
-	vXml = vXml.replace(/\[inline\]\n\n/ig, ' ');
-	vXml = vXml.replace(/\[inline\]/ig, '');
+	vXml = vXml.replace(/\[nobr\]/g, '\u00a0');
+	vXml = vXml.replace(/\[inline\]\n\n/g, ' ');
+	vXml = vXml.replace(/\[inline\]/g, '');
 
 	if (['Name', 'BName'].indexOf(nXml + '') > -1) {
 		let lowerSize;
@@ -1497,7 +1497,7 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 	else {
 		defaultFontSize = 7.5;
 	}
-	var matchRegExp = /^\[defaultsize ([0-9\.]+)\]/ig;
+	var matchRegExp = /^\[defaultsize ([0-9\.]+)\]/g;
 	var match = matchRegExp.exec(vXml);
 	if (match) {
 		defaultFontSize = match[1];
@@ -1507,15 +1507,15 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 	var tagPrefix;
 	var tagSuffix;
 	if (['Traits', 'BTraits'].indexOf(nXml + '') > -1) {
-		vXml = vXml.replace(/\[bi\](.*?)\[\/bi\]/ig, '$1');
-		vXml = vXml.replace(/\[b\](.*?)\[\/b\]/ig, '$1');
-		vXml = vXml.replace(/\[i\](.*?)\[\/i\]/ig, '$1');
+		vXml = vXml.replace(/\[bi\](.*?)\[\/bi\]/g, '$1');
+		vXml = vXml.replace(/\[b\](.*?)\[\/b\]/g, '$1');
+		vXml = vXml.replace(/\[i\](.*?)\[\/i\]/g, '$1');
 		tagPrefix = '</b></i></size></family><size ' + iconFontSize + '>';
 		tagSuffix = '</size><family "Times New Roman"><size ' + defaultFontSize + '><i><b>';
 	}
 	else if (['Shadow', 'BShadow', 'Flavour', 'BFlavour'].indexOf(nXml + '') > -1) {
-		vXml = vXml.replace(/\[bi\](.*?)\[\/bi\]/ig, '[b]$1[/b]');
-		vXml = vXml.replace(/\[i\](.*?)\[\/i\]/ig, '$1');
+		vXml = vXml.replace(/\[bi\](.*?)\[\/bi\]/g, '[b]$1[/b]');
+		vXml = vXml.replace(/\[i\](.*?)\[\/i\]/g, '$1');
 		tagPrefix = '</i></size></family><size ' + iconFontSize + '>';
 		tagSuffix = '</size><family "Times New Roman"><size ' + defaultFontSize + '><i>';
 	}
@@ -1524,68 +1524,68 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 		tagSuffix = '</size><family "Times New Roman"><size ' + defaultFontSize + '>';
 	}
 
-	vXml = vXml.replace(/</ig, '[lt]');
-	vXml = vXml.replace(/>/ig, '[gt]');
-	vXml = vXml.replace(/\[lt\]/ig, '<lt>');
-	vXml = vXml.replace(/\[gt\]/ig, '<gt>');
-	vXml = vXml.replace(/\[unique\]/ig, tagPrefix + '<uni>' + tagSuffix);
-	vXml = vXml.replace(/\[threat\]/ig, tagPrefix + '<thr>' + tagSuffix);
-	vXml = vXml.replace(/\[attack\]/ig, tagPrefix + '<att>' + tagSuffix);
-	vXml = vXml.replace(/\[defense\]/ig, tagPrefix + '<def>' + tagSuffix);
-	vXml = vXml.replace(/\[willpower\]/ig, tagPrefix + '<wil>' + tagSuffix);
-	vXml = vXml.replace(/\[leadership\]/ig, tagPrefix + '<lea>' + tagSuffix);
-	vXml = vXml.replace(/\[lore\]/ig, tagPrefix + '<lor>' + tagSuffix);
-	vXml = vXml.replace(/\[spirit\]/ig, tagPrefix + '<spi>' + tagSuffix);
-	vXml = vXml.replace(/\[tactics\]/ig, tagPrefix + '<tac>' + tagSuffix);
-	vXml = vXml.replace(/\[baggins\]/ig, tagPrefix + '<bag>' + tagSuffix);
-	vXml = vXml.replace(/\[fellowship\]/ig, tagPrefix + '<fel>' + tagSuffix);
-	vXml = vXml.replace(/\[mastery\]/ig, tagPrefix + '<mas>' + tagSuffix);
-	vXml = vXml.replace(/\[sunny\]/ig, tagPrefix + '<hon>' + tagSuffix);
-	vXml = vXml.replace(/\[cloudy\]/ig, tagPrefix + '<hof>' + tagSuffix);
-	vXml = vXml.replace(/\[rainy\]/ig, tagPrefix + '<hb>' + tagSuffix);
-	vXml = vXml.replace(/\[stormy\]/ig, tagPrefix + '<hw>' + tagSuffix);
-	vXml = vXml.replace(/\[sailing\]/ig, tagPrefix + '<sai>' + tagSuffix);
-	vXml = vXml.replace(/\[eos\]/ig, tagPrefix + '<eos>' + tagSuffix);
-	vXml = vXml.replace(/\[person\]/ig, tagPrefix + '<per>' + tagSuffix);
-	vXml = vXml.replace(/\[pp\]/ig, tagPrefix + '<pp>' + tagSuffix);
-	vXml = vXml.replace(/\[center\]/ig, '<center>');
-	vXml = vXml.replace(/([^\n])\<center\>/ig, '$1\n<center>');
-	vXml = vXml.replace(/\[\/center\]\n?/ig, '\n<left>');
-	vXml = vXml.replace(/\[right\]/ig, '<right>');
-	vXml = vXml.replace(/([^\n])\<right\>/ig, '$1\n<right>');
-	vXml = vXml.replace(/\[\/right\]\n?/ig, '\n<left>');
-	vXml = vXml.replace(/\<left\>(\n*)\<center\>/ig, '$1<center>');
-	vXml = vXml.replace(/\<left\>(\n*)\<right\>/ig, '$1<right>');
-	vXml = vXml.replace(/\n*\<left\>$/ig, '');
-	vXml = vXml.replace(/\[bi\]/ig, '<i><b>');
-	vXml = vXml.replace(/\[\/bi\]/ig, '</b></i>');
-	vXml = vXml.replace(/\[b\]/ig, '<b>');
-	vXml = vXml.replace(/\[\/b\]/ig, '</b>');
-	vXml = vXml.replace(/\[i\]/ig, '<i>');
-	vXml = vXml.replace(/\[\/i\]/ig, '</i>');
-	vXml = vXml.replace(/\[u\]/ig, '<u>');
-	vXml = vXml.replace(/\[\/u\]/ig, '</u>');
-	vXml = vXml.replace(/\[strike\]/ig, '<del>');
-	vXml = vXml.replace(/\[\/strike\]/ig, '</del>');
-	vXml = vXml.replace(/\[red\]/ig, '<color #8b1c23>');
-	vXml = vXml.replace(/\[\/red\]/ig, '</color>');
-	vXml = vXml.replace(/\[space\]/ig, '<hs>');
-	vXml = vXml.replace(/\[vspace\]/ig, '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.025 0.025>');
-	vXml = vXml.replace(/\[tab\]/ig, '\t');
-	vXml = vXml.replace(/\[lotr ([0-9\.]+)\]/ig, '<lotr $1>');
-	vXml = vXml.replace(/\[\/lotr\]/ig, '</lotr>');
-	vXml = vXml.replace(/\[lotrheader ([0-9\.]+)\]/ig, '<lotrheader $1>');
-	vXml = vXml.replace(/\[\/lotrheader\]/ig, '</lotrheader>');
-	vXml = vXml.replace(/\[size ([0-9\.]+)\]/ig, '</size><size $1>');
-	vXml = vXml.replace(/\[\/size\]/ig, '</size><size ' + defaultFontSize + '>');
-	vXml = vXml.replace(/^\[defaultsize ([0-9\.]+)\]\n*/ig, '</size><size $1>');
-	vXml = vXml.replace(/\[img ("?)([^\]]+)\]/ig, '<image $1project:$2>');
-	vXml = vXml.replace(/\<image ("?)project:icons\//ig, '<image $1project:imagesIcons/');
-	vXml = vXml.replace(/\<image ("?)project:custom\//ig, '<image $1project:imagesCustom/' + setID + '_');
-	vXml = vXml.replace(/\[lsb\]/ig, '<lsb>');
-	vXml = vXml.replace(/\[rsb\]/ig, '<rsb>');
-	vXml = vXml.replace(/<lsb>/ig, '[');
-	vXml = vXml.replace(/<rsb>/ig, ']');
+	vXml = vXml.replace(/</g, '[lt]');
+	vXml = vXml.replace(/>/g, '[gt]');
+	vXml = vXml.replace(/\[lt\]/g, '<lt>');
+	vXml = vXml.replace(/\[gt\]/g, '<gt>');
+	vXml = vXml.replace(/\[unique\]/g, tagPrefix + '<uni>' + tagSuffix);
+	vXml = vXml.replace(/\[threat\]/g, tagPrefix + '<thr>' + tagSuffix);
+	vXml = vXml.replace(/\[attack\]/g, tagPrefix + '<att>' + tagSuffix);
+	vXml = vXml.replace(/\[defense\]/g, tagPrefix + '<def>' + tagSuffix);
+	vXml = vXml.replace(/\[willpower\]/g, tagPrefix + '<wil>' + tagSuffix);
+	vXml = vXml.replace(/\[leadership\]/g, tagPrefix + '<lea>' + tagSuffix);
+	vXml = vXml.replace(/\[lore\]/g, tagPrefix + '<lor>' + tagSuffix);
+	vXml = vXml.replace(/\[spirit\]/g, tagPrefix + '<spi>' + tagSuffix);
+	vXml = vXml.replace(/\[tactics\]/g, tagPrefix + '<tac>' + tagSuffix);
+	vXml = vXml.replace(/\[baggins\]/g, tagPrefix + '<bag>' + tagSuffix);
+	vXml = vXml.replace(/\[fellowship\]/g, tagPrefix + '<fel>' + tagSuffix);
+	vXml = vXml.replace(/\[mastery\]/g, tagPrefix + '<mas>' + tagSuffix);
+	vXml = vXml.replace(/\[sunny\]/g, tagPrefix + '<hon>' + tagSuffix);
+	vXml = vXml.replace(/\[cloudy\]/g, tagPrefix + '<hof>' + tagSuffix);
+	vXml = vXml.replace(/\[rainy\]/g, tagPrefix + '<hb>' + tagSuffix);
+	vXml = vXml.replace(/\[stormy\]/g, tagPrefix + '<hw>' + tagSuffix);
+	vXml = vXml.replace(/\[sailing\]/g, tagPrefix + '<sai>' + tagSuffix);
+	vXml = vXml.replace(/\[eos\]/g, tagPrefix + '<eos>' + tagSuffix);
+	vXml = vXml.replace(/\[person\]/g, tagPrefix + '<per>' + tagSuffix);
+	vXml = vXml.replace(/\[pp\]/g, tagPrefix + '<pp>' + tagSuffix);
+	vXml = vXml.replace(/\[center\]/g, '<center>');
+	vXml = vXml.replace(/([^\n])\<center\>/g, '$1\n<center>');
+	vXml = vXml.replace(/\[\/center\]\n?/g, '\n<left>');
+	vXml = vXml.replace(/\[right\]/g, '<right>');
+	vXml = vXml.replace(/([^\n])\<right\>/g, '$1\n<right>');
+	vXml = vXml.replace(/\[\/right\]\n?/g, '\n<left>');
+	vXml = vXml.replace(/\<left\>(\n*)\<center\>/g, '$1<center>');
+	vXml = vXml.replace(/\<left\>(\n*)\<right\>/g, '$1<right>');
+	vXml = vXml.replace(/\n*\<left\>$/g, '');
+	vXml = vXml.replace(/\[bi\]/g, '<i><b>');
+	vXml = vXml.replace(/\[\/bi\]/g, '</b></i>');
+	vXml = vXml.replace(/\[b\]/g, '<b>');
+	vXml = vXml.replace(/\[\/b\]/g, '</b>');
+	vXml = vXml.replace(/\[i\]/g, '<i>');
+	vXml = vXml.replace(/\[\/i\]/g, '</i>');
+	vXml = vXml.replace(/\[u\]/g, '<u>');
+	vXml = vXml.replace(/\[\/u\]/g, '</u>');
+	vXml = vXml.replace(/\[strike\]/g, '<del>');
+	vXml = vXml.replace(/\[\/strike\]/g, '</del>');
+	vXml = vXml.replace(/\[red\]/g, '<color #8b1c23>');
+	vXml = vXml.replace(/\[\/red\]/g, '</color>');
+	vXml = vXml.replace(/\[space\]/g, '<hs>');
+	vXml = vXml.replace(/\[vspace\]/g, '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.025 0.025>');
+	vXml = vXml.replace(/\[tab\]/g, '\t');
+	vXml = vXml.replace(/\[lotr ([0-9\.]+)\]/g, '<lotr $1>');
+	vXml = vXml.replace(/\[\/lotr\]/g, '</lotr>');
+	vXml = vXml.replace(/\[lotrheader ([0-9\.]+)\]/g, '<lotrheader $1>');
+	vXml = vXml.replace(/\[\/lotrheader\]/g, '</lotrheader>');
+	vXml = vXml.replace(/\[size ([0-9\.]+)\]/g, '</size><size $1>');
+	vXml = vXml.replace(/\[\/size\]/g, '</size><size ' + defaultFontSize + '>');
+	vXml = vXml.replace(/^\[defaultsize ([0-9\.]+)\]\n*/g, '</size><size $1>');
+	vXml = vXml.replace(/\[img ("?)([^\]]+)\]/g, '<image $1project:$2>');
+	vXml = vXml.replace(/\<image ("?)project:icons\//g, '<image $1project:imagesIcons/');
+	vXml = vXml.replace(/\<image ("?)project:custom\//g, '<image $1project:imagesCustom/' + setID + '_');
+	vXml = vXml.replace(/\[lsb\]/g, '<lsb>');
+	vXml = vXml.replace(/\[rsb\]/g, '<rsb>');
+	vXml = vXml.replace(/<lsb>/g, '[');
+	vXml = vXml.replace(/<rsb>/g, ']');
 
 	vXml = vXml.replace(/([^:;,.?!\u2026]) ((?:<\/b>)?(?:<\/i>)?(?:<\/size>)?(?:<\/family>)?(?:<size [^>]+>)?)(<uni>|<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<bag>|<fel>|<mas>|<hon>|<hof>|<hb>|<hw>|<sai>|<eos>|<per>|<pp>)/g, '$1\u00a0$2$3');
 	vXml = vXml.replace(/([0-9]+) /g, '$1\u00a0');
@@ -1616,8 +1616,8 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 		return res;
 	}
 
-	vXml = vXml.replace(/<lotr ([0-9\.]+)>(.*?)<\/lotr>/ig, updateVafthrudnirReplacer);
-	vXml = vXml.replace(/<lotrheader ([0-9\.]+)>(.*?)<\/lotrheader>/ig, updateLotrHeaderReplacer);
+	vXml = vXml.replace(/<lotr ([0-9\.]+)>(.*?)<\/lotr>/g, updateVafthrudnirReplacer);
+	vXml = vXml.replace(/<lotrheader ([0-9\.]+)>(.*?)<\/lotrheader>/g, updateLotrHeaderReplacer);
 	vXml = vXml.replace(/<size [^>]+><\/size>/g, '');
 	vXml = vXml.replace(/<family [^>]+><\/family>/g, '');
 

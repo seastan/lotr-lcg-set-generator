@@ -669,6 +669,66 @@ def _to_str(value):
     return '' if value is None else str(value)
 
 
+def _clean_tags(text):  # pylint: disable=R0915
+    """ Clean known tags from the text.
+    """
+    text = text.replace('[center]', '')
+    text = text.replace('[/center]', '')
+    text = text.replace('[right]', '')
+    text = text.replace('[/right]', '')
+    text = text.replace('[b]', '')
+    text = text.replace('[/b]', '')
+    text = text.replace('[i]', '')
+    text = text.replace('[/i]', '')
+    text = text.replace('[bi]', '')
+    text = text.replace('[/bi]', '')
+    text = text.replace('[u]', '')
+    text = text.replace('[/u]', '')
+    text = text.replace('[strike]', '')
+    text = text.replace('[/strike]', '')
+    text = text.replace('[red]', '')
+    text = text.replace('[/red]', '')
+    text = text.replace('[space]', '')
+    text = text.replace('[vspace]', '')
+    text = text.replace('[tab]', '')
+    text = text.replace('[nobr]', '')
+    text = text.replace('[inline]', '')
+    text = text.replace('[lsb]', '')
+    text = text.replace('[rsb]', '')
+
+    text = re.sub(r'\[lotr [^\]]+\]', '', text)
+    text = re.sub(r'\[lotrheader [^\]]+\]', '', text)
+    text = re.sub(r'\[size [^\]]+\]', '', text)
+    text = re.sub(r'\[defaultsize [^\]]+\]', '', text)
+    text = re.sub(r'\[img [^\]]+\]', '', text)
+
+    text = text.replace('[/lotr]', '')
+    text = text.replace('[/lotrheader]', '')
+    text = text.replace('[/size]', '')
+
+    text = text.replace('[unique]', '')
+    text = text.replace('[threat]', '')
+    text = text.replace('[attack]', '')
+    text = text.replace('[defense]', '')
+    text = text.replace('[willpower]', '')
+    text = text.replace('[leadership]', '')
+    text = text.replace('[lore]', '')
+    text = text.replace('[spirit]', '')
+    text = text.replace('[tactics]', '')
+    text = text.replace('[baggins]', '')
+    text = text.replace('[fellowship]', '')
+    text = text.replace('[sunny]', '')
+    text = text.replace('[cloudy]', '')
+    text = text.replace('[rainy]', '')
+    text = text.replace('[stormy]', '')
+    text = text.replace('[sailing]', '')
+    text = text.replace('[eos]', '')
+    text = text.replace('[pp]', '')
+
+    text = text.replace('[unmatched quot]', '')
+    return text
+
+
 def _update_card_text(text, lang='English', skip_rules=False,  # pylint: disable=R0915
                       fix_linebreaks=True):
     """ Update card text for RingsDB, Hall of Beorn and Spanish DB.
@@ -711,38 +771,40 @@ def _update_card_text(text, lang='English', skip_rules=False,  # pylint: disable
         text = re.sub(r'\b(Setup)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', text)
         text = re.sub(r'\b(Condition)\b', '[bi]\\1[/bi]', text)
 
-    text = re.sub(r'\[center\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/center\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[right\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/right\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[bi\]', '<b><i>', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/bi\]', '</i></b>', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[b\]', '<b>', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/b\]', '</b>', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[i\]', '<i>', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/i\]', '</i>', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[u\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/u\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[strike\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/strike\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[red\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/red\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[lotr [^\]]+\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/lotr\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[lotrheader [^\]]+\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/lotrheader\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[size [^\]]+\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[\/size\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[defaultsize [^\]]+\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[img [^\]]+\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[space\]', ' ', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[vspace\]', ' ', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[tab\]', '    ', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[nobr\]', ' ', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[inline\]\n+', ' ', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[inline\]', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[lsb\]', '[', text, flags=re.IGNORECASE)
-    text = re.sub(r'\[rsb\]', ']', text, flags=re.IGNORECASE)
+    text = text.replace('[center]', '')
+    text = text.replace('[/center]', '')
+    text = text.replace('[right]', '')
+    text = text.replace('[/right]', '')
+    text = text.replace('[bi]', '<b><i>')
+    text = text.replace('[/bi]', '</i></b>')
+    text = text.replace('[b]', '<b>')
+    text = text.replace('[/b]', '</b>')
+    text = text.replace('[i]', '<i>')
+    text = text.replace('[/i]', '</i>')
+    text = text.replace('[u]', '')
+    text = text.replace('[/u]', '')
+    text = text.replace('[strike]', '')
+    text = text.replace('[/strike]', '')
+    text = text.replace('[red]', '')
+    text = text.replace('[/red]', '')
+    text = text.replace('[space]', ' ')
+    text = text.replace('[vspace]', ' ')
+    text = text.replace('[tab]', '    ')
+    text = text.replace('[nobr]', ' ')
+    text = text.replace('[lsb]', '[')
+    text = text.replace('[rsb]', ']')
+
+    text = re.sub(r'\[lotr [^\]]+\]', '', text)
+    text = re.sub(r'\[lotrheader [^\]]+\]', '', text)
+    text = re.sub(r'\[size [^\]]+\]', '', text)
+    text = re.sub(r'\[defaultsize [^\]]+\]', '', text)
+    text = re.sub(r'\[img [^\]]+\]', '', text)
+    text = re.sub(r'\[inline\]\n+', ' ', text)
+
+    text = text.replace('[inline]', '')
+    text = text.replace('[/lotr]', '')
+    text = text.replace('[/lotrheader]', '')
+    text = text.replace('[/size]', '')
 
     text = text.strip()
     text = re.sub(r' +(?=\n)', '', text)
@@ -759,7 +821,7 @@ def _update_octgn_card_text(text, fix_linebreaks=True):
     """ Update card text for OCTGN.
     """
     text = _update_card_text(text, fix_linebreaks=fix_linebreaks)
-    text = re.sub(r'(?:<b>|<\/b>|<i>|<\/i>)', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'(?:<b>|<\/b>|<i>|<\/i>)', '', text)
 
     text = text.replace('[willpower]', 'Ò')
     text = text.replace('[threat]', '$')
@@ -786,7 +848,7 @@ def _update_dragncards_card_text(text, fix_linebreaks=True):
     """ Update card text for DragnCards.
     """
     text = _update_card_text(text, fix_linebreaks=fix_linebreaks)
-    text = re.sub(r'(?:<b>|<\/b>|<i>|<\/i>)', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'(?:<b>|<\/b>|<i>|<\/i>)', '', text)
     return text
 
 
@@ -1240,10 +1302,12 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
 def _update_discord_category(category):
     """ Update the name of a Discord category.
     """
-    category = re.sub(r'[“”]', '"', category)
-    category = re.sub(r'’', "'", category)
-    category = re.sub(r'…', '', category)
-    category = re.sub(r'[–—]', '-', category)
+    category = category.replace('“', '"')
+    category = category.replace('”', '"')
+    category = category.replace('’', "'")
+    category = category.replace('…', '')
+    category = category.replace('–', '-')
+    category = category.replace('—', '-')
     return category
 
 
@@ -1259,7 +1323,7 @@ def _clean_value(value):  # pylint: disable=R0915
     value = value.replace('---', '—')
     value = value.replace('--', '–')
     value = re.sub(r' -(?=[0-9])', ' –', value)
-    value = re.sub(r'\[hyphen\]', '-', value, flags=re.IGNORECASE)
+    value = value.replace('[hyphen]', '-')
     value = value.replace("'", '’')
     value = value.replace('“', '"')
     value = value.replace('”', '"')
@@ -1270,12 +1334,12 @@ def _clean_value(value):  # pylint: disable=R0915
     value = value.replace('»', '"')
     value = re.sub(r'"([^"]*)"', '“\\1”', value)
     value = value.replace('"', '[unmatched quot]')
-    value = re.sub(r'\[lquot\]', '“', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[rquot\]', '”', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[lfquot\]', '«', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[rfquot\]', '»', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[quot\]', '"', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[apos\]', "'", value, flags=re.IGNORECASE)
+    value = value.replace('[lquot]', '“')
+    value = value.replace('[rquot]', '”')
+    value = value.replace('[lfquot]', '«')
+    value = value.replace('[rfquot]', '»')
+    value = value.replace('[quot]', '"')
+    value = value.replace('[apos]', "'")
     while True:
         value_old = value
         value = re.sub(r'[“”]([^\[]*)\]', '"\\1]', value)
@@ -1285,27 +1349,6 @@ def _clean_value(value):  # pylint: disable=R0915
         value = re.sub(r'–([^\[]*)\]', "--\\1]", value)
         if value == value_old:
             break
-
-    value = re.sub(r'\[unique\]', '[unique]', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[threat\]', '[threat]', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[attack\]', '[attack]', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[defense\]', '[defense]', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[willpower\]', '[willpower]', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[leadership\]', '[leadership]', value,
-                   flags=re.IGNORECASE)
-    value = re.sub(r'\[lore\]', '[lore]', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[spirit\]', '[spirit]', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[tactics\]', '[tactics]', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[baggins\]', '[baggins]', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[fellowship\]', '[fellowship]', value,
-                   flags=re.IGNORECASE)
-    value = re.sub(r'\[sunny\]', '[sunny]', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[cloudy\]', '[cloudy]', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[rainy\]', '[rainy]', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[stormy\]', '[stormy]', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[sailing\]', '[sailing]', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[eos\]', '[eos]', value, flags=re.IGNORECASE)
-    value = re.sub(r'\[pp\]', '[pp]', value, flags=re.IGNORECASE)
 
     value = re.sub(r' +(?=\n)', '', value)
     value = re.sub(r' +', ' ', value)
@@ -1343,9 +1386,9 @@ def _clean_data(data):
                         value = value.replace('[name]', card_name)
 
                 value = _clean_value(value)
-                if key != CARD_DECK_RULES:
-                    value = re.sub(r'\[([^\W\d_a-z][^\]]+)\]', "[bi]\\1[/bi]",
-                                   value)
+#                if key != CARD_DECK_RULES:
+#                    value = re.sub(r'\[([^\W\d_a-z][^\]]+)\]', "[bi]\\1[/bi]",
+#                                   value)
 
                 row[key] = value
 
@@ -3317,22 +3360,37 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
 
         for key, value in row.items():
-            if isinstance(value, str) and '[unmatched quot]' in value:
-                message = ('Unmatched quote symbol in {} column for row '
-                           '#{}{}'.format(key, i, scratch))
-                logging.error(message)
-                if not card_scratch:
-                    errors.append(message)
-                else:
-                    broken_set_ids.add(set_id)
-            elif value == '#REF!':
+            if value == '#REF!':
                 message = ('Reference error in {} column for row '
-                           '#{}{}'.format(key, i, scratch))
+                           '#{}{}'.format(key.replace('Back_', 'Back '), i,
+                                          scratch))
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)
                 else:
                     broken_set_ids.add(set_id)
+            elif isinstance(value, str) and '[unmatched quot]' in value:
+                message = ('Unmatched quote symbol in {} column for row '
+                           '#{}{}'.format(key.replace('Back_', 'Back '), i,
+                                          scratch))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
+
+            if isinstance(value, str) and key != CARD_DECK_RULES:
+                cleaned_value = _clean_tags(value)
+                if key == CARD_SET:
+                    cleaned_value = cleaned_value.replace('[filtered set]', '')
+                elif key in (CARD_FLAVOUR, BACK_PREFIX + CARD_FLAVOUR):
+                    cleaned_value = cleaned_value.replace('[...]', '')
+
+                if '[' in cleaned_value or ']' in cleaned_value:
+                    message = ('Possibly unmatched square bracket symbol in {} '
+                               'column for row #{}{}'.format(
+                                   key.replace('Back_', 'Back '), i, scratch))
+                    logging.error(message)
 
         if (card_deck_rules is not None and
                 card_type not in CARD_TYPES_DECK_RULES):
@@ -3385,12 +3443,36 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 if key == CARD_ADVENTURE and card_type == 'Hero':
                     continue
 
-                if isinstance(value, str) and '[unmatched quot]' in value:
+                if value == '#REF!':
+                    logging.error(
+                        'Reference error in %s column for card ID %s in %s '
+                        'translations, row #%s', key.replace('Back_', 'Back '),
+                        card_id, lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                elif isinstance(value, str) and '[unmatched quot]' in value:
                     logging.error(
                         'Unmatched quote symbol in %s column for card '
                         'ID %s in %s translations, row #%s',
                         key.replace('Back_', 'Back '), card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+                if isinstance(value, str):
+                    cleaned_value = _clean_tags(value)
+                    if key in (CARD_FLAVOUR, BACK_PREFIX + CARD_FLAVOUR):
+                        cleaned_value = cleaned_value.replace('[...]', '')
+
+                    if lang == 'French':
+                        cleaned_value = re.sub(
+                            r'(?:\[Vaillance\]|\[Ressource\]|\[Organisation\]|'
+                            r'\[Qu\u00eate\]|\[Voyage\]|\[Rencontre\]|'
+                            r'\[Combat\]|\[Restauration\]) ', '',
+                            cleaned_value)
+
+                    if '[' in cleaned_value or ']' in cleaned_value:
+                        logging.error(
+                            'Possibly unmatched square bracket symbol in %s '
+                            'column for card ID %s in %s translations, '
+                            'row #%s', key.replace('Back_', 'Back '), card_id,
+                            lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                 if not value and row.get(key):
                     logging.error(
