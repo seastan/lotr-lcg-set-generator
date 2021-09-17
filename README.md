@@ -317,7 +317,7 @@ Please note that all tags are case-sensitive.
 - `[right]` ... `[/right]`: right alignment
 - `[b]` ... `[/b]`: bold text
 - `[i]` ... `[/i]`: italic text
-- `[bi]` ... `[/bi]`: bold + italic text
+- `[bi]` ... `[/bi]` or `{` ... `}`: bold + italic text
 - `[u]` ... `[/u]`: underlined text
 - `[strike]` ... `[/strike]`: strikethrough text
 - `[red]` ... `[/red]`: red (#8B1C23) text
@@ -336,6 +336,8 @@ Please note that all tags are case-sensitive.
 - `[name]`: actual card name
 - `[lsb]`: [
 - `[rsb]`: ]
+- `[lfb]`: {
+- `[rfb]`: }
 - `[lquot]`: unmatched left quote
 - `[rquot]`: unmatched right quote
 - `[lfquot]`: unmatched French left quote
