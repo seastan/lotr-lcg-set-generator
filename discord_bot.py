@@ -1693,8 +1693,8 @@ Card "{}" (set "{}") has been updated:
                 if card.get(lotr.CARD_DISCORD_CHANNEL):
                     channel_name = card[lotr.CARD_DISCORD_CHANNEL]
                     if channel_name not in self.channels:
-                        raise DiscordError('Channel "{}" not found'.format(
-                            channel_name))
+                        logging.warning('Channel "%s" not found', channel_name)
+                        continue
 
                     res = """
 The card has been updated:
@@ -1706,8 +1706,9 @@ The card has been updated:
                     await self._send_channel(channel, res)
                 else:
                     if card[lotr.CARD_DISCORD_CATEGORY] not in self.categories:
-                        raise DiscordError('Category "{}" not found'.format(
-                            card[lotr.CARD_DISCORD_CATEGORY]))
+                        logging.warning('Category "%s" not found',
+                                        card[lotr.CARD_DISCORD_CATEGORY])
+                        continue
 
                     if (card[lotr.CARD_DISCORD_CATEGORY]
                             not in self.general_channels):
