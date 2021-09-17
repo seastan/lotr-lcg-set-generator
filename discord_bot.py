@@ -524,6 +524,29 @@ def find_card_matches(data, command, this=False):
     return matches, num
 
 
+def update_emojis(text):
+    """ Update emojis in the text.
+    """
+    text = text.replace('[willpower]', EMOJIS['[willpower]'])
+    text = text.replace('[threat]', EMOJIS['[threat]'])
+    text = text.replace('[attack]', EMOJIS['[attack]'])
+    text = text.replace('[defense]', EMOJIS['[defense]'])
+    text = text.replace('[leadership]', EMOJIS['[leadership]'])
+    text = text.replace('[spirit]', EMOJIS['[spirit]'])
+    text = text.replace('[tactics]', EMOJIS['[tactics]'])
+    text = text.replace('[lore]', EMOJIS['[lore]'])
+    text = text.replace('[baggins]', EMOJIS['[baggins]'])
+    text = text.replace('[fellowship]', EMOJIS['[fellowship]'])
+    text = text.replace('[unique]', EMOJIS['[unique]'])
+    text = text.replace('[sunny]', EMOJIS['[sunny]'])
+    text = text.replace('[cloudy]', EMOJIS['[cloudy]'])
+    text = text.replace('[rainy]', EMOJIS['[rainy]'])
+    text = text.replace('[stormy]', EMOJIS['[stormy]'])
+    text = text.replace('[sailing]', EMOJIS['[sailing]'])
+    text = text.replace('[eos]', EMOJIS['[eos]'])
+    text = text.replace('[pp]', EMOJIS['[pp]'])
+    return text
+
 def update_text(text):  # pylint: disable=R0915
     """ Update card text.
     """
@@ -547,35 +570,13 @@ def update_text(text):  # pylint: disable=R0915
     text = re.sub(r'\[b\](.+?)\[\/b\]', _fix_bi_in_b, text, flags=re.DOTALL)
     text = re.sub(r'\[i\](.+?)\[\/i\]', _fix_bi_in_i, text, flags=re.DOTALL)
 
-    text = text.replace('[bi]', '***')
-    text = text.replace('[/bi]', '***')
-    text = text.replace('[b]', '**')
-    text = text.replace('[/b]', '**')
-    text = text.replace('[i]', '*')
-    text = text.replace('[/i]', '*')
-    text = text.replace('[u]', '`__')
-    text = text.replace('[/u]', '__')
-    text = text.replace('[strike]', '~~')
-    text = text.replace('[/strike]', '~~')
+    text = text.replace('[bi]', '***').replace('[/bi]', '***')
+    text = text.replace('[b]', '**').replace('[/b]', '**')
+    text = text.replace('[i]', '*').replace('[/i]', '*')
+    text = text.replace('[u]', '__').replace('[/u]', '__')
+    text = text.replace('[strike]', '~~').replace('[/strike]', '~~')
 
-    text = text.replace('[willpower]', EMOJIS['[willpower]'])
-    text = text.replace('[threat]', EMOJIS['[threat]'])
-    text = text.replace('[attack]', EMOJIS['[attack]'])
-    text = text.replace('[defense]', EMOJIS['[defense]'])
-    text = text.replace('[leadership]', EMOJIS['[leadership]'])
-    text = text.replace('[spirit]', EMOJIS['[spirit]'])
-    text = text.replace('[tactics]', EMOJIS['[tactics]'])
-    text = text.replace('[lore]', EMOJIS['[lore]'])
-    text = text.replace('[baggins]', EMOJIS['[baggins]'])
-    text = text.replace('[fellowship]', EMOJIS['[fellowship]'])
-    text = text.replace('[unique]', EMOJIS['[unique]'])
-    text = text.replace('[sunny]', EMOJIS['[sunny]'])
-    text = text.replace('[cloudy]', EMOJIS['[cloudy]'])
-    text = text.replace('[rainy]', EMOJIS['[rainy]'])
-    text = text.replace('[stormy]', EMOJIS['[stormy]'])
-    text = text.replace('[sailing]', EMOJIS['[sailing]'])
-    text = text.replace('[eos]', EMOJIS['[eos]'])
-    text = text.replace('[pp]', EMOJIS['[pp]'])
+    text = update_emojis(text)
 
     text = text.replace('[', '`[')
     text = text.replace(']', ']`')
@@ -2351,6 +2352,9 @@ Targets removed.
         users = [m.display_name for m in self.guilds[0].members
                  if m.display_name not in ignore_users]
         users = [re.sub(r'[^\u0000-\uffff]+', '', u).strip() for u in users]
+        users = [re.sub(r'[,./<>?;\':"\[\]{}]$', '', u).strip() for u in users]
+        users = [u.replace('[', '[[').replace(']', ']]').replace('[[', '[lsb]')
+                 .replace(']]', '[rsb]') for u in users]
         users = sorted(list(set(users)), key=str.casefold)
         return ', '.join(users)
 
