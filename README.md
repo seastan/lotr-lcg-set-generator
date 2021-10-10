@@ -195,7 +195,7 @@ or restarting Google Drive), you may create two additional batch scripts with yo
 - `run_setup.bat`
 - `run_cleanup.bat`
 
-They will be called inside `run_all.bat` automatically.
+They will be called inside `run_all.bat` automatically.  See `run_setup.bat.example`.
 
 Also, see `configuration.nightly.yaml` for a configuration example.
 
