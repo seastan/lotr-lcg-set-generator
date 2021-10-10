@@ -1,0 +1,5 @@
+tasklist /fi "ImageName eq GoogleDriveFS.exe" /fo csv 2>NUL | find /I "GoogleDriveFS.exe">NUL
+if "%ERRORLEVEL%"=="1" (
+  start /B cmd /c "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Google Drive.lnk"
+  timeout /t 300
+)
