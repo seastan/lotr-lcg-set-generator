@@ -9236,12 +9236,20 @@ def upload_dragncards(conf, sets, updated_sets):  # pylint: disable=R0912,R0915
                 if os.path.exists(output_path):
                     for _, _, filenames in os.walk(output_path):
                         for filename in filenames:
+                            logging.info(os.path.join(output_path, filename))
                             try:
                                 scp_client.put(
                                     os.path.join(output_path, filename),
                                     conf['dragncards_remote_image_path'])
                             except Exception:  # pylint: disable=W0703
+                                try:
+                                    client.close()
+                                except Exception:  # pylint: disable=W0703
+                                    pass
+
                                 time.sleep(SCP_SLEEP)
+                                client = _get_ssh_client(conf)
+                                scp_client = SCPClient(client.get_transport())
                                 scp_client.put(
                                     os.path.join(output_path, filename),
                                     conf['dragncards_remote_image_path'])
@@ -9273,12 +9281,20 @@ def upload_dragncards(conf, sets, updated_sets):  # pylint: disable=R0912,R0915
                         shutil.copyfile(os.path.join(output_path, filename),
                                         os.path.join(temp_path, new_filename))
 
+                        logging.info(os.path.join(temp_path, new_filename))
                         try:
                             scp_client.put(
                                 os.path.join(temp_path, new_filename),
                                 conf['dragncards_remote_deck_path'])
                         except Exception:  # pylint: disable=W0703
+                            try:
+                                client.close()
+                            except Exception:  # pylint: disable=W0703
+                                pass
+
                             time.sleep(SCP_SLEEP)
+                            client = _get_ssh_client(conf)
+                            scp_client = SCPClient(client.get_transport())
                             scp_client.put(
                                 os.path.join(temp_path, new_filename),
                                 conf['dragncards_remote_deck_path'])
@@ -9298,18 +9314,29 @@ def upload_dragncards(conf, sets, updated_sets):  # pylint: disable=R0912,R0915
             if (conf['dragncards_remote_json_path'] and
                     conf['dragncards_json'] and
                     os.path.exists(output_path)):
+                logging.info(output_path)
                 try:
                     scp_client.put(output_path,
                                    conf['dragncards_remote_json_path'])
                 except Exception:  # pylint: disable=W0703
+                    try:
+                        client.close()
+                    except Exception:  # pylint: disable=W0703
+                        pass
+
                     time.sleep(SCP_SLEEP)
+                    client = _get_ssh_client(conf)
+                    scp_client = SCPClient(client.get_transport())
                     scp_client.put(output_path,
                                    conf['dragncards_remote_json_path'])
 
                 logging.info('Uploaded %s to DragnCards host',
                              '{}.json'.format(escape_filename(set_name)))
     finally:
-        client.close()
+        try:
+            client.close()
+        except Exception:  # pylint: disable=W0703
+            pass
 
     logging.info('...Uploading outputs to DragnCards (%ss)',
                  round(time.time() - timestamp, 3))
