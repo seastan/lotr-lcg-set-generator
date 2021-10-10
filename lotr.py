@@ -9236,7 +9236,8 @@ def upload_dragncards(conf, sets, updated_sets):  # pylint: disable=R0912,R0915
                 if os.path.exists(output_path):
                     for _, _, filenames in os.walk(output_path):
                         for filename in filenames:
-                            logging.info(os.path.join(output_path, filename))
+                            logging.info('Uploading %s...',
+                                         os.path.join(output_path, filename))
                             try:
                                 scp_client.put(
                                     os.path.join(output_path, filename),
@@ -9281,7 +9282,8 @@ def upload_dragncards(conf, sets, updated_sets):  # pylint: disable=R0912,R0915
                         shutil.copyfile(os.path.join(output_path, filename),
                                         os.path.join(temp_path, new_filename))
 
-                        logging.info(os.path.join(temp_path, new_filename))
+                        logging.info('Uploading %s...',
+                                     os.path.join(temp_path, new_filename))
                         try:
                             scp_client.put(
                                 os.path.join(temp_path, new_filename),
@@ -9314,7 +9316,7 @@ def upload_dragncards(conf, sets, updated_sets):  # pylint: disable=R0912,R0915
             if (conf['dragncards_remote_json_path'] and
                     conf['dragncards_json'] and
                     os.path.exists(output_path)):
-                logging.info(output_path)
+                logging.info('Uploading %s...', output_path)
                 try:
                     scp_client.put(output_path,
                                    conf['dragncards_remote_json_path'])
