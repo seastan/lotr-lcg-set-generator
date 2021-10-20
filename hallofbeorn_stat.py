@@ -52,7 +52,7 @@ def filter_data(data):
             if c['type_name'] in ('Hero', 'Ally', 'Attachment', 'Event',
                                   'Player Side Quest', 'Contract')
             and c['pack_name'] not in (
-                'Two-Player Limited Edition Starter',
+                'Two-Player Limited Edition Starter', 'Revised Core Set',
                 'The Massing at Osgiliath', 'The Battle of Lake-town',
                 'The Stone of Erech', 'Fog on the Barrow-downs',
                 'The Old Forest', 'Murder at the Prancing Pony',
@@ -64,7 +64,9 @@ def filter_data(data):
                 'The Betrayal of Mîm', 'The Fall of Nargothrond')
             and 'Preorder Promotion' not in c['pack_name']
             and c.get('subtype_code') != 'boon'
-            and c['sphere_name'] not in ('Baggins', 'Fellowship')]
+            and c['sphere_name'] not in ('Baggins', 'Fellowship')
+            and (c['pack_name'] not in ('The Scouring of the Shire',)
+                 or c['type_name'] != 'Hero')]
     return data
 
 
