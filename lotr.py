@@ -7903,7 +7903,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                     output_filename = '{}.png'.format(card_name)
 
                 output_filename = _escape_hallofbeorn_filename(output_filename)
-                while output_filename in known_output_filenames:
+                while output_filename.lower() in known_output_filenames:
                     match = re.search(r'\-([0-9]+)\.png$', output_filename)
                     if match:
                         num = int(match.groups()[0]) + 1
@@ -7914,7 +7914,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                         output_filename = re.sub(r'\.png$', '-2.png',
                                                  output_filename)
 
-                known_output_filenames.add(output_filename)
+                known_output_filenames.add(output_filename.lower())
                 shutil.copyfile(os.path.join(output_path, filename),
                                 os.path.join(hallofbeorn_output_path,
                                              output_filename))
