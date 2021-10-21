@@ -1812,7 +1812,7 @@ Card "{}" has been updated:
             command = 'help'
         else:
             command = re.sub(r'^!cron ', '', message.content,
-                             flags=re.IGNORECASE).split('\n')[0]
+                             flags=re.IGNORECASE).split('\n')[0].strip()
 
         logging.info('Received cron command: %s', command)
         if command.lower().startswith('hello'):
@@ -2125,7 +2125,7 @@ Targets removed.
             command = 'help'
         else:
             command = re.sub(r'^!playtest ', '', message.content,
-                             flags=re.IGNORECASE).split('\n')[0]
+                             flags=re.IGNORECASE).split('\n')[0].strip()
 
         logging.info('Received playtest command: %s', command)
         if command.lower() == 'new':
@@ -2320,7 +2320,7 @@ Targets removed.
             command = 'help'
         else:
             command = re.sub(r'^!alepcard ', '', message.content,
-                             flags=re.IGNORECASE).split('\n')[0]
+                             flags=re.IGNORECASE).split('\n')[0].strip()
 
         logging.info('Received card command: %s', command)
 
@@ -2367,7 +2367,7 @@ Targets removed.
             command = 'help'
         else:
             command = re.sub(r'^!stat ', '', message.content,
-                             flags=re.IGNORECASE).split('\n')[0]
+                             flags=re.IGNORECASE).split('\n')[0].strip()
 
         logging.info('Received stat command: %s', command)
 
@@ -2731,7 +2731,7 @@ Targets removed.
             command = 'help'
         else:
             command = re.sub(r'^!art ', '', message.content,
-                             flags=re.IGNORECASE).split('\n')[0]
+                             flags=re.IGNORECASE).split('\n')[0].strip()
 
         logging.info('Received art command: %s', command)
 
@@ -2934,7 +2934,7 @@ Targets removed.
             command = 'help'
         else:
             command = re.sub(r'^!image ', '', message.content,
-                             flags=re.IGNORECASE).split('\n')[0]
+                             flags=re.IGNORECASE).split('\n')[0].strip()
 
         logging.info('Received image command: %s', command)
 
