@@ -6175,6 +6175,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
     processed_images = _collect_artwork_images(
         conf, os.path.join(artwork_path, PROCESSED_ARTWORK_FOLDER))
     images = {**images, **processed_images}
+    images = {k:[v, False] for k, v in images.items()}
     custom_images = _collect_custom_images(
         os.path.join(artwork_path, IMAGES_CUSTOM_FOLDER))
     common_custom_images = _collect_custom_images(
@@ -6215,8 +6216,10 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
             encounter_sets[encounter_set] = (
                 encounter_sets.get(encounter_set, 0) + quantity)
 
-        filename = images.get('{}_{}'.format(card.attrib['id'], 'A'))
-        if filename:
+        image_id = '{}_{}'.format(card.attrib['id'], 'A')
+        if image_id in images:
+            filename = images[image_id][0]
+            images[image_id][1] = True
             prop = _get_property(card, 'Artwork')
             prop.set('value', os.path.split(filename)[-1])
             prop.tail = '\n      '
@@ -6237,12 +6240,13 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                 prop.tail = '\n      '
 
         if card_type == 'Presentation':
-            filename = images.get('{}_{}_{}'.format(
-                card.attrib['id'], 'Top', lang))
-            if not filename:
-                filename = images.get('{}_{}'.format(card.attrib['id'], 'Top'))
+            image_id = '{}_{}_{}'.format(card.attrib['id'], 'Top', lang)
+            if image_id not in images:
+                image_id = '{}_{}'.format(card.attrib['id'], 'Top')
 
-            if filename:
+            if image_id in images:
+                filename = images[image_id][0]
+                images[image_id][1] = True
                 prop = _get_property(card, 'ArtworkTop')
                 prop.set('value', os.path.split(filename)[-1])
                 prop.tail = '\n      '
@@ -6253,12 +6257,13 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                 prop.set('value', str(int(os.path.getmtime(filename))))
                 prop.tail = '\n      '
 
-            filename = images.get('{}_{}_{}'.format(
-                card.attrib['id'], 'Bottom', lang))
-            if not filename:
-                filename = images.get('{}_{}'.format(card.attrib['id'], 'Bottom'))
+            image_id = '{}_{}_{}'.format(card.attrib['id'], 'Bottom', lang)
+            if image_id not in images:
+                image_id = '{}_{}'.format(card.attrib['id'], 'Bottom')
 
-            if filename:
+            if image_id in images:
+                filename = images[image_id][0]
+                images[image_id][1] = True
                 prop = _get_property(card, 'ArtworkBottom')
                 prop.set('value', os.path.split(filename)[-1])
                 prop.tail = '\n      '
@@ -6273,8 +6278,10 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
         if alternate:
             alternate = alternate[0]
 
-        filename = images.get('{}_{}'.format(card.attrib['id'], 'B'))
-        if alternate and filename:
+        image_id = '{}_{}'.format(card.attrib['id'], 'B')
+        if alternate and image_id in images:
+            filename = images[image_id][0]
+            images[image_id][1] = True
             properties = [p for p in alternate]  # pylint: disable=R1721
             if properties:
                 properties[-1].tail = '{}  '.format(properties[-1].tail)
@@ -6371,6 +6378,16 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                     os.path.getsize(icon_images[image]),
                     int(os.path.getmtime(icon_images[image]))))
                 prop.tail = '\n      '
+
+    for filename, is_used in images.values():
+        if is_used:
+            continue
+
+        parts = filename.split('_')
+        if len(parts) == 3 and parts[2] != lang:
+            continue
+
+        logging.error('Unused image detected: %s', filename)
 
     for card in root[0]:
         if card.attrib['id'] in encounter_cards:
