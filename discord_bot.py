@@ -34,7 +34,12 @@ CRON_ERRORS_CMD = './cron_errors.sh'
 CRON_LOG_CMD = './cron_log.sh'
 RCLONE_ART_CMD = './rclone_art.sh "{}"'
 RCLONE_ART_FOLDER_CMD = "rclone lsjson 'ALePCardImages:/{}/'"
+RCLONE_IMAGE_FOLDER_CMD = "rclone lsjson 'ALePRenderedImages:/{}/'"
 RCLONE_COPY_IMAGE_CMD = "rclone copy 'ALePRenderedImages:/{}/{}' '{}/'"
+RCLONE_COPY_CLOUD_IMAGE_CMD = \
+    "rclone copy 'ALePRenderedImages:/{}/{}' 'ALePRenderedImages:/{}/'"
+RCLONE_MOVE_CLOUD_ART_CMD = \
+    "rclone move 'ALePCardImages:/{}/{}' 'ALePCardImages:/{}/'"
 RCLONE_RENDERED_FOLDER_CMD = "rclone lsjson 'ALePRenderedImages:/{}/'"
 
 DIRECT_URL_REGEX = r'itemJson: \[[^,]+,"[^"]+","([^"]+)"'
@@ -55,6 +60,7 @@ ARCHIVE_CATEGORY = 'Archive'
 CARD_DECK_SECTION = '_Deck Section'
 CRON_CHANNEL = 'cron'
 PLAYTEST_CHANNEL = 'playtesting-checklist'
+SCRATCH_FOLDER = '_Scratch'
 UPDATES_CHANNEL = 'spreadsheet-updates'
 GENERAL_CATEGORIES = {
     'Text Channels', 'Division of Labor', 'Player Card Design', 'Printing',
@@ -1000,46 +1006,6 @@ def get_quest_stat(cards):  # pylint: disable=R0912,R0915
     return res
 
 
-async def get_artwork_files(set_id):
-    """ Get the list of artwork files for the set (both remote and local).
-    """
-    path = CONF.get('artwork_destination_path')
-    if not path:
-        raise RCloneFolderError('no artwork folder specified on the '
-                                'server')
-
-    stdout, stderr = await run_shell(RCLONE_ART_FOLDER_CMD.format(set_id))
-    try:
-        filenames = [(f['Name'], f['ModTime']) for f in json.loads(stdout)]
-        filenames.sort(key=lambda f: (f[1], f[0]), reverse=True)
-        filenames = [f[0] for f in filenames]
-    except Exception:
-        message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
-                                                                 stderr)
-        logging.error(message)
-        create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
-        raise RCloneFolderError(message)
-
-    folder = os.path.join(path, set_id)
-    if os.path.exists(folder):
-        sorted_filenames = []
-        for _, _, local_filenames in os.walk(folder):
-            for filename in local_filenames:
-                sorted_filenames.append((
-                    filename,
-                    int(os.path.getmtime(
-                        os.path.join(folder, filename)))))
-
-            break
-
-        sorted_filenames.sort(key=lambda f: (f[1], f[0]), reverse=True)
-        sorted_filenames = [f[0] for f in sorted_filenames]
-        for filename in sorted_filenames:
-            filenames.insert(0, filename)
-
-    return filenames
-
-
 def format_diffs(old_value, new_value):
     """ Format differences.
     """
@@ -1454,7 +1420,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
         old_channel_names = []
         try:
             for change in changes:
-                if len(change) != 2:
+                if len(change) != 3:
                     raise FormatError('Incorrect change format: {}'
                                       .format(change))
 
@@ -1516,6 +1482,16 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                                        .format(old_category_name,
                                                change[1][1]))
                     await asyncio.sleep(CMD_SLEEP_TIME)
+                    res = await self._move_artwork_files(
+                        change[2]['card_id'], change[2]['old_set_id'],
+                        change[2]['new_set_id'])
+                    if res:
+                        await channel.send(res)
+                        await asyncio.sleep(CMD_SLEEP_TIME)
+
+                    await self._copy_image_files(
+                        change[2]['card_id'], change[2]['old_set_id'],
+                        change[2]['new_set_id'])
                 elif change[0] == 'remove':
                     if change[1] not in self.channels:
                         raise DiscordError('Channel "{}" not found'.format(
@@ -1539,6 +1515,12 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                                        'to "{}"'.format(old_category_name,
                                                         ARCHIVE_CATEGORY))
                     await asyncio.sleep(CMD_SLEEP_TIME)
+                    res = await self._move_artwork_files(
+                        change[2]['card_id'], change[2]['old_set_id'],
+                        SCRATCH_FOLDER)
+                    if res:
+                        await channel.send(res)
+                        await asyncio.sleep(CMD_SLEEP_TIME)
                 elif change[0] == 'rename':
                     if len(change[1]) != 2:
                         raise FormatError('Incorrect change format: {}'.format(
@@ -2520,7 +2502,7 @@ Targets removed.
         filename = filename.replace(' ', '_')
 
         content = await get_attachment_content(message)
-        folder = os.path.join(artwork_destination_path, '_Scratch')
+        folder = os.path.join(artwork_destination_path, SCRATCH_FOLDER)
         path = os.path.join(folder, filename)
 
         async with art_lock:
@@ -2533,6 +2515,105 @@ Targets removed.
             self.rclone_art = True
 
         return ''
+
+
+    async def _get_artwork_files(self, set_id):
+        """ Get the ordered list of artwork files for the set.
+        """
+        async with rclone_art_lock:
+            await self._rclone_art()
+
+        stdout, stderr = await run_shell(RCLONE_ART_FOLDER_CMD.format(set_id))
+        try:
+            filenames = [(f['Name'], f['ModTime']) for f in json.loads(stdout)]
+            filenames.sort(key=lambda f: (f[1], f[0]), reverse=True)
+            filenames = [f[0] for f in filenames]
+        except Exception:
+            if 'directory not found' in stderr:
+                return []
+
+            message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
+                                                                     stderr)
+            logging.error(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
+            raise RCloneFolderError(message)
+
+        return filenames
+
+
+    async def _get_image_files(self, set_folder):
+        """ Get the list of rendered images for the set.
+        """
+        stdout, stderr = await run_shell(
+            RCLONE_IMAGE_FOLDER_CMD.format(set_folder))
+        try:
+            filenames = [f['Name'] for f in json.loads(stdout)]
+        except Exception:
+            if 'directory not found' in stderr:
+                return []
+
+            message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
+                                                                     stderr)
+            logging.error(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
+            raise RCloneFolderError(message)
+
+        return filenames
+
+
+    async def _move_artwork_files(self, card_id, old_set_id, new_set_id):
+        """ Move artwork files for the card.
+        """
+        return_message = ''
+        filenames = await self._get_artwork_files(old_set_id)
+        for filename in filenames:
+            if filename.split('_')[0] != card_id:
+                continue
+
+            stdout, stderr = await run_shell(
+                RCLONE_MOVE_CLOUD_ART_CMD.format(
+                    old_set_id, filename, new_set_id))
+            if stdout or stderr:
+                message = 'RClone failed, stdout: {}, stderr: {}'.format(
+                    stdout, stderr)
+                logging.error(message)
+                create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
+                return_message = 'Failing to move artwork files for the card'
+                break
+            else:
+                return_message = \
+                    'Artwork files for the card were successfully moved'
+
+        return return_message
+
+
+    async def _copy_image_files(self, card_id, old_set_id, new_set_id):
+        """ Copy rendered images for the card.
+        """
+        data = await read_card_data()
+        if (old_set_id not in data['set_ids'] or
+                new_set_id not in data['set_ids']):
+            return
+
+        old_set_folder = '{}.English'.format(
+            lotr.escape_filename(data['set_ids'][old_set_id]))
+        new_set_folder = '{}.English'.format(
+            lotr.escape_filename(data['set_ids'][new_set_id]))
+
+        filenames = await self._get_image_files(old_set_folder)
+        for filename in filenames:
+            if '-{}'.format(card_id) not in filename:
+                continue
+
+            stdout, stderr = await run_shell(
+                RCLONE_COPY_CLOUD_IMAGE_CMD.format(
+                    old_set_folder, filename, new_set_folder))
+            if stdout or stderr:
+                message = 'RClone failed, stdout: {}, stderr: {}'.format(
+                    stdout, stderr)
+                logging.error(message)
+                create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
+                break
 
 
     async def _verify_artwork(self, value):  # pylint: disable=R0912,R0914,R0915
@@ -2556,7 +2637,7 @@ Targets removed.
                 return 'no cards found for the set'
 
         matches.sort(key=lambda card: (card[lotr.ROW_COLUMN]))
-        filenames = await get_artwork_files(matches[0][lotr.CARD_SET])
+        filenames = await self._get_artwork_files(matches[0][lotr.CARD_SET])
 
         file_data = {}
         duplicate_artwork = []
@@ -2661,7 +2742,7 @@ Targets removed.
                 return 'no cards found for the set'
 
         matches.sort(key=lambda card: (card[lotr.ROW_COLUMN]))
-        filenames = await get_artwork_files(matches[0][lotr.CARD_SET])
+        filenames = await self._get_artwork_files(matches[0][lotr.CARD_SET])
 
         file_data = {}
         for filename in filenames:

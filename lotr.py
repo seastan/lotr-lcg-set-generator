@@ -3728,7 +3728,8 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
                     channel_diffs.append(
                         (None,
                          (new_dict[card_id][CARD_DISCORD_CHANNEL],
-                          new_dict[card_id][CARD_DISCORD_CATEGORY])))
+                          new_dict[card_id][CARD_DISCORD_CATEGORY]),
+                         (card_id, None, new_dict[card_id][CARD_SET])))
             elif old_dict[card_id] != new_dict[card_id]:
                 if not new_dict[card_id].get(CARD_BOT_DISABLED):
                     diffs = _get_card_diffs(old_dict[card_id],
@@ -3752,7 +3753,9 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
                         (old_dict[card_id][CARD_DISCORD_CHANNEL],
                          old_dict[card_id][CARD_DISCORD_CATEGORY]),
                         (new_dict[card_id][CARD_DISCORD_CHANNEL],
-                         new_dict[card_id][CARD_DISCORD_CATEGORY])))
+                         new_dict[card_id][CARD_DISCORD_CATEGORY]),
+                        (card_id, old_dict[card_id][CARD_SET],
+                         new_dict[card_id][CARD_SET])))
 
         for card_id in old_dict:
             if card_id not in new_dict:
@@ -3760,7 +3763,8 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
                     channel_diffs.append(
                         ((old_dict[card_id][CARD_DISCORD_CHANNEL],
                           old_dict[card_id][CARD_DISCORD_CATEGORY]),
-                         None))
+                         None,
+                         (card_id, old_dict[card_id][CARD_SET], None)))
 
                 card_changes.append(('remove', card_id, {
                     CARD_NAME: old_dict[card_id][CARD_NAME],
@@ -3789,26 +3793,40 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
     channel_changes = []
     for diff in channel_diffs:
         if not diff[0]:
-            channel_changes.append(('add', diff[1]))
+            channel_changes.append(('add', diff[1], None))
         elif not diff[1]:
-            channel_changes.append(('remove', diff[0][0]))
+            channel_changes.append(
+                ('remove', diff[0][0],
+                 {'card_id': diff[2][0],
+                  'old_set_id': diff[2][1],
+                  'new_set_id': diff[2][2]}))
         elif diff[0][0] == diff[1][0]:
             if ('rename', (diff[0][1], diff[1][1])) not in category_changes:
-                channel_changes.append(('move', diff[1]))
+                channel_changes.append(
+                ('move', diff[1],
+                 {'card_id': diff[2][0],
+                  'old_set_id': diff[2][1],
+                  'new_set_id': diff[2][2]}))
         elif diff[0][1] == diff[1][1]:
-            channel_changes.append(('rename', (diff[0][0], diff[1][0])))
+            channel_changes.append(('rename', (diff[0][0], diff[1][0]), None))
         else:
             if ('rename', (diff[0][1], diff[1][1])) not in category_changes:
-                channel_changes.append(('move', (diff[0][0], diff[1][1])))
+                channel_changes.append(
+                    ('move', (diff[0][0], diff[1][1]),
+                     {'card_id': diff[2][0],
+                      'old_set_id': diff[2][1],
+                      'new_set_id': diff[2][2]}))
 
-            channel_changes.append(('rename', (diff[0][0], diff[1][0])))
+            channel_changes.append(('rename', (diff[0][0], diff[1][0]), None))
 
     set_names = [SETS[set_id][SET_NAME] for set_id in FOUND_SETS]
+    set_ids = {set_id:SETS[set_id][SET_NAME] for set_id in FOUND_SETS}
     set_codes = {
         (SETS[set_id][SET_HOB_CODE] or '').lower():SETS[set_id][SET_NAME]
         for set_id in FOUND_SETS}
     output = {'url': url,
               'sets': set_names,
+              'set_ids': set_ids,
               'set_codes': set_codes,
               'data': data}
     with open(DISCORD_CARD_DATA_PATH, 'w', encoding='utf-8') as obj:
