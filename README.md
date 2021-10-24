@@ -47,8 +47,6 @@ completely, you will need to download updates to that folder manually.
     <set ID>/<card ID>_<"A" or "B" or "Top" or "Bottom">_<card name and artist, format is not strict>.<"jpg" or "png">
     <set ID>/custom/
     <set ID>/custom/<custom image>
-    <set ID>/processed/
-    <set ID>/processed/<card ID>_<"A" or "B" or "Top" or "Bottom">_<card name and artist, format is not strict>.<"jpg" or "png">
     custom/
     custom/<custom image>
     icons/
@@ -64,16 +62,12 @@ completely, you will need to download updates to that folder manually.
     8a3273ca-1ccd-4e07-913b-766fcc49fe6f/9a677840-6c2d-4603-b2bd-c39464663913_A_Squire_of_the_Mark_Artist_Ekaterina_Burmak.png
     8a3273ca-1ccd-4e07-913b-766fcc49fe6f/custom/
     8a3273ca-1ccd-4e07-913b-766fcc49fe6f/custom/Encounter-Icons-Ambush-at-Erelas.png
-    8a3273ca-1ccd-4e07-913b-766fcc49fe6f/processed/
-    8a3273ca-1ccd-4e07-913b-766fcc49fe6f/processed/53dcedb3-3640-4655-a150-9d0dd534a126_A_Reclaim_the_Beacon_Artist_Jan_Pospisil.jpg
     custom/
     custom/Do-Not-Read-the-Following.png
     icons/
     icons/ALeP---Children-of-Eorl.png
     icons/Ambush-at-Erelas.png
     ```
-
-    Please note that the files in the `processed` subfolder take precedence over the files in the root folder.
 
 4. Install Google Drive (if it's not installed yet) and make sure that the folder with the artwork is being synced.
 

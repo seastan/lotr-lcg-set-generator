@@ -276,7 +276,6 @@ IMAGES_CUSTOM_FOLDER = 'custom'
 IMAGES_ICONS_FOLDER = 'icons'
 OCTGN_SET_XML = 'set.xml'
 PLAYTEST_SUFFIX = '-Playtest'
-PROCESSED_ARTWORK_FOLDER = 'processed'
 PROJECT_FOLDER = 'Frogmorton'
 TEXT_CHUNK_FLAG = b'tEXt'
 
@@ -6190,9 +6189,6 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
 
     artwork_path = os.path.join(conf['artwork_path'], set_id)
     images = _collect_artwork_images(conf, artwork_path)
-    processed_images = _collect_artwork_images(
-        conf, os.path.join(artwork_path, PROCESSED_ARTWORK_FOLDER))
-    images = {**images, **processed_images}
     images = {k:[v, False] for k, v in images.items()}
     custom_images = _collect_custom_images(
         os.path.join(artwork_path, IMAGES_CUSTOM_FOLDER))
@@ -6566,8 +6562,6 @@ def copy_raw_images(conf, set_id, set_name, lang):
     timestamp = time.time()
 
     artwork_path = os.path.join(conf['artwork_path'], set_id)
-    processed_artwork_path = os.path.join(artwork_path,
-                                          PROCESSED_ARTWORK_FOLDER)
     tree = ET.parse(os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id,
                                                                    lang)))
     root = tree.getroot()
@@ -6577,13 +6571,7 @@ def copy_raw_images(conf, set_id, set_name, lang):
                 filename = _find_properties(card, prop)
                 if filename:
                     filename = filename[0].attrib['value']
-                    if os.path.exists(os.path.join(processed_artwork_path,
-                                                   filename)):
-                        input_path = os.path.join(processed_artwork_path,
-                                                  filename)
-                    else:
-                        input_path = os.path.join(artwork_path, filename)
-
+                    input_path = os.path.join(artwork_path, filename)
                     output_path = os.path.join(IMAGES_RAW_PATH, filename)
                     if not os.path.exists(output_path):
                         shutil.copyfile(input_path, output_path)
@@ -6594,13 +6582,7 @@ def copy_raw_images(conf, set_id, set_name, lang):
                 filename = _find_properties(alternate, 'Artwork')
                 if filename:
                     filename = filename[0].attrib['value']
-                    if os.path.exists(os.path.join(processed_artwork_path,
-                                                   filename)):
-                        input_path = os.path.join(processed_artwork_path,
-                                                  filename)
-                    else:
-                        input_path = os.path.join(artwork_path, filename)
-
+                    input_path = os.path.join(artwork_path, filename)
                     output_path = os.path.join(IMAGES_RAW_PATH, filename)
                     if not os.path.exists(output_path):
                         shutil.copyfile(input_path, output_path)
