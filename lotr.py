@@ -3802,10 +3802,10 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
         elif diff[0][0] == diff[1][0]:
             if ('rename', (diff[0][1], diff[1][1])) not in category_changes:
                 channel_changes.append(
-                ('move', diff[1],
-                 {'card_id': diff[2][0],
-                  'old_set_id': diff[2][1],
-                  'new_set_id': diff[2][2]}))
+                    ('move', diff[1],
+                     {'card_id': diff[2][0],
+                      'old_set_id': diff[2][1],
+                      'new_set_id': diff[2][2]}))
         elif diff[0][1] == diff[1][1]:
             channel_changes.append(('rename', (diff[0][0], diff[1][0]), None))
         else:
