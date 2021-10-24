@@ -41,6 +41,7 @@ RCLONE_COPY_CLOUD_IMAGE_CMD = \
 RCLONE_MOVE_CLOUD_ART_CMD = \
     "rclone move 'ALePCardImages:/{}/{}' 'ALePCardImages:/{}/'"
 RCLONE_RENDERED_FOLDER_CMD = "rclone lsjson 'ALePRenderedImages:/{}/'"
+REMOTE_CRON_TIMESTAMP_CMD = './remote_cron_timestamp.sh "{}"'
 
 DIRECT_URL_REGEX = r'itemJson: \[[^,]+,"[^"]+","([^"]+)"'
 PREVIEW_URL = 'https://drive.google.com/file/d/{}/preview'
@@ -48,6 +49,7 @@ PREVIEW_URL = 'https://drive.google.com/file/d/{}/preview'
 CMD_SLEEP_TIME = 2
 IO_SLEEP_TIME = 1
 RCLONE_ART_SLEEP_TIME = 300
+REMOTE_CRON_TIMESTAMP_SLEEP_TIME = 1800
 WATCH_SLEEP_TIME = 5
 
 ERROR_SUBJECT_TEMPLATE = 'LotR Discord Bot ERROR: {}'
@@ -59,6 +61,7 @@ CHUNK_LIMIT = 1900
 ARCHIVE_CATEGORY = 'Archive'
 CARD_DECK_SECTION = '_Deck Section'
 CRON_CHANNEL = 'cron'
+NOTIFICATIONS_CHANNEL = 'notifications'
 PLAYTEST_CHANNEL = 'playtesting-checklist'
 SCRATCH_FOLDER = '_Scratch'
 UPDATES_CHANNEL = 'spreadsheet-updates'
@@ -197,6 +200,7 @@ def _incremental_id():
 incremental_id = _incremental_id()
 watch_changes_lock = asyncio.Lock()
 rclone_art_lock = asyncio.Lock()
+remote_cron_timestamp_lock = asyncio.Lock()
 playtest_lock = asyncio.Lock()
 art_lock = asyncio.Lock()
 
@@ -1115,8 +1119,10 @@ class MyClient(discord.Client):  # pylint: disable=R0902
 
     watch_changes_schedule_id = None
     rclone_art_schedule_id = None
+    remote_cron_timestamp_schedule_id = None
     archive_category = None
     cron_channel = None
+    notifications_channel = None
     playtest_channel = None
     updates_channel = None
     rclone_art = False
@@ -1150,6 +1156,16 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                 'error obtaining Cron channel: {}'.format(str(exc))))
 
         try:
+            self.notifications_channel = self.get_channel(
+                [c for c in self.get_all_channels()
+                 if str(c.type) == 'text' and
+                 c.name == NOTIFICATIONS_CHANNEL][0].id)
+        except Exception as exc:
+            logging.exception(str(exc))
+            create_mail(WARNING_SUBJECT_TEMPLATE.format(
+                'error obtaining Notifications channel: {}'.format(str(exc))))
+
+        try:
             self.playtest_channel = self.get_channel(
                 [c for c in self.get_all_channels()
                  if str(c.type) == 'text' and
@@ -1177,6 +1193,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
 
         self.loop.create_task(self._watch_changes_schedule())
         self.loop.create_task(self._rclone_art_schedule())
+        self.loop.create_task(self._remote_cron_timestamp_schedule())
         read_external_data()
         await read_card_data()
 
@@ -1277,6 +1294,29 @@ class MyClient(discord.Client):  # pylint: disable=R0902
             await asyncio.sleep(RCLONE_ART_SLEEP_TIME)
 
 
+    async def _remote_cron_timestamp_schedule(self):
+        logging.info('Starting remote cron timestamp schedule...')
+        my_id = incremental_id()
+        while True:
+            async with remote_cron_timestamp_lock:
+                if (not self.remote_cron_timestamp_schedule_id or
+                        self.remote_cron_timestamp_schedule_id < my_id):
+                    self.remote_cron_timestamp_schedule_id = my_id
+                    logging.info(
+                        'Acquiring remote cron timestamp schedule id: %s',
+                        my_id)
+                elif self.remote_cron_timestamp_schedule_id > my_id:
+                    logging.info(
+                        'Detected a new remote cron timestamp schedule id: '
+                        '%s, exiting with the old id: %s',
+                        self.remote_cron_timestamp_schedule_id, my_id)
+                    break
+
+                await self._remote_cron_timestamp()
+
+            await asyncio.sleep(REMOTE_CRON_TIMESTAMP_SLEEP_TIME)
+
+
     async def _watch_changes(self):
         try:
             for _, _, filenames in os.walk(CHANGES_PATH):
@@ -1348,6 +1388,15 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                         ignore_errors=True)
 
                 break
+
+
+    async def _remote_cron_timestamp(self):
+        stdout, _ = await run_shell(
+            REMOTE_CRON_TIMESTAMP_CMD.format(CONF.get('remote_logs_path')))
+        if stdout == '1' and self.notifications_channel:
+            await self._send_channel(
+                self.notifications_channel,
+                'New card images are available in Discord and DragnCards')
 
 
     async def _process_category_changes(self, data):  #pylint: disable=R0912

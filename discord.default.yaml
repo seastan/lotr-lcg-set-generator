@@ -10,5 +10,8 @@ token:
 # Path to card artwork destination folder
 artwork_destination_path: 
 
+# Path to remote logs folder (may be empty)
+remote_logs_path: 
+
 # Users to ignore (a comma-separated list)
 ignore_users: 
