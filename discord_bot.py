@@ -32,12 +32,13 @@ PLAYTEST_PATH = os.path.join('Discord', 'playtest.json')
 
 CRON_ERRORS_CMD = './cron_errors.sh'
 CRON_LOG_CMD = './cron_log.sh'
-RCLONE_ART_CMD = './rclone_art.sh "{}"'
+RCLONE_ART_CMD = "rclone copy '{}' 'ALePCardImages:/'"
 RCLONE_ART_FOLDER_CMD = "rclone lsjson 'ALePCardImages:/{}/'"
-RCLONE_IMAGE_FOLDER_CMD = "rclone lsjson 'ALePRenderedImages:/{}/'"
 RCLONE_COPY_IMAGE_CMD = "rclone copy 'ALePRenderedImages:/{}/{}' '{}/'"
 RCLONE_COPY_CLOUD_IMAGE_CMD = \
     "rclone copy 'ALePRenderedImages:/{}/{}' 'ALePRenderedImages:/{}/'"
+RCLONE_LOGS_CMD = "rclone copy 'ALePLogs:/' '{}/'"
+RCLONE_IMAGE_FOLDER_CMD = "rclone lsjson 'ALePRenderedImages:/{}/'"
 RCLONE_MOVE_CLOUD_ART_CMD = \
     "rclone move 'ALePCardImages:/{}/{}' 'ALePCardImages:/{}/'"
 RCLONE_RENDERED_FOLDER_CMD = "rclone lsjson 'ALePRenderedImages:/{}/'"
@@ -1365,7 +1366,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
         self.rclone_art = False
         stdout, stderr = await run_shell(
             RCLONE_ART_CMD.format(CONF.get('artwork_destination_path')))
-        if stdout != 'Done':
+        if stdout or stderr:
             message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
                                                                      stderr)
             logging.error(message)
@@ -1391,6 +1392,15 @@ class MyClient(discord.Client):  # pylint: disable=R0902
 
 
     async def _remote_cron_timestamp(self):
+        stdout, stderr = await run_shell(
+            RCLONE_LOGS_CMD.format(CONF.get('remote_logs_path')))
+        if stdout or stderr:
+            message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
+                                                                     stderr)
+            logging.error(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
+            return
+
         stdout, _ = await run_shell(
             REMOTE_CRON_TIMESTAMP_CMD.format(CONF.get('remote_logs_path')))
         if stdout == '1' and self.notifications_channel:
