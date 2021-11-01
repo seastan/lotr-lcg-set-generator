@@ -387,7 +387,7 @@ def rename_deck(session, deck_id, deck_name, actual_deck_name):
     """
     res = send_get(
         session,
-        'https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id={}&edit=Y'
+        'https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id={}&edit=Y'
         .format(deck_id))
     match = re.search(SESSIONID_REGEX, res)
     if not match:
@@ -558,7 +558,7 @@ Attempting to fix it automatically...
 2. Click Delete near {actual_deck_name} deck
 3. Find {deck_name} Backup deck in the list, click Save As, type "{deck_name}" and click Save
 4. Find {deck_name} deck in the list again, right click on the checkbox and copy its ID (after "chk_")
-5. Construct a URL https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id=<ID>
+5. Construct a URL https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id=<ID>
 6. Open https://wordpress.com/page/alongextendedparty.com/37 and login into ALeP account (if needed)
 7. Update the link to that URL
 """
@@ -570,7 +570,7 @@ Do the following:
 2. Click *Delete* near **{actual_deck_name}** deck
 3. Find **{deck_name} Backup** deck in the list, click *Save As*, type "{deck_name}" and click *Save*
 4. Find **{deck_name}** deck in the list again, right click on the checkbox and copy its ID (after "chk_")
-5. Construct a URL https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id=<ID>
+5. Construct a URL https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id=<ID>
 6. Open https://wordpress.com/page/alongextendedparty.com/37 and login into ALeP account (if needed)
 7. Update the link to that URL
 {DISCORD_USERS}"""
@@ -583,14 +583,14 @@ Do the following:
         body = f"""Do the following:
 1. Open https://wordpress.com/page/alongextendedparty.com/37 and login into ALeP account (if needed)
 2. Update the link to:
-https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id={new_deck_id}
+https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id={new_deck_id}
 """
         create_mail(ALERT_SUBJECT_TEMPLATE.format(message), body)
         discord_message = f"""Attempt to fix deck **{deck_name}** automatically succeeded!
 Do the following:
 1. Open https://wordpress.com/page/alongextendedparty.com/37 and login into ALeP account (if needed)
 2. Update the link to:
-https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id={new_deck_id}
+https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id={new_deck_id}
 {DISCORD_USERS}"""
         send_discord(discord_message)
         return content, new_deck_id
@@ -661,7 +661,7 @@ def add_deck(deck_name):
         json.dump(data, fobj, indent=4)
 
     deck_url = (
-        'https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id={}'
+        'https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id={}'
         .format(deck_id))
     message = 'Deck {} successfully added to monitoring, URL: {}'.format(
         deck_name, deck_url)
