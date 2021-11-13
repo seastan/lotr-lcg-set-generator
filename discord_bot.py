@@ -1324,7 +1324,9 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                 filenames.sort()
                 filenames = [f for f in filenames if f.endswith('.json')
                              and not f.startswith('__')]
-                if not filenames:
+                broken_filenames = [f for f in filenames if f.endswith('.json')
+                                    and f.startswith('__')]
+                if broken_filenames or not filenames:
                     break
 
                 logging.info('Processing files: %s', filenames)
@@ -1333,6 +1335,20 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                     try:
                         data = await read_json_data(path)
                         logging.info('Processing changes: %s', data)
+
+                        new_slots = len(
+                            [c for c in data.get('categories', [])
+                             if len(c) == 2 and c[0] == 'add']
+                            ) + len(
+                                [c for c in data.get('channels', [])
+                                 if len(c) == 3 and c[0] == 'add']
+                            )
+                        if (CHANNEL_LIMIT - len(list(self.get_all_channels()))
+                                < new_slots):
+                            raise DiscordError(
+                                'No free slots to create {} new channels'
+                                .format(new_slots))
+
                         await self._process_category_changes(data)
                         await self._process_channel_changes(data)
                         await self._process_card_changes(data)
@@ -1658,6 +1674,17 @@ class MyClient(discord.Client):  # pylint: disable=R0902
 
                     if (card[lotr.CARD_DISCORD_CATEGORY]
                             not in self.general_channels):
+                        if (CHANNEL_LIMIT - len(list(self.get_all_channels()))
+                                <= 0):
+                            message = (
+                                'No free slots to create a new channel '
+                                '"general" in category "{}"'
+                                .format(card[lotr.CARD_DISCORD_CATEGORY]))
+                            logging.error(message)
+                            create_mail(ERROR_SUBJECT_TEMPLATE.format(message),
+                                        message)
+                            continue
+
                         await self._add_general_channel(
                             card[lotr.CARD_DISCORD_CATEGORY])
 
@@ -1753,6 +1780,14 @@ The card has been updated:
 
                     if (card[lotr.CARD_DISCORD_CATEGORY]
                             not in self.general_channels):
+                        if (CHANNEL_LIMIT - len(list(self.get_all_channels()))
+                                <= 0):
+                            logging.warning(
+                                'No free slots to create a new channel '
+                                '"general" in category "%s"',
+                                card[lotr.CARD_DISCORD_CATEGORY])
+                            continue
+
                         await self._add_general_channel(
                             card[lotr.CARD_DISCORD_CATEGORY])
 
@@ -1770,11 +1805,6 @@ Card "{}" has been updated:
 
 
     async def _add_general_channel(self, category_name):
-        if CHANNEL_LIMIT - len(list(self.get_all_channels())) <= 0:
-            raise DiscordError(
-                'No free slots to create a new channel "general" in category '
-                '"{}"'.format(category_name))
-
         category = self.get_channel(self.categories[category_name]['id'])
         channel = await self.guilds[0].create_text_channel(
             'general', category=category, position=0)
