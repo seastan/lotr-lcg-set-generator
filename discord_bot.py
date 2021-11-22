@@ -1473,6 +1473,16 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                         'id': category.id,
                         'position': category.position}
                     old_category_names.append(change[1][0])
+
+                    if change[1][0] in self.general_channels:
+                        channel = self.get_channel(
+                            self.general_channels[change[1][0]]['id'])
+                        del self.general_channels[change[1][0]]
+                        self.general_channels[channel.category.name] = {
+                            'name': channel.category.name,
+                            'id': channel.id,
+                            'category_id': channel.category_id}
+
                     logging.info('Renamed category "%s" to "%s"', change[1][0],
                                  change[1][1])
                     await asyncio.sleep(CMD_SLEEP_TIME)
