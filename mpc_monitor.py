@@ -364,6 +364,7 @@ def delete_deck(session, content, deck_id, deck):
         raise ResponseError('No saved projects found, content length: {}'
                             .format(len(content)))
 
+    content = get_decks(session)
     return content
 
 
@@ -379,6 +380,7 @@ def clone_deck(session, content, deck_id, new_deck_name):
         raise ResponseError('No saved projects found, content length: {}'
                             .format(len(content)))
 
+    content = get_decks(session)
     return content
 
 
