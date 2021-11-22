@@ -242,6 +242,7 @@ Additional steps:
   - `0 8 * * 1    <path>/remind_backup.sh >> <path>/cron.log 2>&1`
   - `5 8 1 * *    <path>/remind_backup_monthly.sh >> <path>/cron.log 2>&1`
   - `*/2 * * * *  <path>/monitor_discord_changes.sh >> <path>/cron.log 2>&1`
+  - `0 1 * * *    <path>/monitor_wordpress_token.sh >> <path>/cron.log 2>&1`
   - `19 8 * * *   <path>/scheduled_backup.sh "<local A Long-extended Party/Links Backup path>" >> <path>/cron.log 2>&1`
   - `7 1 * * *    <path>/configutation_backup.sh "<path to a local configuration backup folder>" >> <path>/cron.log 2>&1`
 
