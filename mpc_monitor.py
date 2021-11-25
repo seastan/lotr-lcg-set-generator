@@ -52,6 +52,8 @@ LOG_PATH = 'mpc_monitor.log'
 MAIL_COUNTER_PATH = 'mpc_monitor.cnt'
 MAILS_PATH = 'mails'
 
+WORDPRESS_URL = 'https://public-api.wordpress.com/wp/v2/sites/alongextendedparty.com/pages/{}'
+
 URL_TIMEOUT = 60
 URL_RETRIES = 1
 URL_SLEEP = 1
@@ -255,6 +257,62 @@ def send_post(session, url, form_data):
     return res
 
 
+def get_wordpress_content(data):
+    """ Get content of WordPress page.
+    """
+    url = WORDPRESS_URL.format(data['wordpress_page_id'])
+    headers = {'Authorization': 'Bearer {}'.format(data['wordpress_token'])}
+    for i in range(URL_RETRIES):
+        try:
+            req = requests.get(
+                url,
+                headers=headers,
+                timeout=URL_TIMEOUT)
+            res = json.loads(req.content)['content']['rendered']
+            break
+        except Exception:
+            if i < URL_RETRIES - 1:
+                time.sleep(URL_SLEEP)
+            else:
+                raise
+
+    return res
+
+
+def update_wordpress_content(data, content):
+    """ Update content of WordPress page.
+    """
+    url = WORDPRESS_URL.format(data['wordpress_page_id'])
+    headers = {'Authorization': 'Bearer {}'.format(data['wordpress_token']),
+               'Content-Type': 'application/json'}
+    for i in range(URL_RETRIES):
+        try:
+            requests.put(
+                url,
+                headers=headers,
+                data=json.dumps({'content': content}),
+                timeout=URL_TIMEOUT)
+            break
+        except Exception:
+            if i < URL_RETRIES - 1:
+                time.sleep(URL_SLEEP)
+            else:
+                raise
+
+
+def replace_url(data, old_id, new_id):
+    """ Replace deck ID on Wordpress site.
+    """
+    old_content = get_wordpress_content(data)
+    if old_id not in old_content:
+        return False
+
+    new_content = old_content.replace(old_id, new_id)
+    update_wordpress_content(data, new_content)
+    new_content = get_wordpress_content(data)
+    return new_id in new_content
+
+
 def init_session(cookies):
     """ Init session object.
     """
@@ -449,8 +507,8 @@ Attempting to rename it automatically..."""
         return content
 
 
-def fix_deck(session, content, deck_id, backup_id, deck_name, actual_deck_name,  # pylint: disable=R0912,R0913,R0914,R0915
-             content_id, actual_content_id):
+def fix_deck(session, data, content, deck_id, backup_id, deck_name,  # pylint: disable=R0912,R0913,R0914,R0915
+             actual_deck_name, content_id, actual_content_id):
     """ Fix a corrupted deck.
     """
     if actual_deck_name != deck_name:
@@ -579,22 +637,36 @@ Do the following:
         send_discord(discord_message)
         return '', ''
     else:
-        message = ('Attempt to fix deck {} automatically succeeded! '
-                   'New deck ID: {}'.format(deck_name, new_deck_id))
-        logging.info(message)
-        body = f"""Do the following:
+        res = replace_url(data, deck_id, new_deck_id)
+        if res:
+            message = ('Attempt to fix deck {} automatically succeeded! '
+                       'WordPress web-site is already updated.'.format(deck_name))
+            logging.info(message)
+            body = ''
+            create_mail(ALERT_SUBJECT_TEMPLATE.format(message), body)
+            discord_message = f"""Attempt to fix deck **{deck_name}** automatically succeeded!
+WordPress web-site is already updated."""
+            send_discord(discord_message)
+        else:
+            message = ('Attempt to fix deck {} automatically succeeded, but '
+                       'updating WordPress web-site failed. New deck ID: {}'
+                       .format(deck_name, new_deck_id))
+            logging.info(message)
+            body = f"""Do the following:
 1. Open https://wordpress.com/page/alongextendedparty.com/37 and login into ALeP account (if needed)
 2. Update the link to:
 https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id={new_deck_id}
 """
-        create_mail(ALERT_SUBJECT_TEMPLATE.format(message), body)
-        discord_message = f"""Attempt to fix deck **{deck_name}** automatically succeeded!
+            create_mail(ALERT_SUBJECT_TEMPLATE.format(message), body)
+            discord_message = f"""Attempt to fix deck **{deck_name}** automatically succeeded!
+At the same time, updating WordPress web-site failed.
 Do the following:
 1. Open https://wordpress.com/page/alongextendedparty.com/37 and login into ALeP account (if needed)
 2. Update the link to:
 https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id={new_deck_id}
 {DISCORD_USERS}"""
-        send_discord(discord_message)
+            send_discord(discord_message)
+
         return content, new_deck_id
 
 
@@ -713,7 +785,7 @@ def monitor():
                                 actual_content_id)
             else:
                 new_content, new_deck_id = fix_deck(
-                    session, content, deck_id, backup_id, deck_name,
+                    session, data, content, deck_id, backup_id, deck_name,
                     actual_deck_name, content_id, actual_content_id)
                 if new_content:
                     content = new_content
