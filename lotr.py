@@ -4894,7 +4894,7 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
             if (csv_row['type'] == 'Ally' and csv_row['isUnique'] == 1 and
                     csv_row['sphere'] != 'Neutral'):
                 new_row = csv_row.copy()
-                new_row['pack'] = 'Messenger of the King Allies'
+                new_row['pack'] = 'ALeP - Messenger of the King Allies'
                 new_row['type'] = 'Hero'
                 new_row['code'] = '99{}'.format(new_row['code'])
                 new_row['name'] = '(MotK) {}'.format(new_row['name'])
