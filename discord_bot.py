@@ -71,7 +71,7 @@ GENERAL_CATEGORIES = {
     'Rules', 'Voice Channels', 'Archive'
 }
 
-RENDERED_IMAGES_TTL = 900
+RENDERED_IMAGES_TTL = 600
 
 EMOJIS = {
     '[leadership]': '<:leadership:822573464601886740>',
