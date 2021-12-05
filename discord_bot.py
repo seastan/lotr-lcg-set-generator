@@ -1420,6 +1420,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
         stdout, _ = await run_shell(
             REMOTE_CRON_TIMESTAMP_CMD.format(CONF.get('remote_logs_path')))
         if stdout == '1' and self.notifications_channel:
+            clear_rendered_images()
             await self._send_channel(
                 self.notifications_channel,
                 'New card images are available in Discord and DragnCards')
