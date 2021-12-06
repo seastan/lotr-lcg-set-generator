@@ -1064,8 +1064,8 @@ async def get_rendered_images(set_name):
                         if i['Name'].endswith('-2.png')
                         else re.sub(r'\.png$', '-1.png', i['Name']))
     except Exception:
-        message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
-                                                                 stderr)
+        message = ('RClone failed (rendered images), stdout: {}, stderr: {}'
+                   .format(stdout, stderr))
         logging.error(message)
         if 'directory not found' not in stderr:
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
@@ -1383,8 +1383,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
         stdout, stderr = await run_shell(
             RCLONE_ART_CMD.format(CONF.get('artwork_destination_path')))
         if stdout or stderr:
-            message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
-                                                                     stderr)
+            message = ('RClone failed (artwork), stdout: {}, stderr: {}'
+                       .format(stdout, stderr))
             logging.error(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
             self.rclone_art = True
@@ -1411,8 +1411,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
         stdout, stderr = await run_shell(
             RCLONE_LOGS_CMD.format(CONF.get('remote_logs_path')))
         if stdout or stderr:
-            message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
-                                                                     stderr)
+            message = ('RClone failed (remote cton), stdout: {}, stderr: {}'
+                       .format(stdout, stderr))
             logging.error(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
             return
@@ -2632,8 +2632,8 @@ Targets removed.
             if 'directory not found' in stderr:
                 return []
 
-            message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
-                                                                     stderr)
+            message = ('RClone failed (artwork), stdout: {}, stderr: {}'
+                       .format(stdout, stderr))
             logging.error(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
             raise RCloneFolderError(message)
@@ -2652,8 +2652,8 @@ Targets removed.
             if 'directory not found' in stderr:
                 return []
 
-            message = 'RClone failed, stdout: {}, stderr: {}'.format(stdout,
-                                                                     stderr)
+            message = ('RClone failed (rendered images), stdout: {}, '
+                       'stderr: {}'.format(stdout, stderr))
             logging.error(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
             raise RCloneFolderError(message)
@@ -2674,8 +2674,8 @@ Targets removed.
                 RCLONE_MOVE_CLOUD_ART_CMD.format(
                     old_set_id, filename, new_set_id))
             if stdout or stderr:
-                message = 'RClone failed, stdout: {}, stderr: {}'.format(
-                    stdout, stderr)
+                message = ('RClone failed (artwork), stdout: {}, stderr: {}'
+                           .format(stdout, stderr))
                 logging.error(message)
                 create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
                 return_message = 'Failing to move artwork files for the card'
@@ -2709,8 +2709,8 @@ Targets removed.
                 RCLONE_COPY_CLOUD_IMAGE_CMD.format(
                     old_set_folder, filename, new_set_folder))
             if stdout or stderr:
-                message = 'RClone failed, stdout: {}, stderr: {}'.format(
-                    stdout, stderr)
+                message = ('RClone failed (rendered images), stdout: {}, '
+                           'stderr: {}'.format(stdout, stderr))
                 logging.error(message)
                 create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
                 break
@@ -3051,7 +3051,8 @@ Targets removed.
                             image['filename'], local_path))
                     if not os.path.exists(image_path):
                         if stdout or stderr:
-                            message = ('RClone failed, stdout: {}, stderr: {}'
+                            message = ('RClone failed (rendered images), '
+                                       'stdout: {}, stderr: {}'
                                        .format(stdout, stderr))
                             logging.error(message)
                             create_mail(ERROR_SUBJECT_TEMPLATE.format(message),
@@ -3093,7 +3094,8 @@ Targets removed.
 
                 if not os.path.exists(image_path):
                     if stdout or stderr:
-                        message = ('RClone failed, stdout: {}, stderr: {}'
+                        message = ('RClone failed (rendered images), '
+                                   'stdout: {}, stderr: {}'
                                    .format(stdout, stderr))
                         logging.error(message)
                         create_mail(ERROR_SUBJECT_TEMPLATE.format(message),
