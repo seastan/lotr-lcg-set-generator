@@ -1411,7 +1411,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
         stdout, stderr = await run_shell(
             RCLONE_LOGS_CMD.format(CONF.get('remote_logs_path')))
         if stdout or stderr:
-            message = ('RClone failed (remote cton), stdout: {}, stderr: {}'
+            message = ('RClone failed (remote cron), stdout: {}, stderr: {}'
                        .format(stdout, stderr))
             logging.error(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
