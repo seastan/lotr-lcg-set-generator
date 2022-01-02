@@ -1,10 +1,24 @@
 for /f "usebackq tokens=*" %%i in (`python date.py`) do set date_correct=%%i
 
-tasklist /fi "ImageName eq strangeeons.exe" /fo csv 2>NUL | find /I "strangeeons.exe">NUL
-if "%ERRORLEVEL%"=="0" (
-  echo %date_correct% %time% ERROR Strange Eons is already running, exiting
+set retry=0
+
+:start
+if %retry%==2 (
+  echo %date_correct% %time% exiting
   exit /b
 )
+
+set /a retry=%retry%+1
+echo %date_correct% %time% retry %retry%
+
+echo %date_correct% %time% looking for running Strange Eons
+wmic process where "commandline like '%%strangeeons.exe%%' and not commandline like '%%wmic%%'" delete
+
+:: tasklist /fi "ImageName eq strangeeons.exe" /fo csv 2>NUL | find /I "strangeeons.exe">NUL
+:: if "%ERRORLEVEL%"=="0" (
+::   echo %date_correct% %time% ERROR Strange Eons is already running
+::   exit /b
+:: )
 
 echo %date_correct% %time% looking for running autohotkey scripts
 wmic process where "commandline like '%%strange_eons.ahk%%' and not commandline like '%%wmic%%'" delete
@@ -14,8 +28,8 @@ python run_before_se_remote.py
 echo %date_correct% %time% finished run_before_se_remote.py
 
 if exist runBeforeSE_STARTED (
-  echo %date_correct% %time% ERROR run_before_se_remote.py didn't finish successfully, exiting
-  exit /b
+  echo %date_correct% %time% ERROR run_before_se_remote.py didn't finish successfully
+  goto start
 )
 
 if not exist setGenerator_CREATED (
@@ -28,8 +42,8 @@ call strange_eons.ahk
 echo %date_correct% %time% finished strange_eons.ahk
 
 if not exist makeCards_FINISHED (
-  echo %date_correct% %time% ERROR makeCards script didn't finish successfully, exiting
-  exit /b
+  echo %date_correct% %time% ERROR makeCards script didn't finish successfully
+  goto start
 )
 
 echo %date_correct% %time% waiting until Strange Eons is closed
