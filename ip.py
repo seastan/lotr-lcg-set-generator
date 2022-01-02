@@ -13,6 +13,7 @@ URL_SLEEP = 10
 def get_content(url):
     """ Get URL content.
     """
+    res = ''
     for i in range(URL_RETRIES):
         try:
             req = requests.get(url, timeout=URL_TIMEOUT)
@@ -21,8 +22,6 @@ def get_content(url):
         except Exception:  # pylint: disable=W0703
             if i < URL_RETRIES - 1:
                 time.sleep(URL_SLEEP)
-            else:
-                raise
 
     return res
 
