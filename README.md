@@ -404,7 +404,8 @@ List of available sphere values:
 - `Boon`
 - `Burden`
 - `Nightmare`
-- `Upgraded`
+- `Upgraded` (`Ship Objective` only)
+- `SmallTextArea` (`Encounter Side Quest` only)
 - `Back` (`Rules` only)
 - `Setup` (`Campaign` only)
 - `Blue` (`Presentation` only)

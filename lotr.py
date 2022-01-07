@@ -246,6 +246,7 @@ CARD_TYPES_NIGHTMARE = {'Encounter Side Quest', 'Enemy', 'Location',
 
 SPHERES = set()
 SPHERES_CAMPAIGN = {'Setup'}
+SPHERES_SIDE_QUEST = {'SmallTextArea'}
 SPHERES_PLAYER = {'Baggins', 'Fellowship', 'Leadership', 'Lore', 'Neutral',
                   'Spirit', 'Tactics'}
 SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow',
@@ -1996,6 +1997,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         if card_type == 'Campaign':
             spheres = SPHERES_CAMPAIGN
+        elif card_type == 'Encounter Side Quest':
+            spheres = SPHERES_SIDE_QUEST
         elif card_type == 'Rules':
             spheres = SPHERES_RULES
         elif card_type == 'Presentation':
