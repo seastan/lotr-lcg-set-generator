@@ -376,6 +376,8 @@ List of available card types:
 - `Enemy`
 - `Encounter Side Quest` (alias: `Side Quest`)
 - `Event`
+- `Full Art Landscape`
+- `Full Art Portrait`
 - `Hero`
 - `Location`
 - `Nightmare`
@@ -394,13 +396,13 @@ List of available card types:
 
 List of available sphere values:
 
-- `Baggins`
-- `Fellowship`
 - `Leadership`
 - `Lore`
 - `Neutral`
 - `Spirit`
 - `Tactics`
+- `Baggins`
+- `Fellowship`
 - `Boon`
 - `Burden`
 - `Nightmare`

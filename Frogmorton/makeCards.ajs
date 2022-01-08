@@ -10,10 +10,10 @@ importClass(org.w3c.dom.Node);
 importClass(org.w3c.dom.NodeList);
 
 var doubleSideTypes = ['Campaign', 'Contract', 'Nightmare', 'Presentation', 'Quest', 'Rules'];
-var landscapeTypes = ['Encounter Side Quest', 'Player Side Quest', 'Quest'];
-var playerTypes = ['Ally', 'Attachment', 'Contract', 'Event', 'Hero', 'Hero Promo', 'Player Side Quest', 'Treasure'];
+var landscapeTypes = ['Encounter Side Quest', 'Full Art Landscape', 'Player Side Quest', 'Quest'];
+var playerTypes = ['Ally', 'Attachment', 'Contract', 'Event', 'Full Art Landscape', 'Full Art Portrait', 'Hero', 'Hero Promo', 'Player Side Quest', 'Treasure'];
 var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Side Quest'];
-var nonUniqueTypes = ['Campaign', 'Contract', 'Event', 'Nightmare', 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery', 'Treasure'];
+var nonUniqueTypes = ['Campaign', 'Contract', 'Event', 'Full Art Landscape', 'Full Art Portrait', 'Nightmare', 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery', 'Treasure'];
 
 var portraitRegion = {};
 portraitRegion['Ally'] = '87,0,326,330';
@@ -333,6 +333,10 @@ translate['Victory'] = {'English': 'Victory', 'French': 'Victoire', 'German': 'S
 translate['Page'] = {'English': 'Page', 'French': 'Page', 'German': 'Seite', 'Spanish': 'P\u00e1gina', 'Polish': 'Strona', 'Italian': 'Pagina',
 	'Portuguese': 'P\u00e1gina'};
 translate['Side'] = {'English': 'Side', 'French': 'Face', 'German': 'Seite', 'Spanish': 'Lado', 'Polish': 'Strona', 'Italian': 'Lato', 'Portuguese': 'Lado'};
+translate['Full Art Landscape'] = {'English': 'Full Art Landscape', 'French': 'Full Art Landscape', 'German': 'Full Art Landscape', 'Spanish': 'Full Art Landscape',
+	'Polish': 'Full Art Landscape', 'Italian': 'Full Art Landscape', 'Portuguese': 'Full Art Landscape'};
+translate['Full Art Portrait'] = {'English': 'Full Art Portrait', 'French': 'Full Art Portrait', 'German': 'Full Art Portrait', 'Spanish': 'Full Art Portrait',
+	'Polish': 'Full Art Portrait', 'Italian': 'Full Art Portrait', 'Portuguese': 'Full Art Portrait'};
 
 Thread.busyWindow(main, 'Updating cards...', true);
 

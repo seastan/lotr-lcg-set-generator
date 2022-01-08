@@ -139,12 +139,14 @@ TRANSLATED_COLUMNS = {
 }
 
 CARD_TYPES = {'Ally', 'Attachment', 'Campaign', 'Contract',
-              'Encounter Side Quest', 'Enemy', 'Event', 'Hero', 'Location',
-              'Nightmare', 'Objective', 'Objective Ally', 'Objective Hero',
+              'Encounter Side Quest', 'Enemy', 'Event', 'Full Art Landscape',
+              'Full Art Portrait', 'Hero', 'Location', 'Nightmare',
+              'Objective', 'Objective Ally', 'Objective Hero',
               'Objective Location', 'Player Side Quest', 'Presentation',
               'Quest', 'Rules', 'Ship Enemy', 'Ship Objective', 'Treachery',
               'Treasure'}
-CARD_TYPES_LANDSCAPE = {'Encounter Side Quest', 'Player Side Quest', 'Quest'}
+CARD_TYPES_LANDSCAPE = {'Encounter Side Quest', 'Full Art Landscape',
+                        'Player Side Quest', 'Quest'}
 CARD_TYPES_DOUBLESIDE_MANDATORY = {'Campaign', 'Nightmare', 'Presentation',
                                    'Quest', 'Rules'}
 CARD_TYPES_DOUBLESIDE_OPTIONAL = {'Campaign', 'Contract', 'Nightmare',
@@ -162,19 +164,23 @@ CARD_TYPES_ENCOUNTER_SET = {'Campaign', 'Encounter Side Quest', 'Enemy',
                             'Objective Location', 'Quest', 'Ship Enemy',
                             'Ship Objective', 'Treachery'}
 CARD_TYPES_NO_ENCOUNTER_SET = {'Ally', 'Attachment', 'Contract', 'Event',
+                               'Full Art Landscape', 'Full Art Portrait',
                                'Hero', 'Player Side Quest'}
 CARD_TYPES_UNIQUE = {'Hero', 'Objective Hero'}
-CARD_TYPES_NON_UNIQUE = {'Campaign', 'Contract', 'Event', 'Nightmare',
-                         'Player Side Quest', 'Presentation', 'Quest', 'Rules',
-                         'Treachery', 'Treasure'}
+CARD_TYPES_NO_UNIQUE = {'Campaign', 'Contract', 'Event', 'Full Art Landscape',
+                        'Full Art Portrait', 'Nightmare', 'Player Side Quest',
+                        'Presentation', 'Quest', 'Rules', 'Treachery',
+                        'Treasure'}
 CARD_TYPES_PLAYER_SPHERE = {'Ally', 'Attachment', 'Event', 'Hero',
                             'Player Side Quest'}
 CARD_TYPES_TRAITS = {'Ally', 'Enemy', 'Hero', 'Location', 'Objective Ally',
                      'Objective Hero', 'Objective Location', 'Ship Enemy',
                      'Ship Objective', 'Treasure'}
-CARD_TYPES_NO_TRAITS = {'Campaign', 'Contract', 'Nightmare', 'Presentation',
+CARD_TYPES_NO_TRAITS = {'Campaign', 'Contract', 'Full Art Landscape',
+                        'Full Art Portrait', 'Nightmare', 'Presentation',
                         'Quest', 'Rules'}
-CARD_TYPES_NO_KEYWORDS = {'Campaign', 'Contract', 'Nightmare', 'Presentation',
+CARD_TYPES_NO_KEYWORDS = {'Campaign', 'Contract', 'Full Art Landscape',
+                          'Full Art Portrait', 'Nightmare', 'Presentation',
                           'Rules'}
 CARD_TYPES_COST = {'Hero', 'Ally', 'Attachment', 'Event', 'Player Side Quest',
                    'Treasure', 'Quest'}
@@ -213,9 +219,11 @@ CARD_TYPES_SHADOW = {'Enemy', 'Location', 'Objective', 'Objective Ally',
                      'Objective Hero', 'Objective Location', 'Ship Enemy',
                      'Ship Objective', 'Treachery'}
 CARD_TYPES_SHADOW_ENCOUNTER = {'Ally', 'Attachment', 'Event'}
-CARD_TYPES_NO_FLAVOUR = {'Presentation', 'Rules'}
+CARD_TYPES_NO_FLAVOUR = {'Full Art Landscape', 'Full Art Portrait',
+                         'Presentation', 'Rules'}
 CARD_TYPES_NO_FLAVOUR_BACK = {'Nightmare', 'Presentation', 'Rules'}
-CARD_TYPES_NO_PRINTED_NUMBER = {'Presentation', 'Rules'}
+CARD_TYPES_NO_PRINTED_NUMBER = {'Full Art Landscape', 'Full Art Portrait',
+                                'Presentation', 'Rules'}
 CARD_TYPES_NO_PRINTED_NUMBER_BACK = {'Campaign', 'Nightmare',
                                      'Presentation', 'Rules'}
 CARD_TYPES_NO_ARTIST = {'Presentation', 'Rules'}
@@ -233,9 +241,11 @@ CARD_TYPES_ADVENTURE = {'Campaign', 'Hero', 'Objective', 'Objective Ally',
 CARD_TYPES_SUBTITLE = {'Campaign', 'Objective', 'Objective Ally',
                        'Objective Hero', 'Objective Location',
                        'Quest', 'Ship Objective'}
-CARD_TYPES_NO_ICON = {'Presentation', 'Rules'}
+CARD_TYPES_NO_ICON = {'Full Art Landscape', 'Full Art Portrait',
+                      'Presentation', 'Rules'}
 CARD_TYPES_DECK_RULES = {'Nightmare', 'Quest'}
-CARD_TYPES_ONE_COPY = {'Campaign', 'Contract', 'Encounter Side Quest', 'Hero',
+CARD_TYPES_ONE_COPY = {'Campaign', 'Contract', 'Encounter Side Quest',
+                       'Full Art Landscape', 'Full Art Portrait', 'Hero',
                        'Nightmare', 'Objective Hero', 'Presentation', 'Quest',
                        'Rules', 'Treasure'}
 CARD_TYPES_THREE_COPIES = {'Ally', 'Attachment', 'Event', 'Player Side Quest'}
@@ -243,6 +253,8 @@ CARD_TYPES_BOON = {'Attachment', 'Event', 'Objective Ally'}
 CARD_TYPES_BURDEN = {'Enemy', 'Objective', 'Treachery'}
 CARD_TYPES_NIGHTMARE = {'Encounter Side Quest', 'Enemy', 'Location',
                         'Objective', 'Ship Enemy', 'Treachery', 'Quest'}
+CARD_TYPES_NO_DISCORD_CHANNEL = {'Full Art Landscape', 'Full Art Portrait',
+                                 'Rules', 'Presentation'}
 
 SPHERES = set()
 SPHERES_CAMPAIGN = {'Setup'}
@@ -1917,7 +1929,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif ((card_unique is None and card_type in CARD_TYPES_UNIQUE) or
               (card_unique in ('1', 1) and
-               card_type in CARD_TYPES_NON_UNIQUE)):
+               card_type in CARD_TYPES_NO_UNIQUE)):
             message = 'Incorrect unique value for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -1945,7 +1957,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif ((card_unique_back is None and
                card_type_back in CARD_TYPES_UNIQUE) or
               (card_unique_back in ('1', 1) and
-               card_type_back in CARD_TYPES_NON_UNIQUE)):
+               card_type_back in CARD_TYPES_NO_UNIQUE)):
             message = 'Incorrect unique back value for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -3592,7 +3604,7 @@ def _has_discord_channel(card):
     """ Check whether a card has Discord channel or not.
     """
     if (card[CARD_NAME] == 'T.B.D.'
-            or card[CARD_TYPE] in ('Rules', 'Presentation')):
+            or card[CARD_TYPE] in CARD_TYPES_NO_DISCORD_CHANNEL):
         return False
 
     return True
@@ -3983,14 +3995,17 @@ def _add_set_xml_properties(parent, properties, fix_linebreaks, tab):
 def _needed_for_octgn(card):
     """ Check whether a card is needed for OCTGN or not.
     """
-    return card[CARD_ADVENTURE] != 'Promo'
+    return (card[CARD_ADVENTURE] != 'Promo' and
+            card[CARD_TYPE] not in ('Full Art Landscape',
+                                    'Full Art Portrait'))
 
 
 def _needed_for_dragncards(card):
     """ Check whether a card is needed for DragnCards or not.
     """
     return (card[CARD_ADVENTURE] != 'Promo' and
-            card[CARD_TYPE] != 'Presentation' and
+            card[CARD_TYPE] not in ('Full Art Landscape',
+                                    'Full Art Portrait', 'Presentation') and
             not (card[CARD_TYPE] == 'Rules' and card[CARD_SPHERE] == 'Back'))
 
 
@@ -4759,14 +4774,17 @@ def _needed_for_ringsdb(card):
 def _needed_for_frenchdb(card):
     """ Check whether a card is needed for the French database or not.
     """
-    return (card[CARD_TYPE] not in ('Presentation', 'Rules') and
+    return (card[CARD_TYPE] not in
+            ('Full Art Landscape', 'Full Art Portrait', 'Presentation',
+             'Rules') and
             card[CARD_ADVENTURE] != 'Promo')
 
 
 def _needed_for_spanishdb(card):
     """ Check whether a card is needed for the Spanish database or not.
     """
-    return (card[CARD_TYPE] != 'Presentation' and
+    return (card[CARD_TYPE] not in
+            ('Full Art Landscape', 'Full Art Portrait', 'Presentation') and
             not (card[CARD_TYPE] == 'Rules' and
                  card[CARD_SPHERE] == 'Back') and
             card[CARD_ADVENTURE] != 'Promo')
@@ -5232,6 +5250,8 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
             type_name = 'Setup'
         elif card_type == 'Nightmare':
             type_name = 'Nightmare Setup'
+        elif card_type in ('Full Landscape', 'Full Art Portrait'):
+            type_name = 'None'
         else:
             type_name = card_type or ''
 
@@ -6356,7 +6376,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                     int(os.path.getmtime(custom_images[image]))))
                 prop.tail = '\n      '
 
-        if card_type in ('Presentation', 'Rules'):
+        if card_type in CARD_TYPES_NO_ICON:
             continue
 
         target_icon_images = []
@@ -7713,11 +7733,6 @@ def generate_tts(conf, set_id, set_name, lang, card_dict, scratch):  # pylint: d
     logging.info('[%s, %s] Generating TTS outputs...', set_name, lang)
     timestamp = time.time()
 
-    output_path = os.path.join(OUTPUT_TTS_PATH, '{}.{}'.format(
-        escape_filename(set_name), lang))
-    create_folder(output_path)
-    clear_folder(output_path)
-
     decks_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
                               escape_filename(set_name))
     image_path = os.path.join(IMAGES_TTS_PATH, lang)
@@ -7736,28 +7751,34 @@ def generate_tts(conf, set_id, set_name, lang, card_dict, scratch):  # pylint: d
 
         break
 
-    cmd = GIMP_COMMAND.format(
-        conf['gimp_console_path'],
-        'python-prepare-tts-folder',
-        temp_path.replace('\\', '\\\\'),
-        output_path.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
-    logging.info('[%s, %s] %s', set_name, lang, res)
+    if input_cnt > 0:
+        output_path = os.path.join(OUTPUT_TTS_PATH, '{}.{}'.format(
+            escape_filename(set_name), lang))
+        create_folder(output_path)
+        clear_folder(output_path)
 
-    output_cnt = 0
-    for _, _, filenames in os.walk(output_path):
-        for filename in filenames:
-            output_cnt += 1
-            if os.path.getsize(os.path.join(output_path, filename)
-                               ) < JPG_300_MIN_SIZE:
-                raise GIMPError('GIMP failed for {}'.format(
-                    os.path.join(output_path, filename)))
+        cmd = GIMP_COMMAND.format(
+            conf['gimp_console_path'],
+            'python-prepare-tts-folder',
+            temp_path.replace('\\', '\\\\'),
+            output_path.replace('\\', '\\\\'))
+        res = _run_cmd(cmd)
+        logging.info('[%s, %s] %s', set_name, lang, res)
 
-        break
+        output_cnt = 0
+        for _, _, filenames in os.walk(output_path):
+            for filename in filenames:
+                output_cnt += 1
+                if os.path.getsize(os.path.join(output_path, filename)
+                                   ) < JPG_300_MIN_SIZE:
+                    raise GIMPError('GIMP failed for {}'.format(
+                        os.path.join(output_path, filename)))
 
-    if output_cnt != input_cnt:
-        raise GIMPError('Wrong number of output files: {} instead of {}'
-                        .format(output_cnt, input_cnt))
+            break
+
+        if output_cnt != input_cnt:
+            raise GIMPError('Wrong number of output files: {} instead of {}'
+                            .format(output_cnt, input_cnt))
 
     delete_folder(temp_path)
 
