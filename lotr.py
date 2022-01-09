@@ -6650,11 +6650,14 @@ def create_project():
 def get_skip_info(set_id, lang):
     """ Get skip information for the set and individual cards.
     """
-    skip_ids = set()
-    tree = ET.parse(os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id,
-                                                                   lang)))
+    path = os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id, lang))
+    if not os.path.exists(path):
+        return True, set()
+
+    tree = ET.parse(path)
     root = tree.getroot()
     skip_set = root.attrib.get('skip') == '1'
+    skip_ids = set()
     for card in root[0]:
         if card.attrib.get('skip') == '1':
             skip_ids.add(card.attrib['id'])
