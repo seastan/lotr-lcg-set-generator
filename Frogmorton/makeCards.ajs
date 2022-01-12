@@ -878,10 +878,12 @@ function run(progress, target, filename, icons) {
 				else if (cardType == 'Full Art Portrait') {
 					s.set('Artist-region', '240,514,140,15');
 					s.set('Copyright-region', '34,514,124,15');
+					s.set('Artist', '<right>' + s.get('Artist') + '</right>');
 				}
 				else if (cardType == 'Full Art Landscape') {
 					s.set('Artist-region', '390,364,140,15');
 					s.set('Copyright-region', '34,364,124,15');
+					s.set('Artist', '<right>' + s.get('Artist') + '</right>');
 				}
 				else if (landscapeTypes.indexOf(cardType) > -1) {
 					s.set('Body-style', 'FOREGROUND: #000000; WIDTH: REGULAR; TRACKING: -0.005; FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7');
