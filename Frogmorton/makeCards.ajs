@@ -10,7 +10,7 @@ importClass(org.w3c.dom.Node);
 importClass(org.w3c.dom.NodeList);
 
 var doubleSideTypes = ['Campaign', 'Contract', 'Nightmare', 'Presentation', 'Quest', 'Rules'];
-var landscapeTypes = ['Encounter Side Quest', 'Full Art Landscape', 'Player Side Quest', 'Quest'];
+var landscapeTypes = ['Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Full Art Landscape', 'Player Side Quest', 'Quest'];
 var playerTypes = ['Ally', 'Attachment', 'Contract', 'Event', 'Full Art Landscape', 'Full Art Portrait', 'Hero', 'Hero Promo', 'Player Side Quest', 'Treasure'];
 var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Side Quest'];
 var nonUniqueTypes = ['Campaign', 'Contract', 'Event', 'Full Art Landscape', 'Full Art Portrait', 'Nightmare', 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery', 'Treasure'];
@@ -21,8 +21,11 @@ portraitRegion['Attachment'] = '40,50,333,280';
 portraitRegion['Campaign'] = '0,0,413,245';
 portraitRegion['Contract'] = '0,0,413,315';
 portraitRegion['Encounter Side Quest'] = '0,0,563,413';
+portraitRegion['Encounter Side Quest SmallTextArea'] = '0,0,563,413';
 portraitRegion['Enemy'] = '87,0,326,330';
 portraitRegion['Event'] = '60,0,353,330';
+portraitRegion['Full Art Landscape'] = '0,0,563,413';
+portraitRegion['Full Art Portrait'] = '0,0,413,563';
 portraitRegion['Hero'] = '87,0,326,330';
 portraitRegion['Hero Promo'] = '0,0,413,563';
 portraitRegion['Location'] = '0,60,413,268';
@@ -51,10 +54,12 @@ bodyRegion['Treachery'] = '65,356,283,135';
 bodyRegion['Treasure'] = '57,347,299,144';  // T.B.D.
 
 bodyRegion['Encounter Side Quest'] = '51,269,461,94';
+bodyRegion['Encounter Side Quest SmallTextArea'] = '51,324,461,38';
 bodyRegion['Player Side Quest'] = '51,271,461,94';
 
 var bodyNoTraitRegion = {};
 bodyNoTraitRegion['Encounter Side Quest'] = '51,249,461,114';
+bodyNoTraitRegion['Encounter Side Quest SmallTextArea'] = '51,304,461,58';
 bodyNoTraitRegion['Player Side Quest'] = '51,251,461,114';
 bodyNoTraitRegion['Quest'] = '51,249,461,114';
 
@@ -77,6 +82,7 @@ traitRegion['Treachery'] = '65,336,283,20';
 traitRegion['Treasure'] = '85,327,243,20';  // T.B.D.
 
 traitRegion['Encounter Side Quest'] = '51,249,461,20';
+traitRegion['Encounter Side Quest SmallTextArea'] = '51,304,461,20';
 traitRegion['Player Side Quest'] = '51,251,461,20';
 
 var nameRegion = {};
@@ -85,6 +91,7 @@ nameRegion['Attachment'] = '132,38,183,25';
 nameRegion['Campaign'] = '108,43,197,25';
 nameRegion['Contract'] = '84,245,245,29';
 nameRegion['Encounter Side Quest'] = '100,42,363,29';
+nameRegion['Encounter Side Quest SmallTextArea'] = '100,42,363,29';
 nameRegion['Enemy'] = '94,327,225,25';
 nameRegion['Event'] = '57,86,26,178';
 nameRegion['Hero'] = '100,327,213,25';
@@ -104,6 +111,7 @@ nameRegionUnique['Attachment'] = '132,36,183,25';
 nameRegionUnique['Campaign'] = '108,43,197,25';
 nameRegionUnique['Contract'] = '84,245,245,29';
 nameRegionUnique['Encounter Side Quest'] = '100,39,363,29';
+nameRegionUnique['Encounter Side Quest SmallTextArea'] = '100,39,363,29';
 nameRegionUnique['Enemy'] = '94,325,225,25';
 nameRegionUnique['Event'] = '57,86,26,178';
 nameRegionUnique['Hero'] = '100,325,213,25';
@@ -123,6 +131,7 @@ namePointSize['Attachment'] = 6.5;
 namePointSize['Campaign'] = 6.5;
 namePointSize['Contract'] = 7.5;
 namePointSize['Encounter Side Quest'] = 7.5;
+namePointSize['Encounter Side Quest SmallTextArea'] = 7.5;
 namePointSize['Enemy'] = 6.5;
 namePointSize['Event'] = 6.5;
 namePointSize['Hero'] = 6.5;
@@ -188,6 +197,7 @@ threatCostTint['Hero Promo'] = '0.0,0.0,0.95';
 
 var progressRegion = {};
 progressRegion['Encounter Side Quest'] = '52,202,35,24';
+progressRegion['Encounter Side Quest SmallTextArea'] = '52,257,35,24';
 progressRegion['Location'] = '56,283,35,24';
 progressRegion['Quest'] = '55,202,35,24';
 progressRegion['Player Side Quest'] = '55,202,35,24';
@@ -215,6 +225,7 @@ var encounterPortraitRegion = {};
 encounterPortraitRegion['Campaign'] = '319,190,43,43';
 encounterPortraitRegion['Enemy'] = '321,266,43,43';
 encounterPortraitRegion['Encounter Side Quest'] = '478,187,43,43';
+encounterPortraitRegion['Encounter Side Quest SmallTextArea'] = '478,242,43,43';
 encounterPortraitRegion['Location'] = '319,266,43,43';
 encounterPortraitRegion['Objective'] = '315,269,43,43';
 encounterPortraitRegion['Objective Ally'] = '315,269,43,43';
@@ -226,6 +237,7 @@ encounterPortraitRegion['Treachery'] = '320,269,43,43';
 var encounterNumberRegion = {};
 encounterNumberRegion['Enemy'] = '329,313,26,10';
 encounterNumberRegion['Encounter Side Quest'] = '486,229,26,10';
+encounterNumberRegion['Encounter Side Quest SmallTextArea'] = '486,284,26,10';
 encounterNumberRegion['Location'] = '328,314,26,10';
 encounterNumberRegion['Objective'] = '323,316,26,10';
 encounterNumberRegion['Objective Ally'] = '323,316,26,10';
@@ -235,6 +247,7 @@ encounterNumberRegion['Treachery'] = '329,317,26,10';
 
 var optionBodyShape = {};
 optionBodyShape['Encounter Side Quest'] = '0,0,348,0,64';
+optionBodyShape['Encounter Side Quest SmallTextArea'] = '0,0,348,0,64';
 optionBodyShape['Player Side Quest'] = '0,0,348,0,62';
 optionBodyShape['Quest'] = '0,0,350,0,64';
 
@@ -243,6 +256,7 @@ optionRightDecorationRegion['Ally'] = '298,503,72,18';
 optionRightDecorationRegion['Attachment'] = '300,503,72,18';
 optionRightDecorationRegion['Campaign'] = '301,503,72,18';
 optionRightDecorationRegion['Encounter Side Quest'] = '452,347,72,18';
+optionRightDecorationRegion['Encounter Side Quest SmallTextArea'] = '452,347,72,18';
 optionRightDecorationRegion['Enemy'] = '301,503,72,18';
 optionRightDecorationRegion['Event'] = '298,503,72,18';
 optionRightDecorationRegion['Hero'] = '298,502,72,18';
@@ -261,6 +275,7 @@ optionRightRegion['Ally'] = '305,504,59,20';
 optionRightRegion['Attachment'] = '307,504,59,20';
 optionRightRegion['Campaign'] = '308,504,59,20';
 optionRightRegion['Encounter Side Quest'] = '459,348,59,20';
+optionRightRegion['Encounter Side Quest SmallTextArea'] = '459,348,59,20';
 optionRightRegion['Enemy'] = '308,504,59,20';
 optionRightRegion['Event'] = '305,504,59,20';
 optionRightRegion['Hero'] = '305,503,59,20';
@@ -288,6 +303,8 @@ translate['Campaign'] = {'English': 'Campaign', 'French': 'Campagne', 'German': 
 translate['Contract'] = {'English': 'Contract', 'French': 'Contrat', 'German': 'Abkommen', 'Spanish': 'Contrato', 'Polish': 'Kontrakt', 'Italian': 'Contratto',
 	'Portuguese': 'Contrato'};
 translate['Encounter Side Quest'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria',
+	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria', 'Portuguese': 'Miss\u00e3o Secund\u00e1ria'};
+translate['Encounter Side Quest SmallTextArea'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria',
 	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria', 'Portuguese': 'Miss\u00e3o Secund\u00e1ria'};
 translate['Enemy'] = {'English': 'Enemy', 'French': 'Ennemi', 'German': 'Gegner', 'Spanish': 'Enemigo', 'Polish': 'Wr\u00f3g', 'Italian': 'Nemico', 'Portuguese': 'Inimigo'};
 translate['Event'] = {'English': 'Event', 'French': '\u00c9v\u00e9nement', 'German': 'Ereignis', 'Spanish': 'Evento', 'Polish': 'Wydarzenie', 'Italian': 'Evento',
@@ -490,6 +507,10 @@ function run(progress, target, filename, icons) {
 						card['Sphere'] = 'Promo' + card['Sphere'];
 					}
 
+					if ((cardType == 'Encounter Side Quest') && (card['Sphere'] + '' == 'SmallTextArea')) {
+						cardType = 'Encounter Side Quest SmallTextArea';
+					}
+
 					keywords = card['Keywords'];
 					suffix = '';
 					mapping = [
@@ -577,6 +598,10 @@ function run(progress, target, filename, icons) {
 					if ((cardType == 'Hero') && (card['Adventure'] + '' == 'Promo')) {
 						cardType = 'Hero Promo';
 						card['BSphere'] = 'Promo' + card['BSphere'];
+					}
+
+					if ((cardType == 'Encounter Side Quest') && (card['BSphere'] + '' == 'SmallTextArea')) {
+						cardType = 'Encounter Side Quest SmallTextArea';
 					}
 
 					keywords = card['BKeywords'];
@@ -849,6 +874,14 @@ function run(progress, target, filename, icons) {
 					if (cardType in traitRegion) {
 						s.set('TraitOut-Trait-region', traitRegion[cardType]);
 					}
+				}
+				else if (cardType == 'Full Art Portrait') {
+					s.set('Artist-region', '240,514,140,15');
+					s.set('Copyright-region', '34,514,124,15');
+				}
+				else if (cardType == 'Full Art Landscape') {
+					s.set('Artist-region', '390,364,140,15');
+					s.set('Copyright-region', '34,364,124,15');
 				}
 				else if (landscapeTypes.indexOf(cardType) > -1) {
 					s.set('Body-style', 'FOREGROUND: #000000; WIDTH: REGULAR; TRACKING: -0.005; FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7');
