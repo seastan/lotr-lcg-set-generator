@@ -142,9 +142,9 @@ CARD_TYPES = {'Ally', 'Attachment', 'Campaign', 'Contract',
               'Encounter Side Quest', 'Enemy', 'Event', 'Full Art Landscape',
               'Full Art Portrait', 'Hero', 'Location', 'Nightmare',
               'Objective', 'Objective Ally', 'Objective Hero',
-              'Objective Location', 'Player Side Quest', 'Presentation',
-              'Quest', 'Rules', 'Ship Enemy', 'Ship Objective', 'Treachery',
-              'Treasure'}
+              'Objective Location', 'Player Objective', 'Player Side Quest',
+              'Presentation', 'Quest', 'Rules', 'Ship Enemy', 'Ship Objective',
+              'Treachery', 'Treasure'}
 CARD_TYPES_LANDSCAPE = {'Encounter Side Quest', 'Full Art Landscape',
                         'Player Side Quest', 'Quest'}
 CARD_TYPES_DOUBLESIDE_MANDATORY = {'Campaign', 'Nightmare', 'Presentation',
@@ -152,8 +152,9 @@ CARD_TYPES_DOUBLESIDE_MANDATORY = {'Campaign', 'Nightmare', 'Presentation',
 CARD_TYPES_DOUBLESIDE_OPTIONAL = {'Campaign', 'Contract', 'Nightmare',
                                   'Presentation', 'Quest', 'Rules'}
 CARD_TYPES_PLAYER = {'Ally', 'Attachment', 'Contract', 'Event', 'Hero',
-                     'Player Side Quest', 'Treasure'}
-CARD_TYPES_PLAYER_DECK = {'Ally', 'Attachment', 'Event', 'Player Side Quest'}
+                     'Player Objective', 'Player Side Quest', 'Treasure'}
+CARD_TYPES_PLAYER_DECK = {'Ally', 'Attachment', 'Event', 'Player Objective',
+                          'Player Side Quest'}
 CARD_TYPES_ENCOUNTER_SIZE = {'Enemy', 'Location', 'Objective',
                              'Objective Ally', 'Objective Hero',
                              'Objective Location', 'Ship Enemy',
@@ -165,7 +166,7 @@ CARD_TYPES_ENCOUNTER_SET = {'Campaign', 'Encounter Side Quest', 'Enemy',
                             'Ship Objective', 'Treachery'}
 CARD_TYPES_NO_ENCOUNTER_SET = {'Ally', 'Attachment', 'Contract', 'Event',
                                'Full Art Landscape', 'Full Art Portrait',
-                               'Hero', 'Player Side Quest'}
+                               'Hero', 'Player Objective', 'Player Side Quest'}
 CARD_TYPES_UNIQUE = {'Hero', 'Objective Hero'}
 CARD_TYPES_NO_UNIQUE = {'Campaign', 'Contract', 'Event', 'Full Art Landscape',
                         'Full Art Portrait', 'Nightmare', 'Player Side Quest',
@@ -182,21 +183,22 @@ CARD_TYPES_NO_TRAITS = {'Campaign', 'Contract', 'Full Art Landscape',
 CARD_TYPES_NO_KEYWORDS = {'Campaign', 'Contract', 'Full Art Landscape',
                           'Full Art Portrait', 'Nightmare', 'Presentation',
                           'Rules'}
-CARD_TYPES_COST = {'Hero', 'Ally', 'Attachment', 'Event', 'Player Side Quest',
-                   'Treasure', 'Quest'}
+CARD_TYPES_COST = {'Hero', 'Ally', 'Attachment', 'Event', 'Player Objective',
+                   'Player Side Quest', 'Treasure', 'Quest'}
 CARD_TYPES_ENGAGEMENT = {'Enemy', 'Ship Enemy', 'Quest'}
 CARD_TYPES_THREAT = {'Enemy', 'Location', 'Ship Enemy'}
 CARD_TYPES_WILLPOWER = {'Ally', 'Hero', 'Objective Ally', 'Objective Hero',
                         'Ship Objective'}
-CARD_TYPES_COMBAT = {'Ally', 'Enemy', 'Hero', 'Objective Ally', 'Objective Hero',
-                     'Ship Enemy', 'Ship Objective'}
+CARD_TYPES_COMBAT = {'Ally', 'Enemy', 'Hero', 'Objective Ally',
+                     'Objective Hero', 'Ship Enemy', 'Ship Objective'}
 CARD_TYPES_QUEST = {'Encounter Side Quest', 'Location', 'Objective Location',
                     'Player Side Quest'}
 CARD_TYPES_QUEST_BACK = {'Quest'}
 CARD_TYPES_VICTORY = {'Ally', 'Attachment', 'Encounter Side Quest', 'Enemy',
                       'Event', 'Location', 'Objective', 'Objective Ally',
-                      'Objective Location', 'Player Side Quest', 'Ship Enemy',
-                      'Ship Objective', 'Treachery', 'Treasure'}
+                      'Objective Location', 'Player Objective',
+                      'Player Side Quest', 'Ship Enemy', 'Ship Objective',
+                      'Treachery', 'Treasure'}
 CARD_TYPES_VICTORY_BACK = {'Quest'}
 CARD_TYPES_SPECIAL_ICON = {'Enemy', 'Location', 'Objective', 'Objective Ally',
                            'Objective Location', 'Ship Enemy',
@@ -205,20 +207,22 @@ CARD_TYPES_TEXT = {}
 #CARD_TYPES_TEXT = {'Attachment', 'Campaign', 'Contract',
 #                   'Encounter Side Quest', 'Event', 'Hero', 'Location',
 #                   'Nightmare', 'Objective', 'Objective Ally',
-#                   'Objective Hero', 'Objective Location', 'Player Side Quest',
-#                   'Presentation', 'Rules', 'Ship Enemy', 'Ship Objective',
-#                   'Treasure'}
+#                   'Objective Hero', 'Objective Location', 'Player Objective',
+#                   'Player Side Quest', 'Presentation', 'Rules', 'Ship Enemy',
+#                   'Ship Objective', 'Treasure'}
 CARD_TYPES_TEXT_BACK = {}
 #CARD_TYPES_TEXT_BACK = {'Attachment', 'Campaign', 'Encounter Side Quest',
 #                        'Event', 'Hero', 'Location', 'Nightmare', 'Objective',
 #                        'Objective Ally', 'Objective Hero',
-#                        'Objective Location', 'Player Side Quest', 'Quest',
-#                        'Ship Enemy', 'Ship Objective', 'Treasure'}
+#                        'Objective Location', 'Player Objective',
+#                        'Player Side Quest', 'Quest', 'Ship Enemy',
+#                        'Ship Objective', 'Treasure'}
 CARD_TYPES_NO_TEXT_BACK = {'Presentation'}
 CARD_TYPES_SHADOW = {'Enemy', 'Location', 'Objective', 'Objective Ally',
                      'Objective Hero', 'Objective Location', 'Ship Enemy',
                      'Ship Objective', 'Treachery'}
-CARD_TYPES_SHADOW_ENCOUNTER = {'Ally', 'Attachment', 'Event'}
+CARD_TYPES_SHADOW_ENCOUNTER = {'Ally', 'Attachment', 'Event',
+                               'Player Objective'}
 CARD_TYPES_NO_FLAVOUR = {'Full Art Landscape', 'Full Art Portrait',
                          'Presentation', 'Rules'}
 CARD_TYPES_NO_FLAVOUR_BACK = {'Nightmare', 'Presentation', 'Rules'}
@@ -248,7 +252,8 @@ CARD_TYPES_ONE_COPY = {'Campaign', 'Contract', 'Encounter Side Quest',
                        'Full Art Landscape', 'Full Art Portrait', 'Hero',
                        'Nightmare', 'Objective Hero', 'Presentation', 'Quest',
                        'Rules', 'Treasure'}
-CARD_TYPES_THREE_COPIES = {'Ally', 'Attachment', 'Event', 'Player Side Quest'}
+CARD_TYPES_THREE_COPIES = {'Ally', 'Attachment', 'Event', 'Player Objective',
+                           'Player Side Quest'}
 CARD_TYPES_BOON = {'Attachment', 'Event', 'Objective Ally'}
 CARD_TYPES_BURDEN = {'Enemy', 'Objective', 'Treachery'}
 CARD_TYPES_NIGHTMARE = {'Encounter Side Quest', 'Enemy', 'Location',
@@ -393,6 +398,7 @@ O8D_TEMPLATE = """<deck game="a21af4e8-be4b-4cda-a6b6-534f9717391f"
   <section name="Ally" shared="False" />
   <section name="Attachment" shared="False" />
   <section name="Event" shared="False" />
+  <section name="Player Objective" shared="False" />
   <section name="Side Quest" shared="False" />
   <section name="Sideboard" shared="False" />
   <section name="Quest" shared="True" />
@@ -425,9 +431,9 @@ CARD_TYPE_SUFFIX_HALLOFBEORN = {
 }
 
 CARD_TYPES_PLAYER_FRENCH = {'Ally', 'Attachment', 'Contract', 'Event', 'Hero',
-                            'Player Side Quest', 'Treasure', 'Campaign',
-                            'Objective Ally', 'Objective Hero',
-                            'Ship Objective'}
+                            'Player Objective', 'Player Side Quest',
+                            'Treasure', 'Campaign', 'Objective Ally',
+                            'Objective Hero', 'Ship Objective'}
 CARD_TYPE_FRENCH_IDS = {
     'Ally': 401,
     'Attachment': 403,
@@ -443,6 +449,7 @@ CARD_TYPE_FRENCH_IDS = {
     'Objective Ally': 409,
     'Objective Hero': 416,
     'Objective Location': 417,
+    'Player Objective': 419,
     'Player Side Quest': 412,
     'Quest': 408,
     'Ship Enemy': 404,
@@ -478,6 +485,7 @@ SPANISH = {
     'Objective Ally': 'Objetivo-Aliado',
     'Objective Hero': 'H\u00e9roe-Objetivo',
     'Objective Location': 'Lugar-Objetivo',
+    'Player Objective': 'Objetivo',
     'Player Side Quest': 'Misi\u00f3n Secundaria',
     'Quest': 'Misi\u00f3n',
     'Setup': 'Preparaci\u00f3n',
@@ -4583,6 +4591,7 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
             ally_cards = []
             attachment_cards = []
             event_cards = []
+            player_objective_cards = []
             side_quest_cards = []
             for card in cards:
                 if not card[CARD_ENCOUNTER_SET]:
@@ -4666,6 +4675,8 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                     attachment_cards.append(card)
                 elif card[CARD_TYPE] == 'event':
                     event_cards.append(card)
+                elif card[CARD_TYPE] == 'player objective':
+                    player_objective_cards.append(card)
                 elif card[CARD_TYPE] == 'player side quest':
                     side_quest_cards.append(card)
                 else:
@@ -4700,6 +4711,9 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                           attachment_cards)
             _append_cards(root.findall("./section[@name='Event']")[0],
                           event_cards)
+            _append_cards(
+                root.findall("./section[@name='Player Objective']")[0],
+                player_objective_cards)
             _append_cards(root.findall("./section[@name='Side Quest']")[0],
                           side_quest_cards)
 
