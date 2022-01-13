@@ -396,20 +396,21 @@ List of available card types:
 
 List of available sphere values:
 
+- `Baggins`
+- `Fellowship`
 - `Leadership`
 - `Lore`
 - `Neutral`
 - `Spirit`
 - `Tactics`
-- `Baggins`
-- `Fellowship`
 - `Boon`
 - `Burden`
 - `Nightmare`
-- `Upgraded` (`Ship Objective` only)
-- `SmallTextArea` (`Encounter Side Quest` only)
-- `Back` (`Rules` only)
 - `Setup` (`Campaign` only)
+- `SmallTextArea` (`Encounter Side Quest` only)
+- `SmallTextArea Dark` (`Encounter Side Quest` only)
+- `Back` (`Rules` only)
+- `Upgraded` (`Ship Objective` only)
 - `Blue` (`Presentation` only)
 - `Green` (`Presentation` only)
 - `Purple` (`Presentation` only)

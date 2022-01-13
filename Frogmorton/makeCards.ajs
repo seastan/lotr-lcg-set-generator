@@ -507,8 +507,11 @@ function run(progress, target, filename, icons) {
 						card['Sphere'] = 'Promo' + card['Sphere'];
 					}
 
-					if ((cardType == 'Encounter Side Quest') && (card['Sphere'] + '' == 'SmallTextArea')) {
+					if ((cardType == 'Encounter Side Quest') && (['SmallTextArea', 'SmallTextArea Dark'].indexOf(card['Sphere'] + '') > -1)) {
 						cardType = 'Encounter Side Quest SmallTextArea';
+						if (card['Sphere'] + '' == 'SmallTextArea Dark') {
+							card['Sphere'] = 'SmallTextAreaDark';
+						}
 					}
 
 					keywords = card['Keywords'];
@@ -600,8 +603,11 @@ function run(progress, target, filename, icons) {
 						card['BSphere'] = 'Promo' + card['BSphere'];
 					}
 
-					if ((cardType == 'Encounter Side Quest') && (card['BSphere'] + '' == 'SmallTextArea')) {
+					if ((cardType == 'Encounter Side Quest') && (['SmallTextArea', 'SmallTextArea Dark'].indexOf(card['BSphere'] + '') > -1)) {
 						cardType = 'Encounter Side Quest SmallTextArea';
+						if (card['BSphere'] + '' == 'SmallTextArea Dark') {
+							card['BSphere'] = 'SmallTextAreaDark';
+						}
 					}
 
 					keywords = card['BKeywords'];
