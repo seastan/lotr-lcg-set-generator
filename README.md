@@ -385,6 +385,7 @@ List of available card types:
 - `Objective Ally`
 - `Objective Hero`
 - `Objective Location`
+- `Player Objective`
 - `Player Side Quest`
 - `Presentation`
 - `Quest`
