@@ -854,6 +854,14 @@ def format_match(card, num):
     elif sphere in ('Neutral', 'Boon', 'Burden', 'Nightmare', 'Upgraded'):
         card_type_back = '{} {}'.format(sphere, card_type_back)
 
+    if 'Promo' in lotr.extract_flags(card.get(lotr.CARD_FLAGS)):
+        card_type = '{} (**Promo**)'.format(card_type)
+
+    if (card_type_back and
+            'Promo' in lotr.extract_flags(
+                card.get(lotr.BACK_PREFIX + lotr.CARD_FLAGS))):
+        card_type_back = '{} (**Promo**)'.format(card_type_back)
+
     if card_type_back and card_type_back != card_type:
         card_type = '{} / {}'.format(card_type, card_type_back)
 
