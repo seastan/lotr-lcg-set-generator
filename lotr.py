@@ -83,11 +83,12 @@ CARD_TEXT = 'Text'
 CARD_SHADOW = 'Shadow'
 CARD_FLAVOUR = 'Flavour'
 CARD_PRINTED_NUMBER = 'Printed Card Number'
+CARD_FLAGS = 'Flags'
 CARD_ARTIST = 'Artist'
 CARD_PANX = 'PanX'
 CARD_PANY = 'PanY'
-CARD_PORTRAIT_SHADOW = 'Portrait Shadow'
 CARD_SCALE = 'Scale'
+CARD_PORTRAIT_SHADOW = 'Portrait Shadow'
 CARD_SIDE_B = 'Side B'
 CARD_EASY_MODE = 'Removed for Easy Mode'
 CARD_ADDITIONAL_ENCOUNTER_SETS = 'Additional Encounter Sets'
@@ -117,9 +118,9 @@ MAX_COLUMN = '_Max Column'
 ROW_COLUMN = '_Row'
 
 DISCORD_IGNORE_COLUMNS = {
-    CARD_PANX, CARD_PANY, CARD_PORTRAIT_SHADOW, CARD_SCALE,
+    CARD_PANX, CARD_PANY, CARD_SCALE, CARD_PORTRAIT_SHADOW,
     BACK_PREFIX + CARD_PANX, BACK_PREFIX + CARD_PANY,
-    BACK_PREFIX + CARD_PORTRAIT_SHADOW, BACK_PREFIX + CARD_SCALE, CARD_SIDE_B,
+    BACK_PREFIX + CARD_SCALE, BACK_PREFIX + CARD_PORTRAIT_SHADOW, CARD_SIDE_B,
     CARD_SELECTED, CARD_CHANGED, CARD_SCRATCH
 }
 
@@ -230,6 +231,13 @@ CARD_TYPES_NO_PRINTED_NUMBER = {'Full Art Landscape', 'Full Art Portrait',
                                 'Presentation', 'Rules'}
 CARD_TYPES_NO_PRINTED_NUMBER_BACK = {'Campaign', 'Nightmare',
                                      'Presentation', 'Rules'}
+CARD_TYPES_FLAGS = {'Promo': {'Hero'}}
+CARD_TYPES_FLAGS_BACK = {'Promo': {'Hero'}}
+CARD_TYPES_NO_FLAGS = {'NoArtist': {'Presentation', 'Rules'},
+                       'NoCopyright': {'Presentation', 'Rules'}}
+CARD_TYPES_NO_FLAGS_BACK = {
+    'NoArtist': {'Campaign', 'Nightmare', 'Presentation', 'Rules'},
+    'NoCopyright': {'Campaign', 'Nightmare', 'Presentation', 'Rules'}}
 CARD_TYPES_NO_ARTIST = {'Presentation', 'Rules'}
 CARD_TYPES_NO_ARTIST_BACK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
 CARD_TYPES_NO_ARTWORK = {'Rules'}
@@ -239,7 +247,7 @@ CARD_TYPES_EASY_MODE = {'Encounter Side Quest', 'Enemy', 'Location',
                         'Objective Location', 'Ship Enemy', 'Ship Objective',
                         'Treachery'}
 CARD_TYPES_ADDITIONAL_ENCOUNTER_SETS = {'Quest'}
-CARD_TYPES_ADVENTURE = {'Campaign', 'Hero', 'Objective', 'Objective Ally',
+CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
                         'Objective Hero', 'Objective Location',
                         'Quest', 'Ship Objective'}
 CARD_TYPES_SUBTITLE = {'Campaign', 'Objective', 'Objective Ally',
@@ -261,6 +269,7 @@ CARD_TYPES_NIGHTMARE = {'Encounter Side Quest', 'Enemy', 'Location',
 CARD_TYPES_NO_DISCORD_CHANNEL = {'Full Art Landscape', 'Full Art Portrait',
                                  'Rules', 'Presentation'}
 
+FLAGS = {'NoArtist', 'NoCopyright', 'Promo'}
 SPHERES = set()
 SPHERES_CAMPAIGN = {'Setup'}
 SPHERES_SIDE_QUEST = {'SmallTextArea', 'SmallTextArea Dark'}
@@ -1684,6 +1693,13 @@ def get_sets(conf, sheet_changes=True, scratch_changes=True):
     return chosen_sets
 
 
+def extract_flags(value):
+    """ Extract flags from a string value.
+    """
+    return [f.strip() for f in (value or '').replace(';', '\n').split('\n')
+            if f.strip()]
+
+
 def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
     """ Perform a sanity check of the spreadsheet and return "healthy" sets.
     """
@@ -1730,11 +1746,12 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_shadow = row[CARD_SHADOW]
         card_flavour = row[CARD_FLAVOUR]
         card_printed_number = row[CARD_PRINTED_NUMBER]
+        card_flags = row[CARD_FLAGS]
         card_artist = row[CARD_ARTIST]
         card_panx = row[CARD_PANX]
         card_pany = row[CARD_PANY]
-        card_portrait_shadow = row[CARD_PORTRAIT_SHADOW]
         card_scale = row[CARD_SCALE]
+        card_portrait_shadow = row[CARD_PORTRAIT_SHADOW]
         card_special_icon = row[CARD_SPECIAL_ICON]
 
         card_name_back = row[BACK_PREFIX + CARD_NAME]
@@ -1756,11 +1773,12 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_shadow_back = row[BACK_PREFIX + CARD_SHADOW]
         card_flavour_back = row[BACK_PREFIX + CARD_FLAVOUR]
         card_printed_number_back = row[BACK_PREFIX + CARD_PRINTED_NUMBER]
+        card_flags_back = row[BACK_PREFIX + CARD_FLAGS]
         card_artist_back = row[BACK_PREFIX + CARD_ARTIST]
         card_panx_back = row[BACK_PREFIX + CARD_PANX]
         card_pany_back = row[BACK_PREFIX + CARD_PANY]
-        card_portrait_shadow_back = row[BACK_PREFIX + CARD_PORTRAIT_SHADOW]
         card_scale_back = row[BACK_PREFIX + CARD_SCALE]
+        card_portrait_shadow_back = row[BACK_PREFIX + CARD_PORTRAIT_SHADOW]
         card_special_icon_back = row[BACK_PREFIX + CARD_SPECIAL_ICON]
 
         card_easy_mode = row[CARD_EASY_MODE]
@@ -3029,6 +3047,83 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
+        if card_flags is not None:
+            flags = extract_flags(card_flags)
+            if not flags:
+                message = 'Incorrect flags for row #{}{}'.format(i, scratch)
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
+            elif len(flags) != len(set(flags)):
+                message = 'Duplicate flags for row #{}{}'.format(i, scratch)
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
+            elif [f for f in flags if f not in FLAGS]:
+                message = 'Incorrect flags for row #{}{}'.format(i, scratch)
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
+
+            for flag in flags:
+                if ((flag in CARD_TYPES_FLAGS and
+                     card_type not in CARD_TYPES_FLAGS[flag]) or
+                        (flag in CARD_TYPES_NO_FLAGS and
+                         card_type in CARD_TYPES_NO_FLAGS[flag])):
+                    message = 'Redundant flag "{}" for row #{}{}'.format(
+                        flag, i, scratch)
+                    logging.error(message)
+                    if not card_scratch:
+                        errors.append(message)
+                    else:
+                        broken_set_ids.add(set_id)
+
+        if card_flags_back is not None:
+            flags = extract_flags(card_flags_back)
+            if not flags:
+                message = 'Incorrect flags back for row #{}{}'.format(i,
+                                                                      scratch)
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
+            elif len(flags) != len(set(flags)):
+                message = 'Duplicate flags back for row #{}{}'.format(i,
+                                                                      scratch)
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
+            elif [f for f in flags if f not in FLAGS]:
+                message = 'Incorrect flags back for row #{}{}'.format(i,
+                                                                      scratch)
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
+
+            for flag in flags:
+                if ((flag in CARD_TYPES_FLAGS_BACK and
+                     card_type_back not in CARD_TYPES_FLAGS_BACK[flag]) or
+                        (flag in CARD_TYPES_NO_FLAGS_BACK and
+                         card_type_back in CARD_TYPES_NO_FLAGS_BACK[flag])):
+                    message = 'Redundant flag back "{}" for row #{}{}'.format(
+                        flag, i, scratch)
+                    logging.error(message)
+                    if not card_scratch:
+                        errors.append(message)
+                    else:
+                        broken_set_ids.add(set_id)
+
         if (card_artist is not None and
                 card_type in CARD_TYPES_NO_ARTIST):
             message = 'Redundant artist for row #{}{}'.format(
@@ -3178,50 +3273,6 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_portrait_shadow is not None and
-                card_type not in CARD_TYPES_LANDSCAPE):
-            message = 'Redundant portrait shadow for row #{}{}'.format(
-                i, scratch)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-        elif card_portrait_shadow not in (None, 'Black'):
-            message = ('Incorrect format for portrait shadow for row #{}{}'
-                       .format(i, scratch))
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-
-        if card_portrait_shadow_back is not None and card_type_back is None:
-            message = 'Redundant portrait shadow back for row #{}{}'.format(
-                i, scratch)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-        if (card_portrait_shadow_back is not None and
-                card_type_back not in CARD_TYPES_LANDSCAPE):
-            message = 'Redundant portrait shadow back for row #{}{}'.format(
-                i, scratch)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-        elif card_portrait_shadow_back not in (None, 'Black'):
-            message = ('Incorrect format for portrait shadow back for row '
-                       '#{}{}'.format(i, scratch))
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-
         if (card_scale is not None and
                 card_type in CARD_TYPES_NO_ARTWORK):
             message = 'Redundant scale for row #{}{}'.format(
@@ -3284,6 +3335,50 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
+        if (card_portrait_shadow is not None and
+                card_type not in CARD_TYPES_LANDSCAPE):
+            message = 'Redundant portrait shadow for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_portrait_shadow not in (None, 'Black'):
+            message = ('Incorrect format for portrait shadow for row #{}{}'
+                       .format(i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_portrait_shadow_back is not None and card_type_back is None:
+            message = 'Redundant portrait shadow back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        if (card_portrait_shadow_back is not None and
+                card_type_back not in CARD_TYPES_LANDSCAPE):
+            message = 'Redundant portrait shadow back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_portrait_shadow_back not in (None, 'Black'):
+            message = ('Incorrect format for portrait shadow back for row '
+                       '#{}{}'.format(i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
         if (card_easy_mode is not None and
                 card_type not in CARD_TYPES_EASY_MODE and
                 (card_type_back not in CARD_TYPES_EASY_MODE or
@@ -3340,18 +3435,6 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
               (card_type in CARD_TYPES_SUBTITLE or
                card_type_back in CARD_TYPES_SUBTITLE)):
             message = 'No adventure for row #{}{}'.format(
-                i, scratch)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-        elif (((card_type == 'Hero' and
-                card_type_back not in CARD_TYPES_SUBTITLE) or
-               (card_type_back == 'Hero' and
-                card_type not in CARD_TYPES_SUBTITLE)) and
-              card_adventure not in (None, 'Promo')):
-            message = 'Incorrect format for adventure for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -4003,7 +4086,7 @@ def _add_set_xml_properties(parent, properties, fix_linebreaks, tab):
 def _needed_for_octgn(card):
     """ Check whether a card is needed for OCTGN or not.
     """
-    return (card[CARD_ADVENTURE] != 'Promo' and
+    return ('Promo' not in extract_flags(card[CARD_FLAGS]) and
             card[CARD_TYPE] not in ('Full Art Landscape',
                                     'Full Art Portrait'))
 
@@ -4011,7 +4094,7 @@ def _needed_for_octgn(card):
 def _needed_for_dragncards(card):
     """ Check whether a card is needed for DragnCards or not.
     """
-    return (card[CARD_ADVENTURE] != 'Promo' and
+    return ('Promo' not in extract_flags(card[CARD_FLAGS]) and
             card[CARD_TYPE] not in ('Full Art Landscape',
                                     'Full Art Portrait', 'Presentation') and
             not (card[CARD_TYPE] == 'Rules' and card[CARD_SPHERE] == 'Back'))
@@ -4782,7 +4865,7 @@ def _needed_for_ringsdb(card):
     card_type = ('Treasure' if card.get(CARD_SPHERE) == 'Boon'
                  else card.get(CARD_TYPE))
     return (card_type in CARD_TYPES_PLAYER and
-            card.get(CARD_ADVENTURE) != 'Promo')
+            'Promo' not in extract_flags(card.get(CARD_FLAGS)))
 
 
 def _needed_for_frenchdb(card):
@@ -4791,7 +4874,7 @@ def _needed_for_frenchdb(card):
     return (card[CARD_TYPE] not in
             ('Full Art Landscape', 'Full Art Portrait', 'Presentation',
              'Rules') and
-            card[CARD_ADVENTURE] != 'Promo')
+            'Promo' not in extract_flags(card[CARD_FLAGS]))
 
 
 def _needed_for_spanishdb(card):
@@ -4801,7 +4884,7 @@ def _needed_for_spanishdb(card):
             ('Full Art Landscape', 'Full Art Portrait', 'Presentation') and
             not (card[CARD_TYPE] == 'Rules' and
                  card[CARD_SPHERE] == 'Back') and
-            card[CARD_ADVENTURE] != 'Promo')
+            'Promo' not in extract_flags(card[CARD_FLAGS]))
 
 
 def _ringsdb_code(row):
@@ -5255,8 +5338,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
                              str(card_number).zfill(3))
         position = (row[CARD_PRINTED_NUMBER]
                     if row[CARD_PRINTED_NUMBER] is not None and
-                    card_type == 'Hero' and
-                    row[CARD_ADVENTURE] == 'Promo'
+                    'Promo' in extract_flags(row[CARD_FLAGS])
                     else card_number)
 
         encounter_set = ((row[CARD_ENCOUNTER_SET] or '')
@@ -6068,8 +6150,8 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                      CARD_WILLPOWER, CARD_ATTACK, CARD_DEFENSE, CARD_HEALTH,
                      CARD_QUEST, CARD_VICTORY, CARD_SPECIAL_ICON, CARD_TEXT,
                      CARD_SHADOW, CARD_FLAVOUR, CARD_PRINTED_NUMBER,
-                     CARD_ARTIST, CARD_PANX, CARD_PANY, CARD_PORTRAIT_SHADOW,
-                     CARD_SCALE, CARD_EASY_MODE,
+                     CARD_FLAGS, CARD_ARTIST, CARD_PANX, CARD_PANY,
+                     CARD_SCALE, CARD_PORTRAIT_SHADOW, CARD_EASY_MODE,
                      CARD_ADDITIONAL_ENCOUNTER_SETS, CARD_ADVENTURE, CARD_ICON,
                      CARD_BACK, CARD_VERSION):
             value = _get_xml_property_value(row, name, card_type)
@@ -6108,9 +6190,9 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                          CARD_THREAT, CARD_WILLPOWER, CARD_ATTACK,
                          CARD_DEFENSE, CARD_HEALTH, CARD_QUEST, CARD_VICTORY,
                          CARD_SPECIAL_ICON, CARD_TEXT, CARD_SHADOW,
-                         CARD_FLAVOUR, CARD_PRINTED_NUMBER, CARD_ARTIST,
-                         CARD_PANX, CARD_PANY, CARD_PORTRAIT_SHADOW,
-                         CARD_SCALE):
+                         CARD_FLAVOUR, CARD_PRINTED_NUMBER, CARD_FLAGS,
+                         CARD_ARTIST, CARD_PANX, CARD_PANY,
+                         CARD_SCALE, CARD_PORTRAIT_SHADOW):
                 value = _get_xml_property_value(row, BACK_PREFIX + name,
                                                 card_type)
                 if value != '':

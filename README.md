@@ -340,7 +340,7 @@ Please note that all tags are case-sensitive.
 - `[quot]`: "
 - `[apos]`: '
 - `[hyphen]`: -
-- `[Trait]`: an alias for `[bi]Trait[/bi]` (please note that "Trait" must be capitalized)
+- `{Trait}`: an alias for `[bi]Trait[/bi]`
 - `--`: en dash
 - `---`: em dash
 
@@ -425,9 +425,11 @@ List of available sphere values:
 - `Nightmare Brown` (`Presentation` only)
 - `Nightmare Yellow` (`Presentation` only)
 
-Please note, that not all card types and spheres are currently supported by Strange Eons.
+**Flags**
 
-To choose the promo template for a hero, put "Promo" into `Adventure` column.
+- `NoArtist`
+- `NoCopyright`
+- `Promo` (`Hero` only)
 
 **Special Icons**
 

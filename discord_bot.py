@@ -623,6 +623,9 @@ def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
     else:
         card_sphere = ''
 
+    if 'Promo' in lotr.extract_flags(card.get(prefix + lotr.CARD_FLAGS)):
+        card_sphere = '{} (**Promo**)'.format(card_sphere)
+
     cost = card.get(prefix + lotr.CARD_COST, '')
     if cost == '' or card_type == 'Quest':
         card_cost = ''
@@ -726,8 +729,6 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
     adventure = card.get(lotr.CARD_ADVENTURE, '')
     if adventure == '':
         card_adventure = ''
-    elif card_type == 'Hero' and adventure == 'Promo':
-        card_adventure = '**Promo**\n'
     elif card_type == 'Campaign':
         card_adventure = '*Campaign*: {}\n'.format(adventure)
     else:
@@ -2680,9 +2681,9 @@ Targets removed.
                 create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
                 return_message = 'Failing to move artwork files for the card'
                 break
-            else:
-                return_message = \
-                    'Artwork files for the card were successfully moved'
+
+            return_message = \
+                'Artwork files for the card were successfully moved'
 
         return return_message
 

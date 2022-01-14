@@ -460,6 +460,26 @@ function run(progress, target, filename, icons) {
 			card['Artist'] = 'Unknown Artist';
 		}
 
+		if (card['Flags']) {
+			card['Flags'] = (card['Flags'] + '').replace(';', '\n').split('\n');
+			for (let idx = 0; idx < card['Flags'].length; idx++) {
+				card['Flags'][idx] = card['Flags'][idx].trim();
+			}
+		}
+		else {
+			card['Flags'] = [];
+		}
+
+		if (card['BFlags']) {
+			card['BFlags'] = (card['BFlags'] + '').replace(';', '\n').split('\n');
+			for (let idx = 0; idx < card['BFlags'].length; idx++) {
+				card['BFlags'][idx] = card['BFlags'][idx].trim();
+			}
+		}
+		else {
+			card['BFlags'] = [];
+		}
+
 		let playerCopies = false;
 		if (playerCopyTypes.indexOf(card['Type'] + '') > -1 && card['Quantity'] == 3) {
 			playerCopies = true;
@@ -509,11 +529,11 @@ function run(progress, target, filename, icons) {
 					}
 					else if (['Nightmare Blue', 'Nightmare Green', 'Nightmare Purple', 'Nightmare Red', 'Nightmare Brown', 'Nightmare Yellow'].indexOf(cardSphere) > -1) {
 						Console.err.println('\nERROR: ' + cardSphere + " template is not supported yet.");
-						cardSphere = cardSphere.replace(/Nightmare /, '');
+						cardSphere = cardSphere.replace('Nightmare ', '');
 						card['Sphere'] = cardSphere;
 					}
 
-					if ((cardType == 'Hero') && (card['Adventure'] + '' == 'Promo')) {
+					if ((cardType == 'Hero') && (card['Flags'].indexOf('Promo') > -1)) {
 						cardType = 'Hero Promo';
 						card['Sphere'] = 'Promo' + card['Sphere'];
 					}
@@ -605,11 +625,11 @@ function run(progress, target, filename, icons) {
 					}
 					else if (['Nightmare Blue', 'Nightmare Green', 'Nightmare Purple', 'Nightmare Red', 'Nightmare Brown', 'Nightmare Yellow'].indexOf(cardSphere) > -1) {
 						Console.err.println('\nERROR: ' + cardSphere + " template is not supported yet.");
-						cardSphere = cardSphere.replace(/Nightmare /, '');
+						cardSphere = cardSphere.replace('Nightmare ', '');
 						card['BSphere'] = cardSphere;
 					}
 
-					if ((cardType == 'Hero') && (card['Adventure'] + '' == 'Promo')) {
+					if ((cardType == 'Hero') && (card['BFlags'].indexOf('Promo') > -1)) {
 						cardType = 'Hero Promo';
 						card['BSphere'] = 'Promo' + card['BSphere'];
 					}
