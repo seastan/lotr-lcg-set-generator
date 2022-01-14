@@ -624,7 +624,9 @@ def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
         card_sphere = ''
 
     if 'Promo' in lotr.extract_flags(card.get(prefix + lotr.CARD_FLAGS)):
-        card_sphere = '{} (**Promo**)'.format(card_sphere)
+        card_promo = ' (**Promo**)'
+    else:
+        card_promo = ''
 
     cost = card.get(prefix + lotr.CARD_COST, '')
     if cost == '' or card_type == 'Quest':
@@ -707,7 +709,7 @@ def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
     card_artist = '' if artist == '' else '\n\n*Artist*: {}'.format(artist)
 
     res = f"""{card_unique}{card_name}
-{card_sphere}{card_type}{card_cost}{card_engagement}{card_stage}{card_skills}
+{card_sphere}{card_type}{card_promo}{card_cost}{card_engagement}{card_stage}{card_skills}
 
 {card_traits}{card_keywords}{card_text}{card_shadow}{card_victory}{card_special_icon}{card_flavour}{card_artist}"""  # pylint: disable=C0301
     return res
