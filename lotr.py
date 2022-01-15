@@ -4014,7 +4014,7 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
         return value
 
     if name in (CARD_SPHERE, BACK_PREFIX + CARD_SPHERE):
-        if card_type == 'Treasure':
+        if card_type in ('Player Objective', 'Treasure'):
             value = 'Neutral'
         elif card_type in ('Presentation', 'Rules'):
             value = ''
@@ -4946,7 +4946,7 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
             else:
                 limit = None
 
-            if card_type in ('Contract', 'Treasure'):
+            if card_type in ('Contract', 'Player Objective', 'Treasure'):
                 sphere = 'Neutral'
             else:
                 sphere = row[CARD_SPHERE]
@@ -5062,7 +5062,7 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
         else:
             card_type = row[CARD_TYPE]
 
-        if row[CARD_TYPE] == 'Treasure':
+        if row[CARD_TYPE] in ('Player Objective', 'Treasure'):
             sphere = 'Neutral'
         elif row[CARD_SPHERE] in ('Setup', 'Cave', 'SmallTextArea',
                                   'Upgraded'):
@@ -5103,7 +5103,8 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
             else:
                 card_type = row[BACK_PREFIX + CARD_TYPE]
 
-            if row[BACK_PREFIX + CARD_TYPE] == 'Treasure':
+            if row[BACK_PREFIX + CARD_TYPE] in ('Player Objective',
+                                                'Treasure'):
                 sphere = 'Neutral'
             elif row[BACK_PREFIX + CARD_SPHERE] in ('Setup', 'Cave',
                                                     'SmallTextArea',
@@ -5283,7 +5284,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
             stage_letter = None
             opposite_stage_letter = None
 
-        if card_type in ('Contract', 'Treasure'):
+        if card_type in ('Contract', 'Player Objective', 'Treasure'):
             sphere = 'Neutral'
         elif card_type in ('Campaign', 'Presentation', 'Rules'):
             sphere = 'None'
@@ -5535,7 +5536,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
 
             french_row = TRANSLATIONS['French'].get(row[CARD_ID], {}).copy()
 
-            if row[CARD_TYPE] == 'Contract':
+            if row[CARD_TYPE] in ('Contract', 'Player Objective'):
                 sphere = 'Neutral'
             elif row[CARD_SPHERE] in ('Boon', 'Upgraded'):
                 sphere = None
@@ -5923,7 +5924,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                         spanish_row[key.replace(BACK_PREFIX, '')] = (
                             spanish_row[key])
 
-            if row[CARD_TYPE] in ('Contract', 'Treasure'):
+            if row[CARD_TYPE] in ('Contract', 'Player Objective', 'Treasure'):
                 sphere = 'Neutral'
             else:
                 sphere = row[CARD_SPHERE]
