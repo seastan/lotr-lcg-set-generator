@@ -272,7 +272,7 @@ CARD_TYPES_NO_DISCORD_CHANNEL = {'Full Art Landscape', 'Full Art Portrait',
 FLAGS = {'NoArtist', 'NoCopyright', 'Promo'}
 SPHERES = set()
 SPHERES_CAMPAIGN = {'Setup'}
-SPHERES_SIDE_QUEST = {'SmallTextArea', 'SmallTextArea Dark'}
+SPHERES_SIDE_QUEST = {'Cave', 'SmallTextArea'}
 SPHERES_PLAYER = {'Baggins', 'Fellowship', 'Leadership', 'Lore', 'Neutral',
                   'Spirit', 'Tactics'}
 SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow',
@@ -4018,7 +4018,7 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
             value = 'Neutral'
         elif card_type in ('Presentation', 'Rules'):
             value = ''
-        elif value in ('SmallTextArea', 'SmallTextArea Dark', 'Upgraded'):
+        elif value in ('Cave', 'SmallTextArea', 'Upgraded'):
             value = ''
         elif card_type == 'Campaign':
             value = str(value).upper() if value else 'CAMPAIGN'
@@ -5064,8 +5064,8 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
 
         if row[CARD_TYPE] == 'Treasure':
             sphere = 'Neutral'
-        elif row[CARD_SPHERE] in ('Setup', 'SmallTextArea',
-                                  'SmallTextArea Dark', 'Upgraded'):
+        elif row[CARD_SPHERE] in ('Setup', 'Cave', 'SmallTextArea',
+                                  'Upgraded'):
             sphere = ''
         else:
             sphere = row[CARD_SPHERE]
@@ -5105,8 +5105,8 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
 
             if row[BACK_PREFIX + CARD_TYPE] == 'Treasure':
                 sphere = 'Neutral'
-            elif row[BACK_PREFIX + CARD_SPHERE] in ('Setup', 'SmallTextArea',
-                                                    'SmallTextArea Dark',
+            elif row[BACK_PREFIX + CARD_SPHERE] in ('Setup', 'Cave',
+                                                    'SmallTextArea',
                                                     'Upgraded'):
                 sphere = ''
             else:
@@ -5287,8 +5287,8 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
             sphere = 'Neutral'
         elif card_type in ('Campaign', 'Presentation', 'Rules'):
             sphere = 'None'
-        elif row[CARD_SPHERE] in ('Nightmare', 'SmallTextArea',
-                                  'SmallTextArea Dark', 'Upgraded'):
+        elif row[CARD_SPHERE] in ('Nightmare', 'Cave', 'SmallTextArea',
+                                  'Upgraded'):
             sphere = 'None'
         elif row[CARD_SPHERE] is not None:
             sphere = row[CARD_SPHERE]
@@ -5356,6 +5356,9 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
             type_name = 'Nightmare Setup'
         elif card_type in ('Full Landscape', 'Full Art Portrait'):
             type_name = 'None'
+        elif (card_type == 'Encounter Side Quest' and
+              row[CARD_SPHERE] == 'Cave'):
+            type_name = 'Cave'
         else:
             type_name = card_type or ''
 

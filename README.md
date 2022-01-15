@@ -408,8 +408,8 @@ List of available sphere values:
 - `Burden`
 - `Nightmare`
 - `Setup` (`Campaign` only)
+- `Cave` (`Encounter Side Quest` only)
 - `SmallTextArea` (`Encounter Side Quest` only)
-- `SmallTextArea Dark` (`Encounter Side Quest` only)
 - `Back` (`Rules` only)
 - `Upgraded` (`Ship Objective` only)
 - `Blue` (`Presentation` only)
