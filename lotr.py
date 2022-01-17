@@ -407,7 +407,6 @@ O8D_TEMPLATE = """<deck game="a21af4e8-be4b-4cda-a6b6-534f9717391f"
   <section name="Ally" shared="False" />
   <section name="Attachment" shared="False" />
   <section name="Event" shared="False" />
-  <section name="Player Objective" shared="False" />
   <section name="Side Quest" shared="False" />
   <section name="Sideboard" shared="False" />
   <section name="Quest" shared="True" />
@@ -4674,7 +4673,6 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
             ally_cards = []
             attachment_cards = []
             event_cards = []
-            player_objective_cards = []
             side_quest_cards = []
             for card in cards:
                 if not card[CARD_ENCOUNTER_SET]:
@@ -4754,12 +4752,10 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                     hero_cards.append(card)
                 elif card[CARD_TYPE] == 'ally':
                     ally_cards.append(card)
-                elif card[CARD_TYPE] == 'attachment':
+                elif card[CARD_TYPE] in ('attachment', 'player objective'):
                     attachment_cards.append(card)
                 elif card[CARD_TYPE] == 'event':
                     event_cards.append(card)
-                elif card[CARD_TYPE] == 'player objective':
-                    player_objective_cards.append(card)
                 elif card[CARD_TYPE] == 'player side quest':
                     side_quest_cards.append(card)
                 else:
@@ -4794,9 +4790,6 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                           attachment_cards)
             _append_cards(root.findall("./section[@name='Event']")[0],
                           event_cards)
-            _append_cards(
-                root.findall("./section[@name='Player Objective']")[0],
-                player_objective_cards)
             _append_cards(root.findall("./section[@name='Side Quest']")[0],
                           side_quest_cards)
 
@@ -4957,6 +4950,9 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
             else:
                 cost = _handle_int(row[CARD_COST])
                 threat = None
+
+            if card_type == 'Player Objective':  # temporary fix
+                card_type = 'Attachment'
 
             quantity = (int(row[CARD_QUANTITY])
                         if _is_int(row[CARD_QUANTITY]) else 1)
