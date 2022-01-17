@@ -4855,7 +4855,7 @@ def generate_octgn_o8d(conf, set_id, set_name):
 def _needed_for_ringsdb(card):
     """ Check whether a card is needed for RingsDB or not.
     """
-    card_type = ('Treasure' if card.get(CARD_SPHERE) == 'Boon'
+    card_type = ('Treasure' if card.get(CARD_SPHERE) in ('Boon', 'Burden')
                  else card.get(CARD_TYPE))
     return (card_type in CARD_TYPES_PLAYER and
             'Promo' not in extract_flags(card.get(CARD_FLAGS)))
@@ -4927,7 +4927,7 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                 continue
 
             card_type = ('Treasure'
-                         if row[CARD_SPHERE] == 'Boon'
+                         if row[CARD_SPHERE] in ('Boon', 'Burden')
                          else row[CARD_TYPE])
 
             if card_type in CARD_TYPES_PLAYER_DECK:
@@ -4951,8 +4951,10 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                 cost = _handle_int(row[CARD_COST])
                 threat = None
 
-            if card_type == 'Player Objective':  # temporary fix
-                card_type = 'Attachment'
+            if card_type in ('Contract', 'Player Objective'):
+                card_type = 'Other'
+            elif card_type == 'Treasure':
+                card_type = 'Campaign'
 
             quantity = (int(row[CARD_QUANTITY])
                         if _is_int(row[CARD_QUANTITY]) else 1)
