@@ -162,15 +162,19 @@ def execute_tasks(conf, tasks):
                  if conf['parallelism'] == 'default'
                  else conf['parallelism'])
     processes = min(processes, len(tasks))
-    logging.info('Starting a pool of %s process(es) for %s task(s)',
-                 processes, len(tasks))
-    with Pool(processes=processes, initializer=initializer) as pool:
-        try:
-            pool.map(run, tasks)
-        except KeyboardInterrupt:
-            logging.info('Program was terminated!')
-            pool.terminate()
-            raise KeyboardInterrupt
+    if processes == 1:
+        for task in tasks:
+            run(task)
+    else:
+        logging.info('Starting a pool of %s process(es) for %s task(s)',
+                     processes, len(tasks))
+        with Pool(processes=processes, initializer=initializer) as pool:
+            try:
+                pool.map(run, tasks)
+            except KeyboardInterrupt:
+                logging.info('Program was terminated!')
+                pool.terminate()
+                raise KeyboardInterrupt
 
 
 def main():  # pylint: disable=R0912,R0914,R0915

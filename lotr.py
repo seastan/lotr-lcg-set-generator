@@ -6790,6 +6790,7 @@ def get_actual_sets():
 
 
 def _run_cmd(cmd):
+    logging.info('Running the command: %s', cmd)
     try:
         res = subprocess.run(cmd, stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT, shell=True, check=True)
