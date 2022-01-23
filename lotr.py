@@ -990,7 +990,7 @@ def clear_folder(folder):
 
     for _, _, filenames in os.walk(folder):
         for filename in filenames:
-            if filename not in ('seproject', '.gitignore'):
+            if filename not in ('seproject', '.gitignore', 'desktop.ini'):
                 os.remove(os.path.join(folder, filename))
 
         break
@@ -1022,7 +1022,7 @@ def _clear_modified_images(folder, skip_ids):
     """
     for _, _, filenames in os.walk(folder):
         for filename in filenames:
-            if filename.split('.')[-1] in ('jpg', 'png'):
+            if filename.endswith('.jpg') or filename.endswith('.png'):
                 card_id = filename[50:86]
                 if card_id not in skip_ids:
                     os.remove(os.path.join(folder, filename))
@@ -1155,7 +1155,7 @@ def reset_project_folders(conf):
     if os.path.exists(input_path):
         for _, _, filenames in os.walk(input_path):
             for filename in filenames:
-                if filename.split('.')[-1] != 'png':
+                if not filename.endswith('.png'):
                     continue
 
                 shutil.copyfile(os.path.join(input_path, filename),
@@ -6654,7 +6654,8 @@ def copy_custom_images(conf, set_id, set_name):
     if os.path.exists(images_path):
         for _, _, filenames in os.walk(images_path):
             for filename in filenames:
-                if filename.split('.')[-1] not in ('jpg', 'png'):
+                if (not filename.endswith('.jpg') and
+                        not filename.endswith('.png')):
                     continue
 
                 output_filename = '{}_{}'.format(set_id, filename)
@@ -6669,7 +6670,8 @@ def copy_custom_images(conf, set_id, set_name):
     if os.path.exists(images_path):
         for _, _, filenames in os.walk(images_path):
             for filename in filenames:
-                if filename.split('.')[-1] not in ('jpg', 'png'):
+                if (not filename.endswith('.jpg') and
+                        not filename.endswith('.png')):
                     continue
 
                 output_filename = '{}_{}'.format(set_id, filename)
@@ -6982,7 +6984,7 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disab
     for _, _, filenames in os.walk(input_path):
         filenames = sorted(filenames)
         for filename in filenames:
-            if filename.split('.')[-1] != 'png':
+            if not filename.endswith('.png'):
                 continue
 
             key = filename[50:88]
@@ -7054,7 +7056,7 @@ def generate_png300_octgn(set_id, set_name, lang, skip_ids):
     for _, _, filenames in os.walk(input_path):
         filenames = sorted(filenames)
         for filename in filenames:
-            if filename.split('.')[-1] != 'png':
+            if not filename.endswith('.png'):
                 continue
 
             key = filename[50:88]
@@ -7090,7 +7092,7 @@ def generate_png300_rules_pdf(set_id, set_name, lang, skip_ids, card_data):  # p
     for _, _, filenames in os.walk(input_path):
         filenames = sorted(filenames)
         for filename in filenames:
-            if filename.split('.')[-1] != 'png':
+            if not filename.endswith('.png'):
                 continue
 
             key = filename[50:88]
@@ -7854,6 +7856,9 @@ def generate_tts(conf, set_id, set_name, lang, card_dict, scratch):  # pylint: d
     input_cnt = 0
     for _, _, filenames in os.walk(decks_path):
         for filename in filenames:
+            if not filename.endswith('.o8d'):
+                continue
+
             cnt = _generate_tts_sheets(os.path.join(decks_path, filename),
                                        temp_path, image_path, card_dict,
                                        scratch)
@@ -7878,6 +7883,9 @@ def generate_tts(conf, set_id, set_name, lang, card_dict, scratch):  # pylint: d
         output_cnt = 0
         for _, _, filenames in os.walk(output_path):
             for filename in filenames:
+                if not filename.endswith('.jpg'):
+                    continue
+
                 output_cnt += 1
                 if os.path.getsize(os.path.join(output_path, filename)
                                    ) < JPG_300_MIN_SIZE:
@@ -7918,7 +7926,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
         clear_folder(output_path)
         filenames = sorted(filenames)
         for filename in filenames:
-            if filename.split('.')[-1] != 'png':
+            if not filename.endswith('.png'):
                 continue
 
             output_filename = '{}-{}----{}{}{}'.format(
@@ -7939,6 +7947,9 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
         create_folder(tts_path)
         for _, _, filenames in os.walk(output_path):
             for filename in filenames:
+                if not filename.endswith('.png'):
+                    continue
+
                 shutil.copyfile(
                     os.path.join(output_path, filename),
                     os.path.join(tts_path, filename.split('----')[1]))
@@ -7966,6 +7977,9 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
         clear_folder(temp_path)
         for _, _, filenames in os.walk(output_path):
             for filename in filenames:
+                if not filename.endswith('.png'):
+                    continue
+
                 if (filename.endswith('-2.png') and '----' in filename and
                         filename.split('----')[1][:36] in empty_rules_backs):
                     continue
@@ -7979,7 +7993,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
 
         for _, _, filenames in os.walk(temp_path):
             for filename in filenames:
-                if filename.split('.')[-1] != 'jpg':
+                if not filename.endswith('.jpg'):
                     continue
 
                 if filename.endswith('-2.jpg'):
@@ -8005,6 +8019,9 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
         known_output_filenames = set()
         for _, _, filenames in os.walk(output_path):
             for filename in filenames:
+                if not filename.endswith('.png'):
+                    continue
+
                 if '----' not in filename:
                     continue
 
@@ -8087,6 +8104,9 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
         if cards and known_filenames:
             for _, _, filenames in os.walk(output_path):
                 for filename in filenames:
+                    if not filename.endswith('.png'):
+                        continue
+
                     card_number = filename[:3]
                     if card_number in cards:
                         suffix = '-2' if filename.endswith('-2.png') else ''
@@ -8116,6 +8136,9 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
         if cards and known_filenames:
             for _, _, filenames in os.walk(output_path):
                 for filename in filenames:
+                    if not filename.endswith('.png'):
+                        continue
+
                     card_number = filename[:3]
                     if card_number in cards:
                         if filename.endswith('-2.png'):
@@ -8155,6 +8178,9 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
         if cards and known_filenames:
             for _, _, filenames in os.walk(output_path):
                 for filename in filenames:
+                    if not filename.endswith('.png'):
+                        continue
+
                     if (filename.endswith('-2.png') and
                             '----' in filename and
                             filename.split('----')[1][:36]
@@ -8209,6 +8235,9 @@ def generate_octgn(conf, set_id, set_name, lang, card_data):  # pylint: disable=
 
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
+            if not filename.endswith('.png'):
+                continue
+
             if filename[50:86] not in card_ids:
                 continue
 
@@ -8592,6 +8621,8 @@ def _prepare_printing_images(input_path, output_path, service):  # pylint: disab
     """ Prepare printing images for various services.
     """
     for _, _, filenames in os.walk(input_path):
+        filenames = [f for f in filenames
+                     if f.endswith('.jpg') or f.endswith('.png')]
         if not filenames:
             return
 
@@ -9255,6 +9286,9 @@ def copy_db_outputs(conf, sets):
         clear_folder(destination_path)
         for _, _, filenames in os.walk(output_path):
             for filename in filenames:
+                if not filename.endswith('.png'):
+                    continue
+
                 shutil.copyfile(os.path.join(output_path, filename),
                                 os.path.join(destination_path, filename))
 
@@ -9294,6 +9328,9 @@ def copy_octgn_image_outputs(conf, sets):
         clear_folder(destination_path)
         for _, _, filenames in os.walk(output_path):
             for filename in filenames:
+                if not filename.endswith('.o8c'):
+                    continue
+
                 shutil.copyfile(
                     os.path.join(output_path, filename),
                     os.path.join(conf['octgn_image_destination_path'],
@@ -9327,6 +9364,9 @@ def copy_tts_outputs(conf, sets):
         clear_folder(destination_path)
         for _, _, filenames in os.walk(output_path):
             for filename in filenames:
+                if not filename.endswith('.jpg'):
+                    continue
+
                 shutil.copyfile(os.path.join(output_path, filename),
                                 os.path.join(destination_path, filename))
 
@@ -9424,6 +9464,9 @@ def upload_dragncards(conf, sets, updated_sets):  # pylint: disable=R0912,R0915
                 clear_folder(temp_path)
                 for _, _, filenames in os.walk(output_path):
                     for filename in filenames:
+                        if not filename.endswith('.o8d'):
+                            continue
+
                         if filename.startswith('Player-'):
                             continue
 
