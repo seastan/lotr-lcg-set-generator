@@ -4855,9 +4855,8 @@ def generate_octgn_o8d(conf, set_id, set_name):
 def _needed_for_ringsdb(card):
     """ Check whether a card is needed for RingsDB or not.
     """
-    card_type = ('Treasure' if card.get(CARD_SPHERE) in ('Boon', 'Burden')
-                 else card.get(CARD_TYPE))
-    return (card_type in CARD_TYPES_PLAYER and
+    return ((card.get(CARD_TYPE) in CARD_TYPES_PLAYER or
+             card.get(CARD_SPHERE) in ('Boon', 'Burden')) and
             'Promo' not in extract_flags(card.get(CARD_FLAGS)))
 
 
@@ -4926,11 +4925,7 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                         and row[CARD_ID] not in SELECTED_CARDS)):
                 continue
 
-            card_type = ('Treasure'
-                         if row[CARD_SPHERE] in ('Boon', 'Burden')
-                         else row[CARD_TYPE])
-
-            if card_type in CARD_TYPES_PLAYER_DECK:
+            if row[CARD_TYPE] in CARD_TYPES_PLAYER_DECK:
                 limit = re.search(r'limit .*([0-9]+) per deck',
                                   row[CARD_TEXT] or '',
                                   re.I)
@@ -4939,22 +4934,32 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
             else:
                 limit = None
 
-            if card_type in ('Contract', 'Player Objective', 'Treasure'):
-                sphere = 'Neutral'
-            else:
-                sphere = row[CARD_SPHERE]
-
-            if card_type == 'Hero':
+            if row[CARD_TYPE] == 'Hero':
                 cost = None
                 threat = _handle_int(row[CARD_COST])
             else:
                 cost = _handle_int(row[CARD_COST])
                 threat = None
 
-            if card_type in ('Contract', 'Player Objective'):
+            if row[CARD_SPHERE] == 'Burden':
+                willpower = _handle_int(row[CARD_THREAT])
+            else:
+                willpower = _handle_int(row[CARD_WILLPOWER])
+
+            if (row[CARD_TYPE] in ('Contract', 'Player Objective',
+                                   'Treasure') or
+                    row[CARD_SPHERE] in ('Boon', 'Burden')):
+                sphere = 'Neutral'
+            else:
+                sphere = row[CARD_SPHERE]
+
+            if row[CARD_TYPE] in ('Contract', 'Player Objective'):
                 card_type = 'Other'
-            elif card_type == 'Treasure':
+            elif (row[CARD_TYPE] == 'Treasure' or
+                  row[CARD_SPHERE] in ('Boon', 'Burden')):
                 card_type = 'Campaign'
+            else:
+                card_type = row[CARD_TYPE]
 
             quantity = (int(row[CARD_QUANTITY])
                         if _is_int(row[CARD_QUANTITY]) else 1)
@@ -4986,14 +4991,14 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                 'sphere': sphere,
                 'position': _handle_int(row[CARD_NUMBER]),
                 'code': _ringsdb_code(row),
-                'name': row[CARD_NAME],
+                'name': row[CARD_NAME].replace('’', "'"),
                 'traits': row[CARD_TRAITS],
                 'text': text,
                 'flavor': flavor,
                 'isUnique': row[CARD_UNIQUE] and int(row[CARD_UNIQUE]),
                 'cost': cost,
                 'threat': threat,
-                'willpower': _handle_int(row[CARD_WILLPOWER]),
+                'willpower': willpower,
                 'attack': _handle_int(row[CARD_ATTACK]),
                 'defense': _handle_int(row[CARD_DEFENSE]),
                 'health': _handle_int(row[CARD_HEALTH]),
