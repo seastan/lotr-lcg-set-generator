@@ -1077,6 +1077,8 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
     if not 'offline_mode' in conf:
         conf['offline_mode'] = False
 
+    conf['validate_missing_images'] = False
+
     for lang in conf['output_languages']:
         conf['outputs'][lang] = set(conf['outputs'][lang])
 
@@ -1114,6 +1116,14 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
 
         if 'tts' in conf['outputs'][lang] and not conf['octgn_o8d']:
             conf['octgn_o8d'] = True
+
+        if ('pdf' in conf['outputs'][lang]  # pylint: disable=R0916
+                or 'mbprint' in conf['outputs'][lang]
+                or 'makeplayingcards' in conf['outputs'][lang]
+                or 'drivethrucards' in conf['outputs'][lang]
+                or 'genericpng' in conf['outputs'][lang]
+                or 'genericpng_pdf' in conf['outputs'][lang]):
+            conf['validate_missing_images'] = True
 
         conf['nobleed_300'][lang] = ('db' in conf['outputs'][lang]
                                      or 'octgn' in conf['outputs'][lang]
@@ -6386,6 +6396,9 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                         os.path.split(filename)[-1].split('_Artist_')[1:]
                         ).split('.')[:-1]).replace('_', ' '))
                 prop.tail = '\n      '
+        elif card_type != 'Rules' and conf['validate_missing_images']:
+            logging.error('No image detected for card %s (%s)',
+                          card.attrib['id'], card.attrib['name'])
 
         if card_type == 'Presentation':
             image_id = '{}_{}_{}'.format(card.attrib['id'], 'Top', lang)
@@ -6404,6 +6417,9 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                 prop = _get_property(card, 'ArtworkTop Modified')
                 prop.set('value', str(int(os.path.getmtime(filename))))
                 prop.tail = '\n      '
+            elif conf['validate_missing_images']:
+                logging.error('No top image detected for card %s (%s)',
+                              card.attrib['id'], card.attrib['name'])
 
             image_id = '{}_{}_{}'.format(card.attrib['id'], 'Bottom', lang)
             if image_id not in images:
@@ -6421,6 +6437,9 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                 prop = _get_property(card, 'ArtworkBottom Modified')
                 prop.set('value', str(int(os.path.getmtime(filename))))
                 prop.tail = '\n      '
+            elif conf['validate_missing_images']:
+                logging.error('No bottom image detected for card %s (%s)',
+                              card.attrib['id'], card.attrib['name'])
 
         alternate = [a for a in card if a.attrib.get('type') == 'B']
         if alternate:
