@@ -236,7 +236,7 @@ Additional steps:
 
   - `* * * * *    <path>/check_discord_bot.sh >> <path>/cron.log 2>&1`
   - `* * * * *    <path>/check_run_before_se_service.sh >> <path>/cron.log 2>&1`
-  - `6 6 * * *    python3 <path>/monitor_remote_pipeline.py >> <path>/cron.log 2>&1`
+  - `9 36 * * *   python3 <path>/monitor_remote_pipeline.py >> <path>/cron.log 2>&1`
   - `1-59/2 * * * * flock -xn <path>/mpc_monitor.lock -c 'python3 <path>/mpc_monitor.py > /dev/null' 2>&1`
   - `7 0 * * *    <path>/rclone_backup.sh "<local A Long-extended Party/Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
   - `0 8 * * 1    <path>/remind_backup.sh >> <path>/cron.log 2>&1`
