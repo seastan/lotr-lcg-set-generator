@@ -8,7 +8,7 @@ If (FileExist("makeCards_FINISHED")) {
   Exit
 }
 
-Timeout := 7200000
+Timeout := 5400000
 StartTime := A_TickCount
 
 WriteLog(LogPath, "opening Strange Eons project")
