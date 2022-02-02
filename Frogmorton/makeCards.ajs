@@ -56,13 +56,13 @@ bodyRegion['Ship Objective'] = '65,355,283,137';
 bodyRegion['Treachery'] = '65,356,283,135';
 bodyRegion['Treasure'] = '57,347,299,144';  // T.B.D.
 
-bodyRegion['Cave'] = '51,324,461,38';
+bodyRegion['Cave'] = '336,258,193,105';
 bodyRegion['Encounter Side Quest'] = '51,269,461,94';
 bodyRegion['Encounter Side Quest SmallTextArea'] = '51,324,461,38';
 bodyRegion['Player Side Quest'] = '51,271,461,94';
 
 var bodyNoTraitRegion = {};
-bodyNoTraitRegion['Cave'] = '51,304,461,58';
+bodyNoTraitRegion['Cave'] = '336,238,193,125';
 bodyNoTraitRegion['Encounter Side Quest'] = '51,249,461,114';
 bodyNoTraitRegion['Encounter Side Quest SmallTextArea'] = '51,304,461,58';
 bodyNoTraitRegion['Player Side Quest'] = '51,251,461,114';
@@ -87,7 +87,7 @@ traitRegion['Ship Objective'] = '65,335,283,20';
 traitRegion['Treachery'] = '65,336,283,20';
 traitRegion['Treasure'] = '85,327,243,20';  // T.B.D.
 
-traitRegion['Cave'] = '51,304,461,20';
+traitRegion['Cave'] = '336,238,193,20';
 traitRegion['Encounter Side Quest'] = '51,249,461,20';
 traitRegion['Encounter Side Quest SmallTextArea'] = '51,304,461,20';
 traitRegion['Player Side Quest'] = '51,251,461,20';
@@ -96,7 +96,7 @@ var nameRegion = {};
 nameRegion['Ally'] = '100,329,213,25';
 nameRegion['Attachment'] = '132,38,183,25';
 nameRegion['Campaign'] = '108,43,197,25';
-nameRegion['Cave'] = '100,42,363,29';
+nameRegion['Cave'] = '80,43,160,25';
 nameRegion['Contract'] = '84,245,245,29';
 nameRegion['Encounter Side Quest'] = '100,42,363,29';
 nameRegion['Encounter Side Quest SmallTextArea'] = '100,42,363,29';
@@ -118,7 +118,7 @@ var nameRegionUnique = {};
 nameRegionUnique['Ally'] = '100,326,213,25';
 nameRegionUnique['Attachment'] = '132,36,183,25';
 nameRegionUnique['Campaign'] = '108,43,197,25';
-nameRegionUnique['Cave'] = '100,39,363,29';
+nameRegionUnique['Cave'] = '80,40,160,25';
 nameRegionUnique['Contract'] = '84,245,245,29';
 nameRegionUnique['Encounter Side Quest'] = '100,39,363,29';
 nameRegionUnique['Encounter Side Quest SmallTextArea'] = '100,39,363,29';
@@ -140,7 +140,7 @@ var namePointSize = {};
 namePointSize['Ally'] = 6.5;
 namePointSize['Attachment'] = 6.5;
 namePointSize['Campaign'] = 6.5;
-namePointSize['Cave'] = 7.5;
+namePointSize['Cave'] = 6.5;
 namePointSize['Contract'] = 7.5;
 namePointSize['Encounter Side Quest'] = 7.5;
 namePointSize['Encounter Side Quest SmallTextArea'] = 7.5;
@@ -209,7 +209,6 @@ threatCostTint['Hero'] = '200.0,0.7,0.7';
 threatCostTint['Hero Promo'] = '0.0,0.0,0.95';
 
 var progressRegion = {};
-progressRegion['Cave'] = '52,257,35,24';
 progressRegion['Encounter Side Quest'] = '52,202,35,24';
 progressRegion['Encounter Side Quest SmallTextArea'] = '52,257,35,24';
 progressRegion['Location'] = '56,283,35,24';
@@ -238,7 +237,7 @@ resourceCostRegion['Player Side Quest'] = '43,44,56,37';
 
 var encounterPortraitRegion = {};
 encounterPortraitRegion['Campaign'] = '319,190,43,43';
-encounterPortraitRegion['Cave'] = '478,242,43,43';
+encounterPortraitRegion['Cave'] = '37,35,35,35';
 encounterPortraitRegion['Enemy'] = '321,266,43,43';
 encounterPortraitRegion['Encounter Side Quest'] = '478,187,43,43';
 encounterPortraitRegion['Encounter Side Quest SmallTextArea'] = '478,242,43,43';
@@ -251,7 +250,7 @@ encounterPortraitRegion['Ship Objective'] = '315,269,43,43';
 encounterPortraitRegion['Treachery'] = '320,269,43,43';
 
 var encounterNumberRegion = {};
-encounterNumberRegion['Cave'] = '486,284,26,10';
+encounterNumberRegion['Cave'] = '41,70,26,10';
 encounterNumberRegion['Enemy'] = '329,313,26,10';
 encounterNumberRegion['Encounter Side Quest'] = '486,229,26,10';
 encounterNumberRegion['Encounter Side Quest SmallTextArea'] = '486,284,26,10';
@@ -978,11 +977,20 @@ function run(progress, target, filename, icons) {
 					s.set('EncounterSet4-portrait-clip-region', '378,213,20,20');
 					s.set('EncounterSet5-portrait-clip-region', '354,213,20,20');
 					s.set('Option-pointsize', 5.25);
-					s.set('Artist-region', '130,375,100,15');
 					s.set('Copyright-region', '225,375,124,15');
-					s.set('Collection-portrait-clip-region', '391,376,12,12');
-					s.set('CollectionNumber-region', '403,375,18,15');
-					s.set('CollectionInfo-region', '419,375,20,15');
+
+					if (cardType == 'Cave') {
+						s.set('Artist-region', '342,375,100,15');
+						s.set('Collection-portrait-clip-region', '475,376,12,12');
+						s.set('CollectionNumber-region', '487,375,18,15');
+						s.set('CollectionInfo-region', '503,375,20,15');
+					}
+					else {
+						s.set('Artist-region', '130,375,100,15');
+						s.set('Collection-portrait-clip-region', '391,376,12,12');
+						s.set('CollectionNumber-region', '403,375,18,15');
+						s.set('CollectionInfo-region', '419,375,20,15');
+					}
 
 					if (cardTrait) {
 						s.set('TraitOut', 'true');
@@ -1701,7 +1709,7 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 
 	vXml = vXml.replace(/([^:;,.?!\u2026]) ((?:<\/b>)?(?:<\/i>)?(?:<\/size>)?(?:<\/family>)?(?:<size [^>]+>)?)(<uni>|<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<bag>|<fel>|<mas>|<hon>|<hof>|<hb>|<hw>|<sai>|<eos>|<per>|<pp>)/g, '$1\u00a0$2$3');
 	vXml = vXml.replace(/([0-9]+) /g, '$1\u00a0');
-	vXml = vXml.replace(/ ([0-9]+)([:;,.?!\u2026])/g, '\u00a0$1$2');
+	vXml = vXml.replace(/ ([0-9]+)([:;,.?!\)\u2026])/g, '\u00a0$1$2');
 	vXml = vXml.replace(/(^|[ \n"\u201c\u201d\(])([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,4})([:;,.?!"\u2026\u201c\u201d\)]*) (["\u201c\u201d\(]*)([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,4})([:;,.?!"\u2026\u201c\u201d\)]+)(\n|$)/g, '$1$2$3\u00a0$4$5$6$7');
 	vXml = vXml.replace(/ (["\u201c\u201d\(]*)([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,2})([:;,.?!"\u2026\u201c\u201d\)]+)(\n|$)/g, '\u00a0$1$2$3$4');
 	vXml = vXml.replace(/ ([;:?!])/g, '\u00a0$1');
