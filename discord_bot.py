@@ -589,11 +589,10 @@ def update_text(text):  # pylint: disable=R0915
 
     text = update_emojis(text)
 
-    text = text.replace('[', '`[')
-    text = text.replace(']', ']`')
+    text = text.replace('[split]', '')
+    text = text.replace('[', '`[').replace(']', ']`')
     text = text.replace('``', '')
-    text = text.replace('`[lsb]`', '[')
-    text = text.replace('`[rsb]`', ']')
+    text = text.replace('`[lsb]`', '[').replace('`[rsb]`', ']')
 
     text = text.strip()
     text = re.sub(r' +(?=\n)', '', text)
