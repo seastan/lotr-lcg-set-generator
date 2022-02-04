@@ -340,6 +340,7 @@ Please note that all tags are case-sensitive.
 - `[quot]`: "
 - `[apos]`: '
 - `[hyphen]`: -
+- `[split]`: split the text between different regions (only for `Cave`)
 - `{Trait}`: an alias for `[bi]Trait[/bi]`
 - `--`: en dash
 - `---`: em dash

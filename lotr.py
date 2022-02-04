@@ -725,6 +725,7 @@ def _clean_tags(text):  # pylint: disable=R0915
     text = text.replace('[rsb]', '')
     text = text.replace('[lfb]', '')
     text = text.replace('[rfb]', '')
+    text = text.replace('[split]', '')
 
     text = re.sub(r'\[lotr [^\]]+\]', '', text)
     text = re.sub(r'\[lotrheader [^\]]+\]', '', text)
@@ -823,6 +824,7 @@ def _update_card_text(text, lang='English', skip_rules=False,  # pylint: disable
     text = text.replace('[nobr]', ' ')
     text = text.replace('[lsb]', '[')
     text = text.replace('[rsb]', ']')
+    text = text.replace('[split]', '')
 
     text = re.sub(r'\[lotr [^\]]+\]', '', text)
     text = re.sub(r'\[lotrheader [^\]]+\]', '', text)
@@ -1429,12 +1431,7 @@ def _clean_data(data):
                     else:
                         value = value.replace('[name]', card_name)
 
-                value = _clean_value(value)
-#                if key != CARD_DECK_RULES:
-#                    value = re.sub(r'\[([^\W\d_a-z][^\]]+)\]', "[bi]\\1[/bi]",
-#                                   value)
-
-                row[key] = value
+                row[key] = _clean_value(value)
 
 
 def _clean_sets(data):
@@ -2769,7 +2766,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if card_quest is None and card_type in CARD_TYPES_QUEST:
+        if (card_quest is None and card_type in CARD_TYPES_QUEST and
+                card_sphere != 'Cave'):
             message = 'No quest points for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2804,7 +2802,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_quest_back is None and (
                 card_type_back in CARD_TYPES_QUEST
-                or card_type in CARD_TYPES_QUEST_BACK)):
+                or card_type in CARD_TYPES_QUEST_BACK) and
+              card_sphere_back != 'Cave'):
             message = 'No quest points back for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2968,6 +2967,26 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_text_back is not None and
               card_type_back in CARD_TYPES_NO_TEXT_BACK):
             message = 'Redundant text back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_text is not None and '[split]' in card_text and
+                card_sphere != 'Cave'):
+            message = 'Invalid [split] tag in text for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_text_back is not None and '[split]' in card_text_back and
+                card_sphere_back != 'Cave'):
+            message = 'Invalid [split] tag in text back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:

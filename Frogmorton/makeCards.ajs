@@ -56,20 +56,13 @@ bodyRegion['Ship Objective'] = '65,355,283,137';
 bodyRegion['Treachery'] = '65,356,283,135';
 bodyRegion['Treasure'] = '57,347,299,144';  // T.B.D.
 
-bodyRegion['Cave'] = '336,258,193,105';
+bodyRegion['Cave'] = '50,303,170,60';
 bodyRegion['Encounter Side Quest'] = '51,269,461,94';
 bodyRegion['Encounter Side Quest SmallTextArea'] = '51,324,461,38';
 bodyRegion['Player Side Quest'] = '51,271,461,94';
 
-var bodyNoTraitRegion = {};
-bodyNoTraitRegion['Cave'] = '336,238,193,125';
-bodyNoTraitRegion['Encounter Side Quest'] = '51,249,461,114';
-bodyNoTraitRegion['Encounter Side Quest SmallTextArea'] = '51,304,461,58';
-bodyNoTraitRegion['Player Side Quest'] = '51,251,461,114';
-bodyNoTraitRegion['Quest'] = '51,249,461,114';
-
-var bodyBackRegion = {};
-bodyBackRegion['Campaign'] = '64,60,285,443';
+var body2Region = {};
+body2Region['Cave'] = '347,303,170,60';
 
 var traitRegion = {};
 traitRegion['Ally'] = '57,358,299,20';
@@ -87,10 +80,26 @@ traitRegion['Ship Objective'] = '65,335,283,20';
 traitRegion['Treachery'] = '65,336,283,20';
 traitRegion['Treasure'] = '85,327,243,20';  // T.B.D.
 
-traitRegion['Cave'] = '336,238,193,20';
+traitRegion['Cave'] = '50,283,170,20';
 traitRegion['Encounter Side Quest'] = '51,249,461,20';
 traitRegion['Encounter Side Quest SmallTextArea'] = '51,304,461,20';
 traitRegion['Player Side Quest'] = '51,251,461,20';
+
+var trait2Region = {};
+trait2Region['Cave'] = '347,283,170,20';
+
+var bodyNoTraitRegion = {};
+bodyNoTraitRegion['Cave'] = '50,283,170,80';
+bodyNoTraitRegion['Encounter Side Quest'] = '51,249,461,114';
+bodyNoTraitRegion['Encounter Side Quest SmallTextArea'] = '51,304,461,58';
+bodyNoTraitRegion['Player Side Quest'] = '51,251,461,114';
+bodyNoTraitRegion['Quest'] = '51,249,461,114';
+
+var body2NoTraitRegion = {};
+body2NoTraitRegion['Cave'] = '347,283,170,80';
+
+var bodyBackRegion = {};
+bodyBackRegion['Campaign'] = '64,60,285,443';
 
 var nameRegion = {};
 nameRegion['Ally'] = '100,329,213,25';
@@ -209,6 +218,7 @@ threatCostTint['Hero'] = '200.0,0.7,0.7';
 threatCostTint['Hero Promo'] = '0.0,0.0,0.95';
 
 var progressRegion = {};
+progressRegion['Cave'] = '52,257,35,24';
 progressRegion['Encounter Side Quest'] = '52,202,35,24';
 progressRegion['Encounter Side Quest SmallTextArea'] = '52,257,35,24';
 progressRegion['Location'] = '56,283,35,24';
@@ -978,19 +988,10 @@ function run(progress, target, filename, icons) {
 					s.set('EncounterSet5-portrait-clip-region', '354,213,20,20');
 					s.set('Option-pointsize', 5.25);
 					s.set('Copyright-region', '225,375,124,15');
-
-					if (cardType == 'Cave') {
-						s.set('Artist-region', '342,375,100,15');
-						s.set('Collection-portrait-clip-region', '475,376,12,12');
-						s.set('CollectionNumber-region', '487,375,18,15');
-						s.set('CollectionInfo-region', '503,375,20,15');
-					}
-					else {
-						s.set('Artist-region', '130,375,100,15');
-						s.set('Collection-portrait-clip-region', '391,376,12,12');
-						s.set('CollectionNumber-region', '403,375,18,15');
-						s.set('CollectionInfo-region', '419,375,20,15');
-					}
+					s.set('Artist-region', '130,375,100,15');
+					s.set('Collection-portrait-clip-region', '391,376,12,12');
+					s.set('CollectionNumber-region', '403,375,18,15');
+					s.set('CollectionInfo-region', '419,375,20,15');
 
 					if (cardTrait) {
 						s.set('TraitOut', 'true');
@@ -998,13 +999,25 @@ function run(progress, target, filename, icons) {
 							s.set('TraitOut-Body-region', bodyRegion[cardType]);
 						}
 
+						if (cardType in body2Region) {
+							s.set('TraitOut-Body2-region', body2Region[cardType]);
+						}
+
 						if (cardType in traitRegion) {
 							s.set('TraitOut-Trait-region', traitRegion[cardType]);
+						}
+
+						if (cardType in trait2Region) {
+							s.set('TraitOut-Trait2-region', trait2Region[cardType]);
 						}
 					}
 					else {
 						if (cardType in bodyNoTraitRegion) {
 							s.set('Body-region', bodyNoTraitRegion[cardType]);
+						}
+
+						if (cardType in body2NoTraitRegion) {
+							s.set('Body2-region', body2NoTraitRegion[cardType]);
 						}
 					}
 				}
