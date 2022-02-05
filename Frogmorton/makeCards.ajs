@@ -1014,8 +1014,8 @@ function run(progress, target, filename, icons) {
 						}
 
 						if (s.get('Rules').search('\\[split\\]') > -1) {
-							s.set('RulesRight', s.get('Rules').split('\\[split\\]')[1].trim())
-							s.set('Rules', s.get('Rules').split('\\[split\\]')[0].trim())
+							s.set('RulesRight', s.get('Rules').split('\\[split\\]')[1].trim());
+							s.set('Rules', s.get('Rules').split('\\[split\\]')[0].trim());
 						}
 					}
 					else {
