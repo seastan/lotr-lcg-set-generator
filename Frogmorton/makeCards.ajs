@@ -56,7 +56,7 @@ bodyRegion['Ship Objective'] = '65,355,283,137';
 bodyRegion['Treachery'] = '65,356,283,135';
 bodyRegion['Treasure'] = '57,347,299,144';  // T.B.D.
 
-bodyRegion['Cave'] = '50,303,170,60';
+bodyRegion['Cave'] = '50,303,171,60';
 bodyRegion['Encounter Side Quest'] = '51,269,461,94';
 bodyRegion['Encounter Side Quest SmallTextArea'] = '51,324,461,38';
 bodyRegion['Player Side Quest'] = '51,271,461,94';
@@ -77,20 +77,20 @@ traitRegion['Ship Objective'] = '65,335,283,20';
 traitRegion['Treachery'] = '65,336,283,20';
 traitRegion['Treasure'] = '85,327,243,20';  // T.B.D.
 
-traitRegion['Cave'] = '50,283,170,20';
+traitRegion['Cave'] = '50,283,171,20';
 traitRegion['Encounter Side Quest'] = '51,249,461,20';
 traitRegion['Encounter Side Quest SmallTextArea'] = '51,304,461,20';
 traitRegion['Player Side Quest'] = '51,251,461,20';
 
 var bodyNoTraitRegion = {};
-bodyNoTraitRegion['Cave'] = '50,283,170,80';
+bodyNoTraitRegion['Cave'] = '50,283,171,80';
 bodyNoTraitRegion['Encounter Side Quest'] = '51,249,461,114';
 bodyNoTraitRegion['Encounter Side Quest SmallTextArea'] = '51,304,461,58';
 bodyNoTraitRegion['Player Side Quest'] = '51,251,461,114';
 bodyNoTraitRegion['Quest'] = '51,249,461,114';
 
 var bodyRightNoTraitRegion = {};
-bodyRightNoTraitRegion['Cave'] = '347,283,170,80';
+bodyRightNoTraitRegion['Cave'] = '347,283,171,80';
 
 var bodyBackRegion = {};
 bodyBackRegion['Campaign'] = '64,60,285,443';
@@ -977,11 +977,6 @@ function run(progress, target, filename, icons) {
 					s.set('EncounterSet4-portrait-clip-region', '378,213,20,20');
 					s.set('EncounterSet5-portrait-clip-region', '354,213,20,20');
 					s.set('Option-pointsize', 5.25);
-					s.set('Copyright-region', '225,375,124,15');
-					s.set('Artist-region', '130,375,100,15');
-					s.set('Collection-portrait-clip-region', '391,376,12,12');
-					s.set('CollectionNumber-region', '403,375,18,15');
-					s.set('CollectionInfo-region', '419,375,20,15');
 
 					if (cardTrait) {
 						s.set('TraitOut', 'true');
@@ -1000,8 +995,15 @@ function run(progress, target, filename, icons) {
 					}
 
 					if (cardType == 'Cave') {
+						s.set('Copyright-region', '345,375,124,15');
+						s.set('Artist-region', '48,375,100,15');
+						s.set('Collection-portrait-clip-region', '476,376,12,12');
+						s.set('CollectionNumber-region', '488,375,18,15');
+						s.set('CollectionInfo-region', '504,375,20,15');
+
 						s.set('Body-colour', '#FFFFFF');
 						s.set('Name-colour', '#FFFFFF');
+
 						s.set('BodyRight-style', 'FOREGROUND: #000000; WIDTH: REGULAR; TRACKING: -0.005; FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7');
 						s.set('BodyRight-pointsize', 7);
 						s.set('BodyRight-lineTightness', 0.2);
@@ -1015,6 +1017,13 @@ function run(progress, target, filename, icons) {
 							s.set('RulesRight', s.get('Rules').split('\\[split\\]')[1].trim())
 							s.set('Rules', s.get('Rules').split('\\[split\\]')[0].trim())
 						}
+					}
+					else {
+						s.set('Copyright-region', '225,375,124,15');
+						s.set('Artist-region', '130,375,100,15');
+						s.set('Collection-portrait-clip-region', '391,376,12,12');
+						s.set('CollectionNumber-region', '403,375,18,15');
+						s.set('CollectionInfo-region', '419,375,20,15');
 					}
 				}
 				else {
