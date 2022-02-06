@@ -8168,6 +8168,24 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                 shutil.copyfile(os.path.join(output_path, source_filename),
                                 os.path.join(ringsdb_output_path,
                                              target_filename))
+
+            front_sides = []
+            for _, _, filenames in os.walk(ringsdb_output_path):
+                for filename in filenames:
+                    if not filename.endswith('.png'):
+                        continue
+
+                    if filename.endswith('-2.png'):
+                        front_sides.append(filename.replace('-2.png', '.png'))
+
+                for filename in front_sides:
+                    shutil.move(os.path.join(ringsdb_output_path, filename),
+                                os.path.join(ringsdb_output_path,
+                                             filename.replace('.png',
+                                                              '-1.png')))
+
+                break
+
     elif lang == 'French':  # pylint: disable=R1702
         cards = {}
         for row in card_data:
