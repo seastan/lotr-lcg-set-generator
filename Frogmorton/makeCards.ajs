@@ -781,7 +781,7 @@ function run(progress, target, filename, icons) {
 				s.set('Flavour-formatEnd', '</i></size></family>');
 				s.set('FlavourBack-formatEnd', '</i></size></family>');
 				s.set('Shadow-format', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
-					'<br><center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.5in>' +
+					'<br><center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.55in>' +
 					'<br><left><image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005></size><size 7.5><i><br>');
 				s.set('Engagement-region', '76,48,36,25');
 				s.set('Engagement-tint', '32.0,1.0,0.9');
