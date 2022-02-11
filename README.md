@@ -277,6 +277,7 @@ The scripts will generate the following outputs:
 
 - `Output/DB/<set name>.<language>/`: 300 dpi PNG images for general purposes (including TTS).
 - `Output/DragnCards/<set name>/<set name>.json`: an output file for DragnCards.
+- `Output/DragnCardsHQ/<set name>/`: 480 dpi JPG images for DragnCards.
 - `Output/DriveThruCards/<set name>.<language>/`: a `7z` archive of 300 dpi CMYK JPG images to be printed on DriveThruCards.com.
 - `Output/FrenchDB/<set name>/`: CSV files for French database sda.cgbuilder.fr.
 - `Output/FrenchDBImages/<set name>.<language>/`: 300 dpi PNG images for French database (the same as `Output/DB`, but differently named).

@@ -117,6 +117,7 @@ ringsdb_sessionid:
 outputs:
   English:
     - db
+    - dragncards_hq
     - octgn
     - pdf_a4
     - pdf_letter
@@ -130,6 +131,7 @@ outputs:
     - tts
   German:
 #    - db
+#    - dragncards_hq
 #    - octgn
 #    - pdf_a4
 #    - pdf_letter
@@ -143,6 +145,7 @@ outputs:
 #    - tts
   Spanish:
 #    - db
+#    - dragncards_hq
 #    - octgn
 #    - pdf_a4
 #    - pdf_letter
@@ -156,6 +159,7 @@ outputs:
 #    - tts
   French:
 #    - db
+#    - dragncards_hq
 #    - octgn
 #    - pdf_a4
 #    - pdf_letter
@@ -169,6 +173,7 @@ outputs:
 #    - tts
   Polish:
 #    - db
+#    - dragncards_hq
 #    - octgn
 #    - pdf_a4
 #    - pdf_letter
@@ -182,6 +187,7 @@ outputs:
 #    - tts
   Italian:
 #    - db
+#    - dragncards_hq
 #    - octgn
 #    - pdf_a4
 #    - pdf_letter
@@ -195,6 +201,7 @@ outputs:
 #    - tts
   Portuguese:
 #    - db
+#    - dragncards_hq
 #    - octgn
 #    - pdf_a4
 #    - pdf_letter

@@ -13,7 +13,7 @@ StartTime := A_TickCount
 
 WriteLog(LogPath, "opening Strange Eons project")
 Run setGenerator.seproject
-Sleep 10000
+Sleep 15000
 
 WinGetPos, X, Y, W, H, A
 While (X > 0) {

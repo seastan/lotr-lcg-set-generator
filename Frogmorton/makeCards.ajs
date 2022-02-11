@@ -421,9 +421,13 @@ function run(progress, target, filename, icons) {
 	var copyrightText = docElement.getAttribute('copyright');
 
 	var png300Bleed = false;
+	var png480Bleed = false;
 	var png800Bleed = false;
 	if (doc.getDocumentElement().getAttribute('png300Bleed') + '' == '1') {
 		png300Bleed = true;
+	}
+	if (doc.getDocumentElement().getAttribute('png480Bleed') + '' == '1') {
+		png480Bleed = true;
 	}
 	if (doc.getDocumentElement().getAttribute('png800Bleed') + '' == '1') {
 		png800Bleed = true;
@@ -1390,14 +1394,14 @@ function run(progress, target, filename, icons) {
 					back + '-' + escapeFileName(card['Name']) + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix;
 				progress.status = fname;
 				ResourceKit.writeGameComponentToFile(new File(getProjectMember('Cards/').file, fname + '.' + setID + '.' + lang + '.eon'), newCard);
-				exportCard(newCard, fname, setID, lang, simple_back, png300Bleed, png800Bleed);
+				exportCard(newCard, fname, setID, lang, simple_back, png300Bleed, png480Bleed, png800Bleed);
 			}
 		}
 	}
 	return;
 }
 
-function exportCard(card, fname, setID, lang, simple_back, png300Bleed, png800Bleed) {
+function exportCard(card, fname, setID, lang, simple_back, png300Bleed, png480Bleed, png800Bleed) {
 	var sheets = card.createDefaultSheets();
 	var numSheets;
 	if (simple_back) {
@@ -1408,6 +1412,7 @@ function exportCard(card, fname, setID, lang, simple_back, png300Bleed, png800Bl
 	}
 
 	var ppi300 = 300;
+	var ppi480 = 480;
 	var ppi800 = 800;
 	for (let i = 0; i < numSheets; i++ ) {
 		let bi, file;
@@ -1416,6 +1421,12 @@ function exportCard(card, fname, setID, lang, simple_back, png300Bleed, png800Bl
 			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, ppi300, true);
 			file = new File(getProjectMember('Export/png300Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_PNG);
 			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, ppi300);
+		}
+
+		if (png480Bleed) {
+			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, ppi480, true);
+			file = new File(getProjectMember('Export/png480Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_PNG);
+			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, ppi480);
 		}
 
 		if (png800Bleed) {

@@ -52,6 +52,13 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):
 
 
 @retry()
+def generate_png480_nobleed(conf, set_id, set_name, lang, skip_ids):
+    """ Generate PNG 480 dpi images without bleed margins.
+    """
+    lotr.generate_png480_nobleed(conf, set_id, set_name, lang, skip_ids)
+
+
+@retry()
 def generate_png800_nobleed(conf, set_id, set_name, lang, skip_ids):
     """ Generate PNG 800 dpi images without bleed margins.
     """
@@ -64,6 +71,15 @@ def generate_db(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: d
     """
     lotr.generate_png300_db(conf, set_id, set_name, lang, skip_ids)
     lotr.generate_db(conf, set_id, set_name, lang, card_data)
+
+
+@retry()
+def generate_dragncards_hq(conf, set_id, set_name, lang, skip_ids,  # pylint: disable=R0913
+                           card_data):
+    """ Generate DragnCards HQ outputs.
+    """
+    lotr.generate_png480_dragncards_hq(set_id, set_name, lang, skip_ids)
+    lotr.generate_dragncards_hq(conf, set_id, set_name, lang, card_data)
 
 
 @retry()
@@ -220,6 +236,10 @@ def main():  # pylint: disable=R0912,R0914,R0915
                 pre_tasks.append([generate_png300_nobleed, conf, set_id,
                                   set_name, lang, skip_ids])
 
+            if conf['nobleed_480'][lang]:
+                pre_tasks.append([generate_png480_nobleed, conf, set_id,
+                                  set_name, lang, skip_ids])
+
             if conf['nobleed_800'][lang]:
                 pre_tasks.append([generate_png800_nobleed, conf, set_id,
                                   set_name, lang, skip_ids])
@@ -227,6 +247,10 @@ def main():  # pylint: disable=R0912,R0914,R0915
             if 'db' in conf['outputs'][lang]:
                 tasks.append([generate_db, conf, set_id, set_name, lang,
                               skip_ids, card_data])
+
+            if 'dragncards_hq' in conf['outputs'][lang]:
+                tasks.append([generate_dragncards_hq, conf, set_id, set_name,
+                              lang, skip_ids, card_data])
 
             if 'octgn' in conf['outputs'][lang]:
                 tasks.append([generate_octgn, conf, set_id, set_name, lang,

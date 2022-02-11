@@ -26,6 +26,9 @@ def _get_rotation(drawable):
     """
     rotation = ((drawable.width == 1050 and drawable.height == 750)
                 or (drawable.width == 1126 and drawable.height == 826)
+                or (drawable.width == 1680 and drawable.height == 1200)
+                or (drawable.width == 1800 and drawable.height == 1320)
+                or (drawable.width == 1801 and drawable.height == 1321)
                 or (drawable.width == 2100 and drawable.height == 1500)
                 or (drawable.width == 2250 and drawable.height == 1650)
                 or (drawable.width == 2252 and drawable.height == 1652)
@@ -44,6 +47,12 @@ def _get_bleed_margin_size(drawable):
     if ((drawable.width == 826 and drawable.height == 1126)
             or (drawable.width == 1126 and drawable.height == 826)):
         size = 38
+    elif ((drawable.width == 1320 and drawable.height == 1800)
+          or (drawable.width == 1800 and drawable.height == 1320)):
+        size = 60
+    elif ((drawable.width == 1321 and drawable.height == 1801)
+          or (drawable.width == 1801 and drawable.height == 1321)):
+        size = 60.5
     elif ((drawable.width == 1650 and drawable.height == 2250)
           or (drawable.width == 2250 and drawable.height == 1650)):
         size = 75

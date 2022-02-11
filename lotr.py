@@ -286,16 +286,19 @@ SPECIAL_ICONS = {'eye of sauron', 'eye of sauronx2', 'eye of sauronx3',
 
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}{}*.jpg"'
+MAGICK_COMMAND_JPG = '"{}" mogrify -format jpg "{}{}*.png"'
 MAGICK_COMMAND_LOW = '"{}" mogrify -resize 600x600 -format jpg "{}{}*.png"'
 MAGICK_COMMAND_MBPRINT_PDF = '"{}" convert "{}{}*o.jpg" "{}"'
 MAGICK_COMMAND_RULES_PDF = '"{}" convert "{}{}*.png" "{}"'
 
 JPG_PREVIEW_MIN_SIZE = 40000
 JPG_300_MIN_SIZE = 100000
+JPG_480_MIN_SIZE = 150000
 JPG_800_MIN_SIZE = 1000000
 JPG_300CMYK_MIN_SIZE = 1000000
 JPG_800CMYK_MIN_SIZE = 4000000
 PNG_300_MIN_SIZE = 200000
+PNG_480_MIN_SIZE = 300000
 PNG_800_MIN_SIZE = 2000000
 
 EASY_PREFIX = 'Easy '
@@ -317,6 +320,9 @@ PNG300NOBLEED = 'png300NoBleed'
 PNG300OCTGN = 'png300OCTGN'
 PNG300PDF = 'png300PDF'
 PNG300RULES = 'png300Rules'
+PNG480BLEED = 'png480Bleed'
+PNG480DRAGNCARDSHQ = 'png480DragnCardsHQ'
+PNG480NOBLEED = 'png480NoBleed'
 PNG800BLEED = 'png800Bleed'
 PNG800BLEEDMPC = 'png800BleedMPC'
 PNG800BLEEDGENERIC = 'png800BleedGeneric'
@@ -357,6 +363,7 @@ OCTGN_ZIP_PATH = 'a21af4e8-be4b-4cda-a6b6-534f9717391f/Sets'
 OUTPUT_PATH = 'Output'
 OUTPUT_DB_PATH = os.path.join(OUTPUT_PATH, 'DB')
 OUTPUT_DRAGNCARDS_PATH = os.path.join(OUTPUT_PATH, 'DragnCards')
+OUTPUT_DRAGNCARDS_HQ_PATH = os.path.join(OUTPUT_PATH, 'DragnCardsHQ')
 OUTPUT_DTC_PATH = os.path.join(OUTPUT_PATH, 'DriveThruCards')
 OUTPUT_FRENCHDB_PATH = os.path.join(OUTPUT_PATH, 'FrenchDB')
 OUTPUT_FRENCHDB_IMAGES_PATH = os.path.join(OUTPUT_PATH, 'FrenchDBImages')
@@ -1065,6 +1072,7 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
     conf['output_languages'] = [lang for lang in conf['outputs']
                                 if conf['outputs'][lang]]
     conf['nobleed_300'] = {}
+    conf['nobleed_480'] = {}
     conf['nobleed_800'] = {}  # not used at the moment
 
     if not conf['set_ids']:
@@ -1123,6 +1131,7 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
                 or 'mbprint' in conf['outputs'][lang]
                 or 'makeplayingcards' in conf['outputs'][lang]
                 or 'drivethrucards' in conf['outputs'][lang]
+                or 'dragncards_hq' in conf['outputs'][lang]
                 or 'genericpng' in conf['outputs'][lang]
                 or 'genericpng_pdf' in conf['outputs'][lang]):
             conf['validate_missing_images'] = True
@@ -1130,7 +1139,7 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
         conf['nobleed_300'][lang] = ('db' in conf['outputs'][lang]
                                      or 'octgn' in conf['outputs'][lang]
                                      or 'rules_pdf' in conf['outputs'][lang])
-
+        conf['nobleed_480'][lang] = 'dragncards_hq' in conf['outputs'][lang]
         conf['nobleed_800'][lang] = False
 
     logging.info('...Reading project configuration (%ss)',
@@ -1150,6 +1159,13 @@ def reset_project_folders(conf):
     clear_folder(XML_PATH)
 
     nobleed_folder = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED)
+    for _, subfolders, _ in os.walk(nobleed_folder):
+        for subfolder in subfolders:
+            delete_folder(os.path.join(nobleed_folder, subfolder))
+
+        break
+
+    nobleed_folder = os.path.join(IMAGES_EONS_PATH, PNG480NOBLEED)
     for _, subfolders, _ in os.walk(nobleed_folder):
         for subfolder in subfolders:
             delete_folder(os.path.join(nobleed_folder, subfolder))
@@ -6323,6 +6339,9 @@ def _set_outputs(conf, lang, root):
             or 'pdf' in conf['outputs'][lang]):
         root.set('png300Bleed', '1')
 
+    if conf['nobleed_480'][lang]:
+        root.set('png480Bleed', '1')
+
     if ('makeplayingcards' in conf['outputs'][lang]
             or 'mbprint' in conf['outputs'][lang]
             or 'genericpng' in conf['outputs'][lang]
@@ -6923,6 +6942,84 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
                  round(time.time() - timestamp, 3))
 
 
+def generate_png480_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
+    """ Generate PNG 480 dpi images without bleed margins.
+    """
+    logging.info('[%s, %s] Generating PNG 480 dpi images without bleed '
+                 'margins...', set_name, lang)
+    timestamp = time.time()
+
+    temp_path = os.path.join(
+        TEMP_ROOT_PATH, 'generate_png480_nobleed.{}.{}'.format(set_id,
+                                                               lang))
+    create_folder(temp_path)
+    clear_folder(temp_path)
+
+    temp_path2 = os.path.join(
+        TEMP_ROOT_PATH, 'generate_png480_nobleed2.{}.{}'.format(set_id,
+                                                                lang))
+    create_folder(temp_path2)
+    clear_folder(temp_path2)
+
+    input_cnt = 0
+    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+        filelist = [f for f in zip_obj.namelist()
+                    if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
+                                                  PNG480BLEED))
+                    and f.split('.')[-1] == 'png'
+                    and f.split('.')[-2] == lang
+                    and f.split('.')[-3] == set_id]
+        for filename in filelist:
+            input_cnt += 1
+            output_filename = _update_zip_filename(filename)
+            with zip_obj.open(filename) as zip_file:
+                with open(os.path.join(temp_path, output_filename),
+                          'wb') as output_file:
+                    shutil.copyfileobj(zip_file, output_file)
+
+    cmd = GIMP_COMMAND.format(
+        conf['gimp_console_path'],
+        'python-cut-bleed-margins-folder',
+        temp_path.replace('\\', '\\\\'),
+        temp_path2.replace('\\', '\\\\'))
+    res = _run_cmd(cmd)
+    logging.info('[%s, %s] %s', set_name, lang, res)
+
+    output_cnt = 0
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            output_cnt += 1
+            if os.path.getsize(os.path.join(temp_path2, filename)
+                               ) < PNG_480_MIN_SIZE:
+                raise GIMPError('GIMP failed for {}'.format(
+                    os.path.join(temp_path2, filename)))
+
+        break
+
+    if output_cnt != input_cnt:
+        raise GIMPError('Wrong number of output files: {} instead of {}'
+                        .format(output_cnt, input_cnt))
+
+    output_path = os.path.join(IMAGES_EONS_PATH, PNG480NOBLEED,
+                               '{}.{}'.format(set_id, lang))
+    create_folder(output_path)
+    _clear_modified_images(output_path, skip_ids)
+
+    for _, _, filenames in os.walk(temp_path2):
+        for filename in filenames:
+            shutil.move(os.path.join(temp_path2, filename),
+                        os.path.join(output_path, filename))
+
+        break
+
+    delete_folder(temp_path)
+    delete_folder(temp_path2)
+
+    logging.info('[%s, %s] ...Generating PNG 480 dpi images without bleed '
+                 'margins (%ss)', set_name, lang,
+                 round(time.time() - timestamp, 3))
+
+
 def generate_png800_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
     """ Generate PNG 800 dpi images without bleed margins.
 
@@ -7078,6 +7175,39 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disab
     delete_folder(temp_path2)
 
     logging.info('[%s, %s] ...Generating images for all DB outputs '
+                 '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
+
+
+def generate_png480_dragncards_hq(set_id, set_name, lang, skip_ids):
+    """ Generate images for DragnCards HQ outputs.
+    """
+    logging.info('[%s, %s] Generating images for DragnCards HQ outputs...',
+                 set_name, lang)
+    timestamp = time.time()
+
+    output_path = os.path.join(IMAGES_EONS_PATH, PNG480DRAGNCARDSHQ,
+                               '{}.{}'.format(set_id, lang))
+    create_folder(output_path)
+    _clear_modified_images(output_path, skip_ids)
+
+    input_path = os.path.join(IMAGES_EONS_PATH, PNG480NOBLEED,
+                              '{}.{}'.format(set_id, lang))
+    known_keys = set()
+    for _, _, filenames in os.walk(input_path):
+        filenames = sorted(filenames)
+        for filename in filenames:
+            if not filename.endswith('.png'):
+                continue
+
+            key = filename[50:88]
+            if key not in known_keys:
+                known_keys.add(key)
+                shutil.copyfile(os.path.join(input_path, filename),
+                                os.path.join(output_path, filename))
+
+        break
+
+    logging.info('[%s, %s] ...Generating images for DragnCards HQ outputs '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
@@ -7777,6 +7907,38 @@ def _make_low_quality(conf, input_path):
                                .format(output_cnt, input_cnt))
 
 
+def _make_jpg(conf, input_path, min_size):
+    """ Make JPG images from PNG inputs.
+    """
+    input_cnt = 0
+    for _, _, filenames in os.walk(input_path):
+        for filename in filenames:
+            input_cnt += 1
+
+        break
+
+    if input_cnt:
+        cmd = MAGICK_COMMAND_JPG.format(conf['magick_path'], input_path,
+                                        os.sep)
+        res = _run_cmd(cmd)
+        logging.info(res)
+
+    output_cnt = 0
+    for _, _, filenames in os.walk(input_path):
+        for filename in filenames:
+            output_cnt += 1
+            if os.path.getsize(os.path.join(input_path, filename)
+                               ) < min_size:
+                raise ImageMagickError('ImageMagick failed for {}'.format(
+                    os.path.join(input_path, filename)))
+
+        break
+
+    if output_cnt != input_cnt * 2:
+        raise ImageMagickError('Wrong number of output files: {} instead of {}'
+                               .format(output_cnt, input_cnt))
+
+
 def full_card_dict():
     """ Get card dictionary with both spreadsheet and external data.
     """
@@ -8271,6 +8433,71 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
     logging.info('[%s, %s] ...Generating DB, Preview, Hall of Beorn and '
                  'RingsDB image outputs (%ss)', set_name, lang,
                  round(time.time() - timestamp, 3))
+
+
+def generate_dragncards_hq(conf, set_id, set_name, lang, card_data):  # pylint: disable=R0914
+    """ Generate DragnCards HQ image outputs.
+    """
+    logging.info('[%s, %s] Generating DragnCards HQ image outputs...',
+                 set_name, lang)
+    timestamp = time.time()
+
+    input_path = os.path.join(IMAGES_EONS_PATH, PNG480DRAGNCARDSHQ,
+                              '{}.{}'.format(set_id, lang))
+    output_path = os.path.join(OUTPUT_DRAGNCARDS_HQ_PATH, '{}.{}'.format(
+        escape_filename(set_name), lang))
+
+    temp_path = os.path.join(TEMP_ROOT_PATH,
+                             'generate_dragncards_hq.{}.{}'.format(set_id,
+                                                                   lang))
+    create_folder(temp_path)
+    clear_folder(temp_path)
+
+    card_ids = {row[CARD_ID] for row in card_data
+                if row[CARD_SET] == set_id
+                and _needed_for_octgn(row)}
+
+    for _, _, filenames in os.walk(input_path):
+        for filename in filenames:
+            if not filename.endswith('.png'):
+                continue
+
+            if filename[50:86] not in card_ids:
+                continue
+
+            shutil.copyfile(os.path.join(input_path, filename),
+                            os.path.join(temp_path, filename))
+
+        break
+
+    _make_jpg(conf, temp_path, JPG_480_MIN_SIZE)
+
+    known_filenames = set()
+    for _, _, filenames in os.walk(temp_path):
+        if not filenames:
+            logging.error('[%s, %s] No cards found', set_name, lang)
+            break
+
+        create_folder(output_path)
+        filenames = sorted(filenames)
+        for filename in filenames:
+            if filename.split('.')[-1] != 'jpg':
+                continue
+
+            output_filename = re.sub(
+                r'-1\.jpg$', '.jpg',
+                re.sub(r'-2\.jpg$', '.B.jpg', filename))[50:]
+            if output_filename not in known_filenames:
+                known_filenames.add(output_filename)
+                shutil.copyfile(os.path.join(temp_path, filename),
+                                os.path.join(output_path, output_filename))
+
+        break
+
+    delete_folder(temp_path)
+
+    logging.info('[%s, %s] ...Generating DragnCards HQ image outputs '
+                 '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
 def generate_octgn(conf, set_id, set_name, lang, card_data):  # pylint: disable=R0914
