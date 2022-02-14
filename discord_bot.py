@@ -59,6 +59,7 @@ MAIL_QUOTA = 50
 
 CHANNEL_LIMIT = 500
 CHUNK_LIMIT = 1900
+MAX_PINS = 50
 ARCHIVE_CATEGORY = 'Archive'
 CARD_DECK_SECTION = '_Deck Section'
 CRON_CHANNEL = 'cron'
@@ -1891,11 +1892,16 @@ Card "{}" has been updated:
 
 
     async def _send_channel(self, channel, content):
+        first_message = None
         for i, chunk in enumerate(split_result(content)):
             if i > 0:
                 await asyncio.sleep(1)
 
-            await channel.send(chunk)
+            message = await channel.send(chunk)
+            if i == 0:
+                first_message = message
+
+        return first_message
 
 
     async def _process_cron_command(self, message):  #pylint: disable=R0912
@@ -1935,7 +1941,7 @@ Card "{}" has been updated:
             await self._send_channel(message.channel, res)
 
 
-    async def _new_target(self, content):
+    async def _new_target(self, content):  # pylint: disable=R0914
         """ Set new playtesting targets.
         """
         error_message = """incorrect command format: {}
@@ -1980,6 +1986,11 @@ Deadline: tomorrow.
         data = {'targets': targets,
                 'description': '\n'.join(description)}
 
+        old_target_message = await self._view_target()
+        old_target_message = """----------
+Archiving the previous targets:
+{}""".format(old_target_message)
+
         async with playtest_lock:
             with open(PLAYTEST_PATH, 'w') as obj:
                 json.dump(data, obj)
@@ -1987,7 +1998,16 @@ Deadline: tomorrow.
         playtest_message = """----------
 New playtesting targets:
 {}""".format(format_playtest_message(data))
+
         if self.playtest_channel:
+            pin_message = await self._send_channel(self.playtest_channel,
+                                                   old_target_message)
+            old_pins = await self.playtest_channel.pins()
+            if len(old_pins) >= MAX_PINS:
+                first_pin = old_pins[-1]
+                await first_pin.unpin()
+
+            await pin_message.pin()
             await self._send_channel(self.playtest_channel, playtest_message)
 
         return ''
