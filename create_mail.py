@@ -21,7 +21,7 @@ def create_mail(subject, body='', html='false'):
     """ Create mail file.
     """
     if os.path.isfile(body):
-        with open(body, 'r') as fobj:
+        with open(body, 'r', encoding='utf-8') as fobj:
             body = fobj.read()
 
     if subject or body:
@@ -38,7 +38,7 @@ def create_mail(subject, body='', html='false'):
         html = html.lower() == 'true'
         path = os.path.join(MAILS_PATH,
                             '{}_{}'.format(int(time.time()), uuid.uuid4()))
-        with open(path, 'w') as fobj:
+        with open(path, 'w', encoding='utf-8') as fobj:
             json.dump({'subject': subject, 'body': body, 'html': html}, fobj)
 
 

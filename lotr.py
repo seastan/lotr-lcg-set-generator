@@ -585,7 +585,7 @@ def _read_ringsdb_cookies(conf):
 
     data = {}
     try:
-        with open(RINGSDB_COOKIES_PATH, 'r') as fobj:
+        with open(RINGSDB_COOKIES_PATH, 'r', encoding='utf-8') as fobj:
             data = json.load(fobj)
     except Exception:  # pylint: disable=W0703
         pass
@@ -609,7 +609,7 @@ def _write_ringsdb_cookies(data):
     """
     RINGSDB_COOKIES.clear()
     RINGSDB_COOKIES.update(data)
-    with open(RINGSDB_COOKIES_PATH, 'w') as fobj:
+    with open(RINGSDB_COOKIES_PATH, 'w', encoding='utf-8') as fobj:
         json.dump(data, fobj)
 
 
@@ -1057,7 +1057,7 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
     logging.info('Reading project configuration (%s)...', path)
     timestamp = time.time()
 
-    with open(path, 'r') as f_conf:
+    with open(path, 'r', encoding='utf-8') as f_conf:
         conf = yaml.safe_load(f_conf)
 
     conf['all_languages'] = list(conf['outputs'].keys())
@@ -1218,7 +1218,7 @@ def _get_cached_content(url, content_type):
     path = os.path.join(URL_CACHE_PATH, '{}.{}.cache'.format(
         re.sub(r'[^A-Za-z0-9_\.\-]', '', url), content_type))
     if os.path.exists(path):
-        with open(path, 'br') as obj:
+        with open(path, 'rb') as obj:
             content = obj.read()
             return content
 
@@ -1230,7 +1230,7 @@ def _save_content(url, content, content_type):
     """
     path = os.path.join(URL_CACHE_PATH, '{}.{}.cache'.format(
         re.sub(r'[^A-Za-z0-9_\.\-]', '', url), content_type))
-    with open(path, 'bw') as obj:
+    with open(path, 'wb') as obj:
         obj.write(content)
 
 
@@ -1296,7 +1296,7 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
                        "sheet(s): {}".format(', '.join(missing_sheets)))
 
     try:
-        with open(SHEETS_JSON_PATH, 'r') as fobj:
+        with open(SHEETS_JSON_PATH, 'r', encoding='utf-8') as fobj:
             old_checksums = json.load(fobj)
     except Exception:  # pylint: disable=W0703
         old_checksums = {}
@@ -1345,11 +1345,11 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
                 scratch_changes = True
 
             path = os.path.join(DOWNLOAD_PATH, '{}.json'.format(sheet))
-            with open(path, 'w') as fobj:
+            with open(path, 'w', encoding='utf-8') as fobj:
                 fobj.write(res)
 
     if changes or scratch_changes:
-        with open(SHEETS_JSON_PATH, 'w') as fobj:
+        with open(SHEETS_JSON_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(new_checksums, fobj)
 
     logging.info('...Downloading cards spreadsheet from Google Sheets (%ss)',
@@ -1558,7 +1558,7 @@ def _read_sheet_json(sheet):
     if not os.path.exists(path):
         return []
 
-    with open(path, 'r') as fobj:
+    with open(path, 'r', encoding='utf-8') as fobj:
         data = json.load(fobj)
 
     JSON_CACHE[sheet] = data
@@ -3848,7 +3848,7 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
         row[CARD_NUMBER]))
 
     try:
-        with open(DISCORD_CARD_DATA_PATH, 'r') as obj:
+        with open(DISCORD_CARD_DATA_PATH, 'r', encoding='utf-8') as obj:
             old_data = json.load(obj)['data']
     except Exception:  # pylint: disable=W0703
         old_data = None
@@ -8037,7 +8037,7 @@ def _generate_tts_sheets(deck_path, output_path, image_path, card_dict,  # pylin
                     os.path.join(IMAGES_OTHER_PATH, 'tts_template.jpg'),
                     os.path.join(output_path, '{}.jpg'.format(name)))
                 with open(os.path.join(output_path, '{}.json'.format(name)),
-                          'w') as fobj:
+                          'w', encoding='utf-8') as fobj:
                     res = json.dumps(chunk, indent=4)
                     fobj.write(res)
 
@@ -9833,7 +9833,7 @@ def update_ringsdb(conf, sets):
     timestamp = time.time()
 
     try:
-        with open(RINGSDB_JSON_PATH, 'r') as fobj:
+        with open(RINGSDB_JSON_PATH, 'r', encoding='utf-8') as fobj:
             checksums = json.load(fobj)
     except Exception:  # pylint: disable=W0703
         checksums = {}
@@ -9849,7 +9849,7 @@ def update_ringsdb(conf, sets):
         if not os.path.exists(path):
             continue
 
-        with open(path, 'br') as fobj:
+        with open(path, 'rb') as fobj:
             content = fobj.read()
 
         checksum = hashlib.md5(content).hexdigest()
@@ -9868,7 +9868,7 @@ def update_ringsdb(conf, sets):
 
         res = session.post(
             '{}/admin/csv/upload'.format(conf['ringsdb_url']),
-            files={'upfile': open(path, 'br')},
+            files={'upfile': open(path, 'rb')},
             data={'code': SETS[set_id][SET_HOB_CODE], 'name': set_name})
         res = res.content.decode('utf-8')
         if res != 'Done':
@@ -9879,7 +9879,7 @@ def update_ringsdb(conf, sets):
         _write_ringsdb_cookies(cookies)
 
     if changes:
-        with open(RINGSDB_JSON_PATH, 'w') as fobj:
+        with open(RINGSDB_JSON_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(checksums, fobj)
 
     logging.info('...Updating ringsdb.com (%ss)',

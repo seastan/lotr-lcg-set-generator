@@ -89,7 +89,7 @@ def internet_state():
         return True
 
     try:
-        with open(INTERNET_SENSOR_PATH, 'r') as obj:
+        with open(INTERNET_SENSOR_PATH, 'r', encoding='utf-8') as obj:
             value = obj.read()
             return value.strip() != 'off'
     except Exception as exc:
@@ -121,7 +121,7 @@ def create_mail(subject, body='', skip_check=False):
 
     path = os.path.join(MAILS_PATH,
                         '{}_{}'.format(int(time.time()), uuid.uuid4()))
-    with open(path, 'w') as fobj:
+    with open(path, 'w', encoding='utf-8') as fobj:
         json.dump({'subject': subject, 'body': body, 'html': False}, fobj)
 
 
@@ -130,13 +130,13 @@ def check_mail_counter():
     """
     today = datetime.today().strftime('%Y-%m-%d')
     try:
-        with open(MAIL_COUNTER_PATH, 'r') as fobj:
+        with open(MAIL_COUNTER_PATH, 'r', encoding='utf-8') as fobj:
             data = json.load(fobj)
     except Exception:
         data = {'day': today,
                 'value': 0,
                 'allowed': True}
-        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+        with open(MAIL_COUNTER_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(data, fobj)
 
         return True
@@ -145,7 +145,7 @@ def check_mail_counter():
         data = {'day': today,
                 'value': 0,
                 'allowed': True}
-        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+        with open(MAIL_COUNTER_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(data, fobj)
 
         return True
@@ -155,14 +155,14 @@ def check_mail_counter():
             return False
 
         data['allowed'] = True
-        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+        with open(MAIL_COUNTER_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(data, fobj)
 
         return True
 
     if data['value'] >= MAIL_QUOTA:
         data['allowed'] = False
-        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+        with open(MAIL_COUNTER_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(data, fobj)
 
         message = 'Mail quota exceeded: {}/{}'.format(data['value'] + 1,
@@ -178,11 +178,11 @@ def increment_mail_counter():
     """ Increment mail counter.
     """
     try:
-        with open(MAIL_COUNTER_PATH, 'r') as fobj:
+        with open(MAIL_COUNTER_PATH, 'r', encoding='utf-8') as fobj:
             data = json.load(fobj)
 
         data['value'] += 1
-        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+        with open(MAIL_COUNTER_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(data, fobj)
     except Exception:
         pass
@@ -192,7 +192,7 @@ def send_discord(message):
     """ Send a message to a Discord channel.
     """
     try:
-        with open(DISCORD_CONF_PATH, 'r') as f_conf:
+        with open(DISCORD_CONF_PATH, 'r', encoding='utf-8') as f_conf:
             conf = yaml.safe_load(f_conf)
 
         if conf.get('webhook_url'):
@@ -674,7 +674,7 @@ def add_deck(deck_name):
     """ Add new deck to monitoring.
     """
     try:
-        with open(CONF_PATH, 'r') as fobj:
+        with open(CONF_PATH, 'r', encoding='utf-8') as fobj:
             data = json.load(fobj)
     except Exception:
         logging.error('No configuration found')
@@ -731,7 +731,7 @@ def add_deck(deck_name):
         'failed_content_ids': []
     }
     data['cookies'] = session.cookies.get_dict()
-    with open(CONF_PATH, 'w') as fobj:
+    with open(CONF_PATH, 'w', encoding='utf-8') as fobj:
         json.dump(data, fobj, indent=4)
 
     deck_url = (
@@ -748,7 +748,7 @@ def monitor():
     """ Run the monitoring checks.
     """
     try:
-        with open(CONF_PATH, 'r') as fobj:
+        with open(CONF_PATH, 'r', encoding='utf-8') as fobj:
             data = json.load(fobj)
     except Exception:
         raise ConfigurationError('No configuration found')
@@ -800,7 +800,7 @@ def monitor():
                 content = new_content
 
     data['cookies'] = session.cookies.get_dict()
-    with open(CONF_PATH, 'w') as fobj:
+    with open(CONF_PATH, 'w', encoding='utf-8') as fobj:
         json.dump(data, fobj, indent=4)
 
 

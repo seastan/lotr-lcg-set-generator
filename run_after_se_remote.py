@@ -16,7 +16,7 @@ LOG_FILE = 'run_after_se_remote.log'
 def init_logging():
     """ Init logging.
     """
-    with open(CONFIGURATION_PATH, 'r') as f_conf:
+    with open(CONFIGURATION_PATH, 'r', encoding='utf-8') as f_conf:
         conf = yaml.safe_load(f_conf)
 
     log_path = conf.get('remote_logs_path', '')

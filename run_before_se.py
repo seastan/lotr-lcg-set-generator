@@ -19,7 +19,7 @@ def main(conf=None):  # pylint: disable=R0912,R0915
     """
     timestamp = time.time()
 
-    with open(lotr.RUN_BEFORE_SE_STARTED_PATH, 'w'):
+    with open(lotr.RUN_BEFORE_SE_STARTED_PATH, 'w', encoding='utf-8'):
         pass
 
     if os.path.exists(lotr.PROJECT_CREATED_PATH):
@@ -50,7 +50,7 @@ def main(conf=None):  # pylint: disable=R0912,R0915
         logging.info('Done (%ss)', round(time.time() - timestamp, 3))
         return (sheet_changes, scratch_changes)
 
-    with open(lotr.PIPELINE_STARTED_PATH, 'w'):
+    with open(lotr.PIPELINE_STARTED_PATH, 'w', encoding='utf-8'):
         pass
 
     lotr.extract_data(conf, sheet_changes, scratch_changes)
@@ -117,7 +117,7 @@ def main(conf=None):  # pylint: disable=R0912,R0915
 
     if changes:
         lotr.create_project()
-        with open(lotr.PROJECT_CREATED_PATH, 'w'):
+        with open(lotr.PROJECT_CREATED_PATH, 'w', encoding='utf-8'):
             pass
     else:
         if os.path.exists(lotr.PIPELINE_STARTED_PATH):

@@ -57,7 +57,7 @@ def internet_state():
         return True
 
     try:
-        with open(INTERNET_SENSOR_PATH, 'r') as obj:
+        with open(INTERNET_SENSOR_PATH, 'r', encoding='utf-8') as obj:
             value = obj.read()
             return value.strip() != 'off'
     except Exception as exc:
@@ -71,7 +71,7 @@ def get_sanity_check_message():
     """ Get the latest sanity check message.
     """
     try:
-        with open(SANITY_CHECK_PATH, 'r') as obj:
+        with open(SANITY_CHECK_PATH, 'r', encoding='utf-8') as obj:
             return obj.read().strip()
     except Exception:
         return ''
@@ -81,7 +81,7 @@ def set_sanity_check_message(message):
     """ Set a new sanity check message.
     """
     try:
-        with open(SANITY_CHECK_PATH, 'w') as obj:
+        with open(SANITY_CHECK_PATH, 'w', encoding='utf-8') as obj:
             obj.write(message)
     except Exception as exc:
         message = str(exc)
@@ -93,7 +93,7 @@ def send_discord(message):
     """ Send a message to a Discord channel.
     """
     try:
-        with open(DISCORD_CONF_PATH, 'r') as f_conf:
+        with open(DISCORD_CONF_PATH, 'r', encoding='utf-8') as f_conf:
             conf = yaml.safe_load(f_conf)
 
         if conf.get('webhook_url'):
@@ -146,7 +146,7 @@ def create_mail(subject, body='', skip_check=False):
 
     path = os.path.join(MAILS_PATH,
                         '{}_{}'.format(int(time.time()), uuid.uuid4()))
-    with open(path, 'w') as fobj:
+    with open(path, 'w', encoding='utf-8') as fobj:
         json.dump({'subject': subject, 'body': body, 'html': False}, fobj)
 
 
@@ -155,13 +155,13 @@ def check_mail_counter():
     """
     today = datetime.today().strftime('%Y-%m-%d')
     try:
-        with open(MAIL_COUNTER_PATH, 'r') as fobj:
+        with open(MAIL_COUNTER_PATH, 'r', encoding='utf-8') as fobj:
             data = json.load(fobj)
     except Exception:
         data = {'day': today,
                 'value': 0,
                 'allowed': True}
-        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+        with open(MAIL_COUNTER_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(data, fobj)
 
         return True
@@ -170,7 +170,7 @@ def check_mail_counter():
         data = {'day': today,
                 'value': 0,
                 'allowed': True}
-        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+        with open(MAIL_COUNTER_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(data, fobj)
 
         return True
@@ -180,14 +180,14 @@ def check_mail_counter():
             return False
 
         data['allowed'] = True
-        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+        with open(MAIL_COUNTER_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(data, fobj)
 
         return True
 
     if data['value'] >= MAIL_QUOTA:
         data['allowed'] = False
-        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+        with open(MAIL_COUNTER_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(data, fobj)
 
         message = 'Mail quota exceeded: {}/{}'.format(data['value'] + 1,
@@ -203,11 +203,11 @@ def increment_mail_counter():
     """ Increment mail counter.
     """
     try:
-        with open(MAIL_COUNTER_PATH, 'r') as fobj:
+        with open(MAIL_COUNTER_PATH, 'r', encoding='utf-8') as fobj:
             data = json.load(fobj)
 
         data['value'] += 1
-        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+        with open(MAIL_COUNTER_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(data, fobj)
     except Exception:
         pass

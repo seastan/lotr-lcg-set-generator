@@ -55,7 +55,7 @@ def create_mail(subject, body=''):
 
     path = os.path.join(MAILS_PATH,
                         '{}_{}'.format(int(time.time()), uuid.uuid4()))
-    with open(path, 'w') as fobj:
+    with open(path, 'w', encoding='utf-8') as fobj:
         json.dump({'subject': subject, 'body': body, 'html': False}, fobj)
 
 
@@ -90,7 +90,7 @@ def parse_logs(folder):
 def run():
     """ Run the check.
     """
-    with open(CONFIGURATION_PATH, 'r') as f_conf:
+    with open(CONFIGURATION_PATH, 'r', encoding='utf-8') as f_conf:
         conf = yaml.safe_load(f_conf)
 
     rclone_logs(conf)

@@ -251,7 +251,7 @@ def create_mail(subject, body='', skip_check=False):
 
     path = os.path.join(MAILS_PATH,
                         '{}_{}'.format(int(time.time()), uuid.uuid4()))
-    with open(path, 'w') as fobj:
+    with open(path, 'w', encoding='utf-8') as fobj:
         json.dump({'subject': subject, 'body': body, 'html': False}, fobj)
 
 
@@ -260,13 +260,13 @@ def check_mail_counter():
     """
     today = datetime.today().strftime('%Y-%m-%d')
     try:
-        with open(MAIL_COUNTER_PATH, 'r') as fobj:
+        with open(MAIL_COUNTER_PATH, 'r', encoding='utf-8') as fobj:
             data = json.load(fobj)
     except Exception:
         data = {'day': today,
                 'value': 0,
                 'allowed': True}
-        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+        with open(MAIL_COUNTER_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(data, fobj)
 
         return True
@@ -275,7 +275,7 @@ def check_mail_counter():
         data = {'day': today,
                 'value': 0,
                 'allowed': True}
-        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+        with open(MAIL_COUNTER_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(data, fobj)
 
         return True
@@ -285,14 +285,14 @@ def check_mail_counter():
             return False
 
         data['allowed'] = True
-        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+        with open(MAIL_COUNTER_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(data, fobj)
 
         return True
 
     if data['value'] >= MAIL_QUOTA:
         data['allowed'] = False
-        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+        with open(MAIL_COUNTER_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(data, fobj)
 
         message = 'Mail quota exceeded: {}/{}'.format(data['value'] + 1,
@@ -308,11 +308,11 @@ def increment_mail_counter():
     """ Increment mail counter.
     """
     try:
-        with open(MAIL_COUNTER_PATH, 'r') as fobj:
+        with open(MAIL_COUNTER_PATH, 'r', encoding='utf-8') as fobj:
             data = json.load(fobj)
 
         data['value'] += 1
-        with open(MAIL_COUNTER_PATH, 'w') as fobj:
+        with open(MAIL_COUNTER_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(data, fobj)
     except Exception:
         pass
@@ -322,7 +322,7 @@ def get_discord_configuration():
     """ Get Discord configuration.
     """
     try:
-        with open(CONF_PATH, 'r') as f_conf:
+        with open(CONF_PATH, 'r', encoding='utf-8') as f_conf:
             conf = yaml.safe_load(f_conf)
 
         return conf
@@ -409,11 +409,11 @@ async def read_json_data(path):
     """ Read data from a JSON file.
     """
     try:
-        with open(path, 'r') as obj:
+        with open(path, 'r', encoding='utf-8') as obj:
             data = json.load(obj)
     except Exception:
         await asyncio.sleep(IO_SLEEP_TIME)
-        with open(path, 'r') as obj:
+        with open(path, 'r', encoding='utf-8') as obj:
             data = json.load(obj)
 
     return data
@@ -1992,7 +1992,7 @@ Archiving the previous targets:
 {}""".format(old_target_message)
 
         async with playtest_lock:
-            with open(PLAYTEST_PATH, 'w') as obj:
+            with open(PLAYTEST_PATH, 'w', encoding='utf-8') as obj:
                 json.dump(data, obj)
 
         playtest_message = """----------
@@ -2017,7 +2017,7 @@ New playtesting targets:
         """ Display existing playtesting target.
         """
         async with playtest_lock:
-            with open(PLAYTEST_PATH, 'r') as obj:
+            with open(PLAYTEST_PATH, 'r', encoding='utf-8') as obj:
                 data = json.load(obj)
 
         return format_playtest_message(data)
@@ -2033,7 +2033,7 @@ New playtesting targets:
             return 'please add a playtesting report'
 
         async with playtest_lock:
-            with open(PLAYTEST_PATH, 'r+') as obj:
+            with open(PLAYTEST_PATH, 'r+', encoding='utf-8') as obj:
                 data = json.load(obj)
 
                 nums = [target['num'] for target in data['targets']]
@@ -2091,7 +2091,7 @@ Target "{}" completed. Link: {}
 
         user = ' '.join(params)
         async with playtest_lock:
-            with open(PLAYTEST_PATH, 'r+') as obj:
+            with open(PLAYTEST_PATH, 'r+', encoding='utf-8') as obj:
                 data = json.load(obj)
 
                 existing_nums = set(target['num']
@@ -2160,7 +2160,7 @@ Targets updated.
             return 'no new desription or targets specified'
 
         async with playtest_lock:
-            with open(PLAYTEST_PATH, 'r+') as obj:
+            with open(PLAYTEST_PATH, 'r+', encoding='utf-8') as obj:
                 data = json.load(obj)
 
                 existing_nums = set(target['num']
@@ -2207,7 +2207,7 @@ Targets added.
             return 'no target number(s) specified'
 
         async with playtest_lock:
-            with open(PLAYTEST_PATH, 'r+') as obj:
+            with open(PLAYTEST_PATH, 'r+', encoding='utf-8') as obj:
                 data = json.load(obj)
 
                 existing_nums = set(target['num']

@@ -43,7 +43,7 @@ def create_mail(subject, body=''):
 
     path = os.path.join(MAILS_PATH,
                         '{}_{}'.format(int(time.time()), uuid.uuid4()))
-    with open(path, 'w') as fobj:
+    with open(path, 'w', encoding='utf-8') as fobj:
         json.dump({'subject': subject, 'body': body, 'html': True}, fobj)
 
 
@@ -113,7 +113,7 @@ def main(backup_path):
     """ Main function.
     """
     try:
-        with open(CONF_PATH, 'r') as fobj:
+        with open(CONF_PATH, 'r', encoding='utf-8') as fobj:
             data = json.load(fobj)
     except Exception:
         raise ConfigurationError('No configuration found')
