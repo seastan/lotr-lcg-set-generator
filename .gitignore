@@ -42,7 +42,7 @@ scheduled_backup.json
 setGenerator.seproject
 setGenerator_CREATED
 sheets.json
-USWebCoatedSWOP.icc
+*.icc
 *.cnt
 *.lock
 *.log

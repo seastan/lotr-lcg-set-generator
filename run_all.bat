@@ -1,5 +1,6 @@
 @echo off
 cd /D "%~dp0"
+chcp 65001
 if exist run_setup.bat call run_setup.bat
 if exist env\Scripts\activate.bat call env\Scripts\activate.bat
 
