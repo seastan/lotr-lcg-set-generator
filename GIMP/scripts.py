@@ -786,7 +786,7 @@ register(
 register(
     'python_prepare_makeplayingcards',
     'Prepare an image for MakePlayingCards printing',
-    '1. Rotate a landscape image. 2. Clip bleed margins. 3. Export PNG.',
+    '1. Rotate a landscape image. 2. Clip bleed margins. 3. Adjust brightness/contrast. 4. Export PNG.',
     'A.R.',
     'A.R.',
     '2020',
@@ -804,7 +804,7 @@ register(
 register(
     'python_prepare_makeplayingcards_folder',
     'Prepare a folder of images for MakePlayingCards printing',
-    '1. Rotate a landscape image. 2. Clip bleed margins. 3. Export PNG.',
+    '1. Rotate a landscape image. 2. Clip bleed margins. 3. Adjust brightness/contrast. 4. Export PNG.',
     'A.R.',
     'A.R.',
     '2020',
