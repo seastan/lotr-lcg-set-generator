@@ -1987,9 +1987,6 @@ Deadline: tomorrow.
                 'description': '\n'.join(description)}
 
         old_target_message = await self._view_target()
-        old_target_message = """----------
-Archiving the previous targets:
-{}""".format(old_target_message)
 
         async with playtest_lock:
             with open(PLAYTEST_PATH, 'w', encoding='utf-8') as obj:
@@ -2000,14 +1997,19 @@ New playtesting targets:
 {}""".format(format_playtest_message(data))
 
         if self.playtest_channel:
-            pin_message = await self._send_channel(self.playtest_channel,
-                                                   old_target_message)
-            old_pins = await self.playtest_channel.pins()
-            if len(old_pins) >= MAX_PINS:
-                first_pin = old_pins[-1]
-                await first_pin.unpin()
+            if old_target_message:
+                old_target_message = """----------
+Archiving the previous targets:
+{}""".format(old_target_message)
+                pin_message = await self._send_channel(self.playtest_channel,
+                                                       old_target_message)
+                old_pins = await self.playtest_channel.pins()
+                if len(old_pins) >= MAX_PINS:
+                    first_pin = old_pins[-1]
+                    await first_pin.unpin()
 
-            await pin_message.pin()
+                await pin_message.pin()
+
             await self._send_channel(self.playtest_channel, playtest_message)
 
         return ''
@@ -2017,8 +2019,12 @@ New playtesting targets:
         """ Display existing playtesting target.
         """
         async with playtest_lock:
-            with open(PLAYTEST_PATH, 'r', encoding='utf-8') as obj:
-                data = json.load(obj)
+            try:
+                with open(PLAYTEST_PATH, 'r', encoding='utf-8') as obj:
+                    data = json.load(obj)
+            except Exception:
+                data = {'targets': [],
+                        'description': ''}
 
         return format_playtest_message(data)
 
@@ -2033,27 +2039,30 @@ New playtesting targets:
             return 'please add a playtesting report'
 
         async with playtest_lock:
-            with open(PLAYTEST_PATH, 'r+', encoding='utf-8') as obj:
-                data = json.load(obj)
+            try:
+                with open(PLAYTEST_PATH, 'r+', encoding='utf-8') as obj:
+                    data = json.load(obj)
 
-                nums = [target['num'] for target in data['targets']]
-                if num not in nums:
-                    return 'target "{}" not found'.format(num)
+                    nums = [target['num'] for target in data['targets']]
+                    if num not in nums:
+                        return 'target "{}" not found'.format(num)
 
-                nums = [target['num'] for target in data['targets']
-                        if not target['completed']]
-                if num not in nums:
-                    return 'target "{}" already completed'.format(num)
+                    nums = [target['num'] for target in data['targets']
+                            if not target['completed']]
+                    if num not in nums:
+                        return 'target "{}" already completed'.format(num)
 
-                for target in data['targets']:
-                    if target['num'] == num:
-                        target['completed'] = True
-                        target['user'] = user
-                        break
+                    for target in data['targets']:
+                        if target['num'] == num:
+                            target['completed'] = True
+                            target['user'] = user
+                            break
 
-                obj.seek(0)
-                obj.truncate()
-                json.dump(data, obj)
+                    obj.seek(0)
+                    obj.truncate()
+                    json.dump(data, obj)
+            except Exception:
+                return 'no previous targets found'
 
         all_targets = ('All targets completed now!'
                        if all(target['completed']
@@ -2091,27 +2100,30 @@ Target "{}" completed. Link: {}
 
         user = ' '.join(params)
         async with playtest_lock:
-            with open(PLAYTEST_PATH, 'r+', encoding='utf-8') as obj:
-                data = json.load(obj)
+            try:
+                with open(PLAYTEST_PATH, 'r+', encoding='utf-8') as obj:
+                    data = json.load(obj)
 
-                existing_nums = set(target['num']
-                                    for target in data['targets'])
-                for num in nums:
-                    if num not in existing_nums:
-                        return 'target "{}" not found'.format(num)
+                    existing_nums = set(target['num']
+                                        for target in data['targets'])
+                    for num in nums:
+                        if num not in existing_nums:
+                            return 'target "{}" not found'.format(num)
 
-                for target in data['targets']:
-                    if target['num'] in nums:
-                        if user:
-                            target['completed'] = True
-                            target['user'] = user
-                        else:
-                            target['completed'] = False
-                            target['user'] = None
+                    for target in data['targets']:
+                        if target['num'] in nums:
+                            if user:
+                                target['completed'] = True
+                                target['user'] = user
+                            else:
+                                target['completed'] = False
+                                target['user'] = None
 
-                obj.seek(0)
-                obj.truncate()
-                json.dump(data, obj)
+                    obj.seek(0)
+                    obj.truncate()
+                    json.dump(data, obj)
+            except Exception:
+                return 'no previous targets found'
 
         all_targets = ('All targets completed now!'
                        if all(target['completed']
@@ -2127,7 +2139,7 @@ Targets updated.
         return ''
 
 
-    async def _add_target(self, content):
+    async def _add_target(self, content):  # pylint: disable=R0911
         """ Add additional playtesting targets.
         """
         lines = [line.strip() for line in content.split('\n')[1:]]
@@ -2160,22 +2172,25 @@ Targets updated.
             return 'no new desription or targets specified'
 
         async with playtest_lock:
-            with open(PLAYTEST_PATH, 'r+', encoding='utf-8') as obj:
-                data = json.load(obj)
+            try:
+                with open(PLAYTEST_PATH, 'r+', encoding='utf-8') as obj:
+                    data = json.load(obj)
 
-                existing_nums = set(target['num']
-                                    for target in data['targets'])
-                for num in nums:
-                    if num in existing_nums:
-                        return 'a duplicate target number "{}"'.format(num)
+                    existing_nums = set(target['num']
+                                        for target in data['targets'])
+                    for num in nums:
+                        if num in existing_nums:
+                            return 'a duplicate target number "{}"'.format(num)
 
-                if description:
-                    data['description'] = '\n'.join(description)
+                    if description:
+                        data['description'] = '\n'.join(description)
 
-                data['targets'].extend(targets)
-                obj.seek(0)
-                obj.truncate()
-                json.dump(data, obj)
+                    data['targets'].extend(targets)
+                    obj.seek(0)
+                    obj.truncate()
+                    json.dump(data, obj)
+            except Exception:
+                return 'no previous targets found'
 
         playtest_message = """----------
 Targets added.
@@ -2207,20 +2222,23 @@ Targets added.
             return 'no target number(s) specified'
 
         async with playtest_lock:
-            with open(PLAYTEST_PATH, 'r+', encoding='utf-8') as obj:
-                data = json.load(obj)
+            try:
+                with open(PLAYTEST_PATH, 'r+', encoding='utf-8') as obj:
+                    data = json.load(obj)
 
-                existing_nums = set(target['num']
-                                    for target in data['targets'])
-                for num in nums:
-                    if num not in existing_nums:
-                        return 'target "{}" not found'.format(num)
+                    existing_nums = set(target['num']
+                                        for target in data['targets'])
+                    for num in nums:
+                        if num not in existing_nums:
+                            return 'target "{}" not found'.format(num)
 
-                data['targets'] = [target for target in data['targets']
-                                   if target['num'] not in nums]
-                obj.seek(0)
-                obj.truncate()
-                json.dump(data, obj)
+                    data['targets'] = [target for target in data['targets']
+                                       if target['num'] not in nums]
+                    obj.seek(0)
+                    obj.truncate()
+                    json.dump(data, obj)
+            except Exception:
+                return 'no previous targets found'
 
         playtest_message = """----------
 Targets removed.
@@ -2258,6 +2276,8 @@ Targets removed.
         elif command.lower() == 'view':
             try:
                 res = await self._view_target()
+                if not res:
+                    res = 'no previous targets found'
             except Exception as exc:
                 logging.exception(str(exc))
                 await message.channel.send(
