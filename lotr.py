@@ -1857,7 +1857,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         else:
             card_ids.add(card_id)
 
-        if set_id not in set_ids:
+        if not conf['run_sanity_check_for_all_sets'] and set_id not in set_ids:
             continue
 
         if card_number is None:

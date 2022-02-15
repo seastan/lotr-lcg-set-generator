@@ -59,6 +59,9 @@ selected_only: false
 # Stop processing if there are no spreadsheet changes (true or false)
 exit_if_no_spreadsheet_changes: true
 
+# Run sanity check for all sets (true or false)
+run_sanity_check_for_all_sets: true
+
 # Number of parallel processes to use ("default" means "cpu_count() - 1", but not more than 4)
 parallelism: default
 
