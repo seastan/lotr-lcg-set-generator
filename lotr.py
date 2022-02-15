@@ -9081,15 +9081,15 @@ def _combine_doublesided_rules_cards(set_id, input_path, card_data, service):  #
         second_back_unofficial = os.path.join(
             input_path, '{}-2u.{}'.format(pair[1], file_type))
         if not os.path.exists(first_back_unofficial):
-            logging.error('Path %s does not exist', first_back_unofficial)
+            logging.warning('Path %s does not exist', first_back_unofficial)
             continue
 
         if not os.path.exists(second_front):
-            logging.error('Path %s does not exist', second_front)
+            logging.warning('Path %s does not exist', second_front)
             continue
 
         if not os.path.exists(second_back_unofficial):
-            logging.error('Path %s does not exist', second_back_unofficial)
+            logging.warning('Path %s does not exist', second_back_unofficial)
             continue
 
         if service != 'mpc':
@@ -9098,11 +9098,11 @@ def _combine_doublesided_rules_cards(set_id, input_path, card_data, service):  #
             second_back_official = os.path.join(
                 input_path, '{}-2o.{}'.format(pair[1], file_type))
             if not os.path.exists(first_back_official):
-                logging.error('Path %s does not exist', first_back_official)
+                logging.warning('Path %s does not exist', first_back_official)
                 continue
 
             if not os.path.exists(second_back_official):
-                logging.error('Path %s does not exist', second_back_official)
+                logging.warning('Path %s does not exist', second_back_official)
                 continue
 
         shutil.move(second_front, first_back_unofficial)
