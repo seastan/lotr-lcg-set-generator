@@ -350,6 +350,7 @@ CONFIGURATION_PATH = 'configuration.yaml'
 DISCORD_PATH = 'Discord'
 DISCORD_CARD_DATA_PATH = os.path.join(DISCORD_PATH, 'card_data.json')
 DOWNLOAD_PATH = 'Download'
+DOWNLOAD_TIME_PATH = 'download_time.txt'
 IMAGES_BACK_PATH = 'imagesBack'
 IMAGES_CUSTOM_PATH = os.path.join(PROJECT_FOLDER, 'imagesCustom')
 IMAGES_ICONS_PATH = os.path.join(PROJECT_FOLDER, 'imagesIcons')
@@ -1255,6 +1256,7 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
     logging.info('Downloading cards spreadsheet from Google Sheets...')
     timestamp = time.time()
 
+    utc_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
     changes = False
     scratch_changes = False
     sheets = [SET_SHEET, CARD_SHEET, SCRATCH_SHEET]
@@ -1351,6 +1353,9 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
     if changes or scratch_changes:
         with open(SHEETS_JSON_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(new_checksums, fobj)
+
+        with open(DOWNLOAD_TIME_PATH, 'w', encoding='utf-8') as fobj:
+            fobj.write(utc_time)
 
     logging.info('...Downloading cards spreadsheet from Google Sheets (%ss)',
                  round(time.time() - timestamp, 3))
@@ -9581,6 +9586,11 @@ def copy_db_outputs(conf, sets):
                                 os.path.join(destination_path, filename))
 
             break
+
+        shutil.copyfile(
+            DOWNLOAD_TIME_PATH,
+            os.path.join(destination_path,
+                         os.path.split(DOWNLOAD_TIME_PATH)[-1]))
 
         logging.info('Copied DB outputs for %s', set_name)
 

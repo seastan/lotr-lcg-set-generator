@@ -25,6 +25,7 @@ urlCache/*.cache
 
 configuration.yaml
 discord.yaml
+download_time.txt
 id_rsa
 last_remote_cron_timestamp
 makeCards_FINISHED
