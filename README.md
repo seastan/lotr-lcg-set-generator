@@ -89,8 +89,8 @@ completely, you will need to download updates to that folder manually.
   - Run Strange Eons and install `The Lord of the Rings LCG` plugin.
   - Click `Edit` -> `Preferences` -> `Language`.  Make sure that "English-United States" is chosen for both `Game Language` and `User Interface Language`.
     Click `Drawing`.  Make sure that `Text Fitting Methods` is set to `Reduce Line Spacing and Shrink Text`.  Don't change any other preferences.
-  - Go to plugins folder (run Strange Eons, then click `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`), close Strange Eons and
-    delete or move all files, which names start with `TheLordOfTheRingsLCG`.  Instead of them, copy all generated `.seext` files from the root folder of this repo.
+  - Go to the plugins folder (run Strange Eons, then click `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`), close Strange Eons and
+    delete or move all files, which names start with `TheLordOfTheRingsLCG`.  Instead of them, copy all generated `.seext` files.
 
 6. Install the latest GIMP version from https://www.gimp.org/downloads/.
 
