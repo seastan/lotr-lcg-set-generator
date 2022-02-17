@@ -74,7 +74,23 @@ completely, you will need to download updates to that folder manually.
     If you plan to automatically upload images to Google Drive (see the configuration below),
     go to `Preferences` -> `Settings` and uncheck `Show warning when you remove items from a shared folder`.
 
-5. Install Strange Eons and the custom plugin, see https://github.com/seastan/lotr-lcg-se-plugin for details.
+5. Install Strange Eons and the custom plugin.  Follow these steps:
+
+  - Clone https://github.com/seastan/lotr-lcg-se-plugin to a new local folder.  Go to this folder.
+  - Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir, extract the archive and
+    put `VAFTHRUD.TTF` into `TheLordOfTheRingsLCG-B/resources/TheLordOfTheRingsLCG/font/` folder.
+  - Run `setup.bat` (Windows) or `setup.sh` (Mac/Linux) to generate the `.seext` files.
+  - Make sure that `Times New Roman` font is installed.  If you have Mac or Linux, it may be not installed by default.
+  - Install Strange Eons, `Build 3970`.  Please note that the latest Strange Eons version from the site may not work as expected.  Use the following links:
+    - Windows (64-bit): https://drive.google.com/file/d/19vuP5QFKrjuilJbuFh10NPIn6i_FZZI9/view?usp=sharing
+    - Windows (32-bit): https://drive.google.com/file/d/1lZ6h7OQBvZdh2hOlAiZMYivzeooTqWhW/view?usp=sharing
+    - Mac: https://drive.google.com/file/d/1TkWEjB71fdxxq_gHzhI-WfRXaRrJcGZg/view?usp=sharing
+    - Linux: https://drive.google.com/file/d/1ZC-uSOVKqU7XGZUip3I6OvUT7mPOLLoN/view?usp=sharing
+  - Run Strange Eons and install `The Lord of the Rings LCG` plugin.
+  - Click `Edit` -> `Preferences` -> `Language`.  Make sure that "English-United States" is chosen for both `Game Language` and `User Interface Language`.
+    Click `Drawing`.  Make sure that `Text Fitting Methods` is set to `Reduce Line Spacing and Shrink Text`.  Don't change any other preferences.
+  - Go to plugins folder (run Strange Eons, then click `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`), close Strange Eons and
+    delete or move all files, which names start with `TheLordOfTheRingsLCG`.  Instead of them, copy all generated `.seext` files from the root folder of this repo.
 
 6. Install the latest GIMP version from https://www.gimp.org/downloads/.
 
