@@ -1023,24 +1023,63 @@ def get_quest_stat(cards):  # pylint: disable=R0912,R0915
     return res
 
 
-def format_diffs(old_value, new_value):
+def format_diffs(old_value, new_value):  # pylint: disable=R0912,R0914
     """ Format differences.
     """
     old_lines = old_value.strip().split('\n')
     new_lines = new_value.strip().split('\n')
-    max_length = max(len(old_lines), len(new_lines))
-    for i in range(max_length):
-        if i >= len(old_lines):
-            new_lines[i] = '+ {}'.format(new_lines[i])
-        elif i >= len(new_lines):
-            old_lines[i] = '- {}'.format(old_lines[i])
-        elif old_lines[i] != new_lines[i]:
-            old_lines[i] = '- {}'.format(old_lines[i])
-            new_lines[i] = '+ {}'.format(new_lines[i])
+    matches = 0
+    left = []
+    right = []
+    for left_line in old_lines:
+        if left_line in new_lines:
+            while new_lines:
+                right_line = new_lines.pop(0)
+                if left_line == right_line:
+                    left.append(left_line)
+                    right.append(right_line)
+                    matches += 1
+                    break
 
-    old_value = '\n'.join(old_lines).strip() or ' '
-    new_value = '\n'.join(new_lines).strip() or ' '
-    return old_value, new_value
+                right.append('+ {}'.format(right_line))
+        else:
+            left.append('- {}'.format(left_line))
+
+    for right_line in new_lines:
+        right.append('+ {}'.format(right_line))
+
+    left_value = '\n'.join(left).strip() or ' '
+    right_value = '\n'.join(right).strip() or ' '
+
+    old_lines = old_value.strip().split('\n')
+    new_lines = new_value.strip().split('\n')
+    matches_alt = 0
+    left_alt = []
+    right_alt = []
+    for right_line in new_lines:
+        if right_line in old_lines:
+            while old_lines:
+                left_line = old_lines.pop(0)
+                if right_line == left_line:
+                    right_alt.append(right_line)
+                    left_alt.append(left_line)
+                    matches_alt += 1
+                    break
+
+                left_alt.append('- {}'.format(left_line))
+        else:
+            right_alt.append('+ {}'.format(right_line))
+
+    for left_line in old_lines:
+        left_alt.append('- {}'.format(left_line))
+
+    left_value_alt = '\n'.join(left_alt).strip() or ' '
+    right_value_alt = '\n'.join(right_alt).strip() or ' '
+
+    if matches_alt > matches:
+        return left_value_alt, right_value_alt
+
+    return left_value, right_value
 
 
 def clear_rendered_images():
