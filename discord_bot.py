@@ -1026,8 +1026,10 @@ def get_quest_stat(cards):  # pylint: disable=R0912,R0915
 def format_diffs(old_value, new_value):  # pylint: disable=R0912,R0914
     """ Format differences.
     """
-    old_lines = old_value.strip().split('\n')
-    new_lines = new_value.strip().split('\n')
+    old_lines = [re.sub(r'^([-+])', ' \\1', line)
+                 for line in old_value.strip().split('\n')]
+    new_lines = [re.sub(r'^([-+])', ' \\1', line)
+                 for line in new_value.strip().split('\n')]
     matches = 0
     left = []
     right = []
@@ -1051,8 +1053,10 @@ def format_diffs(old_value, new_value):  # pylint: disable=R0912,R0914
     left_value = '\n'.join(left).strip() or ' '
     right_value = '\n'.join(right).strip() or ' '
 
-    old_lines = old_value.strip().split('\n')
-    new_lines = new_value.strip().split('\n')
+    old_lines = [re.sub(r'^([-+])', ' \\1', line)
+                 for line in old_value.strip().split('\n')]
+    new_lines = [re.sub(r'^([-+])', ' \\1', line)
+                 for line in new_value.strip().split('\n')]
     matches_alt = 0
     left_alt = []
     right_alt = []
