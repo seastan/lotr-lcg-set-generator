@@ -144,17 +144,31 @@ function differences(value1, value2) {
     while (valueSubArr2.length > valueSubArr1.length) {
       valueSubArr1.push('');
     }
+    let oldValues = [];
+    let newValues = [];
     for (let j = 0; j < valueSubArr1.length; j++) {
       if (valueSubArr1[j].trim() == valueSubArr2[j].trim()) {
+        if (oldValues.length > 0) {
+          res += 'OLD: ' + oldValues.join('\n').trim() + '\n';
+          res += '\n';
+          res += 'NEW: ' + newValues.join('\n').trim() + '\n';
+          res += '\n';
+          oldValues = [];
+          newValues = [];
+        }
         continue;
       }
-      res += 'OLD: ' + valueSubArr1[j].trim() + '\n';
-      res += 'NEW: ' + valueSubArr2[j].trim() + '\n';
+      oldValues.push(valueSubArr1[j].trim());
+      newValues.push(valueSubArr2[j].trim());
+    }
+    if (oldValues.length > 0) {
+      res += 'OLD: ' + oldValues.join('\n').trim() + '\n';
+      res += '\n';
+      res += 'NEW: ' + newValues.join('\n').trim() + '\n';
       res += '\n';
     }
   }
-
-  return res;
+  return res.trim();
 }
 
 function SHEETS() {
