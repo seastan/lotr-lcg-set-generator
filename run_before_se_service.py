@@ -9,7 +9,7 @@ from lotr import read_conf
 from run_before_se_cron import init_logging, run
 
 
-SLEEP_TIME = 50
+SLEEP_TIME = 45
 
 
 if __name__ == '__main__':
