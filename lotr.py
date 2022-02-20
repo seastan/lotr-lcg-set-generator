@@ -349,6 +349,7 @@ CARD_BACKS = {'player': {'mpc': ['playerBackOfficialMPC.png',
 CONFIGURATION_PATH = 'configuration.yaml'
 DISCORD_PATH = 'Discord'
 DISCORD_CARD_DATA_PATH = os.path.join(DISCORD_PATH, 'card_data.json')
+DISCORD_TIMESTAMPS_PATH = os.path.join(DISCORD_PATH, 'timestamps.json')
 DOWNLOAD_PATH = 'Download'
 DOWNLOAD_TIME_PATH = 'download_time.txt'
 IMAGES_BACK_PATH = 'imagesBack'
@@ -3858,6 +3859,7 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
     except Exception:  # pylint: disable=W0703
         old_data = None
 
+    modified_card_ids = []
     card_changes = []
     category_diffs = []
     channel_diffs = []
@@ -3870,6 +3872,7 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
         new_dict = {row[CARD_ID]:row for row in data}
         for card_id in new_dict:
             if card_id not in old_dict:
+                modified_card_ids.append(card_id)
                 card_changes.append(('add', card_id, {
                     CARD_NAME: new_dict[card_id][CARD_NAME],
                     CARD_SET_NAME: new_dict[card_id][CARD_SET_NAME],
@@ -3885,10 +3888,10 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
                           new_dict[card_id][CARD_DISCORD_CATEGORY]),
                          (card_id, None, new_dict[card_id][CARD_SET])))
             elif old_dict[card_id] != new_dict[card_id]:
-                if not new_dict[card_id].get(CARD_BOT_DISABLED):
-                    diffs = _get_card_diffs(old_dict[card_id],
-                                            new_dict[card_id])
-                    if diffs:
+                diffs = _get_card_diffs(old_dict[card_id], new_dict[card_id])
+                if diffs:
+                    modified_card_ids.append(card_id)
+                    if not new_dict[card_id].get(CARD_BOT_DISABLED):
                         card_changes.append(('change', card_id, diffs))
 
                 if (old_dict[card_id][CARD_DISCORD_CATEGORY] !=
@@ -3920,6 +3923,7 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
                          None,
                          (card_id, old_dict[card_id][CARD_SET], None)))
 
+                modified_card_ids.append(card_id)
                 card_changes.append(('remove', card_id, {
                     CARD_NAME: old_dict[card_id][CARD_NAME],
                     CARD_SET_NAME: old_dict[card_id][CARD_SET_NAME],
@@ -3987,15 +3991,33 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
         res = json.dumps(output, ensure_ascii=False)
         obj.write(res)
 
-    if category_changes or channel_changes or card_changes:
+    utc_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+    if (category_changes or channel_changes or card_changes or
+            modified_card_ids):
         output = {'categories': category_changes,
                   'channels': channel_changes,
-                  'cards': card_changes}
+                  'cards': card_changes,
+                  'card_ids': modified_card_ids,
+                  'utc_time': utc_time}
         path = os.path.join(
             DISCORD_PATH, 'Changes',
             '{}_{}.json'.format(int(time.time()), uuid.uuid4()))
         with open(path, 'w', encoding='utf-8') as obj:
             res = json.dumps(output, ensure_ascii=False)
+            obj.write(res)
+
+    if modified_card_ids:
+        try:
+            with open(DISCORD_TIMESTAMPS_PATH, 'r', encoding='utf-8') as obj:
+                timestamps = json.load(obj)
+        except Exception:  # pylint: disable=W0703
+            timestamps = {}
+
+        for card_id in modified_card_ids:
+            timestamps[card_id] = utc_time
+
+        with open(DISCORD_TIMESTAMPS_PATH, 'w', encoding='utf-8') as obj:
+            res = json.dumps(timestamps)
             obj.write(res)
 
     logging.info('...Saving the data for the Discord bot (%ss)',
