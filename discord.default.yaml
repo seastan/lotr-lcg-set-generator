@@ -13,5 +13,11 @@ artwork_destination_path:
 # Path to remote logs folder (may be empty)
 remote_logs_path: 
 
+# Path to id_rsa key to upload files to DragnCards
+dragncards_id_rsa_path: 
+
+# DragnCards hostname (username@hostname)
+dragncards_hostname: 
+
 # Users to ignore (a comma-separated list)
 ignore_users: 

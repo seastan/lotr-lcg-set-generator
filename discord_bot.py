@@ -17,6 +17,7 @@ import xml.etree.ElementTree as ET
 
 import aiohttp
 import discord
+import paramiko
 import yaml
 
 import lotr
@@ -156,6 +157,7 @@ List of **!stat** commands:
 
 **!stat assistants** - display the list of ALeP assistants (all Discord users except for those who have a role)
 **!stat channels** - display the number of Discord channels and free channel slots
+**!stat dragncards build** - display information about the latest DragnCards build
 **!stat quest <quest name or set name or set code>** - display the quest statistics (for example: `!stat quest The Battle for the Beacon` or `!stat quest Children of Eorl` or `!stat quest TAP`)
 **!stat help** - display this help message
 """,
@@ -934,6 +936,22 @@ async def read_deck_xml(path):
             cards.append(row)
 
     return cards
+
+
+def get_dragncards_build():
+    """ Get information about the latest DragnCards build.
+    """
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    parts = CONF.get('dragncards_hostname', '').split('@')
+    ssh.connect(parts[1], username=parts[0],
+                key_filename=CONF.get('dragncards_id_rsa_path', ''),
+                timeout=30)
+    _, res, _ = ssh.exec_command(
+        '/var/www/dragncards.com/dragncards/frontend/buildStat.sh',
+        timeout=30)
+    res = res.read().decode()
+    return res
 
 
 def get_quest_stat(cards):  # pylint: disable=R0912,R0915
@@ -2448,7 +2466,7 @@ Targets removed.
             await self._send_channel(message.channel, res)
 
 
-    async def _get_quests_stat(self, quest):  # pylint: disable=R0914
+    async def get_quests_stat(self, quest):  # pylint: disable=R0914
         """ Get statistics for all found quests.
         """
         data = await read_card_data()
@@ -2595,7 +2613,7 @@ Targets removed.
             try:
                 quest = re.sub(r'^quest ', '', command,
                                flags=re.IGNORECASE)
-                res = await self._get_quests_stat(quest)
+                res = await self.get_quests_stat(quest)
             except Exception as exc:
                 logging.exception(str(exc))
                 await message.channel.send(
@@ -2620,6 +2638,17 @@ Targets removed.
         elif command.lower() == 'assistants':
             try:
                 res = self.get_users()
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await self._send_channel(message.channel, res)
+        elif command.lower() == 'dragncards build':
+            await message.channel.send('Please wait...')
+            try:
+                res = get_dragncards_build()
             except Exception as exc:
                 logging.exception(str(exc))
                 await message.channel.send(
