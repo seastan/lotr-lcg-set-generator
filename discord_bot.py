@@ -49,6 +49,7 @@ DIRECT_URL_REGEX = r'itemJson: \[[^,]+,"[^"]+","([^"]+)"'
 PREVIEW_URL = 'https://drive.google.com/file/d/{}/preview'
 
 CMD_SLEEP_TIME = 2
+COMMUNICATION_SLEEP_TIME = 5
 IO_SLEEP_TIME = 1
 RCLONE_ART_SLEEP_TIME = 300
 REMOTE_CRON_TIMESTAMP_SLEEP_TIME = 1800
@@ -208,6 +209,11 @@ rclone_art_lock = asyncio.Lock()
 remote_cron_timestamp_lock = asyncio.Lock()
 playtest_lock = asyncio.Lock()
 art_lock = asyncio.Lock()
+
+
+class CommunicationError(Exception):
+    """ Communication error.
+    """
 
 
 class DiscordError(Exception):
@@ -1245,13 +1251,30 @@ class MyClient(discord.Client):  # pylint: disable=R0902
     general_channels = {}
 
 
+    async def get_all_channels_safe(self):
+        """ Safe method to get all Discord channels.
+        """
+        channels = [c for c in self.get_all_channels()]
+        if not channels:
+            await asyncio.sleep(COMMUNICATION_SLEEP_TIME)
+            channels = [c for c in self.get_all_channels()]
+            if not channels:
+                message = 'No channels obtained from Discord'
+                logging.error(message)
+                create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
+                raise CommunicationError(message)
+
+        return channels
+
+
     async def on_ready(self):
         """ Invoked when the client is ready.
         """
         logging.info('Logged in as %s (%s)', self.user.name, self.user.id)
+        all_channels = await self.get_all_channels_safe()
         try:
             self.archive_category = self.get_channel(
-                [c for c in self.get_all_channels()
+                [c for c in all_channels
                  if str(c.type) == 'category' and
                  c.name == ARCHIVE_CATEGORY][0].id)
         except Exception as exc:
@@ -1261,7 +1284,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
 
         try:
             self.cron_channel = self.get_channel(
-                [c for c in self.get_all_channels()
+                [c for c in all_channels
                  if str(c.type) == 'text' and
                  c.name == CRON_CHANNEL][0].id)
         except Exception as exc:
@@ -1271,7 +1294,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
 
         try:
             self.notifications_channel = self.get_channel(
-                [c for c in self.get_all_channels()
+                [c for c in all_channels
                  if str(c.type) == 'text' and
                  c.name == NOTIFICATIONS_CHANNEL][0].id)
         except Exception as exc:
@@ -1281,7 +1304,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
 
         try:
             self.playtest_channel = self.get_channel(
-                [c for c in self.get_all_channels()
+                [c for c in all_channels
                  if str(c.type) == 'text' and
                  c.name == PLAYTEST_CHANNEL][0].id)
         except Exception as exc:
@@ -1291,7 +1314,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
 
         try:
             self.updates_channel = self.get_channel(
-                [c for c in self.get_all_channels()
+                [c for c in all_channels
                  if str(c.type) == 'text' and
                  c.name == UPDATES_CHANNEL][0].id)
         except Exception as exc:
@@ -1317,7 +1340,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
         categories = {}
         channels = {}
         general_channels = {}
-        for channel in self.get_all_channels():
+        all_channels = await self.get_all_channels_safe()
+        for channel in all_channels:
             if str(channel.type) == 'category':
                 if channel.name in GENERAL_CATEGORIES:
                     continue
@@ -1460,8 +1484,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                                 [c for c in data.get('channels', [])
                                  if len(c) == 3 and c[0] == 'add']
                             )
-                        if (CHANNEL_LIMIT - len(list(self.get_all_channels()))
-                                < new_slots):
+                        all_channels = await self.get_all_channels_safe()
+                        if CHANNEL_LIMIT - len(all_channels) < new_slots:
                             raise DiscordError(
                                 'No free slots to create {} new channels'
                                 .format(new_slots))
@@ -1557,7 +1581,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                                       .format(change))
 
                 if change[0] == 'add':
-                    if CHANNEL_LIMIT - len(list(self.get_all_channels())) <= 0:
+                    all_channels = await self.get_all_channels_safe()
+                    if CHANNEL_LIMIT - len(all_channels) <= 0:
                         raise DiscordError(
                             'No free slots to create a new category "{}"'
                             .format(change[1]))
@@ -1636,7 +1661,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                         raise DiscordError('Category "{}" not found'.format(
                             change[1][1]))
 
-                    if CHANNEL_LIMIT - len(list(self.get_all_channels())) <= 0:
+                    all_channels = await self.get_all_channels_safe()
+                    if CHANNEL_LIMIT - len(all_channels) <= 0:
                         raise DiscordError(
                             'No free slots to create a new channel "{}"'
                             .format(change[1][0]))
@@ -1802,8 +1828,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
 
                     if (card[lotr.CARD_DISCORD_CATEGORY]
                             not in self.general_channels):
-                        if (CHANNEL_LIMIT - len(list(self.get_all_channels()))
-                                <= 0):
+                        all_channels = await self.get_all_channels_safe()
+                        if CHANNEL_LIMIT - len(all_channels) <= 0:
                             message = (
                                 'No free slots to create a new channel '
                                 '"general" in category "{}"'
@@ -1908,8 +1934,8 @@ The card has been updated:
 
                     if (card[lotr.CARD_DISCORD_CATEGORY]
                             not in self.general_channels):
-                        if (CHANNEL_LIMIT - len(list(self.get_all_channels()))
-                                <= 0):
+                        all_channels = await self.get_all_channels_safe()
+                        if CHANNEL_LIMIT - len(all_channels) <= 0:
                             logging.warning(
                                 'No free slots to create a new channel '
                                 '"general" in category "%s"',
@@ -1948,7 +1974,8 @@ Card "{}" has been updated:
 
 
     async def _check_free_slots(self):
-        slots = CHANNEL_LIMIT - len(list(self.get_all_channels()))
+        all_channels = await self.get_all_channels_safe()
+        slots = CHANNEL_LIMIT - len(all_channels)
         if slots < 5:
             logging.warning('Only %s channel slots remain', slots)
             message = 'only {} channel slots remain'.format(slots)
@@ -2625,7 +2652,8 @@ Targets removed.
             await message.channel.send('please specify the quest name')
         elif command.lower() == 'channels':
             try:
-                num = len(list(self.get_all_channels()))
+                all_channels = await self.get_all_channels_safe()
+                num = len(all_channels)
                 res = 'There are {} channels and {} free slots'.format(
                     num, CHANNEL_LIMIT - num)
             except Exception as exc:
