@@ -1,4 +1,4 @@
-""" Collect various statistics from Hall of Beorn.
+""" Collect various data from Hall of Beorn.
 """
 import codecs
 from collections import Counter
@@ -7,6 +7,7 @@ import json
 import os
 import re
 import time
+import uuid
 
 import requests
 import unidecode
@@ -53,6 +54,8 @@ def filter_data(data):
                                   'Player Side Quest', 'Contract')
             and c['pack_name'] not in (
                 'Two-Player Limited Edition Starter', 'Revised Core Set',
+                'Dwarves of Durin', 'Elves of Lórien', 'Defenders of Gondor',
+                'Riders of Rohan',
                 'The Massing at Osgiliath', 'The Battle of Lake-town',
                 'The Stone of Erech', 'Fog on the Barrow-downs',
                 'The Old Forest', 'Murder at the Prancing Pony',
@@ -75,10 +78,10 @@ def collect_traits(data):
     """
     data = filter_data(data)
     text = [(c['text'].replace('~', '')
-             .replace('[leadership]', 'Leadership')
-             .replace('[lore]', 'Lore')
-             .replace('[spirit]', 'Spirit')
-             .replace('[tactics]', 'Tactics')
+             .replace('[leadership]', '***')
+             .replace('[lore]', '***')
+             .replace('[spirit]', '***')
+             .replace('[tactics]', '***')
              .replace(c['name'], '***')
              .replace(unidecode.unidecode(c['name']), '***')
              .replace('Ranger of the North', '***')
@@ -199,8 +202,8 @@ def collect_keywords(data):
             writer.writerow(csv_row)
 
 
-def main():
-    """ Main function.
+def collect_stat():
+    """ Collect traits and keywords statistics from Hall of Beorn.
     """
     data = get_data()
     collect_traits(data)
@@ -208,5 +211,68 @@ def main():
     print('Done')
 
 
+def get_ringsdb_csv(pack_name, pack_code):
+    """ Get Hall of Beorn data and prepare a csv file for RingsDB.
+    """
+    data = get_data()
+    data = [c for c in data if c['pack_name'] == pack_name]
+    file_path = os.path.join(OUTPUT_PATH, '{}.csv'.format(pack_name))
+    with open(file_path, 'w', newline='', encoding='utf-8') as obj:
+        obj.write(codecs.BOM_UTF8.decode('utf-8'))
+        fieldnames = ['pack', 'type', 'sphere', 'position', 'code', 'name',
+                      'traits', 'text', 'flavor', 'isUnique', 'cost', 'threat',
+                      'willpower', 'attack', 'defense', 'health', 'victory',
+                      'quest', 'quantity', 'deckLimit', 'illustrator',
+                      'octgnid', 'hasErrata']
+        writer = csv.DictWriter(obj, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in data:
+            if row['type_name'] in ('Contract', 'Player Objective'):
+                type_name = 'Other'
+            elif (row['type_name'] == 'Treasure' or
+                  row.get('subtype_code') in ('Boon', 'Burden')):
+                type_name = 'Campaign'
+            else:
+                type_name = row['type_name']
+
+            if (row['type_name'] in ('Contract', 'Player Objective',
+                                     'Treasure') or
+                    row.get('subtype_code') in ('Boon', 'Burden')):
+                sphere_name = 'Neutral'
+            else:
+                sphere_name = row.get('sphere_name') or 'Neutral'
+
+            csv_row = {
+                'pack': row['pack_name'],
+                'type': type_name,
+                'sphere': sphere_name,
+                'position': row['position'],
+                'code': '{}{}'.format(pack_code,
+                                      str(int(row['position'])).zfill(3)),
+                'name': row['name'].replace('’', "'"),
+                'traits': row.get('traits', ''),
+                'text': row.get('text', ''),
+                'flavor': row.get('flavor', ''),
+                'isUnique': row.get('is_unique') and '1' or '',
+                'cost': row.get('cost', ''),
+                'threat': row.get('threat', ''),
+                'willpower': row.get('willpower', ''),
+                'attack': row.get('attack', ''),
+                'defense': row.get('defense', ''),
+                'health': row.get('health', ''),
+                'victory': row.get('victory', ''),
+                'quest': row.get('quest_points', ''),
+                'quantity': row.get('quantity', ''),
+                'deckLimit': row.get('deck_limit', ''),
+                'illustrator': row.get('illustrator', ''),
+                'octgnid': row.get('', uuid.uuid4()),
+                'hasErrata': row.get('has_errata') and '1' or ''
+                }
+            writer.writerow(csv_row)
+
+    print('Done')
+
+
 if __name__ == '__main__':
-    main()
+    collect_stat()
+    # get_ringsdb_csv('Dwarves of Durin', '31')
