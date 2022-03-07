@@ -5057,11 +5057,18 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                     fix_linebreaks=False)
                 flavor = '{}\n{}'.format(flavor, flavor_back)
 
+            position = (int(row[CARD_NUMBER])
+                        if is_positive_or_zero_int(row[CARD_NUMBER]) else 0)
+            position = (row[CARD_PRINTED_NUMBER]
+                        if (row[CARD_PRINTED_NUMBER] is not None and
+                            is_positive_or_zero_int(row[CARD_PRINTED_NUMBER]))
+                        else position)
+
             csv_row = {
                 'pack': set_name,
                 'type': card_type,
                 'sphere': sphere,
-                'position': _handle_int(row[CARD_NUMBER]),
+                'position': position,
                 'code': _ringsdb_code(row),
                 'name': row[CARD_NAME].replace('’', "'"),
                 'traits': row[CARD_TRAITS],
@@ -5408,14 +5415,13 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
         traits = _extract_traits(translated_row.get(CARD_TRAITS))
         traits_original = _extract_traits(row.get(CARD_TRAITS))
 
-        card_number = (int(row[CARD_NUMBER])
-                       if is_positive_or_zero_int(row[CARD_NUMBER]) else 0)
-        code = '{}{}'.format(row[CARD_SET_RINGSDB_CODE],
-                             str(card_number).zfill(3))
+        code = _ringsdb_code(row)
+        position = (int(row[CARD_NUMBER])
+                    if is_positive_or_zero_int(row[CARD_NUMBER]) else 0)
         position = (row[CARD_PRINTED_NUMBER]
-                    if row[CARD_PRINTED_NUMBER] is not None and
-                    'Promo' in extract_flags(row[CARD_FLAGS])
-                    else card_number)
+                    if (row[CARD_PRINTED_NUMBER] is not None and
+                        is_positive_or_zero_int(row[CARD_PRINTED_NUMBER]))
+                    else position)
 
         encounter_set = ((row[CARD_ENCOUNTER_SET] or '')
                          if card_type in CARD_TYPES_ENCOUNTER_SET
