@@ -44,6 +44,8 @@ RCLONE_MOVE_CLOUD_ART_CMD = \
     "rclone move 'ALePCardImages:/{}/{}' 'ALePCardImages:/{}/'"
 RCLONE_RENDERED_FOLDER_CMD = "rclone lsjson 'ALePRenderedImages:/{}/'"
 REMOTE_CRON_TIMESTAMP_CMD = './remote_cron_timestamp.sh "{}"'
+RESTART_BOT_CMD = './restart_discord_bot.sh'
+RESTART_CRON_CMD = './restart_run_before_se_service.sh'
 
 DIRECT_URL_REGEX = r'itemJson: \[[^,]+,"[^"]+","([^"]+)"'
 PREVIEW_URL = 'https://drive.google.com/file/d/{}/preview'
@@ -116,6 +118,8 @@ List of **!cron** commands:
 
 **!cron errors** - display all errors from the latest cron run
 **!cron log** - display a full execution log of the latest cron run
+**!cron restart bot** - restart the Discord bot
+**!cron restart cron** - restart the cron process
 **!cron trigger** - trigger reprocessing of all sheets in the next cron run
 **!cron help** - display this help message
 """,
@@ -361,6 +365,15 @@ async def run_shell(cmd):
     stdout = stdout.decode('utf-8').strip()
     stderr = stderr.decode('utf-8').strip()
     return (stdout, stderr)
+
+
+async def run_and_forget_shell(cmd):
+    """ Run a shell command.
+    """
+    await asyncio.create_subprocess_shell(
+        cmd,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE)
 
 
 def split_result(value):
@@ -911,6 +924,18 @@ def delete_sheet_checksums():
     """ Delete existing spredsheet checksums.
     """
     os.remove(lotr.SHEETS_JSON_PATH)
+
+
+async def restart_bot():
+    """ Restart the Discord bot.
+    """
+    await run_and_forget_shell(RESTART_BOT_CMD)
+
+
+async def restart_cron():
+    """ Restart the cron process.
+    """
+    await run_and_forget_shell(RESTART_CRON_CMD)
 
 
 async def read_deck_xml(path):
@@ -2067,6 +2092,25 @@ Card "{}" has been updated:
             await self._send_channel(message.channel, res)
         elif command.lower() == 'trigger':
             delete_sheet_checksums()
+            await message.channel.send('done')
+        elif command.lower() == 'restart bot':
+            await message.channel.send('restarting...')
+            try:
+                await restart_bot()
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+        elif command.lower() == 'restart cron':
+            try:
+                await restart_cron()
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
             await message.channel.send('done')
         else:
             res = HELP['cron']
