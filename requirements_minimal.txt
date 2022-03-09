@@ -1,5 +1,0 @@
-paramiko
-pylint
-pyyaml
-requests
-urllib3

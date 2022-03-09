@@ -114,7 +114,7 @@ for details).
 
   - [skip this step, if you don't use VirtualEnv] `virtualenv env --python=python3.9` (replace `3.9` with your actual Python version)
   - [skip this step, if you don't use VirtualEnv] `env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
-  - `pip install -r requirements.txt` (if you don't plan to generate images - for example, for **Cron Job Pipeline** below - you may run `pip install -r requirements_minimal.txt` instead to skip unneeded dependencies)
+  - `pip install -r requirements.txt`
 
     If for debugging purposes you plan to use Jupyter notebook, additionally run:
 

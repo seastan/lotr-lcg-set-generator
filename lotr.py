@@ -22,20 +22,19 @@ import uuid
 import xml.etree.ElementTree as ET
 import zipfile
 
+import paramiko
 import requests
+from scp import SCPClient
 import unidecode
 import urllib3
 import yaml
 
 try:
-    import paramiko
     import png
     import py7zr
     from reportlab.lib.pagesizes import landscape, letter, A4
     from reportlab.lib.units import inch
     from reportlab.pdfgen.canvas import Canvas
-    from scp import SCPClient
-
     PY7ZR_FILTERS = [{'id': py7zr.FILTER_LZMA2,
                       'preset': 9 | py7zr.PRESET_EXTREME}]
 except Exception:  # pylint: disable=W0703
