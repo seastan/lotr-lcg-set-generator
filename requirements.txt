@@ -1,5 +1,4 @@
 paramiko
-pillow
 py7zr
 pylint
 pypng
