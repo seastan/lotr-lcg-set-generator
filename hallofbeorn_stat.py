@@ -227,6 +227,10 @@ def get_ringsdb_csv(pack_name, pack_code):
         writer = csv.DictWriter(obj, fieldnames=fieldnames)
         writer.writeheader()
         for row in data:
+            for key, value in row.items():
+                if isinstance(value, str):
+                    row[key] = value.replace('\r\n', '\n')
+
             if row['type_name'] in ('Contract', 'Player Objective'):
                 type_name = 'Other'
             elif (row['type_name'] == 'Treasure' or
@@ -265,7 +269,7 @@ def get_ringsdb_csv(pack_name, pack_code):
                 'quantity': row.get('quantity', ''),
                 'deckLimit': row.get('deck_limit', ''),
                 'illustrator': row.get('illustrator', ''),
-                'octgnid': row.get('', uuid.uuid4()),
+                'octgnid': row.get('octgnid', '') or uuid.uuid4(),
                 'hasErrata': row.get('has_errata') and '1' or ''
                 }
             writer.writerow(csv_row)
