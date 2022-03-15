@@ -1,0 +1,52 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<style>
+@font-face {
+    font-family: 'Vafthrudnir';
+    src: url('Fonts/VAFTHRUD.TTF');
+}
+@font-face {
+    font-family: 'Lord of the Headers';
+    src: url('Fonts/LOTRHeader.ttf');
+}
+@font-face {
+    font-family: 'Symbols';
+    src: url('Fonts/LRLsymbols.ttf');
+}
+@font-face {
+    font-family: 'Times New Roman';
+    src: url('Fonts/times.ttf');
+}
+@font-face {
+    font-family: 'Vafthaurdir';
+    src: url('Fonts/Vafthaurdir.ttf');
+}
+</style>
+<script>
+var min_size = 5;
+
+function correct_size(id) {
+    var container = document.getElementById('text1');
+    var size = container.style.fontSize.replace('px', '');
+    while (container.scrollHeight > container.clientHeight) {
+        size -= 1;
+        if (size < min_size) {
+            break;
+        }
+        container.style.fontSize = size + 'px';
+    }
+    container.style.overflowY = 'visible';
+}
+
+window.onload = function onload_callback() {
+    correct_size('text1');
+};
+</script>
+</head>
+<body style="margin: 0; padding: 0; background-image: url('test.jpg');">
+<div id="text1" style="position: absolute; top: 50px; left: 100; width: 100; height: 150; overflow-x: visible; overflow-y: scroll; font-family: Vafthrudnir; font-size: 14px;">
+<span style="font-size: 1em;">Some </span><span style="font-size: 0.8em;">text text text text text text text</span>
+</div>
+</body>
+</html>
