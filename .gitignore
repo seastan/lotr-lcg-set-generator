@@ -16,6 +16,8 @@ internet_state
 mails
 Output/*/*/*
 Output/Scripts/*.csv
+Renderer/Fonts/*.ttf
+Renderer/Fonts/*.TTF
 setEons/*.xml
 setEons/*.xml.old
 setOCTGN/*.xml

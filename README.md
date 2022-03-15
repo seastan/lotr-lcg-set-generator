@@ -267,14 +267,20 @@ Additional steps:
     Replace `<path>` with the absolute path to the root folder.  `cron.log` may be located either in the root folder
     or in some external folder (if you already have other crons).  Set `<backup folder>` to your actual backup folder.
 
-6. The pipeline relies on an external service to send emails and it's your responsibility to implement it :)
+6. Copy all `ttf` files from `lotr-lcg-se-plugin/TheLordOfTheRingsLCG-B/resources/TheLordOfTheRingsLCG/font/` folder
+including `VAFTHRUD.TTF` to `lotr-lcg-set-generator/Renderer/Fonts` folder (`LRLfont.ttf` and `LRLwindlass.ttf`
+are not needed and may be deleted).  Find a `ttf` file for the `Times New Roman` font (you may find it in
+`c:\Windows\Fonts` folder on a Windows machine or download from Internet) and put it in
+`lotr-lcg-set-generator/Renderer/Fonts` folder as `times.ttf`.
+
+7. The pipeline relies on an external service to send emails and it's your responsibility to implement it :)
 
     In the root folder either create `mails` subfolder or a symlink to some external folder.  That external service
     should expect in this folder JSON files in the following format:
 
     {"subject": "`<email subject>`", "body": "`<email body>`", "html": `<true (html) or false (text)>`}
 
-7. Optionally, you may introduce an Internet sensor to be notified when the Internet is not available (so the scripts
+8. Optionally, you may introduce an Internet sensor to be notified when the Internet is not available (so the scripts
 that depend on Internet connectivity won't spam with redundant error messages).  If in the root folder there is a file
 called `internet_state` (it may be a symlink) and it contains `off` then the scripts will assume that there is no
 Internet connectivity.
