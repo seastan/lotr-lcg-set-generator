@@ -11,7 +11,7 @@ If (FileExist("makeCards_FINISHED")) {
 Timeout := 5400000
 StartTime := A_TickCount
 
-WriteLog(LogPath, "opening Strange Eons project")
+WriteLog(LogPath, "opening the project")
 Run setGenerator.seproject
 Sleep 15000
 
@@ -76,7 +76,7 @@ While (!FileExist("makeCards_FINISHED")) {
 }
 Sleep 5000
 
-WriteLog(LogPath, "closing the script and Strange Eons")
+WriteLog(LogPath, "closing the script and the project")
 Send ^{F4}
 Sleep 1000
 Send !{F4}

@@ -11,17 +11,17 @@ if %retry%==2 (
 set /a retry=%retry%+1
 echo %date_correct% %time% retry %retry%
 
-echo %date_correct% %time% looking for running Strange Eons
+echo %date_correct% %time% looking for the running application
 wmic process where "commandline like '%%strangeeons.exe%%' and not commandline like '%%wmic%%'" delete
 
 :: tasklist /fi "ImageName eq strangeeons.exe" /fo csv 2>NUL | find /I "strangeeons.exe">NUL
 :: if "%ERRORLEVEL%"=="0" (
-::   echo %date_correct% %time% ERROR Strange Eons is already running
+::   echo %date_correct% %time% ERROR The application is already running
 ::   exit /b
 :: )
 
 echo %date_correct% %time% looking for running autohotkey scripts
-wmic process where "commandline like '%%strange_eons.ahk%%' and not commandline like '%%wmic%%'" delete
+wmic process where "commandline like '%%eons.ahk%%' and not commandline like '%%wmic%%'" delete
 
 echo %date_correct% %time% started run_before_se_remote.py
 python run_before_se_remote.py
@@ -33,20 +33,20 @@ if exist runBeforeSE_STARTED (
 )
 
 if not exist setGenerator_CREATED (
-  echo %date_correct% %time% No Strange Eons project created
+  echo %date_correct% %time% No project created
   goto after
 )
 
-echo %date_correct% %time% started strange_eons.ahk
-call strange_eons.ahk
-echo %date_correct% %time% finished strange_eons.ahk
+echo %date_correct% %time% started eons.ahk
+call eons.ahk
+echo %date_correct% %time% finished eons.ahk
 
 if not exist makeCards_FINISHED (
   echo %date_correct% %time% ERROR makeCards script didn't finish successfully
   goto start
 )
 
-echo %date_correct% %time% waiting until Strange Eons is closed
+echo %date_correct% %time% waiting until the application is closed
 :loop
 timeout /t 10
 tasklist /fi "ImageName eq strangeeons.exe" /fo csv 2>NUL | find /I "strangeeons.exe">NUL

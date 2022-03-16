@@ -74,22 +74,22 @@ completely, you will need to download updates to that folder manually.
     If you plan to automatically upload images to Google Drive (see the configuration below),
     go to `Preferences` -> `Settings` and uncheck `Show warning when you remove items from a shared folder`.
 
-5. Install Strange Eons and the custom plugin.  Follow these steps:
+5. Install the design tool and the custom plugin.  Follow these steps:
 
   - Clone https://github.com/seastan/lotr-lcg-se-plugin to a new local folder.  Go to this folder.
   - Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir, extract the archive and
     put `VAFTHRUD.TTF` into `TheLordOfTheRingsLCG-B/resources/TheLordOfTheRingsLCG/font/` folder.
   - Run `setup.bat` (Windows) or `setup.sh` (Mac/Linux) to generate the `.seext` files.
   - Make sure that `Times New Roman` font is installed.  If you have Mac or Linux, it may be not installed by default.
-  - Install Strange Eons, `Build 3970`.  Please note that the latest Strange Eons version from the site may not work as expected.  Use the following links:
+  - Install the design tool, `Build 3970`.  Please note that the latest version from the site may not work as expected.  Use the following links:
     - Windows (64-bit): https://drive.google.com/file/d/19vuP5QFKrjuilJbuFh10NPIn6i_FZZI9/view?usp=sharing
     - Windows (32-bit): https://drive.google.com/file/d/1lZ6h7OQBvZdh2hOlAiZMYivzeooTqWhW/view?usp=sharing
     - Mac: https://drive.google.com/file/d/1TkWEjB71fdxxq_gHzhI-WfRXaRrJcGZg/view?usp=sharing
     - Linux: https://drive.google.com/file/d/1ZC-uSOVKqU7XGZUip3I6OvUT7mPOLLoN/view?usp=sharing
-  - Run Strange Eons and install `The Lord of the Rings LCG` plugin.
+  - Run the design tool and install `The Lord of the Rings LCG` plugin.
   - Click `Edit` -> `Preferences` -> `Language`.  Make sure that "English-United States" is chosen for both `Game Language` and `User Interface Language`.
     Click `Drawing`.  Make sure that `Text Fitting Methods` is set to `Reduce Line Spacing and Shrink Text`.  Don't change any other preferences.
-  - Go to the plugins folder (run Strange Eons, then click `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`), close Strange Eons and
+  - Go to the plugins folder (run the design tool, then click `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`), close the program and
     delete or move all files, which names start with `TheLordOfTheRingsLCG`.  Instead of them, copy all generated `.seext` files.
 
 6. Install the latest GIMP version from https://www.gimp.org/downloads/.
@@ -172,11 +172,11 @@ Also, see `configuration.release.yaml` for another configuration example.
 To run the workflow, go to the root folder of this repo and follow these steps:
 
 - [skip this step, if you don't use VirtualEnv] `env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux).
-- Make sure that Strange Eons is closed.
+- Make sure that the design tool is closed.
 - `python run_before_se.py`.
 - Pay attention to possible errors in the script output.
 - Open `setGenerator.seproject` and run `makeCards` script by double-clicking it.
-  Once completed, close Strange Eons and wait until it finished packing the project.
+  Once completed, close the program and wait until it finished packing the project.
 - `python run_after_se.py`.
 - Pay attention to possible errors in the script output.
 
@@ -192,11 +192,11 @@ To run the workflow as one script, run:
 
 - `run_all.bat`
 
-Please note, this script is for the Windows platform only.  It uses AutoHotkey to emulate Strange Eons UI commands
-and is not 100% reliable (it may be stuck on the Strange Eons step).  To minimize the risks:
+Please note, this script is for the Windows platform only.  It uses AutoHotkey to emulate UI commands
+and is not 100% reliable (it may be stuck on the manual step).  To minimize the risks:
 
-- Don't leave Strange Eons open.
-- Make sure the Strange Eons window was maximized when you closed it.
+- Don't leave the design tool open.
+- Make sure the design tool window was maximized when you closed it.
 - Make sure the screen is not locked (and doesn't lock automatically).
 - If the script started, don't touch the keyboard or mouse.
 

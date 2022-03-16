@@ -1,4 +1,4 @@
-""" LotR ALeP workflow (Part 2, after Strange Eons).
+""" LotR ALeP workflow (Part 2).
 """
 import logging
 import os

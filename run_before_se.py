@@ -1,4 +1,4 @@
-""" LotR ALeP workflow (Part 1, before Strange Eons).
+""" LotR ALeP workflow (Part 1).
 """
 import logging
 import os
@@ -63,7 +63,7 @@ def main(conf=None):  # pylint: disable=R0912,R0915
         lotr.verify_images(conf)
         lotr.reset_project_folders(conf)
 
-    strange_eons = False
+    eons = False
     changes = False
     for set_id, set_name in sets:
         scratch = set_id in lotr.FOUND_SCRATCH_SETS
@@ -99,7 +99,7 @@ def main(conf=None):  # pylint: disable=R0912,R0915
             if scratch and lang != 'English':
                 continue
 
-            strange_eons = True
+            eons = True
             lotr.generate_xml(conf, set_id, set_name, lang)
             lotr.update_xml(conf, set_id, set_name, lang)
             new_hash, old_hash = lotr.calculate_hashes(set_id, set_name, lang)
@@ -123,12 +123,11 @@ def main(conf=None):  # pylint: disable=R0912,R0915
         if os.path.exists(lotr.PIPELINE_STARTED_PATH):
             os.remove(lotr.PIPELINE_STARTED_PATH)
 
-        if strange_eons:
+        if eons:
             logging.info('No changes since the last run, skipping creating '
-                         'Strange Eons project')
+                         'the project')
         else:
-            logging.info('No Strange Eons outputs, skipping creating Strange '
-                         'Eons project')
+            logging.info('No project outputs, skipping creating the project')
 
     if os.path.exists(lotr.RUN_BEFORE_SE_STARTED_PATH):
         os.remove(lotr.RUN_BEFORE_SE_STARTED_PATH)

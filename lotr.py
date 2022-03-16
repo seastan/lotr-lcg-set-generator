@@ -1041,7 +1041,7 @@ def _clear_modified_images(folder, skip_ids):
 
 
 def _update_zip_filename(filename):
-    """ Update filename found in the Strange Eons project archive.
+    """ Update filename found in the project archive.
     """
     output_filename = os.path.split(filename)[-1]
     output_filename = output_filename.encode('ascii', errors='replace'
@@ -4044,7 +4044,7 @@ def _copy_octgn_xml(set_id, set_name):
 
 
 def _backup_previous_xml(conf, set_id, lang):
-    """ Backup a previous Strange Eons xml file.
+    """ Backup a previous xml file.
     """
     new_path = os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id, lang))
     old_path = os.path.join(SET_EONS_PATH, '{}.{}.xml.old'.format(set_id,
@@ -6119,7 +6119,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
 
 
 def _get_xml_property_value(row, name, card_type):
-    """ Get Strange Eons xml property value for the given column name.
+    """ Get an xml property value for the given column name.
     """
     value = row[name]
     if value is None:
@@ -6141,7 +6141,7 @@ def _get_xml_property_value(row, name, card_type):
 
 
 def _add_xml_properties(parent, properties, tab):
-    """ Append property elements to Strange Eons xml.
+    """ Append property elements to the xml.
     """
     parent.text = '\n' + tab + '  '
     for i, (name, value) in enumerate(properties):
@@ -6181,10 +6181,9 @@ def translated_data(set_id, lang):
 
 
 def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R0915
-    """ Generate xml file for Strange Eons.
+    """ Generate the xml file.
     """
-    logging.info('[%s, %s] Generating xml file for Strange Eons...',
-                 set_name, lang)
+    logging.info('[%s, %s] Generating the xml file...', set_name, lang)
     timestamp = time.time()
 
     _backup_previous_xml(conf, set_id, lang)
@@ -6295,7 +6294,7 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
         res = ET.tostring(root, encoding='utf-8').decode('utf-8')
         obj.write(res)
 
-    logging.info('[%s, %s] ...Generating xml file for Strange Eons (%ss)',
+    logging.info('[%s, %s] ...Generating the xml file (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
@@ -6364,7 +6363,7 @@ def _collect_custom_images(image_path):
 
 
 def _set_outputs(conf, lang, root):
-    """ Set required outputs for Strange Eons.
+    """ Set required outputs.
     """
     if (conf['nobleed_300'][lang]
             or 'drivethrucards' in conf['outputs'][lang]
@@ -6395,10 +6394,10 @@ def _get_property(parent, name):
 
 
 def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R0915
-    """ Update the Strange Eons xml file with additional data.
+    """ Update the xml file with additional data.
     """
-    logging.info('[%s, %s] Updating the Strange Eons xml file with additional '
-                 'data...', set_name, lang)
+    logging.info('[%s, %s] Updating the xml file with additional data...',
+                 set_name, lang)
     timestamp = time.time()
 
     artwork_path = os.path.join(conf['artwork_path'], set_id)
@@ -6644,16 +6643,15 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                 root[0].remove(card)
 
     tree.write(xml_path)
-    logging.info('[%s, %s] ...Updating the Strange Eons xml file with '
-                 'additional data (%ss)',
-                 set_name, lang, round(time.time() - timestamp, 3))
+    logging.info('[%s, %s] ...Updating the xml file with additional data '
+                 '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
 def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0914
-    """ Update the Strange Eons xml file with hashes and skip flags.
+    """ Update the xml file with hashes and skip flags.
     """
-    logging.info('[%s, %s] Updating the Strange Eons xml file with hashes and '
-                 'skip flags...', set_name, lang)
+    logging.info('[%s, %s] Updating the xml file with hashes and skip '
+                 'flags...', set_name, lang)
     timestamp = time.time()
 
     new_path = os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id, lang))
@@ -6706,9 +6704,9 @@ def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0914
 
     tree.write(new_path)
 
-    logging.info('[%s, %s] ...Updating the Strange Eons xml file with hashes '
-                 'and skip flags (%ss)',
-                 set_name, lang, round(time.time() - timestamp, 3))
+    logging.info('[%s, %s] ...Updating the xml file with hashes and skip '
+                 'flags (%ss)', set_name, lang,
+                 round(time.time() - timestamp, 3))
     return (new_file_hash, old_file_hash)
 
 
@@ -6817,24 +6815,23 @@ def copy_raw_images(conf, set_id, set_name, lang):
 
 
 def copy_xml(set_id, set_name, lang):
-    """ Copy the Strange Eons xml file into the project.
+    """ Copy the xml file into the project.
     """
-    logging.info('[%s, %s] Copying the Strange Eons xml file into '
-                 'the project...', set_name, lang)
+    logging.info('[%s, %s] Copying the xml file into the project...',
+                 set_name, lang)
     timestamp = time.time()
 
     shutil.copyfile(os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id,
                                                                    lang)),
                     os.path.join(XML_PATH, '{}.{}.xml'.format(set_id, lang)))
-    logging.info('[%s, %s] ...Copying the Strange Eons xml file into the '
-                 'project (%ss)',
+    logging.info('[%s, %s] ...Copying the xml file into the project (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
 def create_project():
-    """ Create a Strange Eons project archive.
+    """ Create a project archive.
     """
-    logging.info('Creating a Strange Eons project archive...')
+    logging.info('Creating a project archive...')
     timestamp = time.time()
 
     if os.path.exists(MAKECARDS_FINISHED_PATH):
@@ -6845,7 +6842,7 @@ def create_project():
             for filename in filenames:
                 zip_obj.write(os.path.join(root, filename))
 
-    logging.info('...Creating a Strange Eons project archive (%ss)',
+    logging.info('...Creating a project archive (%ss)',
                  round(time.time() - timestamp, 3))
 
 
@@ -6868,7 +6865,7 @@ def get_skip_info(set_id, lang):
 
 
 def get_actual_sets():
-    """ Get actual sets from the Strange Eons project.
+    """ Get actual sets from the project.
     """
     res = set()
     with zipfile.ZipFile(PROJECT_PATH) as zip_obj:

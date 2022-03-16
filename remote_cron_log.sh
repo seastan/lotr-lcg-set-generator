@@ -27,7 +27,7 @@ if [ ! "$BEFORE_DONE" ]; then
   echo "$ERRORS"
   exit
 fi
-SKIPPING_SE=`echo "$BEFORE_LOG" | grep -a "No changes since the last run, skipping creating Strange Eons project"`
+SKIPPING_SE=`echo "$BEFORE_LOG" | grep -a "No changes since the last run, skipping creating the project"`
 if [ "$SKIPPING_SE" ]; then
   echo "21 No changes since the last run"
   echo "$ERRORS"

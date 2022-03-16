@@ -1,5 +1,5 @@
 # pylint: disable=W0703,C0301
-""" Cron for LotR ALeP workflow (Part 1, before Strange Eons).
+""" Cron for LotR ALeP workflow (Part 1).
 
 NOTE: It's not run as a cron anymore, see `run_before_se_service.py`.
 """
