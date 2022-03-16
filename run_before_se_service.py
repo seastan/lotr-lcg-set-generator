@@ -1,4 +1,4 @@
-""" Service for LotR ALeP workflow (Part 1).
+""" Service for LotR workflow (Part 1).
 
 A wrapper around `run_before_se_cron.py`.
 """

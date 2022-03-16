@@ -1,5 +1,5 @@
 # pylint: disable=W0703,C0301
-""" Cron for LotR ALeP workflow (Part 1).
+""" Cron for LotR workflow (Part 1).
 
 NOTE: It's not run as a cron anymore, see `run_before_se_service.py`.
 """
@@ -27,9 +27,9 @@ MAIL_COUNTER_PATH = 'run_before_se.cnt'
 MAILS_PATH = 'mails'
 SANITY_CHECK_PATH = 'sanity_check.txt'
 
-ERROR_SUBJECT_TEMPLATE = 'LotR ALeP Cron ERROR: {}'
-SANITY_CHECK_SUBJECT_TEMPLATE = 'LotR ALeP Cron CHECK: {}'
-WARNING_SUBJECT_TEMPLATE = 'LotR ALeP Cron WARNING: {}'
+ERROR_SUBJECT_TEMPLATE = 'LotR Cron ERROR: {}'
+SANITY_CHECK_SUBJECT_TEMPLATE = 'LotR Cron CHECK: {}'
+WARNING_SUBJECT_TEMPLATE = 'LotR Cron WARNING: {}'
 MAIL_QUOTA = 50
 
 

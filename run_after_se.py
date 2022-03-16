@@ -1,4 +1,4 @@
-""" LotR ALeP workflow (Part 2).
+""" LotR workflow (Part 2).
 """
 import logging
 import os

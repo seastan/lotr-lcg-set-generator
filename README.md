@@ -65,7 +65,6 @@ completely, you will need to download updates to that folder manually.
     custom/
     custom/Do-Not-Read-the-Following.png
     icons/
-    icons/ALeP---Children-of-Eorl.png
     icons/Ambush-at-Erelas.png
     ```
 
@@ -243,11 +242,11 @@ Additional steps:
 
     You will need to set up the following remotes:
 
-  - `ALePCardImages` (points to `A Long-extended Party/CardImages`)
-  - `ALePLinksBackup` (points to `A Long-extended Party/Links Backup`)
-  - `ALePLogs` (points to `A Long-extended Party/Logs`)
-  - `ALePOCTGN` (points to `A Long-extended Party/Playtesting/OCTGN Files`)
-  - `ALePRenderedImages` (points to `A Long-extended Party/RenderedImages`)
+  - `ALePCardImages` (points to `CardImages`)
+  - `ALePLinksBackup` (points to `Links Backup`)
+  - `ALePLogs` (points to `Logs`)
+  - `ALePOCTGN` (points to `Playtesting/OCTGN Files`)
+  - `ALePRenderedImages` (points to `RenderedImages`)
 
 5. Setup crons:
 
@@ -255,13 +254,13 @@ Additional steps:
   - `* * * * *    <path>/check_run_before_se_service.sh >> <path>/cron.log 2>&1`
   - `36 9 * * *   python3 <path>/monitor_remote_pipeline.py >> <path>/cron.log 2>&1`
   - `1-59/2 * * * * flock -xn <path>/mpc_monitor.lock -c 'python3 <path>/mpc_monitor.py > /dev/null' 2>&1`
-  - `7 0 * * *    <path>/rclone_backup.sh "<local A Long-extended Party/Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
+  - `7 0 * * *    <path>/rclone_backup.sh "<local Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
   - `0 8 * * 1    <path>/remind_backup.sh >> <path>/cron.log 2>&1`
   - `5 8 1 * *    <path>/remind_backup_monthly.sh >> <path>/cron.log 2>&1`
   - `5 8 2 * *    <path>/remind_stat_monthly.sh >> <path>/cron.log 2>&1`
   - `*/2 * * * *  <path>/monitor_discord_changes.sh >> <path>/cron.log 2>&1`
   - `0 1 * * *    <path>/monitor_wordpress_token.sh >> <path>/cron.log 2>&1`
-  - `19 8 * * *   <path>/scheduled_backup.sh "<local A Long-extended Party/Links Backup path>" >> <path>/cron.log 2>&1`
+  - `19 8 * * *   <path>/scheduled_backup.sh "<local Links Backup path>" >> <path>/cron.log 2>&1`
   - `7 1 * * *    <path>/configutation_backup.sh "<path to a local configuration backup folder>" >> <path>/cron.log 2>&1`
 
     Replace `<path>` with the absolute path to the root folder.  `cron.log` may be located either in the root folder
@@ -493,7 +492,7 @@ and separate them using an additional empty line.  For example:
 Each rule is a key-value pair, separated by `:`.  For example:
 
 ```
-Prefix: QA1.5-ALeP
+Prefix: QA1.5
 ```
 
 If you want to set a list of values, separate them by `;`.  For example:
@@ -506,7 +505,7 @@ Below is a list of all supported rules:
 
 - `Prefix`: A **mandatory** filename prefix.  It must start with:
   `<either "Q" (normal mode) or "N" (nightmare mode)><two capital letters and/or numbers>.<one or two numbers><end of string, space or dash>`.
-  For example, `Prefix: Q0B.19-Standalone-ALeP` will result in a filename like `Q0B.19-Standalone-ALeP-The-Scouring-of-the-Shire.o8d`.
+  For example, `Prefix: Q0B.19-Standalone` will result in a filename like `Q0B.19-Standalone-The-Scouring-of-the-Shire.o8d`.
 - `Sets`: Additional sets to be included.  For example: `Sets: ALeP - Children of Eorl`.
 - `Encounter Sets`: Additional encounter sets to be included.  For example:
   `Encounter Sets: Journey in the Dark`.
@@ -553,13 +552,13 @@ means one copy of each different enemy.
 A few more examples:
 
 ```
-Prefix: Q0B.19-Standalone-ALeP
+Prefix: Q0B.19-Standalone
 Remove: Type:Campaign
 Special: Trait:Sharkey & Type:Treachery
 Setup: Saruman; Grima; Brandywine Gate; Type:Side Quest; 4 One-feather Shirriff
 Player: Frodo Baggins
 
-Prefix: Q0C.19-Campaign-ALeP
+Prefix: Q0C.19-Campaign
 External XML: https://raw.githubusercontent.com/seastan/Lord-of-the-Rings/master/o8g/Sets/The%20Road%20Darkens/set.xml
 Sets: The Road Darkens
 Encounter Sets: Journey in the Dark

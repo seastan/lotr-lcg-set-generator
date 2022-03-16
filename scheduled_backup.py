@@ -15,7 +15,7 @@ import requests
 
 
 CONF_PATH = 'scheduled_backup.json'
-ERROR_SUBJECT = 'LotR ALeP Links Backup Error'
+ERROR_SUBJECT = 'LotR Links Backup Error'
 MAILS_PATH = 'mails'
 MAX_FILES = 5
 

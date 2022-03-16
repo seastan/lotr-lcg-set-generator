@@ -52,8 +52,6 @@ LOG_PATH = 'mpc_monitor.log'
 MAIL_COUNTER_PATH = 'mpc_monitor.cnt'
 MAILS_PATH = 'mails'
 
-WORDPRESS_URL = 'https://public-api.wordpress.com/wp/v2/sites/alongextendedparty.com/pages/{}'
-
 URL_TIMEOUT = 60
 URL_RETRIES = 1
 URL_SLEEP = 1
@@ -260,7 +258,7 @@ def send_post(session, url, form_data):
 def get_wordpress_content(data):
     """ Get content of WordPress page.
     """
-    url = WORDPRESS_URL.format(data['wordpress_page_id'])
+    url = data['wordpress_url']
     headers = {'Authorization': 'Bearer {}'.format(data['wordpress_token'])}
     for i in range(URL_RETRIES):
         try:
@@ -282,7 +280,7 @@ def get_wordpress_content(data):
 def update_wordpress_content(data, content):
     """ Update content of WordPress page.
     """
-    url = WORDPRESS_URL.format(data['wordpress_page_id'])
+    url = data['wordpress_url']
     headers = {'Authorization': 'Bearer {}'.format(data['wordpress_token']),
                'Content-Type': 'application/json'}
     for i in range(URL_RETRIES):
@@ -614,24 +612,24 @@ Attempting to fix it automatically...
         logging.exception(message)
         body = f"""Do the following:
 (depending on the error, some steps may be already done)
-1. Open https://www.makeplayingcards.com/design/dn_temporary_designes.aspx and login into ALeP account (if needed)
+1. Open https://www.makeplayingcards.com/design/dn_temporary_designes.aspx and login (if needed)
 2. Click Delete near {actual_deck_name} deck
 3. Find {deck_name} Backup deck in the list, click Save As, type "{deck_name}" and click Save
 4. Find {deck_name} deck in the list again, right click on the checkbox and copy its ID (after "chk_")
 5. Construct a URL https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id=<ID>
-6. Open https://wordpress.com/page/alongextendedparty.com/37 and login into ALeP account (if needed)
+6. Open https://wordpress.com, login (if needed), click Pages and open "MakePlayingCards Direct Links"
 7. Update the link to that URL
 """
         create_mail(ERROR_SUBJECT_TEMPLATE.format(message), body)
         discord_message = f"""Attempt to fix deck **{deck_name}** automatically failed!
 Do the following:
 (depending on the error, some steps may be already done)
-1. Open https://www.makeplayingcards.com/design/dn_temporary_designes.aspx and login into ALeP account (if needed)
+1. Open https://www.makeplayingcards.com/design/dn_temporary_designes.aspx and login (if needed)
 2. Click *Delete* near **{actual_deck_name}** deck
 3. Find **{deck_name} Backup** deck in the list, click *Save As*, type "{deck_name}" and click *Save*
 4. Find **{deck_name}** deck in the list again, right click on the checkbox and copy its ID (after "chk_")
 5. Construct a URL https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id=<ID>
-6. Open https://wordpress.com/page/alongextendedparty.com/37 and login into ALeP account (if needed)
+6. Open https://wordpress.com, login (if needed), click Pages and open "MakePlayingCards Direct Links"
 7. Update the link to that URL
 {DISCORD_USERS}"""
         send_discord(discord_message)
@@ -653,7 +651,7 @@ WordPress web-site is already updated."""
                        .format(deck_name, new_deck_id))
             logging.info(message)
             body = f"""Do the following:
-1. Open https://wordpress.com/page/alongextendedparty.com/37 and login into ALeP account (if needed)
+1. Open https://wordpress.com, login (if needed), click Pages and open "MakePlayingCards Direct Links"
 2. Update the link to:
 https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id={new_deck_id}
 """
@@ -661,7 +659,7 @@ https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_fro
             discord_message = f"""Attempt to fix deck **{deck_name}** automatically succeeded!
 At the same time, updating WordPress web-site failed.
 Do the following:
-1. Open https://wordpress.com/page/alongextendedparty.com/37 and login into ALeP account (if needed)
+1. Open https://wordpress.com, login (if needed), click Pages and open "MakePlayingCards Direct Links"
 2. Update the link to:
 https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id={new_deck_id}
 {DISCORD_USERS}"""

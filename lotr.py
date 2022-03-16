@@ -1,6 +1,6 @@
 # pylint: disable=C0302
 # -*- coding: utf8 -*-
-""" Helper functions for LotR ALeP workflow.
+""" Helper functions for LotR workflow.
 """
 import codecs
 from collections import OrderedDict

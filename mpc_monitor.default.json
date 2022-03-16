@@ -1,6 +1,6 @@
 {
     "wordpress_token": "<wordpress token>",
-    "wordpress_page_id": "<wordpress page id>",
+    "wordpress_url": "<wordpress url>",
     "cookies": "<dictionary of cookies>",
     "decks": {
         "<Deck Name 1>": {
