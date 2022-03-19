@@ -163,6 +163,12 @@ namePointSize['Treachery'] = 6.5;
 
 var subtypeRegion = {};
 subtypeRegion['Attachment'] = '146,301,124,20';
+subtypeRegion['Enemy'] = '146,302,124,20';
+subtypeRegion['Event'] = '146,301,124,20';
+subtypeRegion['Objective'] = '146,309,124,20';
+subtypeRegion['Objective Ally'] = '146,309,124,20';
+subtypeRegion['Ship Enemy'] = '146,302,124,20';
+subtypeRegion['Treachery'] = '146,305,124,20';
 
 var hitPointsRegion = {};
 hitPointsRegion['Ally'] = '66,269,58,40';
@@ -539,12 +545,7 @@ function run(progress, target, filename, icons) {
 						card['Threat'] = '-';
 					}
 
-					if ((cardSphere == 'Burden') && (cardType == 'Enemy')) {
-						Console.err.println('\nERROR: ' + cardType + " doesn't support Burden subtype yet.");
-						cardSphere = '';
-						card['Sphere'] = cardSphere;
-					}
-					else if ((cardSphere == 'Nightmare') && (['Encounter Side Quest', 'Objective', 'Ship Enemy'].indexOf(cardType) > -1)) {
+					else if ((cardSphere == 'Nightmare') && (['Encounter Side Quest', 'Objective'].indexOf(cardType) > -1)) {
 						Console.err.println('\nERROR: ' + cardType + " doesn't support Nightmare template yet.");
 						cardSphere = '';
 						card['Sphere'] = cardSphere;
@@ -562,14 +563,18 @@ function run(progress, target, filename, icons) {
 
 					if ((cardType == 'Hero') && (flags.indexOf('Promo') > -1)) {
 						cardType = 'Hero Promo';
-						card['Sphere'] = 'Promo' + card['Sphere'];
+						cardSphere = 'Promo' + card['Sphere'];
+						card['Sphere'] = cardSphere;
 					}
-
-					if ((cardType == 'Encounter Side Quest') && (card['Sphere'] + '' == 'SmallTextArea')) {
+					else if ((cardType == 'Encounter Side Quest') && (card['Sphere'] + '' == 'SmallTextArea')) {
 						cardType = 'Encounter Side Quest SmallTextArea';
 					}
 					else if ((cardType == 'Encounter Side Quest') && (card['Sphere'] + '' == 'Cave')) {
 						cardType = 'Cave';
+					}
+					else if ((cardType == 'Ship Enemy') && (card['Sphere'] + '' == 'Nightmare')) {
+						cardSphere = 'ShipNightmare';
+						card['Sphere'] = cardSphere;
 					}
 
 					keywords = card['Keywords'];
@@ -643,12 +648,7 @@ function run(progress, target, filename, icons) {
 						card['BThreat'] = '-';
 					}
 
-					if ((cardSphere == 'Burden') && (cardType == 'Enemy')) {
-						Console.err.println('\nERROR: ' + cardType + " doesn't support Burden subtype yet.");
-						cardSphere = '';
-						card['BSphere'] = cardSphere;
-					}
-					else if ((cardSphere == 'Nightmare') && (['Encounter Side Quest', 'Objective', 'Ship Enemy'].indexOf(cardType) > -1)) {
+					else if ((cardSphere == 'Nightmare') && (['Encounter Side Quest', 'Objective'].indexOf(cardType) > -1)) {
 						Console.err.println('\nERROR: ' + cardType + " doesn't support Nightmare template yet.");
 						cardSphere = '';
 						card['BSphere'] = cardSphere;
@@ -666,14 +666,18 @@ function run(progress, target, filename, icons) {
 
 					if ((cardType == 'Hero') && (flags.indexOf('Promo') > -1)) {
 						cardType = 'Hero Promo';
-						card['BSphere'] = 'Promo' + card['BSphere'];
+						cardSphere = 'Promo' + card['BSphere'];
+						card['BSphere'] = cardSphere;
 					}
-
-					if ((cardType == 'Encounter Side Quest') && (card['BSphere'] + '' == 'SmallTextArea')) {
+					else if ((cardType == 'Encounter Side Quest') && (card['BSphere'] + '' == 'SmallTextArea')) {
 						cardType = 'Encounter Side Quest SmallTextArea';
 					}
 					else if ((cardType == 'Encounter Side Quest') && (card['BSphere'] + '' == 'Cave')) {
 						cardType = 'Cave';
+					}
+					else if ((cardType == 'Ship Enemy') && (card['BSphere'] + '' == 'Nightmare')) {
+						cardSphere = 'ShipNightmare';
+						card['BSphere'] = cardSphere;
 					}
 
 					keywords = card['BKeywords'];
