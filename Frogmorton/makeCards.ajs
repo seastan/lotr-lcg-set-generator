@@ -1339,11 +1339,16 @@ function run(progress, target, filename, icons) {
 					s.set('Subtype', updateVafthrudnir(translate[cardSphere][lang].toUpperCase(), 3.515, lang));
 				}
 
-				if (card['Encounter Set Number']) {
-					s.set('EncounterSetNumber', parseInt(card['Encounter Set Number']) + j);
+				if (flags.indexOf('UnknownEncounterSetNumber') > -1) {
+					s.set('EncounterSetNumberOverwrite', '???');
 				}
-				if (card['Encounter Set Total']) {
-					s.set('EncounterSetTotal', card['Encounter Set Total']);
+				else {
+					if (card['Encounter Set Number']) {
+						s.set('EncounterSetNumber', parseInt(card['Encounter Set Number']) + j);
+					}
+					if (card['Encounter Set Total']) {
+						s.set('EncounterSetTotal', card['Encounter Set Total']);
+					}
 				}
 
 				if (card['Removed for Easy Mode'] && j >= parseInt(card['Quantity']) - parseInt(card['Removed for Easy Mode'])) {

@@ -230,8 +230,17 @@ CARD_TYPES_NO_PRINTED_NUMBER = {'Full Art Landscape', 'Full Art Portrait',
                                 'Presentation', 'Rules'}
 CARD_TYPES_NO_PRINTED_NUMBER_BACK = {'Campaign', 'Nightmare',
                                      'Presentation', 'Rules'}
-CARD_TYPES_FLAGS = {'Promo': {'Hero'}}
-CARD_TYPES_FLAGS_BACK = {'Promo': {'Hero'}}
+CARD_TYPES_FLAGS = {'Promo': {'Hero'},
+                    'UnknownEncounterSetNumber':
+                    {'Encounter Side Quest', 'Enemy', 'Location', 'Objective',
+                     'Objective Ally', 'Objective Hero', 'Objective Location',
+                     'Ship Enemy', 'Ship Objective', 'Treachery'}}
+CARD_TYPES_FLAGS_BACK = {'Promo': {'Hero'},
+                         'UnknownEncounterSetNumber':
+                         {'Encounter Side Quest', 'Enemy', 'Location',
+                          'Objective', 'Objective Ally', 'Objective Hero',
+                          'Objective Location', 'Ship Enemy', 'Ship Objective',
+                          'Treachery'}}
 CARD_TYPES_NO_FLAGS = {'NoArtist': {'Presentation', 'Rules'},
                        'NoCopyright': {'Presentation', 'Rules'}}
 CARD_TYPES_NO_FLAGS_BACK = {
@@ -268,7 +277,7 @@ CARD_TYPES_NIGHTMARE = {'Encounter Side Quest', 'Enemy', 'Location',
 CARD_TYPES_NO_DISCORD_CHANNEL = {'Full Art Landscape', 'Full Art Portrait',
                                  'Rules', 'Presentation'}
 
-FLAGS = {'NoArtist', 'NoCopyright', 'Promo'}
+FLAGS = {'NoArtist', 'NoCopyright', 'Promo', 'UnknownEncounterSetNumber'}
 SPHERES = set()
 SPHERES_CAMPAIGN = {'Setup'}
 SPHERES_SIDE_QUEST = {'Cave', 'SmallTextArea'}

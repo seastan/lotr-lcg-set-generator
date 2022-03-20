@@ -455,6 +455,7 @@ List of available sphere values:
 - `NoArtist`
 - `NoCopyright`
 - `Promo` (`Hero` only)
+- `UnknownEncounterSetNumber`
 
 **Special Icons**
 
