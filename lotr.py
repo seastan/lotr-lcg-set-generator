@@ -167,11 +167,10 @@ CARD_TYPES_ENCOUNTER_SET = {'Campaign', 'Encounter Side Quest', 'Enemy',
 CARD_TYPES_NO_ENCOUNTER_SET = {'Ally', 'Attachment', 'Contract', 'Event',
                                'Full Art Landscape', 'Full Art Portrait',
                                'Hero', 'Player Objective', 'Player Side Quest'}
-CARD_TYPES_UNIQUE = {'Hero', 'Objective Hero'}
+CARD_TYPES_UNIQUE = {'Hero', 'Objective Hero', 'Treasure'}
 CARD_TYPES_NO_UNIQUE = {'Campaign', 'Contract', 'Event', 'Full Art Landscape',
                         'Full Art Portrait', 'Nightmare', 'Player Side Quest',
-                        'Presentation', 'Quest', 'Rules', 'Treachery',
-                        'Treasure'}
+                        'Presentation', 'Quest', 'Rules', 'Treachery'}
 CARD_TYPES_PLAYER_SPHERE = {'Ally', 'Attachment', 'Event', 'Hero',
                             'Player Side Quest'}
 CARD_TYPES_TRAITS = {'Ally', 'Enemy', 'Hero', 'Location', 'Objective Ally',
@@ -280,7 +279,7 @@ CARD_TYPES_NO_DISCORD_CHANNEL = {'Full Art Landscape', 'Full Art Portrait',
 FLAGS = {'NoArtist', 'NoCopyright', 'Promo', 'UnknownEncounterSetNumber'}
 SPHERES = set()
 SPHERES_CAMPAIGN = {'Setup'}
-SPHERES_SIDE_QUEST = {'Cave', 'SmallTextArea'}
+SPHERES_SIDE_QUEST = {'Cave', 'NoProgress', 'SmallTextArea'}
 SPHERES_PLAYER = {'Baggins', 'Fellowship', 'Leadership', 'Lore', 'Neutral',
                   'Spirit', 'Tactics'}
 SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow',
@@ -2797,7 +2796,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
 
         if (card_quest is None and card_type in CARD_TYPES_QUEST and
-                card_sphere != 'Cave'):
+                card_sphere not in ('Cave', 'NoProgress')):
             message = 'No quest points for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2833,7 +2832,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_quest_back is None and (
                 card_type_back in CARD_TYPES_QUEST
                 or card_type in CARD_TYPES_QUEST_BACK) and
-              card_sphere_back != 'Cave'):
+              card_sphere_back not in ('Cave', 'NoProgress')):
             message = 'No quest points back for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -4097,7 +4096,7 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
             value = 'Neutral'
         elif card_type in ('Presentation', 'Rules'):
             value = ''
-        elif value in ('Cave', 'SmallTextArea', 'Upgraded'):
+        elif value in ('Cave', 'NoProgress', 'SmallTextArea', 'Upgraded'):
             value = ''
         elif card_type == 'Campaign':
             value = str(value).upper() if value else 'CAMPAIGN'
@@ -5154,8 +5153,8 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
 
         if row[CARD_TYPE] in ('Player Objective', 'Treasure'):
             sphere = 'Neutral'
-        elif row[CARD_SPHERE] in ('Setup', 'Cave', 'SmallTextArea',
-                                  'Upgraded'):
+        elif row[CARD_SPHERE] in ('Setup', 'Cave', 'NoProgress',
+                                  'SmallTextArea', 'Upgraded'):
             sphere = ''
         else:
             sphere = row[CARD_SPHERE]
@@ -5197,6 +5196,7 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
                                                 'Treasure'):
                 sphere = 'Neutral'
             elif row[BACK_PREFIX + CARD_SPHERE] in ('Setup', 'Cave',
+                                                    'NoProgress',
                                                     'SmallTextArea',
                                                     'Upgraded'):
                 sphere = ''
@@ -5378,8 +5378,8 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
             sphere = 'Neutral'
         elif card_type in ('Campaign', 'Presentation', 'Rules'):
             sphere = 'None'
-        elif row[CARD_SPHERE] in ('Nightmare', 'Cave', 'SmallTextArea',
-                                  'Upgraded'):
+        elif row[CARD_SPHERE] in ('Nightmare', 'Cave', 'NoProgress',
+                                  'SmallTextArea', 'Upgraded'):
             sphere = 'None'
         elif row[CARD_SPHERE] is not None:
             sphere = row[CARD_SPHERE]

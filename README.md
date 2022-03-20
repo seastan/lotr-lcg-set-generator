@@ -434,6 +434,7 @@ List of available sphere values:
 - `Nightmare`
 - `Setup` (`Campaign` only)
 - `Cave` (`Encounter Side Quest` only)
+- `NoProgress` (`Encounter Side Quest` only)
 - `SmallTextArea` (`Encounter Side Quest` only)
 - `Back` (`Rules` only)
 - `Upgraded` (`Ship Objective` only)
