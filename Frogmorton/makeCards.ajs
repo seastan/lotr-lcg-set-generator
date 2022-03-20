@@ -13,7 +13,7 @@ var doubleSideTypes = ['Campaign', 'Contract', 'Nightmare', 'Presentation', 'Que
 var landscapeTypes = ['Cave', 'Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Full Art Landscape', 'Player Side Quest', 'Quest'];
 var playerTypes = ['Ally', 'Attachment', 'Contract', 'Event', 'Full Art Landscape', 'Full Art Portrait', 'Hero', 'Hero Promo', 'Player Objective', 'Player Side Quest', 'Treasure'];
 var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Objective', 'Player Side Quest'];
-var nonUniqueTypes = ['Campaign', 'Contract', 'Event', 'Full Art Landscape', 'Full Art Portrait', 'Nightmare', 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery', 'Treasure'];
+var nonUniqueTypes = ['Campaign', 'Contract', 'Event', 'Full Art Landscape', 'Full Art Portrait', 'Nightmare', 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery'];
 
 var portraitRegion = {};
 portraitRegion['Ally'] = '87,0,326,330';
@@ -30,14 +30,18 @@ portraitRegion['Full Art Portrait'] = '0,0,413,563';
 portraitRegion['Hero'] = '87,0,326,330';
 portraitRegion['Hero Promo'] = '0,0,413,563';
 portraitRegion['Location'] = '0,60,413,268';
+portraitRegion['Nightmare'] = '0,77,413,245';
 portraitRegion['Objective'] = '0,69,413,300';
 portraitRegion['Objective Ally'] = '78,81,335,268';
+portraitRegion['Objective Hero'] = '78,81,335,268';
+portraitRegion['Objective Location'] = '0,69,413,300';
 portraitRegion['Player Objective'] = '0,69,413,300';
 portraitRegion['Player Side Quest'] = '0,0,563,413';
 portraitRegion['Quest'] = '0,0,563,413';
 portraitRegion['Ship Enemy'] = '87,0,326,330';
 portraitRegion['Ship Objective'] = '78,81,335,268';
 portraitRegion['Treachery'] = '60,0,353,330';
+portraitRegion['Treasure'] = '0,61,413,265';
 
 var bodyRegion = {};
 bodyRegion['Ally'] = '57,378,299,114';
@@ -48,13 +52,16 @@ bodyRegion['Event'] = '65,351,283,140';
 bodyRegion['Hero'] = '57,377,299,114';
 bodyRegion['Hero Promo'] = '78,467,259,45';
 bodyRegion['Location'] = '56,346,301,142';
+bodyRegion['Nightmare'] = '54,325,305,192';
 bodyRegion['Objective'] = '65,355,283,137';
 bodyRegion['Objective Ally'] = '65,355,283,137';
+bodyRegion['Objective Hero'] = '65,355,283,137';
+bodyRegion['Objective Location'] = '65,355,283,137';
 bodyRegion['Player Objective'] = '65,355,283,137';
 bodyRegion['Ship Enemy'] = '57,377,299,114';
 bodyRegion['Ship Objective'] = '65,355,283,137';
 bodyRegion['Treachery'] = '65,356,283,135';
-bodyRegion['Treasure'] = '57,347,299,144';  // T.B.D.
+bodyRegion['Treasure'] = '57,347,299,132';
 
 bodyRegion['Cave'] = '50,303,171,60';
 bodyRegion['Encounter Side Quest'] = '51,269,461,94';
@@ -71,11 +78,13 @@ traitRegion['Hero Promo'] = '93,449,160,14';
 traitRegion['Location'] = '56,326,301,20';
 traitRegion['Objective'] = '65,335,283,20';
 traitRegion['Objective Ally'] = '65,335,283,20';
+traitRegion['Objective Hero'] = '65,335,283,20';
+traitRegion['Objective Location'] = '65,335,283,20';
 traitRegion['Player Objective'] = '65,335,283,20';
 traitRegion['Ship Enemy'] = '57,357,299,20';
 traitRegion['Ship Objective'] = '65,335,283,20';
 traitRegion['Treachery'] = '65,336,283,20';
-traitRegion['Treasure'] = '85,327,243,20';  // T.B.D.
+traitRegion['Treasure'] = '85,327,243,20';
 
 traitRegion['Cave'] = '50,283,171,20';
 traitRegion['Encounter Side Quest'] = '51,249,461,20';
@@ -94,6 +103,7 @@ bodyRightNoTraitRegion['Cave'] = '347,283,171,80';
 
 var bodyBackRegion = {};
 bodyBackRegion['Campaign'] = '64,60,285,443';
+bodyBackRegion['Nightmare'] = '54,55,305,439';
 
 var nameRegion = {};
 nameRegion['Ally'] = '100,329,213,25';
@@ -108,14 +118,18 @@ nameRegion['Event'] = '57,86,26,178';
 nameRegion['Hero'] = '100,327,213,25';
 nameRegion['Hero Promo'] = '103,418,206,25';
 nameRegion['Location'] = '108,43,197,25';
+nameRegion['Nightmare'] = '95,40,225,34';
 nameRegion['Objective'] = '75,48,263,29';
 nameRegion['Objective Ally'] = '75,48,263,29';
+nameRegion['Objective Hero'] = '75,48,263,29';
+nameRegion['Objective Location'] = '75,48,263,29';
 nameRegion['Player Objective'] = '127,48,211,29';
 nameRegion['Player Side Quest'] = '144,44,368,29';
 nameRegion['Quest'] = '144,44,368,29';
 nameRegion['Ship Enemy'] = '94,327,225,25';
 nameRegion['Ship Objective'] = '75,48,263,29';
 nameRegion['Treachery'] = '55,108,26,164';
+nameRegion['Treasure'] = '132,45,183,25';
 
 var nameRegionUnique = {};
 nameRegionUnique['Ally'] = '100,326,213,25';
@@ -130,14 +144,18 @@ nameRegionUnique['Event'] = '57,86,26,178';
 nameRegionUnique['Hero'] = '100,325,213,25';
 nameRegionUnique['Hero Promo'] = '103,416,206,25';
 nameRegionUnique['Location'] = '108,40,197,25';
+nameRegionUnique['Nightmare'] = '95,40,225,34';
 nameRegionUnique['Objective'] = '75,45,263,29';
 nameRegionUnique['Objective Ally'] = '75,45,263,29';
+nameRegionUnique['Objective Hero'] = '75,45,263,29';
+nameRegionUnique['Objective Location'] = '75,45,263,29';
 nameRegionUnique['Player Objective'] = '127,45,211,29';
 nameRegionUnique['Player Side Quest'] = '144,44,368,29';
 nameRegionUnique['Quest'] = '144,44,368,29';
 nameRegionUnique['Ship Enemy'] = '94,325,225,25';
 nameRegionUnique['Ship Objective'] = '75,45,263,29';
 nameRegionUnique['Treachery'] = '55,108,26,164';
+nameRegionUnique['Treasure'] = '132,43,183,25';
 
 var namePointSize = {};
 namePointSize['Ally'] = 6.5;
@@ -152,14 +170,18 @@ namePointSize['Event'] = 6.5;
 namePointSize['Hero'] = 6.5;
 namePointSize['Hero Promo'] = 6.5;
 namePointSize['Location'] = 6.5;
+namePointSize['Nightmare'] = 6.5;
 namePointSize['Objective'] = 7.5;
 namePointSize['Objective Ally'] = 7.5;
+namePointSize['Objective Hero'] = 7.5;
+namePointSize['Objective Location'] = 7.5;
 namePointSize['Player Objective'] = 7.5;
 namePointSize['Player Side Quest'] = 7.5;
 namePointSize['Quest'] = 7.5;
 namePointSize['Ship Enemy'] = 6.5;
 namePointSize['Ship Objective'] = 7.5;
 namePointSize['Treachery'] = 6.5;
+namePointSize['Treasure'] = 6.5;
 
 var subtypeRegion = {};
 subtypeRegion['Attachment'] = '146,301,124,20';
@@ -167,7 +189,10 @@ subtypeRegion['Enemy'] = '146,302,124,20';
 subtypeRegion['Event'] = '146,301,124,20';
 subtypeRegion['Objective'] = '146,309,124,20';
 subtypeRegion['Objective Ally'] = '146,309,124,20';
+subtypeRegion['Objective Hero'] = '146,309,124,20';
+subtypeRegion['Objective Location'] = '146,309,124,20';
 subtypeRegion['Ship Enemy'] = '146,302,124,20';
+subtypeRegion['Ship Objective'] = '146,309,124,20';
 subtypeRegion['Treachery'] = '146,305,124,20';
 
 var hitPointsRegion = {};
@@ -176,6 +201,7 @@ hitPointsRegion['Enemy'] = '64,269,58,40';
 hitPointsRegion['Hero'] = '64,269,58,40';
 hitPointsRegion['Hero Promo'] = '46,408,58,40';
 hitPointsRegion['Objective Ally'] = '61,272,58,40';
+hitPointsRegion['Objective Hero'] = '61,272,58,40';
 hitPointsRegion['Ship Enemy'] = '64,269,58,40';
 hitPointsRegion['Ship Objective'] = '61,272,58,40';
 
@@ -185,6 +211,7 @@ attackRegion['Enemy'] = '68,156,26,16';
 attackRegion['Hero'] = '68,157,26,16';
 attackRegion['Hero Promo'] = '42,128,26,16';
 attackRegion['Objective Ally'] = '65,159,26,16';
+attackRegion['Objective Hero'] = '65,159,26,16';
 attackRegion['Ship Enemy'] = '68,156,26,16';
 attackRegion['Ship Objective'] = '65,159,26,16';
 
@@ -194,6 +221,7 @@ defenseRegion['Enemy'] = '68,199,26,16';
 defenseRegion['Hero'] = '68,200,26,16';
 defenseRegion['Hero Promo'] = '42,166,26,16';
 defenseRegion['Objective Ally'] = '65,203,26,16';
+defenseRegion['Objective Hero'] = '65,203,26,16';
 defenseRegion['Ship Enemy'] = '68,199,26,16';
 defenseRegion['Ship Objective'] = '65,203,26,16';
 
@@ -202,6 +230,7 @@ willpowerRegion['Ally'] = '70,117,26,16';
 willpowerRegion['Hero'] = '68,117,26,16';
 willpowerRegion['Hero Promo'] = '42,94,26,16';
 willpowerRegion['Objective Ally'] = '65,113,26,16';
+willpowerRegion['Objective Hero'] = '65,113,26,16';
 willpowerRegion['Ship Objective'] = '65,113,26,16';
 
 var threatRegion = {};
@@ -222,12 +251,15 @@ progressRegion['Cave'] = '52,257,35,24';
 progressRegion['Encounter Side Quest'] = '52,202,35,24';
 progressRegion['Encounter Side Quest SmallTextArea'] = '52,257,35,24';
 progressRegion['Location'] = '56,283,35,24';
+progressRegion['Objective Location'] = '56,291,35,24';
 progressRegion['Quest'] = '55,202,35,24';
 progressRegion['Player Side Quest'] = '55,202,35,24';
 
 var adventureRegion = {};
 adventureRegion['Objective'] = '67,83,276,15';
 adventureRegion['Objective Ally'] = '67,83,276,15';
+adventureRegion['Objective Hero'] = '67,83,276,15';
+adventureRegion['Objective Location'] = '67,83,276,15';
 adventureRegion['Quest'] = '190,78,275,15';
 adventureRegion['Ship Objective'] = '67,83,276,15';
 
@@ -244,6 +276,7 @@ resourceCostRegion['Attachment'] = '38,43,56,37';
 resourceCostRegion['Event'] = '37,38,56,37';
 resourceCostRegion['Player Objective'] = '38,43,56,37';
 resourceCostRegion['Player Side Quest'] = '43,44,56,37';
+resourceCostRegion['Treasure'] = '45,61,44,30';
 
 var encounterPortraitRegion = {};
 encounterPortraitRegion['Campaign'] = '319,190,43,43';
@@ -252,12 +285,16 @@ encounterPortraitRegion['Enemy'] = '321,266,43,43';
 encounterPortraitRegion['Encounter Side Quest'] = '478,187,43,43';
 encounterPortraitRegion['Encounter Side Quest SmallTextArea'] = '478,242,43,43';
 encounterPortraitRegion['Location'] = '319,266,43,43';
+encounterPortraitRegion['Nightmare'] = '325,266,37,37';
 encounterPortraitRegion['Objective'] = '315,269,43,43';
 encounterPortraitRegion['Objective Ally'] = '315,269,43,43';
+encounterPortraitRegion['Objective Hero'] = '315,269,43,43';
+encounterPortraitRegion['Objective Location'] = '315,269,43,43';
 encounterPortraitRegion['Quest'] = '474,185,43,43';
 encounterPortraitRegion['Ship Enemy'] = '321,266,43,43';
 encounterPortraitRegion['Ship Objective'] = '315,269,43,43';
 encounterPortraitRegion['Treachery'] = '320,269,43,43';
+encounterPortraitRegion['Treasure'] = '331,482,36,36';
 
 var encounterNumberRegion = {};
 encounterNumberRegion['Cave'] = '41,70,26,10';
@@ -267,6 +304,8 @@ encounterNumberRegion['Encounter Side Quest SmallTextArea'] = '486,284,26,10';
 encounterNumberRegion['Location'] = '328,314,26,10';
 encounterNumberRegion['Objective'] = '323,316,26,10';
 encounterNumberRegion['Objective Ally'] = '323,316,26,10';
+encounterNumberRegion['Objective Hero'] = '323,316,26,10';
+encounterNumberRegion['Objective Location'] = '323,316,26,10';
 encounterNumberRegion['Ship Enemy'] = '329,313,26,10';
 encounterNumberRegion['Ship Objective'] = '323,316,26,10';
 encounterNumberRegion['Treachery'] = '329,317,26,10';
@@ -290,14 +329,18 @@ optionRightDecorationRegion['Event'] = '298,503,72,18';
 optionRightDecorationRegion['Hero'] = '298,502,72,18';
 optionRightDecorationRegion['Hero Promo'] = '282,495,72,18';
 optionRightDecorationRegion['Location'] = '301,503,72,18';
+optionRightDecorationRegion['Nightmare'] = '299,503,72,17';
 optionRightDecorationRegion['Objective'] = '290,502,72,18';
 optionRightDecorationRegion['Objective Ally'] = '290,502,72,18';
+optionRightDecorationRegion['Objective Hero'] = '290,502,72,18';
+optionRightDecorationRegion['Objective Location'] = '290,502,72,18';
 optionRightDecorationRegion['Player Objective'] = '290,502,72,18';
 optionRightDecorationRegion['Player Side Quest'] = '451,349,72,18';
 optionRightDecorationRegion['Quest'] = '450,350,72,18';
 optionRightDecorationRegion['Ship Enemy'] = '301,503,72,18';
 optionRightDecorationRegion['Ship Objective'] = '290,502,72,18';
 optionRightDecorationRegion['Treachery'] = '301,503,72,18';
+optionRightDecorationRegion['Treasure'] = '253,477,72,18';
 
 var optionRightRegion = {};
 optionRightRegion['Ally'] = '305,504,59,20';
@@ -311,14 +354,18 @@ optionRightRegion['Event'] = '305,504,59,20';
 optionRightRegion['Hero'] = '305,503,59,20';
 optionRightRegion['Hero Promo'] = '289,496,59,20';
 optionRightRegion['Location'] = '308,504,59,20';
+optionRightRegion['Nightmare'] = '306,507,59,9';
 optionRightRegion['Objective'] = '297,503,59,20';
 optionRightRegion['Objective Ally'] = '297,503,59,20';
+optionRightRegion['Objective Hero'] = '297,503,59,20';
+optionRightRegion['Objective Location'] = '297,503,59,20';
 optionRightRegion['Player Objective'] = '297,503,59,20';
 optionRightRegion['Player Side Quest'] = '458,350,59,20';
 optionRightRegion['Quest'] = '457,351,59,20';
 optionRightRegion['Ship Enemy'] = '308,504,59,20';
 optionRightRegion['Ship Objective'] = '297,503,59,20';
 optionRightRegion['Treachery'] = '308,504,59,20';
+optionRightRegion['Treasure'] = '260,478,59,20';
 
 var translate = {};
 translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado', 'Polish': 'Sprzymierzeniec', 'Italian': 'Alleato',
@@ -533,29 +580,7 @@ function run(progress, target, filename, icons) {
 						flags.push(card['Flags'][idx_f]);
 					}
 
-					if (cardType == 'Objective Hero') {
-						Console.err.println('\nERROR: ' + cardType + " type is not supported yet.");
-						cardType = 'Objective Ally';
-						card['Type'] = cardType;
-					}
-					else if (cardType == 'Objective Location') {
-						Console.err.println('\nERROR: ' + cardType + " type is not supported yet.");
-						cardType = 'Location';
-						card['Type'] = cardType;
-						card['Threat'] = '-';
-					}
-
-					else if ((cardSphere == 'Nightmare') && (['Encounter Side Quest', 'Objective'].indexOf(cardType) > -1)) {
-						Console.err.println('\nERROR: ' + cardType + " doesn't support Nightmare template yet.");
-						cardSphere = '';
-						card['Sphere'] = cardSphere;
-					}
-					else if (cardSphere == 'Upgraded') {
-						Console.err.println('\nERROR: ' + cardSphere + " template is not supported yet.");
-						cardSphere = '';
-						card['Sphere'] = cardSphere;
-					}
-					else if (['Nightmare Blue', 'Nightmare Green', 'Nightmare Purple', 'Nightmare Red', 'Nightmare Brown', 'Nightmare Yellow'].indexOf(cardSphere) > -1) {
+					if (['Nightmare Blue', 'Nightmare Green', 'Nightmare Purple', 'Nightmare Red', 'Nightmare Brown', 'Nightmare Yellow'].indexOf(cardSphere) > -1) {
 						Console.err.println('\nERROR: ' + cardSphere + " template is not supported yet.");
 						cardSphere = cardSphere.replace('Nightmare ', '');
 						card['Sphere'] = cardSphere;
@@ -571,6 +596,14 @@ function run(progress, target, filename, icons) {
 					}
 					else if ((cardType == 'Encounter Side Quest') && (card['Sphere'] + '' == 'Cave')) {
 						cardType = 'Cave';
+					}
+					else if (cardType == 'Objective Hero') {
+						cardSphere = 'Hero';
+						card['Sphere'] = cardSphere;
+					}
+					else if (cardType == 'Objective Location') {
+						cardSphere = 'Location';
+						card['Sphere'] = cardSphere;
 					}
 					else if ((cardType == 'Ship Enemy') && (card['Sphere'] + '' == 'Nightmare')) {
 						cardSphere = 'ShipNightmare';
@@ -636,29 +669,7 @@ function run(progress, target, filename, icons) {
 						flags.push(card['BFlags'][idx_f]);
 					}
 
-					if (cardType == 'Objective Hero') {
-						Console.err.println('\nERROR: ' + cardType + " type is not supported yet.");
-						cardType = 'Objective Ally';
-						card['BType'] = cardType;
-					}
-					else if (cardType == 'Objective Location') {
-						Console.err.println('\nERROR: ' + cardType + " type is not supported yet.");
-						cardType = 'Location';
-						card['BType'] = cardType;
-						card['BThreat'] = '-';
-					}
-
-					else if ((cardSphere == 'Nightmare') && (['Encounter Side Quest', 'Objective'].indexOf(cardType) > -1)) {
-						Console.err.println('\nERROR: ' + cardType + " doesn't support Nightmare template yet.");
-						cardSphere = '';
-						card['BSphere'] = cardSphere;
-					}
-					else if (cardSphere == 'Upgraded') {
-						Console.err.println('\nERROR: ' + cardSphere + " template is not supported yet.");
-						cardSphere = '';
-						card['BSphere'] = cardSphere;
-					}
-					else if (['Nightmare Blue', 'Nightmare Green', 'Nightmare Purple', 'Nightmare Red', 'Nightmare Brown', 'Nightmare Yellow'].indexOf(cardSphere) > -1) {
+					if (['Nightmare Blue', 'Nightmare Green', 'Nightmare Purple', 'Nightmare Red', 'Nightmare Brown', 'Nightmare Yellow'].indexOf(cardSphere) > -1) {
 						Console.err.println('\nERROR: ' + cardSphere + " template is not supported yet.");
 						cardSphere = cardSphere.replace('Nightmare ', '');
 						card['BSphere'] = cardSphere;
@@ -674,6 +685,14 @@ function run(progress, target, filename, icons) {
 					}
 					else if ((cardType == 'Encounter Side Quest') && (card['BSphere'] + '' == 'Cave')) {
 						cardType = 'Cave';
+					}
+					else if (cardType == 'Objective Hero') {
+						cardSphere = 'Hero';
+						card['BSphere'] = cardSphere;
+					}
+					else if (cardType == 'Objective Location') {
+						cardSphere = 'Location';
+						card['BSphere'] = cardSphere;
 					}
 					else if ((cardType == 'Ship Enemy') && (card['BSphere'] + '' == 'Nightmare')) {
 						cardSphere = 'ShipNightmare';
@@ -1054,7 +1073,7 @@ function run(progress, target, filename, icons) {
 					s.set('CollectionNumber-region', '334,527,18,15');
 					s.set('CollectionInfo-region', '350,527,20,15');
 
-					if (cardType == 'Campaign') {
+					if ((cardType == 'Campaign') || (cardType == 'Nightmare')) {
 						if (cardType in bodyRegion) {
 							s.set('Body-region', bodyRegion[cardType]);
 						}
@@ -1513,6 +1532,7 @@ function updateVafthrudnir(value, lowerSize, lang) {
 	var res = '';
 	var tag = false;
 	value = value.replace(/\[space\]/g, ' ');
+	value = value.replace(/\[SPACE\]/g, ' ');
 	value = updatePunctuation(value, lang);
 	for (let i = 0; i < value.length; i++) {
 		let ch = value[i];
@@ -1555,8 +1575,11 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 	vXml = vXml.replace(/ +(?=\n|$)/g, '');
 	vXml = vXml.replace(/\n+$/g, '');
 	vXml = vXml.replace(/\[nobr\]/g, '\u00a0');
+	vXml = vXml.replace(/\[NOBR\]/g, '\u00a0');
 	vXml = vXml.replace(/\[inline\]\n\n/g, ' ');
 	vXml = vXml.replace(/\[inline\]/g, '');
+	vXml = vXml.replace(/\[INLINE\]\n\n/g, ' ');
+	vXml = vXml.replace(/\[INLINE\]/g, '');
 
 	if (['Name', 'BName'].indexOf(nXml + '') > -1) {
 		let lowerSize;
