@@ -278,14 +278,28 @@ resourceCostRegion['Player Objective'] = '38,43,56,37';
 resourceCostRegion['Player Side Quest'] = '43,44,56,37';
 resourceCostRegion['Treasure'] = '45,61,44,30';
 
+var difficultyRegion = {};
+difficultyRegion['Cave'] = '33,30,42,42';
+difficultyRegion['Encounter Side Quest'] = '473,180,52,52';
+difficultyRegion['Encounter Side Quest SmallTextArea'] = '473,235,52,52';
+difficultyRegion['Enemy'] = '316,260,52,52';
+difficultyRegion['Location'] = '314,259,52,52';
+difficultyRegion['Objective'] = '310,263,52,52';
+difficultyRegion['Objective Ally'] = '310,263,52,52';
+difficultyRegion['Objective Hero'] = '310,263,52,52';
+difficultyRegion['Objective Location'] = '310,263,52,52';
+difficultyRegion['Ship Enemy'] = '316,260,52,52';
+difficultyRegion['Ship Objective'] = '310,263,52,52';
+difficultyRegion['Treachery'] = '315,263,52,52';
+
 var encounterPortraitRegion = {};
 encounterPortraitRegion['Campaign'] = '319,190,43,43';
 encounterPortraitRegion['Cave'] = '37,35,35,35';
+encounterPortraitRegion['Encounter Side Quest'] = '478,186,43,43';
+encounterPortraitRegion['Encounter Side Quest SmallTextArea'] = '478,241,43,43';
 encounterPortraitRegion['Enemy'] = '321,266,43,43';
-encounterPortraitRegion['Encounter Side Quest'] = '478,187,43,43';
-encounterPortraitRegion['Encounter Side Quest SmallTextArea'] = '478,242,43,43';
-encounterPortraitRegion['Location'] = '319,266,43,43';
-encounterPortraitRegion['Nightmare'] = '325,266,37,37';
+encounterPortraitRegion['Location'] = '319,265,43,43';
+encounterPortraitRegion['Nightmare'] = '322,263,43,43';
 encounterPortraitRegion['Objective'] = '315,269,43,43';
 encounterPortraitRegion['Objective Ally'] = '315,269,43,43';
 encounterPortraitRegion['Objective Hero'] = '315,269,43,43';
@@ -294,21 +308,21 @@ encounterPortraitRegion['Quest'] = '474,185,43,43';
 encounterPortraitRegion['Ship Enemy'] = '321,266,43,43';
 encounterPortraitRegion['Ship Objective'] = '315,269,43,43';
 encounterPortraitRegion['Treachery'] = '320,269,43,43';
-encounterPortraitRegion['Treasure'] = '331,482,36,36';
+encounterPortraitRegion['Treasure'] = '327,478,43,43';
 
 var encounterNumberRegion = {};
 encounterNumberRegion['Cave'] = '41,70,26,10';
-encounterNumberRegion['Enemy'] = '329,313,26,10';
-encounterNumberRegion['Encounter Side Quest'] = '486,229,26,10';
-encounterNumberRegion['Encounter Side Quest SmallTextArea'] = '486,284,26,10';
-encounterNumberRegion['Location'] = '328,314,26,10';
-encounterNumberRegion['Objective'] = '323,316,26,10';
-encounterNumberRegion['Objective Ally'] = '323,316,26,10';
-encounterNumberRegion['Objective Hero'] = '323,316,26,10';
-encounterNumberRegion['Objective Location'] = '323,316,26,10';
-encounterNumberRegion['Ship Enemy'] = '329,313,26,10';
-encounterNumberRegion['Ship Objective'] = '323,316,26,10';
-encounterNumberRegion['Treachery'] = '329,317,26,10';
+encounterNumberRegion['Encounter Side Quest'] = '486,230,26,10';
+encounterNumberRegion['Encounter Side Quest SmallTextArea'] = '486,285,26,10';
+encounterNumberRegion['Enemy'] = '328,313,26,10';
+encounterNumberRegion['Location'] = '327,314,26,10';
+encounterNumberRegion['Objective'] = '322,316,26,10';
+encounterNumberRegion['Objective Ally'] = '322,316,26,10';
+encounterNumberRegion['Objective Hero'] = '322,316,26,10';
+encounterNumberRegion['Objective Location'] = '322,316,26,10';
+encounterNumberRegion['Ship Enemy'] = '328,313,26,10';
+encounterNumberRegion['Ship Objective'] = '322,316,26,10';
+encounterNumberRegion['Treachery'] = '328,317,26,10';
 
 var optionBodyShape = {};
 optionBodyShape['Cave'] = '0,0,348,0,64';
@@ -1245,6 +1259,10 @@ function run(progress, target, filename, icons) {
 
 				if (cardType in resourceCostRegion) {
 					s.set('ResourceCost-region', resourceCostRegion[cardType]);
+				}
+
+				if (cardType in difficultyRegion) {
+					s.set('Difficulty-region', difficultyRegion[cardType]);
 				}
 
 				if (cardType in encounterPortraitRegion) {

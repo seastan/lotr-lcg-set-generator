@@ -163,10 +163,11 @@ CARD_TYPES_ENCOUNTER_SET = {'Campaign', 'Encounter Side Quest', 'Enemy',
                             'Location', 'Nightmare', 'Objective',
                             'Objective Ally', 'Objective Hero',
                             'Objective Location', 'Quest', 'Ship Enemy',
-                            'Ship Objective', 'Treachery'}
+                            'Ship Objective', 'Treachery', 'Treasure'}
 CARD_TYPES_NO_ENCOUNTER_SET = {'Ally', 'Attachment', 'Contract', 'Event',
                                'Full Art Landscape', 'Full Art Portrait',
-                               'Hero', 'Player Objective', 'Player Side Quest'}
+                               'Hero', 'Player Objective', 'Player Side Quest',
+                               'Presentation'}
 CARD_TYPES_UNIQUE = {'Hero', 'Objective Hero', 'Treasure'}
 CARD_TYPES_NO_UNIQUE = {'Campaign', 'Contract', 'Event', 'Full Art Landscape',
                         'Full Art Portrait', 'Nightmare', 'Player Side Quest',
@@ -250,9 +251,7 @@ CARD_TYPES_NO_ARTIST_BACK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
 CARD_TYPES_NO_ARTWORK = {'Rules'}
 CARD_TYPES_NO_ARTWORK_BACK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
 CARD_TYPES_EASY_MODE = {'Encounter Side Quest', 'Enemy', 'Location',
-                        'Objective', 'Objective Ally', 'Objective Hero',
-                        'Objective Location', 'Ship Enemy', 'Ship Objective',
-                        'Treachery'}
+                        'Ship Enemy', 'Treachery'}
 CARD_TYPES_ADDITIONAL_ENCOUNTER_SETS = {'Quest'}
 CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
                         'Objective Hero', 'Objective Location',
@@ -288,6 +287,7 @@ SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow',
                         'Nightmare Yellow'}
 SPHERES_RULES = {'Back'}
 SPHERES_SHIP_OBJECTIVE = {'Upgraded'}
+SPHERES_NO_EASY_MODE = {'Boon', 'Burden', 'Cave'}
 SPECIAL_ICONS = {'eye of sauron', 'eye of sauronx2', 'eye of sauronx3',
                  'sailing', 'sailingx2'}
 
@@ -1936,18 +1936,21 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
 
         if (card_encounter_set is None and
-                (card_type in CARD_TYPES_ENCOUNTER_SET or
-                 card_type_back in CARD_TYPES_ENCOUNTER_SET)):
+                ((card_type in CARD_TYPES_ENCOUNTER_SET and
+                  card_sphere != 'Boon') or
+                 (card_type_back in CARD_TYPES_ENCOUNTER_SET and
+                  card_sphere_back != 'Boon'))):
             message = 'No encounter set for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_encounter_set is not None and
-              card_type in CARD_TYPES_NO_ENCOUNTER_SET and
+        elif (card_encounter_set is not None and  # pylint: disable=R0916
+              (card_type in CARD_TYPES_NO_ENCOUNTER_SET
+               or card_sphere == 'Boon') and
               (card_type_back in CARD_TYPES_NO_ENCOUNTER_SET or
-               card_type_back is None)):
+               card_type_back is None or card_sphere_back == 'Boon')):
             message = 'Redundant encounter set for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -3436,10 +3439,12 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_easy_mode is not None and
-                card_type not in CARD_TYPES_EASY_MODE and
+        if (card_easy_mode is not None and  # pylint: disable=R0916
+                (card_type not in CARD_TYPES_EASY_MODE
+                 or card_sphere in SPHERES_NO_EASY_MODE) and
                 (card_type_back not in CARD_TYPES_EASY_MODE or
-                 card_type_back is None)):
+                 card_type_back is None or
+                 card_sphere_back in SPHERES_NO_EASY_MODE)):
             message = 'Redundant removed for easy mode for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
