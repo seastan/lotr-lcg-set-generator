@@ -594,12 +594,6 @@ function run(progress, target, filename, icons) {
 						flags.push(card['Flags'][idx_f]);
 					}
 
-					if (['Nightmare Blue', 'Nightmare Green', 'Nightmare Purple', 'Nightmare Red', 'Nightmare Brown', 'Nightmare Yellow'].indexOf(cardSphere) > -1) {
-						Console.err.println('\nERROR: ' + cardSphere + " template is not supported yet.");
-						cardSphere = cardSphere.replace('Nightmare ', '');
-						card['Sphere'] = cardSphere;
-					}
-
 					if ((cardType == 'Hero') && (flags.indexOf('Promo') > -1)) {
 						cardType = 'Hero Promo';
 						cardSphere = 'Promo' + card['Sphere'];
@@ -681,12 +675,6 @@ function run(progress, target, filename, icons) {
 					flags = [];
 					for (let idx_f = 0; idx_f < card['BFlags'].length; idx_f++) {
 						flags.push(card['BFlags'][idx_f]);
-					}
-
-					if (['Nightmare Blue', 'Nightmare Green', 'Nightmare Purple', 'Nightmare Red', 'Nightmare Brown', 'Nightmare Yellow'].indexOf(cardSphere) > -1) {
-						Console.err.println('\nERROR: ' + cardSphere + " template is not supported yet.");
-						cardSphere = cardSphere.replace('Nightmare ', '');
-						card['BSphere'] = cardSphere;
 					}
 
 					if ((cardType == 'Hero') && (flags.indexOf('Promo') > -1)) {
@@ -865,6 +853,7 @@ function run(progress, target, filename, icons) {
 					s.set('Name-region', '50,420,313,113');
 					s.set('PageIn-region', '48,488,317,15');
 					s.set('PageIn-format', '<right><bottom><family "Times New Roman"><size 7><b>');
+					s.set('Collection-portrait-clip-region', '185,383,43,43');
 					s.set('CollectionInfo-region', '350,527,20,15');
 					s.set('LRL-IllustratorShort', ' ');
 					s.set('Artist', ' ');
@@ -1147,7 +1136,6 @@ function run(progress, target, filename, icons) {
 				if ((cardType == 'Presentation') || (cardType == 'Rules')) {
 					s.set('Type', ' ');
 					s.set('Copyright', '');
-					s.set('Collection', 'Empty');
 				}
 				else {
 					if ((cardType == 'Campaign') && (cardSphere == 'Setup')) {
@@ -1159,7 +1147,12 @@ function run(progress, target, filename, icons) {
 					}
 
 					s.set('Copyright', copyrightText);
+				}
 
+				if (((cardType == 'Presentation') && (['BlueNightmare', 'GreenNightmare', 'PurpleNightmare', 'RedNightmare', 'BrownNightmare', 'YellowNightmare'].indexOf(cardSphere) == -1)) || (cardType == 'Rules')) {
+					s.set('Collection', 'Empty');
+				}
+				else {
 					let selectedIcon;
 					if (card['Collection Icon']) {
 						selectedIcon = card['Collection Icon'];

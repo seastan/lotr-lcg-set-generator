@@ -295,8 +295,7 @@ CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
 CARD_TYPES_SUBTITLE = {'Campaign', 'Objective', 'Objective Ally',
                        'Objective Hero', 'Objective Location',
                        'Quest', 'Ship Objective'}
-CARD_TYPES_NO_ICON = {'Full Art Landscape', 'Full Art Portrait',
-                      'Presentation', 'Rules'}
+CARD_TYPES_NO_ICON = {'Full Art Landscape', 'Full Art Portrait', 'Rules'}
 CARD_TYPES_DECK_RULES = {'Nightmare', 'Quest'}
 CARD_TYPES_ONE_COPY = {'Campaign', 'Contract', 'Encounter Side Quest',
                        'Full Art Landscape', 'Full Art Portrait', 'Hero',
@@ -320,9 +319,8 @@ SPHERES_SIDE_QUEST = {'Cave', 'NoProgress', 'SmallTextArea'}
 SPHERES_PLAYER = {'Baggins', 'Fellowship', 'Leadership', 'Lore', 'Neutral',
                   'Spirit', 'Tactics'}
 SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow',
-                        'Nightmare Blue', 'Nightmare Green',
-                        'Nightmare Purple', 'Nightmare Red', 'Nightmare Brown',
-                        'Nightmare Yellow'}
+                        'BlueNightmare', 'GreenNightmare', 'PurpleNightmare',
+                        'RedNightmare', 'BrownNightmare', 'YellowNightmare'}
 SPHERES_RULES = {'Back'}
 SPHERES_SHIP_OBJECTIVE = {'Upgraded'}
 SPHERES_NO_EASY_MODE = {'Boon', 'Burden', 'Cave'}

@@ -444,12 +444,12 @@ List of available sphere values:
 - `Red` (`Presentation` only)
 - `Brown` (`Presentation` only)
 - `Yellow` (`Presentation` only)
-- `Nightmare Blue` (`Presentation` only)
-- `Nightmare Green` (`Presentation` only)
-- `Nightmare Purple` (`Presentation` only)
-- `Nightmare Red` (`Presentation` only)
-- `Nightmare Brown` (`Presentation` only)
-- `Nightmare Yellow` (`Presentation` only)
+- `BlueNightmare` (`Presentation` only)
+- `GreenNightmare` (`Presentation` only)
+- `PurpleNightmare` (`Presentation` only)
+- `RedNightmare` (`Presentation` only)
+- `BrownNightmare` (`Presentation` only)
+- `YellowNightmare` (`Presentation` only)
 
 **Flags**
 
