@@ -234,9 +234,45 @@ CARD_TYPES_FLAGS = {'Promo': {'Hero'},
                     'UnknownEncounterSetNumber':
                     {'Encounter Side Quest', 'Enemy', 'Location', 'Objective',
                      'Objective Ally', 'Objective Hero', 'Objective Location',
+                     'Ship Enemy', 'Ship Objective', 'Treachery'},
+                    'BlueRing':
+                    {'Encounter Side Quest', 'Enemy', 'Location', 'Objective',
+                     'Objective Ally', 'Objective Hero', 'Objective Location',
+                     'Ship Enemy', 'Ship Objective', 'Treachery'},
+                    'GreenRing':
+                    {'Encounter Side Quest', 'Enemy', 'Location', 'Objective',
+                     'Objective Ally', 'Objective Hero', 'Objective Location',
+                     'Ship Enemy', 'Ship Objective', 'Treachery'},
+                    'PurpleRing':
+                    {'Encounter Side Quest', 'Enemy', 'Location', 'Objective',
+                     'Objective Ally', 'Objective Hero', 'Objective Location',
+                     'Ship Enemy', 'Ship Objective', 'Treachery'},
+                    'RedRing':
+                    {'Encounter Side Quest', 'Enemy', 'Location', 'Objective',
+                     'Objective Ally', 'Objective Hero', 'Objective Location',
                      'Ship Enemy', 'Ship Objective', 'Treachery'}}
 CARD_TYPES_FLAGS_BACK = {'Promo': {'Hero'},
                          'UnknownEncounterSetNumber':
+                         {'Encounter Side Quest', 'Enemy', 'Location',
+                          'Objective', 'Objective Ally', 'Objective Hero',
+                          'Objective Location', 'Ship Enemy', 'Ship Objective',
+                          'Treachery'},
+                         'BlueRing':
+                         {'Encounter Side Quest', 'Enemy', 'Location',
+                          'Objective', 'Objective Ally', 'Objective Hero',
+                          'Objective Location', 'Ship Enemy', 'Ship Objective',
+                          'Treachery'},
+                         'GreenRing':
+                         {'Encounter Side Quest', 'Enemy', 'Location',
+                          'Objective', 'Objective Ally', 'Objective Hero',
+                          'Objective Location', 'Ship Enemy', 'Ship Objective',
+                          'Treachery'},
+                         'PurpleRing':
+                         {'Encounter Side Quest', 'Enemy', 'Location',
+                          'Objective', 'Objective Ally', 'Objective Hero',
+                          'Objective Location', 'Ship Enemy', 'Ship Objective',
+                          'Treachery'},
+                         'RedRing':
                          {'Encounter Side Quest', 'Enemy', 'Location',
                           'Objective', 'Objective Ally', 'Objective Hero',
                           'Objective Location', 'Ship Enemy', 'Ship Objective',
@@ -275,7 +311,9 @@ CARD_TYPES_NIGHTMARE = {'Encounter Side Quest', 'Enemy', 'Location',
 CARD_TYPES_NO_DISCORD_CHANNEL = {'Full Art Landscape', 'Full Art Portrait',
                                  'Rules', 'Presentation'}
 
-FLAGS = {'NoArtist', 'NoCopyright', 'Promo', 'UnknownEncounterSetNumber'}
+FLAGS = {'NoArtist', 'NoCopyright', 'Promo', 'UnknownEncounterSetNumber',
+         'BlueRing', 'GreenRing', 'PurpleRing', 'RedRing'}
+RING_FLAGS = {'BlueRing', 'GreenRing', 'PurpleRing', 'RedRing'}
 SPHERES = set()
 SPHERES_CAMPAIGN = {'Setup'}
 SPHERES_SIDE_QUEST = {'Cave', 'NoProgress', 'SmallTextArea'}
@@ -3131,6 +3169,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 else:
                     broken_set_ids.add(set_id)
 
+            found_ring_flag = False
             for flag in flags:
                 if ((flag in CARD_TYPES_FLAGS and
                      card_type not in CARD_TYPES_FLAGS[flag]) or
@@ -3143,6 +3182,17 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         errors.append(message)
                     else:
                         broken_set_ids.add(set_id)
+                elif flag in RING_FLAGS:
+                    if found_ring_flag:
+                        message = ('More than one ring flag for row #{}{}'
+                                   .format(i, scratch))
+                        logging.error(message)
+                        if not card_scratch:
+                            errors.append(message)
+                        else:
+                            broken_set_ids.add(set_id)
+                    else:
+                        found_ring_flag = True
 
         if card_flags_back is not None:
             flags = extract_flags(card_flags_back)
@@ -3171,6 +3221,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 else:
                     broken_set_ids.add(set_id)
 
+            found_ring_flag = False
             for flag in flags:
                 if ((flag in CARD_TYPES_FLAGS_BACK and
                      card_type_back not in CARD_TYPES_FLAGS_BACK[flag]) or
@@ -3183,6 +3234,17 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         errors.append(message)
                     else:
                         broken_set_ids.add(set_id)
+                elif flag in RING_FLAGS:
+                    if found_ring_flag:
+                        message = ('More than one ring flag back for row #{}{}'
+                                   .format(i, scratch))
+                        logging.error(message)
+                        if not card_scratch:
+                            errors.append(message)
+                        else:
+                            broken_set_ids.add(set_id)
+                    else:
+                        found_ring_flag = True
 
         if (card_artist is not None and
                 card_type in CARD_TYPES_NO_ARTIST):

@@ -1388,7 +1388,19 @@ function run(progress, target, filename, icons) {
 					}
 				}
 
-				if (card['Removed for Easy Mode'] && j >= parseInt(card['Quantity']) - parseInt(card['Removed for Easy Mode'])) {
+				if (flags.indexOf('BlueRing') > -1) {
+					s.set('Difficulty', 'Blue');
+				}
+				else if (flags.indexOf('GreenRing') > -1) {
+					s.set('Difficulty', 'Green');
+				}
+				else if (flags.indexOf('PurpleRing') > -1) {
+					s.set('Difficulty', 'Purple');
+				}
+				else if (flags.indexOf('RedRing') > -1) {
+					s.set('Difficulty', 'Red');
+				}
+				else if (card['Removed for Easy Mode'] && j >= parseInt(card['Quantity']) - parseInt(card['Removed for Easy Mode'])) {
 					s.set('Difficulty', 'Gold');
 				}
 

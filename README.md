@@ -457,6 +457,10 @@ List of available sphere values:
 - `NoCopyright`
 - `Promo` (`Hero` only)
 - `UnknownEncounterSetNumber`
+- `BlueRing`
+- `GreenRing`
+- `PurpleRing`
+- `RedRing`
 
 **Special Icons**
 
