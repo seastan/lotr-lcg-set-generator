@@ -631,6 +631,7 @@ function run(progress, target, filename, icons) {
 						['ThreatCost', 'Cost'],
 						['Stage', 'Cost'],
 						['Engagement', 'Engagement Cost'],
+						['StageLetter', 'Engagement Cost'],
 						['Threat', 'Threat'],
 						['Willpower', 'Willpower'],
 						['Attack', 'Attack'],
@@ -654,6 +655,7 @@ function run(progress, target, filename, icons) {
 					if (doubleSideTypes.indexOf(cardType) > -1) {
 						mapping = mapping.concat([
 							['NameBack', 'BName'],
+							['StageLetterBack', 'BEngagement Cost'],
 							['RulesBack', 'BText'],
 							['FlavourBack', 'BFlavour'],
 							['StoryBack', 'BFlavour'],
@@ -712,7 +714,6 @@ function run(progress, target, filename, icons) {
 						['Trait', 'BTraits'],
 						['ResourceCost', 'BCost'],
 						['ThreatCost', 'BCost'],
-						['Stage', 'BCost'],
 						['Engagement', 'BEngagement Cost'],
 						['Threat', 'BThreat'],
 						['Willpower', 'BWillpower'],
