@@ -1,4 +1,5 @@
-""" Collect various data from Hall of Beorn.
+# -*- coding: utf8 -*-
+""" Collect various data from Hall of Beorn and RingsDB.
 """
 import codecs
 from collections import Counter
@@ -6,39 +7,19 @@ import csv
 import json
 import os
 import re
-import time
 import uuid
 
-import requests
 import unidecode
+
+from lotr import escape_filename, get_content
 
 
 HALLOFBEORN_URL = 'http://hallofbeorn.com/Export/Cards?setType=ALL_SETS'
+RINGSDB_URL = 'https://ringsdb.com/api/public/cards/'
 OUTPUT_PATH = os.path.join('Output', 'Scripts')
 
-URL_TIMEOUT = 15
-URL_RETRIES = 3
-URL_SLEEP = 10
 
-
-def get_content(url):
-    """ Get URL content.
-    """
-    for i in range(URL_RETRIES):
-        try:
-            req = requests.get(url, timeout=URL_TIMEOUT)
-            res = req.content
-            break
-        except Exception:  # pylint: disable=W0703
-            if i < URL_RETRIES - 1:
-                time.sleep(URL_SLEEP)
-            else:
-                raise
-
-    return res
-
-
-def get_data():
+def get_hall_data():
     """ Get Hall of Beorn data.
     """
     data = get_content(HALLOFBEORN_URL)
@@ -46,7 +27,15 @@ def get_data():
     return data
 
 
-def filter_data(data):
+def get_ringsdb_data():
+    """ Get RingsDB data.
+    """
+    data = get_content(RINGSDB_URL)
+    data = json.loads(data)
+    return data
+
+
+def filter_hall_data(data):
     """ Filter Hall of Beorn data.
     """
     data = [c for c in data
@@ -76,7 +65,7 @@ def filter_data(data):
 def collect_traits(data):
     """ Collect traits statistics from Hall of Beorn.
     """
-    data = filter_data(data)
+    data = filter_hall_data(data)
     text = [(c['text'].replace('~', '')
              .replace('[leadership]', '***')
              .replace('[lore]', '***')
@@ -153,7 +142,7 @@ def transform_keyword(value):
 def collect_keywords(data):
     """ Collect keywords statistics from Hall of Beorn.
     """
-    data = filter_data(data)
+    data = filter_hall_data(data)
     keywords = [
         item for sublist in [
             [(transform_keyword(t.strip()),
@@ -205,18 +194,19 @@ def collect_keywords(data):
 def collect_stat():
     """ Collect traits and keywords statistics from Hall of Beorn.
     """
-    data = get_data()
+    data = get_hall_data()
     collect_traits(data)
     collect_keywords(data)
     print('Done')
 
 
-def get_ringsdb_csv(pack_name, pack_code):
-    """ Get Hall of Beorn data and prepare a csv file for RingsDB.
+def create_ringsdb_csv(pack_name, pack_code):
+    """ Get Hall of Beorn data and create a csv file for RingsDB.
     """
-    data = get_data()
+    data = get_hall_data()
     data = [c for c in data if c['pack_name'] == pack_name]
-    file_path = os.path.join(OUTPUT_PATH, '{}.csv'.format(pack_name))
+    file_path = os.path.join(OUTPUT_PATH, '{}.csv'.format(
+        escape_filename(pack_name)))
     with open(file_path, 'w', newline='', encoding='utf-8') as obj:
         obj.write(codecs.BOM_UTF8.decode('utf-8'))
         fieldnames = ['pack', 'type', 'sphere', 'position', 'code', 'name',
@@ -277,6 +267,128 @@ def get_ringsdb_csv(pack_name, pack_code):
     print('Done')
 
 
+def create_dragncards_json(pack_name, pack_id):  # pylint: disable=R0912,R0914
+    """ Get Hall of Beorn data and create a csv file for RingsDB.
+    """
+    source_data = get_ringsdb_data()
+    cards = {}
+    for row in source_data:
+        if row['pack_code'] in ('Starter', 'DoD', 'EoL', 'DoG', 'RoR', 'MotKA',
+                                'ALePMotKA'):
+            continue
+
+        if 'cost' in row:
+            cost = str(row['cost'])
+        elif 'threat' in row:
+            cost = str(row['threat'])
+        else:
+            cost = ''
+
+        key = (row['name'], row['type_name'], row['sphere_name'], cost)
+        if key in cards:
+            cards[key] = '{}, {}'.format(cards[key], row['octgnid'])
+            print('Duplicate IDs for key {}: {}'.format(key, cards[key]))
+        else:
+            cards[key] = row['octgnid']
+
+    data = [r for r in source_data if r['pack_name'] == pack_name]
+    json_data = {}
+    sh_data = ''
+    for row in data:
+        card_type = row['type_name']
+        if card_type == 'Other':
+            card_type = 'Contract'
+        elif card_type == 'Campaign':
+            card_type = 'Treasure'
+
+        if 'cost' in row:
+            cost = str(row['cost'])
+        elif 'threat' in row:
+            cost = str(row['threat'])
+        else:
+            cost = ''
+
+        side_a = {
+            'name': unidecode.unidecode(row['name'].replace("'", '’')),
+            'printname': row['name'].replace("'", '’'),
+            'unique': str(int(row['is_unique'])),
+            'type': card_type,
+            'sphere': row['sphere_name'],
+            'traits': row['traits'],
+            'keywords': '',
+            'cost': cost,
+            'engagementcost': '',
+            'threat': '',
+            'willpower': str(row.get('willpower', '')),
+            'attack': str(row.get('attack', '')),
+            'defense': str(row.get('defense', '')),
+            'hitpoints': str(row.get('health', '')),
+            'questpoints': str(row.get('quest', '')),
+            'victorypoints': str(row.get('victory', '')),
+            'text': re.sub(r'(?:<b>|<\/b>|<i>|<\/i>)', '', row['text']),
+            'shadow': ''
+        }
+
+        side_b = {
+            'name': 'player',
+            'printname': 'player',
+            'unique': '',
+            'type': '',
+            'sphere': '',
+            'traits': '',
+            'keywords': '',
+            'cost': '',
+            'engagementcost': '',
+            'threat': '',
+            'willpower': '',
+            'attack': '',
+            'defense': '',
+            'hitpoints': '',
+            'questpoints': '',
+            'victorypoints': '',
+            'text': '',
+            'shadow': ''
+        }
+
+        card_data = {
+            'sides': {
+                'A': side_a,
+                'B': side_b
+            },
+            'cardsetid': pack_id,
+            'cardpackname': pack_name,
+            'cardid': row['octgnid'],
+            'cardnumber': str(row['position']),
+            'cardquantity': str(row['quantity']),
+            'cardencounterset': ''
+        }
+        json_data[row['octgnid']] = card_data
+
+        key = (row['name'], row['type_name'], row['sphere_name'], cost)
+        if key in cards:
+            line = 'cp {}.jpg {}.jpg\n'.format(cards[key], row['octgnid'])
+        else:
+            line = '  No matching card found for {}\n'.format(key)
+
+        sh_data += line
+
+    file_path = os.path.join(OUTPUT_PATH, '{}.json'.format(
+        escape_filename(pack_name)))
+    with open(file_path, 'w', encoding='utf-8') as obj:
+        res = json.dumps(json_data, ensure_ascii=True, indent=4)
+        obj.write(res)
+
+    file_path = os.path.join(OUTPUT_PATH, '{}.sh'.format(
+        escape_filename(pack_name)))
+    with open(file_path, 'w') as obj:
+        obj.write(sh_data)
+    print('Done')
+
+
 if __name__ == '__main__':
     collect_stat()
-    # get_ringsdb_csv('Dwarves of Durin', '31')
+    # create_ringsdb_csv('Dwarves of Durin', '31')
+    # create_dragncards_json('Dwarves of Durin', '5971cfbb-b5e4-40aa-be0f-3cc575141f18')
+    # create_dragncards_json('Elves of Lórien', '1dffad96-4516-4da5-9b5c-31596784040f')
+    # create_dragncards_json('Defenders of Gondor', 'a4ad9700-a391-4f7c-a239-f32bc1878eaa')
+    # create_dragncards_json('Riders of Rohan', '5a5e23e5-455c-47eb-8275-bfc4b939f7f6')
