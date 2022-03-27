@@ -93,6 +93,7 @@ CARD_EASY_MODE = 'Removed for Easy Mode'
 CARD_ADDITIONAL_ENCOUNTER_SETS = 'Additional Encounter Sets'
 CARD_ADVENTURE = 'Adventure'
 CARD_ICON = 'Collection Icon'
+CARD_COPYRIGHT = 'Copyright'
 CARD_BACK = 'Card Back'
 CARD_VERSION = 'Version'
 CARD_DECK_RULES = 'Deck Rules'
@@ -296,6 +297,7 @@ CARD_TYPES_SUBTITLE = {'Campaign', 'Objective', 'Objective Ally',
                        'Objective Hero', 'Objective Location',
                        'Quest', 'Ship Objective'}
 CARD_TYPES_NO_ICON = {'Full Art Landscape', 'Full Art Portrait', 'Rules'}
+CARD_TYPES_NO_COPYRIGHT = {'Presentation', 'Rules'}
 CARD_TYPES_DECK_RULES = {'Nightmare', 'Quest'}
 CARD_TYPES_ONE_COPY = {'Campaign', 'Contract', 'Encounter Side Quest',
                        'Full Art Landscape', 'Full Art Portrait', 'Hero',
@@ -1856,6 +1858,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_additional_encounter_sets = row[CARD_ADDITIONAL_ENCOUNTER_SETS]
         card_adventure = row[CARD_ADVENTURE]
         card_icon = row[CARD_ICON]
+        card_copyright = row[CARD_COPYRIGHT]
         card_back = row[CARD_BACK]
         card_deck_rules = row[CARD_DECK_RULES]
         card_scratch = row[CARD_SCRATCH]
@@ -3566,6 +3569,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         if card_icon is not None and card_type in CARD_TYPES_NO_ICON:
             message = 'Redundant collection icon for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_copyright is not None and card_type in CARD_TYPES_NO_COPYRIGHT:
+            message = 'Redundant copyright for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -6310,7 +6322,7 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                      CARD_FLAGS, CARD_ARTIST, CARD_PANX, CARD_PANY,
                      CARD_SCALE, CARD_PORTRAIT_SHADOW, CARD_EASY_MODE,
                      CARD_ADDITIONAL_ENCOUNTER_SETS, CARD_ADVENTURE, CARD_ICON,
-                     CARD_BACK, CARD_VERSION):
+                     CARD_COPYRIGHT, CARD_BACK, CARD_VERSION):
             value = _get_xml_property_value(row, name, card_type)
             if value != '':
                 properties.append((name, value))

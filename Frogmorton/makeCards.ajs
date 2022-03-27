@@ -450,6 +450,9 @@ translate['Full Art Landscape'] = {'English': 'Full Art Landscape', 'French': 'F
 	'Polish': 'Full Art Landscape', 'Italian': 'Full Art Landscape', 'Portuguese': 'Full Art Landscape'};
 translate['Full Art Portrait'] = {'English': 'Full Art Portrait', 'French': 'Full Art Portrait', 'German': 'Full Art Portrait', 'Spanish': 'Full Art Portrait',
 	'Polish': 'Full Art Portrait', 'Italian': 'Full Art Portrait', 'Portuguese': 'Full Art Portrait'};
+translate['Presentation'] = {'English': 'Presentation', 'French': 'Presentation', 'German': 'Presentation', 'Spanish': 'Presentation', 'Polish': 'Presentation',
+	'Italian': 'Presentation', 'Portuguese': 'Presentation'};
+translate['Rules'] = {'English': 'Rules', 'French': 'Rules', 'German': 'Rules', 'Spanish': 'Rules', 'Polish': 'Rules', 'Italian': 'Rules', 'Portuguese': 'Rules'};
 
 Thread.busyWindow(main, 'Updating cards...', true);
 
@@ -485,7 +488,7 @@ function run(progress, target, filename, icons) {
 
 	var setName = docElement.getAttribute('name');
 	var setIcon = docElement.getAttribute('icon');
-	var copyrightText = docElement.getAttribute('copyright');
+	var setCopyright = docElement.getAttribute('copyright');
 
 	var png300Bleed = false;
 	var png480Bleed = false;
@@ -1134,20 +1137,19 @@ function run(progress, target, filename, icons) {
 					}
 				}
 
-				if ((cardType == 'Presentation') || (cardType == 'Rules')) {
-					s.set('Type', ' ');
-					s.set('Copyright', '');
+				if ((cardType == 'Campaign') && (cardSphere == 'Setup')) {
+					s.set('Type', updateVafthrudnir(translate['Setup'][lang].toUpperCase(), 5.095, lang));
+					s.set('Template', 'Standard');
 				}
 				else {
-					if ((cardType == 'Campaign') && (cardSphere == 'Setup')) {
-						s.set('Type', updateVafthrudnir(translate['Setup'][lang].toUpperCase(), 5.095, lang));
-						s.set('Template', 'Standard');
-					}
-					else {
-						s.set('Type', updateVafthrudnir(translate[cardType][lang].toUpperCase(), 5.095, lang));
-					}
+					s.set('Type', updateVafthrudnir(translate[cardType][lang].toUpperCase(), 5.095, lang));
+				}
 
-					s.set('Copyright', copyrightText);
+				if (card['Copyright']) {
+					s.set('Copyright', card['Copyright']);
+				}
+				else {
+					s.set('Copyright', setCopyright);
 				}
 
 				if (((cardType == 'Presentation') && (['BlueNightmare', 'GreenNightmare', 'PurpleNightmare', 'RedNightmare', 'BrownNightmare', 'YellowNightmare'].indexOf(cardSphere) == -1)) || (cardType == 'Rules')) {
