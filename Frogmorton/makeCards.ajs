@@ -1166,8 +1166,15 @@ function run(progress, target, filename, icons) {
 					else {
 						selectedIcon = card['Set'];
 					}
-					let iconName = escapeIconFileName(selectedIcon) + '_stroke';
-					if ((flags.indexOf('Promo') == -1) && (icons.indexOf(iconName) > -1)) {
+
+					let iconName;
+					if (flags.indexOf('Promo') > -1) {
+						iconName = escapeIconFileName(selectedIcon) + '_black';
+					}
+					else {
+						iconName = escapeIconFileName(selectedIcon) + '_stroke';
+					}
+					if (icons.indexOf(iconName) > -1) {
 						s.set('Collection', 'Custom');
 						s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
 					}
