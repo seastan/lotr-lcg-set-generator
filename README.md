@@ -453,14 +453,15 @@ List of available sphere values:
 
 **Flags**
 
-- `NoArtist`
-- `NoCopyright`
-- `Promo` (`Hero` only)
-- `UnknownEncounterSetNumber`
 - `BlueRing`
 - `GreenRing`
 - `PurpleRing`
 - `RedRing`
+- `NoArtist`
+- `NoCopyright`
+- `Promo` (`Hero` only)
+- `UnknownEncounterSetNumber`
+- `AdditionalCopies`
 
 **Special Icons**
 

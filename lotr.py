@@ -312,8 +312,9 @@ CARD_TYPES_NIGHTMARE = {'Encounter Side Quest', 'Enemy', 'Location',
 CARD_TYPES_NO_DISCORD_CHANNEL = {'Full Art Landscape', 'Full Art Portrait',
                                  'Rules', 'Presentation'}
 
-FLAGS = {'NoArtist', 'NoCopyright', 'Promo', 'UnknownEncounterSetNumber',
-         'BlueRing', 'GreenRing', 'PurpleRing', 'RedRing'}
+FLAGS = {'BlueRing', 'GreenRing', 'PurpleRing', 'RedRing', 'NoArtist',
+         'NoCopyright', 'Promo', 'UnknownEncounterSetNumber',
+         'AdditionalCopies'}
 RING_FLAGS = {'BlueRing', 'GreenRing', 'PurpleRing', 'RedRing'}
 SPHERES = set()
 SPHERES_CAMPAIGN = {'Setup'}
@@ -1957,7 +1958,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif ((card_type in CARD_TYPES_ONE_COPY or card_sphere == 'Boon') and
-              card_quantity != 1):
+              card_quantity != 1 and
+              not (card_flags and
+                   'AdditionalCopies' in extract_flags(card_flags))):
             message = ('Incorrect card quantity for row #{}{}'.format(
                 i, scratch))
             logging.error(message)
@@ -1966,7 +1969,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_type in CARD_TYPES_THREE_COPIES and
-              card_quantity not in (1, 3)):
+              card_quantity not in (1, 3) and
+              not (card_flags and
+                   'AdditionalCopies' in extract_flags(card_flags))):
             message = ('Incorrect card quantity for row #{}{}'.format(
                 i, scratch))
             logging.error(message)
