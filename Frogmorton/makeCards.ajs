@@ -758,13 +758,6 @@ function run(progress, target, filename, icons) {
 						continue;
 					}
 
-					if (vXml == '-') {
-						vXml = 'minus';
-					}
-					else if (vXml == 'empty') {
-						vXml = 'empty1x1';
-					}
-
 					if (['Victory Points', 'BVictory Points'].indexOf(nXml + '') > -1) {
 						if ((cardType != 'Presentation') && (cardType != 'Rules') && vXml.match(/^[0-9]+$/)) {
 							vXml = translate['Victory'][lang].toUpperCase() + ' ' + vXml;

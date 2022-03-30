@@ -241,6 +241,10 @@ CARD_TYPES_ENCOUNTER_SET_NUMBER = {'Encounter Side Quest', 'Enemy', 'Location',
                                    'Objective Hero', 'Objective Location',
                                    'Ship Enemy', 'Ship Objective', 'Treachery'}
 CARD_TYPES_FLAGS = {'Promo': {'Hero'},
+                    'NoTraits':
+                    {'Ally', 'Enemy', 'Hero', 'Location', 'Objective Ally',
+                     'Objective Hero', 'Objective Location', 'Ship Enemy',
+                     'Ship Objective', 'Treasure'},
                     'BlueRing':
                     {'Encounter Side Quest', 'Enemy', 'Location', 'Objective',
                      'Objective Ally', 'Objective Hero', 'Objective Location',
@@ -258,6 +262,11 @@ CARD_TYPES_FLAGS = {'Promo': {'Hero'},
                      'Objective Ally', 'Objective Hero', 'Objective Location',
                      'Ship Enemy', 'Ship Objective', 'Treachery'}}
 CARD_TYPES_FLAGS_BACK = {'Promo': {'Hero'},
+                         'NoTraits':
+                         {'Ally', 'Enemy', 'Hero', 'Location',
+                          'Objective Ally', 'Objective Hero',
+                          'Objective Location', 'Ship Enemy', 'Ship Objective',
+                          'Treasure'},
                          'BlueRing':
                          {'Encounter Side Quest', 'Enemy', 'Location',
                           'Objective', 'Objective Ally', 'Objective Hero',
@@ -313,7 +322,7 @@ CARD_TYPES_NO_DISCORD_CHANNEL = {'Full Art Landscape', 'Full Art Portrait',
                                  'Rules', 'Presentation'}
 
 FLAGS = {'BlueRing', 'GreenRing', 'PurpleRing', 'RedRing', 'NoArtist',
-         'NoCopyright', 'Promo', 'AdditionalCopies'}
+         'NoCopyright', 'NoTraits', 'Promo', 'AdditionalCopies'}
 RING_FLAGS = {'BlueRing', 'GreenRing', 'PurpleRing', 'RedRing'}
 SPHERES = set()
 SPHERES_CAMPAIGN = {'Setup'}
@@ -2202,7 +2211,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 else:
                     broken_set_ids.add(set_id)
 
-        if card_traits is None and card_type in CARD_TYPES_TRAITS:
+        if (card_traits is None and
+                card_type in CARD_TYPES_TRAITS and
+                not (card_flags and 'NoTraits' in extract_flags(card_flags))):
             message = 'No traits for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2241,7 +2252,10 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif card_traits_back is None and card_type_back in CARD_TYPES_TRAITS:
+        elif (card_traits_back is None and
+              card_type_back in CARD_TYPES_TRAITS and
+              not (card_flags_back and
+                   'NoTraits' in extract_flags(card_flags_back))):
             message = 'No traits back for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:

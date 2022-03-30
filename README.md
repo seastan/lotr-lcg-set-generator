@@ -459,6 +459,7 @@ List of available sphere values:
 - `RedRing`
 - `NoArtist`
 - `NoCopyright`
+- `NoTraits`
 - `Promo` (`Hero` only)
 - `AdditionalCopies`
 
