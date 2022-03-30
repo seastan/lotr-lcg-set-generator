@@ -82,6 +82,7 @@ CARD_TEXT = 'Text'
 CARD_SHADOW = 'Shadow'
 CARD_FLAVOUR = 'Flavour'
 CARD_PRINTED_NUMBER = 'Printed Card Number'
+CARD_ENCOUNTER_SET_NUMBER = 'Encounter Set Number'
 CARD_FLAGS = 'Flags'
 CARD_ARTIST = 'Artist'
 CARD_PANX = 'PanX'
@@ -211,6 +212,7 @@ CARD_TYPES_TEXT = {}
 #                   'Objective Hero', 'Objective Location', 'Player Objective',
 #                   'Player Side Quest', 'Presentation', 'Rules', 'Ship Enemy',
 #                   'Ship Objective', 'Treasure'}
+CARD_TYPES_NO_TEXT = {'Full Art Landscape', 'Full Art Portrait'}
 CARD_TYPES_TEXT_BACK = {}
 #CARD_TYPES_TEXT_BACK = {'Attachment', 'Campaign', 'Encounter Side Quest',
 #                        'Event', 'Hero', 'Location', 'Nightmare', 'Objective',
@@ -218,7 +220,8 @@ CARD_TYPES_TEXT_BACK = {}
 #                        'Objective Location', 'Player Objective',
 #                        'Player Side Quest', 'Quest', 'Ship Enemy',
 #                        'Ship Objective', 'Treasure'}
-CARD_TYPES_NO_TEXT_BACK = {'Presentation'}
+CARD_TYPES_NO_TEXT_BACK = {'Full Art Landscape', 'Full Art Portrait',
+                           'Presentation'}
 CARD_TYPES_SHADOW = {'Enemy', 'Location', 'Objective', 'Objective Ally',
                      'Objective Hero', 'Objective Location', 'Ship Enemy',
                      'Ship Objective', 'Treachery'}
@@ -226,16 +229,18 @@ CARD_TYPES_SHADOW_ENCOUNTER = {'Ally', 'Attachment', 'Event',
                                'Player Objective'}
 CARD_TYPES_NO_FLAVOUR = {'Full Art Landscape', 'Full Art Portrait',
                          'Presentation', 'Rules'}
-CARD_TYPES_NO_FLAVOUR_BACK = {'Nightmare', 'Presentation', 'Rules'}
+CARD_TYPES_NO_FLAVOUR_BACK = {'Full Art Landscape', 'Full Art Portrait',
+                              'Nightmare', 'Presentation', 'Rules'}
 CARD_TYPES_NO_PRINTED_NUMBER = {'Full Art Landscape', 'Full Art Portrait',
                                 'Presentation', 'Rules'}
-CARD_TYPES_NO_PRINTED_NUMBER_BACK = {'Campaign', 'Nightmare',
+CARD_TYPES_NO_PRINTED_NUMBER_BACK = {'Campaign', 'Full Art Landscape',
+                                     'Full Art Portrait', 'Nightmare',
                                      'Presentation', 'Rules'}
+CARD_TYPES_ENCOUNTER_SET_NUMBER = {'Encounter Side Quest', 'Enemy', 'Location',
+                                   'Objective', 'Objective Ally',
+                                   'Objective Hero', 'Objective Location',
+                                   'Ship Enemy', 'Ship Objective', 'Treachery'}
 CARD_TYPES_FLAGS = {'Promo': {'Hero'},
-                    'UnknownEncounterSetNumber':
-                    {'Encounter Side Quest', 'Enemy', 'Location', 'Objective',
-                     'Objective Ally', 'Objective Hero', 'Objective Location',
-                     'Ship Enemy', 'Ship Objective', 'Treachery'},
                     'BlueRing':
                     {'Encounter Side Quest', 'Enemy', 'Location', 'Objective',
                      'Objective Ally', 'Objective Hero', 'Objective Location',
@@ -253,11 +258,6 @@ CARD_TYPES_FLAGS = {'Promo': {'Hero'},
                      'Objective Ally', 'Objective Hero', 'Objective Location',
                      'Ship Enemy', 'Ship Objective', 'Treachery'}}
 CARD_TYPES_FLAGS_BACK = {'Promo': {'Hero'},
-                         'UnknownEncounterSetNumber':
-                         {'Encounter Side Quest', 'Enemy', 'Location',
-                          'Objective', 'Objective Ally', 'Objective Hero',
-                          'Objective Location', 'Ship Enemy', 'Ship Objective',
-                          'Treachery'},
                          'BlueRing':
                          {'Encounter Side Quest', 'Enemy', 'Location',
                           'Objective', 'Objective Ally', 'Objective Hero',
@@ -313,8 +313,7 @@ CARD_TYPES_NO_DISCORD_CHANNEL = {'Full Art Landscape', 'Full Art Portrait',
                                  'Rules', 'Presentation'}
 
 FLAGS = {'BlueRing', 'GreenRing', 'PurpleRing', 'RedRing', 'NoArtist',
-         'NoCopyright', 'Promo', 'UnknownEncounterSetNumber',
-         'AdditionalCopies'}
+         'NoCopyright', 'Promo', 'AdditionalCopies'}
 RING_FLAGS = {'BlueRing', 'GreenRing', 'PurpleRing', 'RedRing'}
 SPHERES = set()
 SPHERES_CAMPAIGN = {'Setup'}
@@ -1821,6 +1820,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_shadow = row[CARD_SHADOW]
         card_flavour = row[CARD_FLAVOUR]
         card_printed_number = row[CARD_PRINTED_NUMBER]
+        card_encounter_set_number = row[CARD_ENCOUNTER_SET_NUMBER]
         card_flags = row[CARD_FLAGS]
         card_artist = row[CARD_ARTIST]
         card_panx = row[CARD_PANX]
@@ -1848,6 +1848,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_shadow_back = row[BACK_PREFIX + CARD_SHADOW]
         card_flavour_back = row[BACK_PREFIX + CARD_FLAVOUR]
         card_printed_number_back = row[BACK_PREFIX + CARD_PRINTED_NUMBER]
+        card_encounter_set_number_back = row[
+            BACK_PREFIX + CARD_ENCOUNTER_SET_NUMBER]
         card_flags_back = row[BACK_PREFIX + CARD_FLAGS]
         card_artist_back = row[BACK_PREFIX + CARD_ARTIST]
         card_panx_back = row[BACK_PREFIX + CARD_PANX]
@@ -3025,6 +3027,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif card_text is not None and card_type in CARD_TYPES_NO_TEXT:
+            message = 'Redundant text for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if card_text_back is not None and card_type_back is None:
             message = 'Redundant text back for row #{}{}'.format(i, scratch)
@@ -3146,6 +3156,35 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
               card_type_back in CARD_TYPES_NO_PRINTED_NUMBER_BACK):
             message = 'Redundant printed number back for row #{}{}'.format(
                 i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_encounter_set_number is not None and
+                card_type not in CARD_TYPES_ENCOUNTER_SET_NUMBER):
+            message = 'Redundant encounter set number for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_encounter_set_number_back is not None and
+                card_type_back is None):
+            message = ('Redundant encounter set number back for row #{}{}'
+                       .format(i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_encounter_set_number_back is not None and
+              card_type_back not in CARD_TYPES_ENCOUNTER_SET_NUMBER):
+            message = ('Redundant encounter set number back for row #{}{}'
+                       .format(i, scratch))
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
@@ -6325,10 +6364,11 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                      CARD_WILLPOWER, CARD_ATTACK, CARD_DEFENSE, CARD_HEALTH,
                      CARD_QUEST, CARD_VICTORY, CARD_SPECIAL_ICON, CARD_TEXT,
                      CARD_SHADOW, CARD_FLAVOUR, CARD_PRINTED_NUMBER,
-                     CARD_FLAGS, CARD_ARTIST, CARD_PANX, CARD_PANY,
-                     CARD_SCALE, CARD_PORTRAIT_SHADOW, CARD_EASY_MODE,
-                     CARD_ADDITIONAL_ENCOUNTER_SETS, CARD_ADVENTURE, CARD_ICON,
-                     CARD_COPYRIGHT, CARD_BACK, CARD_VERSION):
+                     CARD_ENCOUNTER_SET_NUMBER, CARD_FLAGS, CARD_ARTIST,
+                     CARD_PANX, CARD_PANY, CARD_SCALE, CARD_PORTRAIT_SHADOW,
+                     CARD_EASY_MODE, CARD_ADDITIONAL_ENCOUNTER_SETS,
+                     CARD_ADVENTURE, CARD_ICON, CARD_COPYRIGHT, CARD_BACK,
+                     CARD_VERSION):
             value = _get_xml_property_value(row, name, card_type)
             if value != '':
                 properties.append((name, value))
@@ -6365,9 +6405,10 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                          CARD_THREAT, CARD_WILLPOWER, CARD_ATTACK,
                          CARD_DEFENSE, CARD_HEALTH, CARD_QUEST, CARD_VICTORY,
                          CARD_SPECIAL_ICON, CARD_TEXT, CARD_SHADOW,
-                         CARD_FLAVOUR, CARD_PRINTED_NUMBER, CARD_FLAGS,
-                         CARD_ARTIST, CARD_PANX, CARD_PANY,
-                         CARD_SCALE, CARD_PORTRAIT_SHADOW):
+                         CARD_FLAVOUR, CARD_PRINTED_NUMBER,
+                         CARD_ENCOUNTER_SET_NUMBER, CARD_FLAGS, CARD_ARTIST,
+                         CARD_PANX, CARD_PANY, CARD_SCALE,
+                         CARD_PORTRAIT_SHADOW):
                 value = _get_xml_property_value(row, BACK_PREFIX + name,
                                                 card_type)
                 if value != '':
@@ -6527,7 +6568,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                               'Treasure')
                 and card_sphere not in ('Boon', 'Burden') and encounter_set):
             encounter_cards[card.attrib['id']] = encounter_set
-            prop = _get_property(card, 'Encounter Set Number')
+            prop = _get_property(card, 'Encounter Set Number Start')
             prop.set('value', str(encounter_sets.get(encounter_set, 0) + 1))
             prop.tail = '\n      '
             quantity = int(

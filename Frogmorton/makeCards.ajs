@@ -653,7 +653,8 @@ function run(progress, target, filename, icons) {
 						['Cycle', 'Adventure'],
 						['CollectionNumberCustom', 'Card Number'],
 						['CollectionNumberCustomOverwrite', 'Printed Card Number'],
-						['CollectionInfo', 'Version']
+						['CollectionInfo', 'Version'],
+						['EncounterSetNumberOverwrite', 'Encounter Set Number']
 					];
 					if (doubleSideTypes.indexOf(cardType) > -1) {
 						mapping = mapping.concat([
@@ -736,7 +737,8 @@ function run(progress, target, filename, icons) {
 						['Cycle', 'Adventure'],
 						['CollectionNumberCustom', 'Card Number'],
 						['CollectionNumberCustomOverwrite', 'BPrinted Card Number'],
-						['CollectionInfo', 'Version']
+						['CollectionInfo', 'Version'],
+						['EncounterSetNumberOverwrite', 'BEncounter Set Number']
 					];
 				}
 
@@ -1379,16 +1381,11 @@ function run(progress, target, filename, icons) {
 					s.set('Subtype', updateVafthrudnir(translate[cardSphere][lang].toUpperCase(), 3.515, lang));
 				}
 
-				if (flags.indexOf('UnknownEncounterSetNumber') > -1) {
-					s.set('EncounterSetNumberOverwrite', '???');
+				if (card['Encounter Set Number Start']) {
+					s.set('EncounterSetNumber', parseInt(card['Encounter Set Number Start']) + j);
 				}
-				else {
-					if (card['Encounter Set Number']) {
-						s.set('EncounterSetNumber', parseInt(card['Encounter Set Number']) + j);
-					}
-					if (card['Encounter Set Total']) {
-						s.set('EncounterSetTotal', card['Encounter Set Total']);
-					}
+				if (card['Encounter Set Total']) {
+					s.set('EncounterSetTotal', card['Encounter Set Total']);
 				}
 
 				if (flags.indexOf('BlueRing') > -1) {
