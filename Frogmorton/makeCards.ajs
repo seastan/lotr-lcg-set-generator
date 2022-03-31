@@ -1294,6 +1294,9 @@ function run(progress, target, filename, icons) {
 							s.set('PortraitBackShadow', card['Portrait Shadow']);
 						}
 					}
+					if (card['BPortrait Shadow']) {
+						s.set('PortraitBackShadow', card['BPortrait Shadow']);
+					}
 					if (card['Artwork']) {
 						s.set('Portrait-external-path', 'project:imagesRaw/' + card['Artwork']);
 						if (card['PanX'] && card['PanY'] && card['Scale']) {
