@@ -745,6 +745,9 @@ def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
 
     artist = card.get(prefix + lotr.CARD_ARTIST, '')
     card_artist = '' if artist == '' else '\n\n*Artist*: {}'.format(artist)
+    if (card_artist and 'NoArtist' in
+            lotr.extract_flags(card.get(prefix + lotr.CARD_FLAGS))):
+        card_artist = '{} *(not displayed on the card)*'.format(card_artist)
 
     res = f"""{card_unique}{card_name}
 {card_sphere}{card_type}{card_promo}{card_cost}{card_engagement}{card_stage}{card_skills}
@@ -821,6 +824,10 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
     version = card.get(lotr.CARD_VERSION, '')
     card_version = '' if version == '' else ' **{}**'.format(version)
 
+    custom_copyright = card.get(lotr.CARD_COPYRIGHT, '')
+    card_custom_copyright = ('' if custom_copyright == ''
+                             else '**{}**\n'.format(custom_copyright))
+
     quantity = card[lotr.CARD_QUANTITY]
     removed_easy_mode = card.get(lotr.CARD_EASY_MODE, 0)
     if removed_easy_mode > 0:
@@ -847,7 +854,7 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
     res = f"""{res_a}{res_b}
 
 {card_set}{card_icon}, {card_number}{card_version} {card_quantity}
-{card_encounter_set}{card_adventure}{card_custom_back}{card_id}
+{card_encounter_set}{card_adventure}{card_custom_back}{card_custom_copyright}{card_id}
 
 {card_deck_rules}{ringsdb_url}{row_url}
 {channel_url}"""
