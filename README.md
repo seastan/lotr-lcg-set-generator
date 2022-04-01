@@ -453,15 +453,20 @@ List of available sphere values:
 
 **Flags**
 
-- `BlueRing`
-- `GreenRing`
-- `PurpleRing`
-- `RedRing`
+- `AdditionalCopies`
 - `NoArtist`
 - `NoCopyright`
 - `NoTraits`
 - `Promo` (`Hero` only)
-- `AdditionalCopies`
+- `BlueRing`
+- `GreenRing`
+- `PurpleRing`
+- `RedRing`
+
+**Portrait Shadows**
+
+- `Black`
+- `PortraitTint`` (`Quest` Side A only)
 
 **Special Icons**
 

@@ -1290,11 +1290,11 @@ function run(progress, target, filename, icons) {
 				if (side == 'front') {
 					if (card['Portrait Shadow']) {
 						s.set('PortraitShadow', card['Portrait Shadow']);
-						if (cardType == 'Quest') {
+						if ((cardType == 'Quest') && (!card['BArtwork'] || (card['BArtwork'] == card['Artwork']))) {
 							s.set('PortraitBackShadow', card['Portrait Shadow']);
 						}
 					}
-					if (card['BPortrait Shadow']) {
+					if ((cardType == 'Quest') && card['BPortrait Shadow'] && card['BArtwork'] && (card['BArtwork'] != card['Artwork'])) {
 						s.set('PortraitBackShadow', card['BPortrait Shadow']);
 					}
 					if (card['Artwork']) {

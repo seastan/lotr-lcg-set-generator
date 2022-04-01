@@ -3526,8 +3526,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif card_portrait_shadow not in (None, 'Black'):
-            message = ('Incorrect format for portrait shadow for row #{}{}'
+        elif card_portrait_shadow not in (None, 'Black', 'PortraitTint'):
+            message = ('Incorrect value for portrait shadow for row #{}{}'
+                       .format(i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_type != 'Quest' and card_portrait_shadow == 'PortraitTint':
+            message = ('Incorrect value for portrait shadow for row #{}{}'
                        .format(i, scratch))
             logging.error(message)
             if not card_scratch:
@@ -3543,7 +3551,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        if (card_portrait_shadow_back is not None and
+        elif (card_portrait_shadow_back is not None and
                 card_type_back not in CARD_TYPES_LANDSCAPE):
             message = 'Redundant portrait shadow back for row #{}{}'.format(
                 i, scratch)
@@ -3553,7 +3561,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif card_portrait_shadow_back not in (None, 'Black'):
-            message = ('Incorrect format for portrait shadow back for row '
+            message = ('Incorrect value for portrait shadow back for row '
                        '#{}{}'.format(i, scratch))
             logging.error(message)
             if not card_scratch:
