@@ -991,8 +991,8 @@ function run(progress, target, filename, icons) {
 					s.set('Body-pointsize', 7);
 					s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size 7>');
 					s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size 7>');
-					s.set('Flavour-format', '<left></size></family><family "Times New Roman"><size 6.25><i>');
-					s.set('FlavourBack-format', '<left></size></family><family "Times New Roman"><size 6.25><i>');
+					s.set('Flavour-format', '<left></size></family><family "Times New Roman"><size 7><i>');
+					s.set('FlavourBack-format', '<left></size></family><family "Times New Roman"><size 7><i>');
 					s.set('Trait-format', '<center><width regular><tracking -0.005><family "Times New Roman"><size 7.75><i><b>');
 					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.075 0.075>');
 					s.set('Body-lineTightness', 0.2);
@@ -1693,13 +1693,29 @@ function markUp(vXml, nXml, lang, setID, cardType) {
 
 	var defaultFontSize;
 	if (landscapeTypes.indexOf(cardType) > -1) {
-		defaultFontSize = 7;
+		if (['Traits', 'BTraits'].indexOf(nXml + '') > -1) {
+			defaultFontSize = 7.75;
+		}
+		else {
+			defaultFontSize = 7;
+		}
 	}
-	else if (['Flavour', 'BFlavour'].indexOf(nXml + '') > -1) {
-		defaultFontSize = 6.25;
+	else if (cardType == 'Hero Promo') {
+		if (['Traits', 'BTraits'].indexOf(nXml + '') > -1) {
+			defaultFontSize = 6.5;
+		}
+		else if (['Flavour', 'BFlavour'].indexOf(nXml + '') > -1) {
+			defaultFontSize = 4.9;
+		}
+		else {
+			defaultFontSize = 5.9;
+		}
 	}
 	else if (['Traits', 'BTraits'].indexOf(nXml + '') > -1) {
 		defaultFontSize = 8.25;
+	}
+	else if (['Flavour', 'BFlavour'].indexOf(nXml + '') > -1) {
+		defaultFontSize = 6.25;
 	}
 	else {
 		defaultFontSize = 7.5;
