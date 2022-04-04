@@ -2669,7 +2669,8 @@ Targets removed.
         users = [m.display_name for m in self.guilds[0].members
                  if m.display_name not in ignore_users]
         users = [re.sub(r'[^\u0000-\uffff]+', '', u).strip() for u in users]
-        users = [re.sub(r'[,./<>?;\':"\[\]{}]$', '', u).strip() for u in users]
+        users = [re.sub(r'[,./<>?;\':"\[\]\|{}]$', '', u).strip()
+                 for u in users]
         users = [u.replace('[', '[[').replace(']', ']]').replace('[[', '[lsb]')
                  .replace(']]', '[rsb]') for u in users]
         users = sorted(list(set(users)), key=str.casefold)
