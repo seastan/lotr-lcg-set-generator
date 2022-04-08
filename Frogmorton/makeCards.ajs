@@ -13,7 +13,227 @@ var doubleSideTypes = ['Campaign', 'Contract', 'Nightmare', 'Presentation', 'Que
 var landscapeTypes = ['Cave', 'Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Full Art Landscape', 'Player Side Quest', 'Quest'];
 var playerTypes = ['Ally', 'Attachment', 'Contract', 'Event', 'Full Art Landscape', 'Full Art Portrait', 'Hero', 'Hero Promo', 'Player Objective', 'Player Side Quest', 'Treasure'];
 var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Objective', 'Player Side Quest'];
-var nonUniqueTypes = ['Campaign', 'Contract', 'Event', 'Full Art Landscape', 'Full Art Portrait', 'Nightmare', 'Player Side Quest', 'Presentation', 'Quest', 'Rules', 'Treachery'];
+var optionalTraitTypes = ['Cave', 'Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Player Side Quest'];
+
+/*
+var Region = {};
+Region['Ally'] = '';
+Region['Attachment'] = '';
+Region['Campaign'] = '';
+Region['Cave'] = '';
+Region['Contract'] = '';
+Region['Encounter Side Quest'] = '';
+Region['Encounter Side Quest SmallTextArea'] = '';
+Region['Enemy'] = '';
+Region['Event'] = '';
+Region['Full Art Landscape'] = '';
+Region['Full Art Portrait'] = '';
+Region['Hero'] = '';
+Region['Hero Promo'] = '';
+Region['Location'] = '';
+Region['Nightmare'] = '';
+Region['Objective'] = '';
+Region['Objective Ally'] = '';
+Region['Objective Hero'] = '';
+Region['Objective Location'] = '';
+Region['Player Objective'] = '';
+Region['Player Side Quest'] = '';
+Region['Presentation'] = '';
+Region['Quest'] = '';
+Region['Rules'] = '';
+Region['Ship Enemy'] = '';
+Region['Ship Objective'] = '';
+Region['Treachery'] = '';
+Region['Treasure'] = '';
+*/
+
+var gameNamePortraitRegion = {};
+gameNamePortraitRegion['Presentation'] = '50,33,313,140';
+
+var namePortraitRegion = {};
+namePortraitRegion['Presentation'] = '50,420,313,113';
+
+var pageInRegion = {};
+pageInRegion['Presentation'] = '48,488,317,15';
+pageInRegion['Rules'] = '48,488,317,15';
+
+var sideRegion = {};
+sideRegion['Contract'] = '0,279,413,17';
+
+var encounterSet1PortraitRegion = {};
+encounterSet1PortraitRegion['Quest'] = '450,213,20,20';
+
+var encounterSet2PortraitRegion = {};
+encounterSet2PortraitRegion['Quest'] = '426,213,20,20';
+
+var encounterSet3PortraitRegion = {};
+encounterSet3PortraitRegion['Quest'] = '402,213,20,20';
+
+var encounterSet4PortraitRegion = {};
+encounterSet4PortraitRegion['Quest'] = '378,213,20,20';
+
+var encounterSet5PortraitRegion = {};
+encounterSet5PortraitRegion['Quest'] = '354,213,20,20';
+
+var collectionInfoRegion = {};
+collectionInfoRegion['Ally'] = '350,527,20,15';
+collectionInfoRegion['Attachment'] = '350,527,20,15';
+collectionInfoRegion['Campaign'] = '350,527,20,15';
+collectionInfoRegion['Cave'] = '504,375,20,15';
+collectionInfoRegion['Contract'] = '350,527,20,15';
+collectionInfoRegion['Encounter Side Quest'] = '419,375,20,15';
+collectionInfoRegion['Encounter Side Quest SmallTextArea'] = '419,375,20,15';
+collectionInfoRegion['Enemy'] = '350,527,20,15';
+collectionInfoRegion['Event'] = '350,527,20,15';
+collectionInfoRegion['Hero'] = '350,527,20,15';
+collectionInfoRegion['Hero Promo'] = '326,510,20,12';
+collectionInfoRegion['Location'] = '350,527,20,15';
+collectionInfoRegion['Nightmare'] = '350,527,20,15';
+collectionInfoRegion['Objective'] = '350,527,20,15';
+collectionInfoRegion['Objective Ally'] = '350,527,20,15';
+collectionInfoRegion['Objective Hero'] = '350,527,20,15';
+collectionInfoRegion['Objective Location'] = '350,527,20,15';
+collectionInfoRegion['Player Objective'] = '350,527,20,15';
+collectionInfoRegion['Player Side Quest'] = '419,375,20,15';
+collectionInfoRegion['Presentation'] = '350,527,20,15';
+collectionInfoRegion['Quest'] = '419,375,20,15';
+collectionInfoRegion['Rules'] = '350,527,20,15';
+collectionInfoRegion['Ship Enemy'] = '350,527,20,15';
+collectionInfoRegion['Ship Objective'] = '350,527,20,15';
+collectionInfoRegion['Treachery'] = '350,527,20,15';
+collectionInfoRegion['Treasure'] = '350,527,20,15';
+
+var collectionNumberRegion = {};
+collectionNumberRegion['Ally'] = '334,527,18,15';
+collectionNumberRegion['Attachment'] = '334,527,18,15';
+collectionNumberRegion['Campaign'] = '334,527,18,15';
+collectionNumberRegion['Cave'] = '488,375,18,15';
+collectionNumberRegion['Contract'] = '334,527,18,15';
+collectionNumberRegion['Encounter Side Quest'] = '403,375,18,15';
+collectionNumberRegion['Encounter Side Quest SmallTextArea'] = '403,375,18,15';
+collectionNumberRegion['Enemy'] = '334,527,18,15';
+collectionNumberRegion['Event'] = '334,527,18,15';
+collectionNumberRegion['Full Art Landscape'] = '334,527,18,15';
+collectionNumberRegion['Full Art Portrait'] = '334,527,18,15';
+collectionNumberRegion['Hero'] = '334,527,18,15';
+collectionNumberRegion['Hero Promo'] = '314,510,18,12';
+collectionNumberRegion['Location'] = '334,527,18,15';
+collectionNumberRegion['Nightmare'] = '334,527,18,15';
+collectionNumberRegion['Objective'] = '334,527,18,15';
+collectionNumberRegion['Objective Ally'] = '334,527,18,15';
+collectionNumberRegion['Objective Hero'] = '334,527,18,15';
+collectionNumberRegion['Objective Location'] = '334,527,18,15';
+collectionNumberRegion['Player Objective'] = '334,527,18,15';
+collectionNumberRegion['Player Side Quest'] = '403,375,18,15';
+collectionNumberRegion['Quest'] = '403,375,18,15';
+collectionNumberRegion['Ship Enemy'] = '334,527,18,15';
+collectionNumberRegion['Ship Objective'] = '334,527,18,15';
+collectionNumberRegion['Treachery'] = '334,527,18,15';
+collectionNumberRegion['Treasure'] = '334,527,18,15';
+
+var collectionPortraitRegion = {};
+collectionPortraitRegion['Ally'] = '322,528,12,12';
+collectionPortraitRegion['Attachment'] = '322,528,12,12';
+collectionPortraitRegion['Campaign'] = '322,528,12,12';
+collectionPortraitRegion['Cave'] = '476,376,12,12';
+collectionPortraitRegion['Contract'] = '322,528,12,12';
+collectionPortraitRegion['Encounter Side Quest'] = '391,376,12,12';
+collectionPortraitRegion['Encounter Side Quest SmallTextArea'] = '391,376,12,12';
+collectionPortraitRegion['Enemy'] = '322,528,12,12';
+collectionPortraitRegion['Event'] = '322,528,12,12';
+collectionPortraitRegion['Hero'] = '322,528,12,12';
+collectionPortraitRegion['Hero Promo'] = '305,511,9,9';
+collectionPortraitRegion['Location'] = '322,528,12,12';
+collectionPortraitRegion['Nightmare'] = '322,528,12,12';
+collectionPortraitRegion['Objective'] = '322,528,12,12';
+collectionPortraitRegion['Objective Ally'] = '322,528,12,12';
+collectionPortraitRegion['Objective Hero'] = '322,528,12,12';
+collectionPortraitRegion['Objective Location'] = '322,528,12,12';
+collectionPortraitRegion['Player Objective'] = '322,528,12,12';
+collectionPortraitRegion['Player Side Quest'] = '391,376,12,12';
+collectionPortraitRegion['Presentation'] = '185,383,43,43';
+collectionPortraitRegion['Quest'] = '391,376,12,12';
+collectionPortraitRegion['Ship Enemy'] = '322,528,12,12';
+collectionPortraitRegion['Ship Objective'] = '322,528,12,12';
+collectionPortraitRegion['Treachery'] = '322,528,12,12';
+collectionPortraitRegion['Treasure'] = '322,528,12,12';
+
+var typeRegion = {};
+typeRegion['Ally'] = '136,504,141,20';
+typeRegion['Attachment'] = '136,504,141,20';
+typeRegion['Campaign'] = '136,504,141,20';
+typeRegion['Contract'] = '136,504,141,20';
+typeRegion['Enemy'] = '136,504,141,20';
+typeRegion['Event'] = '136,504,141,20';
+typeRegion['Hero'] = '136,504,141,20';
+typeRegion['Hero Promo'] = '285,448,32,15';
+typeRegion['Location'] = '136,504,141,20';
+typeRegion['Nightmare'] = '136,504,141,20';
+typeRegion['Objective'] = '136,504,141,20';
+typeRegion['Objective Ally'] = '136,504,141,20';
+typeRegion['Objective Hero'] = '136,504,141,20';
+typeRegion['Objective Location'] = '136,504,141,20';
+typeRegion['Player Objective'] = '136,504,141,20';
+typeRegion['Ship Enemy'] = '136,504,141,20';
+typeRegion['Ship Objective'] = '136,504,141,20';
+typeRegion['Treachery'] = '136,504,141,20';
+typeRegion['Treasure'] = '136,504,141,20';
+
+var copyrightRegion = {};
+copyrightRegion['Ally'] = '158,527,124,15';
+copyrightRegion['Attachment'] = '158,527,124,15';
+copyrightRegion['Campaign'] = '158,527,124,15';
+copyrightRegion['Cave'] = '345,375,124,15';
+copyrightRegion['Contract'] = '158,527,124,15';
+copyrightRegion['Encounter Side Quest'] = '225,375,124,15';
+copyrightRegion['Encounter Side Quest SmallTextArea'] = '225,375,124,15';
+copyrightRegion['Enemy'] = '158,527,124,15';
+copyrightRegion['Event'] = '158,527,124,15';
+copyrightRegion['Full Art Landscape'] = '34,364,124,15';
+copyrightRegion['Full Art Portrait'] = '34,514,124,15';
+copyrightRegion['Hero'] = '158,527,124,15';
+copyrightRegion['Hero Promo'] = '161,510,124,12';
+copyrightRegion['Location'] = '158,527,124,15';
+copyrightRegion['Nightmare'] = '158,527,124,15';
+copyrightRegion['Objective'] = '158,527,124,15';
+copyrightRegion['Objective Ally'] = '158,527,124,15';
+copyrightRegion['Objective Hero'] = '158,527,124,15';
+copyrightRegion['Objective Location'] = '158,527,124,15';
+copyrightRegion['Player Objective'] = '158,527,124,15';
+copyrightRegion['Player Side Quest'] = '225,375,124,15';
+copyrightRegion['Quest'] = '225,375,124,15';
+copyrightRegion['Ship Enemy'] = '158,527,124,15';
+copyrightRegion['Ship Objective'] = '158,527,124,15';
+copyrightRegion['Treachery'] = '158,527,124,15';
+copyrightRegion['Treasure'] = '158,527,124,15';
+
+var artistRegion = {};
+artistRegion['Ally'] = '63,527,100,15';
+artistRegion['Attachment'] = '63,527,100,15';
+artistRegion['Campaign'] = '63,527,100,15';
+artistRegion['Cave'] = '48,375,100,15';
+artistRegion['Contract'] = '63,527,100,15';
+artistRegion['Encounter Side Quest'] = '130,375,100,15';
+artistRegion['Encounter Side Quest SmallTextArea'] = '130,375,100,15';
+artistRegion['Enemy'] = '63,527,100,15';
+artistRegion['Event'] = '63,527,100,15';
+artistRegion['Full Art Landscape'] = '390,364,140,15';
+artistRegion['Full Art Portrait'] = '240,514,140,15';
+artistRegion['Hero'] = '63,527,100,15';
+artistRegion['Hero Promo'] = '79,510,88,12';
+artistRegion['Location'] = '63,527,100,15';
+artistRegion['Nightmare'] = '63,527,100,15';
+artistRegion['Objective'] = '63,527,100,15';
+artistRegion['Objective Ally'] = '63,527,100,15';
+artistRegion['Objective Hero'] = '63,527,100,15';
+artistRegion['Objective Location'] = '63,527,100,15';
+artistRegion['Player Objective'] = '63,527,100,15';
+artistRegion['Player Side Quest'] = '130,375,100,15';
+artistRegion['Quest'] = '130,375,100,15';
+artistRegion['Ship Enemy'] = '63,527,100,15';
+artistRegion['Ship Objective'] = '63,527,100,15';
+artistRegion['Treachery'] = '63,527,100,15';
+artistRegion['Treasure'] = '63,527,100,15';
 
 var portraitRegion = {};
 portraitRegion['Ally'] = '87,0,326,330';
@@ -43,16 +263,18 @@ portraitRegion['Ship Objective'] = '78,81,335,268';
 portraitRegion['Treachery'] = '60,0,353,330';
 portraitRegion['Treasure'] = '0,61,413,265';
 
+var portraitBackRegion = {};
+portraitBackRegion['Contract'] = '0,0,413,315';
+portraitBackRegion['Quest'] = '0,0,563,413';
+
 var bodyRegion = {};
 bodyRegion['Ally'] = '57,378,299,114';
 bodyRegion['Attachment'] = '57,347,299,144';
-bodyRegion['Campaign'] = '56,277,301,211';
 bodyRegion['Enemy'] = '57,377,299,114';
 bodyRegion['Event'] = '65,351,283,140';
 bodyRegion['Hero'] = '57,377,299,114';
 bodyRegion['Hero Promo'] = '78,467,259,45';
 bodyRegion['Location'] = '56,346,301,142';
-bodyRegion['Nightmare'] = '54,325,305,192';
 bodyRegion['Objective'] = '65,355,283,137';
 bodyRegion['Objective Ally'] = '65,355,283,137';
 bodyRegion['Objective Hero'] = '65,355,283,137';
@@ -61,7 +283,7 @@ bodyRegion['Player Objective'] = '65,355,283,137';
 bodyRegion['Ship Enemy'] = '57,377,299,114';
 bodyRegion['Ship Objective'] = '65,355,283,137';
 bodyRegion['Treachery'] = '65,356,283,135';
-bodyRegion['Treasure'] = '57,347,299,132';
+bodyRegion['Treasure'] = '57,347,299,130';
 
 bodyRegion['Cave'] = '50,303,171,60';
 bodyRegion['Encounter Side Quest'] = '51,269,461,94';
@@ -92,11 +314,17 @@ traitRegion['Encounter Side Quest SmallTextArea'] = '51,304,461,20';
 traitRegion['Player Side Quest'] = '51,251,461,20';
 
 var bodyNoTraitRegion = {};
+bodyNoTraitRegion['Campaign'] = '56,277,301,211';
+bodyNoTraitRegion['Contract'] = '65,313,283,176';
+bodyNoTraitRegion['Nightmare'] = '54,325,305,192';
+bodyNoTraitRegion['Presentation'] = '48,73,317,418';
+bodyNoTraitRegion['Rules'] = '48,73,317,418';
+bodyNoTraitRegion['Quest'] = '51,249,461,114';
+
 bodyNoTraitRegion['Cave'] = '50,283,171,80';
 bodyNoTraitRegion['Encounter Side Quest'] = '51,249,461,114';
 bodyNoTraitRegion['Encounter Side Quest SmallTextArea'] = '51,304,461,58';
 bodyNoTraitRegion['Player Side Quest'] = '51,251,461,114';
-bodyNoTraitRegion['Quest'] = '51,249,461,114';
 
 var bodyRightNoTraitRegion = {};
 bodyRightNoTraitRegion['Cave'] = '347,283,171,80';
@@ -131,57 +359,25 @@ nameRegion['Ship Objective'] = '75,48,263,29';
 nameRegion['Treachery'] = '55,108,26,164';
 nameRegion['Treasure'] = '132,45,183,25';
 
-var nameRegionUnique = {};
-nameRegionUnique['Ally'] = '100,326,213,25';
-nameRegionUnique['Attachment'] = '132,36,183,25';
-nameRegionUnique['Campaign'] = '108,43,197,25';
-nameRegionUnique['Cave'] = '80,40,160,25';
-nameRegionUnique['Contract'] = '84,245,245,29';
-nameRegionUnique['Encounter Side Quest'] = '100,39,363,29';
-nameRegionUnique['Encounter Side Quest SmallTextArea'] = '100,39,363,29';
-nameRegionUnique['Enemy'] = '94,325,225,25';
-nameRegionUnique['Event'] = '57,86,26,178';
-nameRegionUnique['Hero'] = '100,325,213,25';
-nameRegionUnique['Hero Promo'] = '103,416,206,25';
-nameRegionUnique['Location'] = '108,40,197,25';
-nameRegionUnique['Nightmare'] = '95,40,225,34';
-nameRegionUnique['Objective'] = '75,45,263,29';
-nameRegionUnique['Objective Ally'] = '75,45,263,29';
-nameRegionUnique['Objective Hero'] = '75,45,263,29';
-nameRegionUnique['Objective Location'] = '75,45,263,29';
-nameRegionUnique['Player Objective'] = '127,45,211,29';
-nameRegionUnique['Player Side Quest'] = '144,44,368,29';
-nameRegionUnique['Quest'] = '144,44,368,29';
-nameRegionUnique['Ship Enemy'] = '94,325,225,25';
-nameRegionUnique['Ship Objective'] = '75,45,263,29';
-nameRegionUnique['Treachery'] = '55,108,26,164';
-nameRegionUnique['Treasure'] = '132,43,183,25';
-
-var namePointSize = {};
-namePointSize['Ally'] = 6.5;
-namePointSize['Attachment'] = 6.5;
-namePointSize['Campaign'] = 6.5;
-namePointSize['Cave'] = 6.5;
-namePointSize['Contract'] = 7.5;
-namePointSize['Encounter Side Quest'] = 7.5;
-namePointSize['Encounter Side Quest SmallTextArea'] = 7.5;
-namePointSize['Enemy'] = 6.5;
-namePointSize['Event'] = 6.5;
-namePointSize['Hero'] = 6.5;
-namePointSize['Hero Promo'] = 6.5;
-namePointSize['Location'] = 6.5;
-namePointSize['Nightmare'] = 6.5;
-namePointSize['Objective'] = 7.5;
-namePointSize['Objective Ally'] = 7.5;
-namePointSize['Objective Hero'] = 7.5;
-namePointSize['Objective Location'] = 7.5;
-namePointSize['Player Objective'] = 7.5;
-namePointSize['Player Side Quest'] = 7.5;
-namePointSize['Quest'] = 7.5;
-namePointSize['Ship Enemy'] = 6.5;
-namePointSize['Ship Objective'] = 7.5;
-namePointSize['Treachery'] = 6.5;
-namePointSize['Treasure'] = 6.5;
+var nameUniqueRegion = {};
+nameUniqueRegion['Ally'] = '100,326,213,25';
+nameUniqueRegion['Attachment'] = '132,36,183,25';
+nameUniqueRegion['Cave'] = '80,40,160,25';
+nameUniqueRegion['Encounter Side Quest'] = '100,39,363,29';
+nameUniqueRegion['Encounter Side Quest SmallTextArea'] = '100,39,363,29';
+nameUniqueRegion['Enemy'] = '94,325,225,25';
+nameUniqueRegion['Hero'] = '100,325,213,25';
+nameUniqueRegion['Hero Promo'] = '103,416,206,25';
+nameUniqueRegion['Location'] = '108,40,197,25';
+nameUniqueRegion['Objective'] = '75,45,263,29';
+nameUniqueRegion['Objective Ally'] = '75,45,263,29';
+nameUniqueRegion['Objective Hero'] = '75,45,263,29';
+nameUniqueRegion['Objective Location'] = '75,45,263,29';
+nameUniqueRegion['Player Objective'] = '127,45,211,29';
+nameUniqueRegion['Ship Enemy'] = '94,325,225,25';
+nameUniqueRegion['Ship Objective'] = '75,45,263,29';
+nameUniqueRegion['Treachery'] = '55,108,26,164';
+nameUniqueRegion['Treasure'] = '132,43,183,25';
 
 var subtypeRegion = {};
 subtypeRegion['Attachment'] = '146,301,124,20';
@@ -204,6 +400,10 @@ hitPointsRegion['Objective Ally'] = '61,272,58,40';
 hitPointsRegion['Objective Hero'] = '61,272,58,40';
 hitPointsRegion['Ship Enemy'] = '64,269,58,40';
 hitPointsRegion['Ship Objective'] = '61,272,58,40';
+
+var engagementRegion = {};
+engagementRegion['Enemy'] = '76,48,36,25';
+engagementRegion['Ship Enemy'] = '76,48,36,25';
 
 var attackRegion = {};
 attackRegion['Ally'] = '70,157,26,16';
@@ -242,10 +442,6 @@ var threatCostRegion = {};
 threatCostRegion['Hero'] = '75,50,36,25';
 threatCostRegion['Hero Promo'] = '50,48,33,23';
 
-var threatCostTint = {};
-threatCostTint['Hero'] = '200.0,0.7,0.7';
-threatCostTint['Hero Promo'] = '0.0,0.0,0.95';
-
 var progressRegion = {};
 progressRegion['Cave'] = '52,257,35,24';
 progressRegion['Encounter Side Quest'] = '52,202,35,24';
@@ -265,10 +461,6 @@ adventureRegion['Ship Objective'] = '67,83,276,15';
 
 var cycleRegion = {};
 cycleRegion['Campaign'] = '68,243,274,32';
-
-var sphereBodyShape = {};
-sphereBodyShape['Hero'] = '0,0,472,40,0';
-sphereBodyShape['Hero Promo'] = '0,0,0,0,0';
 
 var resourceCostRegion = {};
 resourceCostRegion['Ally'] = '67,41,56,37';
@@ -324,13 +516,6 @@ encounterNumberRegion['Ship Enemy'] = '328,313,26,10';
 encounterNumberRegion['Ship Objective'] = '322,316,26,10';
 encounterNumberRegion['Treachery'] = '328,317,26,10';
 
-var optionBodyShape = {};
-optionBodyShape['Cave'] = '0,0,348,0,64';
-optionBodyShape['Encounter Side Quest'] = '0,0,348,0,64';
-optionBodyShape['Encounter Side Quest SmallTextArea'] = '0,0,348,0,64';
-optionBodyShape['Player Side Quest'] = '0,0,348,0,62';
-optionBodyShape['Quest'] = '0,0,350,0,64';
-
 var optionRightDecorationRegion = {};
 optionRightDecorationRegion['Ally'] = '298,503,72,18';
 optionRightDecorationRegion['Attachment'] = '300,503,72,18';
@@ -380,6 +565,144 @@ optionRightRegion['Ship Enemy'] = '308,504,59,20';
 optionRightRegion['Ship Objective'] = '297,503,59,20';
 optionRightRegion['Treachery'] = '308,504,59,20';
 optionRightRegion['Treasure'] = '260,478,59,20';
+
+var optionSpecialRegion = {};
+optionSpecialRegion['Enemy'] = '55,494,24,24';
+optionSpecialRegion['Location'] = '55,494,24,24';
+optionSpecialRegion['Objective'] = '75,494,24,24';
+optionSpecialRegion['Objective Ally'] = '75,494,24,24';
+optionSpecialRegion['Objective Location'] = '75,494,24,24';
+optionSpecialRegion['Ship Enemy'] = '55,494,24,24';
+optionSpecialRegion['Ship Objective'] = '75,494,24,24';
+optionSpecialRegion['Treachery'] = '55,494,24,24';
+
+var questStageRegion = {};
+questStageRegion['1'] = '44,43,62,42';
+questStageRegion['2'] = '46,44,62,42';
+questStageRegion['3'] = '45,44,62,42';
+questStageRegion['4'] = '44,43,62,42';
+questStageRegion['5'] = '44,43,62,42';
+questStageRegion['6'] = '45,43,62,42';
+questStageRegion['7'] = '45,43,62,42';
+questStageRegion['8'] = '45,43,62,42';
+questStageRegion['9'] = '45,43,62,42';
+
+var bodyPointSize = {};
+bodyPointSize['Ally'] = 7.5;
+bodyPointSize['Attachment'] = 7.5;
+bodyPointSize['Campaign'] = 7.5;
+bodyPointSize['Cave'] = 7;
+bodyPointSize['Contract'] = 7.5;
+bodyPointSize['Encounter Side Quest'] = 7;
+bodyPointSize['Encounter Side Quest SmallTextArea'] = 7;
+bodyPointSize['Enemy'] = 7.5;
+bodyPointSize['Event'] = 7.5;
+bodyPointSize['Hero'] = 7.5;
+bodyPointSize['Hero Promo'] = 5.9;
+bodyPointSize['Location'] = 7.5;
+bodyPointSize['Nightmare'] = 7.5;
+bodyPointSize['Objective'] = 7.5;
+bodyPointSize['Objective Ally'] = 7.5;
+bodyPointSize['Objective Hero'] = 7.5;
+bodyPointSize['Objective Location'] = 7.5;
+bodyPointSize['Player Objective'] = 7.5;
+bodyPointSize['Player Side Quest'] = 7;
+bodyPointSize['Presentation'] = 7.5;
+bodyPointSize['Quest'] = 7;
+bodyPointSize['Rules'] = 7.5;
+bodyPointSize['Ship Enemy'] = 7.5;
+bodyPointSize['Ship Objective'] = 7.5;
+bodyPointSize['Treachery'] = 7.5;
+bodyPointSize['Treasure'] = 7.5;
+
+var flavourPointSize = {};
+flavourPointSize['Ally'] = 6.25;
+flavourPointSize['Attachment'] = 6.25;
+flavourPointSize['Campaign'] = 6.25;
+flavourPointSize['Cave'] = 7;
+flavourPointSize['Contract'] = 6.25;
+flavourPointSize['Encounter Side Quest'] = 7;
+flavourPointSize['Encounter Side Quest SmallTextArea'] = 7;
+flavourPointSize['Enemy'] = 6.25;
+flavourPointSize['Event'] = 6.25;
+flavourPointSize['Hero'] = 6.25;
+flavourPointSize['Hero Promo'] = 4.9;
+flavourPointSize['Location'] = 6.25;
+flavourPointSize['Nightmare'] = 6.25;
+flavourPointSize['Objective'] = 6.25;
+flavourPointSize['Objective Ally'] = 6.25;
+flavourPointSize['Objective Hero'] = 6.25;
+flavourPointSize['Objective Location'] = 6.25;
+flavourPointSize['Player Objective'] = 6.25;
+flavourPointSize['Player Side Quest'] = 7;
+flavourPointSize['Quest'] = 7;
+flavourPointSize['Ship Enemy'] = 6.25;
+flavourPointSize['Ship Objective'] = 6.25;
+flavourPointSize['Treachery'] = 6.25;
+flavourPointSize['Treasure'] = 6.25;
+
+var traitPointSize = {};
+traitPointSize['Ally'] = 8.25;
+traitPointSize['Attachment'] = 8.25;
+traitPointSize['Cave'] = 7.75;
+traitPointSize['Encounter Side Quest'] = 7.75;
+traitPointSize['Encounter Side Quest SmallTextArea'] = 7.75;
+traitPointSize['Enemy'] = 8.25;
+traitPointSize['Event'] = 8.25;
+traitPointSize['Hero'] = 8.25;
+traitPointSize['Hero Promo'] = 6.5;
+traitPointSize['Location'] = 8.25;
+traitPointSize['Objective'] = 8.25;
+traitPointSize['Objective Ally'] = 8.25;
+traitPointSize['Objective Hero'] = 8.25;
+traitPointSize['Objective Location'] = 8.25;
+traitPointSize['Player Objective'] = 8.25;
+traitPointSize['Player Side Quest'] = 7.75;
+traitPointSize['Ship Enemy'] = 8.25;
+traitPointSize['Ship Objective'] = 8.25;
+traitPointSize['Treachery'] = 8.25;
+traitPointSize['Treasure'] = 8.25;
+
+var namePointSize = {};
+namePointSize['Ally'] = 6.5;
+namePointSize['Attachment'] = 6.5;
+namePointSize['Campaign'] = 6.5;
+namePointSize['Cave'] = 6.5;
+namePointSize['Contract'] = 7.5;
+namePointSize['Encounter Side Quest'] = 7.5;
+namePointSize['Encounter Side Quest SmallTextArea'] = 7.5;
+namePointSize['Enemy'] = 6.5;
+namePointSize['Event'] = 6.5;
+namePointSize['Hero'] = 6.5;
+namePointSize['Hero Promo'] = 6.5;
+namePointSize['Location'] = 6.5;
+namePointSize['Nightmare'] = 6.5;
+namePointSize['Objective'] = 7.5;
+namePointSize['Objective Ally'] = 7.5;
+namePointSize['Objective Hero'] = 7.5;
+namePointSize['Objective Location'] = 7.5;
+namePointSize['Player Objective'] = 7.5;
+namePointSize['Player Side Quest'] = 7.5;
+namePointSize['Quest'] = 7.5;
+namePointSize['Ship Enemy'] = 6.5;
+namePointSize['Ship Objective'] = 7.5;
+namePointSize['Treachery'] = 6.5;
+namePointSize['Treasure'] = 6.5;
+
+var threatCostTint = {};
+threatCostTint['Hero'] = '200.0,0.7,0.7';
+threatCostTint['Hero Promo'] = '0.0,0.0,0.95';
+
+var sphereBodyShape = {};
+sphereBodyShape['Hero'] = '0,0,472,40,0';
+sphereBodyShape['Hero Promo'] = '0,0,0,0,0';
+
+var optionBodyShape = {};
+optionBodyShape['Cave'] = '0,0,348,0,64';
+optionBodyShape['Encounter Side Quest'] = '0,0,348,0,64';
+optionBodyShape['Encounter Side Quest SmallTextArea'] = '0,0,348,0,64';
+optionBodyShape['Player Side Quest'] = '0,0,348,0,62';
+optionBodyShape['Quest'] = '0,0,350,0,64';
 
 var translate = {};
 translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado', 'Polish': 'Sprzymierzeniec', 'Italian': 'Alleato',
@@ -644,7 +967,6 @@ function run(progress, target, filename, icons) {
 						['OptionRight', 'Victory Points'],
 						['OptionSpecial', 'Special Icon'],
 						['Rules', 'Text'],
-						['Description', 'Text'],
 						['Shadow', 'Shadow'],
 						['Flavour', 'Flavour'],
 						['Story', 'Flavour'],
@@ -728,7 +1050,6 @@ function run(progress, target, filename, icons) {
 						['OptionRight', 'BVictory Points'],
 						['OptionSpecial', 'BSpecial Icon'],
 						['Rules', 'BText'],
-						['Description', 'BText'],
 						['Shadow', 'BShadow'],
 						['Flavour', 'BFlavour'],
 						['Story', 'BFlavour'],
@@ -788,7 +1109,7 @@ function run(progress, target, filename, icons) {
 						vXml = vXml.toUpperCase();
 					}
 
-					vXml = markUp(vXml, nXml, lang, setID, cardType);
+					vXml = markUp(vXml, nXml, cardType, lang, setID);
 					s.set(nEon, vXml);
 				}
 
@@ -796,71 +1117,12 @@ function run(progress, target, filename, icons) {
 					s.set(flags[idx_f], 1);
 				}
 
-				s.set('Name-style', 'FAMILY: {"Vafthrudnir"}');
-				s.set('Type-style', 'FAMILY: {"Vafthrudnir"}');
-				s.set('Adventure-style', 'FAMILY: {"Vafthrudnir"}');
-				s.set('Cycle-style', 'FAMILY: {"Vafthrudnir"}');
-				s.set('Option-style', 'WIDTH: SEMICONDENSED; FAMILY: {"Vafthrudnir"}');
-				s.set('EncounterSetNumber-style', 'WEIGHT: BOLD; FAMILY: {"Times New Roman"}');
-				s.set('Bottom-style', 'WEIGHT: BOLD; WIDTH: SEMICONDENSED; FAMILY: {"Times New Roman"}');
-				s.set('Adventure-pointsize', 5.25);
-				s.set('Cycle-pointsize', 5.6);
-				s.set('EncounterSetNumber-pointsize', 4);
-				s.set('Flavour-formatEnd', '</i></size></family>');
-				s.set('FlavourBack-formatEnd', '</i></size></family>');
-				s.set('Shadow-format', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
-					'<br><center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.55in>' +
-					'<br><left><image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005></size><size 7.5><i><br>');
-				s.set('Engagement-region', '76,48,36,25');
-				s.set('Engagement-tint', '32.0,1.0,0.9');
-				s.set('Progress-tint', '32.0,1.0,0.9');
-				s.set('HitPoints-tint', '0.0,0.8,1.0');
-				s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
-				s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
-
-				if (cardType == 'Presentation') {
-					if (s.get('OptionRight').search('/') > -1) {
-						s.set('LRL-Page', translate['Page'][lang]);
-						s.set('LRL-PageOf', '<bs></size><size 3> </size><size 7>/</size><size 3> </size><size 7><bs>');
-						s.set('PageNumber', s.get('OptionRight').split('/')[0]);
-						s.set('PageTotal', s.get('OptionRight').split('/')[1]);
-					}
-					else {
-						s.set('PageNumber', 0);
-						s.set('PageTotal', 0);
-					}
-
-					s.set('Story', '');
-					s.set('Flavour', '');
-					s.set('Name', '');
-					s.set('GameName', '');
-
-					s.set('Body-style', 'FOREGROUND: #000000; WIDTH: REGULAR; TRACKING: -0.005; FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5');
-					s.set('Body-pointsize', 7.5);
-					s.set('Description-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
-					s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
-					s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
-					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.1>');
-					s.set('Body-lineTightness', 0.8);
-					s.set('Body-region', '48,73,317,418');
-					s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
-					s.set('GameName-external-path', 'project:imagesRaw/' + card['ArtworkTop']);
-					s.set('GameName-portrait-clip-region', '50,33,313,140');
-					s.set('GameName-region', '50,33,313,140');
-					s.set('Name-external-path', 'project:imagesRaw/' + card['ArtworkBottom']);
-					s.set('Name-portrait-clip-region', '50,420,313,113');
-					s.set('Name-region', '50,420,313,113');
-					s.set('PageIn-region', '48,488,317,15');
-					s.set('PageIn-format', '<right><bottom><family "Times New Roman"><size 7><b>');
-					s.set('Collection-portrait-clip-region', '185,383,43,43');
-					s.set('CollectionInfo-region', '350,527,20,15');
-					s.set('LRL-IllustratorShort', ' ');
-					s.set('Artist', ' ');
+				if ((cardType == 'Cave') && (s.get('Rules').search('\\[split\\]') > -1)) {
+					s.set('RulesRight', s.get('Rules').split('\\[split\\]')[1].trim());
+					s.set('Rules', s.get('Rules').split('\\[split\\]')[0].trim());
 				}
-				else if (cardType == 'Rules') {
-					s.set('LRL-Page', translate['Page'][lang]);
-					s.set('LRL-PageOf', '<bs></size><size 3> </size><size 7>/</size><size 3> </size><size 7><bs>');
 
+				if ((cardType == 'Presentation') || (cardType == 'Rules')) {
 					if (s.get('OptionRight').search('/') > -1) {
 						s.set('PageNumber', s.get('OptionRight').split('/')[0]);
 						s.set('PageTotal', s.get('OptionRight').split('/')[1]);
@@ -881,48 +1143,15 @@ function run(progress, target, filename, icons) {
 						s.set('PageTotalBack', 0);
 					}
 
-					s.set('Name', '');
-					s.set('Story', '');
-					s.set('StoryBack', '');
-					s.set('Flavour', '');
-					s.set('FlavourBack', '');
-
-					s.set('Body-style', 'FOREGROUND: #000000; WIDTH: REGULAR; TRACKING: -0.005; FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5');
-					s.set('Body-pointsize', 7.5);
-					s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
-					s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
-					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.1>');
-					s.set('Body-lineTightness', 0.8);
-					s.set('Body-region', '48,73,317,418');
 					s.set('Background-external-path', 'project:Templates/Rules-Background.png');
 					s.set('BackgroundBack-external-path', 'project:Templates/Rules-Background.png');
-					s.set('PageIn-region', '48,488,317,15');
-					s.set('PageIn-format', '<right><bottom><family "Times New Roman"><size 7><b>');
-					s.set('CollectionInfo-region', '350,527,20,15');
+					s.set('GameName-external-path', 'project:imagesRaw/' + card['ArtworkTop']);
+					s.set('Name-external-path', 'project:imagesRaw/' + card['ArtworkBottom']);
 				}
-				else if (cardType == 'Contract') {
-					s.set('Body-style', 'FOREGROUND: #000000; WIDTH: REGULAR; TRACKING: -0.005; FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5');
-					s.set('Body-pointsize', 7.5);
-					s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
-					s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
-					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.075 0.075>');
-					s.set('Body-lineTightness', 0.2);
-					s.set('Body-region', '65,313,283,176');
-					s.set('Flavour-format', '<left></size></family><family "Times New Roman"><size 6.25><i>');
-					s.set('FlavourBack-format', '<left></size></family><family "Times New Roman"><size 6.25><i>');
-					s.set('Side-region', '0,279,413,17');
-					s.set('Side-style', 'FAMILY: {"Vafthrudnir"}');
-					s.set('Side-pointsize', 3.52);
-					s.set('Type-pointsize', 7.25);
-					s.set('Type-region', '136,504,141,20');
-					s.set('SideA', updateVafthrudnir(translate['Side'][lang].toUpperCase() + ' A', 3.515, lang));
-					s.set('SideB', updateVafthrudnir(translate['Side'][lang].toUpperCase() + ' B', 3.515, lang));
-					s.set('Option-pointsize', 5.25);
-					s.set('Artist-region', '63,527,100,15');
-					s.set('Copyright-region', '158,527,124,15');
-					s.set('Collection-portrait-clip-region', '322,528,12,12');
-					s.set('CollectionNumber-region', '334,527,18,15');
-					s.set('CollectionInfo-region', '350,527,20,15');
+
+				if (cardType == 'Contract') {
+					s.set('SideA', markUp(translate['Side'][lang].toUpperCase() + ' A', 'Side', cardType, lang, setID));
+					s.set('SideB', markUp(translate['Side'][lang].toUpperCase() + ' B', 'Side', cardType, lang, setID));
 
 					if (card['BName']) {
 						s.set('Template', 'DoubleSided');
@@ -931,360 +1160,17 @@ function run(progress, target, filename, icons) {
 						s.set('Template', 'Neutral');
 					}
 				}
-				else if (cardType == 'Hero Promo') {
-					s.set('Body-style', 'FOREGROUND: #000000; WIDTH: REGULAR; TRACKING: -0.005; FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 5.9');
-					s.set('Body-pointsize', 5.9);
-					s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size 5.9>');
-					s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size 5.9>');
-					s.set('Flavour-format', '<left></size></family><family "Times New Roman"><size 4.9><i>');
-					s.set('FlavourBack-format', '<left></size></family><family "Times New Roman"><size 4.9><i>');
-					s.set('Trait-format', '<center><width regular><tracking -0.005><family "Times New Roman"><size 6.5><i><b>');
-					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.075 0.075>');
-					s.set('Body-lineTightness', 0.2);
-					s.set('Type-pointsize', 3.625);
 
-					if (translate[cardType][lang].length > 4) {
-						s.set('Type-region', '279,448,39,15');
-					}
-					else {
-						s.set('Type-region', '285,448,32,15');
-					}
-
-					s.set('TraitOut', 'true');
-					s.set('Option-pointsize', 4.1);
-					s.set('Artist-region', '79,510,88,12');
-					s.set('Copyright-region', '161,510,124,12');
-					s.set('Collection-portrait-clip-region', '305,511,9,9');
-					s.set('CollectionNumber-region', '314,510,18,12');
-					s.set('CollectionInfo-region', '326,510,20,12');
-					s.set('Bottom-colour', '#F0000000');
-					s.set('Bottom-pointsize', 3.5);
-					s.set('Bottom-stroke', 'Custom');
-					s.set('Bottom-stroke-colour', '#00000000');
-					s.set('Bottom-stroke-width', 1);
-
-					if (cardType in bodyRegion) {
-						if (lang == 'German') {
-							s.set('TraitOut-Body-region', '73,467,269,45');
-						}
-						else {
-							s.set('TraitOut-Body-region', bodyRegion[cardType]);
-						}
-					}
-
-					if (cardType in traitRegion) {
-						s.set('TraitOut-Trait-region', traitRegion[cardType]);
-					}
-				}
-				else if (cardType == 'Full Art Portrait') {
-					s.set('Artist-region', '240,514,140,15');
-					s.set('Copyright-region', '34,514,124,15');
-					s.set('Artist', '<right>' + s.get('Artist') + '</right>');
-				}
-				else if (cardType == 'Full Art Landscape') {
-					s.set('Artist-region', '390,364,140,15');
-					s.set('Copyright-region', '34,364,124,15');
-					s.set('Artist', '<right>' + s.get('Artist') + '</right>');
-				}
-				else if (landscapeTypes.indexOf(cardType) > -1) {
-					s.set('Body-style', 'FOREGROUND: #000000; WIDTH: REGULAR; TRACKING: -0.005; FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7');
-					s.set('Body-pointsize', 7);
-					s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size 7>');
-					s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size 7>');
-					s.set('Flavour-format', '<left></size></family><family "Times New Roman"><size 7><i>');
-					s.set('FlavourBack-format', '<left></size></family><family "Times New Roman"><size 7><i>');
-					s.set('Trait-format', '<center><width regular><tracking -0.005><family "Times New Roman"><size 7.75><i><b>');
-					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.075 0.075>');
-					s.set('Body-lineTightness', 0.2);
-					s.set('Story-format', '<left><family "Times New Roman"><size 7><i>');
-					s.set('StoryBack-format', '<left><family "Times New Roman"><size 7><i>');
-					s.set('Story-formatEnd', '</i></size></family>');
-					s.set('StoryBack-formatEnd', '</i></size></family>');
-					s.set('EncounterSet1-portrait-clip-region', '450,213,20,20');
-					s.set('EncounterSet2-portrait-clip-region', '426,213,20,20');
-					s.set('EncounterSet3-portrait-clip-region', '402,213,20,20');
-					s.set('EncounterSet4-portrait-clip-region', '378,213,20,20');
-					s.set('EncounterSet5-portrait-clip-region', '354,213,20,20');
-					s.set('Option-pointsize', 5.25);
-
-					if (cardTrait) {
-						s.set('TraitOut', 'true');
-						if (cardType in bodyRegion) {
-							s.set('TraitOut-Body-region', bodyRegion[cardType]);
-						}
-
-						if (cardType in traitRegion) {
-							s.set('TraitOut-Trait-region', traitRegion[cardType]);
-						}
-					}
-					else {
-						if (cardType in bodyNoTraitRegion) {
-							s.set('Body-region', bodyNoTraitRegion[cardType]);
-						}
-					}
-
-					if (cardType == 'Cave') {
-						s.set('Copyright-region', '345,375,124,15');
-						s.set('Artist-region', '48,375,100,15');
-						s.set('Collection-portrait-clip-region', '476,376,12,12');
-						s.set('CollectionNumber-region', '488,375,18,15');
-						s.set('CollectionInfo-region', '504,375,20,15');
-
-						s.set('Body-colour', '#FFFFFF');
-						s.set('Name-colour', '#FFFFFF');
-
-						s.set('BodyRight-style', 'FOREGROUND: #000000; WIDTH: REGULAR; TRACKING: -0.005; FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7');
-						s.set('BodyRight-pointsize', 7);
-						s.set('BodyRight-lineTightness', 0.2);
-						s.set('BodyRight-colour', '#FFFFFF');
-
-						if (cardType in bodyRightNoTraitRegion) {
-							s.set('BodyRight-region', bodyRightNoTraitRegion[cardType]);
-						}
-
-						if (s.get('Rules').search('\\[split\\]') > -1) {
-							s.set('RulesRight', s.get('Rules').split('\\[split\\]')[1].trim());
-							s.set('Rules', s.get('Rules').split('\\[split\\]')[0].trim());
-						}
-					}
-					else {
-						s.set('Copyright-region', '225,375,124,15');
-						s.set('Artist-region', '130,375,100,15');
-						s.set('Collection-portrait-clip-region', '391,376,12,12');
-						s.set('CollectionNumber-region', '403,375,18,15');
-						s.set('CollectionInfo-region', '419,375,20,15');
-					}
-				}
-				else {
-					s.set('Body-style', 'FOREGROUND: #000000; WIDTH: REGULAR; TRACKING: -0.005; FAMILY: {Eons.namedObjects.LRL.BodyFont}; SIZE: 7.5');
-					s.set('Body-pointsize', 7.5);
-					s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
-					s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size 7.5>');
-					s.set('Flavour-format', '<left></size></family><family "Times New Roman"><size 6.25><i>');
-					s.set('FlavourBack-format', '<left></size></family><family "Times New Roman"><size 6.25><i>');
-					s.set('Trait-format', '<center><width regular><tracking -0.005><family "Times New Roman"><size 8.25><i><b>');
-					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.075 0.075>');
-					s.set('Body-lineTightness', 0.2);
-					s.set('Type-pointsize', 7.25);
-					s.set('Type-region', '136,504,141,20');
-					s.set('TraitOut', 'true');
-					s.set('Option-pointsize', 5.25);
-					s.set('Artist-region', '63,527,100,15');
-					s.set('Copyright-region', '158,527,124,15');
-					s.set('Collection-portrait-clip-region', '322,528,12,12');
-					s.set('CollectionNumber-region', '334,527,18,15');
-					s.set('CollectionInfo-region', '350,527,20,15');
-
-					if ((cardType == 'Campaign') || (cardType == 'Nightmare')) {
-						if (cardType in bodyRegion) {
-							s.set('Body-region', bodyRegion[cardType]);
-						}
-
-						if (cardType in bodyBackRegion) {
-							s.set('BodyBack-region', bodyBackRegion[cardType]);
-						}
-					}
-					else {
-						if (cardType in bodyRegion) {
-							s.set('TraitOut-Body-region', bodyRegion[cardType]);
-						}
-
-						if (cardType in traitRegion) {
-							s.set('TraitOut-Trait-region', traitRegion[cardType]);
-						}
-					}
-				}
-
-				if (cardType == 'Quest') {
-					s.set('NameShare', 0);
-					if (s.get('Stage') + '' == '0') {
-						s.set('Stage-region', '45,43,62,42');
-					}
-					else if (s.get('Stage') + '' == '1') {
-						s.set('Stage-region', '44,43,62,42');
-					}
-					else if (s.get('Stage') + '' == '2') {
-						s.set('Stage-region', '46,44,62,42');
-					}
-					else if (s.get('Stage') + '' == '3') {
-						s.set('Stage-region', '45,44,62,42');
-					}
-					else if (s.get('Stage') + '' == '4') {
-						s.set('Stage-region', '44,43,62,42');
-					}
-					else if (s.get('Stage') + '' == '5') {
-						s.set('Stage-region', '44,43,62,42');
-					}
-					else if (s.get('Stage') + '' == '6') {
-						s.set('Stage-region', '45,43,62,42');
-					}
-					else if (s.get('Stage') + '' == '7') {
-						s.set('Stage-region', '45,43,62,42');
-					}
-					else if (s.get('Stage') + '' == '8') {
-						s.set('Stage-region', '45,43,62,42');
-					}
-					else if (s.get('Stage') + '' == '9') {
-						s.set('Stage-region', '45,43,62,42');
-					}
-					else {
-						s.set('Stage-region', '45,43,62,42');
-					}
+				if (['Boon', 'Burden'].indexOf(cardSphere) > -1) {
+					s.set('Subtype', markUp(translate[cardSphere][lang].toUpperCase(), 'Subtype', cardType, lang, setID));
 				}
 
 				if ((cardType == 'Campaign') && (cardSphere == 'Setup')) {
-					s.set('Type', updateVafthrudnir(translate['Setup'][lang].toUpperCase(), 5.095, lang));
+					s.set('Type', markUp(translate['Setup'][lang].toUpperCase(), 'Type', cardType, lang, setID));
 					s.set('Template', 'Standard');
 				}
 				else {
-					s.set('Type', updateVafthrudnir(translate[cardType][lang].toUpperCase(), 5.095, lang));
-				}
-
-				if (card['Copyright']) {
-					s.set('Copyright', card['Copyright']);
-				}
-				else {
-					s.set('Copyright', setCopyright);
-				}
-
-				if (((cardType == 'Presentation') && (['BlueNightmare', 'GreenNightmare', 'PurpleNightmare', 'RedNightmare', 'BrownNightmare', 'YellowNightmare'].indexOf(cardSphere) == -1)) || (cardType == 'Rules')) {
-					s.set('Collection', 'Empty');
-				}
-				else {
-					let selectedIcon;
-					if (card['Collection Icon']) {
-						selectedIcon = card['Collection Icon'];
-					}
-					else if (setIcon + '') {
-						selectedIcon = setIcon;
-					}
-					else {
-						selectedIcon = card['Set'];
-					}
-
-					let iconName;
-					if (flags.indexOf('Promo') > -1) {
-						iconName = escapeIconFileName(selectedIcon) + '_black';
-					}
-					else {
-						iconName = escapeIconFileName(selectedIcon) + '_stroke';
-					}
-					if (icons.indexOf(iconName) > -1) {
-						s.set('Collection', 'Custom');
-						s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
-					}
-					else {
-						let iconName = escapeIconFileName(selectedIcon);
-						if (icons.indexOf(iconName) > -1) {
-							s.set('Collection', 'Custom');
-							s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
-						}
-						else {
-							s.set('Collection', convertIconName(selectedIcon));
-						}
-					}
-				}
-
-				if (cardType in portraitRegion) {
-					s.set('Portrait-portrait-clip-region', portraitRegion[cardType]);
-					if (doubleSideTypes.indexOf(cardType) > -1) {
-						s.set('PortraitBack-portrait-clip-region', portraitRegion[cardType]);
-					}
-				}
-
-				if (s.get('Unique') + '') {
-					if (cardType in nameRegionUnique) {
-						s.set('Name-region', nameRegionUnique[cardType]);
-					}
-				}
-				else {
-					if (cardType in nameRegion) {
-						s.set('Name-region', nameRegion[cardType]);
-					}
-				}
-
-				if (cardType in namePointSize) {
-					s.set('Name-pointsize', Math.round(namePointSize[cardType] * 1.734 * 100) / 100);
-				}
-
-				if (cardType in subtypeRegion) {
-					s.set('Subtype-region', subtypeRegion[cardType]);
-				}
-
-				if (cardType in hitPointsRegion) {
-					s.set('HitPoints-region', hitPointsRegion[cardType]);
-				}
-
-				if (cardType in attackRegion) {
-					s.set('Attack-region', attackRegion[cardType]);
-				}
-
-				if (cardType in defenseRegion) {
-					s.set('Defense-region', defenseRegion[cardType]);
-				}
-
-				if (cardType in willpowerRegion) {
-					s.set('Willpower-region', willpowerRegion[cardType]);
-				}
-
-				if (cardType in threatRegion) {
-					s.set('Threat-region', threatRegion[cardType]);
-				}
-
-				if (cardType in threatCostRegion) {
-					s.set('ThreatCost-region', threatCostRegion[cardType]);
-				}
-
-				if (cardType in threatCostTint) {
-					s.set('ThreatCost-tint', threatCostTint[cardType]);
-				}
-
-				if (cardType in progressRegion) {
-					s.set('Progress-region', progressRegion[cardType]);
-				}
-
-				if (cardType in adventureRegion) {
-					s.set('Adventure-region', adventureRegion[cardType]);
-				}
-
-				if (cardType in cycleRegion) {
-					s.set('Cycle-region', cycleRegion[cardType]);
-				}
-
-				if (cardType in sphereBodyShape) {
-					s.set('Sphere-Body-shape', sphereBodyShape[cardType]);
-				}
-
-				if (cardType in resourceCostRegion) {
-					s.set('ResourceCost-region', resourceCostRegion[cardType]);
-				}
-
-				if (cardType in difficultyRegion) {
-					s.set('Difficulty-region', difficultyRegion[cardType]);
-				}
-
-				if (cardType in encounterPortraitRegion) {
-					s.set('EncounterSet-portrait-clip-region', encounterPortraitRegion[cardType]);
-				}
-
-				if (cardType in encounterNumberRegion) {
-					s.set('EncounterSetNumber-region', encounterNumberRegion[cardType]);
-				}
-
-				if (cardType in optionBodyShape) {
-					s.set('Option-Body-shape', optionBodyShape[cardType]);
-				}
-
-				if (cardType in optionRightDecorationRegion) {
-					s.set('OptionRightDecoration-region', optionRightDecorationRegion[cardType]);
-				}
-
-				if (cardType in optionRightRegion) {
-					s.set('OptionRight-region', optionRightRegion[cardType]);
-				}
-
-				if (nonUniqueTypes.indexOf(cardType) > -1) {
-					s.set('Unique', '');
+					s.set('Type', markUp(translate[cardType][lang].toUpperCase(), 'Type', cardType, lang, setID));
 				}
 
 				if (side == 'front') {
@@ -1372,11 +1258,6 @@ function run(progress, target, filename, icons) {
 						}
 					}
 				}
-
-				if (['Boon', 'Burden'].indexOf(cardSphere) > -1) {
-					s.set('Subtype', updateVafthrudnir(translate[cardSphere][lang].toUpperCase(), 3.515, lang));
-				}
-
 				if (card['Encounter Set Number Start']) {
 					s.set('EncounterSetNumber', parseInt(card['Encounter Set Number Start']) + j);
 				}
@@ -1398,6 +1279,256 @@ function run(progress, target, filename, icons) {
 				}
 				else if (card['Removed for Easy Mode'] && j >= parseInt(card['Quantity']) - parseInt(card['Removed for Easy Mode'])) {
 					s.set('Difficulty', 'Gold');
+				}
+
+				if (((cardType == 'Presentation') && (['BlueNightmare', 'GreenNightmare', 'PurpleNightmare', 'RedNightmare', 'BrownNightmare', 'YellowNightmare'].indexOf(cardSphere) == -1)) || (cardType == 'Rules')) {
+					s.set('Collection', 'Empty');
+				}
+				else {
+					let selectedIcon;
+					if (card['Collection Icon']) {
+						selectedIcon = card['Collection Icon'];
+					}
+					else if (setIcon + '') {
+						selectedIcon = setIcon;
+					}
+					else {
+						selectedIcon = card['Set'];
+					}
+
+					let iconName;
+					if (flags.indexOf('Promo') > -1) {
+						iconName = escapeIconFileName(selectedIcon) + '_black';
+					}
+					else {
+						iconName = escapeIconFileName(selectedIcon) + '_stroke';
+					}
+					if (icons.indexOf(iconName) > -1) {
+						s.set('Collection', 'Custom');
+						s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
+					}
+					else {
+						let iconName = escapeIconFileName(selectedIcon);
+						if (icons.indexOf(iconName) > -1) {
+							s.set('Collection', 'Custom');
+							s.set('Collection-external-path', 'project:imagesIcons/' + iconName + '.png');
+						}
+						else {
+							s.set('Collection', convertIconName(selectedIcon));
+						}
+					}
+				}
+
+				if (card['Copyright']) {
+					s.set('Copyright', card['Copyright']);
+				}
+				else {
+					s.set('Copyright', setCopyright);
+				}
+
+				if ((cardType == 'Full Art Landscape') || (cardType == 'Full Art Portrait')) {
+					s.set('Artist', '<right>' + s.get('Artist'));
+				}
+
+				let defaultBodyPointSize = 7.5;
+				if (cardType in bodyPointSize) {
+					defaultBodyPointSize = bodyPointSize[cardType];
+				}
+
+				let defaultFlavourPointSize = 6.25;
+				if (cardType in flavourPointSize) {
+					defaultFlavourPointSize = flavourPointSize[cardType];
+				}
+
+				let defaultTraitPointSize = 8.25;
+				if (cardType in traitPointSize) {
+					defaultTraitPointSize = traitPointSize[cardType];
+				}
+				let defaultPagePointSize = 7;
+
+				s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size ' + defaultBodyPointSize + '>');
+				s.set('Rules-formatEnd', '</size></family>');
+				s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size ' + defaultBodyPointSize + '>');
+				s.set('RulesBack-formatEnd', '</size></family>');
+				s.set('RulesRight-format', '<left><tracking -0.005><family "Times New Roman"><size ' + defaultBodyPointSize + '>');
+				s.set('RulesRight-formatEnd', '</size></family>');
+				s.set('Shadow-format', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
+					'<br><center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.55in>' +
+					'<br><image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
+					'<br><left><tracking -0.005><family "Times New Roman"><size ' + defaultBodyPointSize + '><i>');
+				s.set('Shadow-formatEnd', '</i></size></family>');
+				s.set('Flavour-format', '<left><tracking -0.005><family "Times New Roman"><size ' + defaultFlavourPointSize + '><i>');
+				s.set('Flavour-formatEnd', '</i></size></family>');
+				s.set('FlavourBack-format', '<left><tracking -0.005><family "Times New Roman"><size ' + defaultFlavourPointSize + '><i>');
+				s.set('FlavourBack-formatEnd', '</i></size></family>');
+				s.set('Story-format', '<left><tracking -0.005><family "Times New Roman"><size ' + defaultFlavourPointSize + '><i>');
+				s.set('Story-formatEnd', '</i></size></family>');
+				s.set('StoryBack-format', '<left><tracking -0.005><family "Times New Roman"><size ' + defaultFlavourPointSize + '><i>');
+				s.set('StoryBack-formatEnd', '</i></size></family>');
+				s.set('Trait-format', '<center><tracking -0.005><family "Times New Roman"><size ' + defaultTraitPointSize + '><i><b>');
+				s.set('Trait-formatEnd', '</b></i></size></family>');
+				s.set('PageIn-format', '<bottom><right><tracking -0.005><family "Times New Roman"><size ' + defaultPagePointSize + '><b>');
+				s.set('PageIn-formatEnd', '</b></size></family>');
+
+				s.set('Body-style', 'WIDTH: REGULAR; FAMILY: {Eons.namedObjects.LRL.BodyFont}');
+				s.set('BodyRight-style', 'WIDTH: REGULAR; FAMILY: {Eons.namedObjects.LRL.BodyFont}');
+				s.set('Trait-style', 'WIDTH: REGULAR; WEIGHT: BOLD; POSTURE: OBLIQUE; FAMILY: {"Times New Roman"}');
+				s.set('Name-style', 'FAMILY: {"Vafthrudnir"}');
+				s.set('Subtype-style', 'FAMILY: {"Vafthrudnir"}');
+				s.set('Type-style', 'FAMILY: {"Vafthrudnir"}');
+				s.set('Adventure-style', 'FAMILY: {"Vafthrudnir"}');
+				s.set('Cycle-style', 'FAMILY: {"Vafthrudnir"}');
+				s.set('Option-style', 'WIDTH: SEMICONDENSED; FAMILY: {"Vafthrudnir"}');
+				s.set('EncounterSetNumber-style', 'WEIGHT: BOLD; FAMILY: {"Times New Roman"}');
+				s.set('Bottom-style', 'WIDTH: SEMICONDENSED; WEIGHT: BOLD; FAMILY: {"Times New Roman"}');
+				s.set('Side-style', 'FAMILY: {"Vafthrudnir"}');
+				s.set('Page-style', 'WIDTH: SEMICONDENSED; WEIGHT: BOLD; FAMILY: {"Times New Roman"}');
+				s.set('EncounterSetNumber-pointsize', 4);
+				s.set('Engagement-tint', '32.0,1.0,0.9');
+				s.set('Progress-tint', '32.0,1.0,0.9');
+				s.set('HitPoints-tint', '0.0,0.8,1.0');
+				s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
+				s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
+				s.set('LRL-Page', translate['Page'][lang]);
+				s.set('LRL-PageOf', '<bs></size><size 3> </size><size 7>/</size><size 3> </size><size 7><bs>');
+
+				if ((cardType == 'Presentation') || (cardType == 'Rules')) {
+					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.1>');
+					s.set('Body-lineTightness', 0.8);
+					s.set('BodyRight-lineTightness', 0.8);
+				}
+				else {
+					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.075 0.075>');
+					s.set('Body-lineTightness', 0.2);
+					s.set('BodyRight-lineTightness', 0.2);
+				}
+
+				if (cardType == 'Hero Promo') {
+					s.set('Bottom-colour', '#000000');
+					s.set('Bottom-stroke', 'Custom');
+					s.set('Bottom-stroke-colour', '#00000000');
+					s.set('Bottom-stroke-width', 1);
+					s.set('Bottom-pointsize', 3.5);
+				}
+				else {
+					s.set('Bottom-colour', '#FFFFFF');
+					s.set('Bottom-stroke', 'Medium');
+					s.set('Bottom-stroke-colour', '#F0000000');
+					s.set('Bottom-stroke-width', 2);
+					s.set('Bottom-pointsize', 4);
+				}
+
+				if (cardType == 'Cave') {
+					s.set('Body-colour', '#FFFFFF');
+					s.set('BodyRight-colour', '#FFFFFF');
+					s.set('Name-colour', '#FFFFFF');
+				}
+				else {
+					s.set('Body-colour', '#000000');
+					s.set('BodyRight-colour', '#000000');
+					s.set('Name-colour', '#000000');
+				}
+
+				if ((optionalTraitTypes.indexOf(cardType) > -1) && cardTrait) {
+					s.set('TraitOut', 'true');
+					if (cardType in bodyRegion) {
+						s.set('TraitOut-Body-region', bodyRegion[cardType]);
+					}
+
+					if (cardType in traitRegion) {
+						s.set('TraitOut-Trait-region', traitRegion[cardType]);
+					}
+				}
+				else if (cardType in bodyNoTraitRegion) {
+					s.set('Body-region', bodyNoTraitRegion[cardType]);
+				}
+				else {
+					s.set('TraitOut', 'true');
+					if ((cardType == 'Hero Promo') && (lang == 'German')) {
+						s.set('TraitOut-Body-region', '73,467,269,45');
+					}
+					else if (cardType in bodyRegion) {
+						s.set('TraitOut-Body-region', bodyRegion[cardType]);
+					}
+
+					if (cardType in traitRegion) {
+						s.set('TraitOut-Trait-region', traitRegion[cardType]);
+					}
+				}
+
+				if (s.get('Unique') + '') {
+					if (cardType in nameUniqueRegion) {
+						s.set('Name-region', nameUniqueRegion[cardType]);
+					}
+				}
+				else {
+					if (cardType in nameRegion) {
+						s.set('Name-region', nameRegion[cardType]);
+					}
+				}
+
+				if ((cardType == 'Hero Promo') && (translate[cardType][lang].length > 4)) {
+					s.set('Type-region', '279,448,39,15');
+				}
+				else {
+					if (cardType in typeRegion) {
+						s.set('Type-region', typeRegion[cardType]);
+					}
+				}
+
+				if (cardType == 'Quest') {
+					s.set('Stage-region', questStageRegion[s.get('Stage') + '']);
+				}
+
+				if (cardType in namePointSize) {
+					s.set('Name-pointsize', Math.round(namePointSize[cardType] * 1.734 * 100) / 100);
+				}
+
+				let relations = [
+					['Portrait-portrait-clip-region', portraitRegion],
+					['PortraitBack-portrait-clip-region', portraitBackRegion],
+					['BodyBack-region', bodyBackRegion],
+					['BodyRight-region', bodyRightNoTraitRegion],
+					['Subtype-region', subtypeRegion],
+					['HitPoints-region', hitPointsRegion],
+					['Engagement-region', engagementRegion],
+					['Attack-region', attackRegion],
+					['Defense-region', defenseRegion],
+					['Willpower-region', willpowerRegion],
+					['Threat-region', threatRegion],
+					['ThreatCost-region', threatCostRegion],
+					['Progress-region', progressRegion],
+					['Adventure-region', adventureRegion],
+					['Cycle-region', cycleRegion],
+					['ResourceCost-region', resourceCostRegion],
+					['Difficulty-region', difficultyRegion],
+					['EncounterSet-portrait-clip-region', encounterPortraitRegion],
+					['EncounterSetNumber-region', encounterNumberRegion],
+					['OptionRightDecoration-region', optionRightDecorationRegion],
+					['OptionRight-region', optionRightRegion],
+					['OptionSpecial-portrait-clip-region', optionSpecialRegion],
+					['Artist-region', artistRegion],
+					['Copyright-region', copyrightRegion],
+					['Collection-portrait-clip-region', collectionPortraitRegion],
+					['CollectionNumber-region', collectionNumberRegion],
+					['CollectionInfo-region', collectionInfoRegion],
+					['PageIn-region', pageInRegion],
+					['Side-region', sideRegion],
+					['GameName-portrait-clip-region', gameNamePortraitRegion],
+					['Name-portrait-clip-region', namePortraitRegion],
+					['EncounterSet1-portrait-clip-region', encounterSet1PortraitRegion],
+					['EncounterSet2-portrait-clip-region', encounterSet2PortraitRegion],
+					['EncounterSet3-portrait-clip-region', encounterSet3PortraitRegion],
+					['EncounterSet4-portrait-clip-region', encounterSet4PortraitRegion],
+					['EncounterSet5-portrait-clip-region', encounterSet5PortraitRegion],
+					['ThreatCost-tint', threatCostTint],
+					['Sphere-Body-shape', sphereBodyShape],
+					['Option-Body-shape', optionBodyShape]
+				];
+				for (let k = 0; k < relations.length; k++) {
+					if (cardType in relations[k][1]) {
+						s.set(relations[k][0], relations[k][1][cardType]);
+					}
 				}
 
 				let copy;
@@ -1489,6 +1620,14 @@ function exportCard(card, fname, setID, lang, simple_back, png300Bleed, png480Bl
 			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, ppi800);
 		}
 	}
+}
+
+function getProjectMember(path) {
+	var member = project.findChild(path);
+	if (member == null) {
+		throw new Error('Missing required project file: ' + path);
+	}
+	return member;
 }
 
 function capitalizeWord(value) {
@@ -1596,267 +1735,260 @@ function updateVafthrudnir(value, lowerSize, lang) {
 	return res;
 }
 
-function markUp(vXml, nXml, lang, setID, cardType) {
-	vXml += '';
-	vXml = vXml.replace(/ +(?=\n|$)/g, '');
-	vXml = vXml.replace(/\n+$/g, '');
-	vXml = vXml.replace(/\[nobr\]/g, '\u00a0');
-	vXml = vXml.replace(/\[NOBR\]/g, '\u00a0');
-	vXml = vXml.replace(/\[inline\]\n\n/g, ' ');
-	vXml = vXml.replace(/\[inline\]/g, '');
-	vXml = vXml.replace(/\[INLINE\]\n\n/g, ' ');
-	vXml = vXml.replace(/\[INLINE\]/g, '');
+function markUp(value, key, cardType, lang, setID) {
+	value += '';
+	value = value.replace(/ +(?=\n|$)/g, '');
+	value = value.replace(/\n+$/g, '');
+	value = value.replace(/\[nobr\]/g, '\u00a0');
+	value = value.replace(/\[NOBR\]/g, '\u00a0');
+	value = value.replace(/\[inline\]\n\n/g, ' ');
+	value = value.replace(/\[inline\]/g, '');
+	value = value.replace(/\[INLINE\]\n\n/g, ' ');
+	value = value.replace(/\[INLINE\]/g, '');
 
-	if (['Name', 'BName'].indexOf(nXml + '') > -1) {
-		let lowerSize;
+	if (['Side', 'Subtype'].indexOf(key + '') > -1) {
+		return updateVafthrudnir(value, 3.515, lang);
+	}
+	else if (key == 'Type') {
+		return updateVafthrudnir(value, 5.095, lang);
+	}
+	else if (['Name', 'BName'].indexOf(key + '') > -1) {
 		let fixHeight = false;
+		let lowerSize = 6.5;
 		if (cardType in namePointSize) {
 			lowerSize = namePointSize[cardType];
 		}
-		else {
-			lowerSize = 6.5;
-		}
-		if ((['Ally', 'Hero', 'Hero Promo'].indexOf(cardType) > -1) && (vXml.length > 10) &&
-			vXml.match(/^[\u00c0\u00c1\u00c2\u00c3\u00c4\u00c8\u00c9\u00ca\u00cb\u00cc\u00cd\u00ce\u00cf\u00d1\u00d2\u00d3\u00d4\u00d5\u00d6\u00d9\u00da\u00db\u00dc\u0106\u0108\u0143\u015a\u0179\u017b]/)) {
+
+		if ((['Ally', 'Hero', 'Hero Promo'].indexOf(cardType) > -1) && (value.length > 10) &&
+			value.match(/^[\u00c0\u00c1\u00c2\u00c3\u00c4\u00c8\u00c9\u00ca\u00cb\u00cc\u00cd\u00ce\u00cf\u00d1\u00d2\u00d3\u00d4\u00d5\u00d6\u00d9\u00da\u00db\u00dc\u0106\u0108\u0143\u015a\u0179\u017b]/)) {
 			lowerSize = lowerSize * 0.8;
 			fixHeight = true;
 		}
-		res = updateVafthrudnir(vXml, lowerSize, lang);
+		res = updateVafthrudnir(value, lowerSize, lang);
 		if (fixHeight) {
 			res += '<family "Vafthrudnir"><size ' + Math.round(lowerSize / 0.8 * 1.423 * 100) / 100 + '> </size></family>';
 		}
 		return res;
 	}
-	else if ((['Victory Points', 'BVictory Points'].indexOf(nXml + '') > -1) && (['Presentation', 'Rules'].indexOf(cardType) == -1)) {
-		return updateVafthrudnir(vXml, 3.69, lang);
+	else if ((['Victory Points', 'BVictory Points'].indexOf(key + '') > -1) && (['Presentation', 'Rules'].indexOf(cardType) == -1)) {
+		return updateVafthrudnir(value, 3.69, lang);
 	}
-	else if (nXml == 'Adventure') {
+	else if (key == 'Adventure') {
 		if (cardType == 'Campaign') {
-			return updateVafthrudnir(vXml, 5.6, lang);
+			return updateVafthrudnir(value, 5.6, lang);
 		}
 		else {
-			return updateVafthrudnir(vXml, 3.69, lang);
+			return updateVafthrudnir(value, 3.69, lang);
 		}
 	}
 
-	if (['Text', 'BText', 'Shadow', 'BShadow'].indexOf(nXml + '') > -1) {
+	if (['Text', 'BText', 'Shadow', 'BShadow'].indexOf(key + '') > -1) {
 		if (lang == 'English') {
-			vXml = vXml.replace(/\b(Quest Resolution)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
-			vXml = vXml.replace(/\b(Valour )?(Resource |Planning |Quest |Travel |Encounter |Combat |Refresh )?(Action):/g, '[b]$1$2$3[/b]:');
-			vXml = vXml.replace(/\b(When Revealed|Forced|Valour Response|Response|Travel|Shadow|Resolution):/g, '[b]$1[/b]:');
-			vXml = vXml.replace(/\b(Setup)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
-			vXml = vXml.replace(/\b(Condition)\b/g, '[bi]$1[/bi]');
+			value = value.replace(/\b(Quest Resolution)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+			value = value.replace(/\b(Valour )?(Resource |Planning |Quest |Travel |Encounter |Combat |Refresh )?(Action):/g, '[b]$1$2$3[/b]:');
+			value = value.replace(/\b(When Revealed|Forced|Valour Response|Response|Travel|Shadow|Resolution):/g, '[b]$1[/b]:');
+			value = value.replace(/\b(Setup)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+			value = value.replace(/\b(Condition)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'French') {
-			vXml = vXml.replace(/\b(R\u00e9solution de la qu\u00eate)( \([^\)]+\))? ?:/g, '[b]$1[/b]$2 :');
-			vXml = vXml.replace(/(\[Vaillance\] )?(\[Ressource\] |\[Organisation\] |\[Qu\u00eate\] |\[Voyage\] |\[Rencontre\] |\[Combat\] |\[Restauration\] )?\b(Action) ?:/g, '[b]$1$2$3[/b] :');
-			vXml = vXml.replace(/\b(Une fois r\u00e9v\u00e9l\u00e9e|Forc\u00e9|\[Vaillance\] R\u00e9ponse|R\u00e9ponse|Trajet|Ombre|R\u00e9solution) ?:/g, '[b]$1[/b] :');
-			vXml = vXml.replace(/\b(Mise en place)( \([^\)]+\))? ?:/g, '[b]$1[/b]$2 :');
-			vXml = vXml.replace(/\b(Condition)\b/g, '[bi]$1[/bi]');
+			value = value.replace(/\b(R\u00e9solution de la qu\u00eate)( \([^\)]+\))? ?:/g, '[b]$1[/b]$2 :');
+			value = value.replace(/(\[Vaillance\] )?(\[Ressource\] |\[Organisation\] |\[Qu\u00eate\] |\[Voyage\] |\[Rencontre\] |\[Combat\] |\[Restauration\] )?\b(Action) ?:/g, '[b]$1$2$3[/b] :');
+			value = value.replace(/\b(Une fois r\u00e9v\u00e9l\u00e9e|Forc\u00e9|\[Vaillance\] R\u00e9ponse|R\u00e9ponse|Trajet|Ombre|R\u00e9solution) ?:/g, '[b]$1[/b] :');
+			value = value.replace(/\b(Mise en place)( \([^\)]+\))? ?:/g, '[b]$1[/b]$2 :');
+			value = value.replace(/\b(Condition)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'German') {
-			vXml = vXml.replace(/\b(Abenteuer bestehen)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
-			vXml = vXml.replace(/\b(Ehrenvolle )?(Ressourcenaktion|Planungsaktion|Abenteueraktion|Reiseaktion|Begegnungsaktion|Kampfaktion|Auffrischungsaktion|Aktion):/g, '[b]$1$2[/b]:');
-			vXml = vXml.replace(/\b(Wenn aufgedeckt|Erzwungen|Ehrenvolle Reaktion|Reaktion|Reise|Schatten|Aufl\u00f6sung):/g, '[b]$1[/b]:');
-			vXml = vXml.replace(/\b(Vorbereitung)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
-			vXml = vXml.replace(/\b(Zustand)\b/g, '[bi]$1[/bi]');
+			value = value.replace(/\b(Abenteuer bestehen)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+			value = value.replace(/\b(Ehrenvolle )?(Ressourcenaktion|Planungsaktion|Abenteueraktion|Reiseaktion|Begegnungsaktion|Kampfaktion|Auffrischungsaktion|Aktion):/g, '[b]$1$2[/b]:');
+			value = value.replace(/\b(Wenn aufgedeckt|Erzwungen|Ehrenvolle Reaktion|Reaktion|Reise|Schatten|Aufl\u00f6sung):/g, '[b]$1[/b]:');
+			value = value.replace(/\b(Vorbereitung)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+			value = value.replace(/\b(Zustand)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'Spanish') {
-			vXml = vXml.replace(/\b(Resoluci\u00f3n de la misi\u00f3n)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
-			vXml = vXml.replace(/\b(Acci\u00f3n)( de Recursos| de Planificaci\u00f3n| de Misi\u00f3n| de Viaje| de Encuentro| de Combate| de Recuperaci\u00f3n)?( de Valor)?:/g, '[b]$1$2$3[/b]:');
-			vXml = vXml.replace(/\b(Al ser revelada|Obligado|Respuesta de Valor|Respuesta|Viaje|Sombra|Resoluci\u00f3n):/g, '[b]$1[/b]:');
-			vXml = vXml.replace(/\b(Preparaci\u00f3n)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
-			vXml = vXml.replace(/\b(Condici\u00f3n)\b/g, '[bi]$1[/bi]');
+			value = value.replace(/\b(Resoluci\u00f3n de la misi\u00f3n)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+			value = value.replace(/\b(Acci\u00f3n)( de Recursos| de Planificaci\u00f3n| de Misi\u00f3n| de Viaje| de Encuentro| de Combate| de Recuperaci\u00f3n)?( de Valor)?:/g, '[b]$1$2$3[/b]:');
+			value = value.replace(/\b(Al ser revelada|Obligado|Respuesta de Valor|Respuesta|Viaje|Sombra|Resoluci\u00f3n):/g, '[b]$1[/b]:');
+			value = value.replace(/\b(Preparaci\u00f3n)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+			value = value.replace(/\b(Condici\u00f3n)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'Polish') {
-			vXml = vXml.replace(/\b(Rozpatrzenie wyprawy)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
-			vXml = vXml.replace(/\b(Akcja)( Zasob\u00f3w| Planowania| Wyprawy| Podr\u00f3\u017cy| Spotka\u0144| Walki| Odpoczynku)?( M\u0119stwa)?:/g, '[b]$1$2$3[/b]:');
-			vXml = vXml.replace(/\b(Po odkryciu|Wymuszony|Odpowied\u017a M\u0119stwa|Odpowied\u017a|Podr\u00f3\u017c|Cie\u0144|Nast\u0119pstwa):/g, '[b]$1[/b]:');
-			vXml = vXml.replace(/\b(Przygotowanie)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
-			vXml = vXml.replace(/\b(Stan)\b/g, '[bi]$1[/bi]');
+			value = value.replace(/\b(Rozpatrzenie wyprawy)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+			value = value.replace(/\b(Akcja)( Zasob\u00f3w| Planowania| Wyprawy| Podr\u00f3\u017cy| Spotka\u0144| Walki| Odpoczynku)?( M\u0119stwa)?:/g, '[b]$1$2$3[/b]:');
+			value = value.replace(/\b(Po odkryciu|Wymuszony|Odpowied\u017a M\u0119stwa|Odpowied\u017a|Podr\u00f3\u017c|Cie\u0144|Nast\u0119pstwa):/g, '[b]$1[/b]:');
+			value = value.replace(/\b(Przygotowanie)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+			value = value.replace(/\b(Stan)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'Italian') {
-			vXml = vXml.replace(/\b(Risoluzione della Ricerca)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
-			vXml = vXml.replace(/\b(Azione)( Valorosa)?( di Risorse| di Pianificazione| di Ricerca| di Viaggio| di Incontri| di Combattimento| di Riordino)?:/g, '[b]$1$2$3[/b]:');
-			vXml = vXml.replace(/\b(Quando Rivelata|Obbligato|Risposta Valorosa|Risposta|Viaggio|Ombra|Risoluzione):/g, '[b]$1[/b]:');
-			vXml = vXml.replace(/\b(Preparazione)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
-			vXml = vXml.replace(/\b(Condizione)\b/g, '[bi]$1[/bi]');
+			value = value.replace(/\b(Risoluzione della Ricerca)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+			value = value.replace(/\b(Azione)( Valorosa)?( di Risorse| di Pianificazione| di Ricerca| di Viaggio| di Incontri| di Combattimento| di Riordino)?:/g, '[b]$1$2$3[/b]:');
+			value = value.replace(/\b(Quando Rivelata|Obbligato|Risposta Valorosa|Risposta|Viaggio|Ombra|Risoluzione):/g, '[b]$1[/b]:');
+			value = value.replace(/\b(Preparazione)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+			value = value.replace(/\b(Condizione)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'Portuguese') {
-			vXml = vXml.replace(/\b(Resolu\u00e7\u00e3o da Miss\u00e3o)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
-			vXml = vXml.replace(/\b(A\u00e7\u00e3o)( Valorosa)?( de Recursos| de Planejamento| de Miss\u00e3o| de Viagem| de Encontro| de Combate| de Renova\u00e7\u00e3o)?:/g, '[b]$1$2$3[/b]:');
-			vXml = vXml.replace(/\b(Efeito Revelado|Efeito For\u00e7ado|Resposta Valorosa|Resposta|Viagem|Efeito Sombrio|Resolu\u00e7\u00e3o):/g, '[b]$1[/b]:');
-			vXml = vXml.replace(/\b(Prepara\u00e7\u00e3o)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
-			vXml = vXml.replace(/\b(Condi\u00e7\u00e3o)\b/g, '[bi]$1[/bi]');
+			value = value.replace(/\b(Resolu\u00e7\u00e3o da Miss\u00e3o)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+			value = value.replace(/\b(A\u00e7\u00e3o)( Valorosa)?( de Recursos| de Planejamento| de Miss\u00e3o| de Viagem| de Encontro| de Combate| de Renova\u00e7\u00e3o)?:/g, '[b]$1$2$3[/b]:');
+			value = value.replace(/\b(Efeito Revelado|Efeito For\u00e7ado|Resposta Valorosa|Resposta|Viagem|Efeito Sombrio|Resolu\u00e7\u00e3o):/g, '[b]$1[/b]:');
+			value = value.replace(/\b(Prepara\u00e7\u00e3o)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
+			value = value.replace(/\b(Condi\u00e7\u00e3o)\b/g, '[bi]$1[/bi]');
 		}
 	}
 
-	var defaultFontSize;
-	if (landscapeTypes.indexOf(cardType) > -1) {
-		if (['Traits', 'BTraits'].indexOf(nXml + '') > -1) {
-			defaultFontSize = 7.75;
+	var defaultPointSize;
+	if (['Traits', 'BTraits'].indexOf(key + '') > -1) {
+		if (cardType in traitPointSize) {
+			defaultPointSize = traitPointSize[cardType];
 		}
 		else {
-			defaultFontSize = 7;
+			defaultPointSize = 8.25;
 		}
 	}
-	else if (cardType == 'Hero Promo') {
-		if (['Traits', 'BTraits'].indexOf(nXml + '') > -1) {
-			defaultFontSize = 6.5;
-		}
-		else if (['Flavour', 'BFlavour'].indexOf(nXml + '') > -1) {
-			defaultFontSize = 4.9;
+	else if (['Flavour', 'BFlavour'].indexOf(key + '') > -1) {
+		if (cardType in flavourPointSize) {
+			defaultPointSize = flavourPointSize[cardType];
 		}
 		else {
-			defaultFontSize = 5.9;
+			defaultPointSize = 6.25;
 		}
-	}
-	else if (['Traits', 'BTraits'].indexOf(nXml + '') > -1) {
-		defaultFontSize = 8.25;
-	}
-	else if (['Flavour', 'BFlavour'].indexOf(nXml + '') > -1) {
-		defaultFontSize = 6.25;
 	}
 	else {
-		defaultFontSize = 7.5;
+		if (cardType in bodyPointSize) {
+			defaultPointSize = bodyPointSize[cardType];
+		}
+		else {
+			defaultPointSize = 7.5;
+		}
 	}
+
 	var matchRegExp = /^\[defaultsize ([0-9\.]+)\]/g;
-	var match = matchRegExp.exec(vXml);
+	var match = matchRegExp.exec(value);
 	if (match) {
-		defaultFontSize = match[1];
+		defaultPointSize = match[1];
 	}
-	var iconFontSize = defaultFontSize * 1.2;
+	var iconPointSize = defaultPointSize * 1.2;
 
 	var tagPrefix;
 	var tagSuffix;
-	if (['Traits', 'BTraits'].indexOf(nXml + '') > -1) {
-		vXml = vXml.replace(/\[bi\](.*?)\[\/bi\]/g, '$1');
-		vXml = vXml.replace(/\[b\](.*?)\[\/b\]/g, '$1');
-		vXml = vXml.replace(/\[i\](.*?)\[\/i\]/g, '$1');
-		tagPrefix = '</b></i></size></family><size ' + iconFontSize + '>';
-		tagSuffix = '</size><family "Times New Roman"><size ' + defaultFontSize + '><i><b>';
+	if (['Traits', 'BTraits'].indexOf(key + '') > -1) {
+		value = value.replace(/\[bi\](.*?)\[\/bi\]/g, '$1');
+		value = value.replace(/\[b\](.*?)\[\/b\]/g, '$1');
+		value = value.replace(/\[i\](.*?)\[\/i\]/g, '$1');
+		tagPrefix = '</b></i></size></family><size ' + iconPointSize + '>';
+		tagSuffix = '</size><family "Times New Roman"><size ' + defaultPointSize + '><i><b>';
 	}
-	else if (['Shadow', 'BShadow', 'Flavour', 'BFlavour'].indexOf(nXml + '') > -1) {
-		vXml = vXml.replace(/\[bi\](.*?)\[\/bi\]/g, '[b]$1[/b]');
-		vXml = vXml.replace(/\[i\](.*?)\[\/i\]/g, '$1');
-		tagPrefix = '</i></size></family><size ' + iconFontSize + '>';
-		tagSuffix = '</size><family "Times New Roman"><size ' + defaultFontSize + '><i>';
+	else if (['Shadow', 'BShadow', 'Flavour', 'BFlavour'].indexOf(key + '') > -1) {
+		value = value.replace(/\[bi\](.*?)\[\/bi\]/g, '[b]$1[/b]');
+		value = value.replace(/\[i\](.*?)\[\/i\]/g, '$1');
+		tagPrefix = '</i></size></family><size ' + iconPointSize + '>';
+		tagSuffix = '</size><family "Times New Roman"><size ' + defaultPointSize + '><i>';
 	}
 	else {
-		tagPrefix = '</size></family><size ' + iconFontSize + '>';
-		tagSuffix = '</size><family "Times New Roman"><size ' + defaultFontSize + '>';
+		tagPrefix = '</size></family><size ' + iconPointSize + '>';
+		tagSuffix = '</size><family "Times New Roman"><size ' + defaultPointSize + '>';
 	}
 
-	vXml = vXml.replace(/</g, '[lt]');
-	vXml = vXml.replace(/>/g, '[gt]');
-	vXml = vXml.replace(/\[lt\]/g, '<lt>');
-	vXml = vXml.replace(/\[gt\]/g, '<gt>');
-	vXml = vXml.replace(/\[unique\]/g, tagPrefix + '<uni>' + tagSuffix);
-	vXml = vXml.replace(/\[threat\]/g, tagPrefix + '<thr>' + tagSuffix);
-	vXml = vXml.replace(/\[attack\]/g, tagPrefix + '<att>' + tagSuffix);
-	vXml = vXml.replace(/\[defense\]/g, tagPrefix + '<def>' + tagSuffix);
-	vXml = vXml.replace(/\[willpower\]/g, tagPrefix + '<wil>' + tagSuffix);
-	vXml = vXml.replace(/\[leadership\]/g, tagPrefix + '<lea>' + tagSuffix);
-	vXml = vXml.replace(/\[lore\]/g, tagPrefix + '<lor>' + tagSuffix);
-	vXml = vXml.replace(/\[spirit\]/g, tagPrefix + '<spi>' + tagSuffix);
-	vXml = vXml.replace(/\[tactics\]/g, tagPrefix + '<tac>' + tagSuffix);
-	vXml = vXml.replace(/\[baggins\]/g, tagPrefix + '<bag>' + tagSuffix);
-	vXml = vXml.replace(/\[fellowship\]/g, tagPrefix + '<fel>' + tagSuffix);
-	vXml = vXml.replace(/\[mastery\]/g, tagPrefix + '<mas>' + tagSuffix);
-	vXml = vXml.replace(/\[sunny\]/g, tagPrefix + '<hon>' + tagSuffix);
-	vXml = vXml.replace(/\[cloudy\]/g, tagPrefix + '<hof>' + tagSuffix);
-	vXml = vXml.replace(/\[rainy\]/g, tagPrefix + '<hb>' + tagSuffix);
-	vXml = vXml.replace(/\[stormy\]/g, tagPrefix + '<hw>' + tagSuffix);
-	vXml = vXml.replace(/\[sailing\]/g, tagPrefix + '<sai>' + tagSuffix);
-	vXml = vXml.replace(/\[eos\]/g, tagPrefix + '<eos>' + tagSuffix);
-	vXml = vXml.replace(/\[person\]/g, tagPrefix + '<per>' + tagSuffix);
-	vXml = vXml.replace(/\[pp\]/g, tagPrefix + '<pp>' + tagSuffix);
-	vXml = vXml.replace(/\[center\]/g, '<center>');
-	vXml = vXml.replace(/([^\n])\<center\>/g, '$1\n<center>');
-	vXml = vXml.replace(/\[\/center\]\n?/g, '\n<left>');
-	vXml = vXml.replace(/\[right\]/g, '<right>');
-	vXml = vXml.replace(/([^\n])\<right\>/g, '$1\n<right>');
-	vXml = vXml.replace(/\[\/right\]\n?/g, '\n<left>');
-	vXml = vXml.replace(/\<left\>(\n*)\<center\>/g, '$1<center>');
-	vXml = vXml.replace(/\<left\>(\n*)\<right\>/g, '$1<right>');
-	vXml = vXml.replace(/\n*\<left\>$/g, '');
-	vXml = vXml.replace(/\[bi\]/g, '<i><b>');
-	vXml = vXml.replace(/\[\/bi\]/g, '</b></i>');
-	vXml = vXml.replace(/\[b\]/g, '<b>');
-	vXml = vXml.replace(/\[\/b\]/g, '</b>');
-	vXml = vXml.replace(/\[i\]/g, '<i>');
-	vXml = vXml.replace(/\[\/i\]/g, '</i>');
-	vXml = vXml.replace(/\[u\]/g, '<u>');
-	vXml = vXml.replace(/\[\/u\]/g, '</u>');
-	vXml = vXml.replace(/\[strike\]/g, '<del>');
-	vXml = vXml.replace(/\[\/strike\]/g, '</del>');
-	vXml = vXml.replace(/\[red\]/g, '<color #8b1c23>');
-	vXml = vXml.replace(/\[\/red\]/g, '</color>');
-	vXml = vXml.replace(/\[space\]/g, '<hs>');
-	vXml = vXml.replace(/\[vspace\]/g, '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.025 0.025>');
-	vXml = vXml.replace(/\[tab\]/g, '\t');
-	vXml = vXml.replace(/\[lotr ([0-9\.]+)\]/g, '<lotr $1>');
-	vXml = vXml.replace(/\[\/lotr\]/g, '</lotr>');
-	vXml = vXml.replace(/\[lotrheader ([0-9\.]+)\]/g, '<lotrheader $1>');
-	vXml = vXml.replace(/\[\/lotrheader\]/g, '</lotrheader>');
-	vXml = vXml.replace(/\[size ([0-9\.]+)\]/g, '</size><size $1>');
-	vXml = vXml.replace(/\[\/size\]/g, '</size><size ' + defaultFontSize + '>');
-	vXml = vXml.replace(/^\[defaultsize ([0-9\.]+)\]\n*/g, '</size><size $1>');
-	vXml = vXml.replace(/\[img ("?)([^\]]+)\]/g, '<image $1project:$2>');
-	vXml = vXml.replace(/\<image ("?)project:icons\//g, '<image $1project:imagesIcons/');
-	vXml = vXml.replace(/\<image ("?)project:custom\//g, '<image $1project:imagesCustom/' + setID + '_');
-	vXml = vXml.replace(/\[lsb\]/g, '<lsb>');
-	vXml = vXml.replace(/\[rsb\]/g, '<rsb>');
-	vXml = vXml.replace(/<lsb>/g, '[');
-	vXml = vXml.replace(/<rsb>/g, ']');
+	value = value.replace(/</g, '[lt]');
+	value = value.replace(/>/g, '[gt]');
+	value = value.replace(/\[lt\]/g, '<lt>');
+	value = value.replace(/\[gt\]/g, '<gt>');
+	value = value.replace(/\[unique\]/g, tagPrefix + '<uni>' + tagSuffix);
+	value = value.replace(/\[threat\]/g, tagPrefix + '<thr>' + tagSuffix);
+	value = value.replace(/\[attack\]/g, tagPrefix + '<att>' + tagSuffix);
+	value = value.replace(/\[defense\]/g, tagPrefix + '<def>' + tagSuffix);
+	value = value.replace(/\[willpower\]/g, tagPrefix + '<wil>' + tagSuffix);
+	value = value.replace(/\[leadership\]/g, tagPrefix + '<lea>' + tagSuffix);
+	value = value.replace(/\[lore\]/g, tagPrefix + '<lor>' + tagSuffix);
+	value = value.replace(/\[spirit\]/g, tagPrefix + '<spi>' + tagSuffix);
+	value = value.replace(/\[tactics\]/g, tagPrefix + '<tac>' + tagSuffix);
+	value = value.replace(/\[baggins\]/g, tagPrefix + '<bag>' + tagSuffix);
+	value = value.replace(/\[fellowship\]/g, tagPrefix + '<fel>' + tagSuffix);
+	value = value.replace(/\[mastery\]/g, tagPrefix + '<mas>' + tagSuffix);
+	value = value.replace(/\[sunny\]/g, tagPrefix + '<hon>' + tagSuffix);
+	value = value.replace(/\[cloudy\]/g, tagPrefix + '<hof>' + tagSuffix);
+	value = value.replace(/\[rainy\]/g, tagPrefix + '<hb>' + tagSuffix);
+	value = value.replace(/\[stormy\]/g, tagPrefix + '<hw>' + tagSuffix);
+	value = value.replace(/\[sailing\]/g, tagPrefix + '<sai>' + tagSuffix);
+	value = value.replace(/\[eos\]/g, tagPrefix + '<eos>' + tagSuffix);
+	value = value.replace(/\[person\]/g, tagPrefix + '<per>' + tagSuffix);
+	value = value.replace(/\[pp\]/g, tagPrefix + '<pp>' + tagSuffix);
+	value = value.replace(/\[center\]/g, '<center>');
+	value = value.replace(/([^\n])\<center\>/g, '$1\n<center>');
+	value = value.replace(/\[\/center\]\n?/g, '\n<left>');
+	value = value.replace(/\[right\]/g, '<right>');
+	value = value.replace(/([^\n])\<right\>/g, '$1\n<right>');
+	value = value.replace(/\[\/right\]\n?/g, '\n<left>');
+	value = value.replace(/\<left\>(\n*)\<center\>/g, '$1<center>');
+	value = value.replace(/\<left\>(\n*)\<right\>/g, '$1<right>');
+	value = value.replace(/\n*\<left\>$/g, '');
+	value = value.replace(/\[bi\]/g, '<i><b>');
+	value = value.replace(/\[\/bi\]/g, '</b></i>');
+	value = value.replace(/\[b\]/g, '<b>');
+	value = value.replace(/\[\/b\]/g, '</b>');
+	value = value.replace(/\[i\]/g, '<i>');
+	value = value.replace(/\[\/i\]/g, '</i>');
+	value = value.replace(/\[u\]/g, '<u>');
+	value = value.replace(/\[\/u\]/g, '</u>');
+	value = value.replace(/\[strike\]/g, '<del>');
+	value = value.replace(/\[\/strike\]/g, '</del>');
+	value = value.replace(/\[red\]/g, '<color #8b1c23>');
+	value = value.replace(/\[\/red\]/g, '</color>');
+	value = value.replace(/\[space\]/g, '<hs>');
+	value = value.replace(/\[vspace\]/g, '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.025 0.025>');
+	value = value.replace(/\[tab\]/g, '\t');
+	value = value.replace(/\[lotr ([0-9\.]+)\]/g, '<lotr $1>');
+	value = value.replace(/\[\/lotr\]/g, '</lotr>');
+	value = value.replace(/\[lotrheader ([0-9\.]+)\]/g, '<lotrheader $1>');
+	value = value.replace(/\[\/lotrheader\]/g, '</lotrheader>');
+	value = value.replace(/\[size ([0-9\.]+)\]/g, '</size><size $1>');
+	value = value.replace(/\[\/size\]/g, '</size><size ' + defaultPointSize + '>');
+	value = value.replace(/^\[defaultsize ([0-9\.]+)\]\n*/g, '</size><size $1>');
+	value = value.replace(/\[img ("?)([^\]]+)\]/g, '<image $1project:$2>');
+	value = value.replace(/\<image ("?)project:icons\//g, '<image $1project:imagesIcons/');
+	value = value.replace(/\<image ("?)project:custom\//g, '<image $1project:imagesCustom/' + setID + '_');
+	value = value.replace(/\[lsb\]/g, '<lsb>');
+	value = value.replace(/\[rsb\]/g, '<rsb>');
+	value = value.replace(/<lsb>/g, '[');
+	value = value.replace(/<rsb>/g, ']');
 
-	vXml = vXml.replace(/([^:;,.?!\u2026]) ((?:<\/b>)?(?:<\/i>)?(?:<\/size>)?(?:<\/family>)?(?:<size [^>]+>)?)(<uni>|<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<bag>|<fel>|<mas>|<hon>|<hof>|<hb>|<hw>|<sai>|<eos>|<per>|<pp>)/g, '$1\u00a0$2$3');
-	vXml = vXml.replace(/([0-9]+) /g, '$1\u00a0');
-	vXml = vXml.replace(/ ([0-9]+)([:;,.?!\)\u2026])/g, '\u00a0$1$2');
-	vXml = vXml.replace(/(^|[ \n"\u201c\u201d\(])([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,4})([:;,.?!"\u2026\u201c\u201d\)]*) (["\u201c\u201d\(]*)([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,4})([:;,.?!"\u2026\u201c\u201d\)]+)(\n|$)/g, '$1$2$3\u00a0$4$5$6$7');
-	vXml = vXml.replace(/ (["\u201c\u201d\(]*)([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,2})([:;,.?!"\u2026\u201c\u201d\)]+)(\n|$)/g, '\u00a0$1$2$3$4');
-	vXml = vXml.replace(/ ([;:?!])/g, '\u00a0$1');
+	value = value.replace(/([^:;,.?!\u2026]) ((?:<\/b>)?(?:<\/i>)?(?:<\/size>)?(?:<\/family>)?(?:<size [^>]+>)?)(<uni>|<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<bag>|<fel>|<mas>|<hon>|<hof>|<hb>|<hw>|<sai>|<eos>|<per>|<pp>)/g, '$1\u00a0$2$3');
+	value = value.replace(/([0-9]+) /g, '$1\u00a0');
+	value = value.replace(/ ([0-9]+)([:;,.?!\)\u2026])/g, '\u00a0$1$2');
+	value = value.replace(/(^|[ \n"\u201c\u201d\(])([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,4})([:;,.?!"\u2026\u201c\u201d\)]*) (["\u201c\u201d\(]*)([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,4})([:;,.?!"\u2026\u201c\u201d\)]+)(\n|$)/g, '$1$2$3\u00a0$4$5$6$7');
+	value = value.replace(/ (["\u201c\u201d\(]*)([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,2})([:;,.?!"\u2026\u201c\u201d\)]+)(\n|$)/g, '\u00a0$1$2$3$4');
+	value = value.replace(/ ([;:?!])/g, '\u00a0$1');
 
-	var vXmlOld;
+	var valueOld;
 	do {
-		vXmlOld = vXml;
-		vXml = vXml.replace(/\u00a0([^<]+)>/g, ' $1>');
+		valueOld = value;
+		value = value.replace(/\u00a0([^<]+)>/g, ' $1>');
 	}
-	while (vXml != vXmlOld);
+	while (value != valueOld);
 
-	vXml = vXml.replace(/<\/i>(?! )/g, '</size><size 0.01></i>\u00a0</size><size ' + defaultFontSize + '>');
-	vXml = vXml.replace(/<\/i>(?= )/g, '</size><size 0.01></i> </size><size ' + defaultFontSize + '>');
-	vXml = vXml.replace(/\n+$/g, '');
-	vXml = vXml.replace(/\n(<left>|<right>|<center>)?(?=\n)/g, '\n$1<vs>');
+	value = value.replace(/<\/i>(?! )/g, '</size><size 0.01></i>\u00a0</size><size ' + defaultPointSize + '>');
+	value = value.replace(/<\/i>(?= )/g, '</size><size 0.01></i> </size><size ' + defaultPointSize + '>');
+	value = value.replace(/\n+$/g, '');
+	value = value.replace(/\n(<left>|<right>|<center>)?(?=\n)/g, '\n$1<vs>');
 
 	function updateVafthrudnirReplacer(match, p1, p2, offset, string) {
-		var res = '</size></family>' + updateVafthrudnir(p2, p1, lang) + '<family "Times New Roman"><size ' + defaultFontSize + '>';
+		var res = '</size></family>' + updateVafthrudnir(p2, p1, lang) + '<family "Times New Roman"><size ' + defaultPointSize + '>';
 		return res;
 	}
 
 	function updateLotrHeaderReplacer(match, p1, p2, offset, string) {
-		var res = '</size></family><family "Lord of the Headers"><size ' + p1 + '>' + p2 + '</size></family><family "Times New Roman"><size ' + defaultFontSize + '>';
+		var res = '</size></family><family "Lord of the Headers"><size ' + p1 + '>' + p2 + '</size></family><family "Times New Roman"><size ' + defaultPointSize + '>';
 		return res;
 	}
 
-	vXml = vXml.replace(/<lotr ([0-9\.]+)>(.*?)<\/lotr>/g, updateVafthrudnirReplacer);
-	vXml = vXml.replace(/<lotrheader ([0-9\.]+)>(.*?)<\/lotrheader>/g, updateLotrHeaderReplacer);
-	vXml = vXml.replace(/<size [^>]+><\/size>/g, '');
-	vXml = vXml.replace(/<family [^>]+><\/family>/g, '');
+	value = value.replace(/<lotr ([0-9\.]+)>(.*?)<\/lotr>/g, updateVafthrudnirReplacer);
+	value = value.replace(/<lotrheader ([0-9\.]+)>(.*?)<\/lotrheader>/g, updateLotrHeaderReplacer);
+	value = value.replace(/<size [^>]+><\/size>/g, '');
+	value = value.replace(/<family [^>]+><\/family>/g, '');
 
-	vXml = updatePunctuation(vXml, lang);
-	if ((['Traits', 'BTraits'].indexOf(nXml + '') > -1) && (lang == 'Spanish')) {
-		vXml = vXml.replace(/\. /g, ' \u2022 ');
-		vXml = vXml.replace(/\.$/g, '');
+	value = updatePunctuation(value, lang);
+	if ((['Traits', 'BTraits'].indexOf(key + '') > -1) && (lang == 'Spanish')) {
+		value = value.replace(/\. /g, ' \u2022 ');
+		value = value.replace(/\.$/g, '');
 	}
 
-	return vXml;
-}
-
-function getProjectMember(path) {
-	var member = project.findChild(path);
-	if (member == null) {
-		throw new Error('Missing required project file: ' + path);
-	}
-	return member;
+	return value;
 }
