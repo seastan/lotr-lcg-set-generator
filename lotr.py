@@ -3552,7 +3552,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_portrait_shadow_back is not None and
-                card_type_back not in CARD_TYPES_LANDSCAPE):
+              card_type_back not in CARD_TYPES_LANDSCAPE):
             message = 'Redundant portrait shadow back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -4310,7 +4310,8 @@ def _needed_for_octgn(card):
     """
     return ('Promo' not in extract_flags(card[CARD_FLAGS]) and
             card[CARD_TYPE] not in ('Full Art Landscape',
-                                    'Full Art Portrait'))
+                                    'Full Art Portrait', 'Presentation') and
+            not (card[CARD_TYPE] == 'Rules' and card[CARD_SPHERE] == 'Back'))
 
 
 def _needed_for_dragncards(card):
