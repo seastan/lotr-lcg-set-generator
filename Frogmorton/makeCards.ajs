@@ -1,13 +1,4 @@
-useLibrary('imageutils');
-useLibrary('threads');
-importPackage(arkham.project);
-importClass(java.io.File);
-importClass(javax.xml.parsers.DocumentBuilder);
-importClass(javax.xml.parsers.DocumentBuilderFactory);
-importClass(org.w3c.dom.Document);
-importClass(org.w3c.dom.Element);
-importClass(org.w3c.dom.Node);
-importClass(org.w3c.dom.NodeList);
+// common code
 
 var doubleSideTypes = ['Campaign', 'Contract', 'Nightmare', 'Presentation', 'Quest', 'Rules'];
 var landscapeTypes = ['Cave', 'Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Full Art Landscape', 'Player Side Quest', 'Quest'];
@@ -777,38 +768,9 @@ translate['Presentation'] = {'English': 'Presentation', 'French': 'Presentation'
 	'Italian': 'Presentation', 'Portuguese': 'Presentation'};
 translate['Rules'] = {'English': 'Rules', 'French': 'Rules', 'German': 'Rules', 'Spanish': 'Rules', 'Polish': 'Rules', 'Italian': 'Rules', 'Portuguese': 'Rules'};
 
-Thread.busyWindow(main, 'Updating cards...', true);
-
-function main(progress, target) {
-	var icons = [];
-	var iconFiles = project.findChild('imagesIcons').iterator();
-	while (iconFiles.hasNext()) {
-		let icon = (iconFiles.next() + '').replace(/\.png$/g, '');
-		icons.push(icon);
-	}
-
-	var xmlFiles = project.findChild('XML').iterator();
-	while (xmlFiles.hasNext()) {
-		run(progress, target, xmlFiles.next() + '', icons);
-	}
-	var finishedFile = new File('.', 'makeCards_FINISHED');
-	finishedFile.createNewFile();
-	return;
-}
-
-function run(progress, target, filename, icons) {
-	var fXmlFile = new File(getProjectMember('XML/').file, filename + '.xml');
-	Console.err.println('\nReading ' + fXmlFile);
-
-	var setID = filename.split('.')[0];
-	var lang = filename.split('.')[1];
-
-	var dbFactory = DocumentBuilderFactory.newInstance();
-	var dBuilder = dbFactory.newDocumentBuilder();
-	var doc = dBuilder.parse(fXmlFile);
+function run(doc, setID, lang, icons, getCardObjects, saveResult, elementNode, progress) {
 	var docElement = doc.getDocumentElement();
-	docElement.normalize();
-
+	// docElement.normalize();
 	var setName = docElement.getAttribute('name');
 	var setIcon = docElement.getAttribute('icon');
 	var setCopyright = docElement.getAttribute('copyright');
@@ -843,26 +805,25 @@ function run(progress, target, filename, icons) {
 			if (!nProp.getParentNode().isSameNode(nNode)) {
 				continue;
 			}
-			if (nProp && nProp.getNodeType() == Node.ELEMENT_NODE) {
+			if (nProp && nProp.getNodeType() == elementNode) {
 				card[nProp.getAttribute('name')] = nProp.getAttribute('value');
 			}
 		}
 		let altList = nNode.getElementsByTagName('alternate');
 		for (let k = 0; k < altList.getLength(); k++) {
 			let nAlternate = altList.item(k);
-			if (nAlternate && nAlternate.getNodeType() == Node.ELEMENT_NODE) {
+			if (nAlternate && nAlternate.getNodeType() == elementNode) {
 				card['BName'] = nAlternate.getAttribute('name');
 				let altPropList = nAlternate.getElementsByTagName('property');
 				for (let l = 0; l < altPropList.getLength(); l++) {
 					let nAltProp = altPropList.item(l);
-					if (nAltProp && nAltProp.getNodeType() == Node.ELEMENT_NODE) {
+					if (nAltProp && nAltProp.getNodeType() == elementNode) {
 						card['B' + nAltProp.getAttribute('name')] = nAltProp.getAttribute('value');
 					}
 				}
 			}
 		}
 
-		// Console.err.println('\nProcessing ' + card['Name']);
 		if (card['Type'] == 'Quest' && card['BQuest Points']) {
 			card['Quest Points'] = card['BQuest Points'];
 		}
@@ -1063,9 +1024,13 @@ function run(progress, target, filename, icons) {
 					];
 				}
 
-				progress.status = cardName;
-				let newCard = ResourceKit.getGameComponentFromFile(getProjectMember('Templates/' + cardType + '.eon').file, false);
-				let s = newCard.settings;
+				if (progress) {
+					progress.status = cardName;
+				}
+
+				let cardObjects = getCardObjects(cardType);
+				let newCard = cardObjects[0];
+				let s = cardObjects[1];
 
 				for (let k = 0; k < mapping.length; k++) {
 					let nEon = mapping[k][0];
@@ -1165,6 +1130,7 @@ function run(progress, target, filename, icons) {
 					s.set('Subtype', markUp(translate[cardSphere][lang].toUpperCase(), 'Subtype', cardType, lang, setID));
 				}
 
+				s.set('TypeRenderer', cardType);
 				if ((cardType == 'Campaign') && (cardSphere == 'Setup')) {
 					s.set('Type', markUp(translate['Setup'][lang].toUpperCase(), 'Type', cardType, lang, setID));
 					s.set('Template', 'Standard');
@@ -1577,57 +1543,22 @@ function run(progress, target, filename, icons) {
 
 				let fname = (Array(Math.max(0, 4 - (card['Card Number'] + '').length)).join('0') + card['Card Number'] + '-' + copy + '-' +
 					back + '-' + escapeFileName(card['Name']) + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix;
-				progress.status = fname;
-				ResourceKit.writeGameComponentToFile(new File(getProjectMember('Cards/').file, fname + '.' + setID + '.' + lang + '.eon'), newCard);
-				exportCard(newCard, fname, setID, lang, simple_back, png300Bleed, png480Bleed, png800Bleed);
+
+				s.set('CardNumberRenderer', card['Card Number']);
+				s.set('IdRenderer', card['octgn']);
+				s.set('CopyRenderer', copy);
+				s.set('BackRenderer', back);
+				s.set('SuffixRenderer', suffix);
+
+				if (progress) {
+					progress.status = fname;
+				}
+
+				saveResult(s, setID, lang, newCard, fname, simple_back, png300Bleed, png480Bleed, png800Bleed);
 			}
 		}
 	}
 	return;
-}
-
-function exportCard(card, fname, setID, lang, simple_back, png300Bleed, png480Bleed, png800Bleed) {
-	var sheets = card.createDefaultSheets();
-	var numSheets;
-	if (simple_back) {
-		numSheets = 1;
-	}
-	else {
-		numSheets = 2;
-	}
-
-	var ppi300 = 300;
-	var ppi480 = 480;
-	var ppi800 = 800;
-	for (let i = 0; i < numSheets; i++ ) {
-		let bi, file;
-
-		if (png300Bleed) {
-			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, ppi300, true);
-			file = new File(getProjectMember('Export/png300Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_PNG);
-			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, ppi300);
-		}
-
-		if (png480Bleed) {
-			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, ppi480, true);
-			file = new File(getProjectMember('Export/png480Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_PNG);
-			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, ppi480);
-		}
-
-		if (png800Bleed) {
-			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, ppi800, true);
-			file = new File(getProjectMember('Export/png800Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_PNG);
-			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, ppi800);
-		}
-	}
-}
-
-function getProjectMember(path) {
-	var member = project.findChild(path);
-	if (member == null) {
-		throw new Error('Missing required project file: ' + path);
-	}
-	return member;
 }
 
 function capitalizeWord(value) {
@@ -1991,4 +1922,122 @@ function markUp(value, key, cardType, lang, setID) {
 	}
 
 	return value;
+}
+
+
+// SE code
+
+useLibrary('imageutils');
+useLibrary('threads');
+importPackage(arkham.project);
+importClass(java.io.File);
+importClass(javax.xml.parsers.DocumentBuilderFactory);
+importClass(org.w3c.dom.Node);
+
+function getProjectMember(path) {
+	var member = project.findChild(path);
+	if (member == null) {
+		throw new Error('Missing required project file: ' + path);
+	}
+	return member;
+}
+
+function exportCard(card, fname, setID, lang, simple_back, png300Bleed, png480Bleed, png800Bleed) {
+	var sheets = card.createDefaultSheets();
+	var numSheets;
+	if (simple_back) {
+		numSheets = 1;
+	}
+	else {
+		numSheets = 2;
+	}
+
+	var ppi300 = 300;
+	var ppi480 = 480;
+	var ppi800 = 800;
+	for (let i = 0; i < numSheets; i++ ) {
+		let bi, file;
+
+		if (png300Bleed) {
+			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, ppi300, true);
+			file = new File(getProjectMember('Export/png300Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_PNG);
+			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, ppi300);
+		}
+
+		if (png480Bleed) {
+			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, ppi480, true);
+			file = new File(getProjectMember('Export/png480Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_PNG);
+			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, ppi480);
+		}
+
+		if (png800Bleed) {
+			bi = sheets[i].paint(arkham.sheet.RenderTarget.EXPORT, ppi800, true);
+			file = new File(getProjectMember('Export/png800Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_PNG);
+			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, ppi800);
+		}
+	}
+}
+
+function getCardObjectsSE(cardType) {
+	var card = ResourceKit.getGameComponentFromFile(getProjectMember('Templates/' + cardType + '.eon').file, false);
+	var settings = card.settings;  // set(), get()
+	return [card, settings];
+}
+
+function saveResultSE(settings, setID, lang, card, fname, simple_back, png300Bleed, png480Bleed, png800Bleed) {
+	ResourceKit.writeGameComponentToFile(new File(getProjectMember('Cards/').file, fname + '.' + setID + '.' + lang + '.eon'), card);
+	exportCard(card, fname, setID, lang, simple_back, png300Bleed, png480Bleed, png800Bleed);
+}
+
+function mainSE(progress, target) {
+	var icons = [];
+	var iconFiles = project.findChild('imagesIcons').iterator();
+	while (iconFiles.hasNext()) {
+		let icon = (iconFiles.next() + '').replace(/\.png$/g, '');
+		icons.push(icon);
+	}
+
+	var xmlFiles = project.findChild('XML').iterator();
+	while (xmlFiles.hasNext()) {
+		var filename = xmlFiles.next() + '';
+		var fXmlFile = new File(getProjectMember('XML/').file, filename + '.xml');
+		// Console.err.println('\nReading ' + fXmlFile);
+		var setID = filename.split('.')[0];
+		var lang = filename.split('.')[1];
+		var doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(fXmlFile);
+		run(doc, setID, lang, icons, getCardObjectsSE, saveResultSE, Node.ELEMENT_NODE, progress);
+	}
+	var finishedFile = new File('.', 'makeCards_FINISHED');
+	finishedFile.createNewFile();
+}
+
+Thread.busyWindow(mainSE, 'Updating cards...', true);
+
+
+// renderer code
+
+function getCardObjectsRenderer(cardType) {
+	var settings;
+	// T.B.D. create object with set() and get() methods
+	return [null, settings];
+}
+
+function saveResultRenderer(settings, setID, _1, _2, _3, _4, _5, _6, _7) {
+	// T.B.D. save HTML file
+}
+
+function mainRenderer() {
+	var setID;
+	// T.B.D. initialize set ID
+
+	var doc;
+	// T.B.D. initialize javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder().parse() object
+
+	var elementNode;
+	// T.B.D. initialize org.w3c.dom.Node.ELEMENT_NODE
+
+	var icons = [];
+	// T.B.D. fill icons list
+
+	run(doc, setID, 'English', icons, getCardObjectsRenderer, saveResultRenderer, elementNode, null);
 }
