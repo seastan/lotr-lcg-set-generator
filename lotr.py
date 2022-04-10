@@ -202,6 +202,7 @@ CARD_TYPES_VICTORY = {'Ally', 'Attachment', 'Encounter Side Quest', 'Enemy',
                       'Player Side Quest', 'Ship Enemy', 'Ship Objective',
                       'Treachery', 'Treasure'}
 CARD_TYPES_VICTORY_BACK = {'Quest'}
+CARD_SPHERES_NO_VICTORY = {'Cave'}
 CARD_TYPES_SPECIAL_ICON = {'Enemy', 'Location', 'Objective', 'Objective Ally',
                            'Objective Location', 'Ship Enemy',
                            'Ship Objective', 'Treachery'}
@@ -2943,6 +2944,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 else:
                     broken_set_ids.add(set_id)
         elif card_victory is not None and card_type not in CARD_TYPES_VICTORY:
+            message = 'Redundant victory points for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_victory is not None and
+              card_sphere in CARD_SPHERES_NO_VICTORY):
             message = 'Redundant victory points for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
