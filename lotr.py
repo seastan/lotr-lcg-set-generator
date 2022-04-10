@@ -6387,6 +6387,8 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
         card = ET.SubElement(cards, 'card')
         card.set('id', row[CARD_ID])
         card.set('name', row[CARD_NAME] or '')
+        if not _needed_for_dragncards(row):
+            card.set('skipDragncards', '1')
 
         card_type = row[CARD_TYPE]
 
