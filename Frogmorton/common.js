@@ -271,7 +271,7 @@ bodyRegion['Player Objective'] = '65,355,283,137';
 bodyRegion['Ship Enemy'] = '57,377,299,114';
 bodyRegion['Ship Objective'] = '65,355,283,137';
 bodyRegion['Treachery'] = '65,356,283,135';
-bodyRegion['Treasure'] = '57,347,299,130';
+bodyRegion['Treasure'] = '57,347,299,144';
 
 bodyRegion['Cave'] = '50,303,171,60';
 bodyRegion['Encounter Side Quest'] = '51,269,461,94';
@@ -320,18 +320,22 @@ bodyRightNoTraitRegion['Cave'] = '347,283,171,80';
 var bodyBackRegion = {};
 bodyBackRegion['Campaign'] = '64,60,285,443';
 bodyBackRegion['Nightmare'] = '54,55,305,439';
+bodyBackRegion['Quest'] = '51,249,461,114';
 
 var bodyRegionRenderer = {};
 bodyRegionRenderer['Hero'] = '57,377,299,95';
 bodyRegionRenderer['Encounter Side Quest'] = '51,269,461,79';
 bodyRegionRenderer['Encounter Side Quest SmallTextArea'] = '51,324,461,23';
 bodyRegionRenderer['Player Side Quest'] = '51,271,461,79';
+bodyRegionRenderer['Treasure'] = '57,347,299,125';
 
 var bodyNoTraitRegionRenderer = {};
-bodyNoTraitRegionRenderer['Quest'] = '51,249,461,102';
 bodyNoTraitRegionRenderer['Encounter Side Quest'] = '51,249,461,99';
 bodyNoTraitRegionRenderer['Encounter Side Quest SmallTextArea'] = '51,304,461,43';
 bodyNoTraitRegionRenderer['Player Side Quest'] = '51,251,461,99';
+
+var bodyBackRegionRenderer = {};
+bodyBackRegionRenderer['Quest'] = '51,249,461,102';
 
 var nameRegion = {};
 nameRegion['Ally'] = '100,329,213,25';
@@ -696,6 +700,10 @@ threatCostTint['Hero Promo'] = '0.0,0.0,0.95';
 var sphereBodyShape = {};
 sphereBodyShape['Hero'] = '0,0,472,40,0';
 sphereBodyShape['Hero Promo'] = '0,0,0,0,0';
+sphereBodyShape['Treasure'] = '0,0,472,0,34';
+
+var sphereOptionBodyShape = {};
+sphereOptionBodyShape['Treasure'] = '0,0,472,0,104';
 
 var optionBodyShape = {};
 optionBodyShape['Encounter Side Quest'] = '0,0,348,0,62';
@@ -1099,7 +1107,8 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				}
 
 				let bodyShapeNeeded = false;
-				if ((cardType == 'Hero') || ((['Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Player Side Quest', 'Quest'].indexOf(cardType) > -1) &&
+				if ((cardType == 'Hero') || (cardType == 'Treasure') ||
+					((['Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Player Side Quest', 'Quest'].indexOf(cardType) > -1) &&
 					((s.get('OptionRight') && (s.get('OptionRight') + '').length) || (s.get('OptionRightBack') && (s.get('OptionRightBack') + '').length)))) {
 					bodyShapeNeeded = true;
 				}
@@ -1525,6 +1534,14 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					if (cardType in relations[k][1]) {
 						s.set(relations[k][0], relations[k][1][cardType]);
 					}
+				}
+
+				if ((context == 'renderer') && bodyShapeNeeded && (cardType in bodyBackRegionRenderer)) {
+					s.set('BodyBack-region', bodyBackRegionRenderer[cardType]);
+				}
+
+				if ((cardType in sphereOptionBodyShape) && s.get('OptionRight') && (s.get('OptionRight') + '').length) {
+					s.set('Sphere-Body-shape', sphereOptionBodyShape[cardType]);
 				}
 
 				let copy;
