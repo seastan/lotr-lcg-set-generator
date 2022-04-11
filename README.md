@@ -243,6 +243,7 @@ Additional steps:
     You will need to set up the following remotes:
 
   - `ALePCardImages` (points to `CardImages`)
+  - `ALePIcons` (points to `CardImages/icons`)
   - `ALePLinksBackup` (points to `Links Backup`)
   - `ALePLogs` (points to `Logs`)
   - `ALePOCTGN` (points to `Playtesting/OCTGN Files`)
@@ -255,6 +256,7 @@ Additional steps:
   - `36 9 * * *   python3 <path>/monitor_remote_pipeline.py >> <path>/cron.log 2>&1`
   - `1-59/2 * * * * flock -xn <path>/mpc_monitor.lock -c 'python3 <path>/mpc_monitor.py > /dev/null' 2>&1`
   - `7 0 * * *    <path>/rclone_backup.sh "<local Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
+  - `22 * * * *    <path>/rclone_icons.sh >> <path>/cron.log 2>&1`
   - `0 8 * * 1    <path>/remind_backup.sh >> <path>/cron.log 2>&1`
   - `5 8 1 * *    <path>/remind_backup_monthly.sh >> <path>/cron.log 2>&1`
   - `5 8 2 * *    <path>/remind_stat_monthly.sh >> <path>/cron.log 2>&1`
