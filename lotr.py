@@ -3621,6 +3621,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif (card_additional_encounter_sets is not None and
+              len([s.strip() for s in card_additional_encounter_sets.split(';')
+                   if s.strip()]) > 5):
+            message = ('Too many additional encounter sets for row #{}{}'
+                       .format(i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if (card_adventure is not None and
                 card_type not in CARD_TYPES_ADVENTURE and
@@ -4776,7 +4786,8 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
         for encounter_set in [
                 r.lower().strip()
                 for r in
-                str(row[CARD_ADDITIONAL_ENCOUNTER_SETS]).split(';')]:
+                str(row[CARD_ADDITIONAL_ENCOUNTER_SETS]).split(';')
+                if r.lower().strip()]:
             quest['encounter sets'].add(encounter_set)
 
     quests.append(quest)
@@ -5631,7 +5642,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
         additional_encounter_sets = [
             s.strip() for s in str(row[CARD_ADDITIONAL_ENCOUNTER_SETS] or ''
                                    ).split(';')
-            if s != ''] or None
+            if s.strip()] or None
 
         fix_linebreaks = card_type not in ('Presentation', 'Rules')
 
@@ -6768,7 +6779,8 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
         if additional_sets:
             additional_sets = additional_sets[0].attrib['value']
             for additional_set in additional_sets.split(';'):
-                target_icon_images.append(additional_set.strip())
+                if additional_set.strip():
+                    target_icon_images.append(additional_set.strip())
 
         target_icon_images = [_escape_icon_filename('{}.png'.format(i))
                               for i in target_icon_images]

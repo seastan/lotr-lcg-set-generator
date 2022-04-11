@@ -1241,9 +1241,15 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 				}
 				if (card['Additional Encounter Sets']) {
-					let encounterSets = card['Additional Encounter Sets'].split(';');
+					let encounterSetsRaw = card['Additional Encounter Sets'].split(';');
+					let encounterSets = [];
+					for (let k = 0; k < encounterSetsRaw.length; k++) {
+						if (encounterSetsRaw[k].trim()) {
+							encounterSets.push(encounterSetsRaw[k].trim());
+						}
+					}
 					for (let k = 0; k < encounterSets.length; k++) {
-						let iconName = escapeIconFileName(encounterSets[k].trim());
+						let iconName = escapeIconFileName(encounterSets[k]);
 						if (icons.indexOf(iconName) > -1) {
 							s.set('EncounterSet' + (k + 1), 'Custom');
 							s.set('EncounterSet' + (k + 1) + '-external-path',
