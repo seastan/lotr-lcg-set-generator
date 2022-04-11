@@ -10,7 +10,7 @@ function RendererSettings() {
 	};
 }
 
-function getCardObjectsRenderer(cardType) {
+function getCardObjectsRenderer(_1) {
 	var settings = new RendererSettings();
 	return [null, settings];
 }
@@ -31,3 +31,7 @@ function mainRenderer() {
 
 	run('renderer', doc, setID, 'English', icons, getCardObjectsRenderer, saveResultRenderer, null);
 }
+
+const { XMLParser, XMLBuilder, XMLValidator} = require('fast-xml-parser');
+var parser = new XMLParser();
+console.log(parser);

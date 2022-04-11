@@ -226,9 +226,11 @@ See `configuration.cron.yaml` for a configuration example.
 
 Additional steps:
 
-1. Install additional dependency:
+1. Install additional dependencies:
 
   - `pip install discord.py==1.7.3 aiohttp`
+  - `sudo apt-get install nodejs npm wkhtmltopdf`
+  - `cd Renderer/; npm install fast-xml-parser; cd ..`
 
 2. Create `discord.yaml` (see `discord.default.yaml`).
 
