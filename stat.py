@@ -268,7 +268,7 @@ def create_ringsdb_csv(pack_name, pack_code):
 
 
 def create_dragncards_json(pack_name, pack_id):  # pylint: disable=R0912,R0914
-    """ Get Hall of Beorn data and create a csv file for RingsDB.
+    """ Get RingsDB data and create a json file for DragnCards.
     """
     source_data = get_ringsdb_data()
     cards = {}
