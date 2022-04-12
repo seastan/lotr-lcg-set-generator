@@ -153,6 +153,7 @@ for details).
   - `hallofbeorn_json`: creating JSON files for Hall of Beorn (true or false)
   - `frenchdb_csv`: creating CSV files for the French database sda.cgbuilder.fr (true or false)
   - `spanishdb_csv`: creating CSV files for the Spanish database susurrosdelbosqueviejo.com (true or false)
+  - `renderer`: creating DragnCards proxy images (true or false)
   - `upload_dragncards`: uploading outputs to DragnCards (true or false)
   - `dragncards_hostname`: DragnCards hostname (username@hostname)
   - `update_ringsdb`: updating ringsdb.com (true or false)
@@ -265,7 +266,7 @@ Additional steps:
   - `*/2 * * * *  <path>/monitor_discord_changes.sh >> <path>/cron.log 2>&1`
   - `0 1 * * *    <path>/monitor_wordpress_token.sh >> <path>/cron.log 2>&1`
   - `19 8 * * *   <path>/scheduled_backup.sh "<local Links Backup path>" >> <path>/cron.log 2>&1`
-  - `7 1 * * *    <path>/configutation_backup.sh "<path to a local configuration backup folder>" >> <path>/cron.log 2>&1`
+  - `7 1 * * *    <path>/configuration_backup.sh "<path to a local configuration backup folder>" >> <path>/cron.log 2>&1`
 
     Replace `<path>` with the absolute path to the root folder.  `cron.log` may be located either in the root folder
     or in some external folder (if you already have other crons).  Set `<backup folder>` to your actual backup folder.

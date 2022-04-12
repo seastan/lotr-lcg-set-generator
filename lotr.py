@@ -6544,18 +6544,18 @@ def _collect_custom_images(image_path):
 def _set_outputs(conf, lang, root):
     """ Set required outputs.
     """
-    if (conf['nobleed_300'][lang]
-            or 'drivethrucards' in conf['outputs'][lang]
-            or 'pdf' in conf['outputs'][lang]):
+    if (conf['nobleed_300'].get(lang)
+            or 'drivethrucards' in (conf['outputs'][lang] or [])
+            or 'pdf' in (conf['outputs'][lang] or [])):
         root.set('png300Bleed', '1')
 
-    if conf['nobleed_480'][lang]:
+    if conf['nobleed_480'].get(lang):
         root.set('png480Bleed', '1')
 
-    if ('makeplayingcards' in conf['outputs'][lang]
-            or 'mbprint' in conf['outputs'][lang]
-            or 'genericpng' in conf['outputs'][lang]
-            or 'genericpng_pdf' in conf['outputs'][lang]):
+    if ('makeplayingcards' in (conf['outputs'][lang] or [])
+            or 'mbprint' in (conf['outputs'][lang] or [])
+            or 'genericpng' in (conf['outputs'][lang] or [])
+            or 'genericpng_pdf' in (conf['outputs'][lang] or [])):
         root.set('png800Bleed', '1')
 
 
@@ -7006,6 +7006,16 @@ def copy_xml(set_id, set_name, lang):
                     os.path.join(XML_PATH, '{}.{}.xml'.format(set_id, lang)))
     logging.info('[%s, %s] ...Copying the xml file into the project (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
+
+
+def generate_dragncards_proxies(conf, set_id, set_name):
+    """ Generate DragnCards proxies.
+    """
+    logging.info('[%s] Generating DragnCards proxies...', set_name)
+    timestamp = time.time()
+
+    logging.info('[%s] ...Generating DragnCards proxies (%ss)', set_name,
+                 round(time.time() - timestamp, 3))
 
 
 def create_project():

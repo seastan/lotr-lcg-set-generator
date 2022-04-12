@@ -95,19 +95,37 @@ def main(conf=None):  # pylint: disable=R0912,R0915
         if conf['output_languages']:
             lotr.copy_custom_images(conf, set_id, set_name)
 
+        english_xml_generated = False
+        english_xml_changed = False
         for lang in conf['output_languages']:
             if scratch and lang != 'English':
                 continue
 
             eons = True
+            if lang == 'English':
+                english_xml_generated = True
+
             lotr.generate_xml(conf, set_id, set_name, lang)
             lotr.update_xml(conf, set_id, set_name, lang)
             new_hash, old_hash = lotr.calculate_hashes(set_id, set_name, lang)
             if new_hash != old_hash:
                 changes = True
+                if lang == 'English':
+                    english_xml_changed = True
 
             lotr.copy_raw_images(conf, set_id, set_name, lang)
             lotr.copy_xml(set_id, set_name, lang)
+
+        if conf['renderer'] and not english_xml_generated:
+            lotr.generate_xml(conf, set_id, set_name, 'English')
+            lotr.update_xml(conf, set_id, set_name, 'English')
+            new_hash, old_hash = lotr.calculate_hashes(set_id, set_name,
+                                                       'English')
+            if new_hash != old_hash:
+                english_xml_changed = True
+
+        if conf['renderer'] and english_xml_changed:
+            lotr.generate_dragncards_proxies(conf, set_id, set_name)
 
     if conf['octgn_set_xml'] or conf['octgn_o8d']:
         lotr.copy_octgn_outputs(conf, sets)

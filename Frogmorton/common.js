@@ -786,7 +786,6 @@ translate['Rules'] = {'English': 'Rules', 'French': 'Rules', 'German': 'Rules', 
 
 function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progress) {
 	var docElement = doc.getDocumentElement();
-	// docElement.normalize();
 	var setName = docElement.getAttribute('name');
 	var setIcon = docElement.getAttribute('icon');
 	var setCopyright = docElement.getAttribute('copyright');
