@@ -51,7 +51,7 @@ function exportCard(card, fname, setID, lang, simple_back, png300Bleed, png480Bl
 
 function getCardObjectsSE(cardType) {
 	var card = ResourceKit.getGameComponentFromFile(getProjectMember('Templates/' + cardType + '.eon').file, false);
-	var settings = card.settings;  // set(), get()
+	var settings = card.settings;
 	return [card, settings];
 }
 

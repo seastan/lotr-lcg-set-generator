@@ -1582,9 +1582,9 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					simple_back = true;
 				}
 				else if ((playerTypes.indexOf(cardType) > -1 &&
-					  (keywords + '').replace('. ', '.').split('.').indexOf(translate['Encounter Keyword'][lang]) == -1 &&
-					  (card['Card Back'] + '') != 'Encounter') ||
-					 (card['Card Back'] + '') == 'Player') {
+						(keywords + '').replace('. ', '.').split('.').indexOf(translate['Encounter Keyword'][lang]) == -1 &&
+						(card['Card Back'] + '') != 'Encounter') ||
+						(card['Card Back'] + '') == 'Player') {
 					back = 'p';
 					simple_back = true;
 				}
