@@ -64,7 +64,7 @@ function mainSE(progress, target) {
 	var icons = [];
 	var iconFiles = project.findChild('imagesIcons').iterator();
 	while (iconFiles.hasNext()) {
-		let icon = (iconFiles.next() + '').replace(/\.png$/g, '');
+		let icon = (iconFiles.next() + '').replace(/\.png$/, '');
 		icons.push(icon);
 	}
 
