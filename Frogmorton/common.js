@@ -789,19 +789,9 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 	var setName = docElement.getAttribute('name');
 	var setIcon = docElement.getAttribute('icon');
 	var setCopyright = docElement.getAttribute('copyright');
-
-	var png300Bleed = false;
-	var png480Bleed = false;
-	var png800Bleed = false;
-	if (doc.getDocumentElement().getAttribute('png300Bleed') + '' == '1') {
-		png300Bleed = true;
-	}
-	if (doc.getDocumentElement().getAttribute('png480Bleed') + '' == '1') {
-		png480Bleed = true;
-	}
-	if (doc.getDocumentElement().getAttribute('png800Bleed') + '' == '1') {
-		png800Bleed = true;
-	}
+	var png300Bleed = docElement.getAttribute('png300Bleed') + '' == '1';
+	var png480Bleed = docElement.getAttribute('png480Bleed') + '' == '1';
+	var png800Bleed = docElement.getAttribute('png800Bleed') + '' == '1';
 
 	var nList = doc.getElementsByTagName('card');
 	for (let i = 0; i < nList.getLength(); i++) {
