@@ -811,9 +811,6 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 		let propList = nNode.getElementsByTagName('property');
 		for (let j = 0; j < propList.getLength(); j++) {
 			let nProp = propList.item(j);
-			if (!nProp.getParentNode().isSameNode(nNode)) {
-				continue;
-			}
 			if (nProp) {
 				card[nProp.getAttribute('name')] = nProp.getAttribute('value');
 			}
