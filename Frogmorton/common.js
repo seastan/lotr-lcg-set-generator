@@ -1048,7 +1048,15 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					let vXml = card[nXml];
 
 					if (!vXml) {
-						if (['Sphere', 'BSphere', 'Special Icon', 'BSpecial Icon'].indexOf(nXml + '') == -1) {
+						if (['Sphere', 'BSphere'].indexOf(nXml + '') > -1) {
+							if (context == 'renderer') {
+								s.set(nEon, '');
+							}
+						}
+						else if (['Special Icon', 'BSpecial Icon'].indexOf(nXml + '') > -1) {
+							s.set(nEon, 'Empty');
+						}
+						else {
 							s.set(nEon, '');
 						}
 						continue;
@@ -1088,8 +1096,29 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set(nEon, vXml);
 				}
 
-				for (let idx_f = 0; idx_f < flags.length; idx_f++) {
-					s.set(flags[idx_f], 1);
+				if (flags.indexOf('NoArtist') > -1) {
+					s.set('NoArtist', 1);
+				}
+				else {
+					s.set('NoArtist', 0);
+				}
+				if (flags.indexOf('NoArtistBack') > -1) {
+					s.set('NoArtistBack', 1);
+				}
+				else {
+					s.set('NoArtistBack', 0);
+				}
+				if (flags.indexOf('NoCopyright') > -1) {
+					s.set('NoCopyright', 1);
+				}
+				else {
+					s.set('NoCopyright', 0);
+				}
+				if (flags.indexOf('NoCopyrightBack') > -1) {
+					s.set('NoCopyrightBack', 1);
+				}
+				else {
+					s.set('NoCopyrightBack', 0);
 				}
 
 				let bodyShapeNeeded = false;
@@ -1242,17 +1271,26 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('EncounterSet-external-path', '');
 				}
 
-				if (card['Additional Encounter Sets']) {
-					let encounterSetsRaw = card['Additional Encounter Sets'].split(';');
+				if (cardType == 'Quest') {
 					let encounterSets = [];
-					for (let k = 0; k < encounterSetsRaw.length; k++) {
-						if (encounterSetsRaw[k].trim()) {
-							encounterSets.push(encounterSetsRaw[k].trim());
+					if (card['Additional Encounter Sets']) {
+						let encounterSetsRaw = card['Additional Encounter Sets'].split(';');
+						for (let k = 0; k < encounterSetsRaw.length; k++) {
+							if (encounterSetsRaw[k].trim()) {
+								encounterSets.push(encounterSetsRaw[k].trim());
+							}
 						}
+					}
+					while (encounterSets.length < 5) {
+						encounterSets.push('');
 					}
 					for (let k = 0; k < encounterSets.length; k++) {
 						let iconName = escapeIconFileName(encounterSets[k]);
-						if (icons.indexOf(iconName) > -1) {
+						if (iconName == '') {
+							s.set('EncounterSet' + (k + 1), 'Empty');
+							s.set('EncounterSet' + (k + 1) + '-external-path', '');
+						}
+						else if (icons.indexOf(iconName) > -1) {
 							s.set('EncounterSet' + (k + 1), 'Custom');
 							s.set('EncounterSet' + (k + 1) + '-external-path', 'project:imagesIcons/' + iconName + '.png');
 						}
