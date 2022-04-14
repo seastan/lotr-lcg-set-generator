@@ -17,34 +17,34 @@ function RendererSettings() {
     };
 }
 
-function iterateKeys(dict, name, res) {
-    for (let key in dict) {
-        if (dict.hasOwnProperty(key) && (key != '#text') && !key.match(/^@_/)) {
-            let element = dict[key];
-            if (key == name) {
-                if (element instanceof Array) {
-                    for (let i = 0; i < element.length; i++ ) {
-                        res.push(new ElementAdapter(element[i]));
+function iterateKeys(root, name, res) {
+    var json = root.json;
+    for (let key in json) {
+        if (json.hasOwnProperty(key) && (key != '#text') && !key.match(/^@_/)) {
+            let child = json[key];
+            if (child instanceof Array) {
+                for (let i = 0; i < child.length; i++ ) {
+                    let element = new ElementAdapter(child[i], root);
+                    if (key == name) {
+                        res.push(element);
                     }
-                }
-                else {
-                    res.push(new ElementAdapter(element));
-                }
-            }
-            if (element instanceof Array) {
-                for (let i = 0; i < element.length; i++ ) {
-                    iterateKeys(element[i], name, res);
+                    iterateKeys(element, name, res);
                 }
             }
             else {
+                let element = new ElementAdapter(child, root);
+                if (key == name) {
+                    res.push(element);
+                }
                 iterateKeys(element, name, res);
             }
         }
     }
 }
 
-function ElementAdapter(dict) {
-    this.json = dict;
+function ElementAdapter(json, parentElement) {
+    this.json = json;
+    this.parentElement = parentElement;
 
     this.print = function() {
         return JSON.stringify(this.json, null, 2);
@@ -56,8 +56,16 @@ function ElementAdapter(dict) {
 
     this.getElementsByTagName = function(name) {
         var res = [];
-        iterateKeys(this.json, name, res);
+        iterateKeys(this, name, res);
         return new ElementListAdapter(res);
+    };
+
+    this.getParentNode = function() {
+        return this.parentElement;
+    };
+
+    this.isSameNode = function(element) {
+        return this.json == element.json;
     };
 }
 
@@ -95,14 +103,14 @@ function DocumentBuilderAdapter(path) {
     this.getDocumentElement = function() {
         for (let key in this.json) {
             if (this.json.hasOwnProperty(key)) {
-                return new ElementAdapter(this.json[key]);
+                return new ElementAdapter(this.json[key], this);
             }
         }
     };
 
     this.getElementsByTagName = function(name) {
         var res = [];
-        iterateKeys(this.json, name, res);
+        iterateKeys(this, name, res);
         return new ElementListAdapter(res);
     };
 }
