@@ -811,7 +811,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 		let propList = nNode.getElementsByTagName('property');
 		for (let j = 0; j < propList.getLength(); j++) {
 			let nProp = propList.item(j);
-			if (nProp) {
+			if (nProp && nProp.getParentNode().isSameNode(nNode)) {
 				card[nProp.getAttribute('name')] = nProp.getAttribute('value');
 			}
 		}
@@ -1099,13 +1099,19 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					bodyShapeNeeded = true;
 				}
 
-				if ((cardType == 'Cave') && (s.get('Rules').search('\\[split\\]') > -1)) {
-					s.set('RulesRight', s.get('Rules').split('\\[split\\]')[1].trim());
-					s.set('Rules', s.get('Rules').split('\\[split\\]')[0].trim());
+				if (cardType == 'Cave') {
+					if (s.get('Rules').search('\\[split\\]') > -1) {
+						s.set('RulesRight', s.get('Rules').split('\\[split\\]')[1].trim());
+						s.set('Rules', s.get('Rules').split('\\[split\\]')[0].trim());
+					}
+					else {
+						s.set('RulesRight', '');
+					}
 				}
 
 				if ((cardType == 'Presentation') || (cardType == 'Rules')) {
 					if (s.get('OptionRight').search('/') > -1) {
+						s.set('PageFrontShow', 'true');
 						s.set('PageNumber', s.get('OptionRight').split('/')[0]);
 						s.set('PageTotal', s.get('OptionRight').split('/')[1]);
 					}
@@ -1116,6 +1122,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 
 					if (s.get('OptionRightBack').search('/') > -1) {
+						s.set('PageBackShow', 'true');
 						s.set('PageNumberBack', s.get('OptionRightBack').split('/')[0]);
 						s.set('PageTotalBack', s.get('OptionRightBack').split('/')[1]);
 					}
@@ -1145,6 +1152,9 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 
 				if (['Boon', 'Burden'].indexOf(cardSphere) > -1) {
 					s.set('Subtype', markUp(translate[cardSphere][lang].toUpperCase(), 'Subtype', cardType, lang, setID));
+				}
+				else {
+					s.set('Subtype', '');
 				}
 
 				if ((cardType == 'Campaign') && (cardSphere == 'Setup')) {
@@ -1224,8 +1234,14 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 					else {
 						s.set('EncounterSet', convertIconName(card['Encounter Set']));
+						s.set('EncounterSet-external-path', '');
 					}
 				}
+				else {
+					s.set('EncounterSet', 'Empty');
+					s.set('EncounterSet-external-path', '');
+				}
+
 				if (card['Additional Encounter Sets']) {
 					let encounterSetsRaw = card['Additional Encounter Sets'].split(';');
 					let encounterSets = [];
@@ -1238,19 +1254,27 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						let iconName = escapeIconFileName(encounterSets[k]);
 						if (icons.indexOf(iconName) > -1) {
 							s.set('EncounterSet' + (k + 1), 'Custom');
-							s.set('EncounterSet' + (k + 1) + '-external-path',
-								'project:imagesIcons/' + iconName + '.png');
+							s.set('EncounterSet' + (k + 1) + '-external-path', 'project:imagesIcons/' + iconName + '.png');
 						}
 						else {
 							s.set('EncounterSet' + (k + 1), convertIconName(encounterSets[k].trim()));
+							s.set('EncounterSet' + (k + 1) + '-external-path', '');
 						}
 					}
 				}
+
 				if (card['Encounter Set Number Start']) {
 					s.set('EncounterSetNumber', parseInt(card['Encounter Set Number Start']) + j);
 				}
+				else {
+					s.set('EncounterSetNumber', 0);
+				}
+
 				if (card['Encounter Set Total']) {
 					s.set('EncounterSetTotal', card['Encounter Set Total']);
+				}
+				else {
+					s.set('EncounterSetTotal', 0);
 				}
 
 				if (flags.indexOf('BlueRing') > -1) {
@@ -1268,9 +1292,13 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				else if (card['Removed for Easy Mode'] && j >= parseInt(card['Quantity']) - parseInt(card['Removed for Easy Mode'])) {
 					s.set('Difficulty', 'Gold');
 				}
+				else {
+					s.set('Difficulty', 'Standard');
+				}
 
 				if (((cardType == 'Presentation') && (['BlueNightmare', 'GreenNightmare', 'PurpleNightmare', 'RedNightmare', 'BrownNightmare', 'YellowNightmare'].indexOf(cardSphere) == -1)) || (cardType == 'Rules')) {
 					s.set('Collection', 'Empty');
+					s.set('Collection-external-path', '');
 				}
 				else {
 					let selectedIcon;
@@ -1303,6 +1331,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						}
 						else {
 							s.set('Collection', convertIconName(selectedIcon));
+							s.set('Collection-external-path', '');
 						}
 					}
 				}
@@ -1355,7 +1384,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				s.set('StoryBack-formatEnd', '</i></size></family>');
 				s.set('Trait-format', '<center><tracking -0.005><family "Times New Roman"><size ' + defaultTraitPointSize + '><i><b>');
 				s.set('Trait-formatEnd', '</b></i></size></family>');
-				s.set('PageIn-format', '<bottom><right><tracking -0.005><family "Times New Roman"><size ' + defaultPagePointSize + '><b>');
+				s.set('PageIn-format', '<right><tracking -0.005><family "Times New Roman"><size ' + defaultPagePointSize + '><b>');
 				s.set('PageIn-formatEnd', '</b></size></family>');
 
 				s.set('Body-style', 'WIDTH: REGULAR; FAMILY: {Eons.namedObjects.LRL.BodyFont}');
@@ -1431,6 +1460,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 				}
 				else if (cardType in bodyNoTraitRegion) {
+					s.set('TraitOut', 'false');
 					s.set('Body-region', bodyNoTraitRegion[cardType]);
 					if ((context == 'renderer') && bodyShapeNeeded && (cardType in bodyNoTraitRegionRenderer)) {
 						s.set('Body-region', bodyNoTraitRegionRenderer[cardType]);
@@ -1480,6 +1510,9 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				if (cardType in namePointSize) {
 					s.set('Name-pointsize', Math.round(namePointSize[cardType] * 1.734 * 100) / 100);
 				}
+				else {
+					s.set('Name-pointsize', Math.round(6.5 * 1.734 * 100) / 100);
+				}
 
 				let relations = [
 					['Portrait-portrait-clip-region', portraitRegion],
@@ -1518,7 +1551,6 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					['EncounterSet3-portrait-clip-region', encounterSet3PortraitRegion],
 					['EncounterSet4-portrait-clip-region', encounterSet4PortraitRegion],
 					['EncounterSet5-portrait-clip-region', encounterSet5PortraitRegion],
-					['ThreatCost-tint', threatCostTint],
 					['Sphere-Body-shape', sphereBodyShape],
 					['Option-Body-shape', optionBodyShape]
 				];
@@ -1534,6 +1566,13 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 
 				if ((cardType in sphereOptionBodyShape) && s.get('OptionRight') && (s.get('OptionRight') + '').length) {
 					s.set('Sphere-Body-shape', sphereOptionBodyShape[cardType]);
+				}
+
+				if (cardType in threatCostTint) {
+					s.set('ThreatCost-tint', threatCostTint[cardType]);
+				}
+				else {
+					s.set('ThreatCost-tint', '200.0,0.7,0.7');
 				}
 
 				let copy;
