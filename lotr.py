@@ -7008,13 +7008,15 @@ def copy_xml(set_id, set_name, lang):
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
-def generate_dragncards_proxies(conf, set_id, set_name):
+def generate_dragncards_proxies(conf, sets):
     """ Generate DragnCards proxies.
     """
-    logging.info('[%s] Generating DragnCards proxies...', set_name)
+    logging.info('Generating DragnCards proxies...')
     timestamp = time.time()
 
-    logging.info('[%s] ...Generating DragnCards proxies (%ss)', set_name,
+    sets = ','.join(sets)
+
+    logging.info('...Generating DragnCards proxies (%ss)',
                  round(time.time() - timestamp, 3))
 
 

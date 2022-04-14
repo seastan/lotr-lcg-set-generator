@@ -14,7 +14,7 @@ def init_logging():
                         format='%(asctime)s %(levelname)s: %(message)s')
 
 
-def main(conf=None):  # pylint: disable=R0912,R0915
+def main(conf=None):  # pylint: disable=R0912,R0914,R0915
     """ Main function.
     """
     timestamp = time.time()
@@ -65,6 +65,7 @@ def main(conf=None):  # pylint: disable=R0912,R0915
 
     eons = False
     changes = False
+    renderer_sets = []
     for set_id, set_name in sets:
         scratch = set_id in lotr.FOUND_SCRATCH_SETS
         if conf['octgn_set_xml']:
@@ -125,13 +126,16 @@ def main(conf=None):  # pylint: disable=R0912,R0915
                 english_xml_changed = True
 
         if conf['renderer'] and english_xml_changed:
-            lotr.generate_dragncards_proxies(conf, set_id, set_name)
+            renderer_sets.append(set_id)
 
     if conf['octgn_set_xml'] or conf['octgn_o8d']:
         lotr.copy_octgn_outputs(conf, sets)
 
     if conf['ringsdb_csv'] and conf['update_ringsdb']:
         lotr.update_ringsdb(conf, sets)
+
+    if renderer_sets:
+        lotr.generate_dragncards_proxies(conf, renderer_sets)
 
     if changes:
         lotr.create_project()
