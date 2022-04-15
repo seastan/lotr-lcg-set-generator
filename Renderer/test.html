@@ -27,7 +27,7 @@
 var min_size = 5;
 
 function correct_size(id) {
-    var container = document.getElementById('text1');
+    var container = document.getElementById(id);
     var size = container.style.fontSize.replace('px', '');
     while (container.scrollHeight > container.clientHeight) {
         size -= 1;

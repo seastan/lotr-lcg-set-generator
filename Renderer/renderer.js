@@ -120,9 +120,104 @@ function getCardObjectsRenderer(_) {
     return [null, settings];
 }
 
+function round(value, digits) {
+    return +value.toFixed(digits);
+}
+
+function updateFontSize(match, p1, offset, string) {
+    return '<span style="font-size: ' + round((p1 * 1.3333 / 1.75) / 14, 4) + 'em">';
+}
+
+function updateImageWidth(match, p1, p2, offset, string) {
+    var width;
+    if (p2.match(/pt$/)) {
+        width = Math.round(p2.replace(/pt/g, '') * 1.3333 / 1.75);
+    }
+    else if (p2.match(/in$/)) {
+        width = Math.round(p2.replace(/in/g, '') * 300 / 1.75);
+    }
+    else {
+        width = Math.round(p2.replace(/cm/g, '') * 0.393701 * 300 / 1.75);
+    }
+
+    var res;
+    if (width > 0) {
+        res = '<img src="' + p1 + '" width="' + width + '">';
+    }
+    else {
+        res = '';
+    }
+
+    return res;
+}
+
+function updateImageWidthHeight(match, p1, p2, p3, offset, string) {
+    var width;
+    if (p2.match(/pt$/)) {
+        width = Math.round(p2.replace(/pt/g, '') * 1.3333 / 1.75);
+    }
+    else if (p2.match(/in$/)) {
+        width = Math.round(p2.replace(/in/g, '') * 300 / 1.75);
+    }
+    else {
+        width = Math.round(p2.replace(/cm/g, '') * 0.393701 * 300 / 1.75);
+    }
+
+    var height;
+    if (p3.match(/pt$/)) {
+        height = Math.round(p3.replace(/pt/g, '') * 1.3333 / 1.75);
+    }
+    else if (p3.match(/in$/)) {
+        height = Math.round(p3.replace(/in/g, '') * 300 / 1.75);
+    }
+    else {
+        height = Math.round(p3.replace(/cm/g, '') * 0.393701 * 300 / 1.75);
+    }
+
+    var res;
+    if ((width > 0) && (height > 0)) {
+        res = '<img src="' + p1 + '" width="' + width + '" height="' + height + '">';
+    }
+    else {
+        res = '';
+    }
+
+    return res;
+}
+
+function convertTags(value) {
+    value += '';
+    value = value.replace(/<tracking -0.005/g, '');
+    value = value.replace(/<family "([^"]+)">/g, '<span style="font-family: $1">');
+    value = value.replace(/<\/family>/g, '</span>');
+    value = value.replace(/<\/size><size 0\.01><\/i>(?:\u00a0| )<\/size><size [0-9.]+>/g, '</i>');
+    value = value.replace(/<size ([0-9.]+)>/g, updateFontSize);
+    value = value.replace(/<\/size>/g, '</span>');
+    value = value.replace(/<color ([^>]+)>/g, '<span style="color: $1">');
+    value = value.replace(/<\/color>/g, '</span>');
+    value = value.replace(/<lt>/g, '&lt;');
+    value = value.replace(/<gt>/g, '&gt;');
+    value = value.replace(/res:\/\/TheLordOfTheRingsLCG\/image\/empty1x1\.png/g, 'Images/empty.png');
+    value = value.replace(/res:\/\/TheLordOfTheRingsLCG\/image\/ShadowSeparator\.png/g, 'Images/shadow.png');
+    value = value.replace(/project:imagesCustom\/[0-9a-f\-]+_Do-Not-Read-the-Following\.png/g, 'Images/donotread.png');
+    value = value.replace(/project:imagesCustom/g, 'Images');
+    value = value.replace(/project:imagesIcons/g, 'Icons');
+    value = value.replace(/<image ([^ >]+)>/g, '<img src="$1">');
+    value = value.replace(/<image ([^ >]+) ([^ >]+)>/g, updateImageWidth);
+    value = value.replace(/<image ([^ >]+) ([^ >]+) ([^ >]+)>/g, updateImageWidthHeight);
+
+//    value = value.replace(//g, '');
+    return value;
+}
+
 function saveResultRenderer(settings, setID, _1, _2, _3, _4, _5, _6, _7) {
-    // T.B.D. save HTML file
-    console.log(settings.settings);
+    var data = settings.settings;
+    for (let key in data) {
+        if (data.hasOwnProperty(key)) {
+            data[key] = convertTags(data[key]);
+        }
+    }
+    console.log(data);
 }
 
 function mainRenderer() {
