@@ -1445,7 +1445,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				s.set('LRL-IllustratorShort', translate['Illustrator'][lang]);
 				s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
 				s.set('LRL-Page', translate['Page'][lang]);
-				s.set('LRL-PageOf', '<bs></size><size 3> </size><size 7>/</size><size 3> </size><size 7><bs>');
+				s.set('LRL-PageOf', '</size><size 3> </size><size 7>/</size><size 3> </size><size 7>');
 
 				if ((cardType == 'Presentation') || (cardType == 'Rules')) {
 					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.1>');
