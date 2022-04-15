@@ -843,7 +843,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 		}
 
 		if (card['Flags']) {
-			card['Flags'] = (card['Flags'] + '').replace(';', '\n').split('\n');
+			card['Flags'] = (card['Flags'] + '').replace(/;/g, '\n').split('\n');
 			for (let idx_f = 0; idx_f < card['Flags'].length; idx_f++) {
 				card['Flags'][idx_f] = card['Flags'][idx_f].trim();
 			}
@@ -853,7 +853,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 		}
 
 		if (card['BFlags']) {
-			card['BFlags'] = (card['BFlags'] + '').replace(';', '\n').split('\n');
+			card['BFlags'] = (card['BFlags'] + '').replace(/;/g, '\n').split('\n');
 			for (let idx_f = 0; idx_f < card['BFlags'].length; idx_f++) {
 				card['BFlags'][idx_f] = card['BFlags'][idx_f].trim();
 			}
@@ -1646,7 +1646,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					simple_back = true;
 				}
 				else if ((playerTypes.indexOf(cardType) > -1 &&
-						(keywords + '').replace('. ', '.').split('.').indexOf(translate['Encounter Keyword'][lang]) == -1 &&
+						(keywords + '').replace(/\. /g, '.').split('.').indexOf(translate['Encounter Keyword'][lang]) == -1 &&
 						(card['Card Back'] + '') != 'Encounter') ||
 						(card['Card Back'] + '') == 'Player') {
 					back = 'p';
