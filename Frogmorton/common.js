@@ -1959,7 +1959,6 @@ function markUp(value, key, cardType, lang, setID) {
 	value = value.replace(/\[stormy\]/g, tagPrefix + '<hw>' + tagSuffix);
 	value = value.replace(/\[sailing\]/g, tagPrefix + '<sai>' + tagSuffix);
 	value = value.replace(/\[eos\]/g, tagPrefix + '<eos>' + tagSuffix);
-	value = value.replace(/\[person\]/g, tagPrefix + '<per>' + tagSuffix);
 	value = value.replace(/\[pp\]/g, tagPrefix + '<pp>' + tagSuffix);
 	value = value.replace(/\[center\]/g, '<center>');
 	value = value.replace(/([^\n])\<center\>/g, '$1\n<center>');
