@@ -1446,6 +1446,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				s.set('LRL-IllustratorUnknown', translate['Illustrator'][lang] + ' ' + translate['Unknown Artist'][lang]);
 				s.set('LRL-Page', translate['Page'][lang]);
 				s.set('LRL-PageOf', '</size><size 3> </size><size 7>/</size><size 3> </size><size 7>');
+				s.set('HorizontalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.3 0.1>');
 
 				if ((cardType == 'Presentation') || (cardType == 'Rules')) {
 					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.1>');
@@ -1952,7 +1953,6 @@ function markUp(value, key, cardType, lang, setID) {
 	value = value.replace(/\[tactics\]/g, tagPrefix + '<tac>' + tagSuffix);
 	value = value.replace(/\[baggins\]/g, tagPrefix + '<bag>' + tagSuffix);
 	value = value.replace(/\[fellowship\]/g, tagPrefix + '<fel>' + tagSuffix);
-	value = value.replace(/\[mastery\]/g, tagPrefix + '<mas>' + tagSuffix);
 	value = value.replace(/\[sunny\]/g, tagPrefix + '<hon>' + tagSuffix);
 	value = value.replace(/\[cloudy\]/g, tagPrefix + '<hof>' + tagSuffix);
 	value = value.replace(/\[rainy\]/g, tagPrefix + '<hb>' + tagSuffix);
@@ -2033,6 +2033,15 @@ function markUp(value, key, cardType, lang, setID) {
 	value = value.replace(/<lotrheader ([0-9\.]+)>(.*?)<\/lotrheader>/g, updateLotrHeaderReplacer);
 	value = value.replace(/<size [^>]+><\/size>/g, '');
 	value = value.replace(/<family [^>]+><\/family>/g, '');
+
+	value = value.replace(/<hs>/g, '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.3 0.1>');
+
+	if ((cardType == 'Presentation') || (cardType == 'Rules')) {
+		value = value.replace(/<vs>/g, '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.1>');
+	}
+	else {
+		value = value.replace(/<vs>/g, '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.075 0.075>');
+	}
 
 	value = updatePunctuation(value, lang);
 	if ((['Traits', 'BTraits'].indexOf(key + '') > -1) && (lang == 'Spanish')) {
