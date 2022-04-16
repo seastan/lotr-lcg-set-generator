@@ -693,6 +693,9 @@ namePointSize['Ship Objective'] = 7.5;
 namePointSize['Treachery'] = 6.5;
 namePointSize['Treasure'] = 6.5;
 
+var bottomPointSize = {};
+bottomPointSize['Hero Promo'] = 3.5;
+
 var threatCostTint = {};
 threatCostTint['Hero'] = '200.0,0.7,0.7';
 threatCostTint['Hero Promo'] = '0.0,0.0,0.95';
@@ -1399,7 +1402,19 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				if (cardType in traitPointSize) {
 					defaultTraitPointSize = traitPointSize[cardType];
 				}
+
+				let defaultNamePointSize = 6.5;
+				if (cardType in namePointSize) {
+					defaultNamePointSize = namePointSize[cardType];
+				}
+
+				let defaultBottomPointSize = 4;
+				if (cardType in bottomPointSize) {
+					defaultBottomPointSize = bottomPointSize[cardType];
+				}
+
 				let defaultPagePointSize = 7;
+				let defaultEncounterSetNumberPointSize = 4;
 
 				s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size ' + defaultBodyPointSize + '>');
 				s.set('Rules-formatEnd', '</size></family>');
@@ -1425,8 +1440,8 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				s.set('PageIn-format', '<right><tracking -0.005><family "Times New Roman"><size ' + defaultPagePointSize + '><b>');
 				s.set('PageIn-formatEnd', '</b></size></family>');
 
-				s.set('Body-style', 'WIDTH: REGULAR; FAMILY: {Eons.namedObjects.LRL.BodyFont}');
-				s.set('BodyRight-style', 'WIDTH: REGULAR; FAMILY: {Eons.namedObjects.LRL.BodyFont}');
+				s.set('Body-style', 'WIDTH: REGULAR; FAMILY: {"Times New Roman"}');
+				s.set('BodyRight-style', 'WIDTH: REGULAR; FAMILY: {"Times New Roman"}');
 				s.set('Trait-style', 'WIDTH: REGULAR; WEIGHT: BOLD; POSTURE: OBLIQUE; FAMILY: {"Times New Roman"}');
 				s.set('Name-style', 'FAMILY: {"Vafthrudnir"}');
 				s.set('Subtype-style', 'FAMILY: {"Vafthrudnir"}');
@@ -1438,7 +1453,9 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				s.set('Bottom-style', 'WIDTH: SEMICONDENSED; WEIGHT: BOLD; FAMILY: {"Times New Roman"}');
 				s.set('Side-style', 'FAMILY: {"Vafthrudnir"}');
 				s.set('Page-style', 'WIDTH: SEMICONDENSED; WEIGHT: BOLD; FAMILY: {"Times New Roman"}');
-				s.set('EncounterSetNumber-pointsize', 4);
+				s.set('Name-pointsize', Math.round(defaultNamePointSize * 1.734 * 100) / 100);
+				s.set('Bottom-pointsize', defaultBottomPointSize);
+				s.set('EncounterSetNumber-pointsize', defaultEncounterSetNumberPointSize);
 				s.set('Engagement-tint', '32.0,1.0,0.9');
 				s.set('Progress-tint', '32.0,1.0,0.9');
 				s.set('HitPoints-tint', '0.0,0.8,1.0');
@@ -1464,14 +1481,12 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('Bottom-stroke', 'Custom');
 					s.set('Bottom-stroke-colour', '#00000000');
 					s.set('Bottom-stroke-width', 1);
-					s.set('Bottom-pointsize', 3.5);
 				}
 				else {
 					s.set('Bottom-colour', '#FFFFFF');
 					s.set('Bottom-stroke', 'Medium');
 					s.set('Bottom-stroke-colour', '#F0000000');
 					s.set('Bottom-stroke-width', 2);
-					s.set('Bottom-pointsize', 4);
 				}
 
 				if (cardType == 'Cave') {
@@ -1544,13 +1559,6 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 
 				if (cardType == 'Quest') {
 					s.set('Stage-region', questStageRegion[s.get('Stage') + '']);
-				}
-
-				if (cardType in namePointSize) {
-					s.set('Name-pointsize', Math.round(namePointSize[cardType] * 1.734 * 100) / 100);
-				}
-				else {
-					s.set('Name-pointsize', Math.round(6.5 * 1.734 * 100) / 100);
 				}
 
 				let relations = [
@@ -1662,6 +1670,10 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					back + '-' + escapeFileName(card['Name']) + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix;
 
 				if (context == 'renderer') {
+					s.set('Bottom-format', '<left><family "Times New Roman"><size ' + defaultBottomPointSize + '><b>');
+					s.set('Bottom-formatEnd', '</b></size></family>');
+					s.set('EncounterSetNumber-format', '<center><family "Times New Roman"><size ' + defaultEncounterSetNumberPointSize + '><b>');
+					s.set('EncounterSetNumber-formatEnd', '</b></size></family>');
 					s.set('TypeRenderer', cardType);
 					s.set('CardNumberRenderer', card['Card Number']);
 					s.set('IdRenderer', card['octgn']);
