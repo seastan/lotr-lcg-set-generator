@@ -23,7 +23,7 @@ function iterateKeys(root, name, res) {
         if (json.hasOwnProperty(key) && (key != '#text') && !key.match(/^@_/)) {
             let child = json[key];
             if (child instanceof Array) {
-                for (let i = 0; i < child.length; i++ ) {
+                for (let i = 0; i < child.length; i++) {
                     let element = new ElementAdapter(child[i], root);
                     if (key == name) {
                         res.push(element);
@@ -124,6 +124,19 @@ function round(value, digits) {
     return +value.toFixed(digits);
 }
 
+function updateRegion(value) {
+    var regions = value.split(',');
+    if (regions.length != 4) {
+        return value;
+    }
+
+    for (let i = 0; i < regions.length; i++) {
+        regions[i] = Math.round(regions[i] * 2 / 1.75);
+    }
+
+    return regions;
+}
+
 function updateFontSize(match, p1, offset, string) {
     return '<span style="font-size: ' + round((p1 * 1.3333 / 1.75) / 14, 4) + 'em">';
 }
@@ -145,7 +158,7 @@ function updateImageWidth(match, p1, p2, offset, string) {
         res = '<img src="' + p1 + '" width="' + width + '">';
     }
     else {
-        res = '';
+        res = '<img src="Images/empty.png" width="1" height="1">';
     }
 
     return res;
@@ -179,7 +192,7 @@ function updateImageWidthHeight(match, p1, p2, p3, offset, string) {
         res = '<img src="' + p1 + '" width="' + width + '" height="' + height + '">';
     }
     else {
-        res = '';
+        res = '<img src="Images/empty.png" width="1" height="1">';
     }
 
     return res;
@@ -187,7 +200,29 @@ function updateImageWidthHeight(match, p1, p2, p3, offset, string) {
 
 function convertTags(value) {
     value += '';
-    value = value.replace(/<tracking -0.005/g, '');
+    value.replace(/\t/g, ' ');
+    value.replace(/\n/g, '<br>');
+    value = value.replace(/<uni>/g, '<lrs>u</lrs>');
+    value = value.replace(/<thr>/g, '<lrs>t</lrs>');
+    value = value.replace(/<att>/g, '<lrs>a</lrs>');
+    value = value.replace(/<def>/g, '<lrs>d</lrs>');
+    value = value.replace(/<wil>/g, '<lrs>w</lrs>');
+    value = value.replace(/<lea>/g, '<lrs>e</lrs>');
+    value = value.replace(/<lor>/g, '<lrs>o</lrs>');
+    value = value.replace(/<spi>/g, '<lrs>s</lrs>');
+    value = value.replace(/<tac>/g, '<lrs>c</lrs>');
+    value = value.replace(/<bag>/g, '<lrs>b</lrs>');
+    value = value.replace(/<fel>/g, '<lrs>f</lrs>');
+    value = value.replace(/<hon>/g, '<lrs>1</lrs>');
+    value = value.replace(/<hof>/g, '<lrs>2</lrs>');
+    value = value.replace(/<hb>/g, '<lrs>3</lrs>');
+    value = value.replace(/<hw>/g, '<lrs>4</lrs>');
+    value = value.replace(/<sai>/g, '<lrs>0</lrs>');
+    value = value.replace(/<eos>/g, '<lrs>5</lrs>');
+    value = value.replace(/<pp>/g, '<lrs>8</lrs>');
+    value = value.replace(/<lrs>/g, '<family "Symbols">');
+    value = value.replace(/<\/lrs>/g, '</family>');
+    value = value.replace(/<tracking -0.005>/g, '');
     value = value.replace(/<family "([^"]+)">/g, '<span style="font-family: $1">');
     value = value.replace(/<\/family>/g, '</span>');
     value = value.replace(/<\/size><size 0\.01><\/i>(?:\u00a0| )<\/size><size [0-9.]+>/g, '</i>');
@@ -205,16 +240,24 @@ function convertTags(value) {
     value = value.replace(/<image ([^ >]+)>/g, '<img src="$1">');
     value = value.replace(/<image ([^ >]+) ([^ >]+)>/g, updateImageWidth);
     value = value.replace(/<image ([^ >]+) ([^ >]+) ([^ >]+)>/g, updateImageWidthHeight);
-
-//    value = value.replace(//g, '');
+    value = value.replace(/<left>/g, '<div style="text-align: left">');
+    value = value.replace(/<center>/g, '<div style="text-align: center">');
+    value = value.replace(/<right>/g, '<div style="text-align: right">');
     return value;
 }
+
+
 
 function saveResultRenderer(settings, setID, _1, _2, _3, _4, _5, _6, _7) {
     var data = settings.settings;
     for (let key in data) {
         if (data.hasOwnProperty(key)) {
-            data[key] = convertTags(data[key]);
+            if (key.match(/-region$/)) {
+                data[key] = updateRegion(data[key]);
+            }
+            else {
+                data[key] = convertTags(data[key]);
+            }
         }
     }
     console.log(data);
@@ -230,7 +273,7 @@ function mainRenderer() {
         }
     });
 
-    for (let i = 0; i < sets.length; i++ ) {
+    for (let i = 0; i < sets.length; i++) {
         let setID = sets[i];
         if (!setID) {
             continue;
