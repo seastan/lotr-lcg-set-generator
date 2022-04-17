@@ -1284,6 +1284,9 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 							}
 						}
 					}
+					if (context == 'renderer') {
+						s.set('AdditionalEncounterSetsLength', encounterSets.length);
+					}
 					while (encounterSets.length < 5) {
 						encounterSets.push('');
 					}
