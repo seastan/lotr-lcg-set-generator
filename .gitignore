@@ -21,6 +21,7 @@ Output/Scripts/*.sh
 Renderer/Fonts/*.ttf
 Renderer/Fonts/*.TTF
 Renderer/Icons/*.png
+Renderer/Output/*.html
 Renderer/node_modules/
 Renderer/package-lock.json
 setEons/*.xml

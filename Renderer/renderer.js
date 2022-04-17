@@ -246,9 +246,31 @@ function convertTags(value) {
     return value;
 }
 
+function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
+    var containerRules = {
+        'body': function(data) {
+            return '';
+        },
+        'name': function(data) {
+            return '';
+        },
+        'type': function(data) {
+            return '';
+        }};
 
+    var containerNames = [];
+    for (let key in containerRules) {
+        if (containerRules.hasOwnProperty(key)) {
+            containerNames.push(key);
+        }
+    }
+    if (containerNames.length > 0) {
+        containerNames = "'" + containerNames.join("', '") + "'";
+    }
+    else {
+        containerNames = '';
+    }
 
-function saveResultRenderer(settings, setID, _1, _2, _3, _4, _5, _6, _7) {
     var data = settings.settings;
     for (let key in data) {
         if (data.hasOwnProperty(key)) {
@@ -260,7 +282,34 @@ function saveResultRenderer(settings, setID, _1, _2, _3, _4, _5, _6, _7) {
             }
         }
     }
-    console.log(data);
+//    console.log(res);
+
+    var template = data.Template;
+    if ((data.TypeRenderer == 'Campaign') && (template == 'Standard')) {
+        template = '';
+    }
+
+    var additionalEncounterSets = '';
+    if ((data.TypeRenderer == 'Quest') && (data.AdditionalEncounterSetsLength + 0 > 0)) {
+        additionalEncounterSets = data.AdditionalEncounterSetsLength;
+    }
+
+    var background = (data.TypeRenderer + template + additionalEncounterSets).replace(/ /g, '');
+    var html = fs.readFileSync('template.html') + '';
+    html = html.replace('{{ BACKGROUND }}', background);
+    html = html.replace('{{ CONTAINER_NAMES }}', containerNames);
+
+    fs.writeFileSync('Output/' + data.IdRenderer + '.html', html);
+
+    if ((doubleSideTypes.indexOf(data.TypeRenderer) > -1) &&
+        ((data.TypeRenderer != 'Contract') || (template == 'DoubleSided'))) {
+        background = background.replace(/[1-9]?$/, 'Back');
+        html = fs.readFileSync('template.html') + '';
+        html = html.replace('{{ BACKGROUND }}', background);
+        html = html.replace('{{ CONTAINER_NAMES }}', containerNames);
+
+        fs.writeFileSync('Output/' + data.IdRenderer + '.B.html', html);
+    }
 }
 
 function mainRenderer() {
