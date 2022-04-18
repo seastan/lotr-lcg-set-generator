@@ -4,23 +4,28 @@
 <style>
 @font-face {
     font-family: 'Vafthrudnir';
-    src: url('Fonts/VAFTHRUD.TTF');
+    src: url('../Fonts/VAFTHRUD.TTF');
 }
 @font-face {
     font-family: 'Lord of the Headers';
-    src: url('Fonts/LOTRHeader.ttf');
+    src: url('../Fonts/LOTRHeader.ttf');
 }
 @font-face {
     font-family: 'Symbols';
-    src: url('Fonts/LRLsymbols.ttf');
+    src: url('../Fonts/LRLsymbols.ttf');
 }
 @font-face {
     font-family: 'Times New Roman';
-    src: url('Fonts/times.ttf');
+    src: url('../Fonts/times.ttf');
 }
 @font-face {
     font-family: 'Vafthaurdir';
-    src: url('Fonts/Vafthaurdir.ttf');
+    src: url('../Fonts/Vafthaurdir.ttf');
+}
+
+body {
+    color: #000000;
+    font-family: Times New Roman;
 }
 </style>
 <script>
@@ -50,12 +55,7 @@ window.onload = function onload_callback() {
 };
 </script>
 </head>
-<body style="margin: 0; padding: 0; background-image: url('Templates/{{ BACKGROUND }}.jpg');">
+<body style="margin: 0; padding: 0; background-image: url('../Templates/{{ BACKGROUND }}.jpg');">
 {{ CONTAINERS }}
-
-<div id="text1" style="position: absolute; top: 50px; left: 100; width: 100; height: 150; overflow-x: visible; overflow-y: scroll; font-family: Vafthrudnir; font-size: 14px;">
-<span style="font-size: 1em;">Some </span><span style="font-size: 0.8em;">text text text text text text text</span>
-</div>
-
 </body>
 </html>

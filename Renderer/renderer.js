@@ -1,8 +1,10 @@
 const fs = require('fs');
+const he = require('he');
 const {XMLParser} = require('fast-xml-parser');
 eval(fs.readFileSync('../Frogmorton/common.js') + '');
 
-const iconsFolder = 'Icons/';
+const iconsFolder = '../Icons/';
+const imagesFolder = '../Images/';
 const xmlFolder = '../setEons/';
 
 function RendererSettings() {
@@ -28,6 +30,7 @@ function iterateKeys(root, name, res) {
                     if (key == name) {
                         res.push(element);
                     }
+
                     iterateKeys(element, name, res);
                 }
             }
@@ -36,6 +39,7 @@ function iterateKeys(root, name, res) {
                 if (key == name) {
                     res.push(element);
                 }
+
                 iterateKeys(element, name, res);
             }
         }
@@ -51,7 +55,9 @@ function ElementAdapter(json, parentElement) {
     };
 
     this.getAttribute = function(name) {
-        return this.json['@_' + name] + '';
+        var value = this.json['@_' + name] + '';
+        value = he.decode(value);
+        return value;
     };
 
     this.getElementsByTagName = function(name) {
@@ -92,7 +98,8 @@ function ElementListAdapter(list) {
 
 function DocumentBuilderAdapter(path) {
     this.parser = new XMLParser({
-        ignoreAttributes: false
+        ignoreAttributes: false,
+        processEntities: false
     });
     this.json = this.parser.parse(fs.readFileSync(path) + '');
 
@@ -131,20 +138,28 @@ function updateRegion(value) {
     }
 
     for (let i = 0; i < regions.length; i++) {
-        regions[i] = Math.round(regions[i] * 2 / 1.75);
+        let bleed = 0;
+        if (i < 2) {
+            bleed = 38;
+        }
+        regions[i] = Math.round((regions[i] * 2 - bleed) / 1.75);
     }
 
     return regions;
 }
 
-function updateFontSize(match, p1, offset, string) {
-    return '<span style="font-size: ' + round((p1 * 1.3333 / 1.75) / 14, 4) + 'em">';
+function updateFontSize(value) {
+    return round(value * 2 * 1.3333 / 14, 4);
 }
 
-function updateImageWidth(match, p1, p2, offset, string) {
+function updateFontSizeReplacer(match, p1, offset, string) {
+    return '<span style="font-size: ' + updateFontSize(p1) + 'em">';
+}
+
+function updateImageWidthReplacer(match, p1, p2, offset, string) {
     var width;
     if (p2.match(/pt$/)) {
-        width = Math.round(p2.replace(/pt/g, '') * 1.3333 / 1.75);
+        width = Math.round(p2.replace(/pt/g, '') * 2 * 1.3333 / 1.75);
     }
     else if (p2.match(/in$/)) {
         width = Math.round(p2.replace(/in/g, '') * 300 / 1.75);
@@ -158,16 +173,16 @@ function updateImageWidth(match, p1, p2, offset, string) {
         res = '<img src="' + p1 + '" width="' + width + '">';
     }
     else {
-        res = '<img src="Images/empty.png" width="1" height="1">';
+        res = '<img src="' + imagesFolder + 'empty.png" width="1" height="1">';
     }
 
     return res;
 }
 
-function updateImageWidthHeight(match, p1, p2, p3, offset, string) {
+function updateImageWidthHeightReplacer(match, p1, p2, p3, offset, string) {
     var width;
     if (p2.match(/pt$/)) {
-        width = Math.round(p2.replace(/pt/g, '') * 1.3333 / 1.75);
+        width = Math.round(p2.replace(/pt/g, '') * 2 * 1.3333 / 1.75);
     }
     else if (p2.match(/in$/)) {
         width = Math.round(p2.replace(/in/g, '') * 300 / 1.75);
@@ -178,7 +193,7 @@ function updateImageWidthHeight(match, p1, p2, p3, offset, string) {
 
     var height;
     if (p3.match(/pt$/)) {
-        height = Math.round(p3.replace(/pt/g, '') * 1.3333 / 1.75);
+        height = Math.round(p3.replace(/pt/g, '') * 2 * 1.3333 / 1.75);
     }
     else if (p3.match(/in$/)) {
         height = Math.round(p3.replace(/in/g, '') * 300 / 1.75);
@@ -192,7 +207,7 @@ function updateImageWidthHeight(match, p1, p2, p3, offset, string) {
         res = '<img src="' + p1 + '" width="' + width + '" height="' + height + '">';
     }
     else {
-        res = '<img src="Images/empty.png" width="1" height="1">';
+        res = '<img src="' + imagesFolder + 'empty.png" width="1" height="1">';
     }
 
     return res;
@@ -200,8 +215,9 @@ function updateImageWidthHeight(match, p1, p2, p3, offset, string) {
 
 function convertTags(value) {
     value += '';
-    value.replace(/\t/g, ' ');
-    value.replace(/\n/g, '<br>');
+    value = value.replace(/&/g, '&amp;');
+    value = value.replace(/\t/g, ' ');
+    value = value.replace(/\n/g, '<br>');
     value = value.replace(/<uni>/g, '<lrs>u</lrs>');
     value = value.replace(/<thr>/g, '<lrs>t</lrs>');
     value = value.replace(/<att>/g, '<lrs>a</lrs>');
@@ -226,36 +242,86 @@ function convertTags(value) {
     value = value.replace(/<family "([^"]+)">/g, '<span style="font-family: $1">');
     value = value.replace(/<\/family>/g, '</span>');
     value = value.replace(/<\/size><size 0\.01><\/i>(?:\u00a0| )<\/size><size [0-9.]+>/g, '</i>');
-    value = value.replace(/<size ([0-9.]+)>/g, updateFontSize);
+    value = value.replace(/<size ([0-9.]+)>/g, updateFontSizeReplacer);
     value = value.replace(/<\/size>/g, '</span>');
     value = value.replace(/<color ([^>]+)>/g, '<span style="color: $1">');
     value = value.replace(/<\/color>/g, '</span>');
     value = value.replace(/<lt>/g, '&lt;');
     value = value.replace(/<gt>/g, '&gt;');
-    value = value.replace(/res:\/\/TheLordOfTheRingsLCG\/image\/empty1x1\.png/g, 'Images/empty.png');
-    value = value.replace(/res:\/\/TheLordOfTheRingsLCG\/image\/ShadowSeparator\.png/g, 'Images/shadow.png');
-    value = value.replace(/project:imagesCustom\/[0-9a-f\-]+_Do-Not-Read-the-Following\.png/g, 'Images/donotread.png');
-    value = value.replace(/project:imagesCustom/g, 'Images');
-    value = value.replace(/project:imagesIcons/g, 'Icons');
+    value = value.replace(/res:\/\/TheLordOfTheRingsLCG\/image\/empty1x1\.png/g, imagesFolder + 'empty.png');
+    value = value.replace(/res:\/\/TheLordOfTheRingsLCG\/image\/ShadowSeparator\.png/g, imagesFolder + 'shadow.png');
+    value = value.replace(/project:imagesCustom\/[0-9a-f\-]+_Do-Not-Read-the-Following\.png/g, imagesFolder + 'donotread.png');
+    value = value.replace(/project:imagesCustom\//g, imagesFolder);
+    value = value.replace(/project:imagesIcons\//g, iconsFolder);
     value = value.replace(/<image ([^ >]+)>/g, '<img src="$1">');
-    value = value.replace(/<image ([^ >]+) ([^ >]+)>/g, updateImageWidth);
-    value = value.replace(/<image ([^ >]+) ([^ >]+) ([^ >]+)>/g, updateImageWidthHeight);
+    value = value.replace(/<image ([^ >]+) ([^ >]+)>/g, updateImageWidthReplacer);
+    value = value.replace(/<image ([^ >]+) ([^ >]+) ([^ >]+)>/g, updateImageWidthHeightReplacer);
     value = value.replace(/<left>/g, '<div style="text-align: left">');
+    value = value.replace(/<\/left>/g, '</div>');
     value = value.replace(/<center>/g, '<div style="text-align: center">');
+    value = value.replace(/<\/center>/g, '</div>');
     value = value.replace(/<right>/g, '<div style="text-align: right">');
+    value = value.replace(/<\/right>/g, '</div>');
+    return value;
+}
+
+function addMissingDivs(value) {
+    value += '';
+    var cnt = (value.match(/<div /g) || []).length;
+    for (let i = 0; i < cnt; i++) {
+        value += '</div>';
+    }
     return value;
 }
 
 function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
     var containerRules = {
-        'body': function(data) {
-            return '';
+        'Body': function(data) {
+            var content = [];
+            if (data.Story + '') {
+                content.push(data['Story-format'] + data.Story + data['Story-formatEnd']);
+            }
+
+            if (data.Rules + '') {
+                content.push(data['Rules-format'] + data.Rules + data['Rules-formatEnd']);
+            }
+
+            if (data.Shadow + '') {
+                content.push(data['Shadow-format'] + data.Shadow + data['Shadow-formatEnd']);
+            }
+
+            if (data.Flavour + '') {
+                content.push(data['Flavour-format'] + data.Flavour + data['Flavour-formatEnd']);
+            }
+
+            content = content.join('<br>' + data['VerticalSpacer-tag-replacement'] + '<br>');
+            content = '<span style="color: ' + data['Body-colour'] + '">' + content + '</span>';
+            return content;
         },
-        'name': function(data) {
-            return '';
+        'Name': function(data) {
+            if (data.Name + '' == '') {
+                return '';
+            }
+
+            var rotate = '';
+            if (data['Name-region'][3] > data['Name-region'][2]) {
+                rotate = '; transform: rotate(-90deg)';
+            }
+
+            var unique = '';
+            if (data.Unique + '') {
+                unique = '<span style="font-size: ' + updateFontSize(data['Name-pointsize']) + 'em"><span style="font-family: Symbols">u</span> </span>';
+            }
+
+            var content = '<div style="text-align: center' + rotate + '"><span style="color: ' + data['Name-colour'] + '">' + unique + data.Name + '</span></div>';
+            return content;
         },
-        'type': function(data) {
-            return '';
+        'Type': function(data) {
+            if (data.Type + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center">' + data.Type + '</div>';
         }};
 
     var containerNames = [];
@@ -279,11 +345,25 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             }
             else {
                 data[key] = convertTags(data[key]);
+                if (key.match(/-formatEnd$/)) {
+                    data[key] = data[key] + '</div>';
+                }
+                else if (!key.match(/-format$/)) {
+                    data[key] = addMissingDivs(data[key]);
+                }
             }
         }
     }
-//    console.log(res);
 
+    if (data['TraitOut-Body-region']) {
+        data['Body-region'] = data['TraitOut-Body-region'];
+    }
+
+    if (data['TraitOut-Trait-region']) {
+        data['Trait-region'] = data['TraitOut-Trait-region'];
+    }
+
+    console.log(data);
     var template = data.Template;
     if ((data.TypeRenderer == 'Campaign') && (template == 'Standard')) {
         template = '';
@@ -294,11 +374,22 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         additionalEncounterSets = data.AdditionalEncounterSetsLength;
     }
 
+    var containers = [];
+    for (let key in containerRules) {
+        if (containerRules.hasOwnProperty(key)) {
+            if (data[key + '-region'] && (containerRules[key](data))) {
+                let content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
+                    data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: scroll; font-size: 14px">' + containerRules[key](data) + '</div>';
+                containers.push(content);
+            }
+        }
+    }
+
     var background = (data.TypeRenderer + template + additionalEncounterSets).replace(/ /g, '');
     var html = fs.readFileSync('template.html') + '';
     html = html.replace('{{ BACKGROUND }}', background);
     html = html.replace('{{ CONTAINER_NAMES }}', containerNames);
-
+    html = html.replace('{{ CONTAINERS }}', containers.join('\n'));
     fs.writeFileSync('Output/' + data.IdRenderer + '.html', html);
 
     if ((doubleSideTypes.indexOf(data.TypeRenderer) > -1) &&
@@ -307,7 +398,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         html = fs.readFileSync('template.html') + '';
         html = html.replace('{{ BACKGROUND }}', background);
         html = html.replace('{{ CONTAINER_NAMES }}', containerNames);
-
+        // T.B.D.
         fs.writeFileSync('Output/' + data.IdRenderer + '.B.html', html);
     }
 }
@@ -315,7 +406,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 function mainRenderer() {
     var sets = process.argv[2].split(',');
     var icons = [];
-    var files = fs.readdirSync(iconsFolder);
+    var files = fs.readdirSync('Icons');
     files.forEach(function(file, _) {
         if (file.match(/\.png$/)) {
             icons.push(file.replace(/\.png$/, ''));

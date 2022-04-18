@@ -231,7 +231,7 @@ Additional steps:
 
   - `pip install discord.py==1.7.3 aiohttp`
   - `sudo apt-get install nodejs npm wkhtmltopdf`
-  - `cd Renderer/; npm install fast-xml-parser; cd ..`
+  - `cd Renderer/; npm install fast-xml-parser he; cd ..`
 
 2. Create `discord.yaml` (see `discord.default.yaml`).
 
