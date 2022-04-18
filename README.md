@@ -254,19 +254,19 @@ Additional steps:
 
 5. Setup crons:
 
-  - `* * * * *    <path>/check_discord_bot.sh >> <path>/cron.log 2>&1`
-  - `* * * * *    <path>/check_run_before_se_service.sh >> <path>/cron.log 2>&1`
-  - `36 9 * * *   python3 <path>/monitor_remote_pipeline.py >> <path>/cron.log 2>&1`
+  - `* * * * *      <path>/check_discord_bot.sh >> <path>/cron.log 2>&1`
+  - `* * * * *      <path>/check_run_before_se_service.sh >> <path>/cron.log 2>&1`
+  - `36 9 * * *     python3 <path>/monitor_remote_pipeline.py >> <path>/cron.log 2>&1`
   - `1-59/2 * * * * flock -xn <path>/mpc_monitor.lock -c 'python3 <path>/mpc_monitor.py > /dev/null' 2>&1`
-  - `7 0 * * *    <path>/rclone_backup.sh "<local Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
-  - `22 * * * *    <path>/rclone_icons.sh >> <path>/cron.log 2>&1`
-  - `0 8 * * 1    <path>/remind_backup.sh >> <path>/cron.log 2>&1`
-  - `5 8 1 * *    <path>/remind_backup_monthly.sh >> <path>/cron.log 2>&1`
-  - `5 8 2 * *    <path>/remind_stat_monthly.sh >> <path>/cron.log 2>&1`
-  - `*/2 * * * *  <path>/monitor_discord_changes.sh >> <path>/cron.log 2>&1`
-  - `0 1 * * *    <path>/monitor_wordpress_token.sh >> <path>/cron.log 2>&1`
-  - `19 8 * * *   <path>/scheduled_backup.sh "<local Links Backup path>" >> <path>/cron.log 2>&1`
-  - `7 1 * * *    <path>/configuration_backup.sh "<path to a local configuration backup folder>" >> <path>/cron.log 2>&1`
+  - `7 0 * * *      <path>/rclone_backup.sh "<local Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
+  - `22,52 * * * *  <path>/rclone_icons.sh >> <path>/cron.log 2>&1`
+  - `0 8 * * 1      <path>/remind_backup.sh >> <path>/cron.log 2>&1`
+  - `5 8 1 * *      <path>/remind_backup_monthly.sh >> <path>/cron.log 2>&1`
+  - `5 8 2 * *      <path>/remind_stat_monthly.sh >> <path>/cron.log 2>&1`
+  - `*/2 * * * *    <path>/monitor_discord_changes.sh >> <path>/cron.log 2>&1`
+  - `0 1 * * *      <path>/monitor_wordpress_token.sh >> <path>/cron.log 2>&1`
+  - `19 8 * * *     <path>/scheduled_backup.sh "<local Links Backup path>" >> <path>/cron.log 2>&1`
+  - `7 1 * * *      <path>/configuration_backup.sh "<path to a local configuration backup folder>" >> <path>/cron.log 2>&1`
 
     Replace `<path>` with the absolute path to the root folder.  `cron.log` may be located either in the root folder
     or in some external folder (if you already have other crons).  Set `<backup folder>` to your actual backup folder.
