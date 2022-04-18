@@ -1388,7 +1388,12 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				}
 
 				if ((cardType == 'Full Art Landscape') || (cardType == 'Full Art Portrait')) {
-					s.set('Artist', '<right>' + s.get('Artist'));
+					if (context == 'renderer') {
+						s.set('Artist', '<right>' + s.get('Artist') + '</right>');
+					}
+					else {
+						s.set('Artist', '<right>' + s.get('Artist'));
+					}
 				}
 
 				let defaultBodyPointSize = 7.5;
@@ -1425,10 +1430,19 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				s.set('RulesBack-formatEnd', '</size></family>');
 				s.set('RulesRight-format', '<left><tracking -0.005><family "Times New Roman"><size ' + defaultBodyPointSize + '>');
 				s.set('RulesRight-formatEnd', '</size></family>');
-				s.set('Shadow-format', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
-					'<br><center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.55in>' +
-					'<br><image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
-					'<br><left><tracking -0.005><family "Times New Roman"><size ' + defaultBodyPointSize + '><i>');
+				if (context == 'renderer') {
+					s.set('Shadow-format', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
+						'<br><center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.55in></center>' +
+						'<br><image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
+						'<br><left><tracking -0.005><family "Times New Roman"><size ' + defaultBodyPointSize + '><i>');
+				}
+				else {
+					s.set('Shadow-format', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
+						'<br><center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.55in>' +
+						'<br><image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
+						'<br><left><tracking -0.005><family "Times New Roman"><size ' + defaultBodyPointSize + '><i>');
+				}
+
 				s.set('Shadow-formatEnd', '</i></size></family>');
 				s.set('Flavour-format', '<left><tracking -0.005><family "Times New Roman"><size ' + defaultFlavourPointSize + '><i>');
 				s.set('Flavour-formatEnd', '</i></size></family>');
