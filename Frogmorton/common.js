@@ -1388,12 +1388,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				}
 
 				if ((cardType == 'Full Art Landscape') || (cardType == 'Full Art Portrait')) {
-					if (context == 'renderer') {
-						s.set('Artist', '<right>' + s.get('Artist') + '</right>');
-					}
-					else {
-						s.set('Artist', '<right>' + s.get('Artist'));
-					}
+					s.set('Artist', '<right>' + s.get('Artist'));
 				}
 
 				let defaultBodyPointSize = 7.5;
