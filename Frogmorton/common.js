@@ -1,6 +1,8 @@
 var doubleSideTypes = ['Campaign', 'Contract', 'Nightmare', 'Presentation', 'Quest', 'Rules'];
 var playerTypes = ['Ally', 'Attachment', 'Contract', 'Event', 'Full Art Landscape', 'Full Art Portrait', 'Hero', 'Hero Promo', 'Player Objective', 'Player Side Quest', 'Treasure'];
 var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Objective', 'Player Side Quest'];
+var landscapeTypes = ['Encounter Side Quest', 'Full Art Landscape', 'Player Side Quest', 'Quest'];
+
 var optionalTraitTypes = ['Cave', 'Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Player Side Quest'];
 
 /*
@@ -1097,6 +1099,15 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 
 					vXml = markUp(vXml, nXml, cardType, lang, setID);
 					s.set(nEon, vXml);
+				}
+
+				if (landscapeTypes.indexOf(cardType) > -1) {
+					s.set('Flavour', '');
+					s.set('FlavourBack', '');
+				}
+				else {
+					s.set('Story', '');
+					s.set('StoryBack', '');
 				}
 
 				if (flags.indexOf('NoArtist') > -1) {
