@@ -1792,7 +1792,7 @@ function updateVafthrudnir(value, lowerSize, lang) {
 				res += ch.toUpperCase();
 			}
 			else {
-				res += '</family><family "Vafthaurdir">' + ch.toUpperCase() + '</family><family "Vafthrudnir">';
+				res += '</size></family><family "Vafthaurdir"><size ' + lowerSize + '>' + ch.toUpperCase() + '</size></family><family "Vafthrudnir"><size ' + lowerSize + '>';
 			}
 		}
 		else {
