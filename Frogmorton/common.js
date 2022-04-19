@@ -1463,9 +1463,9 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				s.set('PageIn-format', '<right><tracking -0.005><family "Times New Roman"><size ' + defaultPagePointSize + '><b>');
 				s.set('PageIn-formatEnd', '</b></size></family>');
 
-				s.set('Body-style', 'WIDTH: REGULAR; FAMILY: {"Times New Roman"}');
-				s.set('BodyRight-style', 'WIDTH: REGULAR; FAMILY: {"Times New Roman"}');
-				s.set('Trait-style', 'WIDTH: REGULAR; WEIGHT: BOLD; POSTURE: OBLIQUE; FAMILY: {"Times New Roman"}');
+				s.set('Body-style', 'FAMILY: {"Times New Roman"}');
+				s.set('BodyRight-style', 'FAMILY: {"Times New Roman"}');
+				s.set('Trait-style', 'FAMILY: {"Times New Roman"}');
 				s.set('Name-style', 'FAMILY: {"Vafthrudnir"}');
 				s.set('Subtype-style', 'FAMILY: {"Vafthrudnir"}');
 				s.set('Type-style', 'FAMILY: {"Vafthrudnir"}');
@@ -1475,7 +1475,6 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				s.set('EncounterSetNumber-style', 'WEIGHT: BOLD; FAMILY: {"Times New Roman"}');
 				s.set('Bottom-style', 'WIDTH: SEMICONDENSED; WEIGHT: BOLD; FAMILY: {"Times New Roman"}');
 				s.set('Side-style', 'FAMILY: {"Vafthrudnir"}');
-				s.set('Page-style', 'WIDTH: SEMICONDENSED; WEIGHT: BOLD; FAMILY: {"Times New Roman"}');
 				s.set('Name-pointsize', Math.round(defaultNamePointSize * 1.734 * 100) / 100);
 				s.set('Bottom-pointsize', defaultBottomPointSize);
 				s.set('EncounterSetNumber-pointsize', defaultEncounterSetNumberPointSize);
@@ -1693,10 +1692,12 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					back + '-' + escapeFileName(card['Name']) + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix;
 
 				if (context == 'renderer') {
-					s.set('Bottom-format', '<left><family "Times New Roman"><size ' + defaultBottomPointSize + '><b>');
-					s.set('Bottom-formatEnd', '</b></size></family>');
+					s.set('Bottom-format', '<left><width semicondensed><family "Times New Roman"><size ' + defaultBottomPointSize + '><b>');
+					s.set('Bottom-formatEnd', '</b></size></family></width>');
 					s.set('EncounterSetNumber-format', '<center><family "Times New Roman"><size ' + defaultEncounterSetNumberPointSize + '><b>');
 					s.set('EncounterSetNumber-formatEnd', '</b></size></family>');
+					s.set('OptionRight-format', '<center><width semicondensed>');
+					s.set('OptionRight-formatEnd', '</width>');
 					s.set('TypeRenderer', cardType);
 					s.set('CardNumberRenderer', card['Card Number']);
 					s.set('IdRenderer', card['octgn']);
