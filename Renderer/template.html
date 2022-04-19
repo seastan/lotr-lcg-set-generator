@@ -24,6 +24,10 @@
 }
 
 body {
+    margin: 0;
+    padding: 0;
+    background-repeat: no-repeat;
+    background-image: url('../Templates/{{ BACKGROUND }}.png');
     color: #000000;
     font-family: Times New Roman;
 }
@@ -38,14 +42,26 @@ function correct_size(id) {
         return;
     }
     var size = container.style.fontSize.replace('px', '');
-    while (container.scrollHeight > container.clientHeight) {
-        size -= 1;
-        if (size < min_size) {
-            break;
+    if (parseInt(container.style.height.replace('px', '')) > parseInt(container.style.width.replace('px', '')) * 3) {
+        while (container.scrollWidth > container.clientWidth) {
+            size -= 1;
+            if (size < min_size) {
+                break;
+            }
+            container.style.fontSize = size + 'px';
         }
-        container.style.fontSize = size + 'px';
+        container.style.overflowX = 'visible';
     }
-    container.style.overflowY = 'visible';
+    else {
+        while (container.scrollHeight > container.clientHeight) {
+            size -= 1;
+            if (size < min_size) {
+                break;
+            }
+            container.style.fontSize = size + 'px';
+        }
+        container.style.overflowY = 'visible';
+    }
 }
 
 window.onload = function onload_callback() {
@@ -55,7 +71,7 @@ window.onload = function onload_callback() {
 };
 </script>
 </head>
-<body style="margin: 0; padding: 0; background-image: url('../Templates/{{ BACKGROUND }}.jpg');">
+<body>
 {{ CONTAINERS }}
 </body>
 </html>

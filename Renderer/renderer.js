@@ -238,7 +238,7 @@ function convertTags(value) {
     value = value.replace(/<pp>/g, '<lrs>8</lrs>');
     value = value.replace(/<lrs>/g, '<family "Symbols">');
     value = value.replace(/<\/lrs>/g, '</family>');
-    value = value.replace(/<tracking -0.005>/g, '');
+    value = value.replace(/<tracking -0.005><family "([^"]+)">/g, '<span style="letter-spacing: 0.2px; font-family: $1">');
     value = value.replace(/<family "([^"]+)">/g, '<span style="font-family: $1">');
     value = value.replace(/<\/family>/g, '</span>');
     value = value.replace(/<\/size><size 0\.01><\/i>(?:\u00a0| )<\/size><size [0-9.]+>/g, '</i>');
@@ -246,6 +246,8 @@ function convertTags(value) {
     value = value.replace(/<\/size>/g, '</span>');
     value = value.replace(/<color ([^>]+)>/g, '<span style="color: $1">');
     value = value.replace(/<\/color>/g, '</span>');
+    value = value.replace(/<width semicondensed>/g, '<span style="font-stretch: semi-condensed">');
+    value = value.replace(/<\/width>/g, '</span>');
     value = value.replace(/<lt>/g, '&lt;');
     value = value.replace(/<gt>/g, '&gt;');
     value = value.replace(/res:\/\/TheLordOfTheRingsLCG\/image\/empty1x1\.png/g, imagesFolder + 'empty.png');
@@ -295,7 +297,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             }
 
             content = content.join('<br>' + data['VerticalSpacer-tag-replacement'] + '<br>');
-            content = '<span style="color: ' + data['Body-colour'] + '">' + content + '</span>';
+            content = '<span style="color: ' + data['Body-colour'] + '; line-height: 0.95">' + content + '</span>';
             return content;
         },
         'Name': function(data) {
@@ -304,8 +306,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             }
 
             var rotate = '';
-            if (data['Name-region'][3] > data['Name-region'][2]) {
-                rotate = '; transform: rotate(-90deg)';
+            if (data['Name-region'][3] > data['Name-region'][2] * 3) {
+                rotate = '; height: 100%; writing-mode: vertical-rl; display: inline; transform: rotate(-180deg)';
             }
 
             var unique = '';
@@ -363,14 +365,14 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         data['Trait-region'] = data['TraitOut-Trait-region'];
     }
 
-    console.log(data);
+    // console.log(data);
     var template = data.Template;
     if ((data.TypeRenderer == 'Campaign') && (template == 'Standard')) {
         template = '';
     }
 
     var additionalEncounterSets = '';
-    if ((data.TypeRenderer == 'Quest') && (data.AdditionalEncounterSetsLength + 0 > 0)) {
+    if ((data.TypeRenderer == 'Quest') && (parseInt(data.AdditionalEncounterSetsLength) > 0)) {
         additionalEncounterSets = data.AdditionalEncounterSetsLength;
     }
 
@@ -378,8 +380,16 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
     for (let key in containerRules) {
         if (containerRules.hasOwnProperty(key)) {
             if (data[key + '-region'] && (containerRules[key](data))) {
-                let content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
-                    data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: scroll; font-size: 14px">' + containerRules[key](data) + '</div>';
+                let content = '';
+                if (data[key + '-region'][3] > data[key + '-region'][2] * 3) {
+                    content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
+                        data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: scroll; overflow-y: visible; text-align: center; font-size: 14px">' + containerRules[key](data) + '</div>';
+                }
+                else {
+                    content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
+                        data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: scroll; font-size: 14px">' + containerRules[key](data) + '</div>';
+                }
+                content = content.replace(/<\/div><br>/g, '</div>');
                 containers.push(content);
             }
         }
