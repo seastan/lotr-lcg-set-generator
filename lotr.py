@@ -3772,9 +3772,6 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 if key not in TRANSLATED_COLUMNS:
                     continue
 
-                if key == CARD_ADVENTURE and card_type == 'Hero':
-                    continue
-
                 if value == '#REF!':
                     logging.error(
                         'Reference error in %s column for card ID %s in %s '
@@ -5603,8 +5600,6 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
         subtitle = ((translated_row.get(CARD_ADVENTURE) or '')
                     if card_type in CARD_TYPES_SUBTITLE
                     else translated_row.get(CARD_ADVENTURE))
-        if subtitle and card_type == 'Hero':
-            subtitle = None
 
         if card_type in ('Presentation', 'Rules'):
             type_name = 'Setup'
@@ -6382,9 +6377,6 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
         row_copy = row.copy()
         if lang != 'English' and TRANSLATIONS[lang].get(row[CARD_ID]):
             for key in TRANSLATED_COLUMNS:
-                if key == CARD_ADVENTURE and row[CARD_TYPE] == 'Hero':
-                    continue
-
                 row_copy[key] = TRANSLATIONS[lang][row[CARD_ID]][key]
 
         chosen_data.append(row_copy)
