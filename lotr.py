@@ -6476,8 +6476,8 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
         else:
             card.tail = '\n    '
 
-        dragncards_hash = hashlib.md5('|'.join(dragncards_values.append)
-                                     ).hexdigest()
+        dragncards_hash = hashlib.md5('|'.join(dragncards_values).encode()
+                                      ).hexdigest()
         card.set('hashDragncards', dragncards_hash)
 
     output_path = os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id, lang))
