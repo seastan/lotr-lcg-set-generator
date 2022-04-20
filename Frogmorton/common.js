@@ -805,7 +805,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 			continue;
 		}
 
-		if ((context == 'renderer') && (nNode.getAttribute('skipDragncards') == '1')) {
+		if ((context == 'renderer') && ((nNode.getAttribute('noDragncards') == '1') || (nNode.getAttribute('skipDragncards') == '1'))) {
 			continue;
 		}
 

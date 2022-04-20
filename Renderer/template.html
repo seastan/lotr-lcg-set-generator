@@ -41,10 +41,10 @@ function correct_size(id) {
     if (!container) {
         return;
     }
-    var size = container.style.fontSize.replace('px', '');
+    var size = parseInt(container.style.fontSize.replace('px', ''));
     if (parseInt(container.style.height.replace('px', '')) > parseInt(container.style.width.replace('px', '')) * 3) {
         while (container.scrollWidth > container.clientWidth) {
-            size -= 1;
+            size -= 0.5;
             if (size < min_size) {
                 break;
             }
@@ -54,7 +54,7 @@ function correct_size(id) {
     }
     else {
         while (container.scrollHeight > container.clientHeight) {
-            size -= 1;
+            size -= 0.5;
             if (size < min_size) {
                 break;
             }

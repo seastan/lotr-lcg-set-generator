@@ -6391,10 +6391,18 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
         card.set('id', row[CARD_ID])
         card.set('name', row[CARD_NAME] or '')
         if not _needed_for_dragncards(row):
-            card.set('skipDragncards', '1')
+            card.set('noDragncards', '1')
+
+        dragncards_values = []
+        dragncards_values.append(str(row[CARD_NAME] or ''))
+        dragncards_properties = {CARD_UNIQUE, CARD_TYPE, CARD_SPHERE,
+                                 CARD_TRAITS, CARD_KEYWORDS, CARD_COST,
+                                 CARD_ENGAGEMENT, CARD_THREAT, CARD_WILLPOWER,
+                                 CARD_ATTACK, CARD_DEFENSE, CARD_HEALTH,
+                                 CARD_QUEST, CARD_VICTORY, CARD_SPECIAL_ICON,
+                                 CARD_TEXT, CARD_SHADOW}
 
         card_type = row[CARD_TYPE]
-
         properties = []
         for name in (CARD_NUMBER, CARD_QUANTITY, CARD_ENCOUNTER_SET,
                      CARD_UNIQUE, CARD_TYPE, CARD_SPHERE, CARD_TRAITS,
@@ -6410,6 +6418,9 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
             value = _get_xml_property_value(row, name, card_type)
             if value != '':
                 properties.append((name, value))
+
+            if name in dragncards_properties:
+                dragncards_values.append(str(value))
 
         properties.append(('Set Name', set_name))
         properties.append(('Set Icon',
@@ -6437,6 +6448,8 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
             alternate.set('type', 'B')
             alternate.tail = '\n    '
 
+            dragncards_values.append(str(alternate_name or ''))
+
             properties = []
             for name in (CARD_UNIQUE, CARD_TYPE, CARD_SPHERE, CARD_TRAITS,
                          CARD_KEYWORDS, CARD_COST, CARD_ENGAGEMENT,
@@ -6452,6 +6465,9 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                 if value != '':
                     properties.append((name, value))
 
+                if name in dragncards_properties:
+                    dragncards_values.append(str(value))
+
             if properties:
                 _add_xml_properties(alternate, properties, '      ')
 
@@ -6459,6 +6475,10 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
             card.tail = '\n  '
         else:
             card.tail = '\n    '
+
+        dragncards_hash = hashlib.md5('|'.join(dragncards_values.append)
+                                     ).hexdigest()
+        card.set('hashDragncards', dragncards_hash)
 
     output_path = os.path.join(SET_EONS_PATH, '{}.{}.xml'.format(set_id, lang))
     with open(output_path, 'w', encoding='utf-8') as obj:
@@ -6846,6 +6866,7 @@ def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0914
                                                                   lang))
     if os.path.exists(old_path):
         old_hashes = {}
+        old_dragncards_hashes = {}
         skip_ids = set()
 
         tree_old = ET.parse(old_path)
@@ -6853,6 +6874,8 @@ def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0914
         old_file_hash = root_old.attrib['hash']
         for card in root_old[0]:
             old_hashes[card.attrib['id']] = card.attrib['hash']
+            old_dragncards_hashes[card.attrib['id']] = (
+                card.attrib['hashDragncards'])
 
         changed_cards = set()
         for row in DATA:
@@ -6873,6 +6896,10 @@ def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0914
                     card.attrib['id'] not in changed_cards):
                 skip_ids.add(card.attrib['id'])
                 card.set('skip', '1')
+
+            if (old_dragncards_hashes.get(card.attrib['id']) ==
+                    card.attrib['hashDragncards']):
+                card.set('skipDragncards', '1')
 
     tree.write(new_path)
 
