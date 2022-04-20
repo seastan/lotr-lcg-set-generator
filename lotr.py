@@ -6861,6 +6861,7 @@ def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0914
                ).encode()).hexdigest()
     root.set('hash', new_file_hash)
 
+    dragncards_changes = True
     old_file_hash = ''
     old_path = os.path.join(SET_EONS_PATH, '{}.{}.xml.old'.format(set_id,
                                                                   lang))
@@ -6868,6 +6869,7 @@ def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0914
         old_hashes = {}
         old_dragncards_hashes = {}
         skip_ids = set()
+        dragncards_changes = False
 
         tree_old = ET.parse(old_path)
         root_old = tree_old.getroot()
@@ -6900,13 +6902,15 @@ def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0914
             if (old_dragncards_hashes.get(card.attrib['id']) ==
                     card.attrib['hashDragncards']):
                 card.set('skipDragncards', '1')
+            elif not card.attrib.get('noDragncards'):
+                dragncards_changes = True
 
     tree.write(new_path)
 
     logging.info('[%s, %s] ...Updating the xml file with hashes and skip '
                  'flags (%ss)', set_name, lang,
                  round(time.time() - timestamp, 3))
-    return (new_file_hash, old_file_hash)
+    return (old_file_hash != new_file_hash, dragncards_changes)
 
 
 def verify_images(conf):

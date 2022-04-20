@@ -48,7 +48,7 @@ dragncards_remote_deck_path: /var/www/dragncards.com/Lord-of-the-Rings/o8g/Decks
 
 # Whether to reprocess all cards (true)
 # or update only the cards, changed since the previous script run (false)
-reprocess_all: true
+reprocess_all: false
 
 # Whether to reprocess all cards even when reprocess_all=false if the previous script run didn't succeed (true or false)
 reprocess_all_on_error: true
