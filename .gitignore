@@ -22,6 +22,7 @@ Renderer/Fonts/*.ttf
 Renderer/Fonts/*.TTF
 Renderer/Icons/*.png
 Renderer/Output/*.html
+Renderer/Output/*.jpg
 Renderer/node_modules/
 Renderer/package-lock.json
 setEons/*.xml

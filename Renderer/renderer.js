@@ -307,7 +307,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
             var rotate = '';
             if (data['Name-region'][3] > data['Name-region'][2] * 3) {
-                rotate = '; height: 100%; writing-mode: vertical-rl; display: inline; transform: rotate(-180deg)';
+                rotate = '; width: 100%; line-height: ' + (data['Name-region'][2] - 2) + 'px; -webkit-transform: rotate(180deg); transform: rotate(180deg)';
             }
 
             var unique = '';
@@ -382,12 +382,13 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             if (data[key + '-region'] && (containerRules[key](data))) {
                 let content = '';
                 if (data[key + '-region'][3] > data[key + '-region'][2] * 3) {
-                    content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
-                        data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: scroll; overflow-y: visible; text-align: center; font-size: 14px">' + containerRules[key](data) + '</div>';
+                    content = '<div id="' + key + '" style="position: absolute; left: ' + (parseInt(data[key + '-region'][0]) + parseInt(data[key + '-region'][2])) + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
+                        data[key + '-region'][3] + 'px; height: ' + data[key + '-region'][2] + 'px; overflow-x: visible; overflow-y: visible; font-size: 14px; ' +
+                        '-webkit-transform: rotate(90deg); transform: rotate(90deg); -webkit-transform-origin: 0 0 0; transform-origin: 0 0 0">' + containerRules[key](data) + '</div>';
                 }
                 else {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
-                        data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: scroll; font-size: 14px">' + containerRules[key](data) + '</div>';
+                    data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: visible; font-size: 14px">' + containerRules[key](data) + '</div>';
                 }
                 content = content.replace(/<\/div><br>/g, '</div>');
                 containers.push(content);
@@ -397,10 +398,14 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
     var background = (data.TypeRenderer + template + additionalEncounterSets).replace(/ /g, '');
     var html = fs.readFileSync('template.html') + '';
+    var prefix = 'portrait.';
+    if (landscapeTypes.indexOf(data.TypeRenderer) > -1) {
+        prefix = 'landscape.';
+    }
     html = html.replace('{{ BACKGROUND }}', background);
     html = html.replace('{{ CONTAINER_NAMES }}', containerNames);
     html = html.replace('{{ CONTAINERS }}', containers.join('\n'));
-    fs.writeFileSync('Output/' + data.IdRenderer + '.html', html);
+    fs.writeFileSync('Output/' + prefix + data.IdRenderer + '.html', html);
 
     if ((doubleSideTypes.indexOf(data.TypeRenderer) > -1) &&
         ((data.TypeRenderer != 'Contract') || (template == 'DoubleSided'))) {
@@ -409,7 +414,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         html = html.replace('{{ BACKGROUND }}', background);
         html = html.replace('{{ CONTAINER_NAMES }}', containerNames);
         // T.B.D.
-        fs.writeFileSync('Output/' + data.IdRenderer + '.B.html', html);
+        fs.writeFileSync('Output/' + prefix + data.IdRenderer + '.B.html', html);
     }
 }
 
