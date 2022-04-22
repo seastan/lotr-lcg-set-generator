@@ -616,6 +616,10 @@ def update_text(text):  # pylint: disable=R0915
         return '[i]{}[/i]'.format(
             match.groups()[0].replace('[bi]', '[b]').replace('[/bi]', '[/b]'))
 
+    text = text.replace('[bi][bi]', '[bi]').replace('[/bi][/bi]', '[/bi]')
+    text = text.replace('[b][b]', '[b]').replace('[/b][/b]', '[/b]')
+    text = text.replace('[i][i]', '[i]').replace('[/i][/i]', '[/i]')
+
     text = re.sub(r'\[b\](.+?)\[\/b\]', _fix_bi_in_b, text, flags=re.DOTALL)
     text = re.sub(r'\[i\](.+?)\[\/i\]', _fix_bi_in_i, text, flags=re.DOTALL)
 
