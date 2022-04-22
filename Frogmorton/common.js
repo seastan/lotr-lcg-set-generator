@@ -1974,6 +1974,12 @@ function markUp(value, key, cardType, lang, setID) {
 		tagSuffix = '</size><family "Times New Roman"><size ' + defaultPointSize + '>';
 	}
 
+	value = value.replace(/\[bi\]\[bi\]/g, '[bi]');
+	value = value.replace(/\[\/bi\]\[\/bi\]/g, '[/bi]');
+	value = value.replace(/\[b\]\[b\]/g, '[b]');
+	value = value.replace(/\[\/b\]\[\/b\]/g, '[/b]');
+	value = value.replace(/\[i\]\[i\]/g, '[i]');
+	value = value.replace(/\[\/i\]\[\/i\]/g, '[/i]');
 	value = value.replace(/</g, '[lt]');
 	value = value.replace(/>/g, '[gt]');
 	value = value.replace(/\[lt\]/g, '<lt>');
