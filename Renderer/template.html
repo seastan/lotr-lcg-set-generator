@@ -34,7 +34,7 @@ body {
 </style>
 <script>
 var containers = [{{ CONTAINER_NAMES }}];
-var min_size = 3;
+var minSize = 3;
 
 function correct_size(id) {
     var container = document.getElementById(id);
@@ -42,26 +42,33 @@ function correct_size(id) {
         return;
     }
 
-    var size = parseInt(container.style.fontSize.replace('px', ''));
-    container.style.overflowY = 'scroll';
-    while ((container.scrollHeight > container.clientHeight) && (size > min_size)) {
-        size -= 0.5;
-        container.style.fontSize = size + 'px';
+    var buffer = 0;
+    if (id.match(/^Body/)) {
+        buffer = 2;
     }
-    container.style.overflowY = 'visible';
 
-    container.style.overflowX = 'scroll';
-    while ((container.scrollWidth > container.clientWidth) && (size > min_size)) {
-        size -= 0.5;
+    var size = parseFloat(container.style.fontSize.replace('px', ''));
+    while ((container.scrollHeight > container.clientHeight + buffer) && (size > minSize)) {
+        size -= 1;
         container.style.fontSize = size + 'px';
     }
+
+    container.style.overflowY = 'visible';
+    container.style.overflowX = 'auto';
+    while ((container.scrollWidth > container.clientWidth) && (size > minSize)) {
+        size -= 1;
+        container.style.fontSize = size + 'px';
+    }
+
     container.style.overflowX = 'visible';
 }
 
 window.onload = function onload_callback() {
-    for (var i = 0; i < containers.length; i++) {
-        correct_size(containers[i]);
-    }
+    setTimeout(function() {
+        for (var i = 0; i < containers.length; i++) {
+            correct_size(containers[i]);
+        }
+    }, 500);
 };
 </script>
 </head>

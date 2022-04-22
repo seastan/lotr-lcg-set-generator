@@ -297,7 +297,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             }
 
             content = content.join('<br>' + data['VerticalSpacer-tag-replacement'] + '<br>');
-            content = '<span style="color: ' + data['Body-colour'] + '; line-height: 0.95">' + content + '</span>';
+            content = '<div style="color: ' + data['Body-colour'] + '; line-height: 0.96">' + content + '</div>';
             return content;
         },
         'Name': function(data) {
@@ -383,12 +383,12 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 let content = '';
                 if (data[key + '-region'][3] > data[key + '-region'][2] * 3) {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + (parseInt(data[key + '-region'][0]) + parseInt(data[key + '-region'][2])) + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
-                        data[key + '-region'][3] + 'px; height: ' + data[key + '-region'][2] + 'px; overflow-x: visible; overflow-y: visible; font-size: 14px; ' +
+                        data[key + '-region'][3] + 'px; height: ' + data[key + '-region'][2] + 'px; overflow-x: visible; overflow-y: auto; font-size: 14px; ' +
                         '-webkit-transform: rotate(90deg); transform: rotate(90deg); -webkit-transform-origin: 0 0 0; transform-origin: 0 0 0">' + containerRules[key](data) + '</div>';
                 }
                 else {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
-                    data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: visible; font-size: 14px">' + containerRules[key](data) + '</div>';
+                    data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: auto; font-size: 14px">' + containerRules[key](data) + '</div>';
                 }
                 content = content.replace(/<\/div><br>/g, '</div>');
                 containers.push(content);

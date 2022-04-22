@@ -16,7 +16,10 @@ for filename in Output/portrait.*.html; do
     output=${filename//portrait\./}
     output=${output//\.html/.jpg}
     echo "Converting $filename to $output"
-    /usr/local/bin/wkhtmltoimage --enable-javascript --enable-local-file-access --format jpg --images --javascript-delay 500 --no-stop-slow-scripts --quality 95 --width 429 --height 600 "$filename" "$output"
+    /usr/local/bin/wkhtmltoimage --enable-javascript --enable-local-file-access --format jpg --images --javascript-delay 1000 --debug-javascript --no-stop-slow-scripts --quality 95 --width 429 --height 600 "$filename" "$output"
+    if [ -f "$output" ]; then
+        rm $filename
+    fi
 done
 
 for filename in Output/landscape.*.html; do
@@ -24,7 +27,10 @@ for filename in Output/landscape.*.html; do
     output=${filename//landscape\./}
     output=${output//\.html/.jpg}
     echo "Converting $filename to $output"
-    /usr/local/bin/wkhtmltoimage --enable-javascript --enable-local-file-access --format jpg --images --javascript-delay 500 --no-stop-slow-scripts --quality 95 --width 600 --height 429 "$filename" "$output"
+    /usr/local/bin/wkhtmltoimage --enable-javascript --enable-local-file-access --format jpg --images --javascript-delay 1000 --debug-javascript --no-stop-slow-scripts --quality 95 --width 600 --height 429 "$filename" "$output"
+    if [ -f "$output" ]; then
+        rm $filename
+    fi
 done
 
 echo 'wkhtmltoimage finished'
