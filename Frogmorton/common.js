@@ -1120,11 +1120,14 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('NoCopyrightBack', 0);
 				}
 
-				let bodyShapeNeeded = false;
-				if ((cardType == 'Hero') || (cardType == 'Treasure') ||
-					((['Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Player Side Quest', 'Quest'].indexOf(cardType) > -1) &&
-					((s.get('OptionRight') && (s.get('OptionRight') + '').length) || (s.get('OptionRightBack') && (s.get('OptionRightBack') + '').length)))) {
-					bodyShapeNeeded = true;
+				if (context == 'renderer') {
+					let bodyShapeNeeded = false;
+					if (((cardType == 'Hero') && (cardSphere != 'Neutral')) || (cardType == 'Treasure') ||
+						((['Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Player Side Quest', 'Quest'].indexOf(cardType) > -1) &&
+						((s.get('OptionRight') && (s.get('OptionRight') + '').length) || (s.get('OptionRightBack') && (s.get('OptionRightBack') + '').length)))) {
+						bodyShapeNeeded = true;
+					}
+					s.set('BodyShapeNeededRenderer', bodyShapeNeeded);
 				}
 
 				if (cardType == 'Cave') {
@@ -1667,7 +1670,6 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('CopyRenderer', copy);
 					s.set('BackRenderer', back);
 					s.set('SuffixRenderer', suffix);
-					s.set('BodyShapeNeededRenderer', bodyShapeNeeded)
 				}
 
 				if (progress) {
