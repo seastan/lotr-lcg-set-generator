@@ -339,6 +339,7 @@ SPHERES_NO_EASY_MODE = {'Boon', 'Burden', 'Cave'}
 SPECIAL_ICONS = {'eye of sauron', 'eye of sauronx2', 'eye of sauronx3',
                  'sailing', 'sailingx2'}
 
+GENERATE_DRAGNCARDS_COMMAND = './generate_dragncards.sh {}'
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}{}*.jpg"'
 MAGICK_COMMAND_JPG = '"{}" mogrify -format jpg "{}{}*.png"'
@@ -7038,6 +7039,9 @@ def generate_dragncards_proxies(conf, sets):
     timestamp = time.time()
 
     sets = ','.join(sets)
+    cmd = GENERATE_DRAGNCARDS_COMMAND.format(sets)
+    res = _run_cmd(cmd)
+    logging.info(res)
 
     logging.info('...Generating DragnCards proxies (%ss)',
                  round(time.time() - timestamp, 3))
