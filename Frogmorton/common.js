@@ -324,21 +324,6 @@ bodyBackRegion['Campaign'] = '64,60,285,443';
 bodyBackRegion['Nightmare'] = '54,55,305,439';
 bodyBackRegion['Quest'] = '51,249,461,114';
 
-var bodyRegionRenderer = {};
-bodyRegionRenderer['Hero'] = '57,377,299,95';
-bodyRegionRenderer['Encounter Side Quest'] = '51,269,461,79';
-bodyRegionRenderer['Encounter Side Quest SmallTextArea'] = '51,324,461,23';
-bodyRegionRenderer['Player Side Quest'] = '51,271,461,79';
-bodyRegionRenderer['Treasure'] = '57,347,299,125';
-
-var bodyNoTraitRegionRenderer = {};
-bodyNoTraitRegionRenderer['Encounter Side Quest'] = '51,249,461,99';
-bodyNoTraitRegionRenderer['Encounter Side Quest SmallTextArea'] = '51,304,461,43';
-bodyNoTraitRegionRenderer['Player Side Quest'] = '51,251,461,99';
-
-var bodyBackRegionRenderer = {};
-bodyBackRegionRenderer['Quest'] = '51,249,461,102';
-
 var nameRegion = {};
 nameRegion['Ally'] = '100,329,213,25';
 nameRegion['Attachment'] = '132,38,183,25';
@@ -1517,9 +1502,6 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('TraitOut', 'true');
 					if (cardType in bodyRegion) {
 						s.set('TraitOut-Body-region', bodyRegion[cardType]);
-						if ((context == 'renderer') && bodyShapeNeeded && (cardType in bodyRegionRenderer)) {
-							s.set('TraitOut-Body-region', bodyRegionRenderer[cardType]);
-						}
 					}
 
 					if (cardType in traitRegion) {
@@ -1529,9 +1511,6 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				else if (cardType in bodyNoTraitRegion) {
 					s.set('TraitOut', 'false');
 					s.set('Body-region', bodyNoTraitRegion[cardType]);
-					if ((context == 'renderer') && bodyShapeNeeded && (cardType in bodyNoTraitRegionRenderer)) {
-						s.set('Body-region', bodyNoTraitRegionRenderer[cardType]);
-					}
 				}
 				else {
 					s.set('TraitOut', 'true');
@@ -1540,9 +1519,6 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 					else if (cardType in bodyRegion) {
 						s.set('TraitOut-Body-region', bodyRegion[cardType]);
-						if ((context == 'renderer') && bodyShapeNeeded && (cardType in bodyRegionRenderer)) {
-							s.set('TraitOut-Body-region', bodyRegionRenderer[cardType]);
-						}
 					}
 
 					if (cardType in traitRegion) {
@@ -1620,10 +1596,6 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 				}
 
-				if ((context == 'renderer') && bodyShapeNeeded && (cardType in bodyBackRegionRenderer)) {
-					s.set('BodyBack-region', bodyBackRegionRenderer[cardType]);
-				}
-
 				if ((cardType in sphereOptionBodyShape) && s.get('OptionRight') && (s.get('OptionRight') + '').length) {
 					s.set('Sphere-Body-shape', sphereOptionBodyShape[cardType]);
 				}
@@ -1695,6 +1667,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('CopyRenderer', copy);
 					s.set('BackRenderer', back);
 					s.set('SuffixRenderer', suffix);
+					s.set('BodyShapeNeededRenderer', bodyShapeNeeded)
 				}
 
 				if (progress) {
