@@ -133,7 +133,10 @@ function round(value, digits) {
 
 function updateRegion(value) {
     var regions = value.split(',');
-    if (regions.length != 4) {
+    if (regions.length == 5) {
+        regions = [regions[1], regions[2], regions[3], regions[4]];
+    }
+    else if (regions.length != 4) {
         return value;
     }
 
@@ -253,30 +256,31 @@ function convertTags(value) {
     value = value.replace(/res:\/\/TheLordOfTheRingsLCG\/image\/empty1x1\.png/g, imagesFolder + 'empty.png');
     value = value.replace(/res:\/\/TheLordOfTheRingsLCG\/image\/ShadowSeparator\.png/g, imagesFolder + 'shadow.png');
     value = value.replace(/project:imagesCustom\/[0-9a-f\-]+_Do-Not-Read-the-Following\.png/g, imagesFolder + 'donotread.png');
+    value = value.replace(/project:imagesCustom\/[0-9a-f\-]+_Text-Divider-Black\.png/g, imagesFolder + 'textdividerblack.png');
     value = value.replace(/project:imagesCustom\//g, imagesFolder);
     value = value.replace(/project:imagesIcons\//g, iconsFolder);
     value = value.replace(/<image ([^ >]+)>/g, '<img src="$1">');
     value = value.replace(/<image ([^ >]+) ([^ >]+)>/g, updateImageWidthReplacer);
     value = value.replace(/<image ([^ >]+) ([^ >]+) ([^ >]+)>/g, updateImageWidthHeightReplacer);
-    value = value.replace(/<left>/g, '<div style="text-align: left">');
-    value = value.replace(/<\/left>/g, '</div>');
-    value = value.replace(/<center>/g, '<div style="text-align: center">');
-    value = value.replace(/<\/center>/g, '</div>');
-    value = value.replace(/<right>/g, '<div style="text-align: right">');
-    value = value.replace(/<\/right>/g, '</div>');
-    return value;
-}
-
-function addMissingDivs(value) {
-    value += '';
-    var cnt = (value.match(/<div /g) || []).length;
-    for (let i = 0; i < cnt; i++) {
-        value += '</div>';
-    }
+    value = value.replace(/<img src="([^"]+?\/shadow\.png)"[^>]*>/g, '<img src="$1" width="266" height="21">');
+    value = value.replace(/<img src="([^"]+?\/donotread\.png)"[^>]*>/g, '<img src="$1" width="249" height="64">');
+    value = value.replace(/<img src="([^"]+?\/textdividerblack\.png)"[^>]*>/g, '<img src="$1" width="343" height="5">');
+    value = value.replace(/<img src="([^"]+?\/empty\.png)"/g, '<emptyimg src="$1"');
+    value = value.replace(/<img ([^>]+)>/g, '<img $1 style="display: block; margin-left: auto; margin-right: auto">');
+    value = value.replace(/<emptyimg /g, '<img ');
+    value = value.replace(/<left>/g, '');
+    value = value.replace(/<center>/g, '');
+    value = value.replace(/<right>/g, '');
+    value = value.replace(/(style="display: block; margin-left: auto; margin-right: auto">)<br>/g, '$1');
     return value;
 }
 
 function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
+    var containerFontSize = {
+        'Body': 14,
+        'Name': 12,
+        'Type': 12
+    };
     var containerRules = {
         'Body': function(data) {
             var content = [];
@@ -342,17 +346,11 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
     var data = settings.settings;
     for (let key in data) {
         if (data.hasOwnProperty(key)) {
-            if (key.match(/-region$/)) {
+            if (key.match(/-region$/) || key.match(/-Body-shape$/)) {
                 data[key] = updateRegion(data[key]);
             }
             else {
                 data[key] = convertTags(data[key]);
-                if (key.match(/-formatEnd$/)) {
-                    data[key] = data[key] + '</div>';
-                }
-                else if (!key.match(/-format$/)) {
-                    data[key] = addMissingDivs(data[key]);
-                }
             }
         }
     }
@@ -363,6 +361,10 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
     if (data['TraitOut-Trait-region']) {
         data['Trait-region'] = data['TraitOut-Trait-region'];
+    }
+
+    if (data['Option-Body-shape']) {
+        data['Sphere-Body-shape'] = data['Option-Body-shape'];
     }
 
     // console.log(data);
@@ -380,20 +382,54 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
     for (let key in containerRules) {
         if (containerRules.hasOwnProperty(key)) {
             if (data[key + '-region'] && (containerRules[key](data))) {
+                let shapeDiv = '';
+                if ((key == 'Body') && data.BodyShapeNeededRenderer && data['Sphere-Body-shape']) {
+                    shapeDiv = '<div id="BodyShape"><span></span></div>';
+                }
+
                 let content = '';
                 if (data[key + '-region'][3] > data[key + '-region'][2] * 3) {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + (parseInt(data[key + '-region'][0]) + parseInt(data[key + '-region'][2])) + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
-                        data[key + '-region'][3] + 'px; height: ' + data[key + '-region'][2] + 'px; overflow-x: visible; overflow-y: auto; font-size: 14px; ' +
-                        '-webkit-transform: rotate(90deg); transform: rotate(90deg); -webkit-transform-origin: 0 0 0; transform-origin: 0 0 0">' + containerRules[key](data) + '</div>';
+                        data[key + '-region'][3] + 'px; height: ' + data[key + '-region'][2] + 'px; overflow-x: visible; overflow-y: auto; font-size: ' + containerFontSize[key] + 'px; ' +
+                        '-webkit-transform: rotate(90deg); transform: rotate(90deg); -webkit-transform-origin: 0 0 0; transform-origin: 0 0 0">' + shapeDiv + containerRules[key](data) + '</div>';
                 }
                 else {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
-                    data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: auto; font-size: 14px">' + containerRules[key](data) + '</div>';
+                    data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: auto; font-size: ' + containerFontSize[key] + 'px">' + shapeDiv + containerRules[key](data) + '</div>';
                 }
-                content = content.replace(/<\/div><br>/g, '</div>');
+
                 containers.push(content);
             }
         }
+    }
+
+    var shapeCSS = '';
+    if (data.BodyShapeNeededRenderer && data['Sphere-Body-shape'] && data['Body-region']) {
+        var shapeWidth = 0;
+        var shapeAlignment = 'left';
+        var shapeOppositeAlignment = 'right';
+        if (data['Sphere-Body-shape'][2] > 0) {
+            shapeWidth = data['Sphere-Body-shape'][2];
+        }
+        else if (data['Sphere-Body-shape'][3] > 0) {
+            shapeWidth = data['Sphere-Body-shape'][3];
+            shapeAlignment = 'right';
+        }
+
+        var shapeHeight = data['Body-region'][1] + data['Body-region'][3] - data['Sphere-Body-shape'][1] + 12;
+        var shapeTop = data['Body-region'][3] - shapeHeight;
+        shapeCSS = '#BodyShape:before {\n' +
+	    '    content: "";\n' +
+	    '    display: block;\n' +
+	    '    float: ' + shapeOppositeAlignment + ';\n' +
+	    '    height: ' + shapeTop + 'px;\n' +
+            '}\n' +
+            '#BodyShape span {\n' +
+	    '    float: ' + shapeAlignment + ';\n' +
+	    '    clear: both;\n' +
+	    '    width: ' + shapeWidth + 'px;\n' +
+	    '    height: ' + shapeHeight + 'px;\n' +
+            '}';
     }
 
     var background = (data.TypeRenderer + template + additionalEncounterSets).replace(/ /g, '');
@@ -402,10 +438,17 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
     if (landscapeTypes.indexOf(data.TypeRenderer) > -1) {
         prefix = 'landscape.';
     }
+
+    var suffix = '';
+    if (data.SuffixRenderer == '-2') {
+        suffix = '.B';
+    }
+
     html = html.replace('{{ BACKGROUND }}', background);
     html = html.replace('{{ CONTAINER_NAMES }}', containerNames);
+    html = html.replace('{{ SHAPE_CSS }}', shapeCSS);
     html = html.replace('{{ CONTAINERS }}', containers.join('\n'));
-    fs.writeFileSync('Output/' + prefix + data.IdRenderer + '.html', html);
+    fs.writeFileSync('Output/' + prefix + data.IdRenderer + suffix + '.html', html);
 
     if ((doubleSideTypes.indexOf(data.TypeRenderer) > -1) &&
         ((data.TypeRenderer != 'Contract') || (template == 'DoubleSided'))) {

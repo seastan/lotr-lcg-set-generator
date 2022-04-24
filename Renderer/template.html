@@ -31,6 +31,7 @@ body {
     color: #000000;
     font-family: Times New Roman;
 }
+{{ SHAPE_CSS }}
 </style>
 <script>
 var containers = [{{ CONTAINER_NAMES }}];
@@ -42,21 +43,27 @@ function correct_size(id) {
         return;
     }
 
-    var buffer = 0;
+    var bufferHeight = 0;
     if (id.match(/^Body/)) {
-        buffer = 2;
+        bufferHeight = 2;
     }
 
     var size = parseFloat(container.style.fontSize.replace('px', ''));
-    while ((container.scrollHeight > container.clientHeight + buffer) && (size > minSize)) {
-        size -= 1;
+    if (container.scrollHeight <= container.clientHeight + bufferHeight) {
+        console.log(id + ': default font size ' + size + ' px is correct');
+    }
+
+    while ((container.scrollHeight > container.clientHeight + bufferHeight) && (size > minSize)) {
+        console.log(id + ': changed font size from ' + size + ' to ' + (size - 1) + ' px to reduce height');
+        size -= 0.5;
         container.style.fontSize = size + 'px';
     }
 
     container.style.overflowY = 'visible';
     container.style.overflowX = 'auto';
     while ((container.scrollWidth > container.clientWidth) && (size > minSize)) {
-        size -= 1;
+        console.log(id + ': changed font size from ' + size + ' to ' + (size - 1) + ' px to reduce width');
+        size -= 0.5;
         container.style.fontSize = size + 'px';
     }
 
