@@ -1436,19 +1436,10 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				s.set('RulesBack-formatEnd', '</size></family>');
 				s.set('RulesRight-format', '<left><tracking -0.005><family "Times New Roman"><size ' + defaultBodyPointSize + '>');
 				s.set('RulesRight-formatEnd', '</size></family>');
-				if (context == 'renderer') {
-					s.set('Shadow-format', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
-						'<br><center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.55in></center>' +
-						'<br><image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
-						'<br><left><tracking -0.005><family "Times New Roman"><size ' + defaultBodyPointSize + '><i>');
-				}
-				else {
-					s.set('Shadow-format', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
-						'<br><center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.55in>' +
-						'<br><image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
-						'<br><left><tracking -0.005><family "Times New Roman"><size ' + defaultBodyPointSize + '><i>');
-				}
-
+				s.set('Shadow-format', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
+					'<br><center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.55in>' +
+					'<br><image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
+					'<br><left><tracking -0.005><family "Times New Roman"><size ' + defaultBodyPointSize + '><i>');
 				s.set('Shadow-formatEnd', '</i></size></family>');
 				s.set('Flavour-format', '<left><tracking -0.005><family "Times New Roman"><size ' + defaultFlavourPointSize + '><i>');
 				s.set('Flavour-formatEnd', '</i></size></family>');
@@ -1692,11 +1683,11 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					back + '-' + escapeFileName(card['Name']) + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix;
 
 				if (context == 'renderer') {
-					s.set('Bottom-format', '<left><width semicondensed><family "Times New Roman"><size ' + defaultBottomPointSize + '><b>');
+					s.set('Bottom-format', '<width semicondensed><family "Times New Roman"><size ' + defaultBottomPointSize + '><b>');
 					s.set('Bottom-formatEnd', '</b></size></family></width>');
-					s.set('EncounterSetNumber-format', '<center><family "Times New Roman"><size ' + defaultEncounterSetNumberPointSize + '><b>');
+					s.set('EncounterSetNumber-format', '<family "Times New Roman"><size ' + defaultEncounterSetNumberPointSize + '><b>');
 					s.set('EncounterSetNumber-formatEnd', '</b></size></family>');
-					s.set('OptionRight-format', '<center><width semicondensed>');
+					s.set('OptionRight-format', '<width semicondensed>');
 					s.set('OptionRight-formatEnd', '</width>');
 					s.set('TypeRenderer', cardType);
 					s.set('CardNumberRenderer', card['Card Number']);
