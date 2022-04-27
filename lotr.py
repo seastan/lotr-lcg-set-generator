@@ -7032,7 +7032,7 @@ def copy_xml(set_id, set_name, lang):
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
-def generate_dragncards_proxies(conf, sets):
+def generate_dragncards_proxies(sets):
     """ Generate DragnCards proxies.
     """
     logging.info('Generating DragnCards proxies...')
@@ -8355,6 +8355,103 @@ def generate_tts(conf, set_id, set_name, lang, card_dict, scratch):  # pylint: d
 
     logging.info('[%s, %s] ...Generating TTS outputs (%ss)', set_name, lang,
                  round(time.time() - timestamp, 3))
+
+
+def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0914,R0915
+    """ Generate artwork for DragnCards proxy images.
+    """
+    logging.info('[%s] Generating artwork for DragnCards proxy images...',
+                 set_name)
+    timestamp = time.time()
+
+    xml_path = os.path.join(SET_EONS_PATH, '{}.English.xml'.format(set_id))
+    if not os.path.exists(xml_path):
+        logging.error('[%s] No XML found', set_name)
+        logging.info('[%s] ...Generating artwork for DragnCards proxy images '
+                     '(%ss)', set_name, round(time.time() - timestamp, 3))
+        return
+
+    images = {}
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+    for card in root[0]:
+        if 'skip' in card.attrib or 'noDragncards' in card.attrib:
+            continue
+
+        artwork_path = _find_properties(card, 'Artwork')
+        artwork_path = artwork_path and artwork_path[0].attrib['value']
+        if not artwork_path:
+            continue
+
+        card_id = card.attrib['id']
+        artwork_size = _find_properties(card, 'Artwork Size')
+        artwork_size = (int(artwork_size[0].attrib['value'])
+                        if artwork_size else 0)
+        artwork_modified = _find_properties(card, 'Artwork Modified')
+        artwork_modified = (int(artwork_modified[0].attrib['value'])
+                            if artwork_modified else 0)
+        panx = _find_properties(card, 'PanX')
+        panx = float(panx[0].attrib['value']) if panx else 0
+        pany = _find_properties(card, 'PanY')
+        pany = float(pany[0].attrib['value']) if pany else 0
+        scale = _find_properties(card, 'Scale')
+        scale = float(scale[0].attrib['value']) if scale else 0
+        image = {'path': artwork_path,
+                 'panx': panx,
+                 'pany': pany,
+                 'scale': scale,
+                 'snapshot': (panx, pany, scale, artwork_size,
+                              artwork_modified)}
+        images[card_id] = image
+
+    old_xml_path = os.path.join(SET_EONS_PATH,
+                                '{}.English.xml.old'.format(set_id))
+    if os.path.exists(old_xml_path):
+        tree = ET.parse(old_xml_path)
+        root = tree.getroot()
+        for card in root[0]:
+            card_id = card.attrib['id']
+            if card_id not in images:
+                continue
+
+            artwork_path = _find_properties(card, 'Artwork')
+            if not artwork_path:
+                continue
+
+            artwork_size = _find_properties(card, 'Artwork Size')
+            artwork_size = (int(artwork_size[0].attrib['value'])
+                            if artwork_size else 0)
+            artwork_modified = _find_properties(card, 'Artwork Modified')
+            artwork_modified = (int(artwork_modified[0].attrib['value'])
+                                if artwork_modified else 0)
+            panx = _find_properties(card, 'PanX')
+            panx = float(panx[0].attrib['value']) if panx else 0
+            pany = _find_properties(card, 'PanY')
+            pany = float(pany[0].attrib['value']) if pany else 0
+            scale = _find_properties(card, 'Scale')
+            scale = float(scale[0].attrib['value']) if scale else 0
+            if ((panx, pany, scale, artwork_size, artwork_modified) ==
+                    images[card_id]['snapshot']):
+                del images[card_id]
+
+    if images:
+        for key in images:
+            del images[key]['snapshot']
+
+        temp_path = os.path.join(TEMP_ROOT_PATH,
+                                 'generate_renderer_artwork.{}'.format(set_id))
+        create_folder(temp_path)
+        clear_folder(temp_path)
+
+        with open(os.path.join(temp_path, 'images.json'), 'w',
+                  encoding='utf-8') as fobj:
+            res = json.dumps(images, indent=4)
+            fobj.write(res)
+
+        # delete_folder(temp_path)
+
+    logging.info('[%s] ...Generating artwork for DragnCards proxy images '
+                 '(%ss)', set_name, round(time.time() - timestamp, 3))
 
 
 def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R0912,R0914,R0915

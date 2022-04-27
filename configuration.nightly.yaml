@@ -101,6 +101,9 @@ frenchdb_csv: false
 # Creating CSV files for the Spanish database susurrosdelbosqueviejo.com (true or false)
 spanishdb_csv: false
 
+# Creating artwork for DragnCards proxy images
+renderer_artwork: true
+
 # Creating DragnCards proxy images
 renderer: false
 

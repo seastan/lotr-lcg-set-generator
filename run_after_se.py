@@ -153,6 +153,13 @@ def generate_tts(conf, set_id, set_name, lang, card_dict, scratch):  # pylint: d
     lotr.generate_tts(conf, set_id, set_name, lang, card_dict, scratch)
 
 
+@retry()
+def generate_renderer_artwork(conf, set_id, set_name):
+    """ Generate artwork for DragnCards proxy images.
+    """
+    lotr.generate_renderer_artwork(conf, set_id, set_name)
+
+
 def run(args):
     """ Run the function.
     """
@@ -287,6 +294,10 @@ def main():  # pylint: disable=R0912,R0914,R0915
             if 'tts' in conf['outputs'][lang]:
                 post_tasks.append([generate_tts, conf, set_id, set_name, lang,
                                    card_dict, scratch])
+
+        if conf['renderer_artwork']:
+            post_tasks.append([generate_renderer_artwork, conf, set_id,
+                               set_name])
 
     execute_tasks(conf, pre_tasks)
     execute_tasks(conf, tasks)

@@ -126,8 +126,14 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
             if dragncards_changes:
                 renderer_xml_changed = True
 
+            renderer_xml_generated = True
+
         if conf['renderer'] and renderer_xml_changed:
             renderer_sets.append(set_id)
+
+        if conf['renderer_artwork'] and not renderer_xml_generated:
+            lotr.generate_xml(conf, set_id, set_name, 'English')
+            lotr.update_xml(conf, set_id, set_name, 'English')
 
     if conf['octgn_set_xml'] or conf['octgn_o8d']:
         lotr.copy_octgn_outputs(conf, sets)
@@ -136,7 +142,7 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
         lotr.update_ringsdb(conf, sets)
 
     if renderer_sets:
-        lotr.generate_dragncards_proxies(conf, renderer_sets)
+        lotr.generate_dragncards_proxies(renderer_sets)
 
     if changes:
         lotr.create_project()
