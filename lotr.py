@@ -1781,8 +1781,8 @@ def get_sets(conf, sheet_changes=True, scratch_changes=True):
 def extract_flags(value):
     """ Extract flags from a string value.
     """
-    return [f.strip() for f in (value or '').replace(';', '\n').split('\n')
-            if f.strip()]
+    return [f.strip() for f in
+            str(value or '').replace(';', '\n').split('\n') if f.strip()]
 
 
 def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
