@@ -1229,6 +1229,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						}
 						else if (card['Artwork']) {
 							s.set('PortraitBack-external-path', 'project:imagesRaw/' + card['Artwork']);
+							s.set('PortraitShare', 1);
 							if (card['PanX'] && card['PanY'] && card['Scale']) {
 								s.set('PortraitBack-external-panx', card['PanX']);
 								s.set('PortraitBack-external-pany', card['PanY']);

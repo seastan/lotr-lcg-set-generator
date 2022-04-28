@@ -134,6 +134,7 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
         if conf['renderer_artwork'] and not renderer_xml_generated:
             lotr.generate_xml(conf, set_id, set_name, 'English')
             lotr.update_xml(conf, set_id, set_name, 'English')
+            lotr.calculate_hashes(set_id, set_name, 'English')
 
     if conf['octgn_set_xml'] or conf['octgn_o8d']:
         lotr.copy_octgn_outputs(conf, sets)

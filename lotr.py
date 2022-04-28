@@ -8357,7 +8357,35 @@ def generate_tts(conf, set_id, set_name, lang, card_dict, scratch):  # pylint: d
                  round(time.time() - timestamp, 3))
 
 
-def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0914,R0915
+def _extract_image_properties(root):
+    """ Extract image properties from the XML file.
+    """
+    artwork_path = _find_properties(root, 'Artwork')
+    artwork_path = artwork_path and artwork_path[0].attrib['value']
+    if not artwork_path:
+        return None
+
+    artwork_size = _find_properties(root, 'Artwork Size')
+    artwork_size = (int(artwork_size[0].attrib['value'])
+                    if artwork_size else 0)
+    artwork_modified = _find_properties(root, 'Artwork Modified')
+    artwork_modified = (int(artwork_modified[0].attrib['value'])
+                        if artwork_modified else 0)
+    panx = _find_properties(root, 'PanX')
+    panx = float(panx[0].attrib['value']) if panx else 0
+    pany = _find_properties(root, 'PanY')
+    pany = float(pany[0].attrib['value']) if pany else 0
+    scale = _find_properties(root, 'Scale')
+    scale = float(scale[0].attrib['value']) if scale else 0
+    data = {'path': artwork_path,
+            'panx': panx,
+            'pany': pany,
+            'scale': scale,
+            'snapshot': (panx, pany, scale, artwork_size, artwork_modified)}
+    return data
+
+
+def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R0915
     """ Generate artwork for DragnCards proxy images.
     """
     logging.info('[%s] Generating artwork for DragnCards proxy images...',
@@ -8378,31 +8406,21 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0914,
         if 'skip' in card.attrib or 'noDragncards' in card.attrib:
             continue
 
-        artwork_path = _find_properties(card, 'Artwork')
-        artwork_path = artwork_path and artwork_path[0].attrib['value']
-        if not artwork_path:
-            continue
-
         card_id = card.attrib['id']
-        artwork_size = _find_properties(card, 'Artwork Size')
-        artwork_size = (int(artwork_size[0].attrib['value'])
-                        if artwork_size else 0)
-        artwork_modified = _find_properties(card, 'Artwork Modified')
-        artwork_modified = (int(artwork_modified[0].attrib['value'])
-                            if artwork_modified else 0)
-        panx = _find_properties(card, 'PanX')
-        panx = float(panx[0].attrib['value']) if panx else 0
-        pany = _find_properties(card, 'PanY')
-        pany = float(pany[0].attrib['value']) if pany else 0
-        scale = _find_properties(card, 'Scale')
-        scale = float(scale[0].attrib['value']) if scale else 0
-        image = {'path': artwork_path,
-                 'panx': panx,
-                 'pany': pany,
-                 'scale': scale,
-                 'snapshot': (panx, pany, scale, artwork_size,
-                              artwork_modified)}
-        images[card_id] = image
+        data = _extract_image_properties(card)
+        if data:
+            images[card_id] = data
+
+        alternate = [a for a in card if a.attrib.get('type') == 'B']
+        if alternate:
+            alternate = alternate[0]
+            card_type = _find_properties(card, 'Type')
+            card_type = card_type and card_type[0].attrib['value']
+            data_back = _extract_image_properties(alternate)
+            if data_back:
+                images['{}.B'.format(card_id)] = data_back
+            elif card_type in ('Quest', 'Contract') and data:
+                images['{}.B'.format(card_id)] = data.copy()
 
     old_xml_path = os.path.join(SET_EONS_PATH,
                                 '{}.English.xml.old'.format(set_id))
@@ -8411,28 +8429,24 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0914,
         root = tree.getroot()
         for card in root[0]:
             card_id = card.attrib['id']
-            if card_id not in images:
-                continue
-
-            artwork_path = _find_properties(card, 'Artwork')
-            if not artwork_path:
-                continue
-
-            artwork_size = _find_properties(card, 'Artwork Size')
-            artwork_size = (int(artwork_size[0].attrib['value'])
-                            if artwork_size else 0)
-            artwork_modified = _find_properties(card, 'Artwork Modified')
-            artwork_modified = (int(artwork_modified[0].attrib['value'])
-                                if artwork_modified else 0)
-            panx = _find_properties(card, 'PanX')
-            panx = float(panx[0].attrib['value']) if panx else 0
-            pany = _find_properties(card, 'PanY')
-            pany = float(pany[0].attrib['value']) if pany else 0
-            scale = _find_properties(card, 'Scale')
-            scale = float(scale[0].attrib['value']) if scale else 0
-            if ((panx, pany, scale, artwork_size, artwork_modified) ==
-                    images[card_id]['snapshot']):
+            data = _extract_image_properties(card)
+            if (card_id in images and data and
+                    data['snapshot'] == images[card_id]['snapshot']):
                 del images[card_id]
+
+            alternate = [a for a in card if a.attrib.get('type') == 'B']
+            if alternate and '{}.B'.format(card_id) in images:
+                alternate = alternate[0]
+                card_type = _find_properties(card, 'Type')
+                card_type = card_type and card_type[0].attrib['value']
+                data_back = _extract_image_properties(alternate)
+                if (not data_back and data and
+                        card_type in ('Quest', 'Contract')):
+                    data_back = data
+
+                if (data_back and data_back['snapshot'] ==
+                        images['{}.B'.format(card_id)]['snapshot']):
+                    del images['{}.B'.format(card_id)]
 
     if images:
         for key in images:
