@@ -1,3 +1,4 @@
+# pylint: disable=C0302
 #!/usr/bin/env python
 """ Custom GIMP plugin(s).
 """
@@ -6,8 +7,8 @@ import math
 import os
 import re
 
-from gimpfu import (gimp, pdb, register, main, PF_IMAGE, PF_DRAWABLE,
-                    PF_DIRNAME, ROTATE_90, ROTATE_270)
+from gimpfu import (gimp, pdb, register, main, PF_DIRNAME, PF_DRAWABLE,
+                    PF_FILENAME, PF_IMAGE, ROTATE_90, ROTATE_270)
 
 
 def _get_filename_backside(img, file_type='png'):
@@ -563,6 +564,90 @@ def prepare_tts(img, _, output_folder):  # pylint: disable=R0914
     pdb.gimp_undo_push_group_end(img)
 
 
+def generate_renderer_artwork(json_path, output_folder):
+    """ Generate artwork for DragnCards proxy images.
+    """
+    gimp.progress_init('Generate artwork for DragnCards proxy images...')
+
+    try:
+        with open(json_path, 'r') as fobj:
+            images = json.load(fobj)
+    except Exception:  # pylint: disable=W0703
+        return
+
+    for card_id, data in images.items():
+        img = pdb.gimp_file_load(data['path'],
+                                 os.path.split(data['path'])[-1])
+        # drawable = img.layers[0]
+
+        output_file = '%s.jpg' % (card_id,)
+        pdb.file_jpeg_save(img, img.layers[0],
+                           os.path.join(output_folder, output_file),
+                           output_file, 0.9, 0, 1, 0, '', 2, 1, 0, 0)
+
+    _ = """
+
+
+{
+    "a0caa805-fbaa-4554-b77b-4d90d6fa7f0f": {
+        "path": "a0caa805-fbaa-4554-b77b-4d90d6fa7f0f_A_Rowan_Artist_yangzheyy.jpg",
+        "panx": 0.0,
+        "pany": 72.0,
+        "scale": 31.0
+    },
+    "70001234-a1a2-4168-8a60-fff20e565518": {
+        "path": "70001234-a1a2-4168-8a60-fff20e565518_A_Osbera_Artist_Torbj\u00f6rn_K\u00e4llstr\u00f6m.jpg",
+        "panx": 0.0,
+        "pany": 0.0,
+        "scale": 8.0
+    },
+    "70001234-a1a2-4168-8a60-fff20e565518.B": {
+        "path": "70001234-a1a2-4168-8a60-fff20e565518_B_Osbera_Artist_Torbj\u00f6rn_K\u00e4llstr\u00f6m.jpg",
+        "panx": 0.0,
+        "pany": 0.0,
+        "scale": 8.0
+    }
+}
+    parts = file_name.split('_')
+    num = int(parts[-3])
+    rows = int(parts[-4])
+    columns = int(parts[-5])
+    new_width = columns * 750
+    new_height = rows * 1050
+    pdb.gimp_image_scale(img, new_width, new_height)
+
+    cards = [c['path'] for c in cards]
+    if len(cards) != num:
+        pdb.gimp_undo_push_group_end(img)
+        return
+
+    card_rows = [cards[i * columns:(i + 1) * columns]
+                 for i in range((len(cards) + columns - 1) // columns)]
+    if len(card_rows) != rows:
+        pdb.gimp_undo_push_group_end(img)
+        return
+
+    for i, card_row in enumerate(card_rows):
+        for j, card_path in enumerate(card_row):
+            if not os.path.exists(card_path):
+                pdb.gimp_undo_push_group_end(img)
+                return
+
+            card_layer = pdb.gimp_file_load_layer(img, card_path)
+            pdb.gimp_image_insert_layer(img, card_layer, None, -1)
+            rotation = _get_rotation(card_layer)
+            if rotation:
+                _rotate(card_layer, True)
+
+            pdb.gimp_layer_set_offsets(card_layer, j * 750, i * 1050)
+            pdb.gimp_image_merge_down(img, card_layer, 1)
+
+    pdb.file_jpeg_save(img, img.layers[0],
+                       os.path.join(output_folder, file_name), file_name,
+                       1, 0, 1, 0, '', 2, 1, 0, 0)
+    """
+
+
 def cut_bleed_margins_folder(input_folder, output_folder):
     """ Cut bleed margins from a folder of images.
     """
@@ -786,7 +871,8 @@ register(
 register(
     'python_prepare_makeplayingcards',
     'Prepare an image for MakePlayingCards printing',
-    '1. Rotate a landscape image. 2. Clip bleed margins. 3. Adjust brightness/contrast. 4. Export PNG.',
+    '1. Rotate a landscape image. 2. Clip bleed margins. 3. Adjust brightness/contrast. '
+        '4. Export PNG.',
     'A.R.',
     'A.R.',
     '2020',
@@ -804,7 +890,8 @@ register(
 register(
     'python_prepare_makeplayingcards_folder',
     'Prepare a folder of images for MakePlayingCards printing',
-    '1. Rotate a landscape image. 2. Clip bleed margins. 3. Adjust brightness/contrast. 4. Export PNG.',
+    '1. Rotate a landscape image. 2. Clip bleed margins. 3. Adjust brightness/contrast. '
+        '4. Export PNG.',
     'A.R.',
     'A.R.',
     '2020',
@@ -993,5 +1080,21 @@ register(
     prepare_tts_folder,
     menu='<Image>/Filters')
 
+register(
+    'python_generate_renderer_artwork',
+    'Generate artwork for DragnCards proxy images',
+    'Scale, crop and export as JPG each of the input images.',
+    'A.R.',
+    'A.R.',
+    '2020',
+    'Generate Renderer Artwork',
+    '*',
+    [
+        (PF_FILENAME, 'json_path', 'JSON file', None),
+        (PF_DIRNAME, 'output_folder', 'Output folder', None)
+    ],
+    [],
+    generate_renderer_artwork,
+    menu='<Image>/Filters')
 
 main()

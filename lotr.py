@@ -363,6 +363,8 @@ IMAGES_ICONS_FOLDER = 'icons'
 OCTGN_SET_XML = 'set.xml'
 PLAYTEST_SUFFIX = '-Playtest'
 PROJECT_FOLDER = 'Frogmorton'
+RENDERER_FOLDER = 'renderer'
+SCRATCH_FOLDER = '_Scratch'
 TEXT_CHUNK_FLAG = b'tEXt'
 
 DECK_PREFIX_REGEX = r'^[QN][A-Z0-9][A-Z0-9]\.[0-9][0-9]?[\- ]'
@@ -6923,7 +6925,7 @@ def verify_images(conf):
 
     if os.path.exists(conf['artwork_path']):
         for root, _, filenames in os.walk(conf['artwork_path']):
-            if root == os.path.join(conf['artwork_path'], '_Scratch'):
+            if root == os.path.join(conf['artwork_path'], SCRATCH_FOLDER):
                 continue
 
             for filename in filenames:
@@ -8377,7 +8379,7 @@ def _extract_image_properties(root):
     pany = float(pany[0].attrib['value']) if pany else 0
     scale = _find_properties(root, 'Scale')
     scale = float(scale[0].attrib['value']) if scale else 0
-    data = {'path': artwork_path,
+    data = {'path': os.path.join(IMAGES_RAW_PATH, artwork_path),
             'panx': panx,
             'pany': pany,
             'scale': scale,
@@ -8449,6 +8451,7 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
                     del images['{}.B'.format(card_id)]
 
     if images:
+        images_cnt = len(images.keys())
         for key in images:
             del images[key]['snapshot']
 
@@ -8457,12 +8460,46 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
         create_folder(temp_path)
         clear_folder(temp_path)
 
-        with open(os.path.join(temp_path, 'images.json'), 'w',
+        json_path = os.path.join(temp_path, 'images.json')
+        with open(json_path, 'w',
                   encoding='utf-8') as fobj:
             res = json.dumps(images, indent=4)
             fobj.write(res)
 
-        # delete_folder(temp_path)
+        cmd = GIMP_COMMAND.format(
+            conf['gimp_console_path'],
+            'python-generate-renderer-artwork',
+            json_path.replace('\\', '\\\\'),
+            temp_path.replace('\\', '\\\\'))
+        res = _run_cmd(cmd)
+        logging.info('[%s] %s', set_name, res)
+
+        output_cnt = 0
+        for _, _, filenames in os.walk(temp_path):
+            for filename in filenames:
+                if not filename.endswith('.jpg'):
+                    continue
+
+                output_cnt += 1
+
+            break
+
+        if output_cnt != images_cnt:
+            raise GIMPError('Wrong number of output files: {} instead of {}'
+                            .format(output_cnt, images_cnt))
+
+        output_path = os.path.join(conf['artwork_path'], RENDERER_FOLDER)
+        for _, _, filenames in os.walk(temp_path):
+            for filename in filenames:
+                if not filename.endswith('.jpg'):
+                    continue
+
+                shutil.move(os.path.join(temp_path, filename),
+                            os.path.join(output_path, filename))
+
+            break
+
+        delete_folder(temp_path)
 
     logging.info('[%s] ...Generating artwork for DragnCards proxy images '
                  '(%ss)', set_name, round(time.time() - timestamp, 3))

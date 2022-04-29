@@ -51,6 +51,10 @@ completely, you will need to download updates to that folder manually.
     custom/<custom image>
     icons/
     icons/<icon image>
+    renderer/
+    renderer/<lightweight card image>
+    _Scratch/
+    _Scratch/<backup image>
     ```
 
     For example:
@@ -66,6 +70,10 @@ completely, you will need to download updates to that folder manually.
     custom/Do-Not-Read-the-Following.png
     icons/
     icons/Ambush-at-Erelas.png
+    renderer/
+    renderer/e904fc83-7bb9-4868-8d80-60c89ade0ce2.jpg
+    _Scratch/
+    _Scratch/untitled.png
     ```
 
 4. Install Google Drive (if it's not installed yet) and make sure that the folder with the artwork is being synced.
@@ -153,6 +161,7 @@ for details).
   - `hallofbeorn_json`: creating JSON files for Hall of Beorn (true or false)
   - `frenchdb_csv`: creating CSV files for the French database sda.cgbuilder.fr (true or false)
   - `spanishdb_csv`: creating CSV files for the Spanish database susurrosdelbosqueviejo.com (true or false)
+  - `renderer_artwork`: creating artwork for DragnCards proxy images (true or false)
   - `renderer`: creating DragnCards proxy images (true or false)
   - `upload_dragncards`: uploading outputs to DragnCards (true or false)
   - `dragncards_hostname`: DragnCards hostname (username@hostname)
