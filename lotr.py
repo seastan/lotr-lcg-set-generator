@@ -8379,7 +8379,10 @@ def _extract_image_properties(root):
     pany = float(pany[0].attrib['value']) if pany else 0
     scale = _find_properties(root, 'Scale')
     scale = float(scale[0].attrib['value']) if scale else 0
+    card_type = _find_properties(root, 'Type')
+    card_type = card_type[0].attrib['value'] if card_type else ''
     data = {'path': os.path.join(IMAGES_RAW_PATH, artwork_path),
+            'card_type': card_type,
             'panx': panx,
             'pany': pany,
             'scale': scale,
@@ -8416,12 +8419,10 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
         alternate = [a for a in card if a.attrib.get('type') == 'B']
         if alternate:
             alternate = alternate[0]
-            card_type = _find_properties(card, 'Type')
-            card_type = card_type and card_type[0].attrib['value']
             data_back = _extract_image_properties(alternate)
             if data_back:
                 images['{}.B'.format(card_id)] = data_back
-            elif card_type in ('Quest', 'Contract') and data:
+            elif data and data['card_type'] in ('Quest', 'Contract'):
                 images['{}.B'.format(card_id)] = data.copy()
 
     old_xml_path = os.path.join(SET_EONS_PATH,
@@ -8439,11 +8440,9 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
             alternate = [a for a in card if a.attrib.get('type') == 'B']
             if alternate and '{}.B'.format(card_id) in images:
                 alternate = alternate[0]
-                card_type = _find_properties(card, 'Type')
-                card_type = card_type and card_type[0].attrib['value']
                 data_back = _extract_image_properties(alternate)
                 if (not data_back and data and
-                        card_type in ('Quest', 'Contract')):
+                        data['card_type'] in ('Quest', 'Contract')):
                     data_back = data
 
                 if (data_back and data_back['snapshot'] ==

@@ -564,10 +564,38 @@ def prepare_tts(img, _, output_folder):  # pylint: disable=R0914
     pdb.gimp_undo_push_group_end(img)
 
 
-def generate_renderer_artwork(json_path, output_folder):
+def generate_renderer_artwork(json_path, output_folder):  # pylint: disable=R0914,R0915
     """ Generate artwork for DragnCards proxy images.
     """
     gimp.progress_init('Generate artwork for DragnCards proxy images...')
+
+    portrait = {}
+    portrait['Ally'] = '87,0,326,330'
+    portrait['Attachment'] = '40,50,333,280'
+    portrait['Campaign'] = '0,0,413,245'
+    portrait['Contract'] = '0,0,413,315'
+    portrait['Encounter Side Quest'] = '0,0,563,413'
+    portrait['Enemy'] = '87,0,326,330'
+    portrait['Event'] = '60,0,353,330'
+    portrait['Hero'] = '87,0,326,330'
+    portrait['Location'] = '0,60,413,268'
+    portrait['Nightmare'] = '0,77,413,245'
+    portrait['Objective'] = '0,69,413,300'
+    portrait['Objective Ally'] = '78,81,335,268'
+    portrait['Objective Hero'] = '78,81,335,268'
+    portrait['Objective Location'] = '0,69,413,300'
+    portrait['Player Objective'] = '0,69,413,300'
+    portrait['Player Side Quest'] = '0,0,563,413'
+    portrait['Quest'] = '0,0,563,413'
+    portrait['Ship Enemy'] = '87,0,326,330'
+    portrait['Ship Objective'] = '78,81,335,268'
+    portrait['Treachery'] = '60,0,353,330'
+    portrait['Treasure'] = '0,61,413,265'
+
+    for card_type in portrait:
+        values = portrait[card_type].split(',')
+        portrait[card_type] = (float(round(int(values[2]) * 2 / 1.75)),
+                               float(round(int(values[3]) * 2 / 1.75)))
 
     try:
         with open(json_path, 'r') as fobj:
@@ -576,76 +604,64 @@ def generate_renderer_artwork(json_path, output_folder):
         return
 
     for card_id, data in images.items():
+        if data['card_type'] not in portrait:
+            return
+
         img = pdb.gimp_file_load(data['path'],
                                  os.path.split(data['path'])[-1])
-        # drawable = img.layers[0]
+        drawable = img.layers[0]
+        image_width = drawable.width
+        image_height = drawable.height
+
+        img = pdb.gimp_file_load(os.path.join('GIMP', 'black.png'),
+                                 'black.png')
+        pdb.gimp_image_scale(img, image_width, image_height)
+
+        layer = pdb.gimp_file_load_layer(img, data['path'])
+        pdb.gimp_image_insert_layer(img, layer, None, -1)
+        pdb.gimp_layer_set_offsets(layer, 0, 0)
+        pdb.gimp_image_merge_down(img, layer, 1)
+        drawable = img.layers[0]
+
+        portrait_width = portrait[data['card_type']][0]
+        portrait_height = portrait[data['card_type']][1]
+        scale = float(data['scale'])
+        if scale == 0:
+            if (image_height * (portrait_width / image_width) /
+                    portrait_height >= 1):
+                scale = portrait_width / image_width
+            else:
+                scale = portrait_height / image_height
+        else:
+            scale = (scale * 2 / 1.75) / 100
+
+        image_width = round(image_width * scale)
+        image_height = round(image_height * scale)
+        pdb.gimp_image_scale(img, image_width, image_height)
+
+        new_width = image_width + 2 * portrait_width
+        new_height = image_height + 2 * portrait_height
+        pdb.gimp_image_resize(img, new_width, new_height, portrait_width,
+                              portrait_height)
+        pdb.gimp_layer_resize(drawable, new_width, new_height, portrait_width,
+                              portrait_height)
+
+        left = round((image_width - portrait_width) / 2 + portrait_width -
+                     float(data['panx']) * 2 / 1.75)
+        top = round((image_height - portrait_height) / 2 + portrait_height -
+                    float(data['pany']) * 2 / 1.75)
+        #print('%s: image: %s/%s, portrait: %s/%s, left/top: %s/%s' %
+        #      (card_id, image_width, image_height, portrait_width,
+        #       portrait_height, left, top))
+        pdb.gimp_image_resize(img, portrait_width, portrait_height, -left,
+                              -top)
+        pdb.gimp_layer_resize(drawable, portrait_width, portrait_height,
+                              -left, -top)
 
         output_file = '%s.jpg' % (card_id,)
         pdb.file_jpeg_save(img, img.layers[0],
                            os.path.join(output_folder, output_file),
                            output_file, 0.9, 0, 1, 0, '', 2, 1, 0, 0)
-
-    _ = """
-
-
-{
-    "a0caa805-fbaa-4554-b77b-4d90d6fa7f0f": {
-        "path": "a0caa805-fbaa-4554-b77b-4d90d6fa7f0f_A_Rowan_Artist_yangzheyy.jpg",
-        "panx": 0.0,
-        "pany": 72.0,
-        "scale": 31.0
-    },
-    "70001234-a1a2-4168-8a60-fff20e565518": {
-        "path": "70001234-a1a2-4168-8a60-fff20e565518_A_Osbera_Artist_Torbj\u00f6rn_K\u00e4llstr\u00f6m.jpg",
-        "panx": 0.0,
-        "pany": 0.0,
-        "scale": 8.0
-    },
-    "70001234-a1a2-4168-8a60-fff20e565518.B": {
-        "path": "70001234-a1a2-4168-8a60-fff20e565518_B_Osbera_Artist_Torbj\u00f6rn_K\u00e4llstr\u00f6m.jpg",
-        "panx": 0.0,
-        "pany": 0.0,
-        "scale": 8.0
-    }
-}
-    parts = file_name.split('_')
-    num = int(parts[-3])
-    rows = int(parts[-4])
-    columns = int(parts[-5])
-    new_width = columns * 750
-    new_height = rows * 1050
-    pdb.gimp_image_scale(img, new_width, new_height)
-
-    cards = [c['path'] for c in cards]
-    if len(cards) != num:
-        pdb.gimp_undo_push_group_end(img)
-        return
-
-    card_rows = [cards[i * columns:(i + 1) * columns]
-                 for i in range((len(cards) + columns - 1) // columns)]
-    if len(card_rows) != rows:
-        pdb.gimp_undo_push_group_end(img)
-        return
-
-    for i, card_row in enumerate(card_rows):
-        for j, card_path in enumerate(card_row):
-            if not os.path.exists(card_path):
-                pdb.gimp_undo_push_group_end(img)
-                return
-
-            card_layer = pdb.gimp_file_load_layer(img, card_path)
-            pdb.gimp_image_insert_layer(img, card_layer, None, -1)
-            rotation = _get_rotation(card_layer)
-            if rotation:
-                _rotate(card_layer, True)
-
-            pdb.gimp_layer_set_offsets(card_layer, j * 750, i * 1050)
-            pdb.gimp_image_merge_down(img, card_layer, 1)
-
-    pdb.file_jpeg_save(img, img.layers[0],
-                       os.path.join(output_folder, file_name), file_name,
-                       1, 0, 1, 0, '', 2, 1, 0, 0)
-    """
 
 
 def cut_bleed_margins_folder(input_folder, output_folder):

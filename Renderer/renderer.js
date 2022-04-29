@@ -419,16 +419,16 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         var shapeHeight = data['Body-region'][1] + data['Body-region'][3] - data['Sphere-Body-shape'][1] + 12;
         var shapeTop = data['Body-region'][3] - shapeHeight;
         shapeCSS = '#BodyShape:before {\n' +
-	    '    content: "";\n' +
-	    '    display: block;\n' +
-	    '    float: ' + shapeOppositeAlignment + ';\n' +
-	    '    height: ' + shapeTop + 'px;\n' +
+            '    content: "";\n' +
+            '    display: block;\n' +
+            '    float: ' + shapeOppositeAlignment + ';\n' +
+            '    height: ' + shapeTop + 'px;\n' +
             '}\n' +
             '#BodyShape span {\n' +
-	    '    float: ' + shapeAlignment + ';\n' +
-	    '    clear: both;\n' +
-	    '    width: ' + shapeWidth + 'px;\n' +
-	    '    height: ' + shapeHeight + 'px;\n' +
+            '    float: ' + shapeAlignment + ';\n' +
+            '    clear: both;\n' +
+            '    width: ' + shapeWidth + 'px;\n' +
+            '    height: ' + shapeHeight + 'px;\n' +
             '}';
     }
 

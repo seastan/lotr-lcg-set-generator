@@ -247,6 +247,7 @@ portraitRegion['Objective Hero'] = '78,81,335,268';
 portraitRegion['Objective Location'] = '0,69,413,300';
 portraitRegion['Player Objective'] = '0,69,413,300';
 portraitRegion['Player Side Quest'] = '0,0,563,413';
+portraitRegion['Presentation'] = '0,140,413,285';
 portraitRegion['Quest'] = '0,0,563,413';
 portraitRegion['Ship Enemy'] = '87,0,326,330';
 portraitRegion['Ship Objective'] = '78,81,335,268';
