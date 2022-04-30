@@ -659,9 +659,35 @@ def generate_renderer_artwork(json_path, output_folder):  # pylint: disable=R091
                               -left, -top)
 
         output_file = '%s.jpg' % (card_id,)
-        pdb.file_jpeg_save(img, img.layers[0],
+        pdb.file_jpeg_save(img, drawable,
                            os.path.join(output_folder, output_file),
                            output_file, 0.9, 0, 1, 0, '', 2, 1, 0, 0)
+
+
+def generate_renderer_custom_image(img, drawable, output_folder):
+    """ Generate a custom image for DragnCards proxy images.
+    """
+    gimp.progress_init('Generate a custom image for DragnCards proxy '
+                       'images...')
+    pdb.gimp_undo_push_group_start(img)
+
+    if drawable.width > 362:
+        scale = 362.0 / drawable.width
+        image_width = 362
+        image_height = round(drawable.height * scale)
+        pdb.gimp_image_scale(img, image_width, image_height)
+
+        file_name = pdb.gimp_image_get_filename(img)
+        if file_name.endswith('.png'):
+            pdb.file_png_save(img, drawable,
+                              os.path.join(output_folder, file_name),
+                              file_name, 0, 9, 1, 0, 0, 1, 1)
+        else:
+            pdb.file_jpeg_save(img, drawable,
+                               os.path.join(output_folder, file_name),
+                               file_name, 0.9, 0, 1, 0, '', 2, 1, 0, 0)
+
+    pdb.gimp_undo_push_group_end(img)
 
 
 def cut_bleed_margins_folder(input_folder, output_folder):
@@ -742,6 +768,15 @@ def prepare_tts_folder(input_folder, output_folder):
     gimp.progress_init(
         'Prepare a folder of TTS sheet images...')
     _iterate_folder(input_folder, output_folder, prepare_tts)
+
+
+def generate_renderer_custom_image_folder(input_folder, output_folder):
+    """ Generate a folder of custom images for DragnCards proxy images.
+    """
+    gimp.progress_init(
+        'Generate a folder of custom images for DragnCards proxy images...')
+    _iterate_folder(input_folder, output_folder,
+                    generate_renderer_custom_image)
 
 
 register(
@@ -1111,6 +1146,41 @@ register(
     ],
     [],
     generate_renderer_artwork,
+    menu='<Image>/Filters')
+
+register(
+    'python_generate_renderer_custom_image',
+    'Generate a custom image for DragnCards proxy images',
+    'Scale the image.',
+    'A.R.',
+    'A.R.',
+    '2020',
+    'Generate Renderer Custom Image',
+    '*',
+    [
+        (PF_IMAGE, 'image', 'Input image', None),
+        (PF_DRAWABLE, 'drawable', 'Input drawable', None),
+        (PF_DIRNAME, 'output_folder', 'Output folder', None)
+    ],
+    [],
+    generate_renderer_custom_image,
+    menu='<Image>/Filters')
+
+register(
+    'python_generate_renderer_custom_image_folder',
+    'Generate a folder of custom images for DragnCards proxy images',
+    'Scale the image.',
+    'A.R.',
+    'A.R.',
+    '2020',
+    'Generate Renderer Custom Image Folder',
+    '*',
+    [
+        (PF_DIRNAME, 'input_folder', 'Input folder', None),
+        (PF_DIRNAME, 'output_folder', 'Output folder', None)
+    ],
+    [],
+    generate_renderer_custom_image_folder,
     menu='<Image>/Filters')
 
 main()

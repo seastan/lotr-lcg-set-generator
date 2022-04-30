@@ -8381,13 +8381,29 @@ def _extract_image_properties(root):
     scale = float(scale[0].attrib['value']) if scale else 0
     card_type = _find_properties(root, 'Type')
     card_type = card_type[0].attrib['value'] if card_type else ''
-    data = {'path': os.path.join(IMAGES_RAW_PATH, artwork_path),
+    data = {'path': artwork_path,
             'card_type': card_type,
             'panx': panx,
             'pany': pany,
             'scale': scale,
             'snapshot': (panx, pany, scale, artwork_size, artwork_modified)}
     return data
+
+
+def _extract_custom_images(root):
+    """ Extract information about custom images from the XML file.
+    """
+    images = set()
+    i = 0
+    while True:
+        custom_image = _find_properties(root, 'Custom Image_{}'.format(i))
+        if not custom_image:
+            break
+
+        images.add(custom_image[0].attrib['value'].split('|')[0])
+        i += 1
+
+    return images
 
 
 def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R0915
@@ -8405,6 +8421,7 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
         return
 
     images = {}
+    custom_images = set()
     tree = ET.parse(xml_path)
     root = tree.getroot()
     for card in root[0]:
@@ -8412,6 +8429,7 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
             continue
 
         card_id = card.attrib['id']
+        custom_images = custom_images.union(_extract_custom_images(card))
         data = _extract_image_properties(card)
         if data:
             images[card_id] = data
@@ -8419,6 +8437,8 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
         alternate = [a for a in card if a.attrib.get('type') == 'B']
         if alternate:
             alternate = alternate[0]
+            custom_images = custom_images.union(
+                _extract_custom_images(alternate))
             data_back = _extract_image_properties(alternate)
             if data_back:
                 images['{}.B'.format(card_id)] = data_back
@@ -8449,15 +8469,18 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
                         images['{}.B'.format(card_id)]['snapshot']):
                     del images['{}.B'.format(card_id)]
 
+    output_path = os.path.join(conf['artwork_path'], RENDERER_FOLDER)
+    temp_path = os.path.join(TEMP_ROOT_PATH,
+                             'generate_renderer_artwork.{}'.format(set_id))
+    create_folder(temp_path)
+    clear_folder(temp_path)
+
     if images:
         images_cnt = len(images.keys())
         for key in images:
+            images[key]['path'] = os.path.join(conf['artwork_path'], set_id,
+                                               images[key]['path'])
             del images[key]['snapshot']
-
-        temp_path = os.path.join(TEMP_ROOT_PATH,
-                                 'generate_renderer_artwork.{}'.format(set_id))
-        create_folder(temp_path)
-        clear_folder(temp_path)
 
         json_path = os.path.join(temp_path, 'images.json')
         with open(json_path, 'w',
@@ -8487,7 +8510,6 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
             raise GIMPError('Wrong number of output files: {} instead of {}'
                             .format(output_cnt, images_cnt))
 
-        output_path = os.path.join(conf['artwork_path'], RENDERER_FOLDER)
         for _, _, filenames in os.walk(temp_path):
             for filename in filenames:
                 if not filename.endswith('.jpg'):
@@ -8498,7 +8520,43 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
 
             break
 
-        delete_folder(temp_path)
+    if custom_images:
+        clear_folder(temp_path)
+        found_images = False
+        input_path = os.path.join(conf['artwork_path'], set_id,
+                                  IMAGES_CUSTOM_FOLDER)
+        for _, _, filenames in os.walk(input_path):
+            for filename in filenames:
+                if filename in custom_images:
+                    shutil.copyfile(
+                        os.path.join(input_path, filename),
+                        os.path.join(temp_path,
+                                     '{}_{}'.format(set_id, filename)))
+                    found_images = True
+
+            break
+
+        if found_images:
+            cmd = GIMP_COMMAND.format(
+                conf['gimp_console_path'],
+                'python-generate-renderer-custom-image-folder',
+                temp_path.replace('\\', '\\\\'),
+                temp_path.replace('\\', '\\\\'))
+            res = _run_cmd(cmd)
+            logging.info('[%s] %s', set_name, res)
+
+            for _, _, filenames in os.walk(temp_path):
+                for filename in filenames:
+                    if (not filename.endswith('.jpg') and
+                            not filename.endswith('.png')):
+                        continue
+
+                    shutil.move(os.path.join(temp_path, filename),
+                                os.path.join(output_path, filename))
+
+                break
+
+    delete_folder(temp_path)
 
     logging.info('[%s] ...Generating artwork for DragnCards proxy images '
                  '(%ss)', set_name, round(time.time() - timestamp, 3))
