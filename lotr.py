@@ -358,12 +358,12 @@ PNG_480_MIN_SIZE = 300000
 PNG_800_MIN_SIZE = 2000000
 
 EASY_PREFIX = 'Easy '
+GENERATED_FOLDER = 'generated'
 IMAGES_CUSTOM_FOLDER = 'custom'
 IMAGES_ICONS_FOLDER = 'icons'
 OCTGN_SET_XML = 'set.xml'
 PLAYTEST_SUFFIX = '-Playtest'
 PROJECT_FOLDER = 'Frogmorton'
-RENDERER_FOLDER = 'renderer'
 SCRATCH_FOLDER = '_Scratch'
 TEXT_CHUNK_FLAG = b'tEXt'
 
@@ -8469,7 +8469,7 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
                         images['{}.B'.format(card_id)]['snapshot']):
                     del images['{}.B'.format(card_id)]
 
-    output_path = os.path.join(conf['artwork_path'], RENDERER_FOLDER)
+    output_path = os.path.join(conf['artwork_path'], GENERATED_FOLDER)
     temp_path = os.path.join(TEMP_ROOT_PATH,
                              'generate_renderer_artwork.{}'.format(set_id))
     create_folder(temp_path)
