@@ -1259,14 +1259,19 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 				}
 
-				if (card['Encounter Set']) {
-					let iconName = escapeIconFileName(card['Encounter Set']);
+				let encounterSet = card['Encounter Set'];
+				if (card['Encounter Set Back'] && (side == 'back')) {
+					encounterSet = card['Encounter Set Back'];
+				}
+
+				if (encounterSet) {
+					let iconName = escapeIconFileName(encounterSet);
 					if (icons.indexOf(iconName) > -1) {
 						s.set('EncounterSet', 'Custom');
 						s.set('EncounterSet-external-path', 'project:imagesIcons/' + iconName + '.png');
 					}
 					else {
-						s.set('EncounterSet', convertIconName(card['Encounter Set']));
+						s.set('EncounterSet', convertIconName(encounterSet));
 						s.set('EncounterSet-external-path', '');
 					}
 				}
