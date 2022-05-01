@@ -26,10 +26,20 @@
 body {
     margin: 0;
     padding: 0;
-    background-repeat: no-repeat;
-    background-image: url('../Templates/{{ BACKGROUND }}.png');
     color: #000000;
     font-family: Times New Roman;
+}
+
+#Template {
+    background-repeat: no-repeat;
+    background-image: url('../Templates/{{ TEMPLATE_BACKGROUND }}.png');
+    overflow: hidden;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: {{ TEMPLATE_WIDTH }}px;
+    height: {{ TEMPLATE_HEIGHT }}px;
+    z-index: -1;
 }
 {{ SHAPE_CSS }}
 </style>
@@ -73,13 +83,16 @@ function correct_size(id) {
 window.onload = function onload_callback() {
     setTimeout(function() {
         for (var i = 0; i < containers.length; i++) {
-            correct_size(containers[i]);
+            if (['Portrait-portrait-clip', 'PortraitBack-portrait-clip'].indexOf(containers[i]) == -1) {
+                correct_size(containers[i]);
+            }
         }
     }, 500);
 };
 </script>
 </head>
 <body>
+<div id="Template"></div>
 {{ CONTAINERS }}
 </body>
 </html>

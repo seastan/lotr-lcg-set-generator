@@ -3,6 +3,7 @@ const he = require('he');
 const {XMLParser} = require('fast-xml-parser');
 eval(fs.readFileSync('../Frogmorton/common.js') + '');
 
+const generatedImagesFolder = '../GeneratedImages/';
 const iconsFolder = '../Icons/';
 const imagesFolder = '../Images/';
 const xmlFolder = '../setEons/';
@@ -257,7 +258,7 @@ function convertTags(value) {
     value = value.replace(/res:\/\/TheLordOfTheRingsLCG\/image\/ShadowSeparator\.png/g, imagesFolder + 'shadow.png');
     value = value.replace(/project:imagesCustom\/[0-9a-f\-]+_Do-Not-Read-the-Following\.png/g, imagesFolder + 'donotread.png');
     value = value.replace(/project:imagesCustom\/[0-9a-f\-]+_Text-Divider-Black\.png/g, imagesFolder + 'textdividerblack.png');
-    value = value.replace(/project:imagesCustom\//g, imagesFolder);
+    value = value.replace(/project:imagesCustom\//g, generatedImagesFolder);
     value = value.replace(/project:imagesIcons\//g, iconsFolder);
     value = value.replace(/<image ([^ >]+)>/g, '<img src="$1">');
     value = value.replace(/<image ([^ >]+) ([^ >]+)>/g, updateImageWidthReplacer);
@@ -320,6 +321,14 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             }
 
             var content = '<div style="text-align: center' + rotate + '"><span style="color: ' + data['Name-colour'] + '">' + unique + data.Name + '</span></div>';
+            return content;
+        },
+        'Portrait-portrait-clip': function(data) {
+            var suffix = '';
+            if (data.SuffixRenderer == '-2') {
+                suffix = '.B';
+            }
+            var content = '<img src="' + generatedImagesFolder + data.IdRenderer + suffix + '.jpg" width="100%" height="100%">';
             return content;
         },
         'Type': function(data) {
@@ -388,7 +397,11 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 }
 
                 let content = '';
-                if (data[key + '-region'][3] > data[key + '-region'][2] * 3) {
+                if (key == 'Portrait-portrait-clip') {
+                    content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
+                    data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: hidden; overflow-y: hidden; z-index: -2">' + containerRules[key](data) + '</div>';
+                }
+                else if (data[key + '-region'][3] > data[key + '-region'][2] * 3) {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + (parseInt(data[key + '-region'][0]) + parseInt(data[key + '-region'][2])) + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
                         data[key + '-region'][3] + 'px; height: ' + data[key + '-region'][2] + 'px; overflow-x: visible; overflow-y: auto; font-size: ' + containerFontSize[key] + 'px; ' +
                         '-webkit-transform: rotate(90deg); transform: rotate(90deg); -webkit-transform-origin: 0 0 0; transform-origin: 0 0 0">' + shapeDiv + containerRules[key](data) + '</div>';
@@ -435,8 +448,12 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
     var background = (data.TypeRenderer + template + additionalEncounterSets).replace(/ /g, '');
     var html = fs.readFileSync('template.html') + '';
     var prefix = 'portrait.';
+    var width = 429;
+    var height = 600;
     if (landscapeTypes.indexOf(data.TypeRenderer) > -1) {
         prefix = 'landscape.';
+        width = 600;
+        height = 429;
     }
 
     var suffix = '';
@@ -444,7 +461,9 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         suffix = '.B';
     }
 
-    html = html.replace('{{ BACKGROUND }}', background);
+    html = html.replace('{{ TEMPLATE_BACKGROUND }}', background);
+    html = html.replace('{{ TEMPLATE_WIDTH }}', width);
+    html = html.replace('{{ TEMPLATE_HEIGHT }}', height);
     html = html.replace('{{ CONTAINER_NAMES }}', containerNames);
     html = html.replace('{{ SHAPE_CSS }}', shapeCSS);
     html = html.replace('{{ CONTAINERS }}', containers.join('\n'));
