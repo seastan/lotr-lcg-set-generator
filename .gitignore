@@ -20,6 +20,8 @@ Output/Scripts/*.json
 Output/Scripts/*.sh
 Renderer/Fonts/*.ttf
 Renderer/Fonts/*.TTF
+Renderer/GeneratedImages/*.jpg
+Renderer/GeneratedImages/*.png
 Renderer/Icons/*.png
 Renderer/Output/*.html
 Renderer/Output/*.jpg
