@@ -31,6 +31,11 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
         else:
             conf = lotr.read_conf()
 
+    if os.path.exists(lotr.REPROCESS_ALL_PATH):
+        conf['reprocess_all'] = True
+        logging.info('Setting "reprocess_all" to "true" for this run')
+        os.remove(lotr.REPROCESS_ALL_PATH)
+
     if (not conf['reprocess_all'] and conf['reprocess_all_on_error'] and
             os.path.exists(lotr.PIPELINE_STARTED_PATH)):
         conf['reprocess_all'] = True
@@ -150,7 +155,8 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
         with open(lotr.PROJECT_CREATED_PATH, 'w', encoding='utf-8'):
             pass
     else:
-        if os.path.exists(lotr.PIPELINE_STARTED_PATH):
+        if (os.path.exists(lotr.PIPELINE_STARTED_PATH) and
+                not conf['renderer_artwork']):
             os.remove(lotr.PIPELINE_STARTED_PATH)
 
         if eons:

@@ -447,6 +447,7 @@ OUTPUT_SPANISHDB_IMAGES_PATH = os.path.join(OUTPUT_PATH, 'SpanishDBImages')
 OUTPUT_TTS_PATH = os.path.join(OUTPUT_PATH, 'TTS')
 PROJECT_PATH = 'setGenerator.seproject'
 PROJECT_CREATED_PATH = 'setGenerator_CREATED'
+REPROCESS_ALL_PATH = 'REPROCESS_ALL'
 RINGSDB_COOKIES_PATH = 'ringsdb_cookies.json'
 RINGSDB_JSON_PATH = 'ringsdb.json'
 RUN_BEFORE_SE_STARTED_PATH = 'runBeforeSE_STARTED'
