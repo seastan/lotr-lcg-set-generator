@@ -671,9 +671,9 @@ def generate_renderer_custom_image(img, drawable, output_folder):
                        'images...')
     pdb.gimp_undo_push_group_start(img)
 
-    if drawable.width > 362:
-        scale = 362.0 / drawable.width
-        image_width = 362
+    if drawable.width > 360:
+        scale = 360.0 / drawable.width
+        image_width = 360
         image_height = round(drawable.height * scale)
         pdb.gimp_image_scale(img, image_width, image_height)
 
