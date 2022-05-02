@@ -1,4 +1,4 @@
-# pylint: disable=C0302
+# pylint: disable=C0302,C0103
 #!/usr/bin/env python
 """ Custom GIMP plugin(s).
 """
@@ -8,7 +8,91 @@ import os
 import re
 
 from gimpfu import (gimp, pdb, register, main, PF_DIRNAME, PF_DRAWABLE,
-                    PF_FILENAME, PF_IMAGE, ROTATE_90, ROTATE_270)
+                    PF_FILENAME, PF_IMAGE, ROTATE_90, ROTATE_270,
+                    DESATURATE_LUMINANCE, HISTOGRAM_RED, HISTOGRAM_GREEN,
+                    HISTOGRAM_BLUE)
+
+
+# http://leware.net/photo/blogSepia.html
+def _spline_to_points(spline):
+    """ Convert spline to points for the sepia effect.
+
+    http://leware.net/photo/blogSepia.html
+    """
+    points = [k / 255.0 for k in range(256)]
+    x0 = 0.0
+    y0 = 0.0
+    ix = 0
+    x0 = spline.pop(0)  # remove initial (0.0,0.0)
+    y0 = spline.pop(0)
+    while spline:
+        x = spline.pop(0)
+        y = spline.pop(0)
+        while ix < 256:
+            xi = ix / 255.
+            if xi > x:
+                break
+            points[ix] = ((x-xi) * y0 + (xi-x0) * y) / (x-x0)
+            ix += 1
+        x0 = x
+        y0 = y
+    return points
+
+
+def _do_sepia(img, layer, desat=True, red_green=23, green_blue=19):
+    """ Apply the sepia effect.
+
+    http://leware.net/photo/blogSepia.html
+    """
+    gimp.progress_init("Converting " + layer.name + " to sepia...")
+
+    red_green /= 255.  # comvert parms to range 0..1
+    green_blue /= 255.
+
+    # compute the desired adjustments to preserve luminance
+    ar = red_green * 0.70 + green_blue * 0.11  # expected to be +ve
+    ag = ar - red_green                        # could be either
+    ab = ar - red_green - green_blue           # expected to be -ve
+
+    if red_green < 0.0 or green_blue < 0.0 or abs(ar) > 0.4 or abs(ag) > 0.4 or abs(ab) > 0.4:
+        pdb.gimp_message('Unexpected parms, results may surprise you!')
+
+    # Set up an undo group, so the operation will be undone in one step.
+    pdb.gimp_undo_push_group_start(img)
+
+    if desat:
+        # in case not previously done
+        pdb.gimp_drawable_desaturate(layer, DESATURATE_LUMINANCE)
+
+    # versions 1 and 2 of this program used pdb.gimp_drawable_curves_spline(),
+    # but pdb.gimp_drawable_curves_explicit() gives me fewer artefacts
+    # 0.93 is a factor that was useful with pdb.gimp_drawable_curves_spline()
+    # to counter a slight buldging
+
+    # red curve moves up
+    pdb.gimp_drawable_curves_explicit(
+        layer, HISTOGRAM_RED, 256,
+        _spline_to_points([0.0, 0.0, 0.03-0.93*ab, 0.03-0.93*ab+0.93*ar, 0.5-ar/2, 0.5+ar/2,
+                           0.97-0.93*ar, 0.97, 1.0, 1.0]))
+
+    # blue curve moves down
+    pdb.gimp_drawable_curves_explicit(
+        layer, HISTOGRAM_BLUE, 256,
+        _spline_to_points([0.0, 0.0, 0.03-0.93*ab, 0.03, 0.5-ab/2, 0.5+ab/2, 0.97-0.93*ar,
+                           0.97-0.93*ar+0.93*ab, 1.0, 1.0]))
+
+    if abs(ag) > 0.003:  # don't bother if green moves less than 1
+        pdb.gimp_drawable_curves_explicit(
+            layer, HISTOGRAM_GREEN, 256,
+            _spline_to_points([0.0, 0.0, 0.03-0.93*ab, 0.03-0.93*ab+0.93*ag, 0.5-ag/2, 0.5+ag/2,
+                               0.97-0.93*ar, 0.97-0.93*ar+0.93*ag, 1.0, 1.0]))
+
+    # https://stackoverflow.com/questions/58772647/adjust-color-curves-in-python-similar-to-gimp
+
+    pdb.gimp_displays_flush()  #this will update the image.
+
+    # Close the undo group.
+    pdb.gimp_undo_push_group_end(img)
 
 
 def _get_filename_backside(img, file_type='png'):
@@ -657,6 +741,9 @@ def generate_renderer_artwork(json_path, output_folder):  # pylint: disable=R091
                               -top)
         pdb.gimp_layer_resize(drawable, portrait_width, portrait_height,
                               -left, -top)
+
+        if data['card_type'] == 'Quest' and not card_id.endswith('.B'):
+            _do_sepia(img, drawable)
 
         output_file = '%s.jpg' % (card_id,)
         pdb.file_jpeg_save(img, drawable,
