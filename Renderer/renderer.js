@@ -279,8 +279,12 @@ function convertTags(value) {
 function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
     var containerFontSize = {
         'Body': 14,
+        'BodyBack': 14,
+        'BodyRight': 14,
         'Name': 12,
-        'Type': 12
+        'NameBack': 12,
+        'Type': 12,
+        'TypeBack': 12
     };
     var containerRules = {
         'Body': function(data) {
@@ -303,6 +307,11 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
             content = content.join('<br>' + data['VerticalSpacer-tag-replacement'] + '<br>');
             content = '<div style="color: ' + data['Body-colour'] + '; line-height: 0.96">' + content + '</div>';
+            return content;
+        },
+        'BodyRight': function(data) {
+            var content = data['RulesRight-format'] + data.RulesRight + data['RulesRight-formatEnd'];
+            content = '<div style="color: ' + data['BodyRight-colour'] + '; line-height: 0.96">' + content + '</div>';
             return content;
         },
         'Name': function(data) {
@@ -337,7 +346,58 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             }
 
             return '<div style="text-align: center">' + data.Type + '</div>';
-        }};
+        }
+    };
+
+    var containerRulesBack = {
+        'BodyBack': function(data) {
+            var content = [];
+            if (data.StoryBack + '') {
+                content.push(data['StoryBack-format'] + data.StoryBack + data['StoryBack-formatEnd']);
+            }
+
+            if (data.RulesBack + '') {
+                content.push(data['RulesBack-format'] + data.RulesBack + data['RulesBack-formatEnd']);
+            }
+
+            if (data.FlavourBack + '') {
+                content.push(data['FlavourBack-format'] + data.FlavourBack + data['FlavourBack-formatEnd']);
+            }
+
+            content = content.join('<br>' + data['VerticalSpacer-tag-replacement'] + '<br>');
+            content = '<div style="color: ' + data['Body-colour'] + '; line-height: 0.96">' + content + '</div>';
+            return content;
+        },
+        'NameBack': function(data) {
+            if (data.NameBack + '' == '') {
+                return '';
+            }
+
+            var rotate = '';
+            if (data['NameBack-region'][3] > data['NameBack-region'][2] * 3) {
+                rotate = '; width: 100%; line-height: ' + (data['NameBack-region'][2] - 2) + 'px; -webkit-transform: rotate(180deg); transform: rotate(180deg)';
+            }
+
+            var unique = '';
+            if (data.Unique + '') {
+                unique = '<span style="font-size: ' + updateFontSize(data['Name-pointsize']) + 'em"><span style="font-family: Symbols">u</span> </span>';
+            }
+
+            var content = '<div style="text-align: center' + rotate + '"><span style="color: ' + data['Name-colour'] + '">' + unique + data.NameBack + '</span></div>';
+            return content;
+        },
+        'PortraitBack-portrait-clip': function(data) {
+            var content = '<img src="' + generatedImagesFolder + data.IdRenderer + '.B.jpg" width="100%" height="100%">';
+            return content;
+        },
+        'TypeBack': function(data) {
+            if (data.Type + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center">' + data.Type + '</div>';
+        }
+    }
 
     var containerNames = [];
     for (let key in containerRules) {
@@ -374,6 +434,14 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
     if (data['Option-Body-shape']) {
         data['Sphere-Body-shape'] = data['Option-Body-shape'];
+    }
+
+    if (data['Name-region'] && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
+        data['NameBack-region'] = data['Name-region'];
+    }
+
+    if (data['Type-region'] && (data.TypeRenderer == 'Contract')) {
+        data['TypeBack-region'] = data['Type-region'];
     }
 
     // console.log(data);
@@ -416,6 +484,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         }
     }
 
+    // start here
     var shapeCSS = '';
     if (data.BodyShapeNeededRenderer && data['Sphere-Body-shape'] && data['Body-region']) {
         var shapeWidth = 0;
@@ -446,7 +515,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
     }
 
     var background = (data.TypeRenderer + template + additionalEncounterSets).replace(/ /g, '');
-    var html = fs.readFileSync('template.html') + '';
+    var htmlTemplate = fs.readFileSync('template.html') + '';
     var prefix = 'portrait.';
     var width = 429;
     var height = 600;
@@ -461,7 +530,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         suffix = '.B';
     }
 
-    html = html.replace('{{ TEMPLATE_BACKGROUND }}', background);
+    html = htmlTemplate.replace('{{ TEMPLATE_BACKGROUND }}', background);
     html = html.replace('{{ TEMPLATE_WIDTH }}', width);
     html = html.replace('{{ TEMPLATE_HEIGHT }}', height);
     html = html.replace('{{ CONTAINER_NAMES }}', containerNames);
@@ -471,10 +540,51 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
     if ((doubleSideTypes.indexOf(data.TypeRenderer) > -1) &&
         ((data.TypeRenderer != 'Contract') || (template == 'DoubleSided'))) {
-        background = background.replace(/[1-9]?$/, 'Back');
-        html = fs.readFileSync('template.html') + '';
-        html = html.replace('{{ BACKGROUND }}', background);
-        html = html.replace('{{ CONTAINER_NAMES }}', containerNames);
+        var containerNamesBack = [];
+        for (let key in containerRulesBack) {
+            if (containerRulesBack.hasOwnProperty(key)) {
+                containerNamesBack.push(key);
+            }
+        }
+        if (containerNamesBack.length > 0) {
+            containerNamesBack = "'" + containerNamesBack.join("', '") + "'";
+        }
+        else {
+            containerNamesBack = '';
+        }
+
+        var containersBack = [];
+        for (let key in containerRulesBack) {
+            if (containerRulesBack.hasOwnProperty(key)) {
+                if (data[key + '-region'] && (containerRulesBack[key](data))) {
+                    let shapeDiv = '';
+                    if ((key == 'BodyBack') && data.BodyShapeNeededBackRenderer && data['Sphere-Body-shape']) {
+                        shapeDiv = '<div id="BodyShape"><span></span></div>';
+                    }
+
+                    let content = '';
+                    if (key == 'PortraitBack-portrait-clip') {
+                        content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
+                        data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: hidden; overflow-y: hidden; z-index: -2">' + containerRulesBack[key](data) + '</div>';
+                    }
+                    else if (data[key + '-region'][3] > data[key + '-region'][2] * 3) {
+                        content = '<div id="' + key + '" style="position: absolute; left: ' + (parseInt(data[key + '-region'][0]) + parseInt(data[key + '-region'][2])) + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
+                            data[key + '-region'][3] + 'px; height: ' + data[key + '-region'][2] + 'px; overflow-x: visible; overflow-y: auto; font-size: ' + containerFontSize[key] + 'px; ' +
+                            '-webkit-transform: rotate(90deg); transform: rotate(90deg); -webkit-transform-origin: 0 0 0; transform-origin: 0 0 0">' + shapeDiv + containerRulesBack[key](data) + '</div>';
+                    }
+                    else {
+                        content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
+                        data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: auto; font-size: ' + containerFontSize[key] + 'px">' + shapeDiv +
+                        containerRulesBack[key](data) + '</div>';
+                    }
+
+                    containersBack.push(content);
+                }
+            }
+        }
+
+        backgroundBack = background.replace(/[1-9]?$/, 'Back');
+        html = htmlTemplate.replace('{{ CONTAINER_NAMES }}', containerNamesBack);
         // T.B.D.
         fs.writeFileSync('Output/' + prefix + data.IdRenderer + '.B.html', html);
     }
