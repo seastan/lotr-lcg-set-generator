@@ -1,7 +1,7 @@
 var doubleSideTypes = ['Campaign', 'Contract', 'Nightmare', 'Presentation', 'Quest', 'Rules'];
 var playerTypes = ['Ally', 'Attachment', 'Contract', 'Event', 'Full Art Landscape', 'Full Art Portrait', 'Hero', 'Hero Promo', 'Player Objective', 'Player Side Quest', 'Treasure'];
 var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Objective', 'Player Side Quest'];
-var landscapeTypes = ['Encounter Side Quest', 'Full Art Landscape', 'Player Side Quest', 'Quest'];
+var landscapeTypes = ['Cave', 'Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Full Art Landscape', 'Player Side Quest', 'Quest'];
 
 var optionalTraitTypes = ['Cave', 'Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Player Side Quest'];
 
@@ -1125,16 +1125,28 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					let bodyShapeNeeded = false;
 					if (((cardType == 'Hero') && (cardSphere != 'Neutral')) || (cardType == 'Treasure') ||
 						((['Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Player Side Quest', 'Quest'].indexOf(cardType) > -1) &&
-						((s.get('OptionRight') && (s.get('OptionRight') + '').length) || (s.get('OptionRightBack') && (s.get('OptionRightBack') + '').length)))) {
+						(s.get('OptionRight') && (s.get('OptionRight') + '').length))) {
 						bodyShapeNeeded = true;
 					}
 					s.set('BodyShapeNeededRenderer', bodyShapeNeeded);
+
+					let bodyShapeNeededBack = false;
+					if ((cardType == 'Quest') && s.get('OptionRightBack') && (s.get('OptionRightBack') + '').length) {
+						bodyShapeNeededBack = true;
+					}
+					s.set('BodyShapeNeededBackRenderer', bodyShapeNeededBack);
 				}
 
 				if (cardType == 'Cave') {
 					if (s.get('Rules').search('\\[split\\]') > -1) {
-						s.set('RulesRight', s.get('Rules').split('\\[split\\]')[1].trim());
-						s.set('Rules', s.get('Rules').split('\\[split\\]')[0].trim());
+						if (context == 'renderer') {
+							s.set('RulesRight', s.get('Rules').split('[split]')[1].trim());
+							s.set('Rules', s.get('Rules').split('[split]')[0].trim());
+						}
+						else {
+							s.set('RulesRight', s.get('Rules').split('\\[split\\]')[1].trim());
+							s.set('Rules', s.get('Rules').split('\\[split\\]')[0].trim());
+						}
 					}
 					else {
 						s.set('RulesRight', '');
