@@ -64,7 +64,7 @@ function correct_size(id) {
     }
 
     while ((container.scrollHeight > container.clientHeight + bufferHeight) && (size > minSize)) {
-        console.log(id + ': changed font size from ' + size + ' to ' + (size - 1) + ' px to reduce height');
+        console.log(id + ': changed font size from ' + size + ' to ' + (size - 0.5) + ' px to reduce height');
         size -= 0.5;
         container.style.fontSize = size + 'px';
     }
@@ -72,7 +72,7 @@ function correct_size(id) {
     container.style.overflowY = 'visible';
     container.style.overflowX = 'auto';
     while ((container.scrollWidth > container.clientWidth) && (size > minSize)) {
-        console.log(id + ': changed font size from ' + size + ' to ' + (size - 1) + ' px to reduce width');
+        console.log(id + ': changed font size from ' + size + ' to ' + (size - 0.5) + ' px to reduce width');
         size -= 0.5;
         container.style.fontSize = size + 'px';
     }

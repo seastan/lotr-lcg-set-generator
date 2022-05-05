@@ -278,15 +278,29 @@ function convertTags(value) {
 
 function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
     var containerFontSize = {
+        'Adventure': 12,
+        'AdventureBack': 12,
         'Body': 14,
         'BodyBack': 14,
         'BodyRight': 14,
+        'Cycle': 14,
         'Name': 12,
         'NameBack': 12,
+        'Side': 14,
+        'SideBack': 14,
+        'Subtype': 14,
+        'TraitOut-Trait': 14,
         'Type': 12,
         'TypeBack': 12
     };
     var containerRules = {
+        'Adventure': function(data) {
+            if (data.Adventure + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center">' + data.Adventure + '</div>';
+        },
         'Body': function(data) {
             var content = [];
             if (data.Story + '') {
@@ -310,9 +324,20 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             return content;
         },
         'BodyRight': function(data) {
+            if (data.RulesRight + '' == '') {
+                return '';
+            }
+
             var content = data['RulesRight-format'] + data.RulesRight + data['RulesRight-formatEnd'];
             content = '<div style="color: ' + data['BodyRight-colour'] + '; line-height: 0.96">' + content + '</div>';
             return content;
+        },
+        'Cycle': function(data) {
+            if (data.Cycle + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center; padding-top: 4px">' + data.Cycle + '</div>';
         },
         'Name': function(data) {
             if (data.Name + '' == '') {
@@ -340,6 +365,29 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             var content = '<img src="' + generatedImagesFolder + data.IdRenderer + suffix + '.jpg" width="100%" height="100%">';
             return content;
         },
+        'Side': function(data) {
+            if (data.SideA + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center; padding-top: 2px">' + data.SideA + '</div>';
+        },
+        'Subtype': function(data) {
+            if (data.Subtype + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center; padding-top: 4px">' + data.Subtype + '</div>';
+        },
+        'TraitOut-Trait': function(data) {
+            if (data.Trait + '' == '') {
+                return '';
+            }
+
+            var content = data['Trait-format'] + data.Trait + data['Trait-formatEnd'];
+            content = '<div style="text-align: center; color: ' + data['Body-colour'] + '; line-height: 0.96">' + content + '</div>';
+            return content;
+        },
         'Type': function(data) {
             if (data.Type + '' == '') {
                 return '';
@@ -350,6 +398,13 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
     };
 
     var containerRulesBack = {
+        'AdventureBack': function(data) {
+            if (data.Adventure + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center">' + data.Adventure + '</div>';
+        },
         'BodyBack': function(data) {
             var content = [];
             if (data.StoryBack + '') {
@@ -390,6 +445,13 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             var content = '<img src="' + generatedImagesFolder + data.IdRenderer + '.B.jpg" width="100%" height="100%">';
             return content;
         },
+        'SideBack': function(data) {
+            if (data.SideB + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center; padding-top: 2px">' + data.SideB + '</div>';
+        },
         'TypeBack': function(data) {
             if (data.Type + '' == '') {
                 return '';
@@ -397,20 +459,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
             return '<div style="text-align: center">' + data.Type + '</div>';
         }
-    }
-
-    var containerNames = [];
-    for (let key in containerRules) {
-        if (containerRules.hasOwnProperty(key)) {
-            containerNames.push(key);
-        }
-    }
-    if (containerNames.length > 0) {
-        containerNames = "'" + containerNames.join("', '") + "'";
-    }
-    else {
-        containerNames = '';
-    }
+    };
 
     var data = settings.settings;
     for (let key in data) {
@@ -436,8 +485,16 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         data['Sphere-Body-shape'] = data['Option-Body-shape'];
     }
 
+    if (data['Adventure-region'] && (data.TypeRenderer == 'Quest')) {
+        data['AdventureBack-region'] = data['Adventure-region'];
+    }
+
     if (data['Name-region'] && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
         data['NameBack-region'] = data['Name-region'];
+    }
+
+    if (data['Side-region'] && (data.TypeRenderer == 'Contract')) {
+        data['SideBack-region'] = data['Side-region'];
     }
 
     if (data['Type-region'] && (data.TypeRenderer == 'Contract')) {
@@ -455,6 +512,21 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         additionalEncounterSets = data.AdditionalEncounterSetsLength;
     }
 
+    var htmlTemplate = fs.readFileSync('template.html') + '';
+
+    var containerNames = [];
+    for (let key in containerRules) {
+        if (containerRules.hasOwnProperty(key)) {
+            containerNames.push(key);
+        }
+    }
+    if (containerNames.length > 0) {
+        containerNames = "'" + containerNames.join("', '") + "'";
+    }
+    else {
+        containerNames = '';
+    }
+
     var containers = [];
     for (let key in containerRules) {
         if (containerRules.hasOwnProperty(key)) {
@@ -467,7 +539,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 let content = '';
                 if (key == 'Portrait-portrait-clip') {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
-                    data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: hidden; overflow-y: hidden; z-index: -2">' + containerRules[key](data) + '</div>';
+                        data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: hidden; overflow-y: hidden; z-index: -2">' + containerRules[key](data) + '</div>';
                 }
                 else if (data[key + '-region'][3] > data[key + '-region'][2] * 3) {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + (parseInt(data[key + '-region'][0]) + parseInt(data[key + '-region'][2])) + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
@@ -476,7 +548,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 }
                 else {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
-                    data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: auto; font-size: ' + containerFontSize[key] + 'px">' + shapeDiv + containerRules[key](data) + '</div>';
+                        data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: auto; font-size: ' + containerFontSize[key] + 'px">' + shapeDiv + containerRules[key](data) + '</div>';
                 }
 
                 containers.push(content);
@@ -484,12 +556,11 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         }
     }
 
-    // start here
     var shapeCSS = '';
     if (data.BodyShapeNeededRenderer && data['Sphere-Body-shape'] && data['Body-region']) {
-        var shapeWidth = 0;
-        var shapeAlignment = 'left';
-        var shapeOppositeAlignment = 'right';
+        let shapeWidth = 0;
+        let shapeAlignment = 'left';
+        let shapeOppositeAlignment = 'right';
         if (data['Sphere-Body-shape'][2] > 0) {
             shapeWidth = data['Sphere-Body-shape'][2];
         }
@@ -498,8 +569,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             shapeAlignment = 'right';
         }
 
-        var shapeHeight = data['Body-region'][1] + data['Body-region'][3] - data['Sphere-Body-shape'][1] + 12;
-        var shapeTop = data['Body-region'][3] - shapeHeight;
+        let shapeHeight = data['Body-region'][1] + data['Body-region'][3] - data['Sphere-Body-shape'][1] + 12;
+        let shapeTop = data['Body-region'][3] - shapeHeight;
         shapeCSS = '#BodyShape:before {\n' +
             '    content: "";\n' +
             '    display: block;\n' +
@@ -515,7 +586,6 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
     }
 
     var background = (data.TypeRenderer + template + additionalEncounterSets).replace(/ /g, '');
-    var htmlTemplate = fs.readFileSync('template.html') + '';
     var prefix = 'portrait.';
     var width = 429;
     var height = 600;
@@ -530,11 +600,11 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         suffix = '.B';
     }
 
-    html = htmlTemplate.replace('{{ TEMPLATE_BACKGROUND }}', background);
+    var html = htmlTemplate.replace('{{ TEMPLATE_BACKGROUND }}', background);
     html = html.replace('{{ TEMPLATE_WIDTH }}', width);
     html = html.replace('{{ TEMPLATE_HEIGHT }}', height);
-    html = html.replace('{{ CONTAINER_NAMES }}', containerNames);
     html = html.replace('{{ SHAPE_CSS }}', shapeCSS);
+    html = html.replace('{{ CONTAINER_NAMES }}', containerNames);
     html = html.replace('{{ CONTAINERS }}', containers.join('\n'));
     fs.writeFileSync('Output/' + prefix + data.IdRenderer + suffix + '.html', html);
 
@@ -565,7 +635,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                     let content = '';
                     if (key == 'PortraitBack-portrait-clip') {
                         content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
-                        data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: hidden; overflow-y: hidden; z-index: -2">' + containerRulesBack[key](data) + '</div>';
+                            data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: hidden; overflow-y: hidden; z-index: -2">' + containerRulesBack[key](data) + '</div>';
                     }
                     else if (data[key + '-region'][3] > data[key + '-region'][2] * 3) {
                         content = '<div id="' + key + '" style="position: absolute; left: ' + (parseInt(data[key + '-region'][0]) + parseInt(data[key + '-region'][2])) + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
@@ -574,8 +644,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                     }
                     else {
                         content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
-                        data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: auto; font-size: ' + containerFontSize[key] + 'px">' + shapeDiv +
-                        containerRulesBack[key](data) + '</div>';
+                            data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: auto; font-size: ' + containerFontSize[key] + 'px">' + shapeDiv +
+                            containerRulesBack[key](data) + '</div>';
                     }
 
                     containersBack.push(content);
@@ -583,10 +653,54 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             }
         }
 
-        backgroundBack = background.replace(/[1-9]?$/, 'Back');
-        html = htmlTemplate.replace('{{ CONTAINER_NAMES }}', containerNamesBack);
-        // T.B.D.
-        fs.writeFileSync('Output/' + prefix + data.IdRenderer + '.B.html', html);
+        shapeCSS = '';
+        if (data.BodyShapeNeededBackRenderer && data['Sphere-Body-shape'] && data['BodyBack-region']) {
+            let shapeWidth = 0;
+            let shapeAlignment = 'left';
+            let shapeOppositeAlignment = 'right';
+            if (data['Sphere-Body-shape'][2] > 0) {
+                shapeWidth = data['Sphere-Body-shape'][2];
+            }
+            else if (data['Sphere-Body-shape'][3] > 0) {
+                shapeWidth = data['Sphere-Body-shape'][3];
+                shapeAlignment = 'right';
+            }
+
+            let shapeHeight = data['BodyBack-region'][1] + data['BodyBack-region'][3] - data['Sphere-Body-shape'][1] + 12;
+            let shapeTop = data['BodyBack-region'][3] - shapeHeight;
+            shapeCSS = '#BodyShape:before {\n' +
+                '    content: "";\n' +
+                '    display: block;\n' +
+                '    float: ' + shapeOppositeAlignment + ';\n' +
+                '    height: ' + shapeTop + 'px;\n' +
+                '}\n' +
+                '#BodyShape span {\n' +
+                '    float: ' + shapeAlignment + ';\n' +
+                '    clear: both;\n' +
+                '    width: ' + shapeWidth + 'px;\n' +
+                '    height: ' + shapeHeight + 'px;\n' +
+                '}';
+        }
+
+        background = (data.TypeRenderer + template + 'Back').replace(/ /g, '');
+        prefix = 'portrait.';
+        width = 429;
+        height = 600;
+        if (landscapeTypes.indexOf(data.TypeRenderer) > -1) {
+            prefix = 'landscape.';
+            width = 600;
+            height = 429;
+        }
+
+        suffix = '.B';
+
+        html = htmlTemplate.replace('{{ TEMPLATE_BACKGROUND }}', background);
+        html = html.replace('{{ TEMPLATE_WIDTH }}', width);
+        html = html.replace('{{ TEMPLATE_HEIGHT }}', height);
+        html = html.replace('{{ SHAPE_CSS }}', shapeCSS);
+        html = html.replace('{{ CONTAINER_NAMES }}', containerNamesBack);
+        html = html.replace('{{ CONTAINERS }}', containersBack.join('\n'));
+        fs.writeFileSync('Output/' + prefix + data.IdRenderer + suffix + '.html', html);
     }
 }
 
