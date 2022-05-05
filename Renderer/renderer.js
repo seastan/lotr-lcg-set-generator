@@ -286,6 +286,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         'Cycle': 14,
         'Name': 12,
         'NameBack': 12,
+        'OptionRight': 12,
+        'OptionRightBack': 12,
         'Side': 14,
         'SideBack': 14,
         'Subtype': 14,
@@ -356,6 +358,13 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
             var content = '<div style="text-align: center' + rotate + '"><span style="color: ' + data['Name-colour'] + '">' + unique + data.Name + '</span></div>';
             return content;
+        },
+        'OptionRight': function(data) {
+            if (data.OptionRight + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center; padding-top: 4px">' + data.OptionRight + '</div>';
         },
         'Portrait-portrait-clip': function(data) {
             var suffix = '';
@@ -441,6 +450,13 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             var content = '<div style="text-align: center' + rotate + '"><span style="color: ' + data['Name-colour'] + '">' + unique + data.NameBack + '</span></div>';
             return content;
         },
+        'OptionRightBack': function(data) {
+            if (data.OptionRightBack + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center; padding-top: 4px">' + data.OptionRightBack + '</div>';
+        },
         'PortraitBack-portrait-clip': function(data) {
             var content = '<img src="' + generatedImagesFolder + data.IdRenderer + '.B.jpg" width="100%" height="100%">';
             return content;
@@ -487,6 +503,14 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
     if (data['Adventure-region'] && (data.TypeRenderer == 'Quest')) {
         data['AdventureBack-region'] = data['Adventure-region'];
+    }
+
+    if (data['OptionRight-region'] && (data.TypeRenderer == 'Quest')) {
+        data['OptionRightBack-region'] = data['OptionRight-region'];
+    }
+
+    if (data['OptionRightDecoration-region'] && (data.TypeRenderer == 'Quest')) {
+        data['OptionRightBackDecoration-region'] = data['OptionRightDecoration-region'];
     }
 
     if (data['Name-region'] && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
@@ -540,6 +564,14 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 if (key == 'Portrait-portrait-clip') {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
                         data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: hidden; overflow-y: hidden; z-index: -2">' + containerRules[key](data) + '</div>';
+                }
+                else if (key == 'OptionRight') {
+                    content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
+                        data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: auto; z-index: 1; font-size: ' + containerFontSize[key] + 'px">' +
+                        shapeDiv + containerRules[key](data) + '</div>';
+                    content += '<div style="position: absolute; left: ' + data[key + 'Decoration-region'][0] + 'px; top: ' + data[key + 'Decoration-region'][1] + 'px; width: ' +
+                        data[key + 'Decoration-region'][2] + 'px; height: ' + data[key + 'Decoration-region'][3] + 'px; overflow-x: visible; overflow-y: visible">' +
+                        '<img src="' + imagesFolder + 'victorydecoration.png" width="82" height="20"></div>';
                 }
                 else if (data[key + '-region'][3] > data[key + '-region'][2] * 3) {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + (parseInt(data[key + '-region'][0]) + parseInt(data[key + '-region'][2])) + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
@@ -636,6 +668,14 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                     if (key == 'PortraitBack-portrait-clip') {
                         content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
                             data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: hidden; overflow-y: hidden; z-index: -2">' + containerRulesBack[key](data) + '</div>';
+                    }
+                    else if (key == 'OptionRightBack') {
+                        content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
+                            data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: auto; z-index: 1; font-size: ' + containerFontSize[key] + 'px">' + shapeDiv +
+                            containerRulesBack[key](data) + '</div>';
+                        content += '<div style="position: absolute; left: ' + data[key + 'Decoration-region'][0] + 'px; top: ' + data[key + 'Decoration-region'][1] + 'px; width: ' +
+                            data[key + 'Decoration-region'][2] + 'px; height: ' + data[key + 'Decoration-region'][3] + 'px; overflow-x: visible; overflow-y: visible">' +
+                            '<img src="' + imagesFolder + 'victorydecoration.png" width="82" height="20"></div>';
                     }
                     else if (data[key + '-region'][3] > data[key + '-region'][2] * 3) {
                         content = '<div id="' + key + '" style="position: absolute; left: ' + (parseInt(data[key + '-region'][0]) + parseInt(data[key + '-region'][2])) + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
