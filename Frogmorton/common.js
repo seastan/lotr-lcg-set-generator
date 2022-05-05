@@ -322,8 +322,10 @@ bodyRightNoTraitRegion['Cave'] = '347,283,171,80';
 
 var bodyBackRegion = {};
 bodyBackRegion['Campaign'] = '64,60,285,443';
+bodyBackRegion['Contract'] = '65,313,283,176';
 bodyBackRegion['Nightmare'] = '54,55,305,439';
 bodyBackRegion['Quest'] = '51,249,461,114';
+bodyBackRegion['Rules'] = '48,73,317,418';
 
 var nameRegion = {};
 nameRegion['Ally'] = '100,329,213,25';
