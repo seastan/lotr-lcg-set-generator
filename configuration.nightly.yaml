@@ -10,7 +10,7 @@ gimp_console_path: C:\Program Files\GIMP 2\bin\gimp-console-2.10.exe
 # Path to ImageMagick executable
 magick_path: C:\Program Files\ImageMagick-7.0.10-Q16-HDRI\magick.exe
 
-# Path to id_rsa key to upload files to DragnCards
+# Path to id_rsa key to upload files to DragnCards (may be empty)
 dragncards_id_rsa_path: id_rsa
 
 # Path to remote logs folder (may be empty)
@@ -101,26 +101,26 @@ frenchdb_csv: false
 # Creating CSV files for the Spanish database susurrosdelbosqueviejo.com (true or false)
 spanishdb_csv: false
 
-# Creating artwork for DragnCards proxy images
+# Creating artwork for DragnCards proxy images (true or false)
 renderer_artwork: true
 
-# Creating DragnCards proxy images
+# Creating DragnCards proxy images (true or false)
 renderer: false
 
-# Uploading outputs to DragnCards
+# Uploading outputs to DragnCards (true or false)
 upload_dragncards: true
 
-# DragnCards hostname (username@hostname)
-dragncards_hostname: ***
+# DragnCards hostname: username@hostname (may be empty)
+dragncards_hostname: 
 
-# Updating ringsdb.com
+# Updating ringsdb.com (true or false)
 update_ringsdb: false
 
-# ringsdb.com URL
+# ringsdb.com URL (may be empty)
 ringsdb_url: 
 
-# ringsdb.com session id: <PHPSESSID>|<REMEMBERME>
-ringsdb_sessionid:
+# ringsdb.com session id: <PHPSESSID>|<REMEMBERME> (may be empty)
+ringsdb_sessionid: 
 
 # List of image outputs
 outputs:

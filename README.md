@@ -133,7 +133,7 @@ for details).
   - `artwork_path`: local path to the artwork folder (don't use for that any existing folder in this repo)
   - `gimp_console_path`: path to GIMP console executable
   - `magick_path`: path to ImageMagick executable
-  - `dragncards_id_rsa_path`: path to id_rsa key to upload files to DragnCards
+  - `dragncards_id_rsa_path`: path to id_rsa key to upload files to DragnCards (may be empty)
   - `remote_logs_path`: path to remote logs folder (may be empty)
   - `octgn_set_xml_destination_path`: path to OCTGN `set.xml` destination folder (may be empty)
   - `octgn_set_xml_scratch_destination_path`: path to OCTGN `set.xml` scratch destination folder (may be empty)
@@ -164,10 +164,10 @@ for details).
   - `renderer_artwork`: creating artwork for DragnCards proxy images (true or false)
   - `renderer`: creating DragnCards proxy images (true or false)
   - `upload_dragncards`: uploading outputs to DragnCards (true or false)
-  - `dragncards_hostname`: DragnCards hostname (username@hostname)
+  - `dragncards_hostname`: DragnCards hostname: username@hostname (may be empty)
   - `update_ringsdb`: updating ringsdb.com (true or false)
-  - `ringsdb_url`: ringsdb.com URL
-  - `ringsdb_sessionid`: ringsdb.com session ID
+  - `ringsdb_url`: ringsdb.com URL (may be empty)
+  - `ringsdb_sessionid`: ringsdb.com session ID: <PHPSESSID>|<REMEMBERME> (may be empty)
   - `outputs`: list of image outputs for each language (if you added or uncommented new outputs, you also need to set `reprocess_all` to `true`)
 
 For debugging purposes, you may add an additional value:
