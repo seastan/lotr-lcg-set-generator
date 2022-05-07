@@ -164,10 +164,10 @@ for details).
   - `renderer_artwork`: creating artwork for DragnCards proxy images (true or false)
   - `renderer`: creating DragnCards proxy images (true or false)
   - `upload_dragncards`: uploading outputs to DragnCards (true or false)
-  - `dragncards_hostname`: DragnCards hostname: username@hostname (may be empty)
+  - `dragncards_hostname`: DragnCards hostname: `username@hostname` (may be empty)
   - `update_ringsdb`: updating ringsdb.com (true or false)
   - `ringsdb_url`: ringsdb.com URL (may be empty)
-  - `ringsdb_sessionid`: ringsdb.com session ID: <PHPSESSID>|<REMEMBERME> (may be empty)
+  - `ringsdb_sessionid`: ringsdb.com session ID: `<PHPSESSID>|<REMEMBERME>` (may be empty)
   - `outputs`: list of image outputs for each language (if you added or uncommented new outputs, you also need to set `reprocess_all` to `true`)
 
 For debugging purposes, you may add an additional value:
