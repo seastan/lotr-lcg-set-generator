@@ -31,19 +31,22 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
         else:
             conf = lotr.read_conf()
 
+    force_reprocessing = False
     if os.path.exists(lotr.REPROCESS_ALL_PATH):
         conf['reprocess_all'] = True
+        force_reprocessing = True
         logging.info('Setting "reprocess_all" to "true" for this run')
         os.remove(lotr.REPROCESS_ALL_PATH)
 
     if (not conf['reprocess_all'] and conf['reprocess_all_on_error'] and
             os.path.exists(lotr.PIPELINE_STARTED_PATH)):
         conf['reprocess_all'] = True
+        force_reprocessing = True
         logging.info('The previous update did not succeed, setting '
                      '"reprocess_all" to "true" for this run')
 
     sheet_changes, scratch_changes = lotr.download_sheet(conf)
-    if not conf['exit_if_no_spreadsheet_changes']:
+    if force_reprocessing or not conf['exit_if_no_spreadsheet_changes']:
         sheet_changes = True
         scratch_changes = True
 
