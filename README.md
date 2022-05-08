@@ -470,6 +470,7 @@ List of available sphere values:
 **Flags**
 
 - `AdditionalCopies`
+- `Asterisk`
 - `NoArtist`
 - `NoCopyright`
 - `NoTraits`

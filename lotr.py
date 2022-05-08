@@ -242,11 +242,11 @@ CARD_TYPES_ENCOUNTER_SET_NUMBER = {'Encounter Side Quest', 'Enemy', 'Location',
                                    'Objective', 'Objective Ally',
                                    'Objective Hero', 'Objective Location',
                                    'Ship Enemy', 'Ship Objective', 'Treachery'}
-CARD_TYPES_FLAGS = {'Promo': {'Hero'},
-                    'NoTraits':
+CARD_TYPES_FLAGS = {'NoTraits':
                     {'Ally', 'Enemy', 'Hero', 'Location', 'Objective Ally',
                      'Objective Hero', 'Objective Location', 'Ship Enemy',
                      'Ship Objective', 'Treasure'},
+                    'Promo': {'Hero'},
                     'BlueRing':
                     {'Encounter Side Quest', 'Enemy', 'Location', 'Objective',
                      'Objective Ally', 'Objective Hero', 'Objective Location',
@@ -263,12 +263,12 @@ CARD_TYPES_FLAGS = {'Promo': {'Hero'},
                     {'Encounter Side Quest', 'Enemy', 'Location', 'Objective',
                      'Objective Ally', 'Objective Hero', 'Objective Location',
                      'Ship Enemy', 'Ship Objective', 'Treachery'}}
-CARD_TYPES_FLAGS_BACK = {'Promo': {'Hero'},
-                         'NoTraits':
+CARD_TYPES_FLAGS_BACK = {'NoTraits':
                          {'Ally', 'Enemy', 'Hero', 'Location',
                           'Objective Ally', 'Objective Hero',
                           'Objective Location', 'Ship Enemy', 'Ship Objective',
                           'Treasure'},
+                         'Promo': {'Hero'},
                          'BlueRing':
                          {'Encounter Side Quest', 'Enemy', 'Location',
                           'Objective', 'Objective Ally', 'Objective Hero',
@@ -289,9 +289,13 @@ CARD_TYPES_FLAGS_BACK = {'Promo': {'Hero'},
                           'Objective', 'Objective Ally', 'Objective Hero',
                           'Objective Location', 'Ship Enemy', 'Ship Objective',
                           'Treachery'}}
-CARD_TYPES_NO_FLAGS = {'NoArtist': {'Presentation', 'Rules'},
+CARD_TYPES_NO_FLAGS = {'Asterisk': {'Full Art Landscape', 'Full Art Portrait',
+                                    'Presentation', 'Rules'},
+                       'NoArtist': {'Presentation', 'Rules'},
                        'NoCopyright': {'Presentation', 'Rules'}}
 CARD_TYPES_NO_FLAGS_BACK = {
+    'Asterisk': {'Campaign', 'Full Art Landscape', 'Full Art Portrait',
+                 'Nightmare', 'Presentation', 'Rules'},
     'NoArtist': {'Campaign', 'Nightmare', 'Presentation', 'Rules'},
     'NoCopyright': {'Campaign', 'Nightmare', 'Presentation', 'Rules'}}
 CARD_TYPES_NO_ARTIST = {'Presentation', 'Rules'}
@@ -323,8 +327,8 @@ CARD_TYPES_NIGHTMARE = {'Encounter Side Quest', 'Enemy', 'Location',
 CARD_TYPES_NO_DISCORD_CHANNEL = {'Full Art Landscape', 'Full Art Portrait',
                                  'Rules', 'Presentation'}
 
-FLAGS = {'BlueRing', 'GreenRing', 'PurpleRing', 'RedRing', 'NoArtist',
-         'NoCopyright', 'NoTraits', 'Promo', 'AdditionalCopies'}
+FLAGS = {'AdditionalCopies', 'Asterisk', 'NoArtist', 'NoCopyright', 'NoTraits',
+         'Promo', 'BlueRing', 'GreenRing', 'PurpleRing', 'RedRing'}
 RING_FLAGS = {'BlueRing', 'GreenRing', 'PurpleRing', 'RedRing'}
 SPHERES = set()
 SPHERES_CAMPAIGN = {'Setup'}
@@ -348,7 +352,7 @@ MAGICK_COMMAND_LOW = '"{}" mogrify -resize 600x600 -format jpg "{}{}*.png"'
 MAGICK_COMMAND_MBPRINT_PDF = '"{}" convert "{}{}*o.jpg" "{}"'
 MAGICK_COMMAND_RULES_PDF = '"{}" convert "{}{}*.png" "{}"'
 
-JPG_PREVIEW_MIN_SIZE = 40000
+JPG_PREVIEW_MIN_SIZE = 30000
 JPG_300_MIN_SIZE = 100000
 JPG_480_MIN_SIZE = 150000
 JPG_800_MIN_SIZE = 1000000

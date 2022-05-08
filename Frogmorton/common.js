@@ -65,6 +65,32 @@ encounterSet4PortraitRegion['Quest'] = '378,213,20,20';
 var encounterSet5PortraitRegion = {};
 encounterSet5PortraitRegion['Quest'] = '354,213,20,20';
 
+var asteriskRegion = {};
+asteriskRegion['Ally'] = '372,526,8,8';
+asteriskRegion['Attachment'] = '374,526,8,8';
+asteriskRegion['Campaign'] = '374,526,8,8';
+asteriskRegion['Cave'] = '530,376,8,8';
+asteriskRegion['Contract'] = '374,526,8,8';
+asteriskRegion['Encounter Side Quest'] = '532,376,8,8';
+asteriskRegion['Encounter Side Quest SmallTextArea'] = '532,376,8,8';
+asteriskRegion['Enemy'] = '374,526,8,8';
+asteriskRegion['Event'] = '374,526,8,8';
+asteriskRegion['Hero'] = '374,526,8,8';
+asteriskRegion['Hero Promo'] = '352,526,8,8';
+asteriskRegion['Location'] = '374,526,8,8';
+asteriskRegion['Nightmare'] = '380,526,8,8';
+asteriskRegion['Objective'] = '364,526,8,8';
+asteriskRegion['Objective Ally'] = '364,526,8,8';
+asteriskRegion['Objective Hero'] = '364,526,8,8';
+asteriskRegion['Objective Location'] = '364,526,8,8';
+asteriskRegion['Player Objective'] = '364,526,8,8';
+asteriskRegion['Player Side Quest'] = '530,376,8,8';
+asteriskRegion['Quest'] = '530,376,8,8';
+asteriskRegion['Ship Enemy'] = '374,526,8,8';
+asteriskRegion['Ship Objective'] = '364,526,8,8';
+asteriskRegion['Treachery'] = '374,526,8,8';
+asteriskRegion['Treasure'] = '378,526,8,8';
+
 var collectionInfoRegion = {};
 collectionInfoRegion['Ally'] = '350,527,20,15';
 collectionInfoRegion['Attachment'] = '350,527,20,15';
@@ -1104,6 +1130,13 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				else {
 					s.set('NoArtist', 0);
 				}
+				if (flags.indexOf('Asterisk') > -1) {
+					s.set('Asterisk', 1);
+				}
+				else {
+					s.set('Asterisk', 0);
+				}
+
 				if (flags.indexOf('NoArtistBack') > -1) {
 					s.set('NoArtistBack', 1);
 				}
@@ -1121,6 +1154,12 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				}
 				else {
 					s.set('NoCopyrightBack', 0);
+				}
+				if (flags.indexOf('AsteriskBack') > -1) {
+					s.set('AsteriskBack', 1);
+				}
+				else {
+					s.set('AsteriskBack', 0);
 				}
 
 				if (context == 'renderer') {
@@ -1604,6 +1643,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					['CollectionInfo-region', collectionInfoRegion],
 					['PageIn-region', pageInRegion],
 					['Side-region', sideRegion],
+					['Asterisk-region', asteriskRegion],
 					['GameName-portrait-clip-region', gameNamePortraitRegion],
 					['Name-portrait-clip-region', namePortraitRegion],
 					['EncounterSet1-portrait-clip-region', encounterSet1PortraitRegion],
