@@ -284,10 +284,13 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         'BodyBack': 14,
         'BodyRight': 14,
         'Cycle': 14,
+        'EncounterSetNumber': 11,
         'Name': 12,
         'NameBack': 12,
         'OptionRight': 12,
         'OptionRightBack': 12,
+        'PageIn': 11,
+        'PageInBack': 11,
         'Side': 14,
         'SideBack': 14,
         'Subtype': 14,
@@ -341,6 +344,17 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
             return '<div style="text-align: center; padding-top: 4px">' + data.Cycle + '</div>';
         },
+        'EncounterSetNumber': function(data) {
+            if (data.EncounterSetNumberOverwrite + '' != '') {
+                return '<div style="text-align: center; color: #FFFFFF">' + data['EncounterSetNumber-format'] + data.EncounterSetNumberOverwrite + data['EncounterSetNumber-formatEnd'] + '</div>';
+            }
+
+            if (parseInt(data.EncounterSetNumber) == 0) {
+                return '';
+            }
+
+            return '<div style="text-align: center; color: #FFFFFF">' + data['EncounterSetNumber-format'] + data.EncounterSetNumber + '/' + data.EncounterSetTotal + data['EncounterSetNumber-formatEnd'] + '</div>';
+        },
         'Name': function(data) {
             if (data.Name + '' == '') {
                 return '';
@@ -365,6 +379,13 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             }
 
             return '<div style="text-align: center; padding-top: 4px">' + data.OptionRight + '</div>';
+        },
+        'PageIn': function(data) {
+            if (parseInt(data.PageNumber) == 0) {
+                return '';
+            }
+
+            return '<div style="text-align: right">' + data['PageIn-format'] + 'Page ' + data.PageNumber + '/' + data.PageTotal + data['PageIn-formatEnd'] + '</div>';
         },
         'Portrait-portrait-clip': function(data) {
             var suffix = '';
@@ -457,6 +478,13 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
             return '<div style="text-align: center; padding-top: 4px">' + data.OptionRightBack + '</div>';
         },
+        'PageInBack': function(data) {
+            if (parseInt(data.PageNumberBack) == 0) {
+                return '';
+            }
+
+            return '<div style="text-align: right">' + data['PageIn-format'] + 'Page ' + data.PageNumberBack + '/' + data.PageTotalBack + data['PageIn-formatEnd'] + '</div>';
+        },
         'PortraitBack-portrait-clip': function(data) {
             var content = '<img src="' + generatedImagesFolder + data.IdRenderer + '.B.jpg" width="100%" height="100%">';
             return content;
@@ -515,6 +543,10 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
     if (data['Name-region'] && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
         data['NameBack-region'] = data['Name-region'];
+    }
+
+    if (data['PageIn-region'] && (data.TypeRenderer == 'Rules')) {
+        data['PageInBack-region'] = data['PageIn-region'];
     }
 
     if (data['Side-region'] && (data.TypeRenderer == 'Contract')) {
