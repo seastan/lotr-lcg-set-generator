@@ -280,9 +280,17 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
     var containerFontSize = {
         'Adventure': 12,
         'AdventureBack': 12,
+        'Artist': 11,
+        'ArtistBack': 11,
         'Body': 14,
         'BodyBack': 14,
         'BodyRight': 14,
+        'CollectionInfo': 11,
+        'CollectionInfoBack': 11,
+        'CollectionNumber': 11,
+        'CollectionNumberBack': 11,
+        'Copyright': 11,
+        'CopyrightBack': 11,
         'Cycle': 14,
         'EncounterSetNumber': 11,
         'Name': 12,
@@ -305,6 +313,25 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             }
 
             return '<div style="text-align: center">' + data.Adventure + '</div>';
+        },
+        'Artist': function(data) {
+            if (data.Artist + '' == '') {
+                return '';
+            }
+
+            if (parseInt(data.NoArtist) == 1) {
+                return '';
+            }
+
+            return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['Artist-region'][3] + 'px">' + data['Bottom-format'] + data['LRL-IllustratorShort'] + ' ' + data.Artist + data['Bottom-formatEnd'] + '</div>';
+        },
+        'Asterisk': function(data) {
+            if (parseInt(data.Asterisk) == 0) {
+                return '';
+            }
+
+            var content = '<img src="' + imagesFolder + 'asterisk.png" width="9" height="9">';
+            return content;
         },
         'Body': function(data) {
             var content = [];
@@ -337,12 +364,54 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             content = '<div style="color: ' + data['BodyRight-colour'] + '; line-height: 0.96">' + content + '</div>';
             return content;
         },
+        'Collection-portrait-clip': function(data) {
+            if (data['Collection-external-path'] + '' == '') {
+                return '';
+            }
+
+            var content = '<img src="' + data['Collection-external-path'] + '" width="14" height="14">';
+            return content;
+        },
+        'CollectionInfo': function(data) {
+            if (data.CollectionInfo + '' == '') {
+                return '';
+            }
+
+            return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionInfo-region'][3] + 'px">' + data['Bottom-format'] + data.CollectionInfo + data['Bottom-formatEnd'] + '</div>';
+        },
+        'CollectionNumber': function(data) {
+            if ((data.CollectionNumberCustom + '' == '') && (data.CollectionNumberCustomOverwrite + '' == '')) {
+                return '';
+            }
+
+            return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionNumber-region'][3] + 'px">' + data['Bottom-format'] +
+                (data.CollectionNumberCustomOverwrite + '' || data.CollectionNumberCustom) + data['Bottom-formatEnd'] + '</div>';
+        },
+        'Copyright': function(data) {
+            if (data.Copyright + '' == '') {
+                return '';
+            }
+
+            if (parseInt(data.NoCopyright) == 1) {
+                return '';
+            }
+
+            return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['Copyright-region'][3] + 'px">' + data['Bottom-format'] + data.Copyright + data['Bottom-formatEnd'] + '</div>';
+        },
         'Cycle': function(data) {
             if (data.Cycle + '' == '') {
                 return '';
             }
 
             return '<div style="text-align: center; padding-top: 4px">' + data.Cycle + '</div>';
+        },
+        'EncounterSet-portrait-clip': function(data) {
+            if (data['EncounterSet-external-path'] + '' == '') {
+                return '';
+            }
+
+            var content = '<img src="' + data['EncounterSet-external-path'] + '" width="49" height="49">';
+            return content;
         },
         'EncounterSetNumber': function(data) {
             if (data.EncounterSetNumberOverwrite + '' != '') {
@@ -385,7 +454,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="text-align: right">' + data['PageIn-format'] + 'Page ' + data.PageNumber + '/' + data.PageTotal + data['PageIn-formatEnd'] + '</div>';
+            return '<div style="text-align: right">' + data['PageIn-format'] + data['LRL-Page'] + ' ' + data.PageNumber + data['LRL-PageOf'] + data.PageTotal + data['PageIn-formatEnd'] + '</div>';
         },
         'Portrait-portrait-clip': function(data) {
             var suffix = '';
@@ -395,12 +464,27 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             var content = '<img src="' + generatedImagesFolder + data.IdRenderer + suffix + '.jpg" width="100%" height="100%">';
             return content;
         },
+        'Progress': function(data) {
+            if (data.Progress + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center; color: #C36902; font-family: Vafthrudnir; font-size: 27px; width: ' + data['Progress-region'][2] + 'px">' + data.Progress + '</div>';
+        },
         'Side': function(data) {
             if (data.SideA + '' == '') {
                 return '';
             }
 
             return '<div style="text-align: center; padding-top: 2px">' + data.SideA + '</div>';
+        },
+        'Stage': function(data) {
+            if ((data.Stage + '' == '') || (data.StageLetter + '' == '')) {
+                return '';
+            }
+
+            return '<div style="text-align: center; color: #53B2C5; font-family: Vafthrudnir; width: ' + data['Stage-region'][2] + 'px"><span style="vertical-align: middle; display: inline-block; font-size: 48px">' + data.Stage +
+                '</span><span style="vertical-align: middle; display: inline-block; font-size: 24px; padding-bottom: 4px; padding-right: 4px">' + data.StageLetter + '</span></div>';
         },
         'Subtype': function(data) {
             if (data.Subtype + '' == '') {
@@ -435,6 +519,26 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
             return '<div style="text-align: center">' + data.Adventure + '</div>';
         },
+        'ArtistBack': function(data) {
+            if ((data.ArtistBack + '' == '') && (data.Artist + '' == '')) {
+                return '';
+            }
+
+            if (parseInt(data.NoArtistBack) == 1) {
+                return '';
+            }
+
+            return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['ArtistBack-region'][3] + 'px">' + data['Bottom-format'] + data['LRL-IllustratorShort'] +
+                ' ' + (data.ArtistBack + '' || data.Artist) + data['Bottom-formatEnd'] + '</div>';
+        },
+        'AsteriskBack': function(data) {
+            if (parseInt(data.AsteriskBack) == 0) {
+                return '';
+            }
+
+            var content = '<img src="' + imagesFolder + 'asterisk.png" width="9" height="9">';
+            return content;
+        },
         'BodyBack': function(data) {
             var content = [];
             if (data.StoryBack + '') {
@@ -451,6 +555,48 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
             content = content.join('<br>' + data['VerticalSpacer-tag-replacement'] + '<br>');
             content = '<div style="color: ' + data['Body-colour'] + '; line-height: 0.96">' + content + '</div>';
+            return content;
+        },
+        'CollectionBack-portrait-clip': function(data) {
+            if (data['Collection-external-path'] + '' == '') {
+                return '';
+            }
+
+            var content = '<img src="' + data['Collection-external-path'] + '" width="14" height="14">';
+            return content;
+        },
+        'CollectionInfoBack': function(data) {
+            if (data.CollectionInfo + '' == '') {
+                return '';
+            }
+
+            return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionInfoBack-region'][3] + 'px">' + data['Bottom-format'] + data.CollectionInfo + data['Bottom-formatEnd'] + '</div>';
+        },
+        'CollectionNumberBack': function(data) {
+            if ((data.CollectionNumberCustom + '' == '') && (data.CollectionNumberCustomOverwriteBack + '' == '')) {
+                return '';
+            }
+
+            return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionNumberBack-region'][3] + 'px">' + data['Bottom-format'] +
+                (data.CollectionNumberCustomOverwriteBack + '' || data.CollectionNumberCustom) + data['Bottom-formatEnd'] + '</div>';
+        },
+        'CopyrightBack': function(data) {
+            if (data.Copyright + '' == '') {
+                return '';
+            }
+
+            if (parseInt(data.NoCopyrightBack) == 1) {
+                return '';
+            }
+
+            return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['CopyrightBack-region'][3] + 'px">' + data['Bottom-format'] + data.Copyright + data['Bottom-formatEnd'] + '</div>';
+        },
+        'EncounterSetBack-portrait-clip': function(data) {
+            if (data['EncounterSet-external-path'] + '' == '') {
+                return '';
+            }
+
+            var content = '<img src="' + data['EncounterSet-external-path'] + '" width="49" height="49">';
             return content;
         },
         'NameBack': function(data) {
@@ -483,11 +629,18 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="text-align: right">' + data['PageIn-format'] + 'Page ' + data.PageNumberBack + '/' + data.PageTotalBack + data['PageIn-formatEnd'] + '</div>';
+            return '<div style="text-align: right">' + data['PageIn-format'] + data['LRL-Page'] + ' ' + data.PageNumberBack + data['LRL-PageOf'] + data.PageTotalBack + data['PageIn-formatEnd'] + '</div>';
         },
         'PortraitBack-portrait-clip': function(data) {
             var content = '<img src="' + generatedImagesFolder + data.IdRenderer + '.B.jpg" width="100%" height="100%">';
             return content;
+        },
+        'ProgressBack': function(data) {
+            if (data.ProgressBack + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center; color: #C36902; font-family: Vafthrudnir; font-size: 27px; width: ' + data['ProgressBack-region'][2] + 'px">' + data.ProgressBack + '</div>';
         },
         'SideBack': function(data) {
             if (data.SideB + '' == '') {
@@ -495,6 +648,14 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             }
 
             return '<div style="text-align: center; padding-top: 2px">' + data.SideB + '</div>';
+        },
+        'StageBack': function(data) {
+            if ((data.Stage + '' == '') || (data.StageLetterBack + '' == '')) {
+                return '';
+            }
+
+            return '<div style="text-align: center; color: #53B2C5; font-family: Vafthrudnir; width: ' + data['StageBack-region'][2] + 'px"><span style="vertical-align: middle; display: inline-block; font-size: 48px">' + data.Stage +
+                '</span><span style="vertical-align: middle; display: inline-block; font-size: 24px; padding-bottom: 4px; padding-right: 4px">' + data.StageLetterBack + '</span></div>';
         },
         'TypeBack': function(data) {
             if (data.Type + '' == '') {
@@ -533,6 +694,14 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         data['AdventureBack-region'] = data['Adventure-region'];
     }
 
+    if (data['Stage-region'] && (data.TypeRenderer == 'Quest')) {
+        data['StageBack-region'] = data['Stage-region'];
+    }
+
+    if (data['Progress-region'] && (data.TypeRenderer == 'Quest')) {
+        data['ProgressBack-region'] = data['Progress-region'];
+    }
+
     if (data['OptionRight-region'] && (data.TypeRenderer == 'Quest')) {
         data['OptionRightBack-region'] = data['OptionRight-region'];
     }
@@ -541,8 +710,36 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         data['OptionRightBackDecoration-region'] = data['OptionRightDecoration-region'];
     }
 
+    if (data['EncounterSet-portrait-clip-region'] && (data.TypeRenderer == 'Quest')) {
+        data['EncounterSetBack-portrait-clip-region'] = data['EncounterSet-portrait-clip-region'];
+    }
+
     if (data['Name-region'] && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
         data['NameBack-region'] = data['Name-region'];
+    }
+
+    if (data['Artist-region'] && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
+        data['ArtistBack-region'] = data['Artist-region'];
+    }
+
+    if (data['Copyright-region'] && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
+        data['CopyrightBack-region'] = data['Copyright-region'];
+    }
+
+    if (data['Collection-portrait-clip-region'] && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
+        data['CollectionBack-portrait-clip-region'] = data['Collection-portrait-clip-region'];
+    }
+
+    if (data['CollectionNumber-region'] && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
+        data['CollectionNumberBack-region'] = data['CollectionNumber-region'];
+    }
+
+    if (data['CollectionInfo-region'] && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
+        data['CollectionInfoBack-region'] = data['CollectionInfo-region'];
+    }
+
+    if (data['Asterisk-region'] && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
+        data['AsteriskBack-region'] = data['Asterisk-region'];
     }
 
     if (data['PageIn-region'] && (data.TypeRenderer == 'Rules')) {
@@ -557,7 +754,13 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         data['TypeBack-region'] = data['Type-region'];
     }
 
+    if ((data.Progress + '' != '') && (data.TypeRenderer == 'Quest')) {
+        data.ProgressBack = data.Progress;
+        data.Progress = '';
+    }
+
     // console.log(data);
+
     var template = data.Template;
     if ((data.TypeRenderer == 'Campaign') && (template == 'Standard')) {
         template = '';
@@ -596,6 +799,10 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 if (key == 'Portrait-portrait-clip') {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
                         data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: hidden; overflow-y: hidden; z-index: -2">' + containerRules[key](data) + '</div>';
+                }
+                else if (['Collection-portrait-clip', 'EncounterSet-portrait-clip', 'Asterisk', 'Progress', 'Stage'].indexOf(key) > -1) {
+                    content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
+                        data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: visible">' + containerRules[key](data) + '</div>';
                 }
                 else if (key == 'OptionRight') {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
@@ -700,6 +907,10 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                     if (key == 'PortraitBack-portrait-clip') {
                         content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
                             data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: hidden; overflow-y: hidden; z-index: -2">' + containerRulesBack[key](data) + '</div>';
+                    }
+                    else if (['CollectionBack-portrait-clip', 'EncounterSetBack-portrait-clip', 'AsteriskBack', 'ProgressBack', 'StageBack'].indexOf(key) > -1) {
+                        content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
+                            data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: visible">' + containerRulesBack[key](data) + '</div>';
                     }
                     else if (key == 'OptionRightBack') {
                         content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
