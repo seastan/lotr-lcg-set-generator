@@ -405,12 +405,65 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
             return '<div style="text-align: center; padding-top: 4px">' + data.Cycle + '</div>';
         },
+        'Difficulty': function(data) {
+            if (data.Difficulty + '' == 'Standard') {
+                return '';
+            }
+
+            var size = 59;
+            if (data.TypeRenderer == 'Cave') {
+                size = 48;
+            }
+
+            var content = '<img src="' + imagesFolder + data.Difficulty.toLowerCase() + '.png" width="' + size + '" height="' + size + '">';
+            return content;
+        },
         'EncounterSet-portrait-clip': function(data) {
             if (data['EncounterSet-external-path'] + '' == '') {
                 return '';
             }
 
             var content = '<img src="' + data['EncounterSet-external-path'] + '" width="49" height="49">';
+            return content;
+        },
+        'EncounterSet1-portrait-clip': function(data) {
+            if (data['EncounterSet1-external-path'] + '' == '') {
+                return '';
+            }
+
+            var content = '<img src="' + data['EncounterSet1-external-path'] + '" width="23" height="23">';
+            return content;
+        },
+        'EncounterSet2-portrait-clip': function(data) {
+            if (data['EncounterSet2-external-path'] + '' == '') {
+                return '';
+            }
+
+            var content = '<img src="' + data['EncounterSet2-external-path'] + '" width="23" height="23">';
+            return content;
+        },
+        'EncounterSet3-portrait-clip': function(data) {
+            if (data['EncounterSet3-external-path'] + '' == '') {
+                return '';
+            }
+
+            var content = '<img src="' + data['EncounterSet3-external-path'] + '" width="23" height="23">';
+            return content;
+        },
+        'EncounterSet4-portrait-clip': function(data) {
+            if (data['EncounterSet4-external-path'] + '' == '') {
+                return '';
+            }
+
+            var content = '<img src="' + data['EncounterSet4-external-path'] + '" width="23" height="23">';
+            return content;
+        },
+        'EncounterSet5-portrait-clip': function(data) {
+            if (data['EncounterSet5-external-path'] + '' == '') {
+                return '';
+            }
+
+            var content = '<img src="' + data['EncounterSet5-external-path'] + '" width="23" height="23">';
             return content;
         },
         'EncounterSetNumber': function(data) {
@@ -800,7 +853,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
                         data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: hidden; overflow-y: hidden; z-index: -2">' + containerRules[key](data) + '</div>';
                 }
-                else if (['Collection-portrait-clip', 'EncounterSet-portrait-clip', 'Asterisk', 'Progress', 'Stage'].indexOf(key) > -1) {
+                else if (['Collection-portrait-clip', 'Difficulty', 'EncounterSet-portrait-clip', 'EncounterSet1-portrait-clip', 'EncounterSet2-portrait-clip', 'EncounterSet3-portrait-clip', 'EncounterSet4-portrait-clip',
+                          'EncounterSet5-portrait-clip', 'Asterisk', 'Progress', 'Stage'].indexOf(key) > -1) {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
                         data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: visible">' + containerRules[key](data) + '</div>';
                 }
