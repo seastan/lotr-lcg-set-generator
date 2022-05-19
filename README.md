@@ -35,11 +35,10 @@ At the same time, the preferable way is to use Git.
     Add all the sets and cards data.
 
 3. Add the folder with the artwork to your Google Drive to be able to sync it locally.
-This feature is currently hidden on Google Drive UI, but may still be accessed by a shortcut
-(see https://support.google.com/drive/thread/35817359?hl=en).  If this feature is removed
-completely, you will need to download updates to that folder manually.
+Open the folder in the browser, right-click on the folder name, then click `Add shortcut to Drive`.
+Choose `My Drive` and click `Add Shortcut`.
 
-    If it doesn't exist yet (that means you are starting a new project from scratch), create this folder first.
+    If it doesn't exist yet (that means you are starting a new project from scratch), create this folder locally.
     It should have the following structure:
 
     ```
@@ -76,12 +75,15 @@ completely, you will need to download updates to that folder manually.
     _Scratch/untitled.png
     ```
 
-4. Install Google Drive (if it's not installed yet) and make sure that the folder with the artwork is being synced.
+4. If you are using the artwork from Google Drive, make sure that the Google Drive application is installed (install it if needed).
+If the artwork folder is a shortcut, click on the shortcut and copy the actual path to the virtual folder (it might look like
+`G:\.shortcut-targets-by-id\1FY4jVevupiOL48eYOPCPAWqVZq3pQKvO\<folder name>`.  Use that path in the configuration file
+described below.  Right-click on the folder, then click `Offline access` and `Available offline`.
 
-    If you plan to automatically upload images to Google Drive (see the configuration below),
-    go to `Preferences` -> `Settings` and uncheck `Show warning when you remove items from a shared folder`.
+5. If you plan to upload to Google Drive any card outputs or log files, you might need to create shortcuts for more
+existing Google Drive folders and use their local paths in the configuration (repeat the instructions above).
 
-5. Install the design tool and the custom plugin.  Follow these steps:
+6. Install the design tool and the custom plugin.  Follow these steps:
 
   - Clone https://github.com/seastan/lotr-lcg-se-plugin to a new local folder.  Go to this folder.
   - Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir, extract the archive and
@@ -99,25 +101,25 @@ completely, you will need to download updates to that folder manually.
   - Go to the plugins folder (run the design tool, then click `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`), close the program and
     delete or move all files, which names start with `TheLordOfTheRingsLCG`.  Instead of them, copy all generated `.seext` files.
 
-6. Install the latest GIMP version from https://www.gimp.org/downloads/.
+7. Install the latest GIMP version from https://www.gimp.org/downloads/.
 
-7. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `GIMP` folder
+8. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `GIMP` folder
 from this repo, click `OK` and then close GIMP.
 
-8. Install ImageMagick 7.0.10-28 (download Windows version from https://drive.google.com/file/d/1tBFGjE9OakbQNjY-Nqpxky14XVFdGL_G/view?usp=sharing,
+9. Install ImageMagick 7.0.10-28 (download Windows version from https://drive.google.com/file/d/1tBFGjE9OakbQNjY-Nqpxky14XVFdGL_G/view?usp=sharing,
 for other platforms look at https://download.imagemagick.org/ImageMagick/download/releases/).
 
-9. Download `USWebCoatedSWOP.icc` from
+10. Download `USWebCoatedSWOP.icc` from
 https://github.com/cjw-network/cjwpublish1411/blob/master/vendor/imagine/imagine/lib/Imagine/resources/Adobe/CMYK/USWebCoatedSWOP.icc
 into the root folder of this repo.
 
-10. Install AutoHotkey from https://autohotkey.com/download/.
+11. Install AutoHotkey from https://autohotkey.com/download/.
 
-11. Install the latest Python 3 version from https://www.python.org/downloads/.  The minimum supported version is 3.7.
+12. Install the latest Python 3 version from https://www.python.org/downloads/.  The minimum supported version is 3.7.
 Optionally, install VirtualEnv (see https://help.dreamhost.com/hc/en-us/articles/115000695551-Installing-and-using-virtualenv-with-Python-3
 for details).
 
-12. Go to the root folder of this repo and follow these steps:
+13. Go to the root folder of this repo and follow these steps:
 
   - [skip this step, if you don't use VirtualEnv] `virtualenv env --python=python3.9` (replace `3.9` with your actual Python version)
   - [skip this step, if you don't use VirtualEnv] `env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
@@ -127,7 +129,7 @@ for details).
 
   - `pip install jupyter`
 
-13. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
+14. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
   - `sheet_gdid`: Google Sheets ID of the cards spreadsheet
   - `artwork_path`: local path to the artwork folder (don't use for that any existing folder in this repo)
