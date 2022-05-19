@@ -333,6 +333,13 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             var content = '<img src="' + imagesFolder + 'asterisk.png" width="9" height="9">';
             return content;
         },
+        'Attack': function(data) {
+            if (data.Attack + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center; color: #000000; font-family: Vafthrudnir; font-size: 21px; width: ' + data['Attack-region'][2] + 'px">' + data.Attack + '</div>';
+        },
         'Body': function(data) {
             var content = [];
             if (data.Story + '') {
@@ -404,6 +411,13 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             }
 
             return '<div style="text-align: center; padding-top: 4px">' + data.Cycle + '</div>';
+        },
+        'Defense': function(data) {
+            if (data.Defense + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center; color: #000000; font-family: Vafthrudnir; font-size: 21px; width: ' + data['Defense-region'][2] + 'px">' + data.Defense + '</div>';
         },
         'Difficulty': function(data) {
             if (data.Difficulty + '' == 'Standard') {
@@ -477,6 +491,20 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
             return '<div style="text-align: center; color: #FFFFFF">' + data['EncounterSetNumber-format'] + data.EncounterSetNumber + '/' + data.EncounterSetTotal + data['EncounterSetNumber-formatEnd'] + '</div>';
         },
+        'Engagement': function(data) {
+            if (data.Engagement + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center; color: #C46900; font-family: Vafthrudnir; font-size: 29px; width: ' + data['Engagement-region'][2] + 'px">' + data.Engagement + '</div>';
+        },
+        'HitPoints': function(data) {
+            if (data.HitPoints + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center; color: #DD4240; font-family: Vafthrudnir; font-size: 46px; width: ' + data['HitPoints-region'][2] + 'px">' + data.HitPoints + '</div>';
+        },
         'Name': function(data) {
             if (data.Name + '' == '') {
                 return '';
@@ -522,7 +550,20 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="text-align: center; color: #C36902; font-family: Vafthrudnir; font-size: 27px; width: ' + data['Progress-region'][2] + 'px">' + data.Progress + '</div>';
+            return '<div style="text-align: center; color: #C46900; font-family: Vafthrudnir; font-size: 27px; width: ' + data['Progress-region'][2] + 'px">' + data.Progress + '</div>';
+        },
+        'ResourceCost': function(data) {
+            if (data.ResourceCost + '' == '') {
+                return '';
+            }
+
+            var size = 42;
+            if (data.TypeRenderer == 'Treasure') {
+                size = 34;
+            }
+
+            return '<div style="text-align: center; color: #DEDEDE; font-family: Vafthrudnir; font-size: ' + size + 'px; width: ' + data['ResourceCost-region'][2] + 'px">' +
+                '<span style="vertical-align: middle; display: inline-block; padding-right: 2px">' + data.ResourceCost + '</span></div>';
         },
         'Side': function(data) {
             if (data.SideA + '' == '') {
@@ -546,6 +587,20 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
             return '<div style="text-align: center; padding-top: 4px">' + data.Subtype + '</div>';
         },
+        'Threat': function(data) {
+            if (data.Threat + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center; color: #000000; font-family: Vafthrudnir; font-size: 21px; width: ' + data['Threat-region'][2] + 'px">' + data.Threat + '</div>';
+        },
+        'ThreatCost': function(data) {
+            if (data.ThreatCost + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center; color: #2E7496; font-family: Vafthrudnir; font-size: 29px; width: ' + data['ThreatCost-region'][2] + 'px">' + data.ThreatCost + '</div>';
+        },
         'TraitOut-Trait': function(data) {
             if (data.Trait + '' == '') {
                 return '';
@@ -561,6 +616,13 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             }
 
             return '<div style="text-align: center">' + data.Type + '</div>';
+        },
+        'Willpower': function(data) {
+            if (data.Willpower + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center; color: #000000; font-family: Vafthrudnir; font-size: 21px; width: ' + data['Willpower-region'][2] + 'px">' + data.Willpower + '</div>';
         }
     };
 
@@ -693,7 +755,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="text-align: center; color: #C36902; font-family: Vafthrudnir; font-size: 27px; width: ' + data['ProgressBack-region'][2] + 'px">' + data.ProgressBack + '</div>';
+            return '<div style="text-align: center; color: #C46900; font-family: Vafthrudnir; font-size: 27px; width: ' + data['ProgressBack-region'][2] + 'px">' + data.ProgressBack + '</div>';
         },
         'SideBack': function(data) {
             if (data.SideB + '' == '') {
@@ -853,8 +915,9 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
                         data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: hidden; overflow-y: hidden; z-index: -2">' + containerRules[key](data) + '</div>';
                 }
-                else if (['Collection-portrait-clip', 'Difficulty', 'EncounterSet-portrait-clip', 'EncounterSet1-portrait-clip', 'EncounterSet2-portrait-clip', 'EncounterSet3-portrait-clip', 'EncounterSet4-portrait-clip',
-                          'EncounterSet5-portrait-clip', 'Asterisk', 'Progress', 'Stage'].indexOf(key) > -1) {
+                else if (['Asterisk', 'Attack', 'Collection-portrait-clip', 'Defense', 'Difficulty', 'EncounterSet-portrait-clip',
+                          'EncounterSet1-portrait-clip', 'EncounterSet2-portrait-clip', 'EncounterSet3-portrait-clip', 'EncounterSet4-portrait-clip',
+                          'EncounterSet5-portrait-clip', 'Engagement', 'HitPoints', 'Progress', 'ResourceCost', 'Stage', 'Threat', 'ThreatCost', 'Willpower'].indexOf(key) > -1) {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
                         data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: visible">' + containerRules[key](data) + '</div>';
                 }
@@ -962,7 +1025,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                         content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
                             data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: hidden; overflow-y: hidden; z-index: -2">' + containerRulesBack[key](data) + '</div>';
                     }
-                    else if (['CollectionBack-portrait-clip', 'EncounterSetBack-portrait-clip', 'AsteriskBack', 'ProgressBack', 'StageBack'].indexOf(key) > -1) {
+                    else if (['AsteriskBack', 'CollectionBack-portrait-clip', 'EncounterSetBack-portrait-clip', 'ProgressBack', 'StageBack'].indexOf(key) > -1) {
                         content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
                             data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: visible">' + containerRulesBack[key](data) + '</div>';
                     }
