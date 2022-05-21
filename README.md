@@ -119,7 +119,8 @@ into the root folder of this repo.
 Optionally, install VirtualEnv (see https://help.dreamhost.com/hc/en-us/articles/115000695551-Installing-and-using-virtualenv-with-Python-3
 for details).
 
-13. Go to the root folder of this repo and follow these steps:
+13. Go to the root folder of this repo and follow the steps below.  All commands should by run in CLI, for example, `cmd` (Windows)
+or `bash` (Mac/Linux).
 
   - [skip this step, if you don't use VirtualEnv] `virtualenv env --python=python3.9` (replace `3.9` with your actual Python version)
   - [skip this step, if you don't use VirtualEnv] `env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
