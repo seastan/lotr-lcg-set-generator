@@ -352,13 +352,13 @@ MAGICK_COMMAND_LOW = '"{}" mogrify -resize 600x600 -format jpg "{}{}*.png"'
 MAGICK_COMMAND_MBPRINT_PDF = '"{}" convert "{}{}*o.jpg" "{}"'
 MAGICK_COMMAND_RULES_PDF = '"{}" convert "{}{}*.png" "{}"'
 
-JPG_PREVIEW_MIN_SIZE = 30000
-JPG_300_MIN_SIZE = 100000
+JPG_PREVIEW_MIN_SIZE = 25000
+JPG_300_MIN_SIZE = 50000
 JPG_480_MIN_SIZE = 150000
 JPG_800_MIN_SIZE = 1000000
 JPG_300CMYK_MIN_SIZE = 1000000
 JPG_800CMYK_MIN_SIZE = 4000000
-PNG_300_MIN_SIZE = 100000
+PNG_300_MIN_SIZE = 50000
 PNG_480_MIN_SIZE = 300000
 PNG_800_MIN_SIZE = 2000000
 
@@ -10339,6 +10339,10 @@ def update_ringsdb(conf, sets):
 
         checksum = hashlib.md5(content).hexdigest()
         if checksum == checksums.get(set_id):
+            continue
+
+        if (len([p for p in content.decode('utf-8').split('\n') if p.strip()])
+                <= 1):
             continue
 
         changes = True
