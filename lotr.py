@@ -352,7 +352,7 @@ MAGICK_COMMAND_LOW = '"{}" mogrify -resize 600x600 -format jpg "{}{}*.png"'
 MAGICK_COMMAND_MBPRINT_PDF = '"{}" convert "{}{}*o.jpg" "{}"'
 MAGICK_COMMAND_RULES_PDF = '"{}" convert "{}{}*.png" "{}"'
 
-JPG_PREVIEW_MIN_SIZE = 25000
+JPG_PREVIEW_MIN_SIZE = 20000
 JPG_300_MIN_SIZE = 50000
 JPG_480_MIN_SIZE = 150000
 JPG_800_MIN_SIZE = 1000000
