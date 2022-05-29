@@ -1,7 +1,7 @@
 var doubleSideTypes = ['Campaign', 'Contract', 'Nightmare', 'Presentation', 'Quest', 'Rules'];
 var playerTypes = ['Ally', 'Attachment', 'Contract', 'Event', 'Full Art Landscape', 'Full Art Portrait', 'Hero', 'Hero Promo', 'Player Objective', 'Player Side Quest', 'Treasure'];
 var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Objective', 'Player Side Quest'];
-var landscapeTypes = ['Cave', 'Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Full Art Landscape', 'Player Side Quest', 'Quest'];
+var landscapeTypes = ['Cave', 'Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Full Art Landscape', 'Player Side Quest', 'Region', 'Quest'];
 
 var optionalTraitTypes = ['Cave', 'Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Player Side Quest'];
 
@@ -86,6 +86,7 @@ asteriskRegion['Objective Location'] = '364,526,8,8';
 asteriskRegion['Player Objective'] = '364,526,8,8';
 asteriskRegion['Player Side Quest'] = '530,376,8,8';
 asteriskRegion['Quest'] = '530,376,8,8';
+asteriskRegion['Region'] = '530,376,8,8';
 asteriskRegion['Ship Enemy'] = '374,526,8,8';
 asteriskRegion['Ship Objective'] = '364,526,8,8';
 asteriskRegion['Treachery'] = '374,526,8,8';
@@ -113,6 +114,7 @@ collectionInfoRegion['Player Objective'] = '350,527,20,15';
 collectionInfoRegion['Player Side Quest'] = '419,375,20,15';
 collectionInfoRegion['Presentation'] = '350,527,20,15';
 collectionInfoRegion['Quest'] = '419,375,20,15';
+collectionInfoRegion['Region'] = '419,375,20,15';
 collectionInfoRegion['Rules'] = '350,527,20,15';
 collectionInfoRegion['Ship Enemy'] = '350,527,20,15';
 collectionInfoRegion['Ship Objective'] = '350,527,20,15';
@@ -142,6 +144,7 @@ collectionNumberRegion['Objective Location'] = '334,527,18,15';
 collectionNumberRegion['Player Objective'] = '334,527,18,15';
 collectionNumberRegion['Player Side Quest'] = '403,375,18,15';
 collectionNumberRegion['Quest'] = '403,375,18,15';
+collectionNumberRegion['Region'] = '403,375,18,15';
 collectionNumberRegion['Ship Enemy'] = '334,527,18,15';
 collectionNumberRegion['Ship Objective'] = '334,527,18,15';
 collectionNumberRegion['Treachery'] = '334,527,18,15';
@@ -169,6 +172,7 @@ collectionPortraitRegion['Player Objective'] = '322,528,12,12';
 collectionPortraitRegion['Player Side Quest'] = '391,376,12,12';
 collectionPortraitRegion['Presentation'] = '185,383,43,43';
 collectionPortraitRegion['Quest'] = '391,376,12,12';
+collectionPortraitRegion['Region'] = '391,376,12,12';
 collectionPortraitRegion['Ship Enemy'] = '322,528,12,12';
 collectionPortraitRegion['Ship Objective'] = '322,528,12,12';
 collectionPortraitRegion['Treachery'] = '322,528,12,12';
@@ -218,6 +222,7 @@ copyrightRegion['Objective Location'] = '158,527,124,15';
 copyrightRegion['Player Objective'] = '158,527,124,15';
 copyrightRegion['Player Side Quest'] = '225,375,124,15';
 copyrightRegion['Quest'] = '225,375,124,15';
+copyrightRegion['Region'] = '225,375,124,15';
 copyrightRegion['Ship Enemy'] = '158,527,124,15';
 copyrightRegion['Ship Objective'] = '158,527,124,15';
 copyrightRegion['Treachery'] = '158,527,124,15';
@@ -246,6 +251,7 @@ artistRegion['Objective Location'] = '63,527,100,15';
 artistRegion['Player Objective'] = '63,527,100,15';
 artistRegion['Player Side Quest'] = '130,375,100,15';
 artistRegion['Quest'] = '130,375,100,15';
+artistRegion['Region'] = '130,375,100,15';
 artistRegion['Ship Enemy'] = '63,527,100,15';
 artistRegion['Ship Objective'] = '63,527,100,15';
 artistRegion['Treachery'] = '63,527,100,15';
@@ -275,6 +281,7 @@ portraitRegion['Player Objective'] = '0,69,413,300';
 portraitRegion['Player Side Quest'] = '0,0,563,413';
 portraitRegion['Presentation'] = '0,140,413,285';
 portraitRegion['Quest'] = '0,0,563,413';
+portraitRegion['Region'] = '0,0,563,413';
 portraitRegion['Ship Enemy'] = '87,0,326,330';
 portraitRegion['Ship Objective'] = '78,81,335,268';
 portraitRegion['Treachery'] = '60,0,353,330';
@@ -329,6 +336,7 @@ traitRegion['Cave'] = '50,283,171,20';
 traitRegion['Encounter Side Quest'] = '51,249,461,20';
 traitRegion['Encounter Side Quest SmallTextArea'] = '51,304,461,20';
 traitRegion['Player Side Quest'] = '51,251,461,20';
+traitRegion['Region'] = '50,283,171,20';
 
 var bodyNoTraitRegion = {};
 bodyNoTraitRegion['Campaign'] = '56,277,301,211';
@@ -374,6 +382,7 @@ nameRegion['Objective Location'] = '75,48,263,29';
 nameRegion['Player Objective'] = '127,48,211,29';
 nameRegion['Player Side Quest'] = '144,44,368,29';
 nameRegion['Quest'] = '144,44,368,29';
+nameRegion['Region'] = '80,43,160,25';
 nameRegion['Ship Enemy'] = '94,327,225,25';
 nameRegion['Ship Objective'] = '75,48,263,29';
 nameRegion['Treachery'] = '55,108,26,164';
@@ -394,6 +403,7 @@ nameUniqueRegion['Objective Ally'] = '75,45,263,29';
 nameUniqueRegion['Objective Hero'] = '75,45,263,29';
 nameUniqueRegion['Objective Location'] = '75,45,263,29';
 nameUniqueRegion['Player Objective'] = '127,45,211,29';
+nameUniqueRegion['Region'] = '80,40,160,25';
 nameUniqueRegion['Ship Enemy'] = '94,325,225,25';
 nameUniqueRegion['Ship Objective'] = '75,45,263,29';
 nameUniqueRegion['Treachery'] = '55,108,26,164';
@@ -463,7 +473,6 @@ threatCostRegion['Hero'] = '75,50,36,25';
 threatCostRegion['Hero Promo'] = '50,48,33,23';
 
 var progressRegion = {};
-progressRegion['Cave'] = '52,257,35,24';
 progressRegion['Encounter Side Quest'] = '52,202,35,24';
 progressRegion['Encounter Side Quest SmallTextArea'] = '52,257,35,24';
 progressRegion['Location'] = '56,283,35,24';
@@ -500,6 +509,7 @@ difficultyRegion['Objective'] = '310,263,52,52';
 difficultyRegion['Objective Ally'] = '310,263,52,52';
 difficultyRegion['Objective Hero'] = '310,263,52,52';
 difficultyRegion['Objective Location'] = '310,263,52,52';
+difficultyRegion['Region'] = '33,30,42,42';
 difficultyRegion['Ship Enemy'] = '316,260,52,52';
 difficultyRegion['Ship Objective'] = '310,263,52,52';
 difficultyRegion['Treachery'] = '315,263,52,52';
@@ -517,6 +527,7 @@ encounterPortraitRegion['Objective Ally'] = '315,269,43,43';
 encounterPortraitRegion['Objective Hero'] = '315,269,43,43';
 encounterPortraitRegion['Objective Location'] = '315,269,43,43';
 encounterPortraitRegion['Quest'] = '474,185,43,43';
+encounterPortraitRegion['Region'] = '37,35,35,35';
 encounterPortraitRegion['Ship Enemy'] = '321,266,43,43';
 encounterPortraitRegion['Ship Objective'] = '315,269,43,43';
 encounterPortraitRegion['Treachery'] = '320,269,43,43';
@@ -532,6 +543,7 @@ encounterNumberRegion['Objective'] = '322,316,26,10';
 encounterNumberRegion['Objective Ally'] = '322,316,26,10';
 encounterNumberRegion['Objective Hero'] = '322,316,26,10';
 encounterNumberRegion['Objective Location'] = '322,316,26,10';
+encounterNumberRegion['Region'] = '41,70,26,10';
 encounterNumberRegion['Ship Enemy'] = '328,313,26,10';
 encounterNumberRegion['Ship Objective'] = '322,316,26,10';
 encounterNumberRegion['Treachery'] = '328,317,26,10';
@@ -540,7 +552,6 @@ var optionRightDecorationRegion = {};
 optionRightDecorationRegion['Ally'] = '298,503,72,18';
 optionRightDecorationRegion['Attachment'] = '300,503,72,18';
 optionRightDecorationRegion['Campaign'] = '301,503,72,18';
-optionRightDecorationRegion['Cave'] = '452,347,72,18';
 optionRightDecorationRegion['Encounter Side Quest'] = '452,347,72,18';
 optionRightDecorationRegion['Encounter Side Quest SmallTextArea'] = '452,347,72,18';
 optionRightDecorationRegion['Enemy'] = '301,503,72,18';
@@ -565,7 +576,6 @@ var optionRightRegion = {};
 optionRightRegion['Ally'] = '305,504,59,20';
 optionRightRegion['Attachment'] = '307,504,59,20';
 optionRightRegion['Campaign'] = '308,504,59,20';
-optionRightRegion['Cave'] = '459,348,59,20';
 optionRightRegion['Encounter Side Quest'] = '459,348,59,20';
 optionRightRegion['Encounter Side Quest SmallTextArea'] = '459,348,59,20';
 optionRightRegion['Enemy'] = '308,504,59,20';
@@ -678,6 +688,7 @@ traitPointSize['Objective Hero'] = 8.25;
 traitPointSize['Objective Location'] = 8.25;
 traitPointSize['Player Objective'] = 8.25;
 traitPointSize['Player Side Quest'] = 7.75;
+traitPointSize['Region'] = 7.75;
 traitPointSize['Ship Enemy'] = 8.25;
 traitPointSize['Ship Objective'] = 8.25;
 traitPointSize['Treachery'] = 8.25;
@@ -704,6 +715,7 @@ namePointSize['Objective Location'] = 7.5;
 namePointSize['Player Objective'] = 7.5;
 namePointSize['Player Side Quest'] = 7.5;
 namePointSize['Quest'] = 7.5;
+namePointSize['Region'] = 6.5;
 namePointSize['Ship Enemy'] = 6.5;
 namePointSize['Ship Objective'] = 7.5;
 namePointSize['Treachery'] = 6.5;
@@ -774,6 +786,8 @@ translate['Player Side Quest'] = {'English': 'Side Quest', 'French': 'Qu\u00eate
 	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria', 'Portuguese': 'Miss\u00e3o Secund\u00e1ria'};
 translate['Quest'] = {'English': 'Quest', 'French': 'Qu\u00eate', 'German': 'Abenteuer', 'Spanish': 'Misi\u00f3n', 'Polish': 'Wyprawa', 'Italian': 'Ricerca',
 	'Portuguese': 'Miss\u00e3o'};
+translate['Region'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria',
+	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria', 'Portuguese': 'Miss\u00e3o Secund\u00e1ria'};
 translate['Setup'] = {'English': 'Setup', 'French': 'Pr\u00e9paration', 'German': 'Vorbereitung', 'Spanish': 'Preparaci\u00f3n', 'Polish': 'Przygotowanie',
 	'Italian': 'Preparazione', 'Portuguese': 'Prepara\u00e7\u00e3o'};
 translate['Ship Enemy'] = {'English': 'Ship-Enemy', 'French': 'Navire-Ennemi', 'German': 'Schiff-Gegner', 'Spanish': 'Barco-Enemigo', 'Polish': 'Statek-Wr\u00f3g',
@@ -921,6 +935,9 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					else if ((cardType == 'Encounter Side Quest') && (card['Sphere'] + '' == 'Cave')) {
 						cardType = 'Cave';
 					}
+					else if ((cardType == 'Encounter Side Quest') && (card['Sphere'] + '' == 'Region')) {
+						cardType = 'Region';
+					}
 					else if (cardType == 'Objective Hero') {
 						cardSphere = 'Hero';
 						card['Sphere'] = cardSphere;
@@ -1005,6 +1022,9 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 					else if ((cardType == 'Encounter Side Quest') && (card['BSphere'] + '' == 'Cave')) {
 						cardType = 'Cave';
+					}
+					else if ((cardType == 'Encounter Side Quest') && (card['BSphere'] + '' == 'Region')) {
+						cardType = 'Region';
 					}
 					else if (cardType == 'Objective Hero') {
 						cardSphere = 'Hero';
@@ -1550,7 +1570,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('Bottom-stroke-width', 2);
 				}
 
-				if (cardType == 'Cave') {
+				if ((cardType == 'Cave') || (cardType == 'Region')) {
 					s.set('Body-colour', '#FFFFFF');
 					s.set('BodyRight-colour', '#FFFFFF');
 					s.set('Name-colour', '#FFFFFF');

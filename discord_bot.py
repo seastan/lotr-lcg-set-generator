@@ -660,7 +660,7 @@ def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
         card_sphere = '*{}* {} '.format(sphere,
                                         EMOJIS['[{}]'.format(sphere.lower())])
     elif sphere in ('Neutral', 'Boon', 'Burden', 'Nightmare', 'Upgraded',
-                    'Cave'):
+                    'Cave', 'Region'):
         card_sphere = '*{}* '.format(sphere)
     else:
         card_sphere = ''

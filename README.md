@@ -417,8 +417,8 @@ List of available card types:
 - `Attachment`
 - `Campaign`
 - `Contract`
-- `Enemy`
 - `Encounter Side Quest` (alias: `Side Quest`)
+- `Enemy`
 - `Event`
 - `Full Art Landscape`
 - `Full Art Portrait`
@@ -454,6 +454,7 @@ List of available sphere values:
 - `Setup` (`Campaign` only)
 - `Cave` (`Encounter Side Quest` only)
 - `NoProgress` (`Encounter Side Quest` only)
+- `Region` (`Encounter Side Quest` only)
 - `SmallTextArea` (`Encounter Side Quest` only)
 - `Back` (`Rules` only)
 - `Upgraded` (`Ship Objective` only)

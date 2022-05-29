@@ -183,6 +183,7 @@ CARD_TYPES_TRAITS = {'Ally', 'Enemy', 'Hero', 'Location', 'Objective Ally',
 CARD_TYPES_NO_TRAITS = {'Campaign', 'Contract', 'Full Art Landscape',
                         'Full Art Portrait', 'Nightmare', 'Presentation',
                         'Quest', 'Rules'}
+CARD_SPHERES_TRAITS = {'Region'}
 CARD_TYPES_NO_KEYWORDS = {'Campaign', 'Contract', 'Full Art Landscape',
                           'Full Art Portrait', 'Nightmare', 'Presentation',
                           'Rules'}
@@ -197,13 +198,14 @@ CARD_TYPES_COMBAT = {'Ally', 'Enemy', 'Hero', 'Objective Ally',
 CARD_TYPES_QUEST = {'Encounter Side Quest', 'Location', 'Objective Location',
                     'Player Side Quest'}
 CARD_TYPES_QUEST_BACK = {'Quest'}
+CARD_SPHERES_NO_QUEST = {'Cave', 'NoProgress', 'Region'}
 CARD_TYPES_VICTORY = {'Ally', 'Attachment', 'Encounter Side Quest', 'Enemy',
                       'Event', 'Location', 'Objective', 'Objective Ally',
                       'Objective Location', 'Player Objective',
                       'Player Side Quest', 'Ship Enemy', 'Ship Objective',
                       'Treachery', 'Treasure'}
 CARD_TYPES_VICTORY_BACK = {'Quest'}
-CARD_SPHERES_NO_VICTORY = {'Cave'}
+CARD_SPHERES_NO_VICTORY = {'Cave', 'Region'}
 CARD_TYPES_SPECIAL_ICON = {'Enemy', 'Location', 'Objective', 'Objective Ally',
                            'Objective Location', 'Ship Enemy',
                            'Ship Objective', 'Treachery'}
@@ -224,6 +226,7 @@ CARD_TYPES_TEXT_BACK = {}
 #                        'Ship Objective', 'Treasure'}
 CARD_TYPES_NO_TEXT_BACK = {'Full Art Landscape', 'Full Art Portrait',
                            'Presentation'}
+CARD_SPHERES_NO_TEXT = {'Region'}
 CARD_TYPES_SHADOW = {'Enemy', 'Location', 'Objective', 'Objective Ally',
                      'Objective Hero', 'Objective Location', 'Ship Enemy',
                      'Ship Objective', 'Treachery'}
@@ -231,6 +234,7 @@ CARD_TYPES_SHADOW_ENCOUNTER = {'Ally', 'Attachment', 'Event',
                                'Player Objective'}
 CARD_TYPES_NO_FLAVOUR = {'Full Art Landscape', 'Full Art Portrait',
                          'Presentation', 'Rules'}
+CARD_SPHERES_NO_FLAVOUR = {'Region'}
 CARD_TYPES_NO_FLAVOUR_BACK = {'Full Art Landscape', 'Full Art Portrait',
                               'Nightmare', 'Presentation', 'Rules'}
 CARD_TYPES_NO_PRINTED_NUMBER = {'Full Art Landscape', 'Full Art Portrait',
@@ -304,6 +308,7 @@ CARD_TYPES_NO_ARTWORK = {'Rules'}
 CARD_TYPES_NO_ARTWORK_BACK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
 CARD_TYPES_EASY_MODE = {'Encounter Side Quest', 'Enemy', 'Location',
                         'Ship Enemy', 'Treachery'}
+CARD_SPHERES_NO_EASY_MODE = {'Boon', 'Burden', 'Cave', 'Region'}
 CARD_TYPES_ADDITIONAL_ENCOUNTER_SETS = {'Quest'}
 CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
                         'Objective Hero', 'Objective Location',
@@ -332,7 +337,7 @@ FLAGS = {'AdditionalCopies', 'Asterisk', 'NoArtist', 'NoCopyright', 'NoTraits',
 RING_FLAGS = {'BlueRing', 'GreenRing', 'PurpleRing', 'RedRing'}
 SPHERES = set()
 SPHERES_CAMPAIGN = {'Setup'}
-SPHERES_SIDE_QUEST = {'Cave', 'NoProgress', 'SmallTextArea'}
+SPHERES_SIDE_QUEST = {'Cave', 'NoProgress', 'Region', 'SmallTextArea'}
 SPHERES_PLAYER = {'Baggins', 'Fellowship', 'Leadership', 'Lore', 'Neutral',
                   'Spirit', 'Tactics'}
 SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow',
@@ -340,7 +345,6 @@ SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow',
                         'RedNightmare', 'BrownNightmare', 'YellowNightmare'}
 SPHERES_RULES = {'Back'}
 SPHERES_SHIP_OBJECTIVE = {'Upgraded'}
-SPHERES_NO_EASY_MODE = {'Boon', 'Burden', 'Cave'}
 SPECIAL_ICONS = {'eye of sauron', 'eye of sauronx2', 'eye of sauronx3',
                  'sailing', 'sailingx2'}
 
@@ -2238,6 +2242,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif (card_traits is None and
+              card_sphere in CARD_SPHERES_TRAITS and
+              not (card_flags and 'NoTraits' in extract_flags(card_flags))):
+            message = 'No traits for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
         elif card_traits is not None and not card_traits.endswith('.'):
             message = 'Missing period in traits for row #{}{}'.format(
                 i, scratch)
@@ -2276,6 +2289,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_traits_back is not None and
               card_type_back in CARD_TYPES_NO_TRAITS):
             message = 'Redundant traits back for row #{}{}'.format(i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_traits_back is None and
+              card_sphere_back in CARD_SPHERES_TRAITS and
+              not (card_flags_back and
+                   'NoTraits' in extract_flags(card_flags_back))):
+            message = 'No traits back for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
@@ -2871,14 +2894,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
 
         if (card_quest is None and card_type in CARD_TYPES_QUEST and
-                card_sphere not in ('Cave', 'NoProgress')):
+                card_sphere not in CARD_SPHERES_NO_QUEST):
             message = 'No quest points for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif card_quest is not None and card_type not in CARD_TYPES_QUEST:
+        elif (card_quest is not None and
+              (card_type not in CARD_TYPES_QUEST or
+               card_sphere in CARD_SPHERES_NO_QUEST)):
             message = 'Redundant quest points for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2907,7 +2932,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_quest_back is None and (
                 card_type_back in CARD_TYPES_QUEST
                 or card_type in CARD_TYPES_QUEST_BACK) and
-              card_sphere_back not in ('Cave', 'NoProgress')):
+              card_sphere_back not in CARD_SPHERES_NO_QUEST):
             message = 'No quest points back for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -2915,7 +2940,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_quest_back is not None and
-              card_type_back not in CARD_TYPES_QUEST and
+              (card_type_back not in CARD_TYPES_QUEST or
+               card_sphere_back in CARD_SPHERES_NO_QUEST) and
               card_type not in CARD_TYPES_QUEST_BACK):
             message = 'Redundant quest points back for row #{}{}'.format(
                 i, scratch)
@@ -3069,6 +3095,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif card_text is not None and card_sphere in CARD_SPHERES_NO_TEXT:
+            message = 'Redundant text for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if card_text_back is not None and card_type_back is None:
             message = 'Redundant text back for row #{}{}'.format(i, scratch)
@@ -3087,6 +3121,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_text_back is not None and
               card_type_back in CARD_TYPES_NO_TEXT_BACK):
+            message = 'Redundant text back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_text_back is not None and
+              card_sphere_back in CARD_SPHERES_NO_TEXT):
             message = 'Redundant text back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -3143,7 +3186,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if card_flavour is not None and card_type in CARD_TYPES_NO_FLAVOUR:
+        if (card_flavour is not None and
+                (card_type in CARD_TYPES_NO_FLAVOUR or
+                 card_sphere in CARD_SPHERES_NO_FLAVOUR)):
             message = 'Redundant flavour for row #{}{}'.format(i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -3159,7 +3204,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_flavour_back is not None and
-              card_type_back in CARD_TYPES_NO_FLAVOUR_BACK):
+              (card_type_back in CARD_TYPES_NO_FLAVOUR_BACK or
+               card_sphere_back in CARD_SPHERES_NO_FLAVOUR)):
             message = 'Redundant flavour back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -3591,10 +3637,10 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         if (card_easy_mode is not None and  # pylint: disable=R0916
                 (card_type not in CARD_TYPES_EASY_MODE
-                 or card_sphere in SPHERES_NO_EASY_MODE) and
+                 or card_sphere in CARD_SPHERES_NO_EASY_MODE) and
                 (card_type_back not in CARD_TYPES_EASY_MODE or
                  card_type_back is None or
-                 card_sphere_back in SPHERES_NO_EASY_MODE)):
+                 card_sphere_back in CARD_SPHERES_NO_EASY_MODE)):
             message = 'Redundant removed for easy mode for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -4279,7 +4325,8 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
             value = 'Neutral'
         elif card_type in ('Presentation', 'Rules'):
             value = ''
-        elif value in ('Cave', 'NoProgress', 'SmallTextArea', 'Upgraded'):
+        elif value in ('Cave', 'NoProgress', 'Region', 'SmallTextArea',
+                       'Upgraded'):
             value = ''
         elif card_type == 'Campaign':
             value = str(value).upper() if value else 'CAMPAIGN'
@@ -5343,7 +5390,7 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
 
         if row[CARD_TYPE] in ('Player Objective', 'Treasure'):
             sphere = 'Neutral'
-        elif row[CARD_SPHERE] in ('Setup', 'Cave', 'NoProgress',
+        elif row[CARD_SPHERE] in ('Setup', 'Cave', 'NoProgress', 'Region',
                                   'SmallTextArea', 'Upgraded'):
             sphere = ''
         else:
@@ -5385,10 +5432,9 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
             if row[BACK_PREFIX + CARD_TYPE] in ('Player Objective',
                                                 'Treasure'):
                 sphere = 'Neutral'
-            elif row[BACK_PREFIX + CARD_SPHERE] in ('Setup', 'Cave',
-                                                    'NoProgress',
-                                                    'SmallTextArea',
-                                                    'Upgraded'):
+            elif row[BACK_PREFIX + CARD_SPHERE] in (
+                    'Setup', 'Cave', 'NoProgress', 'Region', 'SmallTextArea',
+                    'Upgraded'):
                 sphere = ''
             else:
                 sphere = row[BACK_PREFIX + CARD_SPHERE]
@@ -5571,7 +5617,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
             sphere = 'Neutral'
         elif card_type in ('Campaign', 'Presentation', 'Rules'):
             sphere = 'None'
-        elif row[CARD_SPHERE] in ('Nightmare', 'Cave', 'NoProgress',
+        elif row[CARD_SPHERE] in ('Nightmare', 'Cave', 'NoProgress', 'Region',
                                   'SmallTextArea', 'Upgraded'):
             sphere = 'None'
         elif row[CARD_SPHERE] is not None:
@@ -5640,6 +5686,9 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
         elif (card_type == 'Encounter Side Quest' and
               row[CARD_SPHERE] == 'Cave'):
             type_name = 'Cave'
+        elif (card_type == 'Encounter Side Quest' and
+              row[CARD_SPHERE] == 'Region'):
+            type_name = 'Region'
         else:
             type_name = card_type or ''
 

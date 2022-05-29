@@ -425,7 +425,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             }
 
             var size = 59;
-            if (data.TypeRenderer == 'Cave') {
+            if ((data.TypeRenderer == 'Cave') || (data.TypeRenderer == 'Region')) {
                 size = 48;
             }
 
