@@ -424,12 +424,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var size = 59;
-            if ((data.TypeRenderer == 'Cave') || (data.TypeRenderer == 'Region')) {
-                size = 48;
-            }
-
-            var content = '<img src="' + imagesFolder + data.Difficulty.toLowerCase() + '.png" width="' + size + '" height="' + size + '">';
+            var content = '<img src="' + imagesFolder + data.Difficulty.toLowerCase() + '.png" width="59" height="59">';
             return content;
         },
         'EncounterSet-portrait-clip': function(data) {

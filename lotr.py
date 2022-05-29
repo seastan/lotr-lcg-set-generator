@@ -302,6 +302,10 @@ CARD_TYPES_NO_FLAGS_BACK = {
                  'Nightmare', 'Presentation', 'Rules'},
     'NoArtist': {'Campaign', 'Nightmare', 'Presentation', 'Rules'},
     'NoCopyright': {'Campaign', 'Nightmare', 'Presentation', 'Rules'}}
+CARD_SPHERES_NO_FLAGS = {'BlueRing': {'Cave', 'Region'},
+                         'GreenRing': {'Cave', 'Region'},
+                         'PurpleRing': {'Cave', 'Region'},
+                         'RedRing': {'Cave', 'Region'}}
 CARD_TYPES_NO_ARTIST = {'Presentation', 'Rules'}
 CARD_TYPES_NO_ARTIST_BACK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
 CARD_TYPES_NO_ARTWORK = {'Rules'}
@@ -3297,10 +3301,12 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
             found_ring_flag = False
             for flag in flags:
-                if ((flag in CARD_TYPES_FLAGS and
+                if ((flag in CARD_TYPES_FLAGS and  # pylint: R0916
                      card_type not in CARD_TYPES_FLAGS[flag]) or
                         (flag in CARD_TYPES_NO_FLAGS and
-                         card_type in CARD_TYPES_NO_FLAGS[flag])):
+                         card_type in CARD_TYPES_NO_FLAGS[flag]) or
+                        (flag in CARD_SPHERES_NO_FLAGS and
+                         card_sphere in CARD_SPHERES_NO_FLAGS[flag])):
                     message = 'Redundant flag "{}" for row #{}{}'.format(
                         flag, i, scratch)
                     logging.error(message)
@@ -3349,10 +3355,12 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
             found_ring_flag = False
             for flag in flags:
-                if ((flag in CARD_TYPES_FLAGS_BACK and
+                if ((flag in CARD_TYPES_FLAGS_BACK and  # pylint: R0916
                      card_type_back not in CARD_TYPES_FLAGS_BACK[flag]) or
                         (flag in CARD_TYPES_NO_FLAGS_BACK and
-                         card_type_back in CARD_TYPES_NO_FLAGS_BACK[flag])):
+                         card_type_back in CARD_TYPES_NO_FLAGS_BACK[flag]) or
+                        (flag in CARD_SPHERES_NO_FLAGS and
+                         card_sphere_back in CARD_SPHERES_NO_FLAGS[flag])):
                     message = 'Redundant flag back "{}" for row #{}{}'.format(
                         flag, i, scratch)
                     logging.error(message)
