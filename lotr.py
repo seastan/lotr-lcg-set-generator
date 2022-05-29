@@ -3301,7 +3301,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
             found_ring_flag = False
             for flag in flags:
-                if ((flag in CARD_TYPES_FLAGS and  # pylint: R0916
+                if ((flag in CARD_TYPES_FLAGS and  # pylint: disable=R0916
                      card_type not in CARD_TYPES_FLAGS[flag]) or
                         (flag in CARD_TYPES_NO_FLAGS and
                          card_type in CARD_TYPES_NO_FLAGS[flag]) or
@@ -3355,7 +3355,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
             found_ring_flag = False
             for flag in flags:
-                if ((flag in CARD_TYPES_FLAGS_BACK and  # pylint: R0916
+                if ((flag in CARD_TYPES_FLAGS_BACK and  # pylint: disable=R0916
                      card_type_back not in CARD_TYPES_FLAGS_BACK[flag]) or
                         (flag in CARD_TYPES_NO_FLAGS_BACK and
                          card_type_back in CARD_TYPES_NO_FLAGS_BACK[flag]) or
