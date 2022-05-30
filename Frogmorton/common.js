@@ -869,8 +869,16 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 			card['Text'] = ' ';
 		}
 
+		if ((doubleSideTypes.indexOf(card['Type'] + '') == -1) && card['BName'] && !card['BText']) {
+			card['BText'] = ' ';
+		}
+
 		if (!card['Artist']) {
 			card['Artist'] = 'Unknown Artist';
+		}
+
+		if ((doubleSideTypes.indexOf(card['Type'] + '') == -1) && card['BName'] && !card['BArtist']) {
+			card['BArtist'] = 'Unknown Artist';
 		}
 
 		if (card['Flags']) {
