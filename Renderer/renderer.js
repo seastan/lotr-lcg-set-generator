@@ -3,6 +3,7 @@ const he = require('he');
 const {XMLParser} = require('fast-xml-parser');
 eval(fs.readFileSync('../Frogmorton/common.js') + '');
 
+const generatedImagesFolderCheck = 'GeneratedImages/';
 const generatedImagesFolder = '../GeneratedImages/';
 const iconsFolder = '../Icons/';
 const imagesFolder = '../Images/';
@@ -323,7 +324,16 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['Artist-region'][3] + 'px">' + data['Bottom-format'] + data['LRL-IllustratorShort'] + ' ' + data.Artist + data['Bottom-formatEnd'] + '</div>';
+            var suffix = '';
+            if (data.SuffixRenderer == '-2') {
+                suffix = '.B';
+            }
+            var bottomColour = data['Bottom-colour'];
+            if ((landscapeTypes.indexOf(data.TypeRenderer) > -1) && !fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + suffix + '.jpg')) {
+                bottomColour = '#000000';
+            }
+
+            return '<div style="color: ' + bottomColour + '; line-height: ' + data['Artist-region'][3] + 'px">' + data['Bottom-format'] + data['LRL-IllustratorShort'] + ' ' + data.Artist + data['Bottom-formatEnd'] + '</div>';
         },
         'Asterisk': function(data) {
             if (parseInt(data.Asterisk) == 0) {
@@ -384,14 +394,32 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionInfo-region'][3] + 'px">' + data['Bottom-format'] + data.CollectionInfo + data['Bottom-formatEnd'] + '</div>';
+            var suffix = '';
+            if (data.SuffixRenderer == '-2') {
+                suffix = '.B';
+            }
+            var bottomColour = data['Bottom-colour'];
+            if ((landscapeTypes.indexOf(data.TypeRenderer) > -1) && !fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + suffix + '.jpg')) {
+                bottomColour = '#000000';
+            }
+
+            return '<div style="color: ' + bottomColour + '; line-height: ' + data['CollectionInfo-region'][3] + 'px">' + data['Bottom-format'] + data.CollectionInfo + data['Bottom-formatEnd'] + '</div>';
         },
         'CollectionNumber': function(data) {
             if ((data.CollectionNumberCustom + '' == '') && (data.CollectionNumberCustomOverwrite + '' == '')) {
                 return '';
             }
 
-            return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionNumber-region'][3] + 'px">' + data['Bottom-format'] +
+            var suffix = '';
+            if (data.SuffixRenderer == '-2') {
+                suffix = '.B';
+            }
+            var bottomColour = data['Bottom-colour'];
+            if ((landscapeTypes.indexOf(data.TypeRenderer) > -1) && !fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + suffix + '.jpg')) {
+                bottomColour = '#000000';
+            }
+
+            return '<div style="color: ' + bottomColour + '; line-height: ' + data['CollectionNumber-region'][3] + 'px">' + data['Bottom-format'] +
                 (data.CollectionNumberCustomOverwrite + '' || data.CollectionNumberCustom) + data['Bottom-formatEnd'] + '</div>';
         },
         'Copyright': function(data) {
@@ -403,7 +431,16 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['Copyright-region'][3] + 'px">' + data['Bottom-format'] + data.Copyright + data['Bottom-formatEnd'] + '</div>';
+            var suffix = '';
+            if (data.SuffixRenderer == '-2') {
+                suffix = '.B';
+            }
+            var bottomColour = data['Bottom-colour'];
+            if ((landscapeTypes.indexOf(data.TypeRenderer) > -1) && !fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + suffix + '.jpg')) {
+                bottomColour = '#000000';
+            }
+
+            return '<div style="color: ' + bottomColour + '; line-height: ' + data['Copyright-region'][3] + 'px">' + data['Bottom-format'] + data.Copyright + data['Bottom-formatEnd'] + '</div>';
         },
         'Cycle': function(data) {
             if (data.Cycle + '' == '') {
@@ -537,7 +574,10 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             if (data.SuffixRenderer == '-2') {
                 suffix = '.B';
             }
-            var content = '<img src="' + generatedImagesFolder + data.IdRenderer + suffix + '.jpg" width="100%" height="100%">';
+            var content = '';
+            if (fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + suffix + '.jpg')) {
+                content = '<img src="' + generatedImagesFolder + data.IdRenderer + suffix + '.jpg" width="100%" height="100%">';
+            }
             return content;
         },
         'Progress': function(data) {
@@ -638,7 +678,12 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['ArtistBack-region'][3] + 'px">' + data['Bottom-format'] + data['LRL-IllustratorShort'] +
+            var bottomColour = data['Bottom-colour'];
+            if ((landscapeTypes.indexOf(data.TypeRenderer) > -1) && !fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + '.B.jpg')) {
+                bottomColour = '#000000';
+            }
+
+            return '<div style="color: ' + bottomColour + '; line-height: ' + data['ArtistBack-region'][3] + 'px">' + data['Bottom-format'] + data['LRL-IllustratorShort'] +
                 ' ' + (data.ArtistBack + '' || data.Artist) + data['Bottom-formatEnd'] + '</div>';
         },
         'AsteriskBack': function(data) {
@@ -680,14 +725,24 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionInfoBack-region'][3] + 'px">' + data['Bottom-format'] + data.CollectionInfo + data['Bottom-formatEnd'] + '</div>';
+            var bottomColour = data['Bottom-colour'];
+            if ((landscapeTypes.indexOf(data.TypeRenderer) > -1) && !fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + '.B.jpg')) {
+                bottomColour = '#000000';
+            }
+
+            return '<div style="color: ' + bottomColour + '; line-height: ' + data['CollectionInfoBack-region'][3] + 'px">' + data['Bottom-format'] + data.CollectionInfo + data['Bottom-formatEnd'] + '</div>';
         },
         'CollectionNumberBack': function(data) {
             if ((data.CollectionNumberCustom + '' == '') && (data.CollectionNumberCustomOverwriteBack + '' == '')) {
                 return '';
             }
 
-            return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionNumberBack-region'][3] + 'px">' + data['Bottom-format'] +
+            var bottomColour = data['Bottom-colour'];
+            if ((landscapeTypes.indexOf(data.TypeRenderer) > -1) && !fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + '.B.jpg')) {
+                bottomColour = '#000000';
+            }
+
+            return '<div style="color: ' + bottomColour + '; line-height: ' + data['CollectionNumberBack-region'][3] + 'px">' + data['Bottom-format'] +
                 (data.CollectionNumberCustomOverwriteBack + '' || data.CollectionNumberCustom) + data['Bottom-formatEnd'] + '</div>';
         },
         'CopyrightBack': function(data) {
@@ -699,7 +754,12 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['CopyrightBack-region'][3] + 'px">' + data['Bottom-format'] + data.Copyright + data['Bottom-formatEnd'] + '</div>';
+            var bottomColour = data['Bottom-colour'];
+            if ((landscapeTypes.indexOf(data.TypeRenderer) > -1) && !fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + '.B.jpg')) {
+                bottomColour = '#000000';
+            }
+
+            return '<div style="color: ' + bottomColour + '; line-height: ' + data['CopyrightBack-region'][3] + 'px">' + data['Bottom-format'] + data.Copyright + data['Bottom-formatEnd'] + '</div>';
         },
         'EncounterSetBack-portrait-clip': function(data) {
             if (data['EncounterSet-external-path'] + '' == '') {
@@ -742,7 +802,10 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             return '<div style="text-align: right">' + data['PageIn-format'] + data['LRL-Page'] + ' ' + data.PageNumberBack + data['LRL-PageOf'] + data.PageTotalBack + data['PageIn-formatEnd'] + '</div>';
         },
         'PortraitBack-portrait-clip': function(data) {
-            var content = '<img src="' + generatedImagesFolder + data.IdRenderer + '.B.jpg" width="100%" height="100%">';
+            var content = '';
+            if (fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + '.B.jpg')) {
+                content = '<img src="' + generatedImagesFolder + data.IdRenderer + '.B.jpg" width="100%" height="100%">';
+            }
             return content;
         },
         'ProgressBack': function(data) {
