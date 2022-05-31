@@ -1572,12 +1572,6 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('Bottom-stroke-colour', '#00000000');
 					s.set('Bottom-stroke-width', 1);
 				}
-				else if ((context == 'renderer') && (cardType == 'Region')) {
-					s.set('Bottom-colour', '#000000');
-					s.set('Bottom-stroke', 'Custom');
-					s.set('Bottom-stroke-colour', '#00000000');
-					s.set('Bottom-stroke-width', 1);
-				}
 				else {
 					s.set('Bottom-colour', '#FFFFFF');
 					s.set('Bottom-stroke', 'Medium');
