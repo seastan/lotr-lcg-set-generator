@@ -43,6 +43,7 @@ RCLONE_IMAGE_FOLDER_CMD = "rclone lsjson 'ALePRenderedImages:/{}/'"
 RCLONE_MOVE_CLOUD_ART_CMD = \
     "rclone move 'ALePCardImages:/{}/{}' 'ALePCardImages:/{}/'"
 RCLONE_RENDERED_FOLDER_CMD = "rclone lsjson 'ALePRenderedImages:/{}/'"
+RCLONE_RENDERER_CMD = './rclone_renderer.sh'
 REMOTE_CRON_TIMESTAMP_CMD = './remote_cron_timestamp.sh "{}"'
 RESTART_BOT_CMD = './restart_discord_bot.sh'
 RESTART_CRON_CMD = './restart_run_before_se_service.sh'
@@ -1605,6 +1606,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
             REMOTE_CRON_TIMESTAMP_CMD.format(CONF.get('remote_logs_path')))
         if stdout == '1' and self.notifications_channel:
             clear_rendered_images()
+            await run_shell(RCLONE_RENDERER_CMD)
             await self._send_channel(
                 self.notifications_channel,
                 'New card images are available in Discord and DragnCards')
