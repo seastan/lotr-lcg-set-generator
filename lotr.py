@@ -460,6 +460,7 @@ OUTPUT_SPANISHDB_IMAGES_PATH = os.path.join(OUTPUT_PATH, 'SpanishDBImages')
 OUTPUT_TTS_PATH = os.path.join(OUTPUT_PATH, 'TTS')
 PROJECT_PATH = 'setGenerator.seproject'
 PROJECT_CREATED_PATH = 'setGenerator_CREATED'
+RENDERER_GENERATED_IMAGES_PATH = os.path.join('Renderer', 'GeneratedImages')
 REPROCESS_ALL_PATH = 'REPROCESS_ALL'
 RINGSDB_COOKIES_PATH = 'ringsdb_cookies.json'
 RINGSDB_JSON_PATH = 'ringsdb.json'
@@ -6696,6 +6697,13 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
     encounter_sets = {}
     encounter_cards = {}
 
+    external_data = {}
+    external_path = os.path.join(RENDERER_GENERATED_IMAGES_PATH,
+                                 'artists_{}.json'.format(set_id))
+    if conf['renderer'] and os.path.exists(external_path):
+        with open(external_path, 'r', encoding='utf-8') as fobj:
+            external_data = json.load(fobj)
+
     for card in root[0]:
         card_type = _find_properties(card, 'Type')
         card_type = card_type and card_type[0].attrib['value']
@@ -6742,6 +6750,12 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                     '_Artist_'.join(
                         os.path.split(filename)[-1].split('_Artist_')[1:]
                         ).split('.')[:-1]).replace('_', ' '))
+                prop.tail = '\n      '
+
+            artist = _find_properties(card, 'Artist')
+            if not artist and card.attrib['id'] in external_data:
+                prop = _get_property(card, 'Artist')
+                prop.set('value', external_data[card.attrib['id']])
                 prop.tail = '\n      '
         elif card_type != 'Rules' and conf['validate_missing_images']:
             logging.error('No image detected for card %s (%s)',
@@ -6818,6 +6832,13 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                         os.path.split(filename)[-1].split('_Artist_')[1:]
                         ).split('.')[:-1]).replace('_', ' '))
                 prop.tail = '\n        '
+
+            artist = _find_properties(alternate, 'Artist')
+            artist_id = '{}.B'.format(card.attrib['id'])
+            if not artist and artist_id in external_data:
+                prop = _get_property(alternate, 'Artist')
+                prop.set('value', external_data[artist_id])
+                prop.tail = '\n      '
 
             properties = [p for p in alternate]  # pylint: disable=R1721
             properties[-1].tail = re.sub(r'  $', '', properties[-1].tail)
@@ -8474,6 +8495,19 @@ def _extract_image_properties(root):
     return data
 
 
+def _extract_artist_name(root):
+    """ Extract the artist name from the XML file.
+    """
+    artwork_path = _find_properties(root, 'Artwork')
+    artwork_path = artwork_path and artwork_path[0].attrib['value']
+    if not artwork_path or not '_Artist_' in artwork_path:
+        return None
+
+    artist = '.'.join('_Artist_'.join(artwork_path.split('_Artist_')[1:])
+                      .split('.')[:-1]).replace('_', ' ')
+    return artist
+
+
 def _extract_custom_images(root):
     """ Extract information about custom images from the XML file.
     """
@@ -8491,21 +8525,23 @@ def _extract_custom_images(root):
 
 
 def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R0915
-    """ Generate artwork for DragnCards proxy images.
+    """ Generate artwork and artist names for DragnCards proxy images.
     """
-    logging.info('[%s] Generating artwork for DragnCards proxy images...',
-                 set_name)
+    logging.info('[%s] Generating artwork and artist names for DragnCards '
+                 'proxy images...', set_name)
     timestamp = time.time()
 
     xml_path = os.path.join(SET_EONS_PATH, '{}.English.xml'.format(set_id))
     if not os.path.exists(xml_path):
         logging.error('[%s] No XML found', set_name)
-        logging.info('[%s] ...Generating artwork for DragnCards proxy images '
-                     '(%ss)', set_name, round(time.time() - timestamp, 3))
+        logging.info('[%s] ...Generating artwork and artist names for '
+                     'DragnCards proxy images (%ss)', set_name,
+                     round(time.time() - timestamp, 3))
         return
 
     images = {}
     custom_images = set()
+    artists = {}
     tree = ET.parse(xml_path)
     root = tree.getroot()
     for card in root[0]:
@@ -8518,6 +8554,10 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
         if data:
             images[card_id] = data
 
+        artist = _extract_artist_name(card)
+        if artist:
+            artists[card_id] = artist
+
         alternate = [a for a in card if a.attrib.get('type') == 'B']
         if alternate:
             alternate = alternate[0]
@@ -8528,6 +8568,13 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
                 images['{}.B'.format(card_id)] = data_back
             elif data and data['card_type'] in ('Quest', 'Contract'):
                 images['{}.B'.format(card_id)] = data.copy()
+
+            artist_back = _extract_artist_name(alternate)
+            if artist_back:
+                artists['{}.B'.format(card_id)] = artist_back
+            elif (artist and data and
+                  data['card_type'] in ('Quest', 'Contract')):
+                artists['{}.B'.format(card_id)] = artist
 
     old_xml_path = os.path.join(SET_EONS_PATH,
                                 '{}.English.xml.old'.format(set_id))
@@ -8640,10 +8687,20 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
 
                 break
 
+    if artists:
+        artists_filename = 'artists_{}.json'.format(set_id)
+        with open(os.path.join(temp_path, artists_filename), 'w',
+                  encoding='utf-8') as fobj:
+            json.dump(artists, fobj)
+
+        shutil.move(os.path.join(temp_path, artists_filename),
+                    os.path.join(output_path, artists_filename))
+
     delete_folder(temp_path)
 
-    logging.info('[%s] ...Generating artwork for DragnCards proxy images '
-                 '(%ss)', set_name, round(time.time() - timestamp, 3))
+    logging.info('[%s] ...Generating artwork and artist names for DragnCards '
+                 'proxy images (%ss)', set_name,
+                 round(time.time() - timestamp, 3))
 
 
 def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R0912,R0914,R0915
