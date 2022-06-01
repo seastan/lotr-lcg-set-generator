@@ -1,4 +1,4 @@
-# pylint: disable=W0703,C0301
+# pylint: disable=W0703,C0209,C0301
 """ Monitor MakePlayingCards shared URLs.
 """
 from datetime import datetime
@@ -742,14 +742,14 @@ def add_deck(deck_name):
     print('See {} for details'.format(LOG_PATH))
 
 
-def monitor():
+def monitor():  # pylint: disable=R0914
     """ Run the monitoring checks.
     """
     try:
         with open(CONF_PATH, 'r', encoding='utf-8') as fobj:
             data = json.load(fobj)
-    except Exception:
-        raise ConfigurationError('No configuration found')
+    except Exception as exc:
+        raise ConfigurationError('No configuration found') from exc
 
     if not data.get('cookies'):
         raise ConfigurationError('No cookies found')

@@ -1,3 +1,4 @@
+# pylint: disable=C0209
 """ A wrapper around `run_after_se.py` for remote execution.
 """
 import logging

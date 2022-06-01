@@ -1,4 +1,4 @@
-# pylint: disable=C0103,C0302,W0703
+# pylint: disable=C0103,C0209,C0302,W0703
 # -*- coding: utf8 -*-
 """ Discord bot.
 """
@@ -701,10 +701,10 @@ def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
         'hitpoints': prefix + lotr.CARD_HEALTH,
         'progress': prefix + lotr.CARD_QUEST
     }
-    for skill in skill_map:
-        if card.get(skill_map[skill], '') != '':
+    for skill, value in skill_map.items():
+        if card.get(value, '') != '':
             card_skills += '   {} {}'.format(EMOJIS['[{}]'.format(skill)],
-                                             card[skill_map[skill]])
+                                             card[value])
 
     card_skills = card_skills.strip()
     if card_skills:
@@ -1298,10 +1298,10 @@ class MyClient(discord.Client):  # pylint: disable=R0902
     async def get_all_channels_safe(self):
         """ Safe method to get all Discord channels.
         """
-        channels = [c for c in self.get_all_channels()]
+        channels = [c for c in self.get_all_channels()]  # pylint: disable=R1721
         if not channels:
             await asyncio.sleep(COMMUNICATION_SLEEP_TIME)
-            channels = [c for c in self.get_all_channels()]
+            channels = [c for c in self.get_all_channels()]  # pylint: disable=R1721
             if not channels:
                 message = 'No channels obtained from Discord'
                 logging.error(message)
@@ -2888,7 +2888,7 @@ Targets removed.
             filenames = [(f['Name'], f['ModTime']) for f in json.loads(stdout)]
             filenames.sort(key=lambda f: (f[1], f[0]), reverse=True)
             filenames = [f[0] for f in filenames]
-        except Exception:
+        except Exception as exc:
             if 'directory not found' in stderr:
                 return []
 
@@ -2896,7 +2896,7 @@ Targets removed.
                        .format(stdout, stderr))
             logging.error(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
-            raise RCloneFolderError(message)
+            raise RCloneFolderError(message) from exc
 
         return filenames
 
@@ -2908,7 +2908,7 @@ Targets removed.
             RCLONE_IMAGE_FOLDER_CMD.format(set_folder))
         try:
             filenames = [f['Name'] for f in json.loads(stdout)]
-        except Exception:
+        except Exception as exc:
             if 'directory not found' in stderr:
                 return []
 
@@ -2916,7 +2916,7 @@ Targets removed.
                        'stderr: {}'.format(stdout, stderr))
             logging.error(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
-            raise RCloneFolderError(message)
+            raise RCloneFolderError(message) from exc
 
         return filenames
 
@@ -3499,6 +3499,6 @@ if __name__ == '__main__':
     init_logging()
     CONF.update(get_discord_configuration())
     intents = discord.Intents.default()
-    intents.members = True
+    intents.members = True  # pylint: disable=E0237
     client = MyClient(intents=intents)
     client.run(CONF.get('token'))

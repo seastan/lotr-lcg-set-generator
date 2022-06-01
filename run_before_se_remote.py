@@ -1,3 +1,4 @@
+# pylint: disable=C0209
 """ A wrapper around `run_before_se.py` for remote execution.
 """
 import logging
@@ -42,9 +43,9 @@ def run():
 
         try:
             run_before_se.main()
-        except Exception as exc:  # pylint: disable=W0703
+        except Exception as exc_child:  # pylint: disable=W0703
             message = 'Script failed, exiting: {}: {}'.format(
-                type(exc).__name__, str(exc))[:LOG_LIMIT]
+                type(exc_child).__name__, str(exc_child))[:LOG_LIMIT]
             logging.exception(message)
     finally:
         logging.info('Finished: %s', execution_id)

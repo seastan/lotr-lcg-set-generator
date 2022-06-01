@@ -1,3 +1,4 @@
+# pylint: disable=C0209
 # -*- coding: utf8 -*-
 """ Collect various data from Hall of Beorn and RingsDB.
 """
@@ -99,8 +100,8 @@ def collect_traits(data):
         trait[row[0][2]] += row[1]
         trait['Total'] += row[1]
 
-    for trait in res:
-        res[trait]['Mentions'] = sorted([
+    for trait, trait_data in res.items():
+        trait_data['Mentions'] = sorted([
             t[1] for t in text if re.search(r'\b{}\b'.format(trait), t[0])])
 
     res = sorted(list(res.items()), key=lambda i: (-i[1]['Total'], i[0]))
@@ -380,7 +381,7 @@ def create_dragncards_json(pack_name, pack_id):  # pylint: disable=R0912,R0914
 
     file_path = os.path.join(OUTPUT_PATH, '{}.sh'.format(
         escape_filename(pack_name)))
-    with open(file_path, 'w') as obj:
+    with open(file_path, 'w', encoding='utf-8') as obj:
         obj.write(sh_data)
     print('Done')
 

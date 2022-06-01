@@ -1,3 +1,4 @@
+# pylint: disable=C0209
 """ Create mail file from the script arguments.
 """
 from email.header import Header

@@ -1,4 +1,4 @@
-# pylint: disable=W0703,C0301
+# pylint: disable=W0703,C0209,C0301
 """ Monitor remote pipeline.
 """
 from email.header import Header

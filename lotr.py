@@ -1,4 +1,4 @@
-# pylint: disable=C0302
+# pylint: disable=C0209,C0302
 # -*- coding: utf8 -*-
 """ Helper functions for LotR workflow.
 """
@@ -1367,8 +1367,8 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
             try:
                 SHEET_IDS.update(dict(row for row in
                                       csv.reader(res.splitlines())))
-            except ValueError:
-                raise SheetError("Can't download the Google Sheet")
+            except ValueError as exc:
+                raise SheetError("Can't download the Google Sheet") from exc
 
             if conf['offline_mode']:
                 _save_content(url, res_raw, 'csv')
@@ -1406,9 +1406,9 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
                 data = list(csv.reader(StringIO(res)))
                 none_index = (data[0].index('') if '' in data[0]
                               else len(data[0]))
-            except Exception:  # pylint: disable=W0703
+            except Exception as exc:  # pylint: disable=W0703
                 raise SheetError("Can't download {} from the Google Sheet"
-                                 .format(sheet))
+                                 .format(sheet)) from exc
 
             if conf['offline_mode']:
                 _save_content(url, res_raw, 'csv')
@@ -2983,7 +2983,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     errors.append(message)
                 else:
                     broken_set_ids.add(set_id)
-            elif not (is_positive_int(str(card_victory).split('/')[0]) and
+            elif not (is_positive_int(str(card_victory)
+                                      .split('/', maxsplit=1)[0]) and
                       is_positive_int(str(card_victory).split('/')[1])):
                 message = ('Incorrect format for victory points for row '
                            '#{}{}'.format(i, scratch))
@@ -3027,7 +3028,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     errors.append(message)
                 else:
                     broken_set_ids.add(set_id)
-            elif not (is_positive_int(str(card_victory_back).split('/')[0]) and
+            elif not (is_positive_int(str(card_victory_back)
+                                      .split('/', maxsplit=1)[0]) and
                       is_positive_int(str(card_victory_back).split('/')[1])):
                 message = ('Incorrect format for victory points back for row '
                            '#{}{}'.format(i, scratch))
@@ -6722,7 +6724,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
         if encounter_set:
             encounter_set = encounter_set[0].attrib['value']
 
-        properties = [p for p in card]
+        properties = [p for p in card]  # pylint: disable=R1721
         if properties:
             properties[-1].tail = '{}  '.format(properties[-1].tail)
 
@@ -6820,7 +6822,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
             if image_id in images:
                 filename = images[image_id][0]
                 images[image_id][1] = True
-                properties = [p for p in alternate]
+                properties = [p for p in alternate]  # pylint: disable=R1721
                 if properties:
                     properties[-1].tail = '{}  '.format(properties[-1].tail)
 
@@ -6850,7 +6852,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                 prop.set('value', external_data[artist_id])
                 prop.tail = '\n      '
 
-            properties = [p for p in alternate]
+            properties = [p for p in alternate]  # pylint: disable=R1721
             if properties:
                 properties[-1].tail = re.sub(r'  $', '', properties[-1].tail)
 
@@ -6943,7 +6945,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                 encounter_sets[encounter_cards[card.attrib['id']]]))
             prop.tail = '\n      '
 
-        properties = [p for p in card]
+        properties = [p for p in card]  # pylint: disable=R1721
         if properties:
             properties[-1].tail = re.sub(r'  $', '', properties[-1].tail)
 
@@ -7227,7 +7229,7 @@ def _run_cmd(cmd):
         return res
     except subprocess.CalledProcessError as exc:
         raise RuntimeError('Command "{}" returned error with code {}: {}'
-                           .format(cmd, exc.returncode, exc.output))
+                           .format(cmd, exc.returncode, exc.output)) from exc
 
 
 def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
@@ -8619,10 +8621,10 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
 
     if images:
         images_cnt = len(images.keys())
-        for key in images:
-            images[key]['path'] = os.path.join(conf['artwork_path'], set_id,
-                                               images[key]['path'])
-            del images[key]['snapshot']
+        for value in images.values():
+            value['path'] = os.path.join(conf['artwork_path'], set_id,
+                                         value['path'])
+            del value['snapshot']
 
         json_path = os.path.join(temp_path, 'images.json')
         with open(json_path, 'w',
@@ -9283,9 +9285,9 @@ def generate_pdf(conf, set_id, set_name, lang, card_data):  # pylint: disable=R0
 
     create_folder(output_path)
     pages_raw = []
-    for key in images:
-        pages_raw.extend([(images[key][i * 6:(i + 1) * 6] + [None] * 6)[:6]
-                          for i in range(math.ceil(len(images[key]) / 6))])
+    for value in images.values():
+        pages_raw.extend([(value[i * 6:(i + 1) * 6] + [None] * 6)[:6]
+                          for i in range(math.ceil(len(value) / 6))])
 
     pages = []
     for page in pages_raw:
@@ -9311,12 +9313,12 @@ def generate_pdf(conf, set_id, set_name, lang, card_data):  # pylint: disable=R0
     left_image = os.path.join(IMAGES_OTHER_PATH, 'left_marks.png')
     right_image = os.path.join(IMAGES_OTHER_PATH, 'right_marks.png')
 
-    for page_format in formats:
+    for page_format, obj in formats.items():
         canvas = Canvas(
             os.path.join(output_path, 'Home.{}.{}.{}.pdf'.format(
                 page_format, escape_filename(set_name), lang)),
-            pagesize=landscape(formats[page_format]))
-        width, height = landscape(formats[page_format])
+            pagesize=landscape(obj))
+        width, height = landscape(obj)
         width_margin = (width - 3 * card_width) / 2
         height_margin = (height - 2 * card_height) / 2
         for num, page in enumerate(pages):
@@ -9381,9 +9383,9 @@ def generate_genericpng_pdf(conf, set_id, set_name, lang, card_data):  # pylint:
     clear_folder(temp_path)
     create_folder(output_path)
     pages_raw = []
-    for key in images:
-        pages_raw.extend([(images[key][i * 6:(i + 1) * 6] + [None] * 6)[:6]
-                          for i in range(math.ceil(len(images[key]) / 6))])
+    for value in images.values():
+        pages_raw.extend([(value[i * 6:(i + 1) * 6] + [None] * 6)[:6]
+                          for i in range(math.ceil(len(value) / 6))])
 
     pages = []
     for page in pages_raw:
@@ -9421,12 +9423,12 @@ def generate_genericpng_pdf(conf, set_id, set_name, lang, card_data):  # pylint:
     left_image = os.path.join(IMAGES_OTHER_PATH, 'left_marks.png')
     right_image = os.path.join(IMAGES_OTHER_PATH, 'right_marks.png')
 
-    for page_format in formats:
+    for page_format, format_data in formats.items():
         pdf_filename = '800dpi.{}.{}.{}.pdf'.format(
             page_format, escape_filename(set_name), lang)
         pdf_path = os.path.join(temp_path, pdf_filename)
-        canvas = Canvas(pdf_path, pagesize=landscape(formats[page_format][0]))
-        width, height = landscape(formats[page_format][0])
+        canvas = Canvas(pdf_path, pagesize=landscape(format_data[0]))
+        width, height = landscape(format_data[0])
         width_margin = (width - 3 * card_width) / 2
         height_margin = (height - 2 * card_height) / 2
         for num, page in enumerate(pages):
@@ -9461,13 +9463,13 @@ def generate_genericpng_pdf(conf, set_id, set_name, lang, card_data):  # pylint:
 
         canvas.save()
 
-        if 'zip' in formats[page_format][1]:
+        if 'zip' in format_data[1]:
             with zipfile.ZipFile(
                     os.path.join(output_path, '{}.zip'.format(pdf_filename)),
                     'w') as obj:
                 obj.write(pdf_path, pdf_filename)
 
-        if '7z' in formats[page_format][1]:
+        if '7z' in format_data[1]:
             with py7zr.SevenZipFile(
                     os.path.join(output_path, '{}.7z'.format(pdf_filename)),
                     'w', filters=PY7ZR_FILTERS) as obj:
@@ -10480,10 +10482,11 @@ def update_ringsdb(conf, sets):
         if conf['ringsdb_url'].startswith('https://'):
             session.mount('https://', TLSAdapter())
 
-        res = session.post(
-            '{}/admin/csv/upload'.format(conf['ringsdb_url']),
-            files={'upfile': open(path, 'rb')},
-            data={'code': SETS[set_id][SET_HOB_CODE], 'name': set_name})
+        with open(path, 'rb') as fobj:
+            res = session.post(
+                '{}/admin/csv/upload'.format(conf['ringsdb_url']),
+                files={'upfile': fobj},
+                data={'code': SETS[set_id][SET_HOB_CODE], 'name': set_name})
         res = res.content.decode('utf-8')
         if res != 'Done':
             raise RingsDBError('Error uploading {} to ringsdb.com: {}'

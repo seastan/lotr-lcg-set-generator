@@ -1,4 +1,4 @@
-# pylint: disable=W0703,C0301
+# pylint: disable=W0703,C0209,C0301
 """ Backup Google Docs and Google Sheets links.
 """
 from datetime import datetime
@@ -115,8 +115,8 @@ def main(backup_path):
     try:
         with open(CONF_PATH, 'r', encoding='utf-8') as fobj:
             data = json.load(fobj)
-    except Exception:
-        raise ConfigurationError('No configuration found')
+    except Exception as exc:
+        raise ConfigurationError('No configuration found') from exc
 
     for name in data['docs']:
         backup_doc(backup_path, name, data['docs'][name])
@@ -129,7 +129,7 @@ if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     try:
         main(sys.argv[1])
-    except Exception as exc:
+    except Exception as main_exc:
         create_mail(ERROR_SUBJECT,
-                    'Script failed: {}: {}'.format(type(exc).__name__,
-                                                   str(exc)))
+                    'Script failed: {}: {}'.format(type(main_exc).__name__,
+                                                   str(main_exc)))

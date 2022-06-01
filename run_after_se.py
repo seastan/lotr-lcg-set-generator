@@ -39,6 +39,8 @@ def retry():
                     else:
                         raise
 
+            return None
+
         return _retry
 
     return _wrap
@@ -194,10 +196,10 @@ def execute_tasks(conf, tasks):
         with Pool(processes=processes, initializer=initializer) as pool:
             try:
                 pool.map(run, tasks)
-            except KeyboardInterrupt:
+            except KeyboardInterrupt as exc:
                 logging.info('Program was terminated!')
                 pool.terminate()
-                raise KeyboardInterrupt
+                raise KeyboardInterrupt from exc
 
 
 def main():  # pylint: disable=R0912,R0914,R0915
