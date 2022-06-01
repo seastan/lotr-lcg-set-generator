@@ -30,14 +30,22 @@ import urllib3
 import yaml
 
 try:
-    import png
-    import py7zr
-    from reportlab.lib.pagesizes import landscape, letter, A4
-    from reportlab.lib.units import inch
-    from reportlab.pdfgen.canvas import Canvas
+    import png  # pylint: disable=E0401
+except ModuleNotFoundError:
+    pass
+
+try:
+    import py7zr  # pylint: disable=E0401
     PY7ZR_FILTERS = [{'id': py7zr.FILTER_LZMA2,
                       'preset': 9 | py7zr.PRESET_EXTREME}]
-except Exception:  # pylint: disable=W0703
+except ModuleNotFoundError:
+    PY7ZR_FILTERS = None
+
+try:
+    from reportlab.lib.pagesizes import landscape, letter, A4  # pylint: disable=E0401
+    from reportlab.lib.units import inch  # pylint: disable=E0401
+    from reportlab.pdfgen.canvas import Canvas  # pylint: disable=E0401
+except ModuleNotFoundError:
     pass
 
 
@@ -6704,6 +6712,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
         with open(external_path, 'r', encoding='utf-8') as fobj:
             external_data = json.load(fobj)
 
+    logging.info(external_data)
     for card in root[0]:
         card_type = _find_properties(card, 'Type')
         card_type = card_type and card_type[0].attrib['value']
@@ -6713,7 +6722,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
         if encounter_set:
             encounter_set = encounter_set[0].attrib['value']
 
-        properties = [p for p in card]  # pylint: disable=R1721
+        properties = [p for p in card]
         if properties:
             properties[-1].tail = '{}  '.format(properties[-1].tail)
 
@@ -6751,15 +6760,15 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                         os.path.split(filename)[-1].split('_Artist_')[1:]
                         ).split('.')[:-1]).replace('_', ' '))
                 prop.tail = '\n      '
-
-            artist = _find_properties(card, 'Artist')
-            if not artist and card.attrib['id'] in external_data:
-                prop = _get_property(card, 'Artist')
-                prop.set('value', external_data[card.attrib['id']])
-                prop.tail = '\n      '
         elif card_type != 'Rules' and conf['validate_missing_images']:
             logging.error('No image detected for card %s (%s)',
                           card.attrib['id'], card.attrib['name'])
+
+        artist = _find_properties(card, 'Artist')
+        if not artist and card.attrib['id'] in external_data:
+            prop = _get_property(card, 'Artist')
+            prop.set('value', external_data[card.attrib['id']])
+            prop.tail = '\n      '
 
         if card_type == 'Presentation':
             image_id = '{}_{}_{}'.format(card.attrib['id'], 'Top', lang)
@@ -6807,31 +6816,32 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
             alternate = alternate[0]
 
         image_id = '{}_{}'.format(card.attrib['id'], 'B')
-        if alternate and image_id in images:
-            filename = images[image_id][0]
-            images[image_id][1] = True
-            properties = [p for p in alternate]  # pylint: disable=R1721
-            if properties:
-                properties[-1].tail = '{}  '.format(properties[-1].tail)
+        if alternate:
+            if image_id in images:
+                filename = images[image_id][0]
+                images[image_id][1] = True
+                properties = [p for p in alternate]
+                if properties:
+                    properties[-1].tail = '{}  '.format(properties[-1].tail)
 
-            prop = _get_property(alternate, 'Artwork')
-            prop.set('value', os.path.split(filename)[-1])
-            prop.tail = '\n        '
-            prop = _get_property(alternate, 'Artwork Size')
-            prop.set('value', str(os.path.getsize(filename)))
-            prop.tail = '\n        '
-            prop = _get_property(alternate, 'Artwork Modified')
-            prop.set('value', str(int(os.path.getmtime(filename))))
-            prop.tail = '\n        '
-
-            artist = _find_properties(alternate, 'Artist')
-            if not artist and '_Artist_' in os.path.split(filename)[-1]:
-                prop = _get_property(alternate, 'Artist')
-                prop.set('value', '.'.join(
-                    '_Artist_'.join(
-                        os.path.split(filename)[-1].split('_Artist_')[1:]
-                        ).split('.')[:-1]).replace('_', ' '))
+                prop = _get_property(alternate, 'Artwork')
+                prop.set('value', os.path.split(filename)[-1])
                 prop.tail = '\n        '
+                prop = _get_property(alternate, 'Artwork Size')
+                prop.set('value', str(os.path.getsize(filename)))
+                prop.tail = '\n        '
+                prop = _get_property(alternate, 'Artwork Modified')
+                prop.set('value', str(int(os.path.getmtime(filename))))
+                prop.tail = '\n        '
+
+                artist = _find_properties(alternate, 'Artist')
+                if not artist and '_Artist_' in os.path.split(filename)[-1]:
+                    prop = _get_property(alternate, 'Artist')
+                    prop.set('value', '.'.join(
+                        '_Artist_'.join(
+                            os.path.split(filename)[-1].split('_Artist_')[1:]
+                            ).split('.')[:-1]).replace('_', ' '))
+                    prop.tail = '\n        '
 
             artist = _find_properties(alternate, 'Artist')
             artist_id = '{}.B'.format(card.attrib['id'])
@@ -6840,8 +6850,9 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                 prop.set('value', external_data[artist_id])
                 prop.tail = '\n      '
 
-            properties = [p for p in alternate]  # pylint: disable=R1721
-            properties[-1].tail = re.sub(r'  $', '', properties[-1].tail)
+            properties = [p for p in alternate]
+            if properties:
+                properties[-1].tail = re.sub(r'  $', '', properties[-1].tail)
 
         try:
             text = _find_properties(card, 'Text')[0].attrib['value']
@@ -6932,7 +6943,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                 encounter_sets[encounter_cards[card.attrib['id']]]))
             prop.tail = '\n      '
 
-        properties = [p for p in card]  # pylint: disable=R1721
+        properties = [p for p in card]
         if properties:
             properties[-1].tail = re.sub(r'  $', '', properties[-1].tail)
 
