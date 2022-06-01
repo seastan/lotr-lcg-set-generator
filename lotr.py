@@ -6714,7 +6714,6 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
         with open(external_path, 'r', encoding='utf-8') as fobj:
             external_data = json.load(fobj)
 
-    logging.info(external_data)
     for card in root[0]:
         card_type = _find_properties(card, 'Type')
         card_type = card_type and card_type[0].attrib['value']
