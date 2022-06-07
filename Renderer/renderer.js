@@ -324,16 +324,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var suffix = '';
-            if (data.SuffixRenderer == '-2') {
-                suffix = '.B';
-            }
-            var bottomColour = data['Bottom-colour'];
-            if ((landscapeTypes.indexOf(data.TypeRenderer) > -1) && !fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + suffix + '.jpg')) {
-                bottomColour = '#000000';
-            }
-
-            return '<div style="color: ' + bottomColour + '; line-height: ' + data['Artist-region'][3] + 'px">' + data['Bottom-format'] + data['LRL-IllustratorShort'] + ' ' + data.Artist + data['Bottom-formatEnd'] + '</div>';
+            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['Artist-region'][3] + 'px">' + data['Bottom-format'] + data['LRL-IllustratorShort'] + ' ' + data.Artist + data['Bottom-formatEnd'] + '</div>';
         },
         'Asterisk': function(data) {
             if (parseInt(data.Asterisk) == 0) {
@@ -394,32 +385,14 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var suffix = '';
-            if (data.SuffixRenderer == '-2') {
-                suffix = '.B';
-            }
-            var bottomColour = data['Bottom-colour'];
-            if ((landscapeTypes.indexOf(data.TypeRenderer) > -1) && !fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + suffix + '.jpg')) {
-                bottomColour = '#000000';
-            }
-
-            return '<div style="color: ' + bottomColour + '; line-height: ' + data['CollectionInfo-region'][3] + 'px">' + data['Bottom-format'] + data.CollectionInfo + data['Bottom-formatEnd'] + '</div>';
+            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionInfo-region'][3] + 'px">' + data['Bottom-format'] + data.CollectionInfo + data['Bottom-formatEnd'] + '</div>';
         },
         'CollectionNumber': function(data) {
             if ((data.CollectionNumberCustom + '' == '') && (data.CollectionNumberCustomOverwrite + '' == '')) {
                 return '';
             }
 
-            var suffix = '';
-            if (data.SuffixRenderer == '-2') {
-                suffix = '.B';
-            }
-            var bottomColour = data['Bottom-colour'];
-            if ((landscapeTypes.indexOf(data.TypeRenderer) > -1) && !fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + suffix + '.jpg')) {
-                bottomColour = '#000000';
-            }
-
-            return '<div style="color: ' + bottomColour + '; line-height: ' + data['CollectionNumber-region'][3] + 'px">' + data['Bottom-format'] +
+            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionNumber-region'][3] + 'px">' + data['Bottom-format'] +
                 (data.CollectionNumberCustomOverwrite + '' || data.CollectionNumberCustom) + data['Bottom-formatEnd'] + '</div>';
         },
         'Copyright': function(data) {
@@ -431,16 +404,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var suffix = '';
-            if (data.SuffixRenderer == '-2') {
-                suffix = '.B';
-            }
-            var bottomColour = data['Bottom-colour'];
-            if ((landscapeTypes.indexOf(data.TypeRenderer) > -1) && !fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + suffix + '.jpg')) {
-                bottomColour = '#000000';
-            }
-
-            return '<div style="color: ' + bottomColour + '; line-height: ' + data['Copyright-region'][3] + 'px">' + data['Bottom-format'] + data.Copyright + data['Bottom-formatEnd'] + '</div>';
+            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['Copyright-region'][3] + 'px">' + data['Bottom-format'] + data.Copyright + data['Bottom-formatEnd'] + '</div>';
         },
         'Cycle': function(data) {
             if (data.Cycle + '' == '') {
@@ -678,12 +642,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var bottomColour = data['Bottom-colour'];
-            if ((landscapeTypes.indexOf(data.TypeRenderer) > -1) && !fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + '.B.jpg')) {
-                bottomColour = '#000000';
-            }
-
-            return '<div style="color: ' + bottomColour + '; line-height: ' + data['ArtistBack-region'][3] + 'px">' + data['Bottom-format'] + data['LRL-IllustratorShort'] +
+            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['ArtistBack-region'][3] + 'px">' + data['Bottom-format'] + data['LRL-IllustratorShort'] +
                 ' ' + (data.ArtistBack + '' || data.Artist) + data['Bottom-formatEnd'] + '</div>';
         },
         'AsteriskBack': function(data) {
@@ -725,24 +684,14 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var bottomColour = data['Bottom-colour'];
-            if ((landscapeTypes.indexOf(data.TypeRenderer) > -1) && !fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + '.B.jpg')) {
-                bottomColour = '#000000';
-            }
-
-            return '<div style="color: ' + bottomColour + '; line-height: ' + data['CollectionInfoBack-region'][3] + 'px">' + data['Bottom-format'] + data.CollectionInfo + data['Bottom-formatEnd'] + '</div>';
+            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionInfoBack-region'][3] + 'px">' + data['Bottom-format'] + data.CollectionInfo + data['Bottom-formatEnd'] + '</div>';
         },
         'CollectionNumberBack': function(data) {
             if ((data.CollectionNumberCustom + '' == '') && (data.CollectionNumberCustomOverwriteBack + '' == '')) {
                 return '';
             }
 
-            var bottomColour = data['Bottom-colour'];
-            if ((landscapeTypes.indexOf(data.TypeRenderer) > -1) && !fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + '.B.jpg')) {
-                bottomColour = '#000000';
-            }
-
-            return '<div style="color: ' + bottomColour + '; line-height: ' + data['CollectionNumberBack-region'][3] + 'px">' + data['Bottom-format'] +
+            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionNumberBack-region'][3] + 'px">' + data['Bottom-format'] +
                 (data.CollectionNumberCustomOverwriteBack + '' || data.CollectionNumberCustom) + data['Bottom-formatEnd'] + '</div>';
         },
         'CopyrightBack': function(data) {
@@ -754,12 +703,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var bottomColour = data['Bottom-colour'];
-            if ((landscapeTypes.indexOf(data.TypeRenderer) > -1) && !fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + '.B.jpg')) {
-                bottomColour = '#000000';
-            }
-
-            return '<div style="color: ' + bottomColour + '; line-height: ' + data['CopyrightBack-region'][3] + 'px">' + data['Bottom-format'] + data.Copyright + data['Bottom-formatEnd'] + '</div>';
+            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['CopyrightBack-region'][3] + 'px">' + data['Bottom-format'] + data.Copyright + data['Bottom-formatEnd'] + '</div>';
         },
         'EncounterSetBack-portrait-clip': function(data) {
             if (data['EncounterSet-external-path'] + '' == '') {
