@@ -1,5 +1,6 @@
 """ LotR workflow (Part 1).
 """
+import json
 import logging
 import os
 import sys
@@ -12,6 +13,26 @@ def init_logging():
     """
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s %(levelname)s: %(message)s')
+
+
+def get_reprocess_count():
+    """ Get the number of reprocessing attempts.
+    """
+    try:
+        with open(lotr.REPROCESS_COUNT_PATH, 'r', encoding='utf-8') as fobj:
+            data = json.load(fobj)
+    except Exception:  # pylint: disable=W0703
+        data = {'value': 0}
+
+    return data.get('value', 0)
+
+
+def save_reprocess_count(value):
+    """ Save the number of reprocessing attempts.
+    """
+    data = {'value': value}
+    with open(lotr.REPROCESS_COUNT_PATH, 'w', encoding='utf-8') as fobj:
+        json.dump(data, fobj)
 
 
 def main(conf=None):  # pylint: disable=R0912,R0914,R0915
@@ -40,10 +61,17 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
 
     if (not conf['reprocess_all'] and conf['reprocess_all_on_error'] and
             os.path.exists(lotr.PIPELINE_STARTED_PATH)):
-        conf['reprocess_all'] = True
-        force_reprocessing = True
-        logging.info('The previous update did not succeed, setting '
-                     '"reprocess_all" to "true" for this run')
+        count = get_reprocess_count()
+        if count >= lotr.REPROCESS_RETRIES:
+            logging.info('Maximum number of reprocessing retries exceeded')
+        else:
+            conf['reprocess_all'] = True
+            force_reprocessing = True
+            count += 1
+            save_reprocess_count(count)
+            logging.info('The previous update did not succeed, setting '
+                         '"reprocess_all" to "true" for this run '
+                         '(attempt #%s)', count)
 
     sheet_changes, scratch_changes = lotr.download_sheet(conf)
     if force_reprocessing or not conf['exit_if_no_spreadsheet_changes']:
@@ -158,9 +186,12 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
         with open(lotr.PROJECT_CREATED_PATH, 'w', encoding='utf-8'):
             pass
     else:
-        if (os.path.exists(lotr.PIPELINE_STARTED_PATH) and
-                not conf['renderer_artwork']):
-            os.remove(lotr.PIPELINE_STARTED_PATH)
+        if not conf['renderer_artwork']:
+            if os.path.exists(lotr.PIPELINE_STARTED_PATH):
+                os.remove(lotr.PIPELINE_STARTED_PATH)
+
+            if os.path.exists(lotr.REPROCESS_COUNT_PATH):
+                os.remove(lotr.REPROCESS_COUNT_PATH)
 
         if eons:
             logging.info('No changes since the last run, skipping creating '

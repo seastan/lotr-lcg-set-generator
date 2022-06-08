@@ -466,10 +466,12 @@ OUTPUT_RULES_PDF_PATH = os.path.join(OUTPUT_PATH, 'RulesPDF')
 OUTPUT_SPANISHDB_PATH = os.path.join(OUTPUT_PATH, 'SpanishDB')
 OUTPUT_SPANISHDB_IMAGES_PATH = os.path.join(OUTPUT_PATH, 'SpanishDBImages')
 OUTPUT_TTS_PATH = os.path.join(OUTPUT_PATH, 'TTS')
+PIPELINE_STARTED_PATH = 'pipeline_STARTED'
 PROJECT_PATH = 'setGenerator.seproject'
 PROJECT_CREATED_PATH = 'setGenerator_CREATED'
 RENDERER_GENERATED_IMAGES_PATH = os.path.join('Renderer', 'GeneratedImages')
 REPROCESS_ALL_PATH = 'REPROCESS_ALL'
+REPROCESS_COUNT_PATH = 'reprocess.cnt'
 RINGSDB_COOKIES_PATH = 'ringsdb_cookies.json'
 RINGSDB_JSON_PATH = 'ringsdb.json'
 RUN_BEFORE_SE_STARTED_PATH = 'runBeforeSE_STARTED'
@@ -477,7 +479,6 @@ SET_EONS_PATH = 'setEons'
 SET_OCTGN_PATH = 'setOCTGN'
 SHEETS_JSON_PATH = 'sheets.json'
 TEMP_ROOT_PATH = 'Temp'
-PIPELINE_STARTED_PATH = 'pipeline_STARTED'
 URL_CACHE_PATH = 'urlCache'
 XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
 XML_ZIP_PATH = '{}/XML/'.format(os.path.split(PROJECT_FOLDER)[-1])
@@ -485,6 +486,7 @@ XML_ZIP_PATH = '{}/XML/'.format(os.path.split(PROJECT_FOLDER)[-1])
 TTS_COLUMNS = 10
 TTS_SHEET_SIZE = 69
 
+REPROCESS_RETRIES = 5
 LOG_LIMIT = 5000
 SCP_SLEEP = 30
 URL_TIMEOUT = 15
@@ -10467,8 +10469,8 @@ def update_ringsdb(conf, sets):
         if checksum == checksums.get(set_id):
             continue
 
-        if (len([p for p in content.decode('utf-8').split('\n') if p.strip()])
-                <= 1):
+        if (len([p for p in content.decode('utf-8').split('\n')
+                if p.strip()]) <= 1):
             continue
 
         changes = True

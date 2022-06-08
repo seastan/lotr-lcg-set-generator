@@ -45,6 +45,7 @@ monitor_discord_changes_TRIGGERED
 mpc_monitor.json
 pipeline_STARTED
 remote_logs_path
+reprocess.cnt
 REPROCESS_ALL
 ringsdb.json
 ringsdb_cookies.json

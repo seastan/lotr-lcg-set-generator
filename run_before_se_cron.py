@@ -3,6 +3,7 @@
 
 NOTE: It's not run as a cron anymore, see `run_before_se_service.py`.
 """
+import copy
 from datetime import datetime
 from email.header import Header
 import json
@@ -246,13 +247,15 @@ def rclone_scratch(conf):
                           .format(stdout, stderr))
 
 
-def run(conf=None):  # pylint: disable=R0912
+def run(conf=None):  # pylint: disable=R0912,R0915
     """ Main function.
     """
     cron_id = uuid.uuid4()
     logging.info('Started: %s', cron_id)
 
-    if not conf:
+    if conf:
+        conf = copy.deepcopy(conf)
+    else:
         conf = read_conf()
 
     sheet_changes = True

@@ -338,6 +338,9 @@ def main():  # pylint: disable=R0912,R0914,R0915
     if os.path.exists(lotr.PIPELINE_STARTED_PATH):
         os.remove(lotr.PIPELINE_STARTED_PATH)
 
+    if os.path.exists(lotr.REPROCESS_COUNT_PATH):
+        os.remove(lotr.REPROCESS_COUNT_PATH)
+
     logging.info('Done (%ss)', round(time.time() - timestamp, 3))
 
 
