@@ -10488,6 +10488,7 @@ def update_ringsdb(conf, sets):
                 '{}/admin/csv/upload'.format(conf['ringsdb_url']),
                 files={'upfile': fobj},
                 data={'code': SETS[set_id][SET_HOB_CODE], 'name': set_name})
+
         res = res.content.decode('utf-8')
         if res != 'Done':
             raise RingsDBError('Error uploading {} to ringsdb.com: {}'
