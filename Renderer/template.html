@@ -83,10 +83,11 @@ function correct_size(id) {
 window.onload = function onload_callback() {
     setTimeout(function() {
         for (var i = 0; i < containers.length; i++) {
-            if (['Portrait-portrait-clip', 'Asterisk', 'Attack', 'Collection-portrait-clip', 'Defense', 'Difficulty', 'EncounterSet-portrait-clip',
+            if (['Asterisk', 'Attack', 'Collection-portrait-clip', 'Defense', 'Difficulty', 'EncounterSet-portrait-clip',
                  'EncounterSet1-portrait-clip', 'EncounterSet2-portrait-clip', 'EncounterSet3-portrait-clip', 'EncounterSet4-portrait-clip',
-                 'EncounterSet5-portrait-clip', 'Engagement', 'HitPoints', 'Progress', 'ResourceCost', 'Stage', 'Threat', 'ThreatCost', 'Willpower',
-                 'PortraitBack-portrait-clip', 'AsteriskBack', 'CollectionBack-portrait-clip', 'EncounterSetBack-portrait-clip', 'ProgressBack', 'StageBack'].indexOf(containers[i]) == -1) {
+                 'EncounterSet5-portrait-clip', 'Engagement', 'HitPoints', 'OptionSpecial-portrait-clip', 'Portrait-portrait-clip', 'Progress',
+                 'ResourceCost', 'Stage', 'Threat', 'ThreatCost', 'Willpower', 'AsteriskBack', 'CollectionBack-portrait-clip',
+                 'EncounterSetBack-portrait-clip', 'PortraitBack-portrait-clip', 'ProgressBack', 'StageBack'].indexOf(containers[i]) == -1) {
                 correct_size(containers[i]);
             }
         }

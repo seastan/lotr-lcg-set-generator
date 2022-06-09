@@ -493,7 +493,7 @@ cycleRegion['Campaign'] = '68,243,274,32';
 
 var resourceCostRegion = {};
 resourceCostRegion['Ally'] = '67,41,56,37';
-resourceCostRegion['Attachment'] = '38,43,56,37';
+resourceCostRegion['Attachment'] = '37,44,56,37';
 resourceCostRegion['Event'] = '37,38,56,37';
 resourceCostRegion['Player Objective'] = '38,43,56,37';
 resourceCostRegion['Player Side Quest'] = '43,44,56,37';

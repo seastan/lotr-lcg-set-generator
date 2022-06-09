@@ -324,7 +324,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['Artist-region'][3] + 'px">' + data['Bottom-format'] + data['LRL-IllustratorShort'] + ' ' + data.Artist + data['Bottom-formatEnd'] + '</div>';
+            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['Artist-region'][3] + 'px">' +
+                data['Bottom-format'] + data['LRL-IllustratorShort'] + ' ' + data.Artist + data['Bottom-formatEnd'] + '</div>';
         },
         'Asterisk': function(data) {
             if (parseInt(data.Asterisk) == 0) {
@@ -385,15 +386,16 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionInfo-region'][3] + 'px">' + data['Bottom-format'] + data.CollectionInfo + data['Bottom-formatEnd'] + '</div>';
+            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionInfo-region'][3] + 'px">' +
+                data['Bottom-format'] + data.CollectionInfo + data['Bottom-formatEnd'] + '</div>';
         },
         'CollectionNumber': function(data) {
             if ((data.CollectionNumberCustom + '' == '') && (data.CollectionNumberCustomOverwrite + '' == '')) {
                 return '';
             }
 
-            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionNumber-region'][3] + 'px">' + data['Bottom-format'] +
-                (data.CollectionNumberCustomOverwrite + '' || data.CollectionNumberCustom) + data['Bottom-formatEnd'] + '</div>';
+            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionNumber-region'][3] + 'px">' +
+                data['Bottom-format'] + (data.CollectionNumberCustomOverwrite + '' || data.CollectionNumberCustom) + data['Bottom-formatEnd'] + '</div>';
         },
         'Copyright': function(data) {
             if (data.Copyright + '' == '') {
@@ -404,7 +406,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['Copyright-region'][3] + 'px">' + data['Bottom-format'] + data.Copyright + data['Bottom-formatEnd'] + '</div>';
+            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['Copyright-region'][3] + 'px">' +
+                data['Bottom-format'] + data.Copyright + data['Bottom-formatEnd'] + '</div>';
         },
         'Cycle': function(data) {
             if (data.Cycle + '' == '') {
@@ -499,7 +502,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="text-align: center; color: #DD4240; font-family: Vafthrudnir; font-size: 46px; width: ' + data['HitPoints-region'][2] + 'px">' + data.HitPoints + '</div>';
+            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; text-align: center; color: #DD4240; font-family: Vafthrudnir; font-size: 46px; width: ' +
+                data['HitPoints-region'][2] + 'px">' + data.HitPoints + '</div>';
         },
         'Name': function(data) {
             if (data.Name + '' == '') {
@@ -525,6 +529,14 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             }
 
             return '<div style="text-align: center; padding-top: 4px">' + data.OptionRight + '</div>';
+        },
+        'OptionSpecial-portrait-clip': function(data) {
+            if ((data['OptionSpecial'] + '' == '') || (data['OptionSpecial'] + '' == 'Empty')) {
+                return '';
+            }
+
+            var content = '<img src="' + data['EncounterSet-external-path'] + '" width="49" height="49">';
+            return content;
         },
         'PageIn': function(data) {
             if (parseInt(data.PageNumber) == 0) {
@@ -576,8 +588,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="text-align: center; color: #53B2C5; font-family: Vafthrudnir; width: ' + data['Stage-region'][2] + 'px"><span style="vertical-align: middle; display: inline-block; font-size: 48px">' + data.Stage +
-                '</span><span style="vertical-align: middle; display: inline-block; font-size: 24px; padding-bottom: 4px; padding-right: 4px">' + data.StageLetter + '</span></div>';
+            return '<div style="text-align: center; color: #53B2C5; font-family: Vafthrudnir; width: ' + data['Stage-region'][2] + 'px"><span style="vertical-align: middle; display: inline-block; font-size: 48px">' +
+                data.Stage + '</span><span style="vertical-align: middle; display: inline-block; font-size: 24px; padding-bottom: 4px; padding-right: 4px">' + data.StageLetter + '</span></div>';
         },
         'Subtype': function(data) {
             if (data.Subtype + '' == '') {
@@ -642,8 +654,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['ArtistBack-region'][3] + 'px">' + data['Bottom-format'] + data['LRL-IllustratorShort'] +
-                ' ' + (data.ArtistBack + '' || data.Artist) + data['Bottom-formatEnd'] + '</div>';
+            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['ArtistBack-region'][3] + 'px">' +
+                data['Bottom-format'] + data['LRL-IllustratorShort'] + ' ' + (data.ArtistBack + '' || data.Artist) + data['Bottom-formatEnd'] + '</div>';
         },
         'AsteriskBack': function(data) {
             if (parseInt(data.AsteriskBack) == 0) {
@@ -684,15 +696,16 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionInfoBack-region'][3] + 'px">' + data['Bottom-format'] + data.CollectionInfo + data['Bottom-formatEnd'] + '</div>';
+            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionInfoBack-region'][3] +
+                'px">' + data['Bottom-format'] + data.CollectionInfo + data['Bottom-formatEnd'] + '</div>';
         },
         'CollectionNumberBack': function(data) {
             if ((data.CollectionNumberCustom + '' == '') && (data.CollectionNumberCustomOverwriteBack + '' == '')) {
                 return '';
             }
 
-            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionNumberBack-region'][3] + 'px">' + data['Bottom-format'] +
-                (data.CollectionNumberCustomOverwriteBack + '' || data.CollectionNumberCustom) + data['Bottom-formatEnd'] + '</div>';
+            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionNumberBack-region'][3] +
+                'px">' + data['Bottom-format'] + (data.CollectionNumberCustomOverwriteBack + '' || data.CollectionNumberCustom) + data['Bottom-formatEnd'] + '</div>';
         },
         'CopyrightBack': function(data) {
             if (data.Copyright + '' == '') {
@@ -703,7 +716,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['CopyrightBack-region'][3] + 'px">' + data['Bottom-format'] + data.Copyright + data['Bottom-formatEnd'] + '</div>';
+            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['CopyrightBack-region'][3] + 'px">' +
+                data['Bottom-format'] + data.Copyright + data['Bottom-formatEnd'] + '</div>';
         },
         'EncounterSetBack-portrait-clip': function(data) {
             if (data['EncounterSet-external-path'] + '' == '') {
@@ -771,8 +785,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="text-align: center; color: #53B2C5; font-family: Vafthrudnir; width: ' + data['StageBack-region'][2] + 'px"><span style="vertical-align: middle; display: inline-block; font-size: 48px">' + data.Stage +
-                '</span><span style="vertical-align: middle; display: inline-block; font-size: 24px; padding-bottom: 4px; padding-right: 4px">' + data.StageLetterBack + '</span></div>';
+            return '<div style="text-align: center; color: #53B2C5; font-family: Vafthrudnir; width: ' + data['StageBack-region'][2] + 'px"><span style="vertical-align: middle; display: inline-block; font-size: 48px">' +
+                data.Stage + '</span><span style="vertical-align: middle; display: inline-block; font-size: 24px; padding-bottom: 4px; padding-right: 4px">' + data.StageLetterBack + '</span></div>';
         },
         'TypeBack': function(data) {
             if (data.Type + '' == '') {
