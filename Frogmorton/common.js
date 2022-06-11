@@ -1412,9 +1412,6 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				else if (flags.indexOf('GreenRing') > -1) {
 					s.set('Difficulty', 'Green');
 				}
-				else if (flags.indexOf('PurpleRing') > -1) {
-					s.set('Difficulty', 'Purple');
-				}
 				else if (flags.indexOf('RedRing') > -1) {
 					s.set('Difficulty', 'Red');
 				}

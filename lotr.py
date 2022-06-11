@@ -267,10 +267,6 @@ CARD_TYPES_FLAGS = {'NoTraits':
                     {'Encounter Side Quest', 'Enemy', 'Location', 'Objective',
                      'Objective Ally', 'Objective Hero', 'Objective Location',
                      'Ship Enemy', 'Ship Objective', 'Treachery'},
-                    'PurpleRing':
-                    {'Encounter Side Quest', 'Enemy', 'Location', 'Objective',
-                     'Objective Ally', 'Objective Hero', 'Objective Location',
-                     'Ship Enemy', 'Ship Objective', 'Treachery'},
                     'RedRing':
                     {'Encounter Side Quest', 'Enemy', 'Location', 'Objective',
                      'Objective Ally', 'Objective Hero', 'Objective Location',
@@ -291,11 +287,6 @@ CARD_TYPES_FLAGS_BACK = {'NoTraits':
                           'Objective', 'Objective Ally', 'Objective Hero',
                           'Objective Location', 'Ship Enemy', 'Ship Objective',
                           'Treachery'},
-                         'PurpleRing':
-                         {'Encounter Side Quest', 'Enemy', 'Location',
-                          'Objective', 'Objective Ally', 'Objective Hero',
-                          'Objective Location', 'Ship Enemy', 'Ship Objective',
-                          'Treachery'},
                          'RedRing':
                          {'Encounter Side Quest', 'Enemy', 'Location',
                           'Objective', 'Objective Ally', 'Objective Hero',
@@ -312,7 +303,6 @@ CARD_TYPES_NO_FLAGS_BACK = {
     'NoCopyright': {'Campaign', 'Nightmare', 'Presentation', 'Rules'}}
 CARD_SPHERES_NO_FLAGS = {'BlueRing': {'Cave', 'Region'},
                          'GreenRing': {'Cave', 'Region'},
-                         'PurpleRing': {'Cave', 'Region'},
                          'RedRing': {'Cave', 'Region'}}
 CARD_TYPES_NO_ARTIST = {'Presentation', 'Rules'}
 CARD_TYPES_NO_ARTIST_BACK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
@@ -345,8 +335,8 @@ CARD_TYPES_NO_DISCORD_CHANNEL = {'Full Art Landscape', 'Full Art Portrait',
                                  'Rules', 'Presentation'}
 
 FLAGS = {'AdditionalCopies', 'Asterisk', 'NoArtist', 'NoCopyright', 'NoTraits',
-         'Promo', 'BlueRing', 'GreenRing', 'PurpleRing', 'RedRing'}
-RING_FLAGS = {'BlueRing', 'GreenRing', 'PurpleRing', 'RedRing'}
+         'Promo', 'BlueRing', 'GreenRing', 'RedRing'}
+RING_FLAGS = {'BlueRing', 'GreenRing', 'RedRing'}
 SPHERES = set()
 SPHERES_CAMPAIGN = {'Setup'}
 SPHERES_SIDE_QUEST = {'Cave', 'NoProgress', 'Region', 'SmallTextArea'}

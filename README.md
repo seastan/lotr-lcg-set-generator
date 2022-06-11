@@ -481,7 +481,6 @@ List of available sphere values:
 - `Promo` (`Hero` only)
 - `BlueRing`
 - `GreenRing`
-- `PurpleRing`
 - `RedRing`
 
 **Portrait Shadows**
