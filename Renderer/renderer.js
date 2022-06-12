@@ -3,11 +3,19 @@ const he = require('he');
 const {XMLParser} = require('fast-xml-parser');
 eval(fs.readFileSync('../Frogmorton/common.js') + '');
 
+const difficultyFolder = '../Difficulty/';
 const generatedImagesFolderCheck = 'GeneratedImages/';
 const generatedImagesFolder = '../GeneratedImages/';
 const iconsFolder = '../Icons/';
 const imagesFolder = '../Images/';
 const xmlFolder = '../setEons/';
+
+const difficultyTypes = {
+    'Objective Hero': 'Objective Ally',
+    'Objective Location': 'Objective',
+    'Ship Enemy': 'Enemy',
+    'Ship Objective': 'Objective Ally'
+};
 
 function RendererSettings() {
     this.settings = {};
@@ -332,7 +340,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var content = '<img src="' + imagesFolder + 'asterisk.png" width="9" height="9">';
+            var content = '<img src="' + imagesFolder + 'asterisk.png" width="' + data['Asterisk-region'][2] + '" height="' + data['Asterisk-region'][3] + '">';
             return content;
         },
         'Attack': function(data) {
@@ -378,7 +386,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var content = '<img src="' + data['Collection-external-path'] + '" width="14" height="14">';
+            var content = '<img src="' + data['Collection-external-path'] + '" width="' + data['Collection-portrait-clip-region'][2] + '" height="' + data['Collection-portrait-clip-region'][3] + '">';
             return content;
         },
         'CollectionInfo': function(data) {
@@ -428,7 +436,12 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var content = '<img src="' + imagesFolder + data.Difficulty.toLowerCase() + '.png" width="59" height="59">';
+            var difficultyType = data.TypeRenderer;
+            if (difficultyType in difficultyTypes) {
+                difficultyType = difficultyTypes[difficultyType];
+            }
+
+            var content = '<img src="' + difficultyFolder + difficultyType.replace(/ /g, '') + '-' + data.Difficulty + '.png" style="margin-top: 22px; margin-left: 22px">';
             return content;
         },
         'EncounterSet-portrait-clip': function(data) {
@@ -436,7 +449,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var content = '<img src="' + data['EncounterSet-external-path'] + '" width="49" height="49">';
+            var content = '<img src="' + data['EncounterSet-external-path'] + '" width="' + data['EncounterSet-portrait-clip-region'][2] + '" height="' + data['EncounterSet-portrait-clip-region'][3] + '">';
             return content;
         },
         'EncounterSet1-portrait-clip': function(data) {
@@ -444,7 +457,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var content = '<img src="' + data['EncounterSet1-external-path'] + '" width="23" height="23">';
+            var content = '<img src="' + data['EncounterSet1-external-path'] + '" width="' + data['EncounterSet1-portrait-clip-region'][2] + '" height="' + data['EncounterSet1-portrait-clip-region'][3] + '">';
             return content;
         },
         'EncounterSet2-portrait-clip': function(data) {
@@ -452,7 +465,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var content = '<img src="' + data['EncounterSet2-external-path'] + '" width="23" height="23">';
+            var content = '<img src="' + data['EncounterSet2-external-path'] + '" width="' + data['EncounterSet2-portrait-clip-region'][2] + '" height="' + data['EncounterSet2-portrait-clip-region'][3] + '">';
             return content;
         },
         'EncounterSet3-portrait-clip': function(data) {
@@ -460,7 +473,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var content = '<img src="' + data['EncounterSet3-external-path'] + '" width="23" height="23">';
+            var content = '<img src="' + data['EncounterSet3-external-path'] + '" width="' + data['EncounterSet3-portrait-clip-region'][2] + '" height="' + data['EncounterSet3-portrait-clip-region'][3] + '">';
             return content;
         },
         'EncounterSet4-portrait-clip': function(data) {
@@ -468,7 +481,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var content = '<img src="' + data['EncounterSet4-external-path'] + '" width="23" height="23">';
+            var content = '<img src="' + data['EncounterSet4-external-path'] + '" width="' + data['EncounterSet4-portrait-clip-region'][2] + '" height="' + data['EncounterSet4-portrait-clip-region'][3] + '">';
             return content;
         },
         'EncounterSet5-portrait-clip': function(data) {
@@ -476,7 +489,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var content = '<img src="' + data['EncounterSet5-external-path'] + '" width="23" height="23">';
+            var content = '<img src="' + data['EncounterSet5-external-path'] + '" width="' + data['EncounterSet5-portrait-clip-region'][2] + '" height="' + data['EncounterSet5-portrait-clip-region'][3] + '">';
             return content;
         },
         'EncounterSetNumber': function(data) {
@@ -488,7 +501,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="text-align: center; color: #FFFFFF">' + data['EncounterSetNumber-format'] + data.EncounterSetNumber + '/' + data.EncounterSetTotal + data['EncounterSetNumber-formatEnd'] + '</div>';
+            return '<div style="text-align: center; color: #FFFFFF; line-height: ' + data['EncounterSetNumber-region'][3] + 'px; margin-left: auto; margin-right: auto">' +
+                data['EncounterSetNumber-format'] + data.EncounterSetNumber + '/' + data.EncounterSetTotal + data['EncounterSetNumber-formatEnd'] + '</div>';
         },
         'Engagement': function(data) {
             if (data.Engagement + '' == '') {
@@ -531,11 +545,11 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             return '<div style="text-align: center; padding-top: 4px">' + data.OptionRight + '</div>';
         },
         'OptionSpecial-portrait-clip': function(data) {
-            if ((data['OptionSpecial'] + '' == '') || (data['OptionSpecial'] + '' == 'Empty')) {
+            if ((data.OptionSpecial + '' == '') || (data.OptionSpecial + '' == 'Empty')) {
                 return '';
             }
 
-            var content = '<img src="' + data['EncounterSet-external-path'] + '" width="49" height="49">';
+            var content = '<img src="' + data['EncounterSet-external-path'] + '" width="' + data['OptionSpecial-portrait-clip-region'][2] + '" height="' + data['OptionSpecial-portrait-clip-region'][3] + '">';
             return content;
         },
         'PageIn': function(data) {
@@ -662,7 +676,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var content = '<img src="' + imagesFolder + 'asterisk.png" width="9" height="9">';
+            var content = '<img src="' + imagesFolder + 'asterisk.png" width="' + data['AsteriskBack-region'][2] + '" height="' + data['AsteriskBack-region'][3] + '">';
             return content;
         },
         'BodyBack': function(data) {
@@ -688,7 +702,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var content = '<img src="' + data['Collection-external-path'] + '" width="14" height="14">';
+            var content = '<img src="' + data['Collection-external-path'] + '" width="' + data['CollectionBack-portrait-clip-region'][2] + '" height="' + data['CollectionBack-portrait-clip-region'][3] + '">';
             return content;
         },
         'CollectionInfoBack': function(data) {
@@ -724,7 +738,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var content = '<img src="' + data['EncounterSet-external-path'] + '" width="49" height="49">';
+            var content = '<img src="' + data['EncounterSet-external-path'] + '" width="' + data['EncounterSetBack-portrait-clip-region'][2] + '" height="' + data['EncounterSetBack-portrait-clip-region'][3] + '">';
             return content;
         },
         'NameBack': function(data) {
@@ -933,7 +947,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 }
                 else if (['Asterisk', 'Attack', 'Collection-portrait-clip', 'Defense', 'Difficulty', 'EncounterSet-portrait-clip',
                           'EncounterSet1-portrait-clip', 'EncounterSet2-portrait-clip', 'EncounterSet3-portrait-clip', 'EncounterSet4-portrait-clip',
-                          'EncounterSet5-portrait-clip', 'Engagement', 'HitPoints', 'Progress', 'ResourceCost', 'Stage', 'Threat', 'ThreatCost', 'Willpower'].indexOf(key) > -1) {
+                          'EncounterSet5-portrait-clip', 'Engagement', 'HitPoints', 'OptionSpecial-portrait-clip', 'Progress', 'ResourceCost', 'Stage', 'Threat', 'ThreatCost', 'Willpower'].indexOf(key) > -1) {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
                         data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: visible">' + containerRules[key](data) + '</div>';
                 }
@@ -952,7 +966,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 }
                 else {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
-                        data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: auto; font-size: ' + containerFontSize[key] + 'px">' + shapeDiv + containerRules[key](data) + '</div>';
+                        data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: auto; font-size: ' + containerFontSize[key] + 'px">' +
+                        shapeDiv + containerRules[key](data) + '</div>';
                 }
 
                 containers.push(content);
@@ -1047,8 +1062,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                     }
                     else if (key == 'OptionRightBack') {
                         content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
-                            data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: auto; z-index: 1; font-size: ' + containerFontSize[key] + 'px">' + shapeDiv +
-                            containerRulesBack[key](data) + '</div>';
+                            data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: auto; z-index: 1; font-size: ' + containerFontSize[key] + 'px">' +
+                            shapeDiv + containerRulesBack[key](data) + '</div>';
                         content += '<div style="position: absolute; left: ' + data[key + 'Decoration-region'][0] + 'px; top: ' + data[key + 'Decoration-region'][1] + 'px; width: ' +
                             data[key + 'Decoration-region'][2] + 'px; height: ' + data[key + 'Decoration-region'][3] + 'px; overflow-x: visible; overflow-y: visible">' +
                             '<img src="' + imagesFolder + 'victorydecoration.png" width="82" height="20"></div>';
@@ -1060,8 +1075,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                     }
                     else {
                         content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
-                            data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: auto; font-size: ' + containerFontSize[key] + 'px">' + shapeDiv +
-                            containerRulesBack[key](data) + '</div>';
+                            data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: auto; font-size: ' + containerFontSize[key] + 'px">' +
+                            shapeDiv + containerRulesBack[key](data) + '</div>';
                     }
 
                     containersBack.push(content);
