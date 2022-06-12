@@ -692,7 +692,7 @@ def generate_renderer_artwork(json_path, output_folder):  # pylint: disable=R091
         image_width = drawable.width
         image_height = drawable.height
 
-        img = pdb.gimp_file_load(os.path.join('GIMP', 'black.png'),
+        img = pdb.gimp_file_load(os.path.join('imagesOther', 'black.png'),
                                  'black.png')
         pdb.gimp_image_scale(img, image_width, image_height)
 
