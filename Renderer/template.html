@@ -47,17 +47,13 @@ body {
 var containers = [{{ CONTAINER_NAMES }}];
 var minSize = 3;
 
-function correct_size(id) {
+function correctSize(id) {
     var container = document.getElementById(id);
     if (!container) {
         return;
     }
 
-    var bufferHeight = 0;
-    if (id.match(/^Body/)) {
-        bufferHeight = 2;
-    }
-
+    var bufferHeight = 1;
     var size = parseFloat(container.style.fontSize.replace('px', ''));
     if (container.scrollHeight <= container.clientHeight + bufferHeight) {
         console.log(id + ': default font size ' + size + ' px is correct');
@@ -83,13 +79,7 @@ function correct_size(id) {
 window.onload = function onload_callback() {
     setTimeout(function() {
         for (var i = 0; i < containers.length; i++) {
-            if (['Asterisk', 'Attack', 'Collection-portrait-clip', 'Defense', 'Difficulty', 'EncounterSet-portrait-clip',
-                 'EncounterSet1-portrait-clip', 'EncounterSet2-portrait-clip', 'EncounterSet3-portrait-clip', 'EncounterSet4-portrait-clip',
-                 'EncounterSet5-portrait-clip', 'Engagement', 'HitPoints', 'OptionSpecial-portrait-clip', 'Portrait-portrait-clip', 'Progress',
-                 'ResourceCost', 'Stage', 'Threat', 'ThreatCost', 'Willpower', 'AsteriskBack', 'CollectionBack-portrait-clip',
-                 'EncounterSetBack-portrait-clip', 'PortraitBack-portrait-clip', 'ProgressBack', 'StageBack'].indexOf(containers[i]) == -1) {
-                correct_size(containers[i]);
-            }
+            correctSize(containers[i]);
         }
     }, 500);
 };

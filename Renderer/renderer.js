@@ -10,6 +10,36 @@ const iconsFolder = '../Icons/';
 const imagesFolder = '../Images/';
 const xmlFolder = '../setEons/';
 
+const containerFontSize = {
+    'Adventure': 12,
+    'AdventureBack': 12,
+    'Artist': 11,
+    'ArtistBack': 11,
+    'Body': 14,
+    'BodyBack': 14,
+    'BodyRight': 14,
+    'CollectionInfo': 11,
+    'CollectionInfoBack': 11,
+    'CollectionNumber': 11,
+    'CollectionNumberBack': 11,
+    'Copyright': 11,
+    'CopyrightBack': 11,
+    'Cycle': 14,
+    'EncounterSetNumber': 11,
+    'Name': 12,
+    'NameBack': 12,
+    'OptionRight': 12,
+    'OptionRightBack': 12,
+    'PageIn': 11,
+    'PageInBack': 11,
+    'Side': 14,
+    'SideBack': 14,
+    'Subtype': 14,
+    'TraitOut-Trait': 14,
+    'Type': 12,
+    'TypeBack': 12
+};
+
 const difficultyTypes = {
     'Objective Hero': 'Objective Ally',
     'Objective Location': 'Objective',
@@ -141,7 +171,7 @@ function round(value, digits) {
     return +value.toFixed(digits);
 }
 
-function updateRegion(value) {
+function updateRegion(key, value) {
     var regions = value.split(',');
     if (regions.length == 5) {
         regions = [regions[1], regions[2], regions[3], regions[4]];
@@ -156,6 +186,12 @@ function updateRegion(value) {
             bleed = 38;
         }
         regions[i] = Math.round((regions[i] * 2 - bleed) / 1.75);
+    }
+
+    if (key.replace(/-region$/, '') in containerFontSize) {
+        regions[0] -= 1;
+        regions[2] += 2;
+        regions[3] += 1;
     }
 
     return regions;
@@ -286,35 +322,6 @@ function convertTags(value) {
 }
 
 function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
-    var containerFontSize = {
-        'Adventure': 12,
-        'AdventureBack': 12,
-        'Artist': 11,
-        'ArtistBack': 11,
-        'Body': 14,
-        'BodyBack': 14,
-        'BodyRight': 14,
-        'CollectionInfo': 11,
-        'CollectionInfoBack': 11,
-        'CollectionNumber': 11,
-        'CollectionNumberBack': 11,
-        'Copyright': 11,
-        'CopyrightBack': 11,
-        'Cycle': 14,
-        'EncounterSetNumber': 11,
-        'Name': 12,
-        'NameBack': 12,
-        'OptionRight': 12,
-        'OptionRightBack': 12,
-        'PageIn': 11,
-        'PageInBack': 11,
-        'Side': 14,
-        'SideBack': 14,
-        'Subtype': 14,
-        'TraitOut-Trait': 14,
-        'Type': 12,
-        'TypeBack': 12
-    };
     var containerRules = {
         'Adventure': function(data) {
             if (data.Adventure + '' == '') {
@@ -815,7 +822,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
     for (let key in data) {
         if (data.hasOwnProperty(key)) {
             if (key.match(/-region$/) || key.match(/-Body-shape$/)) {
-                data[key] = updateRegion(data[key]);
+                data[key] = updateRegion(key, data[key]);
             }
             else {
                 data[key] = convertTags(data[key]);
@@ -920,7 +927,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
     var containerNames = [];
     for (let key in containerRules) {
-        if (containerRules.hasOwnProperty(key)) {
+        if (containerRules.hasOwnProperty(key) && (key in containerFontSize)) {
             containerNames.push(key);
         }
     }
@@ -1031,7 +1038,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         ((data.TypeRenderer != 'Contract') || (template == 'DoubleSided'))) {
         var containerNamesBack = [];
         for (let key in containerRulesBack) {
-            if (containerRulesBack.hasOwnProperty(key)) {
+            if (containerRulesBack.hasOwnProperty(key) && (key in containerFontSize)) {
                 containerNamesBack.push(key);
             }
         }
