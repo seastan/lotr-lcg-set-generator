@@ -301,6 +301,7 @@ function convertTags(value) {
     value = value.replace(/<gt>/g, '&gt;');
     value = value.replace(/res:\/\/TheLordOfTheRingsLCG\/image\/empty1x1\.png/g, imagesFolder + 'empty.png');
     value = value.replace(/res:\/\/TheLordOfTheRingsLCG\/image\/ShadowSeparator\.png/g, imagesFolder + 'shadow.png');
+    value = value.replace(/project:imagesCustom\/[0-9a-f\-]+_Spacer\.png/g, imagesFolder + 'spacer.png');
     value = value.replace(/project:imagesCustom\/[0-9a-f\-]+_Do-Not-Read-the-Following\.png/g, imagesFolder + 'donotread.png');
     value = value.replace(/project:imagesCustom\/[0-9a-f\-]+_Text-Divider-Black\.png/g, imagesFolder + 'textdividerblack.png');
     value = value.replace(/project:imagesCustom\//g, generatedImagesFolder);
