@@ -301,7 +301,7 @@ function convertTags(value) {
     value = value.replace(/<gt>/g, '&gt;');
     value = value.replace(/res:\/\/TheLordOfTheRingsLCG\/image\/empty1x1\.png/g, imagesFolder + 'empty.png');
     value = value.replace(/res:\/\/TheLordOfTheRingsLCG\/image\/ShadowSeparator\.png/g, imagesFolder + 'shadow.png');
-    value = value.replace(/project:imagesCustom\/[0-9a-f\-]+_Spacer\.png/g, imagesFolder + 'spacer.png');
+    value = value.replace(/project:imagesCustom\/[0-9a-f\-]+_Spacer\.png/g, imagesFolder + 'empty.png');
     value = value.replace(/project:imagesCustom\/[0-9a-f\-]+_Do-Not-Read-the-Following\.png/g, imagesFolder + 'donotread.png');
     value = value.replace(/project:imagesCustom\/[0-9a-f\-]+_Text-Divider-Black\.png/g, imagesFolder + 'textdividerblack.png');
     value = value.replace(/project:imagesCustom\//g, generatedImagesFolder);
@@ -550,14 +550,15 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="text-align: center; padding-top: 4px">' + data.OptionRight + '</div>';
+            return '<div style="text-align: center; padding-top: 4px">' + data['OptionRight-format'] + data.OptionRight + data['OptionRight-formatEnd'] + '</div>';
         },
         'OptionSpecial-portrait-clip': function(data) {
             if ((data.OptionSpecial + '' == '') || (data.OptionSpecial + '' == 'Empty')) {
                 return '';
             }
 
-            var content = '<img src="' + data['EncounterSet-external-path'] + '" width="' + data['OptionSpecial-portrait-clip-region'][2] + '" height="' + data['OptionSpecial-portrait-clip-region'][3] + '">';
+            var content = '<img src="' + imagesFolder + data.OptionSpecial.toLowerCase().replace(/ /g, '') + '.png" width="' +
+                data['OptionSpecial-portrait-clip-region'][2] + '" height="' + data['OptionSpecial-portrait-clip-region'][3] + '">';
             return content;
         },
         'PageIn': function(data) {
@@ -912,7 +913,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         data.Progress = '';
     }
 
-    // console.log(data);
+    console.log(data);
 
     var template = data.Template;
     if ((data.TypeRenderer == 'Campaign') && (template == 'Standard')) {

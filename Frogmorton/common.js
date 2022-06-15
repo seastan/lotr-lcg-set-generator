@@ -1752,10 +1752,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('OptionRight-format', '<width semicondensed>');
 					s.set('OptionRight-formatEnd', '</width>');
 					s.set('TypeRenderer', cardType);
-					s.set('CardNumberRenderer', card['Card Number']);
 					s.set('IdRenderer', card['octgn']);
-					s.set('CopyRenderer', copy);
-					s.set('BackRenderer', back);
 					s.set('SuffixRenderer', suffix);
 				}
 
