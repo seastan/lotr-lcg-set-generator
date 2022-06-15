@@ -913,8 +913,6 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         data.Progress = '';
     }
 
-    console.log(data);
-
     var template = data.Template;
     if ((data.TypeRenderer == 'Campaign') && (template == 'Standard')) {
         template = '';
