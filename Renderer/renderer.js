@@ -596,8 +596,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 size = 34;
             }
 
-            return '<div style="text-align: center; color: #DEDEDE; font-family: Vafthrudnir; font-size: ' + size + 'px; width: ' + data['ResourceCost-region'][2] + 'px">' +
-                '<span style="vertical-align: middle; display: inline-block; padding-right: 2px">' + data.ResourceCost + '</span></div>';
+            return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; text-align: center; color: #DEDEDE; font-family: Vafthrudnir; font-size: ' + size + 'px; width: ' +
+                data['ResourceCost-region'][2] + 'px">' + '<span style="vertical-align: middle; display: inline-block; padding-right: 2px">' + data.ResourceCost + '</span></div>';
         },
         'Side': function(data) {
             if (data.SideA + '' == '') {
@@ -906,6 +906,10 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
     if (data['Type-region'] && (data.TypeRenderer == 'Contract')) {
         data['TypeBack-region'] = data['Type-region'];
+    }
+    else if (data['Type-region'] && (data.TypeRenderer == 'Nightmare')) {
+        data['TypeBack-region'] = data['Type-region'];
+        data['Type-region'] = null;
     }
 
     if ((data.Progress + '' != '') && (data.TypeRenderer == 'Quest')) {
