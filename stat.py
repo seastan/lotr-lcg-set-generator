@@ -40,12 +40,13 @@ def filter_hall_data(data):
     """ Filter Hall of Beorn data.
     """
     data = [c for c in data
-            if c['type_name'] in ('Hero', 'Ally', 'Attachment', 'Event',
-                                  'Player Side Quest', 'Contract')
+            if c['type_name'] in ('Ally', 'Attachment', 'Event', 'Hero',
+                                  'Contract', 'Player Objective',
+                                  'Player Side Quest')
             and c['pack_name'] not in (
                 'Two-Player Limited Edition Starter', 'Revised Core Set',
                 'Dwarves of Durin', 'Elves of Lórien', 'Defenders of Gondor',
-                'Riders of Rohan',
+                'Riders of Rohan', 'Angmar Awakened Hero Expansion',
                 'The Massing at Osgiliath', 'The Battle of Lake-town',
                 'The Stone of Erech', 'Fog on the Barrow-downs',
                 'The Old Forest', 'Murder at the Prancing Pony',
