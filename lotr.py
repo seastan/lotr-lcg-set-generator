@@ -10285,7 +10285,7 @@ def _upload_dragncards_images(client, conf, sets):
     """ Uploading images to DragnCards.
     """
     scp_client = SCPClient(client.get_transport())
-    for set_id, set_name in sets:
+    for set_id, set_name in sets:  # pylint: disable=R1702
         output_path = os.path.join(
             OUTPUT_OCTGN_IMAGES_PATH,
             '{}.English'.format(escape_filename(set_name)),
@@ -10343,7 +10343,7 @@ def _upload_dragncards_decks(client, conf, sets):
     """ Uploading decks to DragnCards.
     """
     scp_client = SCPClient(client.get_transport())
-    for set_id, set_name in sets:
+    for _, set_name in sets:
         output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
                                    escape_filename(set_name))
         if (conf['dragncards_remote_deck_path'] and conf['octgn_o8d'] and
@@ -10398,7 +10398,7 @@ def _upload_dragncards_json(client, conf, sets):
     """ Uploading JSON files to DragnCards.
     """
     scp_client = SCPClient(client.get_transport())
-    for set_id, set_name in sets:
+    for _, set_name in sets:
         output_path = os.path.join(
             OUTPUT_DRAGNCARDS_PATH,
             escape_filename(set_name),
