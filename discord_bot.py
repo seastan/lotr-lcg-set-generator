@@ -17,7 +17,6 @@ import xml.etree.ElementTree as ET
 
 import aiohttp
 import discord
-import paramiko
 import yaml
 
 import lotr
@@ -117,6 +116,7 @@ List of **!alepcard** commands:
     'cron': """
 List of **!cron** commands:
 
+**!cron dragncards build** - trigger a DragnCards build
 **!cron errors** - display all errors from the latest cron run
 **!cron log** - display a full execution log of the latest cron run
 **!cron restart bot** - restart the Discord bot
@@ -988,20 +988,36 @@ async def read_deck_xml(path):
     return cards
 
 
+def trigger_dragncards_build():
+    """ Trigger a DragnCards build.
+    """
+    ssh = lotr.get_ssh_client(CONF)
+    try:
+        _, _, _ = ssh.exec_command(
+            '/var/www/dragncards.com/dragncards/frontend/buildTrigger.sh',
+            timeout=30)
+    finally:
+        try:
+            ssh.close()
+        except Exception:
+            pass
+
+
 def get_dragncards_build():
     """ Get information about the latest DragnCards build.
     """
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    parts = CONF.get('dragncards_hostname', '').split('@')
-    ssh.connect(parts[1], username=parts[0],
-                key_filename=CONF.get('dragncards_id_rsa_path', ''),
-                timeout=30)
-    _, res, _ = ssh.exec_command(
-        '/var/www/dragncards.com/dragncards/frontend/buildStat.sh',
-        timeout=30)
-    res = res.read().decode()
-    return res
+    ssh = lotr.get_ssh_client(CONF)
+    try:
+        _, res, _ = ssh.exec_command(
+            '/var/www/dragncards.com/dragncards/frontend/buildStat.sh',
+            timeout=30)
+        res = res.read().decode()
+        return res
+    finally:
+        try:
+            ssh.close()
+        except Exception:
+            pass
 
 
 def get_quest_stat(cards):  # pylint: disable=R0912,R0915
@@ -2104,6 +2120,16 @@ Card "{}" has been updated:
                 res = 'no cron logs found'
 
             await self._send_channel(message.channel, res)
+        elif command.lower() == 'dragncards build':
+            try:
+                trigger_dragncards_build()
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await message.channel.send('done')
         elif command.lower() == 'errors':
             res, _ = await run_shell(CRON_ERRORS_CMD)
             if not res:
