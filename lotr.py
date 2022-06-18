@@ -350,6 +350,10 @@ SPHERES_SHIP_OBJECTIVE = {'Upgraded'}
 SPECIAL_ICONS = {'eye of sauron', 'eye of sauronx2', 'eye of sauronx3',
                  'sailing', 'sailingx2'}
 
+DRAGNCARDS_BUILD_STAT_COMMAND = \
+    '/var/www/dragncards.com/dragncards/frontend/buildStat.sh'
+DRAGNCARDS_BUILD_TRIGGER_COMMAND = \
+    '/var/www/dragncards.com/dragncards/frontend/buildTrigger.sh'
 GENERATE_DRAGNCARDS_COMMAND = './generate_dragncards.sh {}'
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}{}*.jpg"'
@@ -421,6 +425,7 @@ DISCORD_CARD_DATA_PATH = os.path.join(DISCORD_PATH, 'card_data.json')
 DISCORD_TIMESTAMPS_PATH = os.path.join(DISCORD_PATH, 'timestamps.json')
 DOWNLOAD_PATH = 'Download'
 DOWNLOAD_TIME_PATH = 'download_time.txt'
+DRAGNCARDS_JSON_PATH = 'dragncards.json'
 IMAGES_BACK_PATH = 'imagesBack'
 IMAGES_CUSTOM_PATH = os.path.join(PROJECT_FOLDER, 'imagesCustom')
 IMAGES_ICONS_PATH = os.path.join(PROJECT_FOLDER, 'imagesIcons')
@@ -478,6 +483,7 @@ TTS_SHEET_SIZE = 69
 
 REPROCESS_RETRIES = 5
 LOG_LIMIT = 5000
+SCP_RETRIES = 3
 SCP_SLEEP = 30
 URL_TIMEOUT = 15
 URL_RETRIES = 3
@@ -1280,7 +1286,7 @@ def get_content(url):
             break
         except Exception:  # pylint: disable=W0703
             if i < URL_RETRIES - 1:
-                time.sleep(URL_SLEEP)
+                time.sleep(URL_SLEEP * (i + 1))
             else:
                 raise
 
@@ -10269,7 +10275,7 @@ def copy_tts_outputs(conf, sets):
                  round(time.time() - timestamp, 3))
 
 
-def get_ssh_client(conf):
+def _get_ssh_client(conf):
     """ Get SCP client.
     """
     client = paramiko.SSHClient()
@@ -10281,150 +10287,209 @@ def get_ssh_client(conf):
     return client
 
 
-def _upload_dragncards_images(client, conf, sets):
-    """ Uploading images to DragnCards.
+def trigger_dragncards_build(conf):
+    """ Trigger a DragnCards build.
     """
-    scp_client = SCPClient(client.get_transport())
-    for set_id, set_name in sets:  # pylint: disable=R1702
-        output_path = os.path.join(
-            OUTPUT_OCTGN_IMAGES_PATH,
-            '{}.English'.format(escape_filename(set_name)),
-            '{}.English.o8c'.format(
-                escape_octgn_filename(escape_filename(set_name))))
-        if (conf['dragncards_remote_image_path'] and
-                'English' in conf['output_languages'] and
-                'octgn' in conf['outputs']['English'] and
-                os.path.exists(output_path)):
-            temp_path = os.path.join(
-                TEMP_ROOT_PATH,
-                'upload_dragncards_{}'.format(escape_filename(set_name)))
-            create_folder(temp_path)
-            clear_folder(temp_path)
-            with zipfile.ZipFile(output_path) as obj:
-                obj.extractall(temp_path)
-
-            output_path = os.path.join(
-                temp_path,
-                'a21af4e8-be4b-4cda-a6b6-534f9717391f',
-                'Sets',
-                set_id,
-                'Cards')
-            if os.path.exists(output_path):
-                for _, _, filenames in os.walk(output_path):
-                    for filename in filenames:
-                        logging.info('Uploading %s...',
-                                     os.path.join(output_path, filename))
-                        try:
-                            scp_client.put(
-                                os.path.join(output_path, filename),
-                                conf['dragncards_remote_image_path'])
-                        except Exception:  # pylint: disable=W0703
-                            try:
-                                client.close()
-                            except Exception:  # pylint: disable=W0703
-                                pass
-
-                            time.sleep(SCP_SLEEP)
-                            client = get_ssh_client(conf)
-                            scp_client = SCPClient(client.get_transport())
-                            scp_client.put(
-                                os.path.join(output_path, filename),
-                                conf['dragncards_remote_image_path'])
-
-                    break
-
-                logging.info('Uploaded images for %s to DragnCards host',
-                             set_name)
-
-            delete_folder(temp_path)
+    logging.info('Running remote command: %s',
+                 DRAGNCARDS_BUILD_TRIGGER_COMMAND)
+    client = _get_ssh_client(conf)
+    try:
+        client.exec_command(DRAGNCARDS_BUILD_TRIGGER_COMMAND, timeout=30)
+    finally:
+        try:
+            client.close()
+        except Exception:  # pylint: disable=W0703
+            pass
 
 
-def _upload_dragncards_decks(client, conf, sets):
-    """ Uploading decks to DragnCards.
+def get_dragncards_build(conf):
+    """ Get information about the latest DragnCards build.
     """
-    scp_client = SCPClient(client.get_transport())
-    for _, set_name in sets:
-        output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
-                                   escape_filename(set_name))
-        if (conf['dragncards_remote_deck_path'] and conf['octgn_o8d'] and
-                os.path.exists(output_path)):
-            temp_path = os.path.join(
-                TEMP_ROOT_PATH,
-                'upload_dragncards_{}'.format(escape_filename(set_name)))
-            create_folder(temp_path)
-            clear_folder(temp_path)
-            for _, _, filenames in os.walk(output_path):
-                for filename in filenames:
-                    if not filename.endswith('.o8d'):
-                        continue
-
-                    if filename.startswith('Player-'):
-                        continue
-
-                    new_filename = re.sub(r'\.o8d$',
-                                          '{}.o8d'.format(PLAYTEST_SUFFIX),
-                                          filename)
-                    shutil.copyfile(os.path.join(output_path, filename),
-                                    os.path.join(temp_path, new_filename))
-
-                    logging.info('Uploading %s...',
-                                 os.path.join(temp_path, new_filename))
-                    try:
-                        scp_client.put(
-                            os.path.join(temp_path, new_filename),
-                            conf['dragncards_remote_deck_path'])
-                    except Exception:  # pylint: disable=W0703
-                        try:
-                            client.close()
-                        except Exception:  # pylint: disable=W0703
-                            pass
-
-                        time.sleep(SCP_SLEEP)
-                        client = get_ssh_client(conf)
-                        scp_client = SCPClient(client.get_transport())
-                        scp_client.put(
-                            os.path.join(temp_path, new_filename),
-                            conf['dragncards_remote_deck_path'])
-
-                    logging.info('Uploaded %s to DragnCards host',
-                                 filename)
-
-                break
-
-            delete_folder(temp_path)
+    logging.info('Running remote command: %s', DRAGNCARDS_BUILD_STAT_COMMAND)
+    client = _get_ssh_client(conf)
+    try:
+        _, res, _ = client.exec_command(DRAGNCARDS_BUILD_STAT_COMMAND,
+                                        timeout=30)
+        res = res.read().decode()
+        return res
+    finally:
+        try:
+            client.close()
+        except Exception:  # pylint: disable=W0703
+            pass
 
 
-def _upload_dragncards_json(client, conf, sets):
-    """ Uploading JSON files to DragnCards.
+def _scp_upload(client, scp_client, conf, source_path, destination_path):
+    """ Upload a file to DragnCards host using SCP.
     """
-    scp_client = SCPClient(client.get_transport())
-    for _, set_name in sets:
-        output_path = os.path.join(
-            OUTPUT_DRAGNCARDS_PATH,
-            escape_filename(set_name),
-            '{}.json'.format(escape_octgn_filename(
-                escape_filename(set_name))))
-        if (conf['dragncards_remote_json_path'] and
-                conf['dragncards_json'] and
-                os.path.exists(output_path)):
-            logging.info('Uploading %s...', output_path)
-            try:
-                scp_client.put(output_path,
-                               conf['dragncards_remote_json_path'])
-            except Exception:  # pylint: disable=W0703
+    logging.info('Uploading %s', source_path)
+    for i in range(SCP_RETRIES):
+        try:
+            scp_client.put(source_path, destination_path)
+            break
+        except Exception:  # pylint: disable=W0703
+            if i < SCP_RETRIES - 1:
                 try:
                     client.close()
                 except Exception:  # pylint: disable=W0703
                     pass
 
-                time.sleep(SCP_SLEEP)
-                client = get_ssh_client(conf)
+                time.sleep(SCP_SLEEP * (i + 1))
+                client = _get_ssh_client(conf)
                 scp_client = SCPClient(client.get_transport())
-                scp_client.put(output_path,
-                               conf['dragncards_remote_json_path'])
+            else:
+                raise
 
-            logging.info('Uploaded %s to DragnCards host',
-                         '{}.json'.format(escape_filename(set_name)))
+    return (client, scp_client)
+
+
+def _upload_dragncards_images(conf, sets):
+    """ Uploading images to DragnCards.
+    """
+    client = _get_ssh_client(conf)
+    try:  # pylint: disable=R1702
+        scp_client = SCPClient(client.get_transport())
+        for set_id, set_name in sets:
+            output_path = os.path.join(
+                OUTPUT_OCTGN_IMAGES_PATH,
+                '{}.English'.format(escape_filename(set_name)),
+                '{}.English.o8c'.format(
+                    escape_octgn_filename(escape_filename(set_name))))
+            if (conf['dragncards_remote_image_path'] and
+                    'English' in conf['output_languages'] and
+                    'octgn' in conf['outputs']['English'] and
+                    os.path.exists(output_path)):
+                temp_path = os.path.join(
+                    TEMP_ROOT_PATH,
+                    'upload_dragncards_{}'.format(escape_filename(set_name)))
+                create_folder(temp_path)
+                clear_folder(temp_path)
+                with zipfile.ZipFile(output_path) as obj:
+                    obj.extractall(temp_path)
+
+                output_path = os.path.join(
+                    temp_path,
+                    'a21af4e8-be4b-4cda-a6b6-534f9717391f',
+                    'Sets',
+                    set_id,
+                    'Cards')
+                if os.path.exists(output_path):
+                    for _, _, filenames in os.walk(output_path):
+                        for filename in filenames:
+                            client, scp_client = _scp_upload(
+                                client,
+                                scp_client,
+                                conf,
+                                os.path.join(output_path, filename),
+                                conf['dragncards_remote_image_path'])
+
+                        break
+
+                    logging.info('Successfully uploaded images for %s to '
+                                 'DragnCards host', set_name)
+
+                delete_folder(temp_path)
+    finally:
+        try:
+            client.close()
+        except Exception:  # pylint: disable=W0703
+            pass
+
+
+def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R0914,R0915
+    """ Uploading decks and JSON files to DragnCards.
+    """
+    try:
+        with open(DRAGNCARDS_JSON_PATH, 'r', encoding='utf-8') as fobj:
+            checksums = json.load(fobj)
+    except Exception:  # pylint: disable=W0703
+        checksums = {}
+
+    changes = False
+    client = _get_ssh_client(conf)
+    try:  # pylint: disable=R1702
+        scp_client = SCPClient(client.get_transport())
+        for _, set_name in sets:
+            output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
+                                       escape_filename(set_name))
+            if (conf['dragncards_remote_deck_path'] and conf['octgn_o8d'] and
+                    os.path.exists(output_path)):
+                temp_path = os.path.join(
+                    TEMP_ROOT_PATH,
+                    'upload_dragncards_{}'.format(escape_filename(set_name)))
+                create_folder(temp_path)
+                clear_folder(temp_path)
+                for _, _, filenames in os.walk(output_path):
+                    for filename in filenames:
+                        if not filename.endswith('.o8d'):
+                            continue
+
+                        if filename.startswith('Player-'):
+                            continue
+
+                        file_path = os.path.join(output_path, filename)
+                        with open(file_path, 'rb') as fobj:
+                            content = fobj.read()
+
+                        checksum = hashlib.md5(content).hexdigest()
+                        if checksum == checksums.get(file_path):
+                            continue
+
+                        changes = True
+                        checksums[file_path] = checksum
+
+                        new_filename = re.sub(r'\.o8d$',
+                                              '{}.o8d'.format(PLAYTEST_SUFFIX),
+                                              filename)
+                        shutil.copyfile(file_path,
+                                        os.path.join(temp_path, new_filename))
+                        client, scp_client = _scp_upload(
+                            client,
+                            scp_client,
+                            conf,
+                            os.path.join(temp_path, new_filename),
+                            conf['dragncards_remote_deck_path'])
+
+                    break
+
+                delete_folder(temp_path)
+
+        for _, set_name in sets:
+            output_path = os.path.join(
+                OUTPUT_DRAGNCARDS_PATH,
+                escape_filename(set_name),
+                '{}.json'.format(escape_octgn_filename(
+                    escape_filename(set_name))))
+            if (conf['dragncards_remote_json_path'] and
+                    conf['dragncards_json'] and
+                    os.path.exists(output_path)):
+
+                with open(output_path, 'rb') as fobj:
+                    content = fobj.read()
+
+                checksum = hashlib.md5(content).hexdigest()
+                if checksum == checksums.get(output_path):
+                    continue
+
+                changes = True
+                checksums[output_path] = checksum
+
+                client, scp_client = _scp_upload(
+                    client,
+                    scp_client,
+                    conf,
+                    output_path,
+                    conf['dragncards_remote_json_path'])
+    finally:
+        try:
+            client.close()
+        except Exception:  # pylint: disable=W0703
+            pass
+
+    if changes:
+        trigger_dragncards_build(conf)
+        with open(DRAGNCARDS_JSON_PATH, 'w', encoding='utf-8') as fobj:
+            json.dump(checksums, fobj)
 
 
 def upload_dragncards(conf, sets, updated_sets):
@@ -10433,16 +10498,8 @@ def upload_dragncards(conf, sets, updated_sets):
     logging.info('Uploading outputs to DragnCards...')
     timestamp = time.time()
 
-    client = get_ssh_client(conf)
-    try:
-        _upload_dragncards_images(client, conf, updated_sets)
-        _upload_dragncards_decks(client, conf, sets)
-        _upload_dragncards_json(client, conf, sets)
-    finally:
-        try:
-            client.close()
-        except Exception:  # pylint: disable=W0703
-            pass
+    _upload_dragncards_images(conf, updated_sets)
+    _upload_dragncards_decks_and_json(conf, sets)
 
     logging.info('...Uploading outputs to DragnCards (%ss)',
                  round(time.time() - timestamp, 3))

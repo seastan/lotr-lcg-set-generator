@@ -988,38 +988,6 @@ async def read_deck_xml(path):
     return cards
 
 
-def trigger_dragncards_build():
-    """ Trigger a DragnCards build.
-    """
-    ssh = lotr.get_ssh_client(CONF)
-    try:
-        _, _, _ = ssh.exec_command(
-            '/var/www/dragncards.com/dragncards/frontend/buildTrigger.sh',
-            timeout=30)
-    finally:
-        try:
-            ssh.close()
-        except Exception:
-            pass
-
-
-def get_dragncards_build():
-    """ Get information about the latest DragnCards build.
-    """
-    ssh = lotr.get_ssh_client(CONF)
-    try:
-        _, res, _ = ssh.exec_command(
-            '/var/www/dragncards.com/dragncards/frontend/buildStat.sh',
-            timeout=30)
-        res = res.read().decode()
-        return res
-    finally:
-        try:
-            ssh.close()
-        except Exception:
-            pass
-
-
 def get_quest_stat(cards):  # pylint: disable=R0912,R0915
     """ Get quest statistics.
     """
@@ -2122,7 +2090,7 @@ Card "{}" has been updated:
             await self._send_channel(message.channel, res)
         elif command.lower() == 'dragncards build':
             try:
-                trigger_dragncards_build()
+                lotr.trigger_dragncards_build(CONF)
             except Exception as exc:
                 logging.exception(str(exc))
                 await message.channel.send(
@@ -2767,7 +2735,7 @@ Targets removed.
         elif command.lower() == 'dragncards build':
             await message.channel.send('Please wait...')
             try:
-                res = get_dragncards_build()
+                res = lotr.get_dragncards_build(CONF)
             except Exception as exc:
                 logging.exception(str(exc))
                 await message.channel.send(
