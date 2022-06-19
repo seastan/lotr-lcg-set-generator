@@ -330,10 +330,11 @@ def main():  # pylint: disable=R0912,R0914,R0915
             updated_sets):
         lotr.copy_tts_outputs(conf, updated_sets)
 
-    if (conf['upload_dragncards'] and
+    if (updated_sets and
+            conf['upload_dragncards'] and
             conf['dragncards_hostname'] and
             conf['dragncards_id_rsa_path']):
-        lotr.upload_dragncards(conf, sets, updated_sets)
+        lotr.upload_dragncards_images(conf, updated_sets)
 
     if os.path.exists(lotr.PIPELINE_STARTED_PATH):
         os.remove(lotr.PIPELINE_STARTED_PATH)

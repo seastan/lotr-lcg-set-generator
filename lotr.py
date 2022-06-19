@@ -354,6 +354,10 @@ DRAGNCARDS_BUILD_STAT_COMMAND = \
     '/var/www/dragncards.com/dragncards/frontend/buildStat.sh'
 DRAGNCARDS_BUILD_TRIGGER_COMMAND = \
     '/var/www/dragncards.com/dragncards/frontend/buildTrigger.sh'
+DRAGNCARDS_IMAGES_FINISH_COMMAND = \
+    '/var/www/dragncards.com/dragncards/frontend/imagesFinish.sh'
+DRAGNCARDS_IMAGES_START_COMMAND = \
+    '/var/www/dragncards.com/dragncards/frontend/imagesStart.sh'
 GENERATE_DRAGNCARDS_COMMAND = './generate_dragncards.sh {}'
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}{}*.jpg"'
@@ -426,6 +430,7 @@ DISCORD_TIMESTAMPS_PATH = os.path.join(DISCORD_PATH, 'timestamps.json')
 DOWNLOAD_PATH = 'Download'
 DOWNLOAD_TIME_PATH = 'download_time.txt'
 DRAGNCARDS_JSON_PATH = 'dragncards.json'
+DRAGNCARDS_FOLDER_PATH = 'dragncards_folder.txt'
 IMAGES_BACK_PATH = 'imagesBack'
 IMAGES_CUSTOM_PATH = os.path.join(PROJECT_FOLDER, 'imagesCustom')
 IMAGES_ICONS_PATH = os.path.join(PROJECT_FOLDER, 'imagesIcons')
@@ -465,6 +470,7 @@ PIPELINE_STARTED_PATH = 'pipeline_STARTED'
 PROJECT_PATH = 'setGenerator.seproject'
 PROJECT_CREATED_PATH = 'setGenerator_CREATED'
 RENDERER_GENERATED_IMAGES_PATH = os.path.join('Renderer', 'GeneratedImages')
+RENDERER_OUTPUT_PATH = os.path.join('Renderer', 'Output')
 REPROCESS_ALL_PATH = 'REPROCESS_ALL'
 REPROCESS_COUNT_PATH = 'reprocess.cnt'
 RINGSDB_COOKIES_PATH = 'ringsdb_cookies.json'
@@ -632,6 +638,11 @@ class GIMPError(Exception):
 
 class ImageMagickError(Exception):
     """ Image Magick error.
+    """
+
+
+class DragnCardsError(Exception):
+    """ DragnCards error.
     """
 
 
@@ -10310,13 +10321,80 @@ def get_dragncards_build(conf):
     try:
         _, res, _ = client.exec_command(DRAGNCARDS_BUILD_STAT_COMMAND,
                                         timeout=30)
-        res = res.read().decode()
+        res = res.read().decode('utf-8').strip()
         return res
     finally:
         try:
             client.close()
         except Exception:  # pylint: disable=W0703
             pass
+
+
+def _get_remote_dragncards_folder(conf):
+    """ Get remote DragnCards folder.
+    """
+    logging.info('Running remote command: %s', DRAGNCARDS_IMAGES_START_COMMAND)
+    client = _get_ssh_client(conf)
+    try:
+        _, res, _ = client.exec_command(DRAGNCARDS_IMAGES_START_COMMAND,
+                                        timeout=30)
+        res = res.read().decode('utf-8').strip()
+        if not res:
+            raise DragnCardsError(
+                'Error getting remote folder from DragnCards')
+
+        return res
+    finally:
+        try:
+            client.close()
+        except Exception:  # pylint: disable=W0703
+            pass
+
+
+def _finish_uploading_dragncards_images(conf, remote_folder):
+    """ Finish uploading images to DragnCards.
+    """
+    logging.info('Running remote command: %s %s',
+                 DRAGNCARDS_IMAGES_FINISH_COMMAND, remote_folder)
+    client = _get_ssh_client(conf)
+    try:
+        _, res, _ = client.exec_command(
+            '{} {}'.format(DRAGNCARDS_IMAGES_FINISH_COMMAND, remote_folder),
+            timeout=30)
+        res = res.read().decode('utf-8').strip()
+        if res != 'Done':
+            raise DragnCardsError('Error uploading images to DragnCards: {}'
+                                  .format(res))
+    finally:
+        try:
+            client.close()
+        except Exception:  # pylint: disable=W0703
+            pass
+
+
+def write_remote_dragncards_folder(conf):
+    """ Write remote DragnCards folder to a local file.
+    """
+    remote_folder = _get_remote_dragncards_folder(conf)
+    with open(DRAGNCARDS_FOLDER_PATH, 'w', encoding='utf-8') as fobj:
+        fobj.write(remote_folder)
+
+
+def _read_remote_dragncards_folder():
+    """ Read remote DragnCards folder from the local file.
+    """
+    if not os.path.exists(DRAGNCARDS_FOLDER_PATH):
+        raise DragnCardsError(
+            'Error reading remote DragnCards folder from the local file')
+
+    with open(DRAGNCARDS_FOLDER_PATH, 'r', encoding='utf-8') as fobj:
+        remote_folder = fobj.read()
+
+    if not remote_folder:
+        raise DragnCardsError(
+            'Error reading remote DragnCards folder from the local file')
+
+    return remote_folder
 
 
 def _scp_upload(client, scp_client, conf, source_path, destination_path):
@@ -10343,9 +10421,14 @@ def _scp_upload(client, scp_client, conf, source_path, destination_path):
     return (client, scp_client)
 
 
-def _upload_dragncards_images(conf, sets):
-    """ Uploading images to DragnCards.
+def upload_dragncards_images(conf, sets):
+    """ Uploading pixel-perfect images to DragnCards.
     """
+    logging.info('Uploading pixel-perfect images to DragnCards...')
+    timestamp = time.time()
+
+    remote_folder = _read_remote_dragncards_folder()
+    images_uploaded = False
     client = _get_ssh_client(conf)
     try:  # pylint: disable=R1702
         scp_client = SCPClient(client.get_transport())
@@ -10355,13 +10438,13 @@ def _upload_dragncards_images(conf, sets):
                 '{}.English'.format(escape_filename(set_name)),
                 '{}.English.o8c'.format(
                     escape_octgn_filename(escape_filename(set_name))))
-            if (conf['dragncards_remote_image_path'] and
-                    'English' in conf['output_languages'] and
+            if ('English' in conf['output_languages'] and
                     'octgn' in conf['outputs']['English'] and
                     os.path.exists(output_path)):
                 temp_path = os.path.join(
                     TEMP_ROOT_PATH,
-                    'upload_dragncards_{}'.format(escape_filename(set_name)))
+                    'upload_dragncards_images_{}'.format(
+                        escape_filename(set_name)))
                 create_folder(temp_path)
                 clear_folder(temp_path)
                 with zipfile.ZipFile(output_path) as obj:
@@ -10375,13 +10458,16 @@ def _upload_dragncards_images(conf, sets):
                     'Cards')
                 if os.path.exists(output_path):
                     for _, _, filenames in os.walk(output_path):
+                        if filenames:
+                            images_uploaded = True
+
                         for filename in filenames:
                             client, scp_client = _scp_upload(
                                 client,
                                 scp_client,
                                 conf,
                                 os.path.join(output_path, filename),
-                                conf['dragncards_remote_image_path'])
+                                remote_folder)
 
                         break
 
@@ -10389,11 +10475,50 @@ def _upload_dragncards_images(conf, sets):
                                  'DragnCards host', set_name)
 
                 delete_folder(temp_path)
+
+        if images_uploaded:
+            _finish_uploading_dragncards_images(conf, remote_folder)
+            trigger_dragncards_build(conf)
+
     finally:
         try:
             client.close()
         except Exception:  # pylint: disable=W0703
             pass
+
+    logging.info('...Uploading pixel-perfect images to DragnCards (%ss)',
+                 round(time.time() - timestamp, 3))
+
+
+def _upload_dragncards_rendered_images(conf):
+    """ Uploading rendered images to DragnCards.
+    """
+    images_uploaded = False
+    client = _get_ssh_client(conf)
+    try:
+        scp_client = SCPClient(client.get_transport())
+        for _, _, filenames in os.walk(RENDERER_OUTPUT_PATH):
+            filenames = [f for f in filenames if f.endswith('.jpg')]
+            if filenames:
+                images_uploaded = True
+
+            for filename in filenames:
+                client, scp_client = _scp_upload(
+                    client,
+                    scp_client,
+                    conf,
+                    os.path.join(RENDERER_OUTPUT_PATH, filename),
+                    conf['dragncards_remote_image_path'])
+                os.remove(os.path.join(RENDERER_OUTPUT_PATH, filename))
+
+            break
+    finally:
+        try:
+            client.close()
+        except Exception:  # pylint: disable=W0703
+            pass
+
+    return images_uploaded
 
 
 def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R0914,R0915
@@ -10416,7 +10541,8 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
                     os.path.exists(output_path)):
                 temp_path = os.path.join(
                     TEMP_ROOT_PATH,
-                    'upload_dragncards_{}'.format(escape_filename(set_name)))
+                    'upload_dragncards_decks_and_json_{}'.format(
+                        escape_filename(set_name)))
                 create_folder(temp_path)
                 clear_folder(temp_path)
                 for _, _, filenames in os.walk(output_path):
@@ -10487,21 +10613,24 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
             pass
 
     if changes:
-        trigger_dragncards_build(conf)
         with open(DRAGNCARDS_JSON_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(checksums, fobj)
 
+    return changes
 
-def upload_dragncards(conf, sets, updated_sets):
-    """ Uploading outputs to DragnCards.
+
+def upload_dragncards_lightweight_outputs(conf, sets):
+    """ Uploading lightweight outputs to DragnCards.
     """
-    logging.info('Uploading outputs to DragnCards...')
+    logging.info('Uploading lightweight outputs to DragnCards...')
     timestamp = time.time()
 
-    _upload_dragncards_images(conf, updated_sets)
-    _upload_dragncards_decks_and_json(conf, sets)
+    changes_rendered_images = _upload_dragncards_rendered_images(conf)
+    changes_decks_and_json = _upload_dragncards_decks_and_json(conf, sets)
+    if changes_rendered_images or changes_decks_and_json:
+        trigger_dragncards_build(conf)
 
-    logging.info('...Uploading outputs to DragnCards (%ss)',
+    logging.info('...Uploading lightweight outputs to DragnCards (%ss)',
                  round(time.time() - timestamp, 3))
 
 
@@ -10555,7 +10684,7 @@ def update_ringsdb(conf, sets):
                 files={'upfile': fobj},
                 data={'code': SETS[set_id][SET_HOB_CODE], 'name': set_name})
 
-        res = res.content.decode('utf-8')
+        res = res.content.decode('utf-8').strip()
         if res != 'Done':
             raise RingsDBError('Error uploading {} to ringsdb.com: {}'
                                .format(set_name, res[:LOG_LIMIT]))

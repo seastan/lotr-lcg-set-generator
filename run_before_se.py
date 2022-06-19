@@ -73,6 +73,11 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
                          '"reprocess_all" to "true" for this run '
                          '(attempt #%s)', count)
 
+    if (conf['upload_dragncards'] and
+            conf['dragncards_hostname'] and
+            conf['dragncards_id_rsa_path']):
+        lotr.write_remote_dragncards_folder(conf)
+
     sheet_changes, scratch_changes = lotr.download_sheet(conf)
     if force_reprocessing or not conf['exit_if_no_spreadsheet_changes']:
         sheet_changes = True
@@ -180,6 +185,11 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
 
     if renderer_sets:
         lotr.generate_dragncards_proxies(renderer_sets)
+
+    if (conf['upload_dragncards_lightweight'] and
+            conf['dragncards_hostname'] and
+            conf['dragncards_id_rsa_path']):
+        lotr.upload_dragncards_lightweight_outputs(conf, sets)
 
     if changes:
         lotr.create_project()

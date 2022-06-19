@@ -107,8 +107,11 @@ renderer_artwork: false
 # Creating DragnCards proxy images (true or false)
 renderer: false
 
-# Uploading outputs to DragnCards (true or false)
+# Uploading pixel-perfect images to DragnCards (true or false)
 upload_dragncards: false
+
+# Uploading lightweight outputs to DragnCards (true or false)
+upload_dragncards_lightweight: false
 
 # DragnCards hostname: username@hostname (may be empty)
 dragncards_hostname: 
