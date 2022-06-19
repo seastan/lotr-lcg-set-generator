@@ -90,7 +90,7 @@ octgn_o8d: true
 ringsdb_csv: false
 
 # Creating JSON files for DragnCards (true or false)
-dragncards_json: true
+dragncards_json: false
 
 # Creating JSON files for Hall of Beorn (true or false)
 hallofbeorn_json: false
