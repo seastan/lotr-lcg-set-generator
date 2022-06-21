@@ -7178,7 +7178,8 @@ def generate_dragncards_proxies(sets):
         with open(GENERATE_DRAGNCARDS_LOG_PATH, 'r', encoding='utf-8') as fobj:
             content = fobj.read()
 
-        card_ids = {c.split('.')[0] for c in content.split('\n') if c}
+        card_ids = {c.split('/')[-1].split('.')[0]
+                    for c in content.split('\n') if c}
 
         cards = {}
         for set_id in sets:
