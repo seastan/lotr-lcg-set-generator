@@ -742,7 +742,7 @@ def add_deck(deck_name):
     print('See {} for details'.format(LOG_PATH))
 
 
-def monitor():  # pylint: disable=R0914
+def monitor():  # pylint: disable=R0912,R0914,R0915
     """ Run the monitoring checks.
     """
     try:
@@ -776,11 +776,37 @@ def monitor():  # pylint: disable=R0914
 
         actual_content_id = match.groups()[0]
         actual_deck_name = match.groups()[1]
+
+        regex = DECK_ID_REGEX.format(backup_id)
+        match = re.search(regex, content)
+        if match:
+            backup_content_id = match.groups()[0]
+            if content_id != backup_content_id:
+                if actual_content_id == backup_content_id:
+                    logging.warning('Content ID has been changed for Deck %s '
+                        'and its backup from %s to %s on MakePlayingCards '
+                        'side', deck_name, content_id, backup_content_id)
+                    content_id = backup_content_id
+                    data['decks'][deck_name]['content_id'] = content_id
+                else:
+                    message = ('Content ID has been changed for Deck {} '
+                               'Backup from {} to {}'.format(
+                               deck_name, content_id, backup_content_id))
+                    logging.error(message)
+                    create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+                    continue
+        else:
+            message = ('Deck {} Backup not found, content length: {} '
+                       '(continuing the checks)'.format(deck_name,
+                                                        len(content)))
+            logging.error(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+
         if actual_content_id != content_id:
             if (actual_content_id in
                     data['decks'][deck_name]['failed_content_ids']):
-                logging.warning('Skipping known failed content ID: %s',
-                                actual_content_id)
+                logging.warning('Skipping known failed content ID %s for '
+                    'Deck %s', actual_content_id, deck_name)
             else:
                 new_content, new_deck_id = fix_deck(
                     session, data, content, deck_id, backup_id, deck_name,
