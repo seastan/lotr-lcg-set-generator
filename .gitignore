@@ -24,6 +24,7 @@ Renderer/GeneratedImages/*.jpg
 Renderer/GeneratedImages/*.png
 Renderer/GeneratedImages/*.json
 Renderer/Icons/*.png
+Renderer/Output/generate_dragncards.txt
 Renderer/Output/*.html
 Renderer/Output/*.jpg
 Renderer/node_modules/
@@ -40,6 +41,7 @@ discord.yaml
 download_time.txt
 dragncards.json
 dragncards_folder.txt
+generate_dragncards.json
 id_rsa
 last_remote_cron_timestamp
 makeCards_FINISHED

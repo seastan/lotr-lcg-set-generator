@@ -431,6 +431,9 @@ DOWNLOAD_PATH = 'Download'
 DOWNLOAD_TIME_PATH = 'download_time.txt'
 DRAGNCARDS_JSON_PATH = 'dragncards.json'
 DRAGNCARDS_FOLDER_PATH = 'dragncards_folder.txt'
+GENERATE_DRAGNCARDS_JSON_PATH = 'generate_dragncards.json'
+GENERATE_DRAGNCARDS_LOG_PATH = os.path.join('Renderer', 'Output',
+                                            'generate_dragncards.txt')
 IMAGES_BACK_PATH = 'imagesBack'
 IMAGES_CUSTOM_PATH = os.path.join(PROJECT_FOLDER, 'imagesCustom')
 IMAGES_ICONS_PATH = os.path.join(PROJECT_FOLDER, 'imagesIcons')
@@ -7170,6 +7173,44 @@ def generate_dragncards_proxies(sets):
     cmd = GENERATE_DRAGNCARDS_COMMAND.format(sets)
     res = _run_cmd(cmd)
     logging.info(res)
+
+    if os.path.exists(GENERATE_DRAGNCARDS_LOG_PATH):
+        with open(GENERATE_DRAGNCARDS_LOG_PATH, 'r', encoding='utf-8') as fobj:
+            content = fobj.read()
+
+        card_ids = {c.split('.')[0] for c in content.split('\n') if c}
+
+        cards = {}
+        for set_id in sets:
+            xml_path = os.path.join(SET_EONS_PATH,
+                                    '{}.English.xml'.format(set_id))
+            if not os.path.exists(xml_path):
+                continue
+
+            tree = ET.parse(xml_path)
+            root = tree.getroot()
+            for card in root[0]:
+                if (card.attrib.get('id') and card.attrib['id'] in card_ids and
+                        card.attrib.get('hashDragncards')):
+                    cards[card.attrib['id']] = card.attrib['hashDragncards']
+                    card_ids.remove(card.attrib['id'])
+
+        if card_ids:
+            logging.warning('No DragnCards hashes for the following '
+                            'generated cards: %s', ', '.join(card_ids))
+
+        if cards:
+            try:
+                with open(GENERATE_DRAGNCARDS_JSON_PATH, 'r',
+                          encoding='utf-8') as fobj:
+                    old_cards = json.load(fobj)
+            except Exception:  # pylint: disable=W0703
+                old_cards = {}
+
+            cards = {**old_cards, **cards}
+            with open(GENERATE_DRAGNCARDS_JSON_PATH, 'w',
+                      encoding='utf-8') as fobj:
+                json.dump(cards, fobj)
 
     logging.info('...Generating DragnCards proxies (%ss)',
                  round(time.time() - timestamp, 3))

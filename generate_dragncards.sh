@@ -12,6 +12,9 @@ echo 'renderer.js finished'
 export XDG_RUNTIME_DIR=/tmp
 LOG_LEVEL=error
 
+rm -f Output/generate_dragncards.txt
+touch Output/generate_dragncards.txt
+
 for filename in Output/portrait.*.html; do
     [ -e "$filename" ] || continue
     output=${filename//portrait\./}
@@ -19,6 +22,7 @@ for filename in Output/portrait.*.html; do
     echo "Converting $filename to $output"
     /usr/local/bin/wkhtmltoimage --enable-local-file-access --images --enable-javascript --debug-javascript --javascript-delay 500 --no-stop-slow-scripts --log-level $LOG_LEVEL --disable-smart-width --width 429 --height 600 --format jpg --quality 95 "$filename" "$output"
     if [ -f "$output" ]; then
+        echo "$output" >> Output/generate_dragncards.txt
         rm $filename
     fi
 done
@@ -30,6 +34,7 @@ for filename in Output/landscape.*.html; do
     echo "Converting $filename to $output"
     /usr/local/bin/wkhtmltoimage --enable-local-file-access --images --enable-javascript --debug-javascript --javascript-delay 500 --no-stop-slow-scripts --log-level $LOG_LEVEL --disable-smart-width --width 600 --height 429 --format jpg --quality 95 "$filename" "$output"
     if [ -f "$output" ]; then
+        echo "$output" >> Output/generate_dragncards.txt
         rm $filename
     fi
 done
