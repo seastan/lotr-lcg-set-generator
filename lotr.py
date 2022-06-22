@@ -6971,7 +6971,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
-def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0914
+def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0912,R0914
     """ Update the xml file with hashes and skip flags.
     """
     logging.info('[%s, %s] Updating the xml file with hashes and skip '
@@ -6993,23 +6993,33 @@ def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0914
                ).encode()).hexdigest()
     root.set('hash', new_file_hash)
 
-    dragncards_changes = True
+    try:
+        with open(GENERATE_DRAGNCARDS_JSON_PATH, 'r',
+                  encoding='utf-8') as fobj:
+            old_dragncards_hashes = json.load(fobj)
+    except Exception:  # pylint: disable=W0703
+        old_dragncards_hashes = {}
+
+    dragncards_changes = False
+    for card in root[0]:
+        if (old_dragncards_hashes.get(card.attrib['id']) ==
+                card.attrib['hashDragncards']):
+            card.set('skipDragncards', '1')
+        elif not card.attrib.get('noDragncards'):
+            dragncards_changes = True
+
     old_file_hash = ''
     old_path = os.path.join(SET_EONS_PATH, '{}.{}.xml.old'.format(set_id,
                                                                   lang))
     if os.path.exists(old_path):
         old_hashes = {}
-        old_dragncards_hashes = {}
         skip_ids = set()
-        dragncards_changes = False
 
         tree_old = ET.parse(old_path)
         root_old = tree_old.getroot()
         old_file_hash = root_old.attrib['hash']
         for card in root_old[0]:
             old_hashes[card.attrib['id']] = card.attrib['hash']
-            old_dragncards_hashes[card.attrib['id']] = (
-                card.attrib['hashDragncards'])
 
         changed_cards = set()
         for row in DATA:
@@ -7030,12 +7040,6 @@ def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0914
                     card.attrib['id'] not in changed_cards):
                 skip_ids.add(card.attrib['id'])
                 card.set('skip', '1')
-
-            if (old_dragncards_hashes.get(card.attrib['id']) ==
-                    card.attrib['hashDragncards']):
-                card.set('skipDragncards', '1')
-            elif not card.attrib.get('noDragncards'):
-                dragncards_changes = True
 
     tree.write(new_path)
 
@@ -7169,8 +7173,7 @@ def generate_dragncards_proxies(sets):
     logging.info('Generating DragnCards proxies...')
     timestamp = time.time()
 
-    sets = ','.join(sets)
-    cmd = GENERATE_DRAGNCARDS_COMMAND.format(sets)
+    cmd = GENERATE_DRAGNCARDS_COMMAND.format(','.join(sets))
     res = _run_cmd(cmd)
     logging.info(res)
 
@@ -7180,7 +7183,6 @@ def generate_dragncards_proxies(sets):
 
         card_ids = {c.split('/')[-1].split('.')[0]
                     for c in content.split('\n') if c}
-
         cards = {}
         for set_id in sets:
             xml_path = os.path.join(SET_EONS_PATH,
@@ -7191,7 +7193,7 @@ def generate_dragncards_proxies(sets):
             tree = ET.parse(xml_path)
             root = tree.getroot()
             for card in root[0]:
-                if (card.attrib.get('id') and card.attrib['id'] in card_ids and
+                if (card.attrib.get('id') in card_ids and
                         card.attrib.get('hashDragncards')):
                     cards[card.attrib['id']] = card.attrib['hashDragncards']
                     card_ids.remove(card.attrib['id'])
