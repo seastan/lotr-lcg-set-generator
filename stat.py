@@ -40,10 +40,10 @@ def filter_hall_data(data):
     """ Filter Hall of Beorn data.
     """
     data = [c for c in data
-            if c['type_name'] in ('Ally', 'Attachment', 'Event', 'Hero',
+            if c['type_name'] in {'Ally', 'Attachment', 'Event', 'Hero',
                                   'Contract', 'Player Objective',
-                                  'Player Side Quest')
-            and c['pack_name'] not in (
+                                  'Player Side Quest'}
+            and c['pack_name'] not in {
                 'Two-Player Limited Edition Starter', 'Revised Core Set',
                 'Dwarves of Durin', 'Elves of Lórien', 'Defenders of Gondor',
                 'Riders of Rohan', 'Angmar Awakened Hero Expansion',
@@ -55,19 +55,57 @@ def filter_hall_data(data):
                 'The Woodland Realm', 'The Mines of Moria',
                 'Escape from Khazad-dûm', 'First Age',
                 'Trial Upon the Marches', 'Among the Outlaws',
-                'The Betrayal of Mîm', 'The Fall of Nargothrond')
+                'The Betrayal of Mîm', 'The Fall of Nargothrond'}
             and 'Preorder Promotion' not in c['pack_name']
             and c.get('subtype_code') != 'boon'
-            and c['sphere_name'] not in ('Baggins', 'Fellowship')
-            and (c['pack_name'] not in ('The Scouring of the Shire',)
+            and c['sphere_name'] not in {'Baggins', 'Fellowship'}
+            and (c['pack_name'] not in {'The Scouring of the Shire',
+                                        'The Nine are Abroad'}
                  or c['type_name'] != 'Hero')]
     return data
+
+
+def collect_spheres(data):
+    """ Collect spheres statistics from Hall of Beorn.
+    """
+    spheres = {'Leadership', 'Lore', 'Spirit', 'Tactics', 'Neutral'}
+    card_types = {'Ally', 'Attachment', 'Event', 'Hero', 'Player Side Quest'}
+    data = [c for c in data if c['type_name'] in card_types]
+
+    res = {}
+    for sphere in spheres:
+        res[sphere] = {t: 0 for t in card_types}
+        res[sphere]['Total'] = 0
+
+    for card in data:
+        res[card['sphere_name']][card['type_name']] += 1
+        res[card['sphere_name']]['Total'] += 1
+
+    res = sorted(list(res.items()), key=lambda i: (-i[1]['Total'], i[0]))
+
+    file_path = os.path.join(OUTPUT_PATH, 'spheres.csv')
+    with open(file_path, 'w', newline='', encoding='utf-8') as obj:
+        obj.write(codecs.BOM_UTF8.decode('utf-8'))
+        fieldnames = ['Sphere', 'Total', 'Hero', 'Ally', 'Attachment', 'Event',
+                      'Player Side Quest']
+        writer = csv.DictWriter(obj, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in res:
+            csv_row = {
+                'Sphere': row[0],
+                'Total': row[1]['Total'],
+                'Hero': row[1]['Hero'] or '',
+                'Ally': row[1]['Ally'] or '',
+                'Attachment': row[1]['Attachment'] or '',
+                'Event': row[1]['Event'] or '',
+                'Player Side Quest': row[1]['Player Side Quest'] or ''
+                }
+            writer.writerow(csv_row)
 
 
 def collect_traits(data):
     """ Collect traits statistics from Hall of Beorn.
     """
-    data = filter_hall_data(data)
     text = [(c['text'].replace('~', '')
              .replace('[leadership]', '***')
              .replace('[lore]', '***')
@@ -134,7 +172,7 @@ def collect_traits(data):
             writer.writerow(csv_row)
 
 
-def transform_keyword(value):
+def _transform_keyword(value):
     """ Transform a keyword value if needed.
     """
     value = re.sub(r' [0-9X]$', ' N', value)
@@ -144,10 +182,9 @@ def transform_keyword(value):
 def collect_keywords(data):
     """ Collect keywords statistics from Hall of Beorn.
     """
-    data = filter_hall_data(data)
     keywords = [
         item for sublist in [
-            [(transform_keyword(t.strip()),
+            [(_transform_keyword(t.strip()),
               c['type_name'],
               c['sphere_name']
               ) for t in c['keywords'].split('.') if t.strip()]
@@ -197,6 +234,8 @@ def collect_stat():
     """ Collect traits and keywords statistics from Hall of Beorn.
     """
     data = get_hall_data()
+    data = filter_hall_data(data)
+    collect_spheres(data)
     collect_traits(data)
     collect_keywords(data)
     print('Done')
