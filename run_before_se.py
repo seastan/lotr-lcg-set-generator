@@ -118,9 +118,6 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
         if conf['ringsdb_csv']:
             lotr.generate_ringsdb_csv(conf, set_id, set_name)
 
-        if conf['dragncards_json']:
-            lotr.generate_dragncards_json(conf, set_id, set_name)
-
         if conf['frenchdb_csv']:
             lotr.generate_frenchdb_csv(conf, set_id, set_name)
 
@@ -137,15 +134,15 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
         if conf['output_languages']:
             lotr.copy_custom_images(conf, set_id, set_name)
 
-        renderer_xml_generated = False
-        renderer_xml_changed = False
+        xml_generated = False
+        xml_changed = False
         for lang in conf['output_languages']:
             if scratch and lang != 'English':
                 continue
 
             eons = True
             if lang == 'English':
-                renderer_xml_generated = True
+                xml_generated = True
 
             lotr.generate_xml(conf, set_id, set_name, lang)
             lotr.update_xml(conf, set_id, set_name, lang)
@@ -154,28 +151,33 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
             if file_changes:
                 changes = True
                 if dragncards_changes and lang == 'English':
-                    renderer_xml_changed = True
+                    xml_changed = True
 
             lotr.copy_raw_images(conf, set_id, set_name, lang)
             lotr.copy_xml(set_id, set_name, lang)
 
-        if conf['renderer'] and not renderer_xml_generated:
+        if conf['renderer'] and not xml_generated:
             lotr.generate_xml(conf, set_id, set_name, 'English')
             lotr.update_xml(conf, set_id, set_name, 'English')
             _, dragncards_changes = lotr.calculate_hashes(set_id, set_name,
                                                           'English')
             if dragncards_changes:
-                renderer_xml_changed = True
+                xml_changed = True
 
-            renderer_xml_generated = True
+            xml_generated = True
 
-        if conf['renderer'] and renderer_xml_changed:
+        if conf['renderer'] and xml_changed:
             renderer_sets.append(set_id)
 
-        if conf['renderer_artwork'] and not renderer_xml_generated:
+        if ((conf['renderer_artwork'] or conf['dragncards_json'])
+                and not xml_generated):
             lotr.generate_xml(conf, set_id, set_name, 'English')
             lotr.update_xml(conf, set_id, set_name, 'English')
             lotr.calculate_hashes(set_id, set_name, 'English')
+            xml_generated = True
+
+        if conf['dragncards_json']:
+            lotr.generate_dragncards_json(conf, set_id, set_name)
 
     if conf['octgn_set_xml'] or conf['octgn_o8d']:
         lotr.copy_octgn_outputs(conf, sets)

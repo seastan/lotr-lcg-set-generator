@@ -431,6 +431,7 @@ DOWNLOAD_PATH = 'Download'
 DOWNLOAD_TIME_PATH = 'download_time.txt'
 DRAGNCARDS_JSON_PATH = 'dragncards.json'
 DRAGNCARDS_FOLDER_PATH = 'dragncards_folder.txt'
+DRAGNCARDS_TIMESTAMPS_JSON_PATH = 'dragncards_timestamps.json'
 GENERATE_DRAGNCARDS_JSON_PATH = 'generate_dragncards.json'
 GENERATE_DRAGNCARDS_LOG_PATH = os.path.join('Renderer', 'Output',
                                             'generate_dragncards.txt')
@@ -5405,6 +5406,30 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
         output_path,
         '{}.json'.format(escape_octgn_filename(escape_filename(set_name))))
 
+    try:
+        with open(DRAGNCARDS_TIMESTAMPS_JSON_PATH, 'r',
+                  encoding='utf-8') as fobj:
+            dragncards_timestamps = json.load(fobj)
+    except Exception:  # pylint: disable=W0703
+        dragncards_timestamps = {}
+
+    try:
+        with open(DOWNLOAD_TIME_PATH, 'r', encoding='utf-8') as fobj:
+            download_time = fobj.read()
+    except Exception:  # pylint: disable=W0703
+        download_time = None
+
+    xml_path = os.path.join(SET_EONS_PATH, '{}.English.xml'.format(set_id))
+    if download_time and os.path.exists(xml_path):
+        tree = ET.parse(xml_path)
+        root = tree.getroot()
+        for card in root[0]:
+            if (card.attrib.get('id') and
+                    not card.attrib.get('skip') and
+                    not card.attrib.get('skipDragncards') and
+                    not card.attrib.get('noDragncards')):
+                dragncards_timestamps[card.attrib['id']] = download_time
+
     json_data = {}
     for row in DATA:
         if (row[CARD_ID] is None
@@ -5549,11 +5574,17 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
             'cardencounterset': _to_str(row[CARD_ENCOUNTER_SET]),
             'playtest': 1
         }
+        if dragncards_timestamps.get(row[CARD_ID]):
+            card_data['modifiedtimeutc'] = dragncards_timestamps[row[CARD_ID]]
+
         json_data[row[CARD_ID]] = card_data
 
     with open(output_path, 'w', encoding='utf-8') as obj:
         res = json.dumps(json_data, ensure_ascii=True, indent=4)
         obj.write(res)
+
+    with open(DRAGNCARDS_TIMESTAMPS_JSON_PATH, 'w', encoding='utf-8') as fobj:
+        json.dump(dragncards_timestamps, fobj)
 
     logging.info('[%s] ...Generating JSON file for DragnCards (%ss)',
                  set_name, round(time.time() - timestamp, 3))
