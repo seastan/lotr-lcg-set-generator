@@ -740,7 +740,7 @@ def is_positive_or_zero_int(value):
         return False
 
 
-def _is_int(value):
+def is_int(value):
     """ Check whether a value is an int or not.
     """
     try:
@@ -775,10 +775,10 @@ def _is_positive_float(value):
         return False
 
 
-def _handle_int(value):
+def handle_int(value):
     """ Handle (not always) integer values.
     """
-    if _is_int(value):
+    if is_int(value):
         return int(value)
 
     return value
@@ -787,7 +787,7 @@ def _handle_int(value):
 def _handle_int_str(value):
     """ Handle (not always) integer values and convert them to string.
     """
-    if _is_int(value):
+    if is_int(value):
         return str(int(value))
 
     return value
@@ -1338,7 +1338,7 @@ def _fix_csv_value(value):
     if value == 'FALSE':
         return None
 
-    if _is_int(value):
+    if is_int(value):
         return int(value)
 
     return value
@@ -4685,7 +4685,7 @@ def load_external_xml(url, sets=None, encounter_sets=None):  # pylint: disable=R
         unique = 1 if unique else None
 
         cost = _find_properties(card, 'Cost')
-        cost = _handle_int(cost[0].attrib['value']) if cost else None
+        cost = handle_int(cost[0].attrib['value']) if cost else None
 
         if not card.attrib.get('size'):
             row[CARD_BACK] = 'Player'
@@ -4738,7 +4738,7 @@ def _update_card_for_rules(card):
 def _append_cards(parent, cards):
     """ Append card elements to the section element.
     """
-    cards = [c for c in cards if _is_int(c[CARD_QUANTITY]) and
+    cards = [c for c in cards if is_int(c[CARD_QUANTITY]) and
              c[CARD_QUANTITY] > 0]
     if cards:
         parent.text = '\n    '
@@ -4758,7 +4758,7 @@ def _test_rule(card, rule):  # pylint: disable=R0911,R0912
     """ Test a deck rule and return the number of affected copies.
     """
     res = re.match(r'^([0-9]+) ', rule)
-    if res and _is_int(card[CARD_QUANTITY]):
+    if res and is_int(card[CARD_QUANTITY]):
         qty = min(int(res.groups()[0]), card[CARD_QUANTITY])
         rule = re.sub(r'^[0-9]+ +', '', rule)
     else:
@@ -5032,7 +5032,7 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                 elif mode == EASY_PREFIX and card[CARD_EASY_MODE]:
                     card_copy = _update_card_for_rules(card.copy())
                     easy_mode = (int(card_copy[CARD_EASY_MODE])
-                                 if _is_int(card_copy[CARD_EASY_MODE]) else 0)
+                                 if is_int(card_copy[CARD_EASY_MODE]) else 0)
                     card_copy[CARD_QUANTITY] -= easy_mode
                     encounter_cards.append(card_copy)
                 else:
@@ -5239,7 +5239,7 @@ def _ringsdb_code(row):
 def _spanishdb_code(row):
     """ Return the card's Spanish database code.
     """
-    card_number = str(_handle_int(row[CARD_NUMBER])).zfill(3)
+    card_number = str(handle_int(row[CARD_NUMBER])).zfill(3)
     code = '{}{}'.format(row[CARD_SET_RINGSDB_CODE], card_number)
     return code
 
@@ -5283,15 +5283,15 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
 
             if row[CARD_TYPE] == 'Hero':
                 cost = None
-                threat = _handle_int(row[CARD_COST])
+                threat = handle_int(row[CARD_COST])
             else:
-                cost = _handle_int(row[CARD_COST])
+                cost = handle_int(row[CARD_COST])
                 threat = None
 
             if row[CARD_SPHERE] == 'Burden':
-                willpower = _handle_int(row[CARD_THREAT])
+                willpower = handle_int(row[CARD_THREAT])
             else:
-                willpower = _handle_int(row[CARD_WILLPOWER])
+                willpower = handle_int(row[CARD_WILLPOWER])
 
             if (row[CARD_TYPE] in ('Contract', 'Player Objective',
                                    'Treasure') or
@@ -5309,7 +5309,7 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                 card_type = row[CARD_TYPE]
 
             quantity = (int(row[CARD_QUANTITY])
-                        if _is_int(row[CARD_QUANTITY]) else 1)
+                        if is_int(row[CARD_QUANTITY]) else 1)
 
             text = _update_card_text('{}\n\n{}'.format(
                 row[CARD_KEYWORDS] or '',
@@ -5353,11 +5353,11 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                 'cost': cost,
                 'threat': threat,
                 'willpower': willpower,
-                'attack': _handle_int(row[CARD_ATTACK]),
-                'defense': _handle_int(row[CARD_DEFENSE]),
-                'health': _handle_int(row[CARD_HEALTH]),
-                'victory': _handle_int(row[CARD_VICTORY]),
-                'quest': _handle_int(row[CARD_QUEST]),
+                'attack': handle_int(row[CARD_ATTACK]),
+                'defense': handle_int(row[CARD_DEFENSE]),
+                'health': handle_int(row[CARD_HEALTH]),
+                'victory': handle_int(row[CARD_VICTORY]),
+                'quest': handle_int(row[CARD_QUEST]),
                 'quantity': quantity,
                 'deckLimit': limit or quantity,
                 'illustrator': row[CARD_ARTIST],
@@ -5375,13 +5375,13 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                 new_row['name'] = '(MotK) {}'.format(new_row['name'])
                 new_row['cost'] = None
                 willpower = (new_row['willpower']
-                             if _is_int(new_row['willpower']) else 0)
+                             if is_int(new_row['willpower']) else 0)
                 attack = (new_row['attack']
-                          if _is_int(new_row['attack']) else 0)
+                          if is_int(new_row['attack']) else 0)
                 defense = (new_row['defense']
-                           if _is_int(new_row['defense']) else 0)
+                           if is_int(new_row['defense']) else 0)
                 health = (new_row['health']
-                          if _is_int(new_row['health']) else 0)
+                          if is_int(new_row['health']) else 0)
                 new_row['threat'] = willpower + attack + defense + health
                 new_row['quantity'] = 1
                 new_row['deckLimit'] = 1
@@ -5435,21 +5435,21 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
         side_a = {
             'name': unidecode.unidecode(_to_str(row[CARD_NAME])),
             'printname': _to_str(row[CARD_NAME]),
-            'unique': _to_str(_handle_int(row[CARD_UNIQUE])),
+            'unique': _to_str(handle_int(row[CARD_UNIQUE])),
             'type': _to_str(card_type),
             'sphere': _to_str(sphere),
             'traits': _to_str(row[CARD_TRAITS]),
             'keywords': _update_dragncards_card_text(_to_str(
                 row[CARD_KEYWORDS])),
-            'cost': _to_str(_handle_int(row[CARD_COST])),
-            'engagementcost': _to_str(_handle_int(row[CARD_ENGAGEMENT])),
-            'threat': _to_str(_handle_int(row[CARD_THREAT])),
-            'willpower': _to_str(_handle_int(row[CARD_WILLPOWER])),
-            'attack': _to_str(_handle_int(row[CARD_ATTACK])),
-            'defense': _to_str(_handle_int(row[CARD_DEFENSE])),
-            'hitpoints': _to_str(_handle_int(row[CARD_HEALTH])),
-            'questpoints': _to_str(_handle_int(row[CARD_QUEST])),
-            'victorypoints': _to_str(_handle_int(victory)),
+            'cost': _to_str(handle_int(row[CARD_COST])),
+            'engagementcost': _to_str(handle_int(row[CARD_ENGAGEMENT])),
+            'threat': _to_str(handle_int(row[CARD_THREAT])),
+            'willpower': _to_str(handle_int(row[CARD_WILLPOWER])),
+            'attack': _to_str(handle_int(row[CARD_ATTACK])),
+            'defense': _to_str(handle_int(row[CARD_DEFENSE])),
+            'hitpoints': _to_str(handle_int(row[CARD_HEALTH])),
+            'questpoints': _to_str(handle_int(row[CARD_QUEST])),
+            'victorypoints': _to_str(handle_int(victory)),
             'text': _update_dragncards_card_text(_to_str(row[CARD_TEXT])),
             'shadow': _update_dragncards_card_text(_to_str(row[CARD_SHADOW]))
         }
@@ -5480,26 +5480,26 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
                 'name': unidecode.unidecode(_to_str(
                     row[BACK_PREFIX + CARD_NAME])),
                 'printname': _to_str(row[BACK_PREFIX + CARD_NAME]),
-                'unique': _to_str(_handle_int(row[BACK_PREFIX + CARD_UNIQUE])),
+                'unique': _to_str(handle_int(row[BACK_PREFIX + CARD_UNIQUE])),
                 'type': _to_str(card_type),
                 'sphere': _to_str(sphere),
                 'traits': _to_str(row[BACK_PREFIX + CARD_TRAITS]),
                 'keywords': _update_dragncards_card_text(_to_str(
                     row[BACK_PREFIX + CARD_KEYWORDS])),
-                'cost': _to_str(_handle_int(row[BACK_PREFIX + CARD_COST])),
+                'cost': _to_str(handle_int(row[BACK_PREFIX + CARD_COST])),
                 'engagementcost': _to_str(
-                    _handle_int(row[BACK_PREFIX + CARD_ENGAGEMENT])),
-                'threat': _to_str(_handle_int(row[BACK_PREFIX + CARD_THREAT])),
+                    handle_int(row[BACK_PREFIX + CARD_ENGAGEMENT])),
+                'threat': _to_str(handle_int(row[BACK_PREFIX + CARD_THREAT])),
                 'willpower': _to_str(
-                    _handle_int(row[BACK_PREFIX + CARD_WILLPOWER])),
-                'attack': _to_str(_handle_int(row[BACK_PREFIX + CARD_ATTACK])),
+                    handle_int(row[BACK_PREFIX + CARD_WILLPOWER])),
+                'attack': _to_str(handle_int(row[BACK_PREFIX + CARD_ATTACK])),
                 'defense': _to_str(
-                    _handle_int(row[BACK_PREFIX + CARD_DEFENSE])),
+                    handle_int(row[BACK_PREFIX + CARD_DEFENSE])),
                 'hitpoints': _to_str(
-                    _handle_int(row[BACK_PREFIX + CARD_HEALTH])),
+                    handle_int(row[BACK_PREFIX + CARD_HEALTH])),
                 'questpoints': _to_str(
-                    _handle_int(row[BACK_PREFIX + CARD_QUEST])),
-                'victorypoints': _to_str(_handle_int(victory)),
+                    handle_int(row[BACK_PREFIX + CARD_QUEST])),
+                'victorypoints': _to_str(handle_int(victory)),
                 'text': _update_dragncards_card_text(_to_str(
                     row[BACK_PREFIX + CARD_TEXT])),
                 'shadow': _update_dragncards_card_text(_to_str(
@@ -5544,8 +5544,8 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
             'cardsetid': _to_str(row[CARD_SET]),
             'cardpackname': _to_str(row[CARD_SET_NAME]),
             'cardid': _to_str(row[CARD_ID]),
-            'cardnumber': _to_str(_handle_int(row[CARD_NUMBER])),
-            'cardquantity': _to_str(_handle_int(row[CARD_QUANTITY])),
+            'cardnumber': _to_str(handle_int(row[CARD_NUMBER])),
+            'cardquantity': _to_str(handle_int(row[CARD_QUANTITY])),
             'cardencounterset': _to_str(row[CARD_ENCOUNTER_SET]),
             'playtest': 1
         }
@@ -5630,7 +5630,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
         elif card_type == 'Quest':
             cost = None
             threat = None
-            quest_stage = _handle_int(row[CARD_COST])
+            quest_stage = handle_int(row[CARD_COST])
             engagement_cost = None
             quest_points = _handle_int_str(row[BACK_PREFIX + CARD_QUEST])
             stage_letter = row[CARD_ENGAGEMENT]
@@ -5737,7 +5737,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
         if row[CARD_SPECIAL_ICON] is not None:
             tokens.append(row[CARD_SPECIAL_ICON])
 
-        if victory_points is not None and not _is_int(victory_points):
+        if victory_points is not None and not is_int(victory_points):
             tokens.append(victory_points)
             victory_points = None
 
@@ -5792,7 +5792,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
             flavor = 'Side A: {} Side B: {}'.format(flavor, flavor_back)
 
         quantity = (int(row[CARD_QUANTITY])
-                    if _is_int(row[CARD_QUANTITY]) else 1)
+                    if is_int(row[CARD_QUANTITY]) else 1)
 
         json_row = {
             'code': code,
@@ -5824,7 +5824,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
             'card_side': card_side,
             'cost': cost,
             'defense': _handle_int_str(row[CARD_DEFENSE]),
-            'easy_mode_quantity': _handle_int(row[CARD_EASY_MODE]),
+            'easy_mode_quantity': handle_int(row[CARD_EASY_MODE]),
             'encounter_set': encounter_set,
             'engagement_cost': engagement_cost,
             'health': _handle_int_str(row[CARD_HEALTH]),
@@ -5905,9 +5905,9 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
 
             if row[CARD_TYPE] == 'Hero':
                 cost = None
-                threat = _update_french_non_int(_handle_int(row[CARD_COST]))
+                threat = _update_french_non_int(handle_int(row[CARD_COST]))
             else:
-                cost = _update_french_non_int(_handle_int(row[CARD_COST]))
+                cost = _update_french_non_int(handle_int(row[CARD_COST]))
                 threat = None
 
             text = _update_french_card_text('{}\n\n{}'.format(
@@ -5927,17 +5927,17 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 quantity = 0
             else:
                 quantity = (int(row[CARD_QUANTITY])
-                            if _is_int(row[CARD_QUANTITY])
+                            if is_int(row[CARD_QUANTITY])
                             else 1)
 
             easy_mode = (int(row[CARD_EASY_MODE])
-                         if _is_int(row[CARD_EASY_MODE])
+                         if is_int(row[CARD_EASY_MODE])
                          else 0)
 
             csv_row = {
                 'id_extension': row[CARD_SET_NAME],
                 'numero_identification': int(row[CARD_NUMBER])
-                                         if _is_int(row[CARD_NUMBER])
+                                         if is_int(row[CARD_NUMBER])
                                          else 0,
                 'id_type_carte': CARD_TYPE_FRENCH_IDS.get(row[CARD_TYPE], 0),
                 'id_sous_type_carte': CARD_SUBTYPE_FRENCH_IDS.get(
@@ -5948,13 +5948,13 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 'cout': cost,
                 'menace': threat,
                 'volonte': _update_french_non_int(
-                    _handle_int(row[CARD_WILLPOWER])),
+                    handle_int(row[CARD_WILLPOWER])),
                 'attaque': _update_french_non_int(
-                    _handle_int(row[CARD_ATTACK])),
+                    handle_int(row[CARD_ATTACK])),
                 'defense': _update_french_non_int(
-                    _handle_int(row[CARD_DEFENSE])),
+                    handle_int(row[CARD_DEFENSE])),
                 'point_vie': _update_french_non_int(
-                    _handle_int(row[CARD_HEALTH])),
+                    handle_int(row[CARD_HEALTH])),
                 'trait': french_row.get(CARD_TRAITS),
                 'texte': text,
                 'indic_unique': int(row[CARD_UNIQUE] or 0),
@@ -6010,16 +6010,16 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 shadow = None
 
             quantity = (int(row[CARD_QUANTITY])
-                        if _is_int(row[CARD_QUANTITY])
+                        if is_int(row[CARD_QUANTITY])
                         else 1)
             easy_mode = (int(row[CARD_EASY_MODE])
-                         if _is_int(row[CARD_EASY_MODE])
+                         if is_int(row[CARD_EASY_MODE])
                          else 0)
 
             csv_row = {
                 'id_extension': row[CARD_SET_NAME],
                 'numero_identification': int(row[CARD_NUMBER])
-                                         if _is_int(row[CARD_NUMBER])
+                                         if is_int(row[CARD_NUMBER])
                                          else 0,
                 'id_type_carte': CARD_TYPE_FRENCH_IDS.get(card_type, 0),
                 'id_sous_type_carte': CARD_SUBTYPE_FRENCH_IDS.get(
@@ -6027,17 +6027,17 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 'id_set_rencontre': row[CARD_ENCOUNTER_SET] or '',
                 'titre': french_row.get(CARD_NAME, ''),
                 'cout_engagement': _update_french_non_int(
-                    _handle_int(row[CARD_ENGAGEMENT])),
+                    handle_int(row[CARD_ENGAGEMENT])),
                 'menace': _update_french_non_int(
-                    _handle_int(row[CARD_THREAT])),
+                    handle_int(row[CARD_THREAT])),
                 'attaque': _update_french_non_int(
-                    _handle_int(row[CARD_ATTACK])),
+                    handle_int(row[CARD_ATTACK])),
                 'defense': _update_french_non_int(
-                    _handle_int(row[CARD_DEFENSE])),
+                    handle_int(row[CARD_DEFENSE])),
                 'point_quete': _update_french_non_int(
-                    _handle_int(row[CARD_QUEST])),
+                    handle_int(row[CARD_QUEST])),
                 'point_vie': _update_french_non_int(
-                    _handle_int(row[CARD_HEALTH])),
+                    handle_int(row[CARD_HEALTH])),
                 'trait': french_row.get(CARD_TRAITS),
                 'texte': text,
                 'effet_ombre': shadow,
@@ -6082,21 +6082,21 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 french_row.get(BACK_PREFIX + CARD_TEXT) or '')).strip()
 
             quantity = (int(row[CARD_QUANTITY])
-                        if _is_int(row[CARD_QUANTITY])
+                        if is_int(row[CARD_QUANTITY])
                         else 1)
 
             csv_row = {
                 'id_extension': row[CARD_SET_NAME],
                 'numero_identification': int(row[CARD_NUMBER])
-                                         if _is_int(row[CARD_NUMBER])
+                                         if is_int(row[CARD_NUMBER])
                                          else 0,
                 'id_set_rencontre': row[CARD_ENCOUNTER_SET] or '',
                 'titre': name,
-                'sequence': str(_handle_int(row[CARD_COST])),
+                'sequence': str(handle_int(row[CARD_COST])),
                 'texteA': text,
                 'texteB': text_back,
                 'point_quete': _update_french_non_int(
-                    _handle_int(row[BACK_PREFIX + CARD_QUEST])),
+                    handle_int(row[BACK_PREFIX + CARD_QUEST])),
                 'nb_normal': quantity,
                 'nb_facile': quantity,
                 'nb_cauchemar': 0
@@ -6183,30 +6183,30 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                                         spanish_row[BACK_PREFIX + CARD_NAME])
 
             quantity = (int(row[CARD_QUANTITY])
-                        if _is_int(row[CARD_QUANTITY])
+                        if is_int(row[CARD_QUANTITY])
                         else 1)
             easy_mode = (int(row[CARD_EASY_MODE])
-                         if _is_int(row[CARD_EASY_MODE])
+                         if is_int(row[CARD_EASY_MODE])
                          else 0)
             if row[CARD_TYPE] == 'Quest':
-                quest_points = _handle_int(row[BACK_PREFIX + CARD_QUEST])
-                engagement = _handle_int(row[CARD_COST])
+                quest_points = handle_int(row[BACK_PREFIX + CARD_QUEST])
+                engagement = handle_int(row[CARD_COST])
                 threat = '{}-{}'.format(
                     row[CARD_ENGAGEMENT] or '',
                     row[BACK_PREFIX + CARD_ENGAGEMENT] or '')
             else:
-                quest_points = _handle_int(row[CARD_QUEST])
-                engagement = _handle_int(row[CARD_ENGAGEMENT])
-                threat = _handle_int(row[CARD_THREAT])
+                quest_points = handle_int(row[CARD_QUEST])
+                engagement = handle_int(row[CARD_ENGAGEMENT])
+                threat = handle_int(row[CARD_THREAT])
 
             if row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL:
                 victory_points = (
-                    _handle_int(spanish_row.get(BACK_PREFIX + CARD_VICTORY))
+                    handle_int(spanish_row.get(BACK_PREFIX + CARD_VICTORY))
                     if spanish_row.get(BACK_PREFIX + CARD_VICTORY) is not None
-                    else _handle_int(spanish_row.get(CARD_VICTORY))
+                    else handle_int(spanish_row.get(CARD_VICTORY))
                     )
             else:
-                victory_points = _handle_int(spanish_row.get(CARD_VICTORY))
+                victory_points = handle_int(spanish_row.get(CARD_VICTORY))
 
             text = _update_card_text('{}\n\n{}'.format(
                 spanish_row.get(CARD_KEYWORDS) or '',
@@ -6238,7 +6238,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 'type_id': row[CARD_TYPE],
                 'set': spanish_row.get(CARD_ENCOUNTER_SET),
                 'set_id': None,
-                'position': _handle_int(row[CARD_NUMBER]),
+                'position': handle_int(row[CARD_NUMBER]),
                 'code': _spanishdb_code(row),
                 'nombre': name,
                 'nombreb': row[CARD_NAME],
@@ -6247,9 +6247,9 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 'tipo': SPANISH.get(row[CARD_TYPE]),
                 'enfrentamiento': engagement,
                 'amenaza': threat,
-                'attack': _handle_int(row[CARD_ATTACK]),
-                'defense': _handle_int(row[CARD_DEFENSE]),
-                'health': _handle_int(row[CARD_HEALTH]),
+                'attack': handle_int(row[CARD_ATTACK]),
+                'defense': handle_int(row[CARD_DEFENSE]),
+                'health': handle_int(row[CARD_HEALTH]),
                 'mision': quest_points,
                 'victory': victory_points,
                 'traits': spanish_row.get(CARD_TRAITS),
@@ -6291,9 +6291,9 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
 
             if row[CARD_TYPE] == 'Hero':
                 cost = None
-                threat = _handle_int(row[CARD_COST])
+                threat = handle_int(row[CARD_COST])
             else:
-                cost = _handle_int(row[CARD_COST])
+                cost = handle_int(row[CARD_COST])
                 threat = None
 
             text = _update_card_text('{}\n\n{}'.format(
@@ -6348,10 +6348,10 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
             if row[CARD_TYPE] == 'Rules':
                 victory_points = None
             else:
-                victory_points = _handle_int(spanish_row.get(CARD_VICTORY))
+                victory_points = handle_int(spanish_row.get(CARD_VICTORY))
 
             quantity = (int(row[CARD_QUANTITY])
-                        if _is_int(row[CARD_QUANTITY])
+                        if is_int(row[CARD_QUANTITY])
                         else 1)
 
             if row[CARD_TYPE] in CARD_TYPES_PLAYER_DECK:
@@ -6369,7 +6369,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 'cycle_id': None,
                 'type_id': row[CARD_TYPE],
                 'sphere_id': sphere,
-                'position': _handle_int(row[CARD_NUMBER]),
+                'position': handle_int(row[CARD_NUMBER]),
                 'code': _spanishdb_code(row),
                 'name': spanish_row.get(CARD_NAME),
                 'traits': spanish_row.get(CARD_TRAITS),
@@ -6378,12 +6378,12 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 'is_unique': int(row[CARD_UNIQUE] or 0),
                 'cost': cost,
                 'threat': threat,
-                'willpower': _handle_int(row[CARD_WILLPOWER]),
-                'attack': _handle_int(row[CARD_ATTACK]),
-                'defense': _handle_int(row[CARD_DEFENSE]),
-                'health': _handle_int(row[CARD_HEALTH]),
+                'willpower': handle_int(row[CARD_WILLPOWER]),
+                'attack': handle_int(row[CARD_ATTACK]),
+                'defense': handle_int(row[CARD_DEFENSE]),
+                'health': handle_int(row[CARD_HEALTH]),
                 'victory': victory_points,
-                'quest': _handle_int(row[CARD_QUEST]),
+                'quest': handle_int(row[CARD_QUEST]),
                 'quantity': quantity,
                 'deck_limit': limit or quantity,
                 'illustrator': row[CARD_ARTIST],
@@ -8957,7 +8957,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
         cards = {}
         for row in card_data:
             if row[CARD_SET] == set_id and _needed_for_ringsdb(row):
-                card_number = str(_handle_int(row[CARD_NUMBER])).zfill(3)
+                card_number = str(handle_int(row[CARD_NUMBER])).zfill(3)
                 code = _ringsdb_code(row)
                 cards[card_number] = [code]
                 if (row[CARD_TYPE] == 'Ally' and row[CARD_UNIQUE] and
@@ -9011,7 +9011,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
         cards = {}
         for row in card_data:
             if row[CARD_SET] == set_id and _needed_for_frenchdb(row):
-                card_number = str(_handle_int(row[CARD_NUMBER])).zfill(3)
+                card_number = str(handle_int(row[CARD_NUMBER])).zfill(3)
                 cards[card_number] = row[CARD_NUMBER]
 
         pairs = []
@@ -9053,7 +9053,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
             if (row[CARD_SET] == set_id and
                     (_needed_for_spanishdb(row) or
                      row[CARD_TYPE] == 'Presentation')):
-                card_number = str(_handle_int(row[CARD_NUMBER])).zfill(3)
+                card_number = str(handle_int(row[CARD_NUMBER])).zfill(3)
                 cards[card_number] = _spanishdb_code(row)
 
         pairs = []
