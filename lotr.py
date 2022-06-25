@@ -4413,7 +4413,7 @@ def _add_set_xml_properties(parent, properties, fix_linebreaks, tab):
 
         prop = ET.SubElement(parent, 'property')
         prop.set('name', name)
-        prop.set('value', _update_octgn_card_text(str(_handle_int_str(value)),
+        prop.set('value', _update_octgn_card_text(_to_str(handle_int(value)),
                                                   fix_linebreaks=fix_linebreaks))
 
         if i == len(properties) - 1:
@@ -5239,7 +5239,7 @@ def _ringsdb_code(row):
 def _spanishdb_code(row):
     """ Return the card's Spanish database code.
     """
-    card_number = str(handle_int(row[CARD_NUMBER])).zfill(3)
+    card_number = _to_str(handle_int(row[CARD_NUMBER])).zfill(3)
     code = '{}{}'.format(row[CARD_SET_RINGSDB_CODE], card_number)
     return code
 
@@ -6092,7 +6092,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                                          else 0,
                 'id_set_rencontre': row[CARD_ENCOUNTER_SET] or '',
                 'titre': name,
-                'sequence': str(handle_int(row[CARD_COST])),
+                'sequence': _to_str(handle_int(row[CARD_COST])),
                 'texteA': text,
                 'texteB': text_back,
                 'point_quete': _update_french_non_int(
@@ -6430,7 +6430,7 @@ def _add_xml_properties(parent, properties, tab):
 
         prop = ET.SubElement(parent, 'property')
         prop.set('name', name)
-        prop.set('value', str(_handle_int_str(value)))
+        prop.set('value', _to_str(handle_int(value)))
 
         if i == len(properties) - 1:
             prop.tail = '\n' + tab
@@ -8957,7 +8957,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
         cards = {}
         for row in card_data:
             if row[CARD_SET] == set_id and _needed_for_ringsdb(row):
-                card_number = str(handle_int(row[CARD_NUMBER])).zfill(3)
+                card_number = _to_str(handle_int(row[CARD_NUMBER])).zfill(3)
                 code = _ringsdb_code(row)
                 cards[card_number] = [code]
                 if (row[CARD_TYPE] == 'Ally' and row[CARD_UNIQUE] and
@@ -9011,7 +9011,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
         cards = {}
         for row in card_data:
             if row[CARD_SET] == set_id and _needed_for_frenchdb(row):
-                card_number = str(handle_int(row[CARD_NUMBER])).zfill(3)
+                card_number = _to_str(handle_int(row[CARD_NUMBER])).zfill(3)
                 cards[card_number] = row[CARD_NUMBER]
 
         pairs = []
@@ -9053,7 +9053,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
             if (row[CARD_SET] == set_id and
                     (_needed_for_spanishdb(row) or
                      row[CARD_TYPE] == 'Presentation')):
-                card_number = str(handle_int(row[CARD_NUMBER])).zfill(3)
+                card_number = _to_str(handle_int(row[CARD_NUMBER])).zfill(3)
                 cards[card_number] = _spanishdb_code(row)
 
         pairs = []
