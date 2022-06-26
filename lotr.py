@@ -5699,6 +5699,18 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
         res = json.dumps(json_data, ensure_ascii=True, indent=4)
         obj.write(res)
 
+    for card in json_data.values():
+        if 'playtest' in card:
+            del card['playtest']
+
+        if 'modifiedtimeutc' in card:
+            del card['modifiedtimeutc']
+
+    output_path = '{}.release'.format(output_path)
+    with open(output_path, 'w', encoding='utf-8') as obj:
+        res = json.dumps(json_data, ensure_ascii=True, indent=4)
+        obj.write(res)
+
     with open(DRAGNCARDS_TIMESTAMPS_JSON_PATH, 'w', encoding='utf-8') as fobj:
         json.dump(dragncards_timestamps, fobj)
 
@@ -10780,7 +10792,6 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
             if (conf['dragncards_remote_json_path'] and
                     conf['dragncards_json'] and
                     os.path.exists(output_path)):
-
                 with open(output_path, 'rb') as fobj:
                     content = fobj.read()
 
