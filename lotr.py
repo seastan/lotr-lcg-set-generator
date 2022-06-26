@@ -217,6 +217,7 @@ CARD_SPHERES_NO_VICTORY = {'Cave', 'Region'}
 CARD_TYPES_SPECIAL_ICON = {'Enemy', 'Location', 'Objective', 'Objective Ally',
                            'Objective Location', 'Ship Enemy',
                            'Ship Objective', 'Treachery'}
+CARD_TYPES_NO_PERIOD_CHECK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
 CARD_TYPES_TEXT = {}
 #CARD_TYPES_TEXT = {'Attachment', 'Campaign', 'Contract',
 #                   'Encounter Side Quest', 'Event', 'Hero', 'Location',
@@ -1823,6 +1824,23 @@ def extract_flags(value):
             str(value or '').replace(';', '\n').split('\n') if f.strip()]
 
 
+def _verify_period(value):
+    """ Verify period at the end of the paragraph.
+    """
+    res = True
+    paragraphs = value.split('\n\n')
+    for paragraph in paragraphs:
+        if not (re.search(
+                    r'\.\)?”?(?:\[\/b\]|\[\/i\]|\[\/bi\])?$', paragraph) or
+                re.search(
+                    r'\.”\)(?:\[\/b\]|\[\/i\]|\[\/bi\])?$', paragraph) or
+                paragraph.endswith('[vspace]')):
+            res = False
+            break
+
+    return res
+
+
 def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
     """ Perform a sanity check of the spreadsheet and return "healthy" sets.
     """
@@ -3131,6 +3149,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif (card_text is not None and
+              card_type not in CARD_TYPES_NO_PERIOD_CHECK and
+              not _verify_period(card_text)):
+            message = ('Missing period at the end of the text paragraph for '
+                       'row #{}{}'.format(i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if card_text_back is not None and card_type_back is None:
             message = 'Redundant text back for row #{}{}'.format(i, scratch)
@@ -3160,6 +3188,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
               card_sphere_back in CARD_SPHERES_NO_TEXT):
             message = 'Redundant text back for row #{}{}'.format(
                 i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_text_back is not None and
+              card_type_back not in CARD_TYPES_NO_PERIOD_CHECK and
+              not _verify_period(card_text_back)):
+            message = ('Missing period at the end of the text back paragraph '
+                       'for row #{}{}'.format(i, scratch))
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
@@ -3197,6 +3235,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif card_shadow is not None and not _verify_period(card_shadow):
+            message = ('Missing period at the end of shadow for row #{}{}'
+                       .format(i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if card_shadow_back is not None and card_type_back is None:
             message = 'Redundant shadow back for row #{}{}'.format(i, scratch)
@@ -3208,6 +3254,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif card_shadow_back is not None:
             message = 'Redundant shadow back for row #{}{}'.format(
                 i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_shadow_back is not None and
+              not _verify_period(card_shadow_back)):
+            message = ('Missing period at the end of shadow back for row '
+                       '#{}{}'.format(i, scratch))
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
@@ -3997,6 +4052,67 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     'Incorrect victory points back for card '
                     'ID %s in %s translations, row #%s', card_id,
                     lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+            if card_text is not None:
+                card_text_tr = TRANSLATIONS[lang][card_id].get(CARD_TEXT, '')
+                if (card_type not in CARD_TYPES_NO_PERIOD_CHECK and
+                      not _verify_period(card_text_tr)):
+                    logging.error(
+                        'Missing period at the end of the text paragraph for '
+                        'card ID %s in %s translations, row #%s', card_id,
+                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+                if '[split]' in card_text and '[split]' not in card_text_tr:
+                    logging.error(
+                        'Missing [split] tag in text for card ID %s in %s '
+                        'translations, row #%s', card_id, lang,
+                        TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                elif '[split]' not in card_text and '[split]' in card_text_tr:
+                    logging.error(
+                        'Invalid [split] tag in text for card ID %s in %s '
+                        'translations, row #%s', card_id, lang,
+                        TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+            if card_text_back is not None:
+                card_text_back_tr = TRANSLATIONS[lang][card_id].get(
+                    BACK_PREFIX + CARD_TEXT, '')
+                if (card_type_back not in CARD_TYPES_NO_PERIOD_CHECK and
+                      not _verify_period(card_text_back_tr)):
+                    logging.error(
+                        'Missing period at the end of the text back paragraph '
+                        'for card ID %s in %s translations, row #%s', card_id,
+                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+                if ('[split]' in card_text_back and
+                        '[split]' not in card_text_back_tr):
+                    logging.error(
+                        'Missing [split] tag in text back for card ID %s in '
+                        '%s translations, row #%s', card_id, lang,
+                        TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                elif ('[split]' not in card_text_back and
+                      '[split]' in card_text_back_tr):
+                    logging.error(
+                        'Invalid [split] tag in text back for card ID %s in '
+                        '%s translations, row #%s', card_id, lang,
+                        TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+            if card_shadow is not None:
+                card_shadow_tr = TRANSLATIONS[lang][card_id].get(
+                    CARD_SHADOW, '')
+                if not _verify_period(card_shadow_tr):
+                    logging.error(
+                        'Missing period at the end of shadow for card ID %s '
+                        'in %s translations, row #%s', card_id, lang,
+                        TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+            if card_shadow_back is not None:
+                card_shadow_back_tr = TRANSLATIONS[lang][card_id].get(
+                    BACK_PREFIX + CARD_SHADOW, '')
+                if not _verify_period(card_shadow_back_tr):
+                    logging.error(
+                        'Missing period at the end of shadow back for card ID '
+                        '%s in %s translations, row #%s', card_id, lang,
+                        TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
     logging.info('')
     if errors:
