@@ -1593,7 +1593,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
             await run_shell(RCLONE_RENDERER_CMD)
             await self._send_channel(
                 self.notifications_channel,
-                'New card images are available in Discord and DragnCards')
+                'New pixel-perfect card images are available in Discord and '
+                'DragnCards')
 
 
     async def _process_category_changes(self, data):  #pylint: disable=R0912
