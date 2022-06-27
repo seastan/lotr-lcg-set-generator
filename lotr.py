@@ -332,6 +332,7 @@ CARD_TYPES_BOON = {'Attachment', 'Event', 'Objective Ally'}
 CARD_TYPES_BURDEN = {'Enemy', 'Objective', 'Treachery'}
 CARD_TYPES_NIGHTMARE = {'Encounter Side Quest', 'Enemy', 'Location',
                         'Objective', 'Ship Enemy', 'Treachery', 'Quest'}
+CARD_TYPES_NOSTAT = {'Enemy'}
 CARD_TYPES_NO_DISCORD_CHANNEL = {'Full Art Landscape', 'Full Art Portrait',
                                  'Rules', 'Presentation'}
 
@@ -340,7 +341,6 @@ FLAGS = {'AdditionalCopies', 'Asterisk', 'NoArtist', 'NoCopyright', 'NoTraits',
 RING_FLAGS = {'BlueRing', 'GreenRing', 'RedRing'}
 SPHERES = set()
 SPHERES_CAMPAIGN = {'Setup'}
-SPHERES_SIDE_QUEST = {'Cave', 'NoProgress', 'Region', 'SmallTextArea'}
 SPHERES_PLAYER = {'Baggins', 'Fellowship', 'Leadership', 'Lore', 'Neutral',
                   'Spirit', 'Tactics'}
 SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow',
@@ -348,6 +348,7 @@ SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow',
                         'RedNightmare', 'BrownNightmare', 'YellowNightmare'}
 SPHERES_RULES = {'Back'}
 SPHERES_SHIP_OBJECTIVE = {'Upgraded'}
+SPHERES_SIDE_QUEST = {'Cave', 'NoProgress', 'Region', 'SmallTextArea'}
 SPECIAL_ICONS = {'eye of sauron', 'eye of sauronx2', 'eye of sauronx3',
                  'sailing', 'sailingx2'}
 
@@ -2210,6 +2211,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         if card_type in CARD_TYPES_NIGHTMARE:
             spheres.add('Nightmare')
 
+        if card_type in CARD_TYPES_NOSTAT:
+            spheres.add('NoStat')
+
         if (card_sphere is None and
                 (card_type in CARD_TYPES_PLAYER_SPHERE or
                  card_type == 'Presentation')):
@@ -2243,6 +2247,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
             if card_type_back in CARD_TYPES_NIGHTMARE:
                 spheres_back.add('Nightmare')
+
+            if card_type_back in CARD_TYPES_NOSTAT:
+                spheres_back.add('NoStat')
 
             if card_sphere_back is not None and card_type_back is None:
                 message = 'Redundant sphere back for row #{}{}'.format(
@@ -4473,8 +4480,8 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
             value = 'Neutral'
         elif card_type in ('Presentation', 'Rules'):
             value = ''
-        elif value in ('Cave', 'NoProgress', 'Region', 'SmallTextArea',
-                       'Upgraded'):
+        elif value in ('Cave', 'NoProgress', 'NoStat', 'Region',
+                       'SmallTextArea', 'Upgraded'):
             value = ''
         elif card_type == 'Campaign':
             value = str(value).upper() if value else 'CAMPAIGN'
@@ -5562,8 +5569,8 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
 
         if row[CARD_TYPE] in ('Player Objective', 'Treasure'):
             sphere = 'Neutral'
-        elif row[CARD_SPHERE] in ('Setup', 'Cave', 'NoProgress', 'Region',
-                                  'SmallTextArea', 'Upgraded'):
+        elif row[CARD_SPHERE] in ('Cave', 'NoProgress', 'NoStat', 'Region',
+                                  'Setup', 'SmallTextArea', 'Upgraded'):
             sphere = ''
         else:
             sphere = row[CARD_SPHERE]
@@ -5605,8 +5612,8 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
                                                 'Treasure'):
                 sphere = 'Neutral'
             elif row[BACK_PREFIX + CARD_SPHERE] in (
-                    'Setup', 'Cave', 'NoProgress', 'Region', 'SmallTextArea',
-                    'Upgraded'):
+                    'Cave', 'NoProgress', 'NoStat', 'Region', 'Setup',
+                    'SmallTextArea', 'Upgraded'):
                 sphere = ''
             else:
                 sphere = row[BACK_PREFIX + CARD_SPHERE]
@@ -5807,8 +5814,8 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
             sphere = 'Neutral'
         elif card_type in ('Campaign', 'Presentation', 'Rules'):
             sphere = 'None'
-        elif row[CARD_SPHERE] in ('Nightmare', 'Cave', 'NoProgress', 'Region',
-                                  'SmallTextArea', 'Upgraded'):
+        elif row[CARD_SPHERE] in ('Cave', 'Nightmare', 'NoProgress', 'NoStat',
+                                  'Region', 'SmallTextArea', 'Upgraded'):
             sphere = 'None'
         elif row[CARD_SPHERE] is not None:
             sphere = row[CARD_SPHERE]

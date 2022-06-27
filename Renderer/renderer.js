@@ -41,6 +41,7 @@ const containerFontSize = {
 };
 
 const difficultyTypes = {
+    'Enemy NoStat': 'Enemy',
     'Objective Hero': 'Objective Ally',
     'Objective Location': 'Objective',
     'Ship Enemy': 'Enemy',
