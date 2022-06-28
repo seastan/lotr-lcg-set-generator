@@ -5,6 +5,7 @@
 import codecs
 from collections import Counter
 import csv
+import html
 import json
 import os
 import re
@@ -12,13 +13,17 @@ import uuid
 
 import unidecode
 
-from lotr import escape_filename, get_content, handle_int, is_int
+from lotr import (create_folder, escape_filename, get_content, handle_int,
+                  is_int)
 
 
-HALLOFBEORN_URL = 'http://hallofbeorn.com/Export/Cards?setType=ALL_SETS'
+HALLOFBEORN_CARDS_URL = 'http://hallofbeorn.com/Export/Cards?setType=ALL_SETS'
+HALLOFBEORN_SCENARIO_URL = 'http://hallofbeorn.com/Cards/ScenarioDetails/{}'
+HALLOFBEORN_SCENARIOS_URL = 'http://hallofbeorn.com/LotR/Scenarios/'
 RINGSDB_URL = 'https://ringsdb.com/api/public/cards/'
 HALLOFBEORN_PATH = os.path.join('Output', 'HallOfBeorn')
 OUTPUT_PATH = os.path.join('Output', 'Scripts')
+OUTPUT_SCENARIOS_PATH = os.path.join('Output', 'Scripts', 'Scenarios')
 
 EXCLUDE_SETS = {
     'Revised Core Set', 'Angmar Awakened Hero Expansion',
@@ -34,8 +39,9 @@ EXCLUDE_SETS = {
 PROMO_HEROES_SETS = {'The Scouring of the Shire', 'The Nine are Abroad'}
 FUTURE_SETS = {'Blood in the Isen'}
 
-USE_HALLOFBEORN_CACHE = False
+SCENARIOS_REGEX = r' href="\/LotR\/Scenarios/([^"]+)">'
 
+USE_HALLOFBEORN_CARDS_CACHE = False
 
 
 def get_hall_data():
@@ -43,7 +49,7 @@ def get_hall_data():
     """
     cache_path = os.path.join(OUTPUT_PATH, 'hall.json')
     data = None
-    if USE_HALLOFBEORN_CACHE:
+    if USE_HALLOFBEORN_CARDS_CACHE:
         try:
             with open(cache_path, 'r', encoding='utf-8') as fobj:
                 data = json.load(fobj)
@@ -53,7 +59,7 @@ def get_hall_data():
             pass
 
     if not data:
-        data = get_content(HALLOFBEORN_URL)
+        data = get_content(HALLOFBEORN_CARDS_URL)
         data = json.loads(data)
         print('Downloading Hall of Beorn data from the site')
         with open(cache_path, 'w', encoding='utf-8') as fobj:
@@ -502,6 +508,32 @@ def collect_stat():
     print('Done')
 
 
+def collect_scenarios():
+    """ Collect scenarios statistics from Hall of Beorn.
+    """
+    create_folder(OUTPUT_SCENARIOS_PATH)
+    html_data = get_content(HALLOFBEORN_SCENARIOS_URL).decode('utf-8')
+    scenarios = re.findall(SCENARIOS_REGEX, html_data)
+    cnt = 0
+    for scenario in scenarios:
+        scenario = html.unescape(scenario)
+        url = HALLOFBEORN_SCENARIO_URL.format(scenario)
+        data = get_content(url)
+        try:
+            json.loads(data)
+        except Exception:  # pylint: disable=W0703
+            print('Error collecting scenario data for {}'.format(scenario))
+        else:
+            cnt += 1
+            path = os.path.join(OUTPUT_SCENARIOS_PATH,
+                                '{}.json'.format(scenario))
+            with open(path, 'wb') as obj:
+                obj.write(data)
+
+    print('Collected {} scenarios'.format(cnt))
+    print('Done')
+
+
 def create_ringsdb_csv(pack_name, pack_code):
     """ Get Hall of Beorn data and create a csv file for RingsDB.
     """
@@ -689,6 +721,7 @@ def create_dragncards_json(pack_name, pack_id):  # pylint: disable=R0912,R0914
 
 if __name__ == '__main__':
     collect_stat()
+    collect_scenarios()
     # create_ringsdb_csv('Dwarves of Durin', '31')
     # create_dragncards_json('Dwarves of Durin', '5971cfbb-b5e4-40aa-be0f-3cc575141f18')
     # create_dragncards_json('Elves of Lórien', '1dffad96-4516-4da5-9b5c-31596784040f')
