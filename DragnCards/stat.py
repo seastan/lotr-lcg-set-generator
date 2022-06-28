@@ -1,4 +1,4 @@
-# pylint: disable=W0703
+# pylint: disable=C0209,W0703
 # -*- coding: utf8 -*-
 """ Collect DragnCards and RingsDB statistics.
 """
@@ -276,17 +276,20 @@ def get_dragncards_data(ringsdb_data, month):  # pylint: disable=R0914
                             host=DRAGNCARDS_HOST,
                             port=DRAGNCARDS_PORT,
                             database=DRAGNCARDS_DATABASE)
-    cursor = conn.cursor()
-    next_month = get_next_month(month)
-    offset = 0
-    while True:
-        dragncards_data = run_dragncards_query(cursor, month, next_month,
-                                               offset)
-        process_dragncards_data(dragncards_data, ringsdb_data, packs, stat)
-        if len(dragncards_data) < QUERY_LIMIT:
-            break
+    try:
+        cursor = conn.cursor()
+        next_month = get_next_month(month)
+        offset = 0
+        while True:
+            dragncards_data = run_dragncards_query(
+                cursor, month, next_month, offset)
+            process_dragncards_data(dragncards_data, ringsdb_data, packs, stat)
+            if len(dragncards_data) < QUERY_LIMIT:
+                break
 
-        offset += QUERY_LIMIT
+            offset += QUERY_LIMIT
+    finally:
+        conn.close()
 
     logging.info('Processed all records from DragnCards database')
 
