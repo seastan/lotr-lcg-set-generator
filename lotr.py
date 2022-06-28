@@ -9184,20 +9184,31 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                                 os.path.join(ringsdb_output_path,
                                              target_filename))
 
-            front_sides = []
+            back_sides = []
             for _, _, filenames in os.walk(ringsdb_output_path):
                 for filename in filenames:
                     if not filename.endswith('.png'):
                         continue
 
                     if filename.endswith('-2.png'):
-                        front_sides.append(filename.replace('-2.png', '.png'))
+                        back_sides.append(filename)
 
-                for filename in front_sides:
-                    shutil.move(os.path.join(ringsdb_output_path, filename),
-                                os.path.join(ringsdb_output_path,
-                                             filename.replace('.png',
-                                                              '-1.png')))
+                for filename in back_sides:
+                    back_path = os.path.join(ringsdb_output_path, filename)
+                    front_path = os.path.join(
+                        ringsdb_output_path,
+                        filename.replace('-2.png', '.png'))
+                    copy_path = os.path.join(
+                        ringsdb_output_path,
+                        filename.replace('-2.png', '-1.png'))
+                    shutil.copyfile(front_path, copy_path)
+                    cmd = GIMP_COMMAND.format(
+                        conf['gimp_console_path'],
+                        'python-glue-ringsdb-images',
+                        front_path.replace('\\', '\\\\'),
+                        back_path.replace('\\', '\\\\'))
+                    res = _run_cmd(cmd)
+                    logging.info('[%s, %s] %s', set_name, lang, res)
 
                 break
 

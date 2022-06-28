@@ -1,4 +1,4 @@
-# pylint: disable=C0302,C0103
+# pylint: disable=C0103,C0209,C0302
 #!/usr/bin/env python
 """ Custom GIMP plugin(s).
 """
@@ -605,7 +605,7 @@ def prepare_tts(img, _, output_folder):  # pylint: disable=R0914
 
     json_path = re.sub(r'\.jpg$', '.json', pdb.gimp_image_get_filename(img))
     try:
-        with open(json_path, 'r') as fobj:
+        with open(json_path, 'r', encoding='utf-8') as fobj:
             cards = json.load(fobj)
     except Exception:  # pylint: disable=W0703
         pdb.gimp_undo_push_group_end(img)
@@ -643,6 +643,37 @@ def prepare_tts(img, _, output_folder):  # pylint: disable=R0914
     pdb.gimp_undo_push_group_end(img)
 
 
+def glue_ringsdb_images(front_path, back_path):
+    """ Glue RingsDB images.
+    """
+    gimp.progress_init('Glue RingsDB images...')
+
+    img = pdb.gimp_file_load(front_path,
+                             os.path.split(front_path)[-1])
+    drawable = img.layers[0]
+    image_width = drawable.width
+    image_height = drawable.height
+
+    img = pdb.gimp_file_load(os.path.join('imagesOther', 'black.png'),
+                             'black.png')
+    pdb.gimp_image_scale(img, image_width, image_height * 2)
+
+    layer = pdb.gimp_file_load_layer(img, front_path)
+    pdb.gimp_image_insert_layer(img, layer, None, -1)
+    pdb.gimp_layer_set_offsets(layer, 0, 0)
+    pdb.gimp_image_merge_down(img, layer, 1)
+
+    layer = pdb.gimp_file_load_layer(img, back_path)
+    pdb.gimp_image_insert_layer(img, layer, None, -1)
+    pdb.gimp_layer_set_offsets(layer, 0, image_height)
+    pdb.gimp_image_merge_down(img, layer, 1)
+
+    drawable = img.layers[0]
+    pdb.file_png_save(img, drawable,
+                      front_path, os.path.split(front_path)[-1],
+                      0, 9, 1, 0, 0, 1, 1)
+
+
 def generate_renderer_artwork(json_path, output_folder):  # pylint: disable=R0914,R0915
     """ Generate artwork for DragnCards proxy images.
     """
@@ -671,13 +702,13 @@ def generate_renderer_artwork(json_path, output_folder):  # pylint: disable=R091
     portrait['Treachery'] = '60,0,353,330'
     portrait['Treasure'] = '0,61,413,265'
 
-    for card_type in portrait:
+    for card_type in portrait.keys():
         values = portrait[card_type].split(',')
         portrait[card_type] = (float(round(int(values[2]) * 2 / 1.75)),
                                float(round(int(values[3]) * 2 / 1.75)))
 
     try:
-        with open(json_path, 'r') as fobj:
+        with open(json_path, 'r', encoding='utf-8') as fobj:
             images = json.load(fobj)
     except Exception:  # pylint: disable=W0703
         return
@@ -1211,6 +1242,24 @@ register(
     ],
     [],
     prepare_tts_folder,
+    menu='<Image>/Filters')
+
+register(
+    'python_glue_ringsdb_images',
+    'Glue RingsDB images',
+    'Glue two RingsDB images vertically.',
+    'A.R.',
+    'A.R.',
+    '2020',
+    'Glue RingsDB images',
+    '*',
+    [
+        (PF_FILENAME, 'front_path', 'Front image (will be overwritten)',
+         None),
+        (PF_FILENAME, 'back_path', 'Back image', None)
+    ],
+    [],
+    glue_ringsdb_images,
     menu='<Image>/Filters')
 
 register(
