@@ -213,10 +213,11 @@ CARD_TYPES_VICTORY = {'Ally', 'Attachment', 'Encounter Side Quest', 'Enemy',
                       'Player Side Quest', 'Ship Enemy', 'Ship Objective',
                       'Treachery', 'Treasure'}
 CARD_TYPES_VICTORY_BACK = {'Quest'}
-CARD_SPHERES_NO_VICTORY = {'Cave', 'Region'}
+CARD_SPHERES_NO_VICTORY = {'Cave', 'NoStat', 'Region'}
 CARD_TYPES_SPECIAL_ICON = {'Enemy', 'Location', 'Objective', 'Objective Ally',
                            'Objective Location', 'Ship Enemy',
                            'Ship Objective', 'Treachery'}
+CARD_SPHERES_NO_SPECIAL_ICON = {'NoStat'}
 CARD_TYPES_NO_PERIOD_CHECK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
 CARD_TYPES_TEXT = {}
 #CARD_TYPES_TEXT = {'Attachment', 'Campaign', 'Contract',
@@ -3086,6 +3087,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif (card_victory_back is not None and
+              card_sphere_back in CARD_SPHERES_NO_VICTORY):
+            message = 'Redundant victory points back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if (card_special_icon is not None and
                 card_special_icon.lower() not in SPECIAL_ICONS):
@@ -3098,6 +3108,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_special_icon is not None and
               card_type not in CARD_TYPES_SPECIAL_ICON):
+            message = 'Redundant special icon for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_special_icon is not None and
+              card_sphere in CARD_SPHERES_NO_SPECIAL_ICON):
             message = 'Redundant special icon for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -3125,6 +3144,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_special_icon_back is not None and
               card_type_back not in CARD_TYPES_SPECIAL_ICON):
+            message = 'Redundant special icon back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_special_icon_back is not None and
+              card_sphere_back in CARD_SPHERES_NO_SPECIAL_ICON):
             message = 'Redundant special icon back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
