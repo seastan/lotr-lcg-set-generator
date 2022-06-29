@@ -110,7 +110,7 @@ def get_ringsdb_data(month):
     """
     if USE_RINGSDB_DATA_MOCK:
         try:
-            with open(RINGSDB_DATA_MOCK_PATH, 'r') as fobj:
+            with open(RINGSDB_DATA_MOCK_PATH, 'r', encoding='utf-8') as fobj:
                 return json.load(fobj)
         except Exception as exc:
             message = 'Reading RingsDB data mock failed: {}'.format(str(exc))
@@ -119,7 +119,7 @@ def get_ringsdb_data(month):
             raise
 
     try:
-        with open(RINGSDB_COOKIES_PATH, 'r') as fobj:
+        with open(RINGSDB_COOKIES_PATH, 'r', encoding='utf-8') as fobj:
             cookies = json.load(fobj)
     except Exception as exc:
         message = 'Reading RingsDB cookies failed: {}'.format(str(exc))
@@ -141,7 +141,7 @@ def get_ringsdb_data(month):
         raise
 
     cookies = session.cookies.get_dict()
-    with open(RINGSDB_COOKIES_PATH, 'w') as fobj:
+    with open(RINGSDB_COOKIES_PATH, 'w', encoding='utf-8') as fobj:
         json.dump(cookies, fobj)
 
     return res
@@ -237,14 +237,13 @@ def process_dragncards_data(dragncards_data, ringsdb_data, packs, stat):  # pyli
                 or owners['player4']):
             continue
 
-        for owner in owners:
+        for owner in owners.keys():  # pylint: disable=C0201,C0206
             if 'Custom Set' in {c[0] for c in owners[owner].values()}:
                 owners[owner] = {}
 
-        for owner in owners:
-            if owners[owner]:
-                last_release_date = max(packs[c[0]]
-                                        for c in owners[owner].values())
+        for owner, cards in owners.items():
+            if cards:
+                last_release_date = max(packs[c[0]] for c in cards.values())
                 last_cycle = None
                 for cycle in ringsdb_data['pack_rules']:
                     if (ringsdb_data['pack_rules'][cycle][0]
@@ -300,9 +299,9 @@ def get_dragncards_data(ringsdb_data, month):  # pylint: disable=R0914
         users.setdefault(record[1], []).append(record[0])
 
     decks_users = {}
-    for user in users:
+    for cycles in users.values():
         last_cycle = sorted(
-            users[user],
+            cycles,
             key=lambda c: ringsdb_data['pack_rules'][c][0], reverse=True)[0]
         decks_users[last_cycle] = decks_users.get(last_cycle, 0) + 1
 
@@ -313,9 +312,9 @@ def get_dragncards_data(ringsdb_data, month):  # pylint: disable=R0914
         users.setdefault(record[1], []).append(record[0])
 
     quests_users = {}
-    for user in users:
+    for cycles in users.values():
         last_cycle = sorted(
-            users[user],
+            cycles,
             key=lambda c: ringsdb_data['pack_rules'][c][0], reverse=True)[0]
         quests_users[last_cycle] = quests_users.get(last_cycle, 0) + 1
 
