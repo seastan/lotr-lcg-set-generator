@@ -276,7 +276,6 @@ Additional steps:
   - `7 0 * * *      <path>/rclone_backup.sh "<local Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
   - `22,52 * * * *  <path>/rclone_renderer.sh >> <path>/cron.log 2>&1`
   - `0 8 * * 1      <path>/remind_backup.sh >> <path>/cron.log 2>&1`
-  - `5 8 1 * *      <path>/remind_backup_monthly.sh >> <path>/cron.log 2>&1`
   - `5 8 2 * *      <path>/remind_stat_monthly.sh >> <path>/cron.log 2>&1`
   - `*/2 * * * *    <path>/monitor_discord_changes.sh >> <path>/cron.log 2>&1`
   - `0 1 * * *      <path>/monitor_wordpress_token.sh >> <path>/cron.log 2>&1`
