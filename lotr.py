@@ -8745,8 +8745,11 @@ def _extract_image_properties(root):
     scale = float(scale[0].attrib['value']) if scale else 0
     card_type = _find_properties(root, 'Type')
     card_type = card_type[0].attrib['value'] if card_type else ''
+    card_sphere = _find_properties(root, 'Sphere')
+    card_sphere = card_sphere[0].attrib['value'] if card_sphere else ''
     data = {'path': artwork_path,
             'card_type': card_type,
+            'card_sphere': card_sphere,
             'panx': panx,
             'pany': pany,
             'scale': scale,

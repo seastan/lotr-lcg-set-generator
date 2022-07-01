@@ -1,4 +1,4 @@
-# pylint: disable=C0103,C0209,C0302
+# pylint: disable=C0103,C0209,C0302,W1514
 #!/usr/bin/env python
 """ Custom GIMP plugin(s).
 """
@@ -605,7 +605,7 @@ def prepare_tts(img, _, output_folder):  # pylint: disable=R0914
 
     json_path = re.sub(r'\.jpg$', '.json', pdb.gimp_image_get_filename(img))
     try:
-        with open(json_path, 'r', encoding='utf-8') as fobj:
+        with open(json_path, 'r') as fobj:
             cards = json.load(fobj)
     except Exception:  # pylint: disable=W0703
         pdb.gimp_undo_push_group_end(img)
@@ -686,6 +686,7 @@ def generate_renderer_artwork(json_path, output_folder):  # pylint: disable=R091
     portrait['Contract'] = '0,0,413,315'
     portrait['Encounter Side Quest'] = '0,0,563,413'
     portrait['Enemy'] = '87,0,326,330'
+    portrait['Enemy NoStat'] = '0,0,413,563'
     portrait['Event'] = '60,0,353,330'
     portrait['Hero'] = '87,0,326,330'
     portrait['Location'] = '0,60,413,268'
@@ -708,13 +709,17 @@ def generate_renderer_artwork(json_path, output_folder):  # pylint: disable=R091
                                float(round(int(values[3]) * 2 / 1.75)))
 
     try:
-        with open(json_path, 'r', encoding='utf-8') as fobj:
+        with open(json_path, 'r') as fobj:
             images = json.load(fobj)
     except Exception:  # pylint: disable=W0703
         return
 
     for card_id, data in images.items():
-        if data['card_type'] not in portrait:
+        card_type = data['card_type']
+        if data['card_sphere'] == 'NoStat':
+            card_type = '{} {}'.format(card_type, data['card_sphere'])
+
+        if card_type not in portrait:
             return
 
         img = pdb.gimp_file_load(data['path'],
@@ -733,8 +738,8 @@ def generate_renderer_artwork(json_path, output_folder):  # pylint: disable=R091
         pdb.gimp_image_merge_down(img, layer, 1)
         drawable = img.layers[0]
 
-        portrait_width = portrait[data['card_type']][0]
-        portrait_height = portrait[data['card_type']][1]
+        portrait_width = portrait[card_type][0]
+        portrait_height = portrait[card_type][1]
         scale = float(data['scale'])
         if scale == 0:
             if (image_height * (portrait_width / image_width) /
@@ -768,7 +773,7 @@ def generate_renderer_artwork(json_path, output_folder):  # pylint: disable=R091
         pdb.gimp_layer_resize(drawable, portrait_width, portrait_height,
                               -left, -top)
 
-        if data['card_type'] == 'Quest' and not card_id.endswith('.B'):
+        if card_type == 'Quest' and not card_id.endswith('.B'):
             _do_sepia(img, drawable)
 
         output_file = '%s.jpg' % (card_id,)
