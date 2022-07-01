@@ -164,6 +164,8 @@ List of **!stat** commands:
 **!stat assistants** - display the list of assistants (all Discord users except for those who have a role)
 **!stat channels** - display the number of Discord channels and free channel slots
 **!stat dragncards build** - display information about the latest DragnCards build
+**!stat plays <quest name>** - display information about all DragnCards plays for the quest
+**!stat plays <quest name> <date in YYYY-MM-DD format>** - display information about all DragnCards plays for the quest starting from the specified date
 **!stat quest <quest name or set name or set code>** - display the quest statistics (for example: `!stat quest The Battle for the Beacon` or `!stat quest Children of Eorl` or `!stat quest TAP`)
 **!stat help** - display this help message
 """,
@@ -1259,6 +1261,14 @@ async def get_attachment_content(message):
                 content = await res.read()
 
     return content
+
+
+def get_plays_stat(quest, start_date):
+    """ Get information about all DragnCards plays for the quest.
+    """
+    res = lotr.get_dragncards_plays(CONF, quest, start_date)
+    res = '```\n{}```'.format(res)
+    return res
 
 
 class MyClient(discord.Client):  # pylint: disable=R0902
@@ -2685,7 +2695,7 @@ Targets removed.
         return ', '.join(users)
 
 
-    async def _process_stat_command(self, message):
+    async def _process_stat_command(self, message):  # pylint: disable=R0912,R0915
         """ Process a stat command.
         """
         if message.content.lower() == '!stat':
@@ -2737,6 +2747,31 @@ Targets removed.
             await message.channel.send('Please wait...')
             try:
                 res = lotr.get_dragncards_build(CONF)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await self._send_channel(message.channel, res)
+        if command.lower().startswith('plays '):
+            await message.channel.send('Please wait...')
+            try:
+                quest = re.sub(r'^plays ', '', command,
+                               flags=re.IGNORECASE)
+                start_date = ''
+                parts = quest.split(' ')
+                if (len(parts) > 1 and
+                        re.match(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}$', parts[-1])):
+                    try:
+                        datetime.strptime(parts[-1], '%Y-%m-%d')
+                    except ValueError:
+                        pass
+                    else:
+                        start_date = parts[-1]
+                        quest = ' '.join(parts[:-1])
+
+                res = get_plays_stat(quest, start_date)
             except Exception as exc:
                 logging.exception(str(exc))
                 await message.channel.send(
