@@ -354,6 +354,8 @@ SPECIAL_ICONS = {'eye of sauron', 'eye of sauronx2', 'eye of sauronx3',
                  'sailing', 'sailingx2'}
 
 DRAGNCARDS_ALL_PLAYS_COMMAND = '/home/webhost/python/AR/all_plays.sh "{}" "{}"'
+DRAGNCARDS_PLAYS_STAT_COMMAND = \
+    '/home/webhost/python/AR/plays_stat.sh "{}" "{}"'
 DRAGNCARDS_BUILD_STAT_COMMAND = \
     '/var/www/dragncards.com/dragncards/frontend/buildStat.sh'
 DRAGNCARDS_BUILD_TRIGGER_COMMAND = \
@@ -10583,10 +10585,27 @@ def get_dragncards_build(conf):
             pass
 
 
-def get_dragncards_plays(conf, quest, start_date):
+def get_dragncards_all_plays(conf, quest, start_date):
     """ Get information about all DragnCards plays for the quest.
     """
     command = DRAGNCARDS_ALL_PLAYS_COMMAND.format(quest, start_date)
+    logging.info('Running remote command: %s', command)
+    client = _get_ssh_client(conf)
+    try:
+        _, res, _ = client.exec_command(command, timeout=120)
+        res = res.read().decode('utf-8').strip()
+        return res
+    finally:
+        try:
+            client.close()
+        except Exception:  # pylint: disable=W0703
+            pass
+
+
+def get_dragncards_plays_stat(conf, quest, start_date):
+    """ Get aggregated plays statistics for the quest.
+    """
+    command = DRAGNCARDS_PLAYS_STAT_COMMAND.format(quest, start_date)
     logging.info('Running remote command: %s', command)
     client = _get_ssh_client(conf)
     try:

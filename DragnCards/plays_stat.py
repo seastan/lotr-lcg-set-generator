@@ -1,6 +1,6 @@
 # pylint: disable=C0209
 # -*- coding: utf8 -*-
-""" Get all plays for the quest.
+""" Get aggregated plays statistics for the quest.
 """
 import json
 import logging
@@ -17,7 +17,7 @@ DRAGNCARDS_HOST = '127.0.0.1'
 DRAGNCARDS_PORT = 5432
 DRAGNCARDS_DATABASE = 'dragncards_prod'
 
-LOG_PATH = 'all_plays.log'
+LOG_PATH = 'plays_stat.log'
 QUEST_PATH = '/var/www/dragncards.com/Lord-of-the-Rings/o8g/Decks/Quests/QPT-AleP-Playtest/'
 
 MIN_INSERTED_AT = '2022-01-01 00:00:00'
@@ -58,9 +58,7 @@ def get_replays(quest, inserted_at):
     """ Get all replays for the quest from the database.
     """
     query = """
-SELECT inserted_at,
-  uuid,
-  num_players,
+SELECT num_players,
   rounds,
   CASE WHEN outcome != '' THEN outcome ELSE 'incomplete' END AS outcome,
   game_json::json->>'playerData' AS player_data,
@@ -90,6 +88,46 @@ ORDER BY inserted_at
 
     finally:
         conn.close()
+
+
+def prepare_row(replays, players, outcome):
+    """ Prepare statistics row.
+    """
+    if players == '[any]':
+        players_filter = {'1', '2', '3', '4'}
+    else:
+        players_filter = {players}
+
+    if outcome == '[any]':
+        outcome_filter = {'victory', 'defeat', '-'}
+    else:
+        outcome_filter = {outcome}
+
+    selected = [r for r in replays if r['num_players'] in players_filter and
+                r['outcome'] in outcome_filter]
+    if not selected:
+        return None
+
+    threats = []
+    for replay in selected:
+        threats.extend([replay['player1_threat'], replay['player2_threat'],
+                        replay['player3_threat'], replay['player4_threat']])
+
+    threats = [t for t in threats if t != 0]
+
+    # format values
+    values = [players,
+              outcome,
+              len(selected),
+              min(r['rounds'] for r in selected),
+              max(r['rounds'] for r in selected),
+              round(sum(r['rounds'] for r in selected) / len(selected), 1),
+              min(threats),
+              max(threats),
+              round(sum(threats) / len(threats), 1)
+              ]
+    res = '\t'.join([str(v) for v in values])
+    return res
 
 
 def main():  # pylint: disable=R0912,R0915
@@ -149,6 +187,15 @@ def main():  # pylint: disable=R0912,R0915
         if replay['num_players'] == 2 and not replay['player2_heroes']:
             continue
 
+        replay['num_players'] = str(replay['num_players'])
+        if replay['outcome'] == 'incomplete':
+            replay['outcome'] = '-'
+
+        replay['player1_threat'] = replay['player_data']['player1']['threat']
+        replay['player2_threat'] = replay['player_data']['player2']['threat']
+        replay['player3_threat'] = replay['player_data']['player3']['threat']
+        replay['player4_threat'] = replay['player_data']['player4']['threat']
+
         filtered.append(replay)
 
     if not filtered:
@@ -163,89 +210,16 @@ def main():  # pylint: disable=R0912,R0915
         print(res)
         return
 
-    max_num_players = max(r['num_players'] for r in filtered)
-    if max_num_players == 4:
-        max_threat_length = 11
-    elif max_num_players == 3:
-        max_threat_length = 8
-    else:
-        max_threat_length = 6
-
-    threat_header = 'threat'
-    while len(threat_header) < max_threat_length:
-        threat_header = '{} '.format(threat_header)
-
-    headers = ['date       ', 'replay_id                           ',
-               'P ', 'R ', 'outcome', threat_header, 'heroes']
-    headers = ' '.join(headers)
+    headers = ['players', 'outcome', 'plays', 'rnd_min', 'rnd_max',
+               'rnd_avg', 'thr_min', 'thr_max', 'thr_avg']
+    headers = '\t'.join(headers)
 
     res = []
-    for replay in filtered:
-        replay['player1_threat'] = str(
-            replay['player_data']['player1']['threat'])
-        replay['player2_threat'] = str(
-            replay['player_data']['player2']['threat'])
-        replay['player3_threat'] = str(
-            replay['player_data']['player3']['threat'])
-        replay['player4_threat'] = str(
-            replay['player_data']['player4']['threat'])
-
-        replay['player1_heroes'] = ', '.join(replay['player1_heroes'])
-        replay['player2_heroes'] = ', '.join(replay['player2_heroes'])
-        replay['player3_heroes'] = ', '.join(replay['player3_heroes'])
-        replay['player4_heroes'] = ', '.join(replay['player4_heroes'])
-
-        replay['inserted_at'] = replay['inserted_at'].strftime('%Y-%m-%d ')
-        if replay['outcome'] == 'incomplete':
-            replay['outcome'] = '-      '
-        elif replay['outcome'] == 'defeat':
-            replay['outcome'] = 'defeat '
-
-        replay['rounds'] = str(replay['rounds'])
-        while len(replay['rounds']) < 2:
-            replay['rounds'] = '{} '.format(replay['rounds'])
-
-        if replay['num_players'] == 1:
-            replay['threat'] = replay['player1_threat']
-            replay['heroes'] = replay['player1_heroes']
-        elif replay['num_players'] == 2:
-            replay['threat'] = '|'.join([replay['player1_threat'],
-                                         replay['player2_threat']])
-            replay['heroes'] = '|'.join([replay['player1_heroes'],
-                                         replay['player2_heroes']])
-        elif replay['num_players'] == 3:
-            replay['threat'] = '|'.join([replay['player1_threat'],
-                                         replay['player2_threat'],
-                                         replay['player3_threat']])
-            replay['heroes'] = '|'.join([replay['player1_heroes'],
-                                         replay['player2_heroes'],
-                                         replay['player3_heroes']])
-        else:
-            replay['threat'] = '|'.join([replay['player1_threat'],
-                                         replay['player2_threat'],
-                                         replay['player3_threat'],
-                                         replay['player4_threat']])
-            replay['heroes'] = '|'.join([replay['player1_heroes'],
-                                         replay['player2_heroes'],
-                                         replay['player3_heroes'],
-                                         replay['player4_heroes']])
-
-        replay['num_players'] = '{} '.format(replay['num_players'])
-
-        while len(replay['threat']) < max_threat_length:
-            replay['threat'] = '{} '.format(replay['threat'])
-
-        replay['heroes'] = replay['heroes'].replace(
-            ' , ', ',').replace(', ', ',')
-
-        values = [replay['inserted_at'],
-                  replay['uuid'],
-                  replay['num_players'],
-                  replay['rounds'],
-                  replay['outcome'],
-                  replay['threat'],
-                  replay['heroes']]
-        res.append(' '.join(values))
+    for players in ('[any]', '1', '2', '3', '4'):
+        for outcome in ('[any]', 'victory', 'defeat', '-'):
+            row = prepare_row(filtered, players, outcome)
+            if row:
+                res.append(row)
 
     res = '\n'.join([headers] + res)
     logging.info(res)
