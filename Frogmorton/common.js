@@ -1652,6 +1652,16 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						s.set('Name-region', nameRegion[cardType]);
 					}
 				}
+				if (s.get('Name').match(/[\u00c0\u00c1\u00c2\u00c3\u00c4\u00c8\u00c9\u00ca\u00cb\u00cc\u00cd\u00ce\u00cf\u00d1\u00d2\u00d3\u00d4\u00d5\u00d6\u00d9\u00da\u00db\u00dc\u0106\u0108\u0143\u015a\u0179\u017b]/)) {
+					let parts = s.get('Name-region').split(',');
+					if (['Event', 'Treachery'].indexOf(cardType) > -1) {
+						parts[0] = (parseInt(parts[0]) + 1).toString();
+					}
+					else {
+						parts[1] = (parseInt(parts[1]) + 2).toString();
+					}
+					s.set('Name-region', parts.join(','));
+				}
 
 				if ((cardType == 'Hero Promo') && (translate[cardType][lang].length > 4)) {
 					s.set('Type-region', '279,448,39,15');
@@ -1924,7 +1934,7 @@ function markUp(value, key, cardType, lang, setID) {
 		}
 
 		if ((['Ally', 'Hero', 'Hero Promo'].indexOf(cardType) > -1) && (value.length > 10) &&
-			value.match(/^[\u00c0\u00c1\u00c2\u00c3\u00c4\u00c8\u00c9\u00ca\u00cb\u00cc\u00cd\u00ce\u00cf\u00d1\u00d2\u00d3\u00d4\u00d5\u00d6\u00d9\u00da\u00db\u00dc\u0106\u0108\u0143\u015a\u0179\u017b]/)) {
+			value.match(/[\u00c0\u00c1\u00c2\u00c3\u00c4\u00c8\u00c9\u00ca\u00cb\u00cc\u00cd\u00ce\u00cf\u00d1\u00d2\u00d3\u00d4\u00d5\u00d6\u00d9\u00da\u00db\u00dc\u0106\u0108\u0143\u015a\u0179\u017b]/)) {
 			lowerSize = lowerSize * 0.8;
 			fixHeight = true;
 		}
