@@ -30,7 +30,7 @@ At the same time, the preferable way is to use Git.
 
     If it doesn't exist yet (that means you are starting a new project from scratch),
     upload `Spreadsheet/spreadsheet.xlsx` from this repo, click `Save as Google Sheets`,
-    click `Share` and `Change to anyone with the link`.  Click `Script editor` and upload the scripts
+    click `Share` and `Change to anyone with the link`.  Click `Extensions -> Apps Script` and upload the scripts
     from `Spreadsheet/Code.gs`.  After that, re-run `=SHEETS()` function from `A1` cell of the first `-` tab.
     Add all the sets and cards data.
 
