@@ -247,7 +247,8 @@ def main():  # pylint: disable=R0912,R0915
                   replay['heroes']]
         res.append(' '.join(values))
 
-    res = '\n'.join([headers] + res)
+    total = '\n{} plays in total.'.format(len(filtered))
+    res = '\n'.join([headers] + res + [total])
     logging.info(res)
     print(res)
 
