@@ -55,7 +55,6 @@ SCRATCH_SHEET = 'Scratch Data'
 
 SET_ID = 'GUID'
 SET_NAME = 'Name'
-SET_VERSION = 'Version'
 SET_COLLECTION_ICON = 'Collection Icon'
 SET_RINGSDB_CODE = 'RingsDB Code'
 SET_HOB_CODE = 'HoB Code'
@@ -4606,7 +4605,7 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
     root = ET.fromstring(SET_XML_TEMPLATE)
     root.set('name', str(set_name))
     root.set('id', str(set_id))
-    root.set('version', str(SETS[set_id][SET_VERSION] or 0))
+    root.set('version', '1.0')
     cards = root.findall("./cards")[0]
 
     chosen_data = []
