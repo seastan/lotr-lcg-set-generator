@@ -1392,10 +1392,10 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
                 _save_content(url, res_raw, 'csv')
 
         missing_sheets = [sheet for sheet in sheets
-                          if sheet not in SHEET_IDS]
+                          if sheet not in SHEET_IDS and sheet != SCRATCH_SHEET]
         if missing_sheets:
-            SheetError("Can't find sheet ID(s) for the following "
-                       "sheet(s): {}".format(', '.join(missing_sheets)))
+            raise SheetError("Can't find sheet ID(s) for the following "
+                             "sheet(s): {}".format(', '.join(missing_sheets)))
 
     try:
         with open(SHEETS_JSON_PATH, 'r', encoding='utf-8') as fobj:
@@ -1405,36 +1405,43 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
 
     new_checksums = {}
     for sheet in sheets:
-        url = (
-            'https://docs.google.com/spreadsheets/d/{}/export?format=csv&gid={}'
-            .format(conf['sheet_gdid'], SHEET_IDS[sheet]))
-        res = _get_cached_content(url, 'csv') if conf['offline_mode'] else None
-        if res:
-            res = res.decode('utf-8')
-            data = list(csv.reader(StringIO(res)))
-            none_index = data[0].index('') if '' in data[0] else len(data[0])
+        if sheet not in SHEET_IDS:
+            data = []
         else:
-            res_raw = get_content(url)
-            res = res_raw.decode('utf-8')
-            if not res or '<html' in res:
-                raise SheetError("Can't download {} from the Google Sheet"
-                                 .format(sheet))
-
-            try:
+            url = (
+                'https://docs.google.com/spreadsheets/d/{}/export?'
+                'format=csv&gid={}'.format(conf['sheet_gdid'],
+                                           SHEET_IDS[sheet]))
+            res = (_get_cached_content(url, 'csv') if conf['offline_mode']
+                   else None)
+            if res:
+                res = res.decode('utf-8')
                 data = list(csv.reader(StringIO(res)))
                 none_index = (data[0].index('') if '' in data[0]
                               else len(data[0]))
-            except Exception as exc:  # pylint: disable=W0703
-                raise SheetError("Can't download {} from the Google Sheet"
-                                 .format(sheet)) from exc
+            else:
+                res_raw = get_content(url)
+                res = res_raw.decode('utf-8')
+                if not res or '<html' in res:
+                    raise SheetError("Can't download {} from the Google Sheet"
+                                     .format(sheet))
 
-            if conf['offline_mode']:
-                _save_content(url, res_raw, 'csv')
+                try:
+                    data = list(csv.reader(StringIO(res)))
+                    none_index = (data[0].index('') if '' in data[0]
+                                  else len(data[0]))
+                except Exception as exc:  # pylint: disable=W0703
+                    raise SheetError("Can't download {} from the Google Sheet"
+                                     .format(sheet)) from exc
+
+                if conf['offline_mode']:
+                    _save_content(url, res_raw, 'csv')
 
         data = [row[:none_index] for row in data]
         data = [[_fix_csv_value(v) for v in row] for row in data]
-        while not any(data[-1]):
-            data.pop()
+        if data:
+            while not any(data[-1]):
+                data.pop()
 
         JSON_CACHE[sheet] = data
         res = json.dumps(data)
