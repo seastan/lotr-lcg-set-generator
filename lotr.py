@@ -870,7 +870,7 @@ def _clean_tags(text):  # pylint: disable=R0915
 
 def _update_card_text(text, lang='English', skip_rules=False,  # pylint: disable=R0915
                       fix_linebreaks=True):
-    """ Update card text for RingsDB, Hall of Beorn and Spanish DB.
+    """ Update card text for RingsDB, Hall of Beorn, French and Spanish DBs.
     """
     text = str(text)
     if lang == 'Spanish' and not skip_rules:
@@ -1000,7 +1000,7 @@ def _get_french_icon(name):
 
 
 def _update_french_card_text(text):
-    """ Update card text for French database.
+    """ Update card text for French DB.
     """
     text = _update_card_text(text, lang='French')
     text = text.replace('\n', '<br>')
