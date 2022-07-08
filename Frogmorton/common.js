@@ -299,6 +299,9 @@ var portraitBackRegion = {};
 portraitBackRegion['Contract'] = '0,0,413,315';
 portraitBackRegion['Quest'] = '0,0,563,413';
 
+var bodyRegionHeroPromo = {};
+bodyRegionHeroPromo['German'] = '73,467,269,45';
+
 var bodyRegion = {};
 bodyRegion['Ally'] = '57,378,299,114';
 bodyRegion['Attachment'] = '57,347,299,144';
@@ -1630,8 +1633,8 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				}
 				else {
 					s.set('TraitOut', 'true');
-					if ((cardType == 'Hero Promo') && (lang == 'German')) {
-						s.set('TraitOut-Body-region', '73,467,269,45');
+					if (lang in bodyRegionHeroPromo) {
+						s.set('TraitOut-Body-region', bodyRegionHeroPromo[lang]);
 					}
 					else if (cardType in bodyRegion) {
 						s.set('TraitOut-Body-region', bodyRegion[cardType]);
