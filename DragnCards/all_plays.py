@@ -20,7 +20,8 @@ DRAGNCARDS_DATABASE = 'dragncards_prod'
 LOG_PATH = 'all_plays.log'
 QUEST_PATH = '/var/www/dragncards.com/Lord-of-the-Rings/o8g/Decks/Quests/QPT-AleP-Playtest/'
 
-MIN_INSERTED_AT = '2022-01-01 00:00:00'
+LIMIT = 500
+MIN_INSERTED_AT = '2021-10-01 00:00:00'
 
 
 def init_logging():
@@ -73,7 +74,8 @@ WHERE encounter ILIKE %s
   AND inserted_at >= %s
   AND rounds > 0
   AND (rounds > 1 OR outcome IN ('victory', 'defeat', 'incomplete'))
-ORDER BY inserted_at
+ORDER BY inserted_at DESC
+LIMIT %s
     """
 
     conn = psycopg2.connect(user=DRAGNCARDS_USER,
@@ -83,9 +85,10 @@ ORDER BY inserted_at
                             database=DRAGNCARDS_DATABASE)
     try:
         cursor = conn.cursor(cursor_factory=extras.DictCursor)
-        cursor.execute(query, ('%{}'.format(quest), inserted_at))
+        cursor.execute(query, ('%{}'.format(quest), inserted_at, LIMIT))
         res = cursor.fetchall()
         res = [dict(row) for row in res]
+        res.reverse()
         return res
 
     finally:
