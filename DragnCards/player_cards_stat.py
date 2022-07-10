@@ -106,9 +106,8 @@ def get_start_date(cursor):
     if res and res[0]:
         res = res[0] + datetime.timedelta(days=1)
     else:
-        res = datetime.datetime.strptime(DEFAULT_START_DATE, '%Y-%m-%d')
+        res = datetime.datetime.strptime(DEFAULT_START_DATE, '%Y-%m-%d').date()
 
-    res = res.date()
     return res
 
 
