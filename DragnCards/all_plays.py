@@ -99,7 +99,7 @@ def main():  # pylint: disable=R0912,R0915
     """ Main function.
     """
     if len(sys.argv) <= 1 or not sys.argv[1]:
-        res = 'No quest specified'
+        res = 'no quest specified'
         logging.error(res)
         print(res)
         return
@@ -127,7 +127,7 @@ def main():  # pylint: disable=R0912,R0915
         else:
             inserted_at_str = ''
 
-        res = 'No plays for quest {}{} found'.format(quest_raw,
+        res = 'no plays found for quest {}{}'.format(quest_raw,
                                                      inserted_at_str)
         logging.info(res)
         print(res)
@@ -160,7 +160,7 @@ def main():  # pylint: disable=R0912,R0915
         else:
             inserted_at_str = ''
 
-        res = 'No plays for quest {}{} found'.format(quest_raw,
+        res = 'no plays found for quest {}{}'.format(quest_raw,
                                                      inserted_at_str)
         logging.info(res)
         print(res)

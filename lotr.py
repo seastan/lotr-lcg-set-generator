@@ -352,6 +352,8 @@ SPHERES_SIDE_QUEST = {'Cave', 'NoProgress', 'Region', 'SmallTextArea'}
 SPECIAL_ICONS = {'eye of sauron', 'eye of sauronx2', 'eye of sauronx3',
                  'sailing', 'sailingx2'}
 
+DRAGNCARDS_PLAYER_CARDS_STAT_COMMAND = \
+    '/home/webhost/python/AR/player_cards_stat.sh "{}" "{}"'
 DRAGNCARDS_ALL_PLAYS_COMMAND = '/home/webhost/python/AR/all_plays.sh "{}" "{}"'
 DRAGNCARDS_PLAYS_STAT_COMMAND = \
     '/home/webhost/python/AR/plays_stat.sh "{}" "{}"'
@@ -10582,6 +10584,23 @@ def get_dragncards_build(conf):
     try:
         _, res, _ = client.exec_command(DRAGNCARDS_BUILD_STAT_COMMAND,
                                         timeout=30)
+        res = res.read().decode('utf-8').strip()
+        return res
+    finally:
+        try:
+            client.close()
+        except Exception:  # pylint: disable=W0703
+            pass
+
+
+def get_dragncards_player_cards_stat(conf, card_ids, start_date):
+    """ Get DragnCards player cards statistics for the set.
+    """
+    command = DRAGNCARDS_PLAYER_CARDS_STAT_COMMAND.format(card_ids, start_date)
+    logging.info('Running remote command: %s', command)
+    client = _get_ssh_client(conf)
+    try:
+        _, res, _ = client.exec_command(command, timeout=120)
         res = res.read().decode('utf-8').strip()
         return res
     finally:

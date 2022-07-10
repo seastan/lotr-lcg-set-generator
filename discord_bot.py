@@ -164,6 +164,8 @@ List of **!stat** commands:
 **!stat assistants** - display the list of assistants (all Discord users except for those who have a role)
 **!stat channels** - display the number of Discord channels and free channel slots
 **!stat dragncards build** - display information about the latest DragnCards build
+**!stat player cards <set name or set code>** - display DragnCards player cards statistics for the set
+**!stat player cards <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date
 **!stat plays all <quest name>** - display information about all DragnCards plays for the quest
 **!stat plays all <quest name> <date in YYYY-MM-DD format>** - display information about all DragnCards plays for the quest starting from the specified date
 **!stat plays stat <quest name>** - display aggregated DragnCards plays statistics for the quest
@@ -1263,6 +1265,45 @@ async def get_attachment_content(message):
                 content = await res.read()
 
     return content
+
+
+async def get_player_cards_stat(set_name, start_date):
+    """ Get DragnCards player cards statistics for the set.
+    """
+    data = await read_card_data()
+    set_name = re.sub(r'^alep---', '', lotr.normalized_name(set_name))
+    matches = [card for card in data['data'] if re.sub(
+        r'^alep---', '',
+        lotr.normalized_name(card[lotr.CARD_SET_NAME])) == set_name and
+        card[lotr.CARD_TYPE] in lotr.CARD_TYPES_PLAYER and
+        'Promo' not in lotr.extract_flags(card.get(lotr.CARD_FLAGS))]
+    if not matches:
+        set_code = set_name.lower()
+        matches = [card for card in data['data']
+                   if card[lotr.CARD_SET_HOB_CODE].lower() == set_code and
+                   card[lotr.CARD_TYPE] in lotr.CARD_TYPES_PLAYER and
+                   'Promo' not in
+                   lotr.extract_flags(card.get(lotr.CARD_FLAGS))]
+        if not matches:
+            return 'no cards found for the set'
+
+    cards = {c[lotr.CARD_ID]:c[lotr.CARD_NAME] for c in matches}
+    card_ids = ','.join(list(cards.keys()))
+    res = lotr.get_dragncards_player_cards_stat(CONF, card_ids, start_date)
+    lines = res.split('\n')
+    for i in range(1, len(lines)):
+        parts = lines[i].split('\t', 1)
+        if parts[0] in cards:
+            parts[0] = cards[parts[0]]
+            while len(parts[0]) < 36:
+                parts[0] = '{} '.format(parts[0])
+
+            lines[i] = '\t'.join(parts)
+
+    lines[1:] = sorted(lines[1:])
+    res = '\n'.join(lines)
+    res = '```\n{}```'.format(res.expandtabs())
+    return res
 
 
 def get_all_plays(quest, start_date):
@@ -2705,7 +2746,7 @@ Targets removed.
         return ', '.join(users)
 
 
-    async def _process_stat_command(self, message):  # pylint: disable=R0912,R0915
+    async def _process_stat_command(self, message):  # pylint: disable=R0911.R0912,R0915
         """ Process a stat command.
         """
         if message.content.lower() == '!stat':
@@ -2757,6 +2798,31 @@ Targets removed.
             await message.channel.send('Please wait...')
             try:
                 res = lotr.get_dragncards_build(CONF)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await self._send_channel(message.channel, res)
+        elif command.lower().startswith('player cards '):
+            await message.channel.send('Please wait...')
+            try:
+                set_name = re.sub(r'^player cards ', '', command,
+                                  flags=re.IGNORECASE)
+                start_date = ''
+                parts = set_name.split(' ')
+                if (len(parts) > 1 and
+                        re.match(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}$', parts[-1])):
+                    try:
+                        datetime.strptime(parts[-1], '%Y-%m-%d')
+                    except ValueError:
+                        pass
+                    else:
+                        start_date = parts[-1]
+                        set_name = ' '.join(parts[:-1])
+
+                res = await get_player_cards_stat(set_name, start_date)
             except Exception as exc:
                 logging.exception(str(exc))
                 await message.channel.send(

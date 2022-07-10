@@ -85,7 +85,6 @@ ORDER BY inserted_at
         res = cursor.fetchall()
         res = [dict(row) for row in res]
         return res
-
     finally:
         conn.close()
 
@@ -114,8 +113,6 @@ def prepare_row(replays, players, outcome):
                         replay['player3_threat'], replay['player4_threat']])
 
     threats = [t for t in threats if t != 0]
-
-    # format values
     values = [players,
               outcome,
               len(selected),
@@ -134,7 +131,7 @@ def main():  # pylint: disable=R0912,R0915
     """ Main function.
     """
     if len(sys.argv) <= 1 or not sys.argv[1]:
-        res = 'No quest specified'
+        res = 'no quest specified'
         logging.error(res)
         print(res)
         return
@@ -162,7 +159,7 @@ def main():  # pylint: disable=R0912,R0915
         else:
             inserted_at_str = ''
 
-        res = 'No plays for quest {}{} found'.format(quest_raw,
+        res = 'no plays found for quest {}{}'.format(quest_raw,
                                                      inserted_at_str)
         logging.info(res)
         print(res)
@@ -204,7 +201,7 @@ def main():  # pylint: disable=R0912,R0915
         else:
             inserted_at_str = ''
 
-        res = 'No plays for quest {}{} found'.format(quest_raw,
+        res = 'no plays found for quest {}{}'.format(quest_raw,
                                                      inserted_at_str)
         logging.info(res)
         print(res)
