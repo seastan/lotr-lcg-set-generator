@@ -3,6 +3,8 @@
 """ Discord bot.
 """
 import asyncio
+import codecs
+import csv
 from datetime import datetime
 from email.header import Header
 import json
@@ -29,6 +31,7 @@ LOG_PATH = 'discord_bot.log'
 MAIL_COUNTER_PATH = 'discord_bot.cnt'
 MAILS_PATH = 'mails'
 PLAYTEST_PATH = os.path.join('Discord', 'playtest.json')
+USERS_LIST_PATH = os.path.join('Discord', 'users.csv')
 
 CRON_ERRORS_CMD = './cron_errors.sh'
 CRON_LOG_CMD = './cron_log.sh'
@@ -191,6 +194,11 @@ List of **!image** commands:
 **!image card this** (or **!image this**) - if in a card channel, post the last rendered images for the card
 **!image refresh** - clear the image cache (if you just uploaded new images to the Google Drive)
 **!image help** - display this help message
+""",
+    'secret': """
+List of **!secret** commands:
+
+**!secret users** - prepare a list of all Discord users and save it in `Discord/users.csv`
 """
 }
 
@@ -2725,19 +2733,23 @@ Targets removed.
         await self._send_channel(message.channel, res)
 
 
-    def get_users(self):
-        """ Get the list of Discord users.
+    def get_assistants(self):
+        """ Get the list of Discord assistants.
         """
-        ignore_users = {u.strip() for u in CONF.get('ignore_users').split(',')}
-        users = [m.display_name for m in self.guilds[0].members
-                 if m.display_name not in ignore_users]
-        users = [re.sub(r'[^\u0000-\uffff]+', '', u).strip() for u in users]
-        users = [re.sub(r'[,./<>?;\':"\[\]\|{}]$', '', u).strip()
-                 for u in users]
-        users = [u.replace('[', '[[').replace(']', ']]').replace('[[', '[lsb]')
-                 .replace(']]', '[rsb]') for u in users]
-        users = sorted(list(set(users)), key=str.casefold)
-        return ', '.join(users)
+        ignore_assistants = {u.strip()
+                             for u in CONF.get('ignore_assistants').split(',')}
+        assistants = [m.display_name for m in self.guilds[0].members
+                     if m.display_name not in ignore_assistants]
+        assistants = [re.sub(r'[^\u0000-\uffff]+', '', u).strip()
+                      for u in assistants]
+        assistants = [re.sub(r'[,./<>?;\':"\[\]\|{}]$', '', u).strip()
+                      for u in assistants]
+        assistants = [u.replace('[', '[[').replace(']', ']]')
+                      .replace('[[', '[lsb]').replace(']]', '[rsb]')
+                      for u in assistants]
+        assistants = sorted(list(set(assistants)), key=str.casefold)
+        assistants = ', '.join(assistants)
+        return assistants
 
 
     async def _process_stat_command(self, message):  # pylint: disable=R0911.R0912,R0915
@@ -2780,7 +2792,7 @@ Targets removed.
             await self._send_channel(message.channel, res)
         elif command.lower() == 'assistants':
             try:
-                res = self.get_users()
+                res = self.get_assistants()
             except Exception as exc:
                 logging.exception(str(exc))
                 await message.channel.send(
@@ -2877,6 +2889,82 @@ Targets removed.
         else:
             res = HELP['stat']
             await self._send_channel(message.channel, res)
+
+
+    async def _process_secret_command(self, message):
+        """ Process a secret command.
+        """
+        command = re.sub(r'^!secret ', '', message.content,
+                         flags=re.IGNORECASE).split('\n')[0].strip()
+
+        logging.info('Received secret command: %s', command)
+
+        if command.lower() == 'users':
+            await message.delete()
+            await message.channel.send('Please wait...')
+            try:
+                await self._prepare_users_list()
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await self._send_channel(message.channel, 'Done')
+
+
+    async def _prepare_users_list(self):  # pylint: disable=R0914
+        """ Prepare a list of all Discord users and save it in the CSV file.
+
+        """
+        ignore_users = {u.strip() for u in CONF.get('ignore_users').split(',')}
+        role_names = sorted([r.name.replace(' Assistant', '')
+                             for r in self.guilds[0].roles
+                             if r.name.endswith(' Assistant')])
+
+        messages = {}
+        for channel in self.guilds[0].text_channels:
+            async for message in channel.history(limit=None):
+                created = message.created_at.strftime('%Y-%m-%d')
+                if created > messages.get(message.author.id, ('', ''))[0]:
+                    messages[message.author.id] = (created, channel.name)
+
+        members = self.guilds[0].members
+        rows = []
+        for member in members:
+            if (member.bot or member.system or
+                    member.display_name in ignore_users):
+                continue
+
+            if member.display_name == member.name:
+                name = member.display_name
+            else:
+                name = '{} [{}]'.format(member.display_name, member.name)
+
+            row = {
+                'name': name,
+                'joined': member.joined_at.strftime('%Y-%m-%d'),
+                'last message date': messages.get(member.id, ('', ''))[0],
+                'last message channel': messages.get(member.id, ('', ''))[1]
+                }
+
+            for role in member.roles:
+                role_name = role.name.replace(' Assistant', '')
+                if role_name in role_names:
+                    row[role_name] = 1
+
+            rows.append(row)
+
+        rows.sort(key=lambda r: r['name'].lower())
+        with open(USERS_LIST_PATH, 'w', newline='', encoding='utf-8') as obj:
+            obj.write(codecs.BOM_UTF8.decode('utf-8'))
+            fieldnames = ['name', 'joined', 'last message date',
+                          'last message channel']
+            fieldnames.extend(role_names)
+            writer = csv.DictWriter(obj, fieldnames=fieldnames)
+            writer.writeheader()
+            for row in rows:
+                writer.writerow(row)
 
 
     async def _save_artwork(self, message, side, artist):  # pylint: disable=R0911,R0912,R0914
@@ -3579,7 +3667,8 @@ Targets removed.
         """
         logging.info('Received help command')
 
-        help_keys = sorted([key for key in HELP if key != 'playtest'])
+        help_keys = sorted([key for key in HELP
+                            if key not in ('playtest', 'secret')])
         help_keys.append('playtest')
         res = ''.join(HELP[key] for key in help_keys)
         await self._send_channel(message.channel, res)
@@ -3610,6 +3699,8 @@ Targets removed.
             elif (message.content.lower().startswith('!stat ') or
                   message.content.lower() == '!stat'):
                 await self._process_stat_command(message)
+            elif message.content.lower().startswith('!secret '):
+                await self._process_secret_command(message)
             elif message.content.lower().startswith('!help'):
                 await self._process_help_command(message)
         except Exception as exc:

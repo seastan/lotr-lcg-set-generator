@@ -1,5 +1,6 @@
 .ipynb_checkpoints/
 __pycache__/
+Discord/users.csv
 Discord/*.json
 Discord/Changes/*.json
 Discord/Images/*/*
