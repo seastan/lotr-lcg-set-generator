@@ -1377,8 +1377,11 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				}
 
 				let encounterSet = card['Encounter Set'];
-				if (card['Encounter Set Back'] && (side == 'back')) {
-					encounterSet = card['Encounter Set Back'];
+				if (card['Encounter Set Icon'] && (side == 'front')) {
+					encounterSet = card['Encounter Set Icon'];
+				}
+				else if (card['BEncounter Set Icon'] && (side == 'back')) {
+					encounterSet = card['BEncounter Set Icon'];
 				}
 
 				if (encounterSet) {

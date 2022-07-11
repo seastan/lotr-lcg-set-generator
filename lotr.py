@@ -90,6 +90,7 @@ CARD_SHADOW = 'Shadow'
 CARD_FLAVOUR = 'Flavour'
 CARD_PRINTED_NUMBER = 'Printed Card Number'
 CARD_ENCOUNTER_SET_NUMBER = 'Encounter Set Number'
+CARD_ENCOUNTER_SET_ICON = 'Encounter Set Icon'
 CARD_FLAGS = 'Flags'
 CARD_ARTIST = 'Artist'
 CARD_PANX = 'PanX'
@@ -100,7 +101,6 @@ CARD_SIDE_B = 'Side B'
 CARD_EASY_MODE = 'Removed for Easy Mode'
 CARD_ADDITIONAL_ENCOUNTER_SETS = 'Additional Encounter Sets'
 CARD_ADVENTURE = 'Adventure'
-CARD_ENCOUNTER_SET_BACK = 'Encounter Set Back'
 CARD_ICON = 'Collection Icon'
 CARD_COPYRIGHT = 'Copyright'
 CARD_BACK = 'Card Back'
@@ -255,6 +255,11 @@ CARD_TYPES_ENCOUNTER_SET_NUMBER = {'Encounter Side Quest', 'Enemy', 'Location',
                                    'Objective', 'Objective Ally',
                                    'Objective Hero', 'Objective Location',
                                    'Ship Enemy', 'Ship Objective', 'Treachery'}
+CARD_TYPES_ENCOUNTER_SET_ICON = {'Campaign', 'Encounter Side Quest', 'Enemy',
+                                 'Location', 'Nightmare', 'Objective',
+                                 'Objective Ally', 'Objective Hero',
+                                 'Objective Location', 'Quest', 'Ship Enemy',
+                                 'Ship Objective', 'Treachery', 'Treasure'}
 CARD_TYPES_FLAGS = {'NoTraits':
                     {'Ally', 'Enemy', 'Hero', 'Location', 'Objective Ally',
                      'Objective Hero', 'Objective Location', 'Ship Enemy',
@@ -1901,6 +1906,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_flavour = row[CARD_FLAVOUR]
         card_printed_number = row[CARD_PRINTED_NUMBER]
         card_encounter_set_number = row[CARD_ENCOUNTER_SET_NUMBER]
+        card_encounter_set_icon = row[CARD_ENCOUNTER_SET_ICON]
         card_flags = row[CARD_FLAGS]
         card_artist = row[CARD_ARTIST]
         card_panx = row[CARD_PANX]
@@ -1930,6 +1936,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_printed_number_back = row[BACK_PREFIX + CARD_PRINTED_NUMBER]
         card_encounter_set_number_back = row[
             BACK_PREFIX + CARD_ENCOUNTER_SET_NUMBER]
+        card_encounter_set_icon_back = row[
+            BACK_PREFIX + CARD_ENCOUNTER_SET_ICON]
         card_flags_back = row[BACK_PREFIX + CARD_FLAGS]
         card_artist_back = row[BACK_PREFIX + CARD_ARTIST]
         card_panx_back = row[BACK_PREFIX + CARD_PANX]
@@ -1941,7 +1949,6 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_easy_mode = row[CARD_EASY_MODE]
         card_additional_encounter_sets = row[CARD_ADDITIONAL_ENCOUNTER_SETS]
         card_adventure = row[CARD_ADVENTURE]
-        card_encounter_set_back = row[CARD_ENCOUNTER_SET_BACK]
         card_icon = row[CARD_ICON]
         card_copyright = row[CARD_COPYRIGHT]
         card_back = row[CARD_BACK]
@@ -3372,7 +3379,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
 
         if (card_encounter_set_number is not None and
-                card_type not in CARD_TYPES_ENCOUNTER_SET_NUMBER):
+                (card_type not in CARD_TYPES_ENCOUNTER_SET_NUMBER or
+                 card_sphere in ('Boon', 'Burden'))):
             message = 'Redundant encounter set number for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -3391,8 +3399,40 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_encounter_set_number_back is not None and
-              card_type_back not in CARD_TYPES_ENCOUNTER_SET_NUMBER):
+              (card_type_back not in CARD_TYPES_ENCOUNTER_SET_NUMBER or
+               card_sphere_back in ('Boon', 'Burden'))):
             message = ('Redundant encounter set number back for row #{}{}'
+                       .format(i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_encounter_set_icon is not None and
+                (card_type not in CARD_TYPES_ENCOUNTER_SET_ICON or
+                 card_sphere == 'Boon')):
+            message = 'Redundant encounter set icon for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if (card_encounter_set_icon_back is not None and
+                card_type_back is None):
+            message = ('Redundant encounter set icon back for row #{}{}'
+                       .format(i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_encounter_set_icon_back is not None and
+              (card_type_back not in CARD_TYPES_ENCOUNTER_SET_ICON or
+               card_sphere_back == 'Boon')):
+            message = ('Redundant encounter set icon back for row #{}{}'
                        .format(i, scratch))
             logging.error(message)
             if not card_scratch:
@@ -3836,18 +3876,6 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
               (card_type in CARD_TYPES_SUBTITLE or
                card_type_back in CARD_TYPES_SUBTITLE)):
             message = 'No adventure for row #{}{}'.format(
-                i, scratch)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-
-        if (card_encounter_set_back is not None and
-                (card_type_back is None or
-                 card_type_back in CARD_TYPES_NO_ENCOUNTER_SET or
-                 card_sphere_back == 'Boon')):
-            message = 'Redundant encounter set back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
@@ -4542,7 +4570,7 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
 
         return value
 
-    if name in (CARD_ENCOUNTER_SET, CARD_ENCOUNTER_SET_BACK):
+    if name == CARD_ENCOUNTER_SET:
         if row[CARD_ADVENTURE]:
             value = row[CARD_ADVENTURE]
 
@@ -4697,15 +4725,10 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
             alternate.tail = '\n    '
 
             properties = []
-            value = _get_set_xml_property_value(row, CARD_ENCOUNTER_SET_BACK,
+            value = _get_set_xml_property_value(row, CARD_ENCOUNTER_SET,
                                                 card_type)
             if value != '':
                 properties.append((CARD_ENCOUNTER_SET, value))
-            else:
-                value = _get_set_xml_property_value(row, CARD_ENCOUNTER_SET,
-                                                    card_type)
-                if value != '':
-                    properties.append((CARD_ENCOUNTER_SET, value))
 
             for name in (CARD_UNIQUE, CARD_TYPE, CARD_SPHERE, CARD_TRAITS,
                          CARD_COST, CARD_ENGAGEMENT, CARD_THREAT,
@@ -5790,9 +5813,6 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
                 if key.startswith(BACK_PREFIX):
                     new_row[key.replace(BACK_PREFIX, '')] = new_row[key]
 
-            if new_row[CARD_ENCOUNTER_SET_BACK] is not None:
-                new_row[CARD_ENCOUNTER_SET] = new_row[CARD_ENCOUNTER_SET_BACK]
-
             card_data.append(new_row)
 
     for row in card_data:
@@ -6725,10 +6745,10 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                      CARD_WILLPOWER, CARD_ATTACK, CARD_DEFENSE, CARD_HEALTH,
                      CARD_QUEST, CARD_VICTORY, CARD_SPECIAL_ICON, CARD_TEXT,
                      CARD_SHADOW, CARD_FLAVOUR, CARD_PRINTED_NUMBER,
-                     CARD_ENCOUNTER_SET_NUMBER, CARD_FLAGS, CARD_ARTIST,
-                     CARD_PANX, CARD_PANY, CARD_SCALE, CARD_PORTRAIT_SHADOW,
-                     CARD_EASY_MODE, CARD_ADDITIONAL_ENCOUNTER_SETS,
-                     CARD_ADVENTURE, CARD_ENCOUNTER_SET_BACK, CARD_ICON,
+                     CARD_ENCOUNTER_SET_NUMBER, CARD_ENCOUNTER_SET_ICON,
+                     CARD_FLAGS, CARD_ARTIST, CARD_PANX, CARD_PANY, CARD_SCALE,
+                     CARD_PORTRAIT_SHADOW, CARD_EASY_MODE,
+                     CARD_ADDITIONAL_ENCOUNTER_SETS, CARD_ADVENTURE, CARD_ICON,
                      CARD_COPYRIGHT, CARD_BACK, CARD_VERSION):
             value = _get_xml_property_value(row, name, card_type)
             if value != '':
@@ -6772,9 +6792,9 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                          CARD_DEFENSE, CARD_HEALTH, CARD_QUEST, CARD_VICTORY,
                          CARD_SPECIAL_ICON, CARD_TEXT, CARD_SHADOW,
                          CARD_FLAVOUR, CARD_PRINTED_NUMBER,
-                         CARD_ENCOUNTER_SET_NUMBER, CARD_FLAGS, CARD_ARTIST,
-                         CARD_PANX, CARD_PANY, CARD_SCALE,
-                         CARD_PORTRAIT_SHADOW):
+                         CARD_ENCOUNTER_SET_NUMBER, CARD_ENCOUNTER_SET_ICON,
+                         CARD_FLAGS, CARD_ARTIST, CARD_PANX, CARD_PANY,
+                         CARD_SCALE, CARD_PORTRAIT_SHADOW):
                 value = _get_xml_property_value(row, BACK_PREFIX + name,
                                                 card_type)
                 if value != '':
