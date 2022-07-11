@@ -803,16 +803,10 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
     else:
         card_custom_back = ''
 
-    if card.get(lotr.CARD_ENCOUNTER_SET_BACK):
-        encounter_set_back = ' / {}'.format(card[lotr.CARD_ENCOUNTER_SET_BACK])
-    else:
-        encounter_set_back = ''
-
     card_encounter_set = (
         '' if encounter_set == ''
-        else '*Encounter Set*: {}{}{}\n'.format(encounter_set,
-                                                encounter_set_back,
-                                                additional_sets))
+        else '*Encounter Set*: {}{}\n'.format(encounter_set,
+                                              additional_sets))
 
     card_set = re.sub(r'^ALeP - ', '', card[lotr.CARD_SET_NAME])
     card_id = '*id:* {}'.format(card[lotr.CARD_ID])
