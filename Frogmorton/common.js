@@ -942,7 +942,9 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 			}
 			for (let idx = 0; idx < sides.length; idx++) {
 				let side = sides[idx];
-				let cardName, cardType, cardSphere, keywords, suffix, mapping, flags;
+				let keywords = '';
+				let keywordsBack = '';
+				let cardName, cardType, cardSphere, suffix, mapping, flags;
 				if (side == 'front') {
 					cardName = card['Name'];
 					cardType = card['Type'] + '';
@@ -1019,6 +1021,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						['EncounterSetNumberOverwrite', 'Encounter Set Number']
 					];
 					if (doubleSideTypes.indexOf(cardType) > -1) {
+						keywordsBack = card['BKeywords'];
 						mapping = mapping.concat([
 							['NameBack', 'BName'],
 							['StageLetterBack', 'BEngagement Cost'],
@@ -1075,7 +1078,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						card['BSphere'] = cardSphere;
 					}
 
-					keywords = card['BKeywords'];
+					keywordsBack = card['BKeywords'];
 					suffix = '-2';
 					mapping = [
 						// Convert from member name in xml file to member name in eon file
@@ -1150,9 +1153,14 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 							vXml = translate['Unknown Artist'][lang];
 						}
 					}
-					else if (['Text', 'BText'].indexOf(nXml + '') > -1) {
+					else if (nXml == 'Text') {
 						if (keywords) {
 							vXml = keywords + '\n\n' + vXml;
+						}
+					}
+					else if (nXml == 'BText') {
+						if (keywordsBack) {
+							vXml = keywordsBack + '\n\n' + vXml;
 						}
 					}
 					else if (nXml == 'Card Number') {
