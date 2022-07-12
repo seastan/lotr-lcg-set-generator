@@ -48,7 +48,7 @@ def get_playtest_cards():
                     cards = json.load(fobj)
                 except Exception as exc:
                     logging.error('Error parsing %s: %s', filename, str(exc))
-                    continue
+                    raise
 
             if not cards:
                 continue
