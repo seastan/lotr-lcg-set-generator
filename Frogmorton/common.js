@@ -1941,16 +1941,12 @@ function markUp(value, key, cardType, lang, setID) {
 		return updateVafthrudnir(value, 5.095, lang);
 	}
 	else if (['Name', 'BName'].indexOf(key + '') > -1) {
-		let fixHeight = false;
 		let lowerSize = 6.5;
 		if (cardType in namePointSize) {
 			lowerSize = namePointSize[cardType];
 		}
 
 		res = updateVafthrudnir(value, lowerSize, lang);
-		if (fixHeight) {
-			res += '<family "Vafthrudnir"><size ' + Math.round(lowerSize / 0.8 * 1.423 * 100) / 100 + '> </size></family>';
-		}
 		return res;
 	}
 	else if ((['Victory Points', 'BVictory Points'].indexOf(key + '') > -1) && (['Presentation', 'Rules'].indexOf(cardType) == -1)) {
