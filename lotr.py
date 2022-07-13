@@ -60,8 +60,9 @@ SET_RINGSDB_CODE = 'RingsDB Code'
 SET_HOB_CODE = 'HoB Code'
 SET_DISCORD_PREFIX = 'Discord Prefix'
 SET_COPYRIGHT = 'Copyright'
-SET_CHANGED = 'Changed'
 SET_LOCKED = 'Locked'
+SET_IGNORE = 'Ignore'
+SET_CHANGED = 'Changed'
 
 BACK_PREFIX = 'Back_'
 CARD_SET = 'Set'
@@ -1822,10 +1823,11 @@ def get_sets(conf, sheet_changes=True, scratch_changes=True):
             chosen_sets.add(row[SET_ID])
 
     if 'all' in conf['set_ids'] and sheet_changes:
-        chosen_sets.update(s for s in FOUND_SETS)
+        chosen_sets.update(s for s in FOUND_SETS if not SETS[s][SET_IGNORE])
 
     if 'all_scratch' in conf['set_ids'] and scratch_changes:
-        chosen_sets.update(s for s in FOUND_SCRATCH_SETS)
+        chosen_sets.update(s for s in FOUND_SCRATCH_SETS
+                           if not SETS[s][SET_IGNORE])
 
     chosen_sets = list(chosen_sets)
     chosen_sets = [s for s in chosen_sets if s not in conf['ignore_set_ids']]
