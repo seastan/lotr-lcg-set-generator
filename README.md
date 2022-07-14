@@ -249,8 +249,8 @@ Additional steps:
 
 2. Create `discord.yaml` (see `discord.default.yaml`).
 
-3. Create `mpc_monitor.json` (see `mpc_monitor.default.json`) and `scheduled_backup.json`
-(see `scheduled_backup.default.json`).
+3. Create `mpc_monitor.json` (see `mpc_monitor.default.json`), `ringsdb_prod_cookies.json` (see `ringsdb_prod_cookies.default.json`)
+and `scheduled_backup.json` (see `scheduled_backup.default.json`).
 
 4. Setup rclone:
 
@@ -269,10 +269,11 @@ Additional steps:
 
 5. Setup crons:
 
+  - `1-59/2 * * * * flock -xn <path>/mpc_monitor.lock -c 'python3 <path>/mpc_monitor.py > /dev/null' 2>&1`
+  - `5 1 * * *      python3 <path>/download_ringsdb_stat.py >> <path>/cron.log 2>&1`
+  - `36 9 * * *     python3 <path>/monitor_remote_pipeline.py >> <path>/cron.log 2>&1`
   - `* * * * *      <path>/check_discord_bot.sh >> <path>/cron.log 2>&1`
   - `* * * * *      <path>/check_run_before_se_service.sh >> <path>/cron.log 2>&1`
-  - `36 9 * * *     python3 <path>/monitor_remote_pipeline.py >> <path>/cron.log 2>&1`
-  - `1-59/2 * * * * flock -xn <path>/mpc_monitor.lock -c 'python3 <path>/mpc_monitor.py > /dev/null' 2>&1`
   - `7 0 * * *      <path>/rclone_backup.sh "<local Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
   - `22,52 * * * *  <path>/rclone_renderer.sh >> <path>/cron.log 2>&1`
   - `0 8 * * 1      <path>/remind_backup.sh >> <path>/cron.log 2>&1`

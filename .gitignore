@@ -55,6 +55,8 @@ reprocess.cnt
 REPROCESS_ALL
 ringsdb.json
 ringsdb_cookies.json
+ringsdb_prod_cookies.json
+ringsdb_stat.json
 run_setup.bat
 run_cleanup.bat
 runBeforeSE_STARTED
