@@ -2,6 +2,7 @@
 # -*- coding: utf8 -*-
 """ Get aggregated statistics about player cards being playtested.
 """
+from datetime import datetime
 import logging
 import os
 import re
@@ -28,7 +29,7 @@ def init_logging():
                         format='%(asctime)s %(levelname)s: %(message)s')
 
 
-def get_stat(card_ids, start_date):
+def get_stat(card_ids, start_date, end_date):
     """ Get cards statistics from the database.
     """
     query = """
@@ -57,6 +58,7 @@ def get_stat(card_ids, start_date):
             SUM(avg_play * decks) / SUM(decks) AS avg_play
         FROM player_cards_stat
         WHERE stat_date >= %s
+            AND stat_date < %s
             AND card_id IN %s
         GROUP BY card_id
     ) t
@@ -69,7 +71,7 @@ def get_stat(card_ids, start_date):
                             database=DRAGNCARDS_DATABASE)
     try:
         cursor = conn.cursor(cursor_factory=extras.DictCursor)
-        cursor.execute(query, (start_date, tuple(card_ids)))
+        cursor.execute(query, (start_date, end_date, tuple(card_ids)))
         res = cursor.fetchall()
         res = [dict(row) for row in res]
         return res
@@ -121,13 +123,19 @@ def main():
         return
 
     card_ids = sys.argv[1].split(',')
+
     if (len(sys.argv) > 2 and sys.argv[2] and
             sys.argv[2] > DEFAULT_START_DATE):
         start_date = sys.argv[2]
     else:
         start_date = DEFAULT_START_DATE
 
-    data = get_stat(card_ids, start_date)
+    if len(sys.argv) > 3 and sys.argv[3] and sys.argv[3] > start_date:
+        end_date = sys.argv[3]
+    else:
+        end_date = datetime.utcnow().date().strftime('%Y-%m-%d')
+
+    data = get_stat(card_ids, start_date, end_date)
     if not data:
         if start_date > DEFAULT_START_DATE:
             start_date_str = ' since {}'.format(start_date)
