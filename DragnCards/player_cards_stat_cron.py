@@ -1,6 +1,6 @@
 # pylint: disable=C0209,W0703
 # -*- coding: utf8 -*-
-""" Collect statistics about player cards being playtested.
+""" Collect statistics about player cards.
 """
 import datetime
 import json
@@ -22,7 +22,7 @@ DRAGNCARDS_HOST = '127.0.0.1'
 DRAGNCARDS_PORT = 5432
 DRAGNCARDS_DATABASE = 'dragncards_prod'
 
-DEFAULT_START_DATE = '2021-10-01'
+DEFAULT_START_DATE = '2021-09-01'
 CARD_TYPES_PLAYER = {'Ally', 'Attachment', 'Contract', 'Event', 'Hero',
                      'Player Objective', 'Player Side Quest', 'Treasure'}
 
@@ -33,10 +33,10 @@ def init_logging():
                         format='%(asctime)s %(levelname)s: %(message)s')
 
 
-def get_playtest_cards():
-    """ Get the names of all player cards being playtested.
+def get_player_cards():
+    """ Get all player cards.
     """
-    playtest_cards = set()
+    player_cards = set()
     for _, _, filenames in os.walk(JSON_PATH):
         for filename in filenames:
             if not filename.endswith('.json'):
@@ -53,17 +53,13 @@ def get_playtest_cards():
             if not cards:
                 continue
 
-            first_card = list(cards.values())[0]
-            if first_card.get('playtest') != 1:
-                continue
-
             for card in cards.values():
                 if card['sides']['A']['type'] in CARD_TYPES_PLAYER:
-                    playtest_cards.add(card['cardid'])
+                    player_cards.add(card['cardid'])
 
         break
 
-    return playtest_cards
+    return player_cards
 
 
 def create_table(cursor):
@@ -144,9 +140,10 @@ def get_dragncards_data(cursor, stat_date):
 
 
 def insert_stat(cursor, values):
-    """ Get DragnCards data for a particular date.
+    """ Insert statistics into the table.
     """
-    values = ['({})'.format(','.join(["'{}'".format(v['card_id'].replace("'", '')),
+    values = ['({})'.format(','.join(["'{}'".format(v['card_id']
+                                                    .replace("'", '')),
                                       str(v['decks']),
                                       str(v['multiplayer']),
                                       str(v['victory']),
@@ -166,7 +163,7 @@ def insert_stat(cursor, values):
     cursor.execute(query)
 
 
-def process_stat_date(cursor, stat_date, playtest_cards):  # pylint: disable=R0912,R0914,R0915
+def process_stat_date(cursor, stat_date, player_cards):  # pylint: disable=R0912,R0914,R0915
     """ Collect statistics for a particular date.
     """
     logging.info('Processing %s', stat_date)
@@ -213,7 +210,7 @@ def process_stat_date(cursor, stat_date, playtest_cards):  # pylint: disable=R09
                   'player4': {},
                   'shared': {}}
         for card in row['cards'].values():
-            if card['cardDbId'] not in playtest_cards:
+            if card['cardDbId'] not in player_cards:
                 continue
 
             card_deck = False
@@ -270,11 +267,10 @@ def process_stat_date(cursor, stat_date, playtest_cards):  # pylint: disable=R09
                 })
 
     if not res:
-        logging.info('No playtest statistics for %s', stat_date)
+        logging.info('No player cards statistics for %s', stat_date)
         return
 
-    logging.info('Found playtest statistics for %s card(s) for %s',
-                 len(res), stat_date)
+    logging.info('Found statistics for %s card(s) for %s', len(res), stat_date)
     values = []
     for card_id, card_stat in res.items():
         decks = len(card_stat)
@@ -310,10 +306,10 @@ def main():
     logging.info('Starting the script')
     timestamp = time.time()
     try:
-        playtest_cards = get_playtest_cards()
-        logging.info('Collected %s playtest card(s)', len(playtest_cards))
-        if not playtest_cards:
-            logging.info('No playtest cards, exiting')
+        player_cards = get_player_cards()
+        logging.info('Collected %s player card(s)', len(player_cards))
+        if not player_cards:
+            logging.info('No player cards, exiting')
             return
 
         conn = psycopg2.connect(user=DRAGNCARDS_USER,
@@ -328,7 +324,7 @@ def main():
             start_date = get_start_date(cursor)
             end_date = get_end_date()
             while start_date <= end_date:
-                process_stat_date(cursor, start_date, playtest_cards)
+                process_stat_date(cursor, start_date, player_cards)
                 start_date += datetime.timedelta(days=1)
         finally:
             conn.close()

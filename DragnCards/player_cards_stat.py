@@ -18,7 +18,7 @@ DRAGNCARDS_DATABASE = 'dragncards_prod'
 
 LOG_PATH = 'player_cards_stat.log'
 
-DEFAULT_START_DATE = '2021-10-01'
+DEFAULT_START_DATE = '2021-09-01'
 
 
 def init_logging():

@@ -21,7 +21,7 @@ LOG_PATH = 'all_plays.log'
 QUEST_PATH = '/var/www/dragncards.com/Lord-of-the-Rings/o8g/Decks/Quests/QPT-AleP-Playtest/'
 
 LIMIT = 500
-MIN_INSERTED_AT = '2021-10-01 00:00:00'
+MIN_INSERTED_AT = '2021-09-01 00:00:00'
 
 
 def init_logging():
