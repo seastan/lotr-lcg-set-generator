@@ -40,12 +40,12 @@ def get_stat(card_ids, start_date, end_date):
         victory,
         defeat,
         decks - victory - defeat AS incomplete,
-        ROUND(avg_included::numeric, 2) AS avg_included,
-        ROUND((avg_deck * 100 / avg_included)::numeric, 2) AS pct_deck,
-        ROUND((avg_hand * 100 / avg_included)::numeric, 2) AS pct_hand,
-        ROUND((avg_play * 100 / avg_included)::numeric, 2) AS pct_play,
+        ROUND(avg_included::numeric, 1) AS avg_included,
+        ROUND((avg_deck * 100 / avg_included)::numeric, 1) AS pct_deck,
+        ROUND((avg_hand * 100 / avg_included)::numeric, 1) AS pct_hand,
+        ROUND((avg_play * 100 / avg_included)::numeric, 1) AS pct_play,
         ROUND(((avg_included - avg_deck - avg_hand - avg_play) * 100 /
-               avg_included)::numeric, 2) AS pct_out
+               avg_included)::numeric, 1) AS pct_out
     FROM (
         SELECT card_id,
             SUM(decks) AS decks,
