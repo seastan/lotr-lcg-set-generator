@@ -5381,7 +5381,8 @@ def generate_octgn_o8d(conf, set_id, set_name):
             obj.write('\n')
             obj.write(res)
 
-    _generate_octgn_o8d_player(conf, set_id, set_name)
+    # not needed at the moment
+    # _generate_octgn_o8d_player(conf, set_id, set_name)
 
     logging.info('[%s] ...Generating .o8d files for OCTGN and DragnCards '
                  '(%ss)', set_name, round(time.time() - timestamp, 3))
