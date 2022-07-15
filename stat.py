@@ -17,7 +17,7 @@ from lotr import (create_folder, escape_filename, get_content, handle_int,
                   is_int)
 
 
-HALLOFBEORN_CARDS_URL = 'http://hallofbeorn.com/Export/Cards?setType=ALL_SETS'
+HALLOFBEORN_CARDS_URL = 'http://hallofbeorn.com/Export/ALeP'
 HALLOFBEORN_SCENARIO_URL = 'http://hallofbeorn.com/Cards/ScenarioDetails/{}'
 HALLOFBEORN_SCENARIOS_URL = 'http://hallofbeorn.com/LotR/Scenarios/'
 RINGSDB_URL = 'https://ringsdb.com/api/public/cards/'
@@ -27,9 +27,9 @@ OUTPUT_SCENARIOS_PATH = os.path.join('Output', 'Scripts', 'Scenarios')
 
 EXCLUDE_SETS = {
     'Revised Core Set', 'Angmar Awakened Hero Expansion',
-    'Two-Player Limited Edition Starter', 'Dwarves of Durin',
-    'Elves of Lórien', 'Defenders of Gondor', 'Riders of Rohan',
-    'The Massing at Osgiliath', 'The Battle of Lake-town',
+    'The Bonds of Fellowship', 'Two-Player Limited Edition Starter',
+    'Dwarves of Durin', 'Elves of Lórien', 'Defenders of Gondor',
+    'Riders of Rohan', 'The Massing at Osgiliath', 'The Battle of Lake-town',
     'The Stone of Erech', 'Fog on the Barrow-downs', 'The Old Forest',
     'Murder at the Prancing Pony', 'The Ruins of Belegost',
     'The Siege of Annúminas', 'Attack on Dol Guldur', 'The Wizard\'s Quest',
