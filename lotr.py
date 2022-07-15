@@ -1,4 +1,4 @@
-# pylint: disable=C0209,C0302
+# pylint: disable=C0209,C0302,W0703
 # -*- coding: utf8 -*-
 """ Helper functions for LotR workflow.
 """
@@ -359,7 +359,7 @@ SPECIAL_ICONS = {'eye of sauron', 'eye of sauronx2', 'eye of sauronx3',
                  'sailing', 'sailingx2'}
 
 DRAGNCARDS_PLAYER_CARDS_STAT_COMMAND = \
-    '/home/webhost/python/AR/player_cards_stat.sh "{}" "{}"'
+    '/home/webhost/python/AR/player_cards_stat.sh "{}" "{}" "{}"'
 DRAGNCARDS_ALL_PLAYS_COMMAND = '/home/webhost/python/AR/all_plays.sh "{}" "{}"'
 DRAGNCARDS_PLAYS_STAT_COMMAND = \
     '/home/webhost/python/AR/plays_stat.sh "{}" "{}"'
@@ -696,7 +696,7 @@ def _read_ringsdb_cookies(conf):
     try:
         with open(RINGSDB_COOKIES_PATH, 'r', encoding='utf-8') as fobj:
             data = json.load(fobj)
-    except Exception:  # pylint: disable=W0703
+    except Exception:
         pass
 
     if data:
@@ -1312,7 +1312,7 @@ def get_content(url):
             req = requests.get(url, timeout=URL_TIMEOUT)
             res = req.content
             break
-        except Exception:  # pylint: disable=W0703
+        except Exception:
             if i < URL_RETRIES - 1:
                 time.sleep(URL_SLEEP * (i + 1))
             else:
@@ -1408,7 +1408,7 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
     try:
         with open(SHEETS_JSON_PATH, 'r', encoding='utf-8') as fobj:
             old_checksums = json.load(fobj)
-    except Exception:  # pylint: disable=W0703
+    except Exception:
         old_checksums = {}
 
     new_checksums = {}
@@ -1438,7 +1438,7 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
                     data = list(csv.reader(StringIO(res)))
                     none_index = (data[0].index('') if '' in data[0]
                                   else len(data[0]))
-                except Exception as exc:  # pylint: disable=W0703
+                except Exception as exc:
                     raise SheetError("Can't download {} from the Google Sheet"
                                      .format(sheet)) from exc
 
@@ -4316,7 +4316,7 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
     try:
         with open(DISCORD_CARD_DATA_PATH, 'r', encoding='utf-8') as obj:
             old_data = json.load(obj)['data']
-    except Exception:  # pylint: disable=W0703
+    except Exception:
         old_data = None
 
     modified_card_ids = []
@@ -4470,7 +4470,7 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
         try:
             with open(DISCORD_TIMESTAMPS_PATH, 'r', encoding='utf-8') as obj:
                 timestamps = json.load(obj)
-        except Exception:  # pylint: disable=W0703
+        except Exception:
             timestamps = {}
 
         for card_id in modified_card_ids:
@@ -5597,13 +5597,13 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
         with open(DRAGNCARDS_TIMESTAMPS_JSON_PATH, 'r',
                   encoding='utf-8') as fobj:
             dragncards_timestamps = json.load(fobj)
-    except Exception:  # pylint: disable=W0703
+    except Exception:
         dragncards_timestamps = {}
 
     try:
         with open(DOWNLOAD_TIME_PATH, 'r', encoding='utf-8') as fobj:
             download_time = fobj.read()
-    except Exception:  # pylint: disable=W0703
+    except Exception:
         download_time = None
 
     xml_path = os.path.join(SET_EONS_PATH, '{}.English.xml'.format(set_id))
@@ -7224,7 +7224,7 @@ def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0912,R0914
         with open(GENERATE_DRAGNCARDS_JSON_PATH, 'r',
                   encoding='utf-8') as fobj:
             old_dragncards_hashes = json.load(fobj)
-    except Exception:  # pylint: disable=W0703
+    except Exception:
         old_dragncards_hashes = {}
 
     dragncards_changes = False
@@ -7434,7 +7434,7 @@ def generate_dragncards_proxies(sets):
                 with open(GENERATE_DRAGNCARDS_JSON_PATH, 'r',
                           encoding='utf-8') as fobj:
                     old_cards = json.load(fobj)
-            except Exception:  # pylint: disable=W0703
+            except Exception:
                 old_cards = {}
 
             cards = {**old_cards, **cards}
@@ -10594,7 +10594,7 @@ def trigger_dragncards_build(conf):
     finally:
         try:
             client.close()
-        except Exception:  # pylint: disable=W0703
+        except Exception:
             pass
 
 
@@ -10611,14 +10611,15 @@ def get_dragncards_build(conf):
     finally:
         try:
             client.close()
-        except Exception:  # pylint: disable=W0703
+        except Exception:
             pass
 
 
-def get_dragncards_player_cards_stat(conf, card_ids, start_date):
+def get_dragncards_player_cards_stat(conf, card_ids, start_date, end_date):
     """ Get DragnCards player cards statistics for the set.
     """
-    command = DRAGNCARDS_PLAYER_CARDS_STAT_COMMAND.format(card_ids, start_date)
+    command = DRAGNCARDS_PLAYER_CARDS_STAT_COMMAND.format(
+        card_ids, start_date, end_date)
     logging.info('Running remote command: %s', command)
     client = _get_ssh_client(conf)
     try:
@@ -10628,7 +10629,7 @@ def get_dragncards_player_cards_stat(conf, card_ids, start_date):
     finally:
         try:
             client.close()
-        except Exception:  # pylint: disable=W0703
+        except Exception:
             pass
 
 
@@ -10645,7 +10646,7 @@ def get_dragncards_all_plays(conf, quest, start_date):
     finally:
         try:
             client.close()
-        except Exception:  # pylint: disable=W0703
+        except Exception:
             pass
 
 
@@ -10662,7 +10663,7 @@ def get_dragncards_plays_stat(conf, quest, start_date):
     finally:
         try:
             client.close()
-        except Exception:  # pylint: disable=W0703
+        except Exception:
             pass
 
 
@@ -10683,7 +10684,7 @@ def _get_remote_dragncards_folder(conf):
     finally:
         try:
             client.close()
-        except Exception:  # pylint: disable=W0703
+        except Exception:
             pass
 
 
@@ -10704,7 +10705,7 @@ def _finish_uploading_dragncards_images(conf, remote_folder):
     finally:
         try:
             client.close()
-        except Exception:  # pylint: disable=W0703
+        except Exception:
             pass
 
 
@@ -10741,11 +10742,11 @@ def _scp_upload(client, scp_client, conf, source_path, destination_path):
         try:
             scp_client.put(source_path, destination_path)
             break
-        except Exception:  # pylint: disable=W0703
+        except Exception:
             if i < SCP_RETRIES - 1:
                 try:
                     client.close()
-                except Exception:  # pylint: disable=W0703
+                except Exception:
                     pass
 
                 time.sleep(SCP_SLEEP * (i + 1))
@@ -10819,7 +10820,7 @@ def upload_dragncards_images(conf, sets):
     finally:
         try:
             client.close()
-        except Exception:  # pylint: disable=W0703
+        except Exception:
             pass
 
     logging.info('...Uploading pixel-perfect images to DragnCards (%ss)',
@@ -10851,7 +10852,7 @@ def _upload_dragncards_rendered_images(conf):
     finally:
         try:
             client.close()
-        except Exception:  # pylint: disable=W0703
+        except Exception:
             pass
 
     return images_uploaded
@@ -10863,7 +10864,7 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
     try:
         with open(DRAGNCARDS_JSON_PATH, 'r', encoding='utf-8') as fobj:
             checksums = json.load(fobj)
-    except Exception:  # pylint: disable=W0703
+    except Exception:
         checksums = {}
 
     changes = False
@@ -10944,7 +10945,7 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
     finally:
         try:
             client.close()
-        except Exception:  # pylint: disable=W0703
+        except Exception:
             pass
 
     if changes:
@@ -10978,7 +10979,7 @@ def update_ringsdb(conf, sets):
     try:
         with open(RINGSDB_JSON_PATH, 'r', encoding='utf-8') as fobj:
             checksums = json.load(fobj)
-    except Exception:  # pylint: disable=W0703
+    except Exception:
         checksums = {}
 
     changes = False

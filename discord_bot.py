@@ -31,6 +31,7 @@ LOG_PATH = 'discord_bot.log'
 MAIL_COUNTER_PATH = 'discord_bot.cnt'
 MAILS_PATH = 'mails'
 PLAYTEST_PATH = os.path.join('Discord', 'playtest.json')
+RINGSDB_STAT_PATH = 'ringsdb_stat.json'
 USERS_LIST_PATH = os.path.join('Discord', 'users.csv')
 
 CRON_ERRORS_CMD = './cron_errors.sh'
@@ -71,7 +72,7 @@ ARCHIVE_CATEGORY = 'Archive'
 CARD_DECK_SECTION = '_Deck Section'
 CRON_CHANNEL = 'cron'
 NOTIFICATIONS_CHANNEL = 'notifications'
-PLAYTEST_CHANNEL = 'playtesting-checklist'
+PLAYTEST_CHANNEL = 'checklist'
 SCRATCH_FOLDER = '_Scratch'
 UPDATES_CHANNEL = 'spreadsheet-updates'
 GENERAL_CATEGORIES = {
@@ -1289,9 +1290,19 @@ async def get_player_cards_stat(set_name, start_date):
         if not matches:
             return 'no cards found for the set'
 
+    set_name = matches[0][lotr.CARD_SET_NAME]
+    try:
+        with open(RINGSDB_STAT_PATH, 'r', encoding='utf-8') as obj:
+            ringsdb_data = json.load(obj)
+            end_date = [p['date_release'] for p in ringsdb_data['packs']
+                        if p['name'] == set_name][0]
+    except Exception:
+        end_date = ''
+
     cards = {c[lotr.CARD_ID]:c[lotr.CARD_NAME] for c in matches}
     card_ids = ','.join(list(cards.keys()))
-    res = lotr.get_dragncards_player_cards_stat(CONF, card_ids, start_date)
+    res = lotr.get_dragncards_player_cards_stat(
+        CONF, card_ids, start_date, end_date)
     lines = res.split('\n')
     for i in range(1, len(lines)):
         parts = lines[i].split('\t', 1)
