@@ -360,9 +360,10 @@ SPECIAL_ICONS = {'eye of sauron', 'eye of sauronx2', 'eye of sauronx3',
 
 DRAGNCARDS_PLAYER_CARDS_STAT_COMMAND = \
     '/home/webhost/python/AR/player_cards_stat.sh "{}" "{}" "{}"'
-DRAGNCARDS_ALL_PLAYS_COMMAND = '/home/webhost/python/AR/all_plays.sh "{}" "{}"'
+DRAGNCARDS_ALL_PLAYS_COMMAND = \
+    '/home/webhost/python/AR/all_plays.sh "{}" "{}" "{}"'
 DRAGNCARDS_PLAYS_STAT_COMMAND = \
-    '/home/webhost/python/AR/plays_stat.sh "{}" "{}"'
+    '/home/webhost/python/AR/plays_stat.sh "{}" "{}" "{}"'
 DRAGNCARDS_BUILD_STAT_COMMAND = \
     '/var/www/dragncards.com/dragncards/frontend/buildStat.sh'
 DRAGNCARDS_BUILD_TRIGGER_COMMAND = \
@@ -10634,10 +10635,10 @@ def get_dragncards_player_cards_stat(conf, card_ids, start_date, end_date):
             pass
 
 
-def get_dragncards_all_plays(conf, quest, start_date):
+def get_dragncards_all_plays(conf, quest, start_date, end_date):
     """ Get information about all DragnCards plays for the quest.
     """
-    command = DRAGNCARDS_ALL_PLAYS_COMMAND.format(quest, start_date)
+    command = DRAGNCARDS_ALL_PLAYS_COMMAND.format(quest, start_date, end_date)
     logging.info('Running remote command: %s', command)
     client = _get_ssh_client(conf)
     try:
@@ -10651,10 +10652,10 @@ def get_dragncards_all_plays(conf, quest, start_date):
             pass
 
 
-def get_dragncards_plays_stat(conf, quest, start_date):
+def get_dragncards_plays_stat(conf, quest, start_date, end_date):
     """ Get aggregated plays statistics for the quest.
     """
-    command = DRAGNCARDS_PLAYS_STAT_COMMAND.format(quest, start_date)
+    command = DRAGNCARDS_PLAYS_STAT_COMMAND.format(quest, start_date, end_date)
     logging.info('Running remote command: %s', command)
     client = _get_ssh_client(conf)
     try:

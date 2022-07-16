@@ -1319,18 +1319,50 @@ async def get_player_cards_stat(set_name, start_date):
     return res
 
 
-def get_all_plays(quest, start_date):
+async def get_all_plays(quest, start_date):
     """ Get information about all DragnCards plays for the quest.
     """
-    res = lotr.get_dragncards_all_plays(CONF, quest, start_date)
+    data = await read_card_data()
+    matches = [card for card in data['data']
+               if card.get(lotr.CARD_ENCOUNTER_SET, '').lower() ==
+               quest.lower()]
+    if not matches:
+        return 'quest {} not found'.format(quest)
+
+    set_name = matches[0][lotr.CARD_SET_NAME]
+    try:
+        with open(RINGSDB_STAT_PATH, 'r', encoding='utf-8') as obj:
+            ringsdb_data = json.load(obj)
+            end_date = [p['date_release'] for p in ringsdb_data['packs']
+                        if p['name'] == set_name][0]
+    except Exception:
+        end_date = ''
+
+    res = lotr.get_dragncards_all_plays(CONF, quest, start_date, end_date)
     res = '```\n{}```'.format(res.expandtabs())
     return res
 
 
-def get_plays_stat(quest, start_date):
+async def get_plays_stat(quest, start_date):
     """ Get aggregated DragnCards plays statistics for the quest.
     """
-    res = lotr.get_dragncards_plays_stat(CONF, quest, start_date)
+    data = await read_card_data()
+    matches = [card for card in data['data']
+               if card.get(lotr.CARD_ENCOUNTER_SET, '').lower() ==
+               quest.lower()]
+    if not matches:
+        return 'quest {} not found'.format(quest)
+
+    set_name = matches[0][lotr.CARD_SET_NAME]
+    try:
+        with open(RINGSDB_STAT_PATH, 'r', encoding='utf-8') as obj:
+            ringsdb_data = json.load(obj)
+            end_date = [p['date_release'] for p in ringsdb_data['packs']
+                        if p['name'] == set_name][0]
+    except Exception:
+        end_date = ''
+
+    res = lotr.get_dragncards_plays_stat(CONF, quest, start_date, end_date)
     res = '```\n{}```'.format(res.expandtabs())
     return res
 
@@ -2864,7 +2896,7 @@ Targets removed.
                         start_date = parts[-1]
                         quest = ' '.join(parts[:-1])
 
-                res = get_all_plays(quest, start_date)
+                res = await get_all_plays(quest, start_date)
             except Exception as exc:
                 logging.exception(str(exc))
                 await message.channel.send(
@@ -2889,7 +2921,7 @@ Targets removed.
                         start_date = parts[-1]
                         quest = ' '.join(parts[:-1])
 
-                res = get_plays_stat(quest, start_date)
+                res = await get_plays_stat(quest, start_date)
             except Exception as exc:
                 logging.exception(str(exc))
                 await message.channel.send(

@@ -5,7 +5,6 @@
 from datetime import datetime
 import logging
 import os
-import re
 import sys
 
 import psycopg2
@@ -18,7 +17,6 @@ DRAGNCARDS_PORT = 5432
 DRAGNCARDS_DATABASE = 'dragncards_prod'
 
 LOG_PATH = 'player_cards_stat.log'
-
 DEFAULT_START_DATE = '2021-09-01'
 
 
@@ -122,7 +120,8 @@ def main():
         print(res)
         return
 
-    card_ids = sys.argv[1].split(',')
+    card_ids_raw = sys.argv[1]
+    card_ids = card_ids_raw.split(',')
 
     if (len(sys.argv) > 2 and sys.argv[2] and
             sys.argv[2] > DEFAULT_START_DATE):
@@ -130,11 +129,13 @@ def main():
     else:
         start_date = DEFAULT_START_DATE
 
-    if len(sys.argv) > 3 and sys.argv[3] and sys.argv[3] > start_date:
+    if len(sys.argv) > 3 and sys.argv[3]:
         end_date = sys.argv[3]
     else:
         end_date = datetime.utcnow().date().strftime('%Y-%m-%d')
 
+    logging.info('Processing cards %s between %s and %s', card_ids_raw,
+                 start_date, end_date)
     data = get_stat(card_ids, start_date, end_date)
     if not data:
         if start_date > DEFAULT_START_DATE:

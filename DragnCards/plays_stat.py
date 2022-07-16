@@ -2,10 +2,10 @@
 # -*- coding: utf8 -*-
 """ Get aggregated plays statistics for the quest.
 """
+from datetime import datetime
 import json
 import logging
 import os
-import re
 import sys
 
 import psycopg2
@@ -18,9 +18,7 @@ DRAGNCARDS_PORT = 5432
 DRAGNCARDS_DATABASE = 'dragncards_prod'
 
 LOG_PATH = 'plays_stat.log'
-QUEST_PATH = '/var/www/dragncards.com/Lord-of-the-Rings/o8g/Decks/Quests/QPT-AleP-Playtest/'
-
-MIN_INSERTED_AT = '2022-01-01 00:00:00'
+DEFAULT_START_DATE = '2021-09-01'
 
 
 def init_logging():
@@ -30,31 +28,7 @@ def init_logging():
                         format='%(asctime)s %(levelname)s: %(message)s')
 
 
-def get_playtesting_quests():
-    """ Get the names of all playtesting quests.
-    """
-    quests = set()
-    for _, _, filenames in os.walk(QUEST_PATH):
-        for filename in filenames:
-            if not filename.endswith('.o8d'):
-                continue
-
-            quest = re.sub(r'(-playtest)?\.o8d$', '', filename.lower())
-            parts = quest.split('-')
-            if len(parts) < 2:
-                continue
-
-            quest = ' '.join(parts[1:])
-            quest = re.sub(r'^alep +', '', quest)
-            quest = re.sub(r'^alep +', '', quest)
-            quests.add(quest)
-
-        break
-
-    return quests
-
-
-def get_replays(quest, inserted_at):
+def get_replays(quest, start_date, end_date):
     """ Get all replays for the quest from the database.
     """
     query = """
@@ -69,6 +43,7 @@ SELECT num_players,
 FROM replays
 WHERE encounter ILIKE %s
   AND inserted_at >= %s
+  AND inserted_at < %s
   AND rounds > 0
   AND (rounds > 1 OR outcome IN ('victory', 'defeat', 'incomplete'))
 ORDER BY inserted_at
@@ -81,7 +56,7 @@ ORDER BY inserted_at
                             database=DRAGNCARDS_DATABASE)
     try:
         cursor = conn.cursor(cursor_factory=extras.DictCursor)
-        cursor.execute(query, ('%{}'.format(quest), inserted_at))
+        cursor.execute(query, ('%{}'.format(quest), start_date, end_date))
         res = cursor.fetchall()
         res = [dict(row) for row in res]
         return res
@@ -98,7 +73,7 @@ def prepare_row(replays, players, outcome):
         players_filter = {players}
 
     if outcome == '[any]':
-        outcome_filter = {'victory', 'defeat', '-'}
+        outcome_filter = {'win', 'loss', '-'}
     else:
         outcome_filter = {outcome}
 
@@ -136,31 +111,30 @@ def main():  # pylint: disable=R0912,R0915
         print(res)
         return
 
-    quest_raw = sys.argv[1]
-    quest = quest_raw.lower().replace('-', ' ')
-    quest = re.sub(r'^alep +', '', quest)
-    quests = get_playtesting_quests()
-    if quest not in quests:
-        res = '{} is not a playtesting quest'.format(quest_raw)
-        logging.error(res)
-        print(res)
-        return
+    quest = sys.argv[1]
 
     if (len(sys.argv) > 2 and sys.argv[2] and
-            sys.argv[2] > MIN_INSERTED_AT):
-        inserted_at = sys.argv[2]
+            sys.argv[2] > DEFAULT_START_DATE):
+        start_date = sys.argv[2]
     else:
-        inserted_at = MIN_INSERTED_AT
+        start_date = DEFAULT_START_DATE
 
-    replays = get_replays(quest, inserted_at)
+    if len(sys.argv) > 3 and sys.argv[3]:
+        end_date = sys.argv[3]
+    else:
+        end_date = datetime.utcnow().date().strftime('%Y-%m-%d')
+
+    logging.info('Processing %s between %s and %s', quest, start_date,
+                 end_date)
+    replays = get_replays(quest, start_date, end_date)
     if not replays:
-        if inserted_at > MIN_INSERTED_AT:
-            inserted_at_str = ' since {}'.format(inserted_at)
+        if start_date > DEFAULT_START_DATE:
+            start_date_str = ' since {}'.format(start_date)
         else:
-            inserted_at_str = ''
+            start_date_str = ''
 
-        res = 'no plays found for quest {}{}'.format(quest_raw,
-                                                     inserted_at_str)
+        res = 'no plays found for quest {}{}'.format(quest,
+                                                     start_date_str)
         logging.info(res)
         print(res)
         return
@@ -185,7 +159,11 @@ def main():  # pylint: disable=R0912,R0915
             continue
 
         replay['num_players'] = str(replay['num_players'])
-        if replay['outcome'] == 'incomplete':
+        if replay['outcome'] == 'victory':
+            replay['outcome'] = 'win'
+        elif replay['outcome'] == 'defeat':
+            replay['outcome'] = 'loss'
+        else:
             replay['outcome'] = '-'
 
         replay['player1_threat'] = replay['player_data']['player1']['threat']
@@ -196,13 +174,13 @@ def main():  # pylint: disable=R0912,R0915
         filtered.append(replay)
 
     if not filtered:
-        if inserted_at > MIN_INSERTED_AT:
-            inserted_at_str = ' since {}'.format(inserted_at)
+        if start_date > DEFAULT_START_DATE:
+            start_date_str = ' since {}'.format(start_date)
         else:
-            inserted_at_str = ''
+            start_date_str = ''
 
-        res = 'no plays found for quest {}{}'.format(quest_raw,
-                                                     inserted_at_str)
+        res = 'no plays found for quest {}{}'.format(quest,
+                                                     start_date_str)
         logging.info(res)
         print(res)
         return
