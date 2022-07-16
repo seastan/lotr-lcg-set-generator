@@ -1308,14 +1308,14 @@ async def get_player_cards_stat(set_name, start_date):
         parts = lines[i].split('\t', 1)
         if parts[0] in cards:
             parts[0] = cards[parts[0]]
-            while len(parts[0]) < 36:
-                parts[0] = '{} '.format(parts[0])
+            if len(parts[0]) < 29:
+                parts[0] = parts[0] + ' ' * (29 - len(parts[0]))
 
             lines[i] = '\t'.join(parts)
 
     lines[1:] = sorted(lines[1:])
     res = '\n'.join(lines)
-    res = '```\n{}```'.format(res.expandtabs())
+    res = '```\n{}```'.format(res.expandtabs(6))
     return res
 
 

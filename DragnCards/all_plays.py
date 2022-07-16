@@ -175,11 +175,12 @@ def main():  # pylint: disable=R0912,R0915
         max_threat_length = 6
 
     threat_header = 'threat'
-    while len(threat_header) < max_threat_length:
-        threat_header = '{} '.format(threat_header)
+    if len(threat_header) < max_threat_length:
+        threat_header = (threat_header +
+                         ' ' * (max_threat_length - len(threat_header)))
 
     headers = ['date       ', 'replay_id                           ',
-               'P ', 'R ', 'outcome', threat_header, 'heroes']
+               'P ', 'R ', 'res ', threat_header, 'heroes']
     headers = ' '.join(headers)
 
     res = []
@@ -199,14 +200,17 @@ def main():  # pylint: disable=R0912,R0915
         replay['player4_heroes'] = ', '.join(replay['player4_heroes'])
 
         replay['inserted_at'] = replay['inserted_at'].strftime('%Y-%m-%d ')
-        if replay['outcome'] == 'incomplete':
-            replay['outcome'] = '-      '
+        if replay['outcome'] == 'victory':
+            replay['outcome'] = 'win '
         elif replay['outcome'] == 'defeat':
-            replay['outcome'] = 'defeat '
+            replay['outcome'] = 'loss'
+        else:
+            replay['outcome'] = '-   '
 
         replay['rounds'] = str(replay['rounds'])
-        while len(replay['rounds']) < 2:
-            replay['rounds'] = '{} '.format(replay['rounds'])
+        if len(replay['rounds']) < 2:
+            replay['rounds'] = (replay['rounds'] +
+                                ' ' * (2 - len(replay['rounds'])))
 
         if replay['num_players'] == 1:
             replay['threat'] = replay['player1_threat']
@@ -235,8 +239,9 @@ def main():  # pylint: disable=R0912,R0915
 
         replay['num_players'] = '{} '.format(replay['num_players'])
 
-        while len(replay['threat']) < max_threat_length:
-            replay['threat'] = '{} '.format(replay['threat'])
+        if len(replay['threat']) < max_threat_length:
+            replay['threat'] = (replay['threat'] + ' ' *
+                                (max_threat_length - len(replay['threat'])))
 
         replay['heroes'] = replay['heroes'].replace(
             ' , ', ',').replace(', ', ',')

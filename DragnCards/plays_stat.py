@@ -207,13 +207,13 @@ def main():  # pylint: disable=R0912,R0915
         print(res)
         return
 
-    headers = ['players', 'outcome', 'plays', 'rnd_min', 'rnd_max',
+    headers = ['players', 'result', 'plays', 'rnd_min', 'rnd_max',
                'rnd_avg', 'thr_min', 'thr_max', 'thr_avg']
     headers = '\t'.join(headers)
 
     res = []
     for players in ('[any]', '1', '2', '3', '4'):
-        for outcome in ('[any]', 'victory', 'defeat', '-'):
+        for outcome in ('[any]', 'win', 'loss', '-'):
             row = prepare_row(filtered, players, outcome)
             if row:
                 res.append(row)
