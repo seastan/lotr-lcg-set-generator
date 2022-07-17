@@ -170,10 +170,13 @@ List of **!stat** commands:
 **!stat dragncards build** - display information about the latest DragnCards build
 **!stat player cards <set name or set code>** - display DragnCards player cards statistics for the set
 **!stat player cards <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date
-**!stat plays all <quest name>** - display information about all DragnCards plays for the quest
-**!stat plays all <quest name> <date in YYYY-MM-DD format>** - display information about all DragnCards plays for the quest starting from the specified date
-**!stat plays stat <quest name>** - display aggregated DragnCards plays statistics for the quest
-**!stat plays stat <quest name> <date in YYYY-MM-DD format>** - display aggregated DragnCards plays statistics for the quest starting from the specified date
+**!stat player cards help** - display additional help about DragnCards player cards statistics
+**!stat all plays <quest name>** - display all DragnCards plays for the quest
+**!stat all plays <quest name> <date in YYYY-MM-DD format>** - display all DragnCards plays for the quest starting from the specified date
+**!stat all plays help** - display additional help about all DragnCards plays for the quest
+**!stat plays <quest name>** - display aggregated DragnCards plays statistics for the quest
+**!stat plays <quest name> <date in YYYY-MM-DD format>** - display aggregated DragnCards plays statistics for the quest starting from the specified date
+**!stat plays help** - display additional help about aggregated DragnCards plays statistics for the quest
 **!stat quest <quest name or set name or set code>** - display the quest statistics (for example: `!stat quest The Battle for the Beacon` or `!stat quest Children of Eorl` or `!stat quest TAP`)
 **!stat help** - display this help message
 """,
@@ -202,6 +205,55 @@ List of **!secret** commands:
 **!secret users** - prepare a list of all Discord users and save it in `Discord/users.csv`
 """
 }
+HELP_STAT_PLAYER_CARDS = """
+**!stat player cards <set name or set code>** - display DragnCards player cards statistics for the set
+**!stat player cards <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date
+**!stat player cards help** - display this help message
+
+**Columns:**
+`card      ` card name
+`plays     ` total number of plays
+`solo      ` number of solo plays
+`mp        ` number of multiplayer plays
+`win       ` number of victories
+`loss      ` number of defeats
+`-         ` number of incomplete plays
+`num       ` average number of copies of the card included in the deck
+`deck      ` % of cards in the player deck at the end of the play
+`hand      ` % of cards in the player hand at the end of the play
+`play      ` % of cards in play at the end of the play
+`other     ` % of cards in all other areas at the end of the play (discard pile, victory display, etc.)
+"""
+HELP_STAT_ALL_PLAYS = """
+**!stat all plays <quest name>** - display all DragnCards plays for the quest
+**!stat all plays <quest name> <date in YYYY-MM-DD format>** - display all DragnCards plays for the quest starting from the specified date
+**!stat all plays help** - display this help message
+
+**Columns:**
+`date      ` date of the plays
+`replay_id ` replay ID.  You may replay any play by using a URL like `https://www.dragncards.com/newroom/replay/8da313ce-2f3a-4671-bd97-5ab379d39133`
+`P         ` number of players
+`R         ` number of rounds
+`res       ` outcome of the play.  "win" means victory, "loss" means defeat, and "-" means an incomplete play.
+`threat    ` threat of each player at the end of the play
+`heroes    ` starting heroes of each player
+"""
+HELP_STAT_PLAYS = """
+**!stat plays <quest name>** - display aggregated DragnCards plays statistics for the quest
+**!stat plays <quest name> <date in YYYY-MM-DD format>** - display aggregated DragnCards plays statistics for the quest starting from the specified date
+**!stat plays help** - display this help message
+
+**Columns:**
+`players   ` number of players. "[any]" means aggregated statistics for any number of players.
+`result    ` outcome of the play.  "win" means victory, "loss" means defeat, "-" means an incomplete play, and "[any]" means aggregated statistics for all outcomes.
+`plays     ` total number of plays
+`rnd_min   ` minimum number of rounds
+`rnd_max   ` maximum number of rounds
+`rnd_avg   ` average number of rounds
+`thr_min   ` minimum player's threat at the end of the play
+`thr_max   ` maximum player's threat at the end of the play
+`thr_avg   ` average player's threat at the end of the play
+"""
 
 CARD_DATA = {}
 CONF = {}
@@ -2854,6 +2906,8 @@ Targets removed.
                 return
 
             await self._send_channel(message.channel, res)
+        elif command.lower() == 'player cards help':
+            await self._send_channel(message.channel, HELP_STAT_PLAYER_CARDS)
         elif command.lower().startswith('player cards '):
             await message.channel.send('Please wait...')
             try:
@@ -2879,10 +2933,12 @@ Targets removed.
                 return
 
             await self._send_channel(message.channel, res)
-        elif command.lower().startswith('plays all '):
+        elif command.lower() == 'all plays help':
+            await self._send_channel(message.channel, HELP_STAT_ALL_PLAYS)
+        elif command.lower().startswith('all plays '):
             await message.channel.send('Please wait...')
             try:
-                quest = re.sub(r'^plays all ', '', command,
+                quest = re.sub(r'^all plays ', '', command,
                                flags=re.IGNORECASE)
                 start_date = ''
                 parts = quest.split(' ')
@@ -2904,10 +2960,12 @@ Targets removed.
                 return
 
             await self._send_channel(message.channel, res)
-        elif command.lower().startswith('plays stat '):
+        elif command.lower() == 'plays help':
+            await self._send_channel(message.channel, HELP_STAT_PLAYS)
+        elif command.lower().startswith('plays '):
             await message.channel.send('Please wait...')
             try:
-                quest = re.sub(r'^plays stat ', '', command,
+                quest = re.sub(r'^plays ', '', command,
                                flags=re.IGNORECASE)
                 start_date = ''
                 parts = quest.split(' ')
