@@ -56,6 +56,7 @@ URL_TIMEOUT = 60
 URL_RETRIES = 1
 URL_SLEEP = 1
 NEXT_LIMIT = 10
+MAX_NOT_FOUND_ERRORS = 5
 
 
 class ConfigurationError(Exception):
@@ -760,6 +761,7 @@ def monitor():  # pylint: disable=R0912,R0914,R0915
         logging.info('The site is undergoing system upgrade')
         return
 
+    not_found_errors = 0
     for deck_name in data.get('decks', {}):
         content_id = data['decks'][deck_name]['content_id']
         deck_id = data['decks'][deck_name]['deck_id']
@@ -768,6 +770,13 @@ def monitor():  # pylint: disable=R0912,R0914,R0915
         regex = DECK_ID_REGEX.format(deck_id)
         match = re.search(regex, content)
         if not match:
+            not_found_errors += 1
+            if not_found_errors >= MAX_NOT_FOUND_ERRORS:
+                message = 'Too many not found errors, exiting'
+                logging.error(message)
+                create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+                break
+
             message = 'Deck {} not found, content length: {}'.format(
                 deck_name, len(content))
             logging.error(message)
@@ -796,6 +805,13 @@ def monitor():  # pylint: disable=R0912,R0914,R0915
                     create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
                     continue
         else:
+            not_found_errors += 1
+            if not_found_errors >= MAX_NOT_FOUND_ERRORS:
+                message = 'Too many not found errors, exiting'
+                logging.error(message)
+                create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+                break
+
             message = ('Deck {} Backup not found, content length: {} '
                        '(continuing the checks)'.format(deck_name,
                                                         len(content)))
