@@ -616,8 +616,9 @@ Staging Setup: The Carrock
 
 **Standalone Scripts**
 
+- `copy_output.py`: Script to copy all set outputs to a destination folder.
+- `make_unique_png.py`: Script to make unique PNG files for MakePlayingCards.
 - `stat.py`: Collect various data from Hall of Beorn and RingsDB and put outputs into `Output/Scripts` folder.
-- `make_unique_png.py`: Script to make unique PNG files for MakePlayingCards (pass the path to input folder).
 
 **GIMP Plugins**
 
