@@ -402,6 +402,10 @@ nameRegion['Ship Objective'] = '75,48,263,29';
 nameRegion['Treachery'] = '55,108,26,164';
 nameRegion['Treasure'] = '132,45,183,25';
 
+var nameBackRegion = {};
+nameBackRegion['Contract'] = '84,245,245,29';
+nameBackRegion['Quest'] = '144,44,368,29';
+
 var nameUniqueRegion = {};
 nameUniqueRegion['Ally'] = '100,326,213,25';
 nameUniqueRegion['Attachment'] = '132,36,183,25';
@@ -1668,17 +1672,6 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 				}
 
-				if (cardName.match(/[\u00c0\u00c1\u00c2\u00c3\u00c4\u00c8\u00c9\u00ca\u00cb\u00cc\u00cd\u00ce\u00cf\u00d1\u00d2\u00d3\u00d4\u00d5\u00d6\u00d9\u00da\u00db\u00dc\u0106\u0108\u0143\u015a\u0179\u017b]/)) {
-					let parts = s.get('Name-region').split(',');
-					if (['Event', 'Treachery'].indexOf(cardType) > -1) {
-						parts[0] = (parseInt(parts[0]) + 1).toString();
-					}
-					else {
-						parts[1] = (parseInt(parts[1]) + 2).toString();
-					}
-					s.set('Name-region', parts.join(','));
-				}
-
 				if ((cardType == 'Hero Promo') && (translate[cardType][lang].length > 4)) {
 					s.set('Type-region', '279,448,39,15');
 				}
@@ -1708,6 +1701,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					['Progress-region', progressRegion],
 					['Adventure-region', adventureRegion],
 					['Cycle-region', cycleRegion],
+					['NameBack-region', nameBackRegion],
 					['ResourceCost-region', resourceCostRegion],
 					['Difficulty-region', difficultyRegion],
 					['EncounterSet-portrait-clip-region', encounterPortraitRegion],
@@ -1737,6 +1731,23 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					if (cardType in relations[k][1]) {
 						s.set(relations[k][0], relations[k][1][cardType]);
 					}
+				}
+
+				if ((s.get('Name-region') + '') && cardName.match(/[\u00c0\u00c1\u00c2\u00c3\u00c4\u00c8\u00c9\u00ca\u00cb\u00cc\u00cd\u00ce\u00cf\u00d1\u00d2\u00d3\u00d4\u00d5\u00d6\u00d9\u00da\u00db\u00dc\u0106\u0108\u0143\u015a\u0179\u017b]/)) {
+					let parts = s.get('Name-region').split(',');
+					if (['Event', 'Treachery'].indexOf(cardType) > -1) {
+						parts[0] = (parseInt(parts[0]) + 1).toString();
+					}
+					else {
+						parts[1] = (parseInt(parts[1]) + 2).toString();
+					}
+					s.set('Name-region', parts.join(','));
+				}
+
+				if ((s.get('NameBack-region') + '') && (s.get('NameBack') + '').match(/[\u00c0\u00c1\u00c2\u00c3\u00c4\u00c8\u00c9\u00ca\u00cb\u00cc\u00cd\u00ce\u00cf\u00d1\u00d2\u00d3\u00d4\u00d5\u00d6\u00d9\u00da\u00db\u00dc\u0106\u0108\u0143\u015a\u0179\u017b]/)) {
+					let parts = s.get('NameBack-region').split(',');
+					parts[1] = (parseInt(parts[1]) + 2).toString();
+					s.set('NameBack-region', parts.join(','));
 				}
 
 				if ((cardType in sphereOptionBodyShape) && s.get('OptionRight') && (s.get('OptionRight') + '').length) {
