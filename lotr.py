@@ -334,8 +334,8 @@ CARD_TYPES_ONE_COPY = {'Campaign', 'Contract', 'Encounter Side Quest',
                        'Rules', 'Treasure'}
 CARD_TYPES_THREE_COPIES = {'Ally', 'Attachment', 'Event', 'Player Objective',
                            'Player Side Quest'}
-CARD_TYPES_BOON = {'Attachment', 'Event', 'Objective Ally'}
-CARD_TYPES_BURDEN = {'Enemy', 'Objective', 'Treachery'}
+CARD_TYPES_BOON = {'Ally', 'Attachment', 'Event', 'Objective Ally'}
+CARD_TYPES_BURDEN = {'Encounter Side Quest', 'Enemy', 'Objective', 'Treachery'}
 CARD_TYPES_NIGHTMARE = {'Encounter Side Quest', 'Enemy', 'Location',
                         'Objective', 'Ship Enemy', 'Treachery', 'Quest'}
 CARD_TYPES_NOSTAT = {'Enemy'}
@@ -2050,8 +2050,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif ((card_type in CARD_TYPES_ONE_COPY or card_sphere == 'Boon') and
-              card_quantity != 1 and
+        elif (card_type in CARD_TYPES_ONE_COPY and card_quantity != 1 and
               not (card_flags and
                    'AdditionalCopies' in extract_flags(card_flags))):
             message = ('Incorrect card quantity for row #{}{}'.format(
@@ -2062,7 +2061,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_type in CARD_TYPES_THREE_COPIES and
-              card_quantity not in (1, 3) and
+              card_sphere != 'Boon' and card_quantity not in (1, 3) and
               not (card_flags and
                    'AdditionalCopies' in extract_flags(card_flags))):
             message = ('Incorrect card quantity for row #{}{}'.format(

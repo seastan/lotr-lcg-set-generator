@@ -425,6 +425,7 @@ nameUniqueRegion['Treachery'] = '55,108,26,164';
 nameUniqueRegion['Treasure'] = '132,43,183,25';
 
 var subtypeRegion = {};
+subtypeRegion['Ally'] = '146,301,124,20';
 subtypeRegion['Attachment'] = '146,301,124,20';
 subtypeRegion['Enemy'] = '146,302,124,20';
 subtypeRegion['Event'] = '146,301,124,20';
