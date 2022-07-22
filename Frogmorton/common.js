@@ -1649,7 +1649,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				}
 				else {
 					s.set('TraitOut', 'true');
-					if (lang in bodyRegionHeroPromo) {
+					if ((cardType == 'Hero Promo') && (lang in bodyRegionHeroPromo)) {
 						s.set('TraitOut-Body-region', bodyRegionHeroPromo[lang]);
 					}
 					else if (cardType in bodyRegion) {
