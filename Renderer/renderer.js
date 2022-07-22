@@ -869,10 +869,6 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         data['EncounterSetBack-portrait-clip-region'] = data['EncounterSet-portrait-clip-region'];
     }
 
-    if (data['Name-region'] && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
-        data['NameBack-region'] = data['Name-region'];
-    }
-
     if (data['Artist-region'] && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
         data['ArtistBack-region'] = data['Artist-region'];
     }
