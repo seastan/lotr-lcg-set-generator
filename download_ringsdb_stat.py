@@ -20,7 +20,7 @@ MAILS_PATH = 'mails'
 OUTPUT_PATH = 'ringsdb_stat.json'
 
 RINGSDB_COOKIES_PATH = 'ringsdb_prod_cookies.json'
-RINGSDB_URL = 'https://ringsdb.com/admin/stat'
+RINGSDB_URL = 'https://ringsdb.com/admin/stat_packs'
 
 
 def init_logging():
