@@ -189,7 +189,9 @@ function updateRegion(key, value) {
         regions[i] = Math.round((regions[i] * 2 - bleed) / 1.75);
     }
 
-    if (key.replace(/-region$/, '') in containerFontSize) {
+    var sizeKey = key.replace(/-region$/, '');
+    if ((sizeKey in containerFontSize) &&
+        (['Artist', 'CollectionInfo', 'CollectionNumber', 'Copyright'].indexOf(sizeKey) == -1)) {
         regions[0] -= 1;
         regions[2] += 2;
         regions[3] += 1;
@@ -601,7 +603,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 data['ResourceCost-region'][2] + 'px">' + '<span style="vertical-align: middle; display: inline-block; padding-right: 2px">' + data.ResourceCost + '</span></div>';
         },
         'Side': function(data) {
-            if (data.SideA + '' == '') {
+            if ((data.SideA + '' == '') || (data.Template == 'Neutral')) {
                 return '';
             }
 
