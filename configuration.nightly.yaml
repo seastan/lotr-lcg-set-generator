@@ -69,16 +69,14 @@ parallelism: default
 set_ids:
   - all  # all non-scratch sets
   - all_scratch  # all scratch sets
-#  - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f
 
 # List of set IDs to ignore
 ignore_set_ids:
-  - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f
+#  - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f
 
 # List of set IDs to copy to OCTGN image destination
 set_ids_octgn_image_destination:
 #  - all  # all non-scratch sets
-#  - 8a3273ca-1ccd-4e07-913b-766fcc49fe6f
 
 # Creating set.xml files for OCTGN (true or false)
 octgn_set_xml: false
