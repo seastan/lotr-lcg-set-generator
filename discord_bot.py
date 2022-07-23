@@ -168,16 +168,24 @@ List of **!stat** commands:
 **!stat assistants** - display the list of assistants (all Discord users except for those who have a role)
 **!stat channels** - display the number of Discord channels and free channel slots
 **!stat dragncards build** - display information about the latest DragnCards build
+**!stat quest <quest name or set name or set code>** - display the quest statistics (for example: `!stat quest The Battle for the Beacon` or `!stat quest Children of Eorl` or `!stat quest TAP`)
+
 **!stat player cards <set name or set code>** - display DragnCards player cards statistics for the set
 **!stat player cards <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date
 **!stat player cards help** - display additional help about DragnCards player cards statistics
+
 **!stat all plays <quest name>** - display all DragnCards plays for the quest
 **!stat all plays <quest name> <date in YYYY-MM-DD format>** - display all DragnCards plays for the quest starting from the specified date
 **!stat all plays help** - display additional help about all DragnCards plays for the quest
+
 **!stat plays <quest name>** - display aggregated DragnCards plays statistics for the quest
 **!stat plays <quest name> <date in YYYY-MM-DD format>** - display aggregated DragnCards plays statistics for the quest starting from the specified date
 **!stat plays help** - display additional help about aggregated DragnCards plays statistics for the quest
-**!stat quest <quest name or set name or set code>** - display the quest statistics (for example: `!stat quest The Battle for the Beacon` or `!stat quest Children of Eorl` or `!stat quest TAP`)
+
+**!stat quests** - display aggregated DragnCards statistics for all released ALeP quests
+**!stat quests <date in YYYY-MM-DD format>** - display aggregated DragnCards statistics for all released ALeP quests starting from the specified date
+**!stat quests help** - display additional help about aggregated DragnCards statistics for all released ALeP quests
+
 **!stat help** - display this help message
 """,
     'art': """
@@ -253,6 +261,24 @@ HELP_STAT_PLAYS = """
 `thr_min   ` minimum player's threat at the end of the play
 `thr_max   ` maximum player's threat at the end of the play
 `thr_avg   ` average player's threat at the end of the play
+"""
+HELP_STAT_QUESTS = """
+**!stat quests** - display aggregated DragnCards statistics for all released ALeP quests
+**!stat quests <date in YYYY-MM-DD format>** - display aggregated DragnCards statistics for all released ALeP quests starting from the specified date
+**!stat quests help** - display this help message
+
+**Columns:**
+`quest     ` quest name
+`plays     ` total number of plays
+`solo      ` number of solo plays
+`mp        ` number of multiplayer plays
+`win       ` number of victories
+`loss      ` number of defeats
+`-         ` number of incomplete plays
+`rnd W     ` average number of rounds (victories)
+`rnd L     ` average number of rounds (defeats)
+`thr W     ` average player's threat at the end of the play (victories)
+`thr L     ` average player's threat at the end of the play (defeats)
 """
 
 CARD_DATA = {}
@@ -1322,7 +1348,7 @@ async def get_attachment_content(message):
     return content
 
 
-async def get_player_cards_stat(set_name, start_date):
+async def get_dragncards_player_cards_stat(set_name, start_date):
     """ Get DragnCards player cards statistics for the set.
     """
     data = await read_card_data()
@@ -1352,7 +1378,7 @@ async def get_player_cards_stat(set_name, start_date):
         end_date = ''
 
     cards = {c[lotr.CARD_ID]:c[lotr.CARD_NAME] for c in matches}
-    card_ids = ','.join(list(cards.keys()))
+    card_ids = ';'.join(list(cards.keys()))
     res = lotr.get_dragncards_player_cards_stat(
         CONF, card_ids, start_date, end_date)
     lines = res.split('\n')
@@ -1371,7 +1397,7 @@ async def get_player_cards_stat(set_name, start_date):
     return res
 
 
-async def get_all_plays(quest, start_date):
+async def get_dragncards_all_plays(quest, start_date):
     """ Get information about all DragnCards plays for the quest.
     """
     data = await read_card_data()
@@ -1395,7 +1421,7 @@ async def get_all_plays(quest, start_date):
     return res
 
 
-async def get_plays_stat(quest, start_date):
+async def get_dragncards_plays_stat(quest, start_date):
     """ Get aggregated DragnCards plays statistics for the quest.
     """
     data = await read_card_data()
@@ -1416,6 +1442,33 @@ async def get_plays_stat(quest, start_date):
 
     res = lotr.get_dragncards_plays_stat(CONF, quest, start_date, end_date)
     res = '```\n{}```'.format(res.expandtabs())
+    return res
+
+
+async def get_dragncards_quests_stat(start_date):
+    """ Get aggregated DragnCards statistics for all released ALeP quests.
+    """
+    with open(RINGSDB_STAT_PATH, 'r', encoding='utf-8') as obj:
+        ringsdb_data = json.load(obj)
+
+    packs = {}
+    for pack in ringsdb_data['packs']:
+        if pack['name'].startswith('ALeP - '):
+            packs[pack['name']] = pack['date_release']
+
+    quests = []
+    for pack in ringsdb_data['quests']:
+        if pack['name'] in packs:
+            pack_start_date = max(packs[pack['name']], start_date)
+            for quest in pack['quests']:
+                quests.append('{}|{}'.format(re.sub(r'^ALeP - ', '', quest),
+                                             pack_start_date))
+
+    if not quests:
+        return 'no quests found'
+
+    res = lotr.get_dragncards_quests_stat(CONF, ';'.join(quests))
+    res = '```\n{}```'.format(res.expandtabs(6))
     return res
 
 
@@ -2925,7 +2978,8 @@ Targets removed.
                         start_date = parts[-1]
                         set_name = ' '.join(parts[:-1])
 
-                res = await get_player_cards_stat(set_name, start_date)
+                res = await get_dragncards_player_cards_stat(set_name,
+                                                             start_date)
             except Exception as exc:
                 logging.exception(str(exc))
                 await message.channel.send(
@@ -2952,7 +3006,7 @@ Targets removed.
                         start_date = parts[-1]
                         quest = ' '.join(parts[:-1])
 
-                res = await get_all_plays(quest, start_date)
+                res = await get_dragncards_all_plays(quest, start_date)
             except Exception as exc:
                 logging.exception(str(exc))
                 await message.channel.send(
@@ -2979,7 +3033,35 @@ Targets removed.
                         start_date = parts[-1]
                         quest = ' '.join(parts[:-1])
 
-                res = await get_plays_stat(quest, start_date)
+                res = await get_dragncards_plays_stat(quest, start_date)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await self._send_channel(message.channel, res)
+        elif command.lower() == 'quests help':
+            await self._send_channel(message.channel, HELP_STAT_QUESTS)
+        elif (command.lower() == 'quests' or
+              command.lower().startswith('quests ')):
+            await message.channel.send('Please wait...')
+            try:
+                start_date = re.sub(r'^quests ?', '', command,
+                                    flags=re.IGNORECASE)
+                if start_date:
+                    if not re.match(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}$',
+                                    start_date):
+                        res = 'incorrect date format'
+                    else:
+                        try:
+                            datetime.strptime(start_date, '%Y-%m-%d')
+                        except ValueError:
+                            res = 'incorrect date format'
+                        else:
+                            res = await get_dragncards_quests_stat(start_date)
+                else:
+                    res = await get_dragncards_quests_stat('')
             except Exception as exc:
                 logging.exception(str(exc))
                 await message.channel.send(

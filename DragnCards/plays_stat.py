@@ -46,7 +46,6 @@ WHERE encounter ILIKE %s
   AND inserted_at < %s
   AND rounds > 0
   AND (rounds > 1 OR outcome IN ('victory', 'defeat', 'incomplete'))
-ORDER BY inserted_at
     """
 
     conn = psycopg2.connect(user=DRAGNCARDS_USER,

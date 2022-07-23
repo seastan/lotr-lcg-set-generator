@@ -364,6 +364,8 @@ DRAGNCARDS_ALL_PLAYS_COMMAND = \
     '/home/webhost/python/AR/all_plays.sh "{}" "{}" "{}"'
 DRAGNCARDS_PLAYS_STAT_COMMAND = \
     '/home/webhost/python/AR/plays_stat.sh "{}" "{}" "{}"'
+DRAGNCARDS_QUESTS_STAT_COMMAND = \
+    '/home/webhost/python/AR/quests_stat.sh "{}"'
 DRAGNCARDS_BUILD_STAT_COMMAND = \
     '/var/www/dragncards.com/dragncards/frontend/buildStat.sh'
 DRAGNCARDS_BUILD_TRIGGER_COMMAND = \
@@ -10652,9 +10654,26 @@ def get_dragncards_all_plays(conf, quest, start_date, end_date):
 
 
 def get_dragncards_plays_stat(conf, quest, start_date, end_date):
-    """ Get aggregated plays statistics for the quest.
+    """ Get aggregated DragnCards plays statistics for the quest.
     """
     command = DRAGNCARDS_PLAYS_STAT_COMMAND.format(quest, start_date, end_date)
+    logging.info('Running remote command: %s', command)
+    client = _get_ssh_client(conf)
+    try:
+        _, res, _ = client.exec_command(command, timeout=120)
+        res = res.read().decode('utf-8').strip()
+        return res
+    finally:
+        try:
+            client.close()
+        except Exception:
+            pass
+
+
+def get_dragncards_quests_stat(conf, quests):
+    """ Get aggregated DragnCards statistics for all released ALeP quests.
+    """
+    command = DRAGNCARDS_QUESTS_STAT_COMMAND.format(quests)
     logging.info('Running remote command: %s', command)
     client = _get_ssh_client(conf)
     try:

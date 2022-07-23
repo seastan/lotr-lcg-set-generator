@@ -121,7 +121,7 @@ def main():
         return
 
     card_ids_raw = sys.argv[1]
-    card_ids = card_ids_raw.split(',')
+    card_ids = card_ids_raw.split(';')
 
     if (len(sys.argv) > 2 and sys.argv[2] and
             sys.argv[2] > DEFAULT_START_DATE):
