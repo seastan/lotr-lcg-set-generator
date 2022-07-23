@@ -72,11 +72,12 @@ function mainSE(progress, target) {
 	while (xmlFiles.hasNext()) {
 		var filename = xmlFiles.next() + '';
 		var fXmlFile = new File(getProjectMember('XML/').file, filename + '.xml');
-		// Console.err.println('\nReading ' + fXmlFile);
+		Console.err.println('\nReading ' + fXmlFile);
 		var setID = filename.split('.')[0];
 		var lang = filename.split('.')[1];
 		var doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(fXmlFile);
 		run('se', doc, setID, lang, icons, getCardObjectsSE, saveResultSE, progress);
+		Console.err.println('\n' + fXmlFile + ' finished');
 	}
 	var finishedFile = new File('.', 'makeCards_FINISHED');
 	finishedFile.createNewFile();
