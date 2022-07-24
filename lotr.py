@@ -301,11 +301,14 @@ CARD_TYPES_FLAGS_BACK = {'NoTraits':
                           'Treachery'}}
 CARD_TYPES_NO_FLAGS = {'Asterisk': {'Full Art Landscape', 'Full Art Portrait',
                                     'Presentation', 'Rules'},
+                       'IgnoreRules': {'Full Art Landscape',
+                                       'Full Art Portrait'},
                        'NoArtist': {'Presentation', 'Rules'},
                        'NoCopyright': {'Presentation', 'Rules'}}
 CARD_TYPES_NO_FLAGS_BACK = {
     'Asterisk': {'Campaign', 'Full Art Landscape', 'Full Art Portrait',
                  'Nightmare', 'Presentation', 'Rules'},
+                 'IgnoreRules': {'Full Art Landscape', 'Full Art Portrait'},
     'NoArtist': {'Campaign', 'Nightmare', 'Presentation', 'Rules'},
     'NoCopyright': {'Campaign', 'Nightmare', 'Presentation', 'Rules'}}
 CARD_SPHERES_NO_FLAGS = {'BlueRing': {'Cave', 'Region'},
@@ -342,8 +345,9 @@ CARD_TYPES_NOSTAT = {'Enemy'}
 CARD_TYPES_NO_DISCORD_CHANNEL = {'Full Art Landscape', 'Full Art Portrait',
                                  'Rules', 'Presentation'}
 
-FLAGS = {'AdditionalCopies', 'Asterisk', 'NoArtist', 'NoCopyright', 'NoTraits',
-         'Promo', 'BlueRing', 'GreenRing', 'RedRing'}
+FLAGS = {'AdditionalCopies', 'Asterisk', 'IgnoreRules', 'NoArtist',
+         'NoCopyright', 'NoTraits', 'Promo', 'BlueRing', 'GreenRing',
+         'RedRing'}
 RING_FLAGS = {'BlueRing', 'GreenRing', 'RedRing'}
 SPHERES = set()
 SPHERES_CAMPAIGN = {'Setup'}
@@ -1864,6 +1868,32 @@ def _verify_period(value):
     return res
 
 
+def get_rules_errors(text):
+    """ Detect text rules errors.
+    """
+    errors = []
+    paragraphs = [p.strip() for p in text.split('\n') if p.strip()]
+    for paragraph in paragraphs:
+        if (re.search(r'limit once per', paragraph, flags=re.IGNORECASE) and
+                not re.search(r'\(Limit once per .+\.\)”?$', paragraph)):
+            errors.append('"(Limit once per ___.)"')
+
+        if (re.search(r'limit (?:twice|two times|2 times) per', paragraph,
+                      flags=re.IGNORECASE) and
+                not re.search(r'\(Limit twice per .+\.\)”?$', paragraph)):
+            errors.append('"(Limit twice per ___.)"')
+
+        if (re.search(r'limit (?:thrice|three times|3 times) per', paragraph,
+                      flags=re.IGNORECASE) and
+                not re.search(r'\(Limit 3 times per .+\.\)”?$', paragraph)):
+            errors.append('"(Limit 3 times per ___.)"')
+
+        if re.search(r'to travel here', paragraph, flags=re.IGNORECASE):
+            errors.append('"to travel here"')
+
+    return errors
+
+
 def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
     """ Perform a sanity check of the spreadsheet and return "healthy" sets.
     """
@@ -3216,6 +3246,19 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif (card_text is not None and not
+                  (card_flags and 'IgnoreRules' in extract_flags(card_flags))):
+            rules_errors = get_rules_errors(card_text)
+            if rules_errors:
+                message = (
+                    'Rules error(s) in text for row #{}{}: {} (use '
+                    'IgnoreRules flag to ignore)'.format(
+                        i, scratch, ', '.join(rules_errors)))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
 
         if card_text_back is not None and card_type_back is None:
             message = 'Redundant text back for row #{}{}'.format(i, scratch)
@@ -3260,6 +3303,20 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif (card_text_back is not None and not
+                  (card_flags_back and
+                   'IgnoreRules' in extract_flags(card_flags_back))):
+            rules_errors = get_rules_errors(card_text_back)
+            if rules_errors:
+                message = (
+                    'Rules error(s) in text back for row #{}{}: {} (use '
+                    'IgnoreRules flag to ignore)'.format(
+                        i, scratch, ', '.join(rules_errors)))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
 
         if (card_text is not None and '[split]' in card_text and
                 card_sphere != 'Cave'):
@@ -3300,6 +3357,19 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif (card_shadow is not None and not
+                  (card_flags and 'IgnoreRules' in extract_flags(card_flags))):
+            rules_errors = get_rules_errors(card_shadow)
+            if rules_errors:
+                message = (
+                    'Rules error(s) in shadow for row #{}{}: {} (use '
+                    'IgnoreRules flag to ignore)'.format(
+                        i, scratch, ', '.join(rules_errors)))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
 
         if card_shadow_back is not None and card_type_back is None:
             message = 'Redundant shadow back for row #{}{}'.format(i, scratch)
@@ -3325,6 +3395,20 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif (card_shadow_back is not None and not
+                  (card_flags_back and
+                   'IgnoreRules' in extract_flags(card_flags_back))):
+            rules_errors = get_rules_errors(card_shadow_back)
+            if rules_errors:
+                message = (
+                    'Rules error(s) in shadow back for row #{}{}: {} (use '
+                    'IgnoreRules flag to ignore)'.format(
+                        i, scratch, ', '.join(rules_errors)))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
 
         if (card_flavour is not None and
                 (card_type in CARD_TYPES_NO_FLAVOUR or

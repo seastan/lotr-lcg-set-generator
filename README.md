@@ -478,6 +478,7 @@ List of available sphere values:
 
 - `AdditionalCopies`
 - `Asterisk`
+- `IgnoreRules`
 - `NoArtist`
 - `NoCopyright`
 - `NoTraits`
