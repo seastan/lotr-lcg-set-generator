@@ -1888,8 +1888,25 @@ def get_rules_errors(text):
                 not re.search(r'\(Limit 3 times per .+\.\)”?$', paragraph)):
             errors.append('"(Limit 3 times per ___.)"')
 
-        if re.search(r'to travel here', paragraph, flags=re.IGNORECASE):
+        if ' to travel here' in paragraph:
             errors.append('"to travel here"')
+
+        if re.search(r' he (?:or she|commit|controls|deals|(?:just )?discard|'
+                     'is eliminated|must|owns|puts|raises)', paragraph):
+            errors.append('"he"')
+
+        if re.search(r' his (?:or her|(?:eligible )?characters|choice|control|'
+                     'deck|discard pile|hand|hero|out-of-play deck|own|'
+                     'play area|threat)', paragraph):
+            errors.append('"his"')
+
+        if (' him or her' in paragraph or
+                'engaged with him' in paragraph or
+                'in front of him' in paragraph):
+            errors.append('"him"')
+
+        if 'out of play deck' in paragraph:
+            errors.append('"out-of-play deck"')
 
     return errors
 
@@ -3246,8 +3263,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_text is not None and not
-                  (card_flags and 'IgnoreRules' in extract_flags(card_flags))):
+        elif (card_text is not None and
+              card_type not in ('Presentation', 'Rules') and
+              not (card_flags and 'IgnoreRules' in extract_flags(card_flags))):
             rules_errors = get_rules_errors(card_text)
             if rules_errors:
                 message = (
@@ -3303,8 +3321,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_text_back is not None and not
-                  (card_flags_back and
+        elif (card_text_back is not None and
+              card_type_back not in ('Presentation', 'Rules') and
+              not (card_flags_back and
                    'IgnoreRules' in extract_flags(card_flags_back))):
             rules_errors = get_rules_errors(card_text_back)
             if rules_errors:
@@ -3357,8 +3376,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_shadow is not None and not
-                  (card_flags and 'IgnoreRules' in extract_flags(card_flags))):
+        elif (card_shadow is not None and
+              not (card_flags and 'IgnoreRules' in extract_flags(card_flags))):
             rules_errors = get_rules_errors(card_shadow)
             if rules_errors:
                 message = (
@@ -3395,8 +3414,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_shadow_back is not None and not
-                  (card_flags_back and
+        elif (card_shadow_back is not None and
+              not (card_flags_back and
                    'IgnoreRules' in extract_flags(card_flags_back))):
             rules_errors = get_rules_errors(card_shadow_back)
             if rules_errors:
