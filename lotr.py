@@ -1905,9 +1905,6 @@ def get_rules_errors(text):
                 'in front of him' in paragraph):
             errors.append('"him"')
 
-        if 'out of play deck' in paragraph:
-            errors.append('"out-of-play deck"')
-
     return errors
 
 
