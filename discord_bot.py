@@ -2895,6 +2895,9 @@ Targets removed.
         assistants = [u.replace('[', '[[').replace(']', ']]')
                       .replace('[[', '[lsb]').replace(']]', '[rsb]')
                       for u in assistants]
+        assistants = [
+            u.replace('(he/him)', '').replace('(she/her)', '').strip()
+            for u in assistants]
         assistants = sorted(list(set(assistants)), key=str.casefold)
         assistants = ', '.join(assistants)
         return assistants
