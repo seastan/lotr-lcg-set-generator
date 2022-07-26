@@ -8943,7 +8943,7 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
 
     xml_path = os.path.join(SET_EONS_PATH, '{}.English.xml'.format(set_id))
     if not os.path.exists(xml_path):
-        logging.error('[%s] No XML found', set_name)
+        logging.info('[%s] No XML found for the set', set_name)
         logging.info('[%s] ...Generating artwork and artist names for '
                      'DragnCards proxy images (%ss)', set_name,
                      round(time.time() - timestamp, 3))
