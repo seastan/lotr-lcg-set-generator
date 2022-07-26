@@ -1857,6 +1857,7 @@ def _verify_period(value):
     res = True
     paragraphs = value.split('\n\n')
     for paragraph in paragraphs:
+        paragraph = paragraph.replace('[/size]', '')
         if not (re.search(
                     r'\.\)?”?(?:\[\/b\]|\[\/i\]|\[\/bi\])?$', paragraph) or
                 re.search(
@@ -2369,7 +2370,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif card_traits is not None and not card_traits.endswith('.'):
+        elif (card_traits is not None and
+              not card_traits.endswith('.') and
+              not card_traits.endswith('.[/size]')):
             message = 'Missing period in traits for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -2378,7 +2381,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_traits is not None and
-              card_traits.replace('.', '').replace(' ', '') == ''):
+              card_traits.replace('.', '').replace(' ', '')
+              .replace('[size]', '').replace('[/size]', '') == ''):
             message = 'Incorrect traits for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -2423,7 +2427,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_traits_back is not None and
-              not card_traits_back.endswith('.')):
+              not card_traits_back.endswith('.') and
+              not card_traits_back.endswith('.[/size]')):
             message = 'Missing period in traits back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -2432,7 +2437,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_traits_back is not None and
-              card_traits_back.replace('.', '').replace(' ', '') == ''):
+              card_traits_back.replace('.', '').replace(' ', '')
+              .replace('[size]', '').replace('[/size]', '') == ''):
             message = 'Incorrect traits back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -2448,9 +2454,11 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_keywords is not None and not
-              (card_keywords.endswith('.') or
-               card_keywords.endswith('.[inline]'))):
+        elif (card_keywords is not None and
+              not card_keywords.endswith('.') and
+              not card_keywords.endswith('.[/size]') and
+              not card_keywords.endswith('.[inline]') and
+              not card_keywords.endswith('.[/size][inline]')):
             message = 'Missing period in keywords for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -2459,8 +2467,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_keywords is not None and
-              card_keywords.replace('[inline]', '').replace('.', '').replace(
-                  ' ', '') == ''):
+              card_keywords.replace('[inline]', '').replace('.', '')
+              .replace(' ', '').replace('[size]', '')
+              .replace('[/size]', '') == ''):
             message = 'Incorrect keywords for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -2486,9 +2495,11 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_keywords_back is not None and not
-              (card_keywords_back.endswith('.') or
-               card_keywords_back.endswith('.[inline]'))):
+        elif (card_keywords_back is not None and
+              not card_keywords_back.endswith('.') and
+              not card_keywords_back.endswith('.[/size]') and
+              not card_keywords_back.endswith('.[inline]') and
+              not card_keywords_back.endswith('.[/size][inline]')):
             message = 'Missing period in keywords back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -2497,8 +2508,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_keywords_back is not None and
-              card_keywords_back.replace('[inline]', '').replace(
-                  '.', '').replace(' ', '') == ''):
+              card_keywords_back.replace('[inline]', '').replace('.', '')
+              .replace(' ', '').replace('[size]', '')
+              .replace('[/size]', '') == ''):
             message = 'Incorrect keywords back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
