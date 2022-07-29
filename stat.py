@@ -105,14 +105,6 @@ def get_hall_data():
     return data
 
 
-def get_ringsdb_data():
-    """ Get RingsDB data.
-    """
-    data = get_content(RINGSDB_URL)
-    data = json.loads(data)
-    return data
-
-
 def filter_hall_data(data):
     """ Filter Hall of Beorn data.
     """
@@ -599,6 +591,14 @@ def create_ringsdb_csv(pack_name, pack_code):
             writer.writerow(csv_row)
 
     print('Done')
+
+
+def get_ringsdb_data():
+    """ Get RingsDB data.
+    """
+    data = get_content(RINGSDB_URL)
+    data = json.loads(data)
+    return data
 
 
 def create_dragncards_json(pack_name, pack_id):  # pylint: disable=R0912,R0914
