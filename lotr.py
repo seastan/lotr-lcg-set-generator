@@ -1512,7 +1512,9 @@ def _clean_value(value):  # pylint: disable=R0915
     value = value.replace('...', '…')
     value = value.replace('---', '—')
     value = value.replace('--', '–')
+    value = value.replace('−', '-')
     value = re.sub(r' -(?=[0-9])', ' –', value)
+    value = re.sub(r' —(?=[0-9])', ' –', value)
     value = value.replace('[hyphen]', '-')
     value = value.replace("'", '’')
     value = value.replace('“', '"')
@@ -1869,7 +1871,7 @@ def _verify_period(value):
     return res
 
 
-def get_rules_errors(text):
+def get_rules_errors(text):  # pylint: disable=R0912
     """ Detect text rules errors.
     """
     errors = []
@@ -1905,6 +1907,22 @@ def get_rules_errors(text):
                 'engaged with him' in paragraph or
                 'in front of him' in paragraph):
             errors.append('"him"')
+
+        if re.search(r'encounter deck[^.]+from the top of the encounter deck',
+                     paragraph):
+            errors.append('"from the top of the encounter deck"')
+
+        if re.search(r' gets [^+–]', paragraph):
+            errors.append('"gets a stat modification"')
+
+        if re.search(r' gains [+–]', paragraph):
+            errors.append('"gains a non-stat modification"')
+
+        if re.search(r'discards? . cards? at random', paragraph):
+            errors.append('"Discard _ random card(s)"')
+
+        if re.search(r'\(Counts as a (?:\[bi\]|{)?Condition', paragraph):
+            errors.append('"Condition attachments"')
 
         if 'cancelled' in paragraph:
             errors.append('"canceled"')
