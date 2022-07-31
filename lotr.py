@@ -311,16 +311,16 @@ CARD_TYPES_NO_FLAGS_BACK = {
                  'IgnoreRules': {'Full Art Landscape', 'Full Art Portrait'},
     'NoArtist': {'Campaign', 'Nightmare', 'Presentation', 'Rules'},
     'NoCopyright': {'Campaign', 'Nightmare', 'Presentation', 'Rules'}}
-CARD_SPHERES_NO_FLAGS = {'BlueRing': {'Cave', 'Region'},
-                         'GreenRing': {'Cave', 'Region'},
-                         'RedRing': {'Cave', 'Region'}}
+CARD_SPHERES_NO_FLAGS = {'BlueRing': {'Cave', 'NoStat', 'Region'},
+                         'GreenRing': {'Cave', 'NoStat', 'Region'},
+                         'RedRing': {'Cave', 'NoStat', 'Region'}}
 CARD_TYPES_NO_ARTIST = {'Presentation', 'Rules'}
 CARD_TYPES_NO_ARTIST_BACK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
 CARD_TYPES_NO_ARTWORK = {'Rules'}
 CARD_TYPES_NO_ARTWORK_BACK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
 CARD_TYPES_EASY_MODE = {'Encounter Side Quest', 'Enemy', 'Location',
                         'Ship Enemy', 'Treachery'}
-CARD_SPHERES_NO_EASY_MODE = {'Boon', 'Burden', 'Cave', 'Region'}
+CARD_SPHERES_NO_EASY_MODE = {'Boon', 'Burden', 'Cave', 'NoStat', 'Region'}
 CARD_TYPES_ADDITIONAL_ENCOUNTER_SETS = {'Quest'}
 CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
                         'Objective Hero', 'Objective Location',
