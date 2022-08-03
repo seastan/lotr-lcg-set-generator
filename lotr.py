@@ -407,6 +407,9 @@ SCRATCH_FOLDER = '_Scratch'
 TEXT_CHUNK_FLAG = b'tEXt'
 
 DECK_PREFIX_REGEX = r'^[QN][A-Z0-9][A-Z0-9]\.[0-9][0-9]?[\- ]'
+KEYWORDS_REGEX = (r'^(?: ?[A-Z][a-z]+(?: [0-9X]+(?:\[pp\])?)?\.|'
+                  r' ?Guarded \(enemy\)\.| ?Guarded \(location\)\.|'
+                  r' ?Guarded \(enemy or location\)\.| ?Fate -1\.)+$')
 UUID_REGEX = r'^[0-9a-h]{8}-[0-9a-h]{4}-[0-9a-h]{4}-[0-9a-h]{4}-[0-9a-h]{12}$'
 
 JPG300BLEEDDTC = 'jpg300BleedDTC'
@@ -1871,12 +1874,15 @@ def _verify_period(value):
     return res
 
 
-def get_rules_errors(text):  # pylint: disable=R0912,R0915
+def get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
     """ Detect text rules errors.
     """
     errors = []
     text = re.sub(r'\[i\].+?\[\/i\]', '', text, flags=re.DOTALL)
     paragraphs = [p.strip() for p in text.split('\n') if p.strip()]
+    if not paragraphs:
+        return errors
+
     for paragraph in paragraphs:
         if (re.search(r'limit once per', paragraph, flags=re.IGNORECASE) and
                 not re.search(r'\(Limit once per .+\.\)”?$', paragraph)):
@@ -1968,8 +1974,30 @@ def get_rules_errors(text):  # pylint: disable=R0912,R0915
                      paragraph, flags=re.IGNORECASE):
             errors.append('"adds(?) _ resource(s) to _ resource pool"')
 
+        if ('cannot be chosen as the current quest' in paragraph and
+                not 'cannot be chosen as the current quest during the quest '
+                'phase' in paragraph):
+            errors.append('"during the quest phase"')
+
+        if 'active quest' in paragraph or 'current quest stage' in paragraph:
+            errors.append('"current quest"')
+
+        if 'per player' in re.sub(r'limit [^.]+\.', '', paragraph,
+                                  flags=re.IGNORECASE):
+            errors.append('"[pp]"')
+
         if 'cancelled' in paragraph:
             errors.append('"canceled"')
+
+    if ((field == CARD_TEXT and
+         card[CARD_TYPE] not in CARD_TYPES_NO_KEYWORDS) or
+            (field == BACK_PREFIX + CARD_TEXT and
+             card[BACK_PREFIX + CARD_TYPE] not in CARD_TYPES_NO_KEYWORDS)):
+        if re.match(KEYWORDS_REGEX,
+                    paragraphs[0].replace('Immune to player card effects.', '')
+                    .replace('Cannot have attachments.', '').replace('  ', '')
+                    .strip()):
+            errors.append('"first line of the text looks like keyword(s)"')
 
     return errors
 
@@ -2542,6 +2570,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif (card_keywords is not None and not
+              re.match(KEYWORDS_REGEX, card_keywords.replace('[inline]', '')
+                       .replace('[size]', '').replace('[/size]', ''))):
+            message = 'Incorrect keywords for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if card_keywords_back is not None and card_type_back is None:
             message = 'Redundant keywords back for row #{}{}'.format(
@@ -2576,6 +2614,17 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
               card_keywords_back.replace('[inline]', '').replace('.', '')
               .replace(' ', '').replace('[size]', '')
               .replace('[/size]', '') == ''):
+            message = 'Incorrect keywords back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_keywords_back is not None and not
+              re.match(KEYWORDS_REGEX, card_keywords_back
+                       .replace('[inline]', '').replace('[size]', '')
+                       .replace('[/size]', ''))):
             message = 'Incorrect keywords back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -3340,7 +3389,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_text is not None and
               card_type != 'Presentation' and card_sphere != 'Back' and
               not (card_flags and 'IgnoreRules' in extract_flags(card_flags))):
-            rules_errors = get_rules_errors(card_text)
+            rules_errors = get_rules_errors(card_text, CARD_TEXT, row)
             if rules_errors:
                 message = (
                     'Rules error(s) in text for row #{}{}: {} (use '
@@ -3400,7 +3449,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
               card_sphere_back != 'Back' and
               not (card_flags_back and
                    'IgnoreRules' in extract_flags(card_flags_back))):
-            rules_errors = get_rules_errors(card_text_back)
+            rules_errors = get_rules_errors(card_text_back,
+                                            BACK_PREFIX + CARD_TEXT, row)
             if rules_errors:
                 message = (
                     'Rules error(s) in text back for row #{}{}: {} (use '
@@ -3453,7 +3503,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_shadow is not None and
               not (card_flags and 'IgnoreRules' in extract_flags(card_flags))):
-            rules_errors = get_rules_errors(card_shadow)
+            rules_errors = get_rules_errors(card_shadow, CARD_SHADOW, row)
             if rules_errors:
                 message = (
                     'Rules error(s) in shadow for row #{}{}: {} (use '
@@ -3492,7 +3542,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_shadow_back is not None and
               not (card_flags_back and
                    'IgnoreRules' in extract_flags(card_flags_back))):
-            rules_errors = get_rules_errors(card_shadow_back)
+            rules_errors = get_rules_errors(card_shadow_back,
+                                            BACK_PREFIX + CARD_SHADOW, row)
             if rules_errors:
                 message = (
                     'Rules error(s) in shadow back for row #{}{}: {} (use '
