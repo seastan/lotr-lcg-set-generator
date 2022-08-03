@@ -1871,58 +1871,102 @@ def _verify_period(value):
     return res
 
 
-def get_rules_errors(text):  # pylint: disable=R0912
+def get_rules_errors(text):  # pylint: disable=R0912,R0915
     """ Detect text rules errors.
     """
     errors = []
+    text = re.sub(r'\[i\].+?\[\/i\]', '', text, flags=re.DOTALL)
     paragraphs = [p.strip() for p in text.split('\n') if p.strip()]
     for paragraph in paragraphs:
         if (re.search(r'limit once per', paragraph, flags=re.IGNORECASE) and
                 not re.search(r'\(Limit once per .+\.\)”?$', paragraph)):
-            errors.append('"(Limit once per ___.)"')
+            errors.append('"(Limit once per _.)"')
 
         if (re.search(r'limit (?:twice|two times|2 times) per', paragraph,
                       flags=re.IGNORECASE) and
                 not re.search(r'\(Limit twice per .+\.\)”?$', paragraph)):
-            errors.append('"(Limit twice per ___.)"')
+            errors.append('"(Limit twice per _.)"')
 
         if (re.search(r'limit (?:thrice|three times|3 times) per', paragraph,
                       flags=re.IGNORECASE) and
                 not re.search(r'\(Limit 3 times per .+\.\)”?$', paragraph)):
-            errors.append('"(Limit 3 times per ___.)"')
+            errors.append('"(Limit 3 times per _.)"')
 
         if ' to travel here' in paragraph:
-            errors.append('"to travel here"')
+            errors.append('"redundant: to travel here"')
 
         if re.search(r' he (?:or she|commit|controls|deals|(?:just )?discard|'
                      'is eliminated|must|owns|puts|raises)', paragraph):
-            errors.append('"he"')
+            errors.append('"they"')
 
         if re.search(r' his (?:or her|(?:eligible )?characters|choice|control|'
                      'deck|discard pile|hand|hero|out-of-play deck|own|'
                      'play area|threat)', paragraph):
-            errors.append('"his"')
+            errors.append('"their"')
 
         if (' him or her' in paragraph or
                 'engaged with him' in paragraph or
                 'in front of him' in paragraph):
-            errors.append('"him"')
+            errors.append('"them"')
 
         if re.search(r'encounter deck[^.]+from the top of the encounter deck',
                      paragraph):
-            errors.append('"from the top of the encounter deck"')
+            errors.append('"redundant: from the top of the encounter deck"')
 
-        if re.search(r' gets [^+–]', paragraph):
-            errors.append('"gets a stat modification"')
+        if re.search(r'encounter deck[^.]+from the encounter deck', paragraph):
+            errors.append('"redundant: from the encounter deck"')
 
-        if re.search(r' gains [+–]', paragraph):
-            errors.append('"gains a non-stat modification"')
+        if re.search(r'discards? (?:[^ ]+ )?cards? from the top of the '
+                     'encounter deck', paragraph, flags=re.IGNORECASE):
+            errors.append('"from the encounter deck"')
 
-        if re.search(r'discards? . cards? at random', paragraph):
-            errors.append('"Discard _ random card(s)"')
+        if re.search(r' gets? [^+–]', paragraph):
+            errors.append('"gain(s) a non-stat modification"')
+
+        if re.search(r' gains? [+–]', paragraph):
+            errors.append('"get(s) a stat modification"')
+
+        if re.search(r'discards? . cards? at random', paragraph,
+                     flags=re.IGNORECASE):
+            errors.append('"discard(s) _ random card(s)"')
 
         if re.search(r'\(Counts as a (?:\[bi\]|{)?Condition', paragraph):
             errors.append('"Condition attachments"')
+
+        if ' by this effect' in paragraph:
+            errors.append('"this way"')
+
+        if re.search(r'any player may trigger this (?:action|response)',
+                     paragraph, flags=re.IGNORECASE):
+            errors.append('"Any player may trigger this effect"')
+
+        if re.search(r'\(any player may trigger this effect',
+                     paragraph, flags=re.IGNORECASE):
+            errors.append('"Any player may trigger this effect"')
+
+        if (re.search(r'adds? [0-9] resources? to ',
+                      paragraph, flags=re.IGNORECASE) and
+                not re.search(r'adds? [0-9] resources? to [^.]+ pool',
+                              paragraph, flags=re.IGNORECASE)):
+            errors.append('"places(?) _ resource token(s) on"')
+
+        if re.search(r'adds? [0-9] resource tokens? to [^.]+ pool',
+                     paragraph, flags=re.IGNORECASE):
+            errors.append('"adds(?) _ resource(s) to _ resource pool"')
+        elif re.search(r'adds? [0-9] resource tokens? to ',
+                       paragraph, flags=re.IGNORECASE):
+            errors.append('"places(?) _ resource token(s) on"')
+
+        if re.search(r'places? [0-9] resources? on [^.]+ pool',
+                     paragraph, flags=re.IGNORECASE):
+            errors.append('"adds(?) _ resource(s) to _ resource pool"')
+        elif re.search(r'places? [0-9] resources? on ',
+                       paragraph, flags=re.IGNORECASE):
+            errors.append('"places(?) _ resource token(s) on"')
+
+        if re.search(r'places? [0-9] resource tokens? on [^.]+ pool',
+                     paragraph, flags=re.IGNORECASE):
+            errors.append('"adds(?) _ resource(s) to _ resource pool"')
 
         if 'cancelled' in paragraph:
             errors.append('"canceled"')
@@ -3294,7 +3338,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_text is not None and
-              card_type not in ('Presentation', 'Rules') and
+              card_type != 'Presentation' and card_sphere != 'Back' and
               not (card_flags and 'IgnoreRules' in extract_flags(card_flags))):
             rules_errors = get_rules_errors(card_text)
             if rules_errors:
@@ -3352,7 +3396,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_text_back is not None and
-              card_type_back not in ('Presentation', 'Rules') and
+              card_type_back != 'Presentation' and
+              card_sphere_back != 'Back' and
               not (card_flags_back and
                    'IgnoreRules' in extract_flags(card_flags_back))):
             rules_errors = get_rules_errors(card_text_back)
