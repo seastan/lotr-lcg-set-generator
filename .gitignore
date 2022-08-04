@@ -37,6 +37,7 @@ setOCTGN/*.xml.old
 Temp/*/*
 urlCache/*.cache
 
+check_ringsdb_alep_decks.json
 configuration.yaml
 discord.yaml
 download_time.txt

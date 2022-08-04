@@ -24,3 +24,6 @@ ignore_assistants:
 
 # Users to ignore (a comma-separated list)
 ignore_users: 
+
+# Discord Webhook URL for ringsdb_alep_decks channel
+ringsdb_alep_decks_webhook_url: 
