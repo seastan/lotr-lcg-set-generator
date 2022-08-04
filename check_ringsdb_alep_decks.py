@@ -121,7 +121,7 @@ def send_discord(message):
     return False
 
 
-def process_ringsdb_data():  # pylint: disable=R0914
+def process_ringsdb_data():  # pylint: disable=R0912,R0914,R0915
     """ Process the data from RingsDB.
     """
     today = datetime.today().strftime('%Y-%m-%d')
@@ -160,13 +160,13 @@ def process_ringsdb_data():  # pylint: disable=R0914
     data.sort(key=lambda d: d['id'])
     new_decks = [d['id'] for d in data]
     previous_decks = set(previous_data['previous_decks'])
-    alep_count = 0
+    deck_count = 0
     for deck in data:
         if deck['id'] in previous_decks:
             continue
 
         if deck['last_pack'].startswith('ALeP - '):
-            alep_count += 1
+            deck_count += 1
             heroes = []
             for hero in deck['heroes_details']:
                 hero_text = '{} {} *({})*'.format(
@@ -175,22 +175,39 @@ def process_ringsdb_data():  # pylint: disable=R0914
                     hero['pack'])
                 heroes.append(hero_text)
 
+            alep_cards = 0
+            for code in deck['slots']:
+                code = int(code)
+                if (300000 <= code < 400000 or
+                        500000 <= code < 600000 or
+                        99300000 <= code < 99400000 or
+                        99500000 <= code < 99600000):
+                    alep_cards += 1
+
+            if alep_cards > 1:
+                alep_cards = '{} ALeP cards'.format(alep_cards)
+            elif alep_cards == 1:
+                alep_cards = '1 ALeP card'
+            else:
+                continue
+
             url = 'https://ringsdb.com/decklist/view/{}'.format(deck['id'])
             message = """New AleP deck has been published to RingsDB:
 
-**{}** *({} threat, cards up to {})*
+**{}** *({} threat, {} up to {})*
 {}
 {}
 ` `""".format(deck['name'].replace('*', '').strip(),
              deck['starting_threat'],
+             alep_cards,
              deck['last_pack'],
              ', '.join(heroes),
              url)
             logging.info(message)
             send_discord(message)
 
-    if alep_count > 1:
-        logging.info('Found %s new ALeP deck(s)', alep_count)
+    if deck_count > 1:
+        logging.info('Found %s new ALeP deck(s)', deck_count)
     else:
         logging.info('No new ALeP decks found')
 
