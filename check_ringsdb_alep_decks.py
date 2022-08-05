@@ -132,7 +132,7 @@ def get_ringsdb_content(url):
         try:
             res = requests.get(url)
             res = res.content.decode('utf-8')
-            logging.info('RingsDB answer: %s...', res[:100])
+            logging.info('RingsDB answer: %s', res[:100])
             data = json.loads(res)
             break
         except Exception:
