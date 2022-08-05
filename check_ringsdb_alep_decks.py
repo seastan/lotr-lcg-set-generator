@@ -34,6 +34,10 @@ EMOJIS = {
     'Fellowship': '<:fellowship:822573464586027058>'
 }
 
+URL_TIMEOUT = 30
+URL_RETRIES = 3
+URL_SLEEP = 30
+
 
 class DiscordResponseError(Exception):
     """ Discord Response error.
@@ -121,15 +125,32 @@ def send_discord(message):
     return False
 
 
+def get_ringsdb_content(url):
+    """ Get RingsDB URL content.
+    """
+    for i in range(URL_RETRIES):
+        try:
+            res = requests.get(url)
+            res = res.content.decode('utf-8')
+            logging.info('RingsDB answer: %s...', res[:100])
+            data = json.loads(res)
+            break
+        except Exception:
+            if i < URL_RETRIES - 1:
+                time.sleep(URL_SLEEP * (i + 1))
+            else:
+                raise
+
+    return data
+
+
 def process_ringsdb_data():  # pylint: disable=R0912,R0914,R0915
     """ Process the data from RingsDB.
     """
     today = datetime.today().strftime('%Y-%m-%d')
     try:
         url = RINGSDB_URL.format(today)
-        res = requests.get(url)
-        res = res.content.decode('utf-8')
-        data = json.loads(res)
+        data = get_ringsdb_content(url)
     except Exception as exc:
         message = 'Reading RingsDB data for today failed: {}'.format(str(exc))
         logging.error(message)
@@ -139,9 +160,7 @@ def process_ringsdb_data():  # pylint: disable=R0912,R0914,R0915
     yesterday = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
     try:
         url = RINGSDB_URL.format(yesterday)
-        res = requests.get(url)
-        res = res.content.decode('utf-8')
-        data_yesterday = json.loads(res)
+        data_yesterday = get_ringsdb_content(url)
     except Exception as exc:
         message = 'Reading RingsDB data for yesterday failed: {}'.format(
             str(exc))
@@ -191,10 +210,16 @@ def process_ringsdb_data():  # pylint: disable=R0912,R0914,R0915
             else:
                 continue
 
+            if deck['description_md']:
+                description = deck['description_md']
+            else:
+                description = 'no description'
+
             url = 'https://ringsdb.com/decklist/view/{}'.format(deck['id'])
             message = """New AleP deck has been published to RingsDB:
 
 **{}** by {} *({} threat, {} up to {})*
+{}
 {}
 {}
 ` `""".format(deck['name'].replace('*', '').strip(),
@@ -203,6 +228,7 @@ def process_ringsdb_data():  # pylint: disable=R0912,R0914,R0915
               alep_cards,
               deck['last_pack'],
               ', '.join(heroes),
+              description,
               url)
             logging.info(message)
             send_discord(message)
