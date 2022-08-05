@@ -194,15 +194,16 @@ def process_ringsdb_data():  # pylint: disable=R0912,R0914,R0915
             url = 'https://ringsdb.com/decklist/view/{}'.format(deck['id'])
             message = """New AleP deck has been published to RingsDB:
 
-**{}** *({} threat, {} up to {})*
+**{}** by {} *({} threat, {} up to {})*
 {}
 {}
 ` `""".format(deck['name'].replace('*', '').strip(),
-             deck['starting_threat'],
-             alep_cards,
-             deck['last_pack'],
-             ', '.join(heroes),
-             url)
+              deck['username'],
+              deck['starting_threat'],
+              alep_cards,
+              deck['last_pack'],
+              ', '.join(heroes),
+              url)
             logging.info(message)
             send_discord(message)
 
