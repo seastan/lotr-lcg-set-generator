@@ -151,17 +151,14 @@ def main():
                 not replay['player1_heroes']):
             continue
 
-        if replay['num_players'] == 4 and (not replay['player2_heroes'] or
-                                           not replay['player3_heroes'] or
-                                           not replay['player4_heroes']):
-            continue
+        if replay['num_players'] == 4 and not replay['player4_heroes']:
+            replay['num_players'] = 3
 
-        if replay['num_players'] == 3 and (not replay['player2_heroes'] or
-                                           not replay['player3_heroes']):
-            continue
+        if replay['num_players'] == 3 and not replay['player3_heroes']:
+            replay['num_players'] = 2
 
         if replay['num_players'] == 2 and not replay['player2_heroes']:
-            continue
+            replay['num_players'] = 1
 
         replay['player1_threat'] = replay['player_data']['player1']['threat']
         replay['player2_threat'] = replay['player_data']['player2']['threat']

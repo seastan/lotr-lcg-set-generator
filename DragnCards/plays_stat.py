@@ -145,17 +145,14 @@ def main():  # pylint: disable=R0912,R0915
                 not replay['player1_heroes']):
             continue
 
-        if replay['num_players'] == 4 and (not replay['player2_heroes'] or
-                                           not replay['player3_heroes'] or
-                                           not replay['player4_heroes']):
-            continue
+        if replay['num_players'] == 4 and not replay['player4_heroes']:
+            replay['num_players'] = 3
 
-        if replay['num_players'] == 3 and (not replay['player2_heroes'] or
-                                           not replay['player3_heroes']):
-            continue
+        if replay['num_players'] == 3 and not replay['player3_heroes']:
+            replay['num_players'] = 2
 
         if replay['num_players'] == 2 and not replay['player2_heroes']:
-            continue
+            replay['num_players'] = 1
 
         replay['num_players'] = str(replay['num_players'])
         if replay['outcome'] == 'victory':
