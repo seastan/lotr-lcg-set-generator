@@ -1950,6 +1950,14 @@ def get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                      paragraph, flags=re.IGNORECASE):
             errors.append('"Any player may trigger this effect"')
 
+        if ('cannot be chosen as the current quest' in paragraph and
+                not 'cannot be chosen as the current quest during the quest '
+                'phase' in paragraph):
+            errors.append('"during the quest phase"')
+
+        if 'active quest' in paragraph or 'current quest stage' in paragraph:
+            errors.append('"current quest"')
+
         if (re.search(r'adds? [0-9] resources? to ',
                       paragraph, flags=re.IGNORECASE) and
                 not re.search(r'adds? [0-9] resources? to [^.]+ pool',
@@ -1974,17 +1982,21 @@ def get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                      paragraph, flags=re.IGNORECASE):
             errors.append('"adds(?) _ resource(s) to _ resource pool"')
 
-        if ('cannot be chosen as the current quest' in paragraph and
-                not 'cannot be chosen as the current quest during the quest '
-                'phase' in paragraph):
-            errors.append('"during the quest phase"')
-
-        if 'active quest' in paragraph or 'current quest stage' in paragraph:
-            errors.append('"current quest"')
-
         if 'per player' in re.sub(r'limit [^.]+\.', '', paragraph,
                                   flags=re.IGNORECASE):
             errors.append('"[pp]"')
+
+        if re.search(r'step is completed?',
+                     paragraph.replace('complete rules', '')):
+            errors.append('"redundant: is complete(d)"')
+        elif re.search(r'\bcomplete[ds]?\b',
+                       paragraph.replace('complete rules', ''),
+                       flags=re.IGNORECASE):
+            errors.append('"defeat(ed)"')
+
+        if re.search(r'play only after',
+                     paragraph, flags=re.IGNORECASE):
+            errors.append('"Response: At the end of _"')
 
         if 'cancelled' in paragraph:
             errors.append('"canceled"')
@@ -3376,7 +3388,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_text is not None and
+        elif (card_text is not None and card_text != 'TBD' and
               card_type not in CARD_TYPES_NO_PERIOD_CHECK and
               not _verify_period(card_text)):
             message = ('Missing period at the end of the text paragraph for '
@@ -3434,7 +3446,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_text_back is not None and
+        elif (card_text_back is not None and card_text_back != 'TBD' and
               card_type_back not in CARD_TYPES_NO_PERIOD_CHECK and
               not _verify_period(card_text_back)):
             message = ('Missing period at the end of the text back paragraph '
@@ -3493,7 +3505,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif card_shadow is not None and not _verify_period(card_shadow):
+        elif (card_shadow is not None and card_shadow != 'TBD' and
+              not _verify_period(card_shadow)):
             message = ('Missing period at the end of shadow for row #{}{}'
                        .format(i, scratch))
             logging.error(message)
@@ -3530,7 +3543,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_shadow_back is not None and
+        elif (card_shadow_back is not None and card_shadow_back != 'TBD' and
               not _verify_period(card_shadow_back)):
             message = ('Missing period at the end of shadow back for row '
                        '#{}{}'.format(i, scratch))
