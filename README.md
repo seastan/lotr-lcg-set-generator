@@ -26,6 +26,8 @@ At the same time, the preferable way is to use Git.
     git pull
     ```
 
+    If you prefer UI interface, instead of `Git CMD` you may also use `GitHub Desktop` (https://desktop.github.com).
+
 2. Make sure there is a spreadsheet on Google Sheets (most likely, it already exists).
 
     If it doesn't exist yet (that means you are starting a new project from scratch),
@@ -120,7 +122,7 @@ Optionally, install VirtualEnv (see https://help.dreamhost.com/hc/en-us/articles
 for details).
 
 13. Go to the root folder of this repo and follow the steps below.  All commands should by run in CLI, for example, `cmd` (Windows)
-or `bash` (Mac/Linux).
+or `bash` (Mac/Linux).  To navigate to a right folder inside your CLI you can use `cd <folder>` command.
 
   - [skip this step, if you don't use VirtualEnv] `virtualenv env --python=python3.9` (replace `3.9` with your actual Python version)
   - [skip this step, if you don't use VirtualEnv] `env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
