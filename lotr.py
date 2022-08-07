@@ -1958,28 +1958,30 @@ def get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if 'active quest' in paragraph or 'current quest stage' in paragraph:
             errors.append('"current quest"')
 
-        if (re.search(r'adds? [0-9] resources? to ',
+        if (re.search(r'adds? [0-9X](?:\[pp\])? resources? to ',
                       paragraph, flags=re.IGNORECASE) and
-                not re.search(r'adds? [0-9] resources? to [^.]+ pool',
-                              paragraph, flags=re.IGNORECASE)):
+                not re.search(
+                    r'adds? [0-9X](?:\[pp\])? resources? to [^.]+ pool',
+                    paragraph, flags=re.IGNORECASE)):
             errors.append('"places(?) _ resource token(s) on"')
 
-        if re.search(r'adds? [0-9] resource tokens? to [^.]+ pool',
+        if re.search(r'adds? [0-9X](?:\[pp\])? resource tokens? to [^.]+ pool',
                      paragraph, flags=re.IGNORECASE):
             errors.append('"adds(?) _ resource(s) to _ resource pool"')
-        elif re.search(r'adds? [0-9] resource tokens? to ',
+        elif re.search(r'adds? [0-9X](?:\[pp\])? resource tokens? to ',
                        paragraph, flags=re.IGNORECASE):
             errors.append('"places(?) _ resource token(s) on"')
 
-        if re.search(r'places? [0-9] resources? on [^.]+ pool',
+        if re.search(r'places? [0-9X](?:\[pp\])? resources? on [^.]+ pool',
                      paragraph, flags=re.IGNORECASE):
             errors.append('"adds(?) _ resource(s) to _ resource pool"')
-        elif re.search(r'places? [0-9] resources? on ',
+        elif re.search(r'places? [0-9X](?:\[pp\])? resources? on ',
                        paragraph, flags=re.IGNORECASE):
             errors.append('"places(?) _ resource token(s) on"')
 
-        if re.search(r'places? [0-9] resource tokens? on [^.]+ pool',
-                     paragraph, flags=re.IGNORECASE):
+        if re.search(
+                r'places? [0-9X](?:\[pp\])? resource tokens? on [^.]+ pool',
+                paragraph, flags=re.IGNORECASE):
             errors.append('"adds(?) _ resource(s) to _ resource pool"')
 
         if 'per player' in re.sub(r'limit [^.]+\.', '', paragraph,
@@ -2000,6 +2002,11 @@ def get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
 
         if 'cancelled' in paragraph:
             errors.append('"canceled"')
+
+    if (field == CARD_TEXT and card[CARD_TYPE] == 'Quest'
+            and str(card[CARD_COST]) == '1'):
+        if 'When Revealed' in text:
+            errors.append('"Setup"')
 
     if ((field == CARD_TEXT and
          card[CARD_TYPE] not in CARD_TYPES_NO_KEYWORDS) or
@@ -3800,6 +3807,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif card_artist is not None and 'Hogdson' in card_artist:
+            message = 'Hodgson not Hogdson in row #{}{}!'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
 
         if card_artist_back is not None and card_type_back is None:
             message = 'Redundant artist back for row #{}{}'.format(i, scratch)
@@ -3811,6 +3826,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_artist_back is not None and
               card_type_back in CARD_TYPES_NO_ARTIST_BACK):
             message = 'Redundant artist back for row #{}{}'.format(
+                i, scratch)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_artist_back is not None and 'Hogdson' in card_artist_back:
+            message = 'Hodgson not Hogdson in row #{}{}!'.format(
                 i, scratch)
             logging.error(message)
             if not card_scratch:
