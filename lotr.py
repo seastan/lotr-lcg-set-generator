@@ -301,6 +301,8 @@ CARD_TYPES_FLAGS_BACK = {'NoTraits':
                           'Treachery'}}
 CARD_TYPES_NO_FLAGS = {'Asterisk': {'Full Art Landscape', 'Full Art Portrait',
                                     'Presentation', 'Rules'},
+                       'IgnoreName': {'Full Art Landscape',
+                                      'Full Art Portrait'},
                        'IgnoreRules': {'Full Art Landscape',
                                        'Full Art Portrait'},
                        'NoArtist': {'Presentation', 'Rules'},
@@ -308,7 +310,8 @@ CARD_TYPES_NO_FLAGS = {'Asterisk': {'Full Art Landscape', 'Full Art Portrait',
 CARD_TYPES_NO_FLAGS_BACK = {
     'Asterisk': {'Campaign', 'Full Art Landscape', 'Full Art Portrait',
                  'Nightmare', 'Presentation', 'Rules'},
-                 'IgnoreRules': {'Full Art Landscape', 'Full Art Portrait'},
+    'IgnoreName': {'Full Art Landscape', 'Full Art Portrait'},
+    'IgnoreRules': {'Full Art Landscape', 'Full Art Portrait'},
     'NoArtist': {'Campaign', 'Nightmare', 'Presentation', 'Rules'},
     'NoCopyright': {'Campaign', 'Nightmare', 'Presentation', 'Rules'}}
 CARD_SPHERES_NO_FLAGS = {'BlueRing': {'Cave', 'NoStat', 'Region'},
@@ -345,9 +348,9 @@ CARD_TYPES_NOSTAT = {'Enemy'}
 CARD_TYPES_NO_DISCORD_CHANNEL = {'Full Art Landscape', 'Full Art Portrait',
                                  'Rules', 'Presentation'}
 
-FLAGS = {'AdditionalCopies', 'Asterisk', 'IgnoreRules', 'NoArtist',
-         'NoCopyright', 'NoTraits', 'Promo', 'BlueRing', 'GreenRing',
-         'RedRing'}
+FLAGS = {'AdditionalCopies', 'Asterisk', 'IgnoreName', 'IgnoreRules',
+         'NoArtist', 'NoCopyright', 'NoTraits', 'Promo', 'BlueRing',
+         'GreenRing', 'RedRing'}
 RING_FLAGS = {'BlueRing', 'GreenRing', 'RedRing'}
 SPHERES = set()
 SPHERES_CAMPAIGN = {'Setup'}
@@ -637,6 +640,9 @@ CARD_COLUMNS = {}
 SHEET_IDS = {}
 SETS = {}
 DATA = []
+ALL_TRAITS = set()
+ALL_SCRATCH_TRAITS = set()
+PRE_SANITY_CHECK = {}
 TRANSLATIONS = {}
 SELECTED_CARDS = set()
 FOUND_SETS = set()
@@ -1500,6 +1506,40 @@ def _update_discord_category(category):
     return category
 
 
+def _extract_all_traits(data):
+    """ Collect all traits from the spreadsheet.
+    """
+    ALL_TRAITS.clear()
+    for row in data:
+        if row[CARD_SCRATCH]:
+            continue
+
+        if row[CARD_TRAITS]:
+            traits = re.sub(r'\[[^\]]+\]', '', row[CARD_TRAITS])
+            ALL_TRAITS.update(
+                [t.strip() for t in traits.split('.') if t.strip()])
+
+        if row[BACK_PREFIX + CARD_TRAITS]:
+            traits = re.sub(r'\[[^\]]+\]', '', row[BACK_PREFIX + CARD_TRAITS])
+            ALL_TRAITS.update(
+                [t.strip() for t in traits.split('.') if t.strip()])
+
+    ALL_SCRATCH_TRAITS.clear()
+    for row in data:
+        if not row[CARD_SCRATCH]:
+            continue
+
+        if row[CARD_TRAITS]:
+            traits = re.sub(r'\[[^\]]+\]', '', row[CARD_TRAITS])
+            ALL_SCRATCH_TRAITS.update(
+                [t.strip() for t in traits.split('.') if t.strip()])
+
+        if row[BACK_PREFIX + CARD_TRAITS]:
+            traits = re.sub(r'\[[^\]]+\]', '', row[BACK_PREFIX + CARD_TRAITS])
+            ALL_SCRATCH_TRAITS.update(
+                [t.strip() for t in traits.split('.') if t.strip()])
+
+
 def _clean_value(value):  # pylint: disable=R0915
     """ Clean a value from the spreadsheet.
     """
@@ -1557,9 +1597,11 @@ def _clean_value(value):  # pylint: disable=R0915
     return value
 
 
-def _clean_data(data):
+def _clean_data(data):  # pylint: disable=R0912
     """ Clean data from the spreadsheet.
     """
+    PRE_SANITY_CHECK.clear()
+
     for row in data:
         card_name = str(row.get(CARD_NAME) or '').strip()
         if len(card_name) == 1:
@@ -1572,8 +1614,58 @@ def _clean_data(data):
         if not card_name_back:
             card_name_back = card_name
 
+        if (card_name and card_name not in ALL_TRAITS and
+                (not row[CARD_SCRATCH] or
+                 card_name not in ALL_SCRATCH_TRAITS) and
+                not (row[CARD_FLAGS] and
+                     'IgnoreName' in extract_flags(row[CARD_FLAGS]))):
+            test_card_name = r'\b' + re.escape(card_name) + r'\b'
+        else:
+            test_card_name = None
+
+        if (card_name_back and card_name_back not in ALL_TRAITS and
+                (not row[CARD_SCRATCH] or
+                 card_name_back not in ALL_SCRATCH_TRAITS) and
+                not (row[BACK_PREFIX + CARD_FLAGS] and
+                     'IgnoreName' in
+                     extract_flags(row[BACK_PREFIX + CARD_FLAGS]))):
+            test_card_name_back = r'\b' + re.escape(card_name) + r'\b'
+        else:
+            test_card_name_back = None
+
         for key, value in row.items():
             if isinstance(value, str):
+                if test_card_name:
+                    if (key == CARD_TEXT and
+                            re.search(test_card_name, value)):
+                        error = 'Hardcoded card name instead of [name] in text'
+                        PRE_SANITY_CHECK.setdefault(
+                            (row[ROW_COLUMN], row[CARD_SCRATCH]),
+                            []).append(error)
+                    elif (key == CARD_SHADOW and
+                          re.search(test_card_name, value)):
+                        error = (
+                            'Hardcoded card name instead of [name] in shadow')
+                        PRE_SANITY_CHECK.setdefault(
+                            (row[ROW_COLUMN], row[CARD_SCRATCH]),
+                            []).append(error)
+
+                if test_card_name_back:
+                    if (key == BACK_PREFIX + CARD_TEXT and
+                            re.search(test_card_name_back, value)):
+                        error = ('Hardcoded card name instead of [name] in '
+                                 'text back')
+                        PRE_SANITY_CHECK.setdefault(
+                            (row[ROW_COLUMN], row[CARD_SCRATCH]),
+                            []).append(error)
+                    elif (key == BACK_PREFIX + CARD_SHADOW and
+                          re.search(test_card_name_back, value)):
+                        error = ('Hardcoded card name instead of [name] in '
+                                 'shadow back')
+                        PRE_SANITY_CHECK.setdefault(
+                            (row[ROW_COLUMN], row[CARD_SCRATCH]),
+                            []).append(error)
+
                 if key != CARD_DECK_RULES:
                     if key.startswith(BACK_PREFIX):
                         value = value.replace('[name]', card_name_back)
@@ -1770,6 +1862,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
             DATA.extend(data)
 
     DATA[:] = [row for row in DATA if not _skip_row(row)]
+    _extract_all_traits(DATA)
     _clean_data(DATA)
 
     SELECTED_CARDS.update({row[CARD_ID] for row in DATA if row[CARD_SELECTED]})
@@ -2117,6 +2210,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_deck_rules = row[CARD_DECK_RULES]
         card_scratch = row[CARD_SCRATCH]
         scratch = ' (Scratch)' if card_scratch else ''
+
+#        if (i, card_scratch) in PRE_SANITY_CHECK:
+#            for error in PRE_SANITY_CHECK[(i, card_scratch)]:
+#                message = ('{} for row #{}{} (use IgnoreName flag to ignore)'
+#                           .format(error, i, scratch))
+#                logging.error(message)
+#                if not card_scratch:
+#                    errors.append(message)
 
         if set_id is None:
             message = 'No set ID for row #{}{}'.format(i, scratch)

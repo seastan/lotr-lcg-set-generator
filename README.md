@@ -481,6 +481,7 @@ List of available sphere values:
 
 - `AdditionalCopies`
 - `Asterisk`
+- `IgnoreName`
 - `IgnoreRules`
 - `NoArtist`
 - `NoCopyright`
