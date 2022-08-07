@@ -70,6 +70,7 @@ def get_ringsdb_data():
     try:
         res = session.get(RINGSDB_URL)
         res = res.content.decode('utf-8')
+        logging.info('RingsDB answer: %s', res[:100])
         res = json.loads(res)
     except Exception as exc:
         message = 'Reading RingsDB data failed: {}'.format(str(exc))
