@@ -329,7 +329,7 @@ def cut_bleed_margins(img, drawable, output_folder):
         file_name, _ = _get_filename_backside(img)
     except Exception:  # pylint: disable=W0703
         pdb.gimp_undo_push_group_end(img)
-        return
+        raise
 
     clip_size = _get_bleed_margin_size(drawable)
     if clip_size:
@@ -351,7 +351,7 @@ def prepare_db_output(img, drawable, output_folder):
         file_name, _ = _get_filename_backside(img)
     except Exception:  # pylint: disable=W0703
         pdb.gimp_undo_push_group_end(img)
-        return
+        raise
 
     pdb.script_fu_round_corners(img, drawable, 40, 0, 0, 0, 0, 0, 0)
 
@@ -371,9 +371,10 @@ def prepare_pdf_front_old(img, drawable, output_folder):
         file_name, back_side = _get_filename_backside(img)
     except Exception:  # pylint: disable=W0703
         pdb.gimp_undo_push_group_end(img)
-        return
+        raise
 
     if back_side:
+        print('ERROR: %s is a back side image' % (file_name,))
         pdb.gimp_undo_push_group_end(img)
         return
 
@@ -405,9 +406,10 @@ def prepare_pdf_front(img, drawable, output_folder):
         file_name, back_side = _get_filename_backside(img)
     except Exception:  # pylint: disable=W0703
         pdb.gimp_undo_push_group_end(img)
-        return
+        raise
 
     if back_side:
+        print('ERROR: %s is a back side image' % (file_name,))
         pdb.gimp_undo_push_group_end(img)
         return
 
@@ -436,9 +438,10 @@ def prepare_pdf_back(img, drawable, output_folder):
         file_name, back_side = _get_filename_backside(img)
     except Exception:  # pylint: disable=W0703
         pdb.gimp_undo_push_group_end(img)
-        return
+        raise
 
     if not back_side:
+        print('ERROR: %s is not a back side image' % (file_name,))
         pdb.gimp_undo_push_group_end(img)
         return
 
@@ -467,7 +470,7 @@ def prepare_makeplayingcards(img, drawable, output_folder):
         file_name, back_side = _get_filename_backside(img)
     except Exception:  # pylint: disable=W0703
         pdb.gimp_undo_push_group_end(img)
-        return
+        raise
 
     rotation = _get_rotation(drawable)
     clip_size = _get_mpc_clip_size(drawable)
@@ -496,7 +499,7 @@ def prepare_drivethrucards_jpg(img, drawable, output_folder):
         file_name, back_side = _get_filename_backside(img, 'jpg')
     except Exception:  # pylint: disable=W0703
         pdb.gimp_undo_push_group_end(img)
-        return
+        raise
 
     rotation = _get_rotation(drawable)
     clip_size = _get_dtc_clip_size(drawable)
@@ -523,7 +526,7 @@ def prepare_drivethrucards_tif(img, drawable, output_folder):
         file_name, back_side = _get_filename_backside(img, 'tif')
     except Exception:  # pylint: disable=W0703
         pdb.gimp_undo_push_group_end(img)
-        return
+        raise
 
     rotation = _get_rotation(drawable)
     clip_size = _get_dtc_clip_size(drawable)
@@ -549,7 +552,7 @@ def prepare_mbprint_jpg(img, drawable, output_folder):
         file_name, back_side = _get_filename_backside(img, 'jpg')
     except Exception:  # pylint: disable=W0703
         pdb.gimp_undo_push_group_end(img)
-        return
+        raise
 
     rotation = _get_rotation(drawable)
     if rotation:
@@ -571,7 +574,7 @@ def prepare_generic_png(img, drawable, output_folder):
         file_name, back_side = _get_filename_backside(img, 'png')
     except Exception:  # pylint: disable=W0703
         pdb.gimp_undo_push_group_end(img)
-        return
+        raise
 
     rotation = _get_rotation(drawable)
     if rotation:
@@ -593,7 +596,7 @@ def prepare_tts(img, _, output_folder):  # pylint: disable=R0914
         file_name, _ = _get_filename_backside(img, 'jpg')
     except Exception:  # pylint: disable=W0703
         pdb.gimp_undo_push_group_end(img)
-        return
+        raise
 
     parts = file_name.split('_')
     num = int(parts[-3])
@@ -609,22 +612,27 @@ def prepare_tts(img, _, output_folder):  # pylint: disable=R0914
             cards = json.load(fobj)
     except Exception:  # pylint: disable=W0703
         pdb.gimp_undo_push_group_end(img)
-        return
+        raise
 
     cards = [c['path'] for c in cards]
     if len(cards) != num:
+        print('ERROR: incorrect number of files: %s instead of %s' %
+              (len(cards), num))
         pdb.gimp_undo_push_group_end(img)
         return
 
     card_rows = [cards[i * columns:(i + 1) * columns]
                  for i in range((len(cards) + columns - 1) // columns)]
     if len(card_rows) != rows:
+        print('ERROR: incorrect number of rows: %s instead of %s' %
+              (len(card_rows), rows))
         pdb.gimp_undo_push_group_end(img)
         return
 
     for i, card_row in enumerate(card_rows):
         for j, card_path in enumerate(card_row):
             if not os.path.exists(card_path):
+                print("ERROR: path %s doesn't exist" % (card_path,))
                 pdb.gimp_undo_push_group_end(img)
                 return
 
@@ -711,8 +719,8 @@ def generate_renderer_artwork(json_path, output_folder):  # pylint: disable=R091
     try:
         with open(json_path, 'r') as fobj:
             images = json.load(fobj)
-    except Exception:  # pylint: disable=W0703
-        return
+    except Exception:  # pylint: disable=W0703,W0706
+        raise
 
     for card_id, data in images.items():
         card_type = data['card_type']
@@ -720,6 +728,7 @@ def generate_renderer_artwork(json_path, output_folder):  # pylint: disable=R091
             card_type = '{} {}'.format(card_type, data['card_sphere'])
 
         if card_type not in portrait:
+            print('ERROR: incorrect card type: %s' % (card_type,))
             return
 
         img = pdb.gimp_file_load(data['path'],
