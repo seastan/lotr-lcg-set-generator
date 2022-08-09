@@ -302,16 +302,18 @@ CARD_TYPES_FLAGS_BACK = {'NoTraits':
 CARD_TYPES_NO_FLAGS = {'Asterisk': {'Full Art Landscape', 'Full Art Portrait',
                                     'Presentation', 'Rules'},
                        'IgnoreName': {'Full Art Landscape',
-                                      'Full Art Portrait'},
+                                      'Full Art Portrait', 'Presentation',
+                                      'Rules'},
                        'IgnoreRules': {'Full Art Landscape',
-                                       'Full Art Portrait'},
+                                       'Full Art Portrait', 'Presentation'},
                        'NoArtist': {'Presentation', 'Rules'},
                        'NoCopyright': {'Presentation', 'Rules'}}
 CARD_TYPES_NO_FLAGS_BACK = {
     'Asterisk': {'Campaign', 'Full Art Landscape', 'Full Art Portrait',
                  'Nightmare', 'Presentation', 'Rules'},
-    'IgnoreName': {'Full Art Landscape', 'Full Art Portrait'},
-    'IgnoreRules': {'Full Art Landscape', 'Full Art Portrait'},
+    'IgnoreName': {'Full Art Landscape', 'Full Art Portrait', 'Presentation',
+                   'Rules'},
+    'IgnoreRules': {'Full Art Landscape', 'Full Art Portrait', 'Presentation'},
     'NoArtist': {'Campaign', 'Nightmare', 'Presentation', 'Rules'},
     'NoCopyright': {'Campaign', 'Nightmare', 'Presentation', 'Rules'}}
 CARD_SPHERES_NO_FLAGS = {'BlueRing': {'Cave', 'NoStat', 'Region'},
@@ -347,6 +349,7 @@ CARD_TYPES_NIGHTMARE = {'Encounter Side Quest', 'Enemy', 'Location',
 CARD_TYPES_NOSTAT = {'Enemy'}
 CARD_TYPES_NO_DISCORD_CHANNEL = {'Full Art Landscape', 'Full Art Portrait',
                                  'Rules', 'Presentation'}
+CARD_TYPES_NO_NAME_TAG = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
 
 FLAGS = {'AdditionalCopies', 'Asterisk', 'IgnoreName', 'IgnoreRules',
          'NoArtist', 'NoCopyright', 'NoTraits', 'Promo', 'BlueRing',
@@ -1614,18 +1617,20 @@ def _clean_data(data):  # pylint: disable=R0912
         if not card_name_back:
             card_name_back = card_name
 
-        if (card_name and card_name not in ALL_TRAITS and
+        if (card_name and card_name not in ALL_TRAITS and  # pylint: disable=R0916
                 (not row[CARD_SCRATCH] or
                  card_name not in ALL_SCRATCH_TRAITS) and
+                row[CARD_TYPE] not in CARD_TYPES_NO_NAME_TAG and
                 not (row[CARD_FLAGS] and
                      'IgnoreName' in extract_flags(row[CARD_FLAGS]))):
             test_card_name = r'\b' + re.escape(card_name) + r'\b'
         else:
             test_card_name = None
 
-        if (card_name_back and card_name_back not in ALL_TRAITS and
+        if (card_name_back and card_name_back not in ALL_TRAITS and  # pylint: disable=R0916
                 (not row[CARD_SCRATCH] or
                  card_name_back not in ALL_SCRATCH_TRAITS) and
+                row[BACK_PREFIX + CARD_TYPE] not in CARD_TYPES_NO_NAME_TAG and
                 not (row[BACK_PREFIX + CARD_FLAGS] and
                      'IgnoreName' in
                      extract_flags(row[BACK_PREFIX + CARD_FLAGS]))):
@@ -2035,7 +2040,7 @@ def get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if ' by this effect' in paragraph:
             errors.append('"this way"')
 
-        if re.search(r'any player may trigger this (?:action|response)',
+        if re.search(r'may trigger this (?:action|response)',
                      paragraph, flags=re.IGNORECASE):
             errors.append('"Any player may trigger this effect"')
 
@@ -2211,14 +2216,6 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_scratch = row[CARD_SCRATCH]
         scratch = ' (Scratch)' if card_scratch else ''
 
-#        if (i, card_scratch) in PRE_SANITY_CHECK:
-#            for error in PRE_SANITY_CHECK[(i, card_scratch)]:
-#                message = ('{} for row #{}{} (use IgnoreName flag to ignore)'
-#                           .format(error, i, scratch))
-#                logging.error(message)
-#                if not card_scratch:
-#                    errors.append(message)
-
         if set_id is None:
             message = 'No set ID for row #{}{}'.format(i, scratch)
             logging.error(message)
@@ -2266,6 +2263,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         if not conf['run_sanity_check_for_all_sets'] and set_id not in set_ids:
             continue
+
+        if (i, card_scratch) in PRE_SANITY_CHECK:
+            for error in PRE_SANITY_CHECK[(i, card_scratch)]:
+                message = ('{} for row #{}{} (use IgnoreName flag to ignore)'
+                           .format(error, i, scratch))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
 
         if card_number is None:
             message = 'No card number for row #{}{}'.format(i, scratch)
@@ -2469,19 +2474,19 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
 
         if card_type == 'Campaign':
-            spheres = SPHERES_CAMPAIGN
+            spheres = SPHERES_CAMPAIGN.copy()
         elif card_type == 'Encounter Side Quest':
-            spheres = SPHERES_SIDE_QUEST
+            spheres = SPHERES_SIDE_QUEST.copy()
         elif card_type == 'Rules':
-            spheres = SPHERES_RULES
+            spheres = SPHERES_RULES.copy()
         elif card_type == 'Presentation':
-            spheres = SPHERES_PRESENTATION
+            spheres = SPHERES_PRESENTATION.copy()
         elif card_type == 'Ship Objective':
-            spheres = SPHERES_SHIP_OBJECTIVE
+            spheres = SPHERES_SHIP_OBJECTIVE.copy()
         elif card_type in CARD_TYPES_PLAYER_SPHERE:
-            spheres = SPHERES_PLAYER
+            spheres = SPHERES_PLAYER.copy()
         else:
-            spheres = SPHERES
+            spheres = SPHERES.copy()
 
         if card_type in CARD_TYPES_BOON:
             spheres.add('Boon')
@@ -2514,11 +2519,11 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         if card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL:
             if card_type_back == 'Ship Objective':
-                spheres_back = SPHERES_SHIP_OBJECTIVE
+                spheres_back = SPHERES_SHIP_OBJECTIVE.copy()
             elif card_type_back in CARD_TYPES_PLAYER_SPHERE:
-                spheres_back = SPHERES_PLAYER
+                spheres_back = SPHERES_PLAYER.copy()
             else:
-                spheres_back = SPHERES
+                spheres_back = SPHERES.copy()
 
             if card_type_back in CARD_TYPES_BOON:
                 spheres_back.add('Boon')
