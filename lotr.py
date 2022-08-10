@@ -1559,8 +1559,8 @@ def _clean_value(value):  # pylint: disable=R0915
     value = value.replace('---', '—')
     value = value.replace('--', '–')
     value = value.replace('−', '-')
-    value = re.sub(r' -(?=[0-9])', ' –', value)
-    value = re.sub(r' —(?=[0-9])', ' –', value)
+    value = re.sub(r' -(?=[0-9X])', ' –', value)
+    value = re.sub(r' —(?=[0-9X])', ' –', value)
     value = value.replace('[hyphen]', '-')
     value = value.replace("'", '’')
     value = value.replace('“', '"')
@@ -2100,6 +2100,49 @@ def get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
 
         if 'cancelled' in paragraph:
             errors.append('"canceled"')
+
+        if re.search(r' (?:[+–][0-9X]+|printed) attack\b', paragraph):
+            errors.append('"[attack] as tag"')
+
+        if re.search(
+                r' (?:leadership|lore|spirit|tactics|baggins|fellowship)\b',
+                paragraph):
+            errors.append('"[sphere name] as tag"')
+
+        if (re.search(
+                r'[Mm]ore than [0-9]+(?!\[pp\])',
+                paragraph.replace('no more', '').replace('No more', '')) and
+                not re.search(r'[Cc]annot[^.]+?more than [0-9]+(?!\[pp\])',
+                              paragraph)):
+            errors.append('"_ or more"')
+
+        if (re.search(r'[Ff]ewer than [0-9]+(?!\[pp\])', paragraph) and
+                not re.search(r'[Cc]annot[^.]+?fewer than [0-9]+(?!\[pp\])',
+                              paragraph)):
+            errors.append('"_ or fewer (less)"')
+
+        if (re.search(r'[Ll]ess than [0-9]+(?!\[pp\])', paragraph) and
+                not re.search(r'[Cc]annot[^.]+?less than [0-9]+(?!\[pp\])',
+                              paragraph)):
+            errors.append('"_ or fewer (less)"')
+
+        if re.search(r' defense\b', paragraph):
+            errors.append('"[defense] as tag"')
+
+        if re.search(r' willpower\b', paragraph):
+            errors.append('"[willpower] as tag"')
+
+        if re.search(r' (?:[+–][0-9X]+|printed) attack\b', paragraph):
+            errors.append('"[attack] as tag"')
+
+        if re.search(
+                r' (?:[+–][0-9X]+|printed) threat\b',
+                paragraph.replace('threat cost', '').replace('threat penalty',
+                                                             '')):
+            errors.append('"[threat] as tag"')
+
+        if re.search(r'[Cc]hoose[^:]*?: Either', paragraph):
+            errors.append('"choose: either"')
 
     if (field == CARD_TEXT and card[CARD_TYPE] == 'Quest'
             and str(card[CARD_COST]) == '1'):
@@ -3571,7 +3614,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_text_back is not None and
               card_type_back != 'Presentation' and
-              card_sphere_back != 'Back' and
+              card_sphere != 'Back' and
               not (card_flags_back and
                    'IgnoreRules' in extract_flags(card_flags_back))):
             rules_errors = get_rules_errors(card_text_back,
