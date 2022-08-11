@@ -109,7 +109,7 @@ EMOJIS = {
 HELP = {
     'alepcard': """
 List of **!alepcard** commands:
-
+` `
 **!alepcard <card name>** - display the first card matching a given card name (for example: `!alepcard Thengel`)
 **!alepcard <card name> n:<number>** - display the card #number matching a given card name (for example: `!alepcard Back Card n:2`)
 **!alepcard <card name> s:<set code>** - display the first card matching a given card name from a given set (for example: `!alepcard Back Card s:CoE`)
@@ -119,7 +119,7 @@ List of **!alepcard** commands:
 """,
     'cron': """
 List of **!cron** commands:
-
+` `
 **!cron dragncards build** - trigger a DragnCards build
 **!cron errors** - display all errors from the latest cron run
 **!cron log** - display a full execution log of the latest cron run
@@ -130,7 +130,7 @@ List of **!cron** commands:
 """,
     'playtest': """
 List of **!playtest** commands:
-
+` `
 **!playtest new
 <optional description>
 <list of targets>**
@@ -164,33 +164,33 @@ Some report
 """,
     'stat': """
 List of **!stat** commands:
-
+` `
 **!stat assistants** - display the list of assistants (all Discord users except for those who have a role)
 **!stat channels** - display the number of Discord channels and free channel slots
 **!stat dragncards build** - display information about the latest DragnCards build
 **!stat quest <quest name or set name or set code>** - display the quest statistics (for example: `!stat quest The Battle for the Beacon` or `!stat quest Children of Eorl` or `!stat quest TAP`)
-
+` `
 **!stat player cards <set name or set code>** - display DragnCards player cards statistics for the set
 **!stat player cards <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date
 **!stat player cards help** - display additional help about DragnCards player cards statistics
-
+` `
 **!stat all plays <quest name>** - display all DragnCards plays for the quest
 **!stat all plays <quest name> <date in YYYY-MM-DD format>** - display all DragnCards plays for the quest starting from the specified date
 **!stat all plays help** - display additional help about all DragnCards plays for the quest
-
+` `
 **!stat plays <quest name>** - display aggregated DragnCards plays statistics for the quest
 **!stat plays <quest name> <date in YYYY-MM-DD format>** - display aggregated DragnCards plays statistics for the quest starting from the specified date
 **!stat plays help** - display additional help about aggregated DragnCards plays statistics for the quest
-
+` `
 **!stat quests** - display aggregated DragnCards statistics for all released ALeP quests
 **!stat quests <date in YYYY-MM-DD format>** - display aggregated DragnCards statistics for all released ALeP quests starting from the specified date
 **!stat quests help** - display additional help about aggregated DragnCards statistics for all released ALeP quests
-
+` `
 **!stat help** - display this help message
 """,
     'art': """
 List of **!art** commands:
-
+` `
 **!art artists <set name or set code>** - display a copy-pasteable list of artist names (for example: `!art artists Children of Eorl` or `!art artists CoE`)
 **!art save <artist>** (as a reply to a message with an image attachment) - save the image as a card's artwork for the front side (for example: `!art save Ted Nasmith`)
 **!art saveb <artist>** (as a reply to a message with an image attachment) - save the image as a card's artwork for the back side (for example: `!art saveb John Howe`)
@@ -200,16 +200,21 @@ List of **!art** commands:
 """,
     'image': """
 List of **!image** commands:
-
+` `
 **!image set <set name or set code>** - post the last rendered images for all cards from a set (for example: `!image set The Aldburg Plot` or `!image set TAP`)
 **!image card <card name>** (or **!image <card name>**) - post the last rendered images for the first card matching a given card name (for example: `!image card Gavin`)
 **!image card this** (or **!image this**) - if in a card channel, post the last rendered images for the card
 **!image refresh** - clear the image cache (if you just uploaded new images to the Google Drive)
 **!image help** - display this help message
 """,
+    'edit': """
+List of **!edit** commands:
+` `
+**!edit rules <set name or set code>** - display all text that may be a subject of editing rules for a set (for example: `!edit rules Children of Eorl` or `!edit rules CoE`)
+""",
     'secret': """
 List of **!secret** commands:
-
+` `
 **!secret users** - prepare a list of all Discord users and save it in `Discord/users.csv`
 """
 }
@@ -217,7 +222,7 @@ HELP_STAT_PLAYER_CARDS = """
 **!stat player cards <set name or set code>** - display DragnCards player cards statistics for the set
 **!stat player cards <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date
 **!stat player cards help** - display this help message
-
+` `
 **Columns:**
 `card      ` card name
 `plays     ` total number of plays
@@ -236,7 +241,7 @@ HELP_STAT_ALL_PLAYS = """
 **!stat all plays <quest name>** - display all DragnCards plays for the quest
 **!stat all plays <quest name> <date in YYYY-MM-DD format>** - display all DragnCards plays for the quest starting from the specified date
 **!stat all plays help** - display this help message
-
+` `
 **Columns:**
 `date      ` date of the plays
 `replay_id ` replay ID.  You may replay any play by using a URL like `https://www.dragncards.com/newroom/replay/8da313ce-2f3a-4671-bd97-5ab379d39133`
@@ -250,7 +255,7 @@ HELP_STAT_PLAYS = """
 **!stat plays <quest name>** - display aggregated DragnCards plays statistics for the quest
 **!stat plays <quest name> <date in YYYY-MM-DD format>** - display aggregated DragnCards plays statistics for the quest starting from the specified date
 **!stat plays help** - display this help message
-
+` `
 **Columns:**
 `players   ` number of players. "[any]" means aggregated statistics for any number of players.
 `result    ` outcome of the play.  "win" means victory, "loss" means defeat, "-" means an incomplete play, and "[any]" means aggregated statistics for all outcomes.
@@ -266,7 +271,7 @@ HELP_STAT_QUESTS = """
 **!stat quests** - display aggregated DragnCards statistics for all released ALeP quests
 **!stat quests <date in YYYY-MM-DD format>** - display aggregated DragnCards statistics for all released ALeP quests starting from the specified date
 **!stat quests help** - display this help message
-
+` `
 **Columns:**
 `quest     ` quest name
 `plays     ` total number of plays
@@ -1470,6 +1475,81 @@ async def get_dragncards_quests_stat(start_date):
     res = lotr.get_dragncards_quests_stat(CONF, ';'.join(quests))
     res = '```\n{}```'.format(res.expandtabs(6))
     return res
+
+
+def get_rules_precedents(text, field, card, res):
+    """ Detect text rules precedents.
+    """
+    text = re.sub(r'\[i\].+?\[\/i\]', '\\*\\*\\*', text, flags=re.DOTALL)
+    paragraphs = [p.strip() for p in text.split('\n') if p.strip()]
+    if not paragraphs:
+        return
+
+    for paragraph in paragraphs:
+        if re.search(r'\b(?:they|them|their)\b', paragraph,
+                     flags=re.IGNORECASE):
+            data = {'name': card[lotr.CARD_NAME],
+                    'field': field,
+                    'text': re.sub(r'\b(they|them|their)\b', '**\\1**',
+                                   paragraph, flags=re.IGNORECASE),
+                    'row': card[lotr.ROW_COLUMN]}
+            res.setdefault('you/your', []).append(data)
+
+        if re.search(r'\beither\b[^.]+\bor\b', paragraph, flags=re.IGNORECASE):
+            data = {'name': card[lotr.CARD_NAME],
+                    'field': field,
+                    'text': re.sub(r'\b(either)\b', '**\\1**',
+                                   re.sub(r'\b(or)\b', '**\\1**', paragraph,
+                                          flags=re.IGNORECASE),
+                                   flags=re.IGNORECASE),
+                    'row': card[lotr.ROW_COLUMN]}
+            res.setdefault('Commas in either ... or statements',
+                           []).append(data)
+
+        if ' 1[pp]' in paragraph:
+            data = {'name': card[lotr.CARD_NAME],
+                    'field': field,
+                    'text': re.sub(r'(?<= 1\[pp\] )([A-Za-z-]+)', '**\\1**',
+                                   paragraph),
+                    'row': card[lotr.ROW_COLUMN]}
+            res.setdefault('Plural after [pp]', []).append(data)
+
+        if re.search(r'\b(?:he|him|his|she|her|it|its)\b', paragraph,
+                     flags=re.IGNORECASE):
+            data = {'name': card[lotr.CARD_NAME],
+                    'field': field,
+                    'text': re.sub(r'\b(he|him|his|she|her|it|its)\b',
+                                   '**\\1**', paragraph,
+                                   flags=re.IGNORECASE),
+                    'row': card[lotr.ROW_COLUMN]}
+            res.setdefault('Self-referential pronouns', []).append(data)
+
+        if re.search(r'\bany\b(?! active location| [2-9])', paragraph,
+                     flags=re.IGNORECASE):
+            data = {'name': card[lotr.CARD_NAME],
+                    'field': field,
+                    'text': re.sub(
+                        r'\b(any\b(?: 1)?)(?! active location| [2-9])',
+                        '**\\1**', paragraph, flags=re.IGNORECASE),
+                    'row': card[lotr.ROW_COLUMN]}
+            res.setdefault('Use of singular "any"', []).append(data)
+
+        if re.search(r'\b(?:a|an)\b', paragraph, flags=re.IGNORECASE):
+            data = {'name': card[lotr.CARD_NAME],
+                    'field': field,
+                    'text': re.sub(r'\b(a|an)\b', '**\\1**', paragraph,
+                                   flags=re.IGNORECASE),
+                    'row': card[lotr.ROW_COLUMN]}
+            res.setdefault('Use of numerals (a/an)', []).append(data)
+
+        if re.search(r'\b(?:one|two|three|four|five|six)\b', paragraph,
+                     flags=re.IGNORECASE):
+            data = {'name': card[lotr.CARD_NAME],
+                    'field': field,
+                    'text': re.sub(r'\b(one|two|three|four|five|six)\b',
+                                   '**\\1**', paragraph, flags=re.IGNORECASE),
+                    'row': card[lotr.ROW_COLUMN]}
+            res.setdefault('Use of numerals', []).append(data)
 
 
 class MyClient(discord.Client):  # pylint: disable=R0902
@@ -3383,19 +3463,18 @@ Targets removed.
         set_name = re.sub(r'^alep---', '', lotr.normalized_name(value))
         matches = [card for card in data['data'] if re.sub(
             r'^alep---', '',
-            lotr.normalized_name(card[lotr.CARD_SET_NAME])) ==
-                   set_name and card[lotr.CARD_TYPE] not in ('Presentation',
-                                                             'Rules')]
+            lotr.normalized_name(card[lotr.CARD_SET_NAME])) == set_name and
+                   card[lotr.CARD_TYPE] not in ('Presentation', 'Rules')]
+
         if not matches:
             set_code = value.lower()
             matches = [card for card in data['data']
-                       if card[lotr.CARD_SET_HOB_CODE].lower() == set_code
-                       and card[lotr.CARD_TYPE] not in ('Presentation',
-                                                        'Rules')]
+                       if card[lotr.CARD_SET_HOB_CODE].lower() == set_code and
+                       card[lotr.CARD_TYPE] not in ('Presentation', 'Rules')]
             if not matches:
                 return 'no cards found for the set'
 
-        matches.sort(key=lambda card: (card[lotr.ROW_COLUMN]))
+        matches.sort(key=lambda card: card[lotr.ROW_COLUMN])
         filenames = await self._get_artwork_files(matches[0][lotr.CARD_SET])
 
         file_data = {}
@@ -3848,6 +3927,99 @@ Targets removed.
                 await self._send_channel(message.channel, res)
 
 
+    async def _display_rules(self, value):  # ylint: disable=R0912,R0914,R0915
+        """ Display all text that may be a subject of editing rules for a set.
+        """
+        data = await read_card_data()
+
+        set_name = re.sub(r'^alep---', '', lotr.normalized_name(value))
+        matches = [card for card in data['data'] if re.sub(
+            r'^alep---', '',
+            lotr.normalized_name(card[lotr.CARD_SET_NAME])) == set_name and
+                   card[lotr.CARD_TYPE] != 'Presentation' and
+                   card.get(lotr.CARD_SPHERE) != 'Back']
+
+        if not matches:
+            set_code = value.lower()
+            matches = [card for card in data['data']
+                       if card[lotr.CARD_SET_HOB_CODE].lower() == set_code and
+                       card[lotr.CARD_TYPE] != 'Presentation' and
+                       card.get(lotr.CARD_SPHERE) != 'Back']
+            if not matches:
+                return 'no cards found for the set'
+
+        matches.sort(key=lambda card: card[lotr.ROW_COLUMN])
+        res = {}
+        for card in matches:
+            if card.get(lotr.CARD_TEXT) is not None:
+                get_rules_precedents(
+                    card[lotr.CARD_TEXT], lotr.CARD_TEXT, card, res)
+
+            if card.get(lotr.BACK_PREFIX + lotr.CARD_TEXT) is not None:
+                get_rules_precedents(
+                    card[lotr.BACK_PREFIX + lotr.CARD_TEXT],
+                         lotr.BACK_PREFIX + lotr.CARD_TEXT, card, res)
+
+            if card.get(lotr.CARD_SHADOW) is not None:
+                get_rules_precedents(
+                    card[lotr.CARD_SHADOW], lotr.CARD_SHADOW, card, res)
+
+            if card.get(lotr.BACK_PREFIX + lotr.CARD_SHADOW) is not None:
+                get_rules_precedents(
+                    card[lotr.BACK_PREFIX + lotr.CARD_SHADOW],
+                         lotr.BACK_PREFIX + lotr.CARD_SHADOW, card, res)
+
+        output = []
+        for rule, card_list in res.items():
+            rule_output = '__**{}**:__'.format(rule)
+            for card_data in card_list:
+                row_url = '<{}&range=A{}>'.format(data['url'],
+                                                  card_data['row'])
+                rule_output += '\n` `\n*{}* (**{}**):\n{}\n{}'.format(
+                    card_data['name'], card_data['field'].replace('_', ' '),
+                    card_data['text'], row_url)
+
+            output.append(rule_output)
+
+        output = '\n` `\n'.join(output)
+        if output:
+            output = '{}\n` `\nDone.'.format(output)
+        else:
+            output = 'no rules precedents found'
+
+        return output
+
+
+    async def _process_edit_command(self, message):
+        """ Process an edit command.
+        """
+        if message.content.lower() == '!edit':
+            command = 'help'
+        else:
+            command = re.sub(r'^!edit ', '', message.content,
+                             flags=re.IGNORECASE).split('\n')[0].strip()
+
+        logging.info('Received edit command: %s', command)
+
+        if command.lower().startswith('rules '):
+            try:
+                set_name = re.sub(r'^rules ', '', command,
+                                  flags=re.IGNORECASE)
+                res = await self._display_rules(set_name)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await self._send_channel(message.channel, res)
+        elif command.lower() == 'rules':
+            await message.channel.send('please specify the set')
+        else:
+            res = HELP['edit']
+            await self._send_channel(message.channel, res)
+
+
     async def _process_help_command(self, message):
         """ Process a help command.
         """
@@ -3885,6 +4057,9 @@ Targets removed.
             elif (message.content.lower().startswith('!stat ') or
                   message.content.lower() == '!stat'):
                 await self._process_stat_command(message)
+            elif (message.content.lower().startswith('!edit ') or
+                  message.content.lower() == '!edit'):
+                await self._process_edit_command(message)
             elif message.content.lower().startswith('!secret '):
                 await self._process_secret_command(message)
             elif message.content.lower().startswith('!help'):

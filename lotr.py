@@ -1972,7 +1972,7 @@ def _verify_period(value):
     return res
 
 
-def get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
+def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
     """ Detect text rules errors.
     """
     errors = []
@@ -2112,17 +2112,17 @@ def get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if (re.search(
                 r'[Mm]ore than [0-9]+(?!\[pp\])',
                 paragraph.replace('no more', '').replace('No more', '')) and
-                not re.search(r'[Cc]annot[^.]+?more than [0-9]+(?!\[pp\])',
+                not re.search(r'[Cc]annot[^.]+more than [0-9]+(?!\[pp\])',
                               paragraph)):
             errors.append('"_ or more"')
 
         if (re.search(r'[Ff]ewer than [0-9]+(?!\[pp\])', paragraph) and
-                not re.search(r'[Cc]annot[^.]+?fewer than [0-9]+(?!\[pp\])',
+                not re.search(r'[Cc]annot[^.]+fewer than [0-9]+(?!\[pp\])',
                               paragraph)):
             errors.append('"_ or fewer (less)"')
 
         if (re.search(r'[Ll]ess than [0-9]+(?!\[pp\])', paragraph) and
-                not re.search(r'[Cc]annot[^.]+?less than [0-9]+(?!\[pp\])',
+                not re.search(r'[Cc]annot[^.]+less than [0-9]+(?!\[pp\])',
                               paragraph)):
             errors.append('"_ or fewer (less)"')
 
@@ -3557,7 +3557,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_text is not None and
               card_type != 'Presentation' and card_sphere != 'Back' and
               not (card_flags and 'IgnoreRules' in extract_flags(card_flags))):
-            rules_errors = get_rules_errors(card_text, CARD_TEXT, row)
+            rules_errors = _get_rules_errors(card_text, CARD_TEXT, row)
             if rules_errors:
                 message = (
                     'Rules error(s) in text for row #{}{}: {} (use '
@@ -3617,8 +3617,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
               card_sphere != 'Back' and
               not (card_flags_back and
                    'IgnoreRules' in extract_flags(card_flags_back))):
-            rules_errors = get_rules_errors(card_text_back,
-                                            BACK_PREFIX + CARD_TEXT, row)
+            rules_errors = _get_rules_errors(card_text_back,
+                                             BACK_PREFIX + CARD_TEXT, row)
             if rules_errors:
                 message = (
                     'Rules error(s) in text back for row #{}{}: {} (use '
@@ -3672,7 +3672,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_shadow is not None and
               not (card_flags and 'IgnoreRules' in extract_flags(card_flags))):
-            rules_errors = get_rules_errors(card_shadow, CARD_SHADOW, row)
+            rules_errors = _get_rules_errors(card_shadow, CARD_SHADOW, row)
             if rules_errors:
                 message = (
                     'Rules error(s) in shadow for row #{}{}: {} (use '
@@ -3711,8 +3711,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_shadow_back is not None and
               not (card_flags_back and
                    'IgnoreRules' in extract_flags(card_flags_back))):
-            rules_errors = get_rules_errors(card_shadow_back,
-                                            BACK_PREFIX + CARD_SHADOW, row)
+            rules_errors = _get_rules_errors(card_shadow_back,
+                                             BACK_PREFIX + CARD_SHADOW, row)
             if rules_errors:
                 message = (
                     'Rules error(s) in shadow back for row #{}{}: {} (use '
