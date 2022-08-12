@@ -3588,6 +3588,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif card_text is not None and 'When revealed:' in card_text:
+            message = ('Capitalize "When Revealed" in the text for row #{}{}'
+                       .format(i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
         elif (card_text is not None and
               card_type != 'Presentation' and card_sphere != 'Back' and
               not (card_flags and 'IgnoreRules' in extract_flags(card_flags))):
@@ -3641,6 +3649,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
               not _verify_period(card_text_back)):
             message = ('Missing period at the end of the text back paragraph '
                        'for row #{}{}'.format(i, scratch))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_text_back is not None and 'When revealed:' in card_text_back:
+            message = ('Capitalize "When Revealed" in the text back for '
+                       'row #{}{}'.format(i, scratch))
             logging.error(message)
             if not card_scratch:
                 errors.append(message)

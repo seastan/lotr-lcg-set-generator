@@ -1477,7 +1477,7 @@ async def get_dragncards_quests_stat(start_date):
     return res
 
 
-def get_rules_precedents(text, field, card, res):
+def get_rules_precedents(text, field, card, res):  # pylint: disable=R0912
     """ Detect text rules precedents.
     """
     text = re.sub(r'\[i\].+?\[\/i\]', '\\*\\*\\*', text, flags=re.DOTALL)
