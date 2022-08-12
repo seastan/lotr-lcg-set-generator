@@ -2043,8 +2043,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if re.search(r'may trigger this (?:action|response)',
                      paragraph, flags=re.IGNORECASE):
             errors.append('"Any player may trigger this effect"')
-
-        if re.search(r'\(any player may trigger this effect',
+        elif re.search(r'\(any player may trigger this effect',
                      paragraph, flags=re.IGNORECASE):
             errors.append('"Any player may trigger this effect"')
 
@@ -2110,21 +2109,47 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
             errors.append('"[sphere name] as tag"')
 
         if (re.search(
-                r'[Mm]ore than [0-9]+(?!\[pp\])',
-                paragraph.replace('no more', '').replace('No more', '')) and
-                not re.search(r'[Cc]annot[^.]+more than [0-9]+(?!\[pp\])',
-                              paragraph)):
-            errors.append('"_ or more"')
+                r'more than [0-9]+(?!\[pp\])',
+                re.sub(r'no more', '', paragraph, flags=re.IGNORECASE),
+                flags=re.IGNORECASE) and
+                not re.search(r'cannot[^.]+more than [0-9]+(?!\[pp\])',
+                              re.sub(r'cannot[^.]+unless', '', paragraph,
+                                     flags=re.IGNORECASE),
+                              flags=re.IGNORECASE)):
+            errors.append('"_ or more (greater)"')
+        elif (re.search(
+                r'greater than [0-9]+(?!\[pp\])', paragraph,
+                flags=re.IGNORECASE) and
+                not re.search(r'cannot[^.]+greater than [0-9]+(?!\[pp\])',
+                              re.sub(r'cannot[^.]+unless', '', paragraph,
+                                     flags=re.IGNORECASE),
+                              flags=re.IGNORECASE)):
+            errors.append('"_ or more (greater)"')
 
-        if (re.search(r'[Ff]ewer than [0-9]+(?!\[pp\])', paragraph) and
-                not re.search(r'[Cc]annot[^.]+fewer than [0-9]+(?!\[pp\])',
-                              paragraph)):
+        if (re.search(r'fewer than [0-9]+(?!\[pp\])', paragraph,
+                      flags=re.IGNORECASE) and
+                not re.search(r'cannot[^.]+fewer than [0-9]+(?!\[pp\])',
+                              re.sub(r'cannot[^.]+unless', '', paragraph,
+                                     flags=re.IGNORECASE),
+                              flags=re.IGNORECASE)):
+            errors.append('"_ or fewer (less)"')
+        elif (re.search(r'less than [0-9]+(?!\[pp\])', paragraph,
+                        flags=re.IGNORECASE) and
+                not re.search(r'cannot[^.]+less than [0-9]+(?!\[pp\])',
+                              re.sub(r'cannot[^.]+unless', '', paragraph,
+                                     flags=re.IGNORECASE),
+                              flags=re.IGNORECASE)):
             errors.append('"_ or fewer (less)"')
 
-        if (re.search(r'[Ll]ess than [0-9]+(?!\[pp\])', paragraph) and
-                not re.search(r'[Cc]annot[^.]+less than [0-9]+(?!\[pp\])',
-                              paragraph)):
-            errors.append('"_ or fewer (less)"')
+        if (re.search(r'cannot[^.]+ [0-9]+ or (?:more|greater)',
+                      re.sub(r'cannot[^.]+unless', '', paragraph,
+                             flags=re.IGNORECASE), flags=re.IGNORECASE)):
+            errors.append('"more (greater) than _"')
+
+        if (re.search(r'cannot[^.]+ [0-9]+ or (?:less|fewer)',
+                      re.sub(r'cannot[^.]+unless', '', paragraph,
+                             flags=re.IGNORECASE), flags=re.IGNORECASE)):
+            errors.append('"fewer (less) than _"')
 
         if re.search(r' defense\b', paragraph):
             errors.append('"[defense] as tag"')
@@ -2143,6 +2168,15 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
 
         if re.search(r'[Cc]hoose[^:]*?: Either', paragraph):
             errors.append('"choose: either"')
+
+        if re.search(r'\bheal[^.]+?\bon\b',
+                     re.sub(r'\bfrom\b[^.]+?\bon\b', '', paragraph,
+                            flags=re.IGNORECASE),
+                     flags=re.IGNORECASE):
+            errors.append('"heal _ from"')
+
+        if 'quest card' in paragraph:
+            errors.append('"redundant: card(s)"')
 
     if (field == CARD_TEXT and card[CARD_TYPE] == 'Quest'
             and str(card[CARD_COST]) == '1'):
