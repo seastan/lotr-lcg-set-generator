@@ -1493,7 +1493,7 @@ def get_rules_precedents(text, field, card, res):
                     'text': re.sub(r'\b(they|them|their)\b', '**\\1**',
                                    paragraph, flags=re.IGNORECASE),
                     'row': card[lotr.ROW_COLUMN]}
-            res.setdefault('you/your', []).append(data)
+            res.setdefault('You/your', []).append(data)
 
         if re.search(r'\beither\b[^.]+\bor\b', paragraph, flags=re.IGNORECASE):
             data = {'name': card[lotr.CARD_NAME],
@@ -1534,14 +1534,6 @@ def get_rules_precedents(text, field, card, res):
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('Use of singular "any"', []).append(data)
 
-        if re.search(r'\b(?:a|an)\b', paragraph, flags=re.IGNORECASE):
-            data = {'name': card[lotr.CARD_NAME],
-                    'field': field,
-                    'text': re.sub(r'\b(a|an)\b', '**\\1**', paragraph,
-                                   flags=re.IGNORECASE),
-                    'row': card[lotr.ROW_COLUMN]}
-            res.setdefault('Use of numerals (a/an)', []).append(data)
-
         if re.search(r'\b(?:one|two|three|four|five|six)\b', paragraph,
                      flags=re.IGNORECASE):
             data = {'name': card[lotr.CARD_NAME],
@@ -1550,6 +1542,59 @@ def get_rules_precedents(text, field, card, res):
                                    '**\\1**', paragraph, flags=re.IGNORECASE),
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('Use of numerals', []).append(data)
+
+        if re.search(r'\b(?:a|an)\b', paragraph, flags=re.IGNORECASE):
+            data = {'name': card[lotr.CARD_NAME],
+                    'field': field,
+                    'text': re.sub(r'\b(a|an)\b', '**\\1**', paragraph,
+                                   flags=re.IGNORECASE),
+                    'row': card[lotr.ROW_COLUMN]}
+            res.setdefault('Use of numerals (a/an)', []).append(data)
+
+        if re.search(r'\b(?:less|fewer)\b', paragraph,
+                     flags=re.IGNORECASE):
+            data = {'name': card[lotr.CARD_NAME],
+                    'field': field,
+                    'text': re.sub(r'\b(less|fewer)\b', '**\\1**', paragraph,
+                                   flags=re.IGNORECASE),
+                    'row': card[lotr.ROW_COLUMN]}
+            res.setdefault('Less vs fewer', []).append(data)
+
+        if re.search(r'\b(?:more|greater)\b', paragraph,
+                     flags=re.IGNORECASE):
+            data = {'name': card[lotr.CARD_NAME],
+                    'field': field,
+                    'text': re.sub(r'\b(more|greater)\b', '**\\1**', paragraph,
+                                   flags=re.IGNORECASE),
+                    'row': card[lotr.ROW_COLUMN]}
+            res.setdefault('More vs greater', []).append(data)
+
+        if re.search(r'\bif able\b', paragraph,
+                     flags=re.IGNORECASE):
+            data = {'name': card[lotr.CARD_NAME],
+                    'field': field,
+                    'text': re.sub(r'\b(if able)\b', '**\\1**', paragraph,
+                                   flags=re.IGNORECASE),
+                    'row': card[lotr.ROW_COLUMN]}
+            res.setdefault('If able', []).append(data)
+
+        if re.search(r': [A-Z]', paragraph):
+            paragraph = re.sub(r'\bQuest Resolution(?: \([^\)]+\))?:', '',
+                               paragraph)
+            paragraph = re.sub(r'\b(?:Valour )?(?:Resource |Planning |Quest '
+                               r'|Travel |Encounter |Combat |Refresh )?'
+                               r'(?:Action):', '', paragraph)
+            paragraph = re.sub(r'\b(?:When Revealed|Forced|Valour Response'
+                               r'|Response|Travel|Shadow|Resolution):', '',
+                               paragraph)
+            paragraph = re.sub(r'\bSetup(?: \([^\)]+\))?:', '', paragraph)
+            if re.search(r': [A-Z]', paragraph):
+                data = {'name': card[lotr.CARD_NAME],
+                        'field': field,
+                        'text': re.sub(r'(: [A-Z][a-z-]+)', '**\\1**',
+                                       paragraph),
+                        'row': card[lotr.ROW_COLUMN]}
+                res.setdefault('Capitalization after a colon', []).append(data)
 
 
 class MyClient(discord.Client):  # pylint: disable=R0902
@@ -3981,7 +4026,7 @@ Targets removed.
 
             output.append(rule_output)
 
-        output = '\n` `\n'.join(output)
+        output = '\n` `\n'.join(sorted(output))
         if output:
             output = '{}\n` `\nDone.'.format(output)
         else:
