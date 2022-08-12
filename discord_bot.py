@@ -3449,6 +3449,9 @@ Targets removed.
         """ Move artwork files for the card.
         """
         return_message = ''
+        if old_set_id == new_set_id:
+            return return_message
+
         filenames = await self._get_artwork_files(old_set_id)
         for filename in filenames:
             if filename.split('_')[0] != card_id:
