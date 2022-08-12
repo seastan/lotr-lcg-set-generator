@@ -643,6 +643,8 @@ CARD_COLUMNS = {}
 SHEET_IDS = {}
 SETS = {}
 DATA = []
+ALL_NAMES = set()
+ALL_SCRATCH_NAMES = set()
 ALL_TRAITS = set()
 ALL_SCRATCH_TRAITS = set()
 PRE_SANITY_CHECK = {}
@@ -1509,38 +1511,57 @@ def _update_discord_category(category):
     return category
 
 
+def _extract_all_names(data):
+    """ Collect all names from the spreadsheet.
+    """
+    ALL_NAMES.clear()
+    ALL_SCRATCH_NAMES.clear()
+    for row in data:
+        if row[CARD_TYPE] in CARD_TYPES_NO_NAME_TAG:
+            continue
+
+        if row[CARD_SCRATCH]:
+            if row[CARD_NAME]:
+                ALL_SCRATCH_NAMES.add(row[CARD_NAME].strip())
+
+            if row[CARD_SIDE_B]:
+                ALL_SCRATCH_NAMES.add(row[CARD_SIDE_B].strip())
+        else:
+            if row[CARD_NAME]:
+                ALL_NAMES.add(row[CARD_NAME].strip())
+
+            if row[CARD_SIDE_B]:
+                ALL_NAMES.add(row[CARD_SIDE_B].strip())
+
+
 def _extract_all_traits(data):
     """ Collect all traits from the spreadsheet.
     """
     ALL_TRAITS.clear()
-    for row in data:
-        if row[CARD_SCRATCH]:
-            continue
-
-        if row[CARD_TRAITS]:
-            traits = re.sub(r'\[[^\]]+\]', '', row[CARD_TRAITS])
-            ALL_TRAITS.update(
-                [t.strip() for t in traits.split('.') if t.strip()])
-
-        if row[BACK_PREFIX + CARD_TRAITS]:
-            traits = re.sub(r'\[[^\]]+\]', '', row[BACK_PREFIX + CARD_TRAITS])
-            ALL_TRAITS.update(
-                [t.strip() for t in traits.split('.') if t.strip()])
-
     ALL_SCRATCH_TRAITS.clear()
     for row in data:
-        if not row[CARD_SCRATCH]:
-            continue
+        if row[CARD_SCRATCH]:
+            if row[CARD_TRAITS]:
+                traits = re.sub(r'\[[^\]]+\]', '', row[CARD_TRAITS])
+                ALL_SCRATCH_TRAITS.update(
+                    [t.strip() for t in traits.split('.') if t.strip()])
 
-        if row[CARD_TRAITS]:
-            traits = re.sub(r'\[[^\]]+\]', '', row[CARD_TRAITS])
-            ALL_SCRATCH_TRAITS.update(
-                [t.strip() for t in traits.split('.') if t.strip()])
+            if row[BACK_PREFIX + CARD_TRAITS]:
+                traits = re.sub(r'\[[^\]]+\]', '',
+                                row[BACK_PREFIX + CARD_TRAITS])
+                ALL_SCRATCH_TRAITS.update(
+                    [t.strip() for t in traits.split('.') if t.strip()])
+        else:
+            if row[CARD_TRAITS]:
+                traits = re.sub(r'\[[^\]]+\]', '', row[CARD_TRAITS])
+                ALL_TRAITS.update(
+                    [t.strip() for t in traits.split('.') if t.strip()])
 
-        if row[BACK_PREFIX + CARD_TRAITS]:
-            traits = re.sub(r'\[[^\]]+\]', '', row[BACK_PREFIX + CARD_TRAITS])
-            ALL_SCRATCH_TRAITS.update(
-                [t.strip() for t in traits.split('.') if t.strip()])
+            if row[BACK_PREFIX + CARD_TRAITS]:
+                traits = re.sub(r'\[[^\]]+\]', '',
+                                row[BACK_PREFIX + CARD_TRAITS])
+                ALL_TRAITS.update(
+                    [t.strip() for t in traits.split('.') if t.strip()])
 
 
 def _clean_value(value):  # pylint: disable=R0915
@@ -1600,12 +1621,26 @@ def _clean_value(value):  # pylint: disable=R0915
     return value
 
 
-def _clean_data(data):  # pylint: disable=R0912
+def _get_similar_names(card_name, scratch):
+    """ Get similar card names.
+    """
+    card_name_regex = r'\b' + re.escape(card_name) + r'\b'
+    res = {n for n in ALL_NAMES
+           if re.search(card_name_regex, n) and card_name != n}
+    if scratch:
+        res_scratch = {n for n in ALL_SCRATCH_NAMES
+                       if re.search(card_name_regex, n) and card_name != n}
+        res.update(res_scratch)
+
+    return res
+
+
+def _clean_data(data):  # pylint: disable=R0912,R0915
     """ Clean data from the spreadsheet.
     """
     PRE_SANITY_CHECK.clear()
 
-    for row in data:
+    for row in data:  # pylint: disable=R1702
         card_name = str(row.get(CARD_NAME) or '').strip()
         if len(card_name) == 1:
             card_name = card_name.upper()
@@ -1623,9 +1658,9 @@ def _clean_data(data):  # pylint: disable=R0912
                 row[CARD_TYPE] not in CARD_TYPES_NO_NAME_TAG and
                 not (row[CARD_FLAGS] and
                      'IgnoreName' in extract_flags(row[CARD_FLAGS]))):
-            test_card_name = r'\b' + re.escape(card_name) + r'\b'
+            card_name_regex = r'\b' + re.escape(card_name) + r'\b'
         else:
-            test_card_name = None
+            card_name_regex = None
 
         if (card_name_back and card_name_back not in ALL_TRAITS and  # pylint: disable=R0916
                 (not row[CARD_SCRATCH] or
@@ -1634,42 +1669,82 @@ def _clean_data(data):  # pylint: disable=R0912
                 not (row[BACK_PREFIX + CARD_FLAGS] and
                      'IgnoreName' in
                      extract_flags(row[BACK_PREFIX + CARD_FLAGS]))):
-            test_card_name_back = r'\b' + re.escape(card_name) + r'\b'
+            card_name_regex_back = r'\b' + re.escape(card_name) + r'\b'
         else:
-            test_card_name_back = None
+            card_name_regex_back = None
 
         for key, value in row.items():
             if isinstance(value, str):
-                if test_card_name:
-                    if (key == CARD_TEXT and
-                            re.search(test_card_name, value)):
-                        error = 'Hardcoded card name instead of [name] in text'
-                        PRE_SANITY_CHECK.setdefault(
-                            (row[ROW_COLUMN], row[CARD_SCRATCH]),
-                            []).append(error)
-                    elif (key == CARD_SHADOW and
-                          re.search(test_card_name, value)):
-                        error = (
-                            'Hardcoded card name instead of [name] in shadow')
-                        PRE_SANITY_CHECK.setdefault(
-                            (row[ROW_COLUMN], row[CARD_SCRATCH]),
-                            []).append(error)
+                if card_name_regex:
+                    if key == CARD_TEXT and re.search(card_name_regex, value):
+                        prepared_value = value
+                        similar_names = _get_similar_names(card_name,
+                                                           row[CARD_SCRATCH])
+                        for similar_name in similar_names:
+                            similar_name_regex = (
+                                r'\b' + re.escape(similar_name) + r'\b')
+                            prepared_value = re.sub(similar_name_regex, '',
+                                                    prepared_value)
 
-                if test_card_name_back:
+                        if re.search(card_name_regex, prepared_value):
+                            error = ('Hardcoded card name instead of [name] '
+                                     'in text')
+                            PRE_SANITY_CHECK.setdefault(
+                                (row[ROW_COLUMN], row[CARD_SCRATCH]),
+                                []).append(error)
+                    elif (key == CARD_SHADOW and
+                          re.search(card_name_regex, value)):
+                        prepared_value = value
+                        similar_names = _get_similar_names(card_name,
+                                                           row[CARD_SCRATCH])
+                        for similar_name in similar_names:
+                            similar_name_regex = (
+                                r'\b' + re.escape(similar_name) + r'\b')
+                            prepared_value = re.sub(similar_name_regex, '',
+                                                    prepared_value)
+
+                        if re.search(card_name_regex, prepared_value):
+                            error = ('Hardcoded card name instead of [name] '
+                                     'in shadow')
+                            PRE_SANITY_CHECK.setdefault(
+                                (row[ROW_COLUMN], row[CARD_SCRATCH]),
+                                []).append(error)
+
+                if card_name_regex_back:
                     if (key == BACK_PREFIX + CARD_TEXT and
-                            re.search(test_card_name_back, value)):
-                        error = ('Hardcoded card name instead of [name] in '
-                                 'text back')
-                        PRE_SANITY_CHECK.setdefault(
-                            (row[ROW_COLUMN], row[CARD_SCRATCH]),
-                            []).append(error)
+                            re.search(card_name_regex_back, value)):
+                        prepared_value = value
+                        similar_names = _get_similar_names(card_name_back,
+                                                           row[CARD_SCRATCH])
+                        for similar_name in similar_names:
+                            similar_name_regex = (
+                                r'\b' + re.escape(similar_name) + r'\b')
+                            prepared_value = re.sub(similar_name_regex, '',
+                                                    prepared_value)
+
+                        if re.search(card_name_regex_back, prepared_value):
+                            error = ('Hardcoded card name instead of [name] '
+                                     'in text back')
+                            PRE_SANITY_CHECK.setdefault(
+                                (row[ROW_COLUMN], row[CARD_SCRATCH]),
+                                []).append(error)
                     elif (key == BACK_PREFIX + CARD_SHADOW and
-                          re.search(test_card_name_back, value)):
-                        error = ('Hardcoded card name instead of [name] in '
-                                 'shadow back')
-                        PRE_SANITY_CHECK.setdefault(
-                            (row[ROW_COLUMN], row[CARD_SCRATCH]),
-                            []).append(error)
+                              re.search(card_name_regex_back, value)):
+                        prepared_value = value
+                        similar_names = _get_similar_names(card_name_back,
+                                                           row[CARD_SCRATCH])
+                        for similar_name in similar_names:
+                            similar_name_regex = (
+                                r'\b' + re.escape(similar_name) + r'\b')
+                            prepared_value = re.sub(similar_name_regex, '',
+                                                    prepared_value)
+
+                        if re.search(card_name_regex_back, prepared_value):
+                            error = ('Hardcoded card name instead of [name] '
+                                     'in shadow back')
+                            PRE_SANITY_CHECK.setdefault(
+                                (row[ROW_COLUMN], row[CARD_SCRATCH]),
+                                []).append(error)
 
                 if key != CARD_DECK_RULES:
                     if key.startswith(BACK_PREFIX):
@@ -1867,6 +1942,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
             DATA.extend(data)
 
     DATA[:] = [row for row in DATA if not _skip_row(row)]
+    _extract_all_names(DATA)
     _extract_all_traits(DATA)
     _clean_data(DATA)
 
