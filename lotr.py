@@ -2254,6 +2254,9 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if 'quest card' in paragraph:
             errors.append('"redundant: card(s)"')
 
+        if re.search(r'[2-90X] card\b', paragraph):
+            errors.append('"cards"')
+
     if (field == CARD_TEXT and card[CARD_TYPE] == 'Quest'
             and str(card[CARD_COST]) == '1'):
         if 'When Revealed' in text:
