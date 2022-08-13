@@ -2254,7 +2254,8 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if 'quest card' in paragraph:
             errors.append('"redundant: card(s)"')
 
-        if re.search(r'[2-90X] card\b', paragraph):
+        if re.search(r'(?<!\bstage )[2-90X] card\b', paragraph,
+                     flags=re.IGNORECASE):
             errors.append('"cards"')
 
     if (field == CARD_TEXT and card[CARD_TYPE] == 'Quest'
