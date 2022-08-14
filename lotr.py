@@ -2168,6 +2168,15 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                        paragraph.replace('complete rules', ''),
                        flags=re.IGNORECASE):
             errors.append('"defeat(ed)"')
+        elif re.search(r'explore (?:this |a quest )?stage', paragraph,
+                       flags=re.IGNORECASE):
+            errors.append('"defeat(ed)"')
+        elif re.search(r'(?:stage|quest) (?:is|is not|cannot be) explored',
+                       paragraph):
+            errors.append('"defeat(ed)"')
+        elif re.search(r'\b(?:clear|cleared)\b', paragraph,
+                       flags=re.IGNORECASE):
+            errors.append('"defeat(ed)"')
 
         if re.search(r'play only after',
                      paragraph, flags=re.IGNORECASE):
@@ -2253,6 +2262,9 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
 
         if 'quest card' in paragraph:
             errors.append('"redundant: card(s)"')
+
+        if 'set-aside' in paragraph:
+            errors.append('"set aside"')
 
         if re.search(r'(?<!\bstage )[2-90X] card\b', paragraph,
                      flags=re.IGNORECASE):
