@@ -639,6 +639,11 @@ RESTRICTED_TRANSLATION = {
     'Spanish': 'Restringido'
 }
 
+LOWERCASE_WORDS = {
+    'a', 'an', 'the', 'and', 'as', 'at', 'but', 'by', 'for', 'from', 'if',
+    'in', 'into', 'nor', 'of', 'on', 'onto', 'or', 'out', 'so', 'than',
+    'that', 'to', 'up', 'with', 'am', 'are', 'is', 'was', 'were', 'sonof_'}
+
 CARD_COLUMNS = {}
 SHEET_IDS = {}
 SETS = {}
@@ -2048,6 +2053,63 @@ def _verify_period(value):
     return res
 
 
+def _is_capitalized(word):
+    """ Check whether the word is capitalized or not.
+    """
+    return word and word[0] == word[0].upper()
+
+
+def _get_capitalization_errors(text):  # pylint: disable=R0912
+    """ Detect capitalization errors.
+    """
+    errors = []
+    text = (text.replace(' son of ', ' sonof_ ')
+            .replace(' Son of ', ' Sonof_ ')
+            .replace(' son Of ', ' sonOf_ ')
+            .replace(' Son Of ', ' SonOf_ '))
+    parts = text.split(' ')
+    parts = [re.sub(r'^\.\.\.', '',
+                    re.sub(r'(?:\.\.\.|[,.?!\'])$', '',
+                           re.sub(r'^“', '', re.sub(r'”$', '', p))))
+             for p in parts]
+    if '' in parts:
+        errors.append('"an empty word"')
+
+    parts = [p for p in parts if p]
+    if len(parts) > 0:
+        if not _is_capitalized(parts[0]):
+            errors.append('"first word ({}) should be capitalized"'
+                          .format(parts[0]))
+
+    if len(parts) > 1:
+        if not _is_capitalized(parts[-1]):
+            errors.append('"last word ({}) should be capitalized"'
+                          .format(parts[-1]))
+
+    if len(parts) > 2:
+        for part in parts[1:-1]:
+            capitalized = _is_capitalized(part)
+            if capitalized and part.lower() in LOWERCASE_WORDS:
+                errors.append('"{} should not be capitalized"'.format(
+                    part.replace('Sonof_', 'Son of')
+                    .replace('sonOf_', 'son Of').replace('SonOf_', 'Son Of')))
+            elif not capitalized and part.lower() not in LOWERCASE_WORDS:
+                errors.append('"{} should be capitalized"'.format(part))
+
+    for part in parts:
+        for character in re.findall(r'(?<=’).', part):
+            if character != character.lower():
+                errors.append('"use lowercase after \' in {}"'.format(part))
+                break
+
+        for character in re.findall(r'(?<=-).', re.sub(r'-[a-z]+-', '', part)):
+            if character != character.lower():
+                errors.append('"use lowercase after - in {}"'.format(part))
+                break
+
+    return errors
+
+
 def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
     """ Detect text rules errors.
     """
@@ -2529,6 +2591,20 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif (card_encounter_set is not None and
+              not (card_flags and 'IgnoreName' in extract_flags(card_flags))):
+            capitalization_errors = _get_capitalization_errors(
+                card_encounter_set)
+            if capitalization_errors:
+                message = (
+                    'Capitalization error(s) in encounter set for row #{}{}: '
+                    '{} (use IgnoreName flag to ignore)'.format(
+                        i, scratch, ', '.join(capitalization_errors)))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
 
         if card_name is None:
             message = 'No card name for row #{}{}'.format(i, scratch)
@@ -2537,6 +2613,19 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif (card_name is not None and
+              not (card_flags and 'IgnoreName' in extract_flags(card_flags))):
+            capitalization_errors = _get_capitalization_errors(card_name)
+            if capitalization_errors:
+                message = (
+                    'Capitalization error(s) in card name for row #{}{}: {} '
+                    '(use IgnoreName flag to ignore)'.format(
+                        i, scratch, ', '.join(capitalization_errors)))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
 
         if card_name_back is not None and card_type_back is None:
             message = 'Redundant card name back for row #{}{}'.format(
@@ -2553,6 +2642,20 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif (card_name_back is not None and
+              not (card_flags_back and
+                   'IgnoreName' in extract_flags(card_flags_back))):
+            capitalization_errors = _get_capitalization_errors(card_name_back)
+            if capitalization_errors:
+                message = (
+                    'Capitalization error(s) in card name back for row #{}{}: '
+                    '{} (use IgnoreName flag to ignore)'.format(
+                        i, scratch, ', '.join(capitalization_errors)))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
 
         if card_unique is not None and card_unique not in ('1', 1):
             message = 'Incorrect format for unique for row #{}{}'.format(
@@ -2777,6 +2880,20 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif (card_traits is not None and
+              not (card_flags and 'IgnoreName' in extract_flags(card_flags))):
+            capitalization_errors = _get_capitalization_errors(
+                card_traits.replace('[size]', '').replace('[/size]', ''))
+            if capitalization_errors:
+                message = (
+                    'Capitalization error(s) in traits for row #{}{}: {} '
+                    '(use IgnoreName flag to ignore)'.format(
+                        i, scratch, ', '.join(capitalization_errors)))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
 
         if card_traits_back is not None and card_type_back is None:
             message = 'Redundant traits back for row #{}{}'.format(i, scratch)
@@ -2833,6 +2950,21 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif (card_traits_back is not None and
+              not (card_flags_back and
+                   'IgnoreName' in extract_flags(card_flags_back))):
+            capitalization_errors = _get_capitalization_errors(
+                card_traits_back.replace('[size]', '').replace('[/size]', ''))
+            if capitalization_errors:
+                message = (
+                    'Capitalization error(s) in traits back for row #{}{}: {} '
+                    '(use IgnoreName flag to ignore)'.format(
+                        i, scratch, ', '.join(capitalization_errors)))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
 
         if card_keywords is not None and card_type in CARD_TYPES_NO_KEYWORDS:
             message = 'Redundant keywords for row #{}{}'.format(i, scratch)
@@ -4442,6 +4574,19 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif (card_adventure is not None and
+              not (card_flags and 'IgnoreName' in extract_flags(card_flags))):
+            capitalization_errors = _get_capitalization_errors(card_adventure)
+            if capitalization_errors:
+                message = (
+                    'Capitalization error(s) in adventure for row #{}{}: '
+                    '{} (use IgnoreName flag to ignore)'.format(
+                        i, scratch, ', '.join(capitalization_errors)))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
 
         if card_icon is not None and card_type in CARD_TYPES_NO_ICON:
             message = 'Redundant collection icon for row #{}{}'.format(
