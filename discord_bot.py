@@ -1363,6 +1363,15 @@ async def get_dragncards_player_cards_stat(set_name, start_date):
         lotr.normalized_name(card[lotr.CARD_SET_NAME])) == set_name and
         card[lotr.CARD_TYPE] in lotr.CARD_TYPES_PLAYER and
         'Promo' not in lotr.extract_flags(card.get(lotr.CARD_FLAGS))]
+
+    if not matches:
+        new_set_name = 'the-{}'.format(set_name)
+        matches = [card for card in data['data'] if re.sub(
+            r'^alep---', '',
+            lotr.normalized_name(card[lotr.CARD_SET_NAME])) == new_set_name and
+            card[lotr.CARD_TYPE] in lotr.CARD_TYPES_PLAYER and
+            'Promo' not in lotr.extract_flags(card.get(lotr.CARD_FLAGS))]
+
     if not matches:
         set_code = set_name.lower()
         matches = [card for card in data['data']
@@ -3517,7 +3526,14 @@ Targets removed.
         matches = [card for card in data['data'] if re.sub(
             r'^alep---', '',
             lotr.normalized_name(card[lotr.CARD_SET_NAME])) == set_name and
-                   card[lotr.CARD_TYPE] not in ('Presentation', 'Rules')]
+            card[lotr.CARD_TYPE] not in ('Presentation', 'Rules')]
+
+        if not matches:
+            new_set_name = 'the-{}'.format(set_name)
+            matches = [card for card in data['data'] if re.sub(
+                r'^alep---', '',
+                lotr.normalized_name(card[lotr.CARD_SET_NAME])) == new_set_name
+                and card[lotr.CARD_TYPE] not in ('Presentation', 'Rules')]
 
         if not matches:
             set_code = value.lower()
@@ -3620,9 +3636,15 @@ Targets removed.
         set_name = re.sub(r'^alep---', '', lotr.normalized_name(value))
         matches = [card for card in data['data'] if re.sub(
             r'^alep---', '',
-            lotr.normalized_name(card[lotr.CARD_SET_NAME])) ==
-                   set_name and card[lotr.CARD_TYPE] not in ('Presentation',
-                                                             'Rules')]
+            lotr.normalized_name(card[lotr.CARD_SET_NAME])) == set_name and
+            card[lotr.CARD_TYPE] not in ('Presentation', 'Rules')]
+        if not matches:
+            new_set_name = 'the-{}'.format(set_name)
+            matches = [card for card in data['data'] if re.sub(
+                r'^alep---', '',
+                lotr.normalized_name(card[lotr.CARD_SET_NAME])) == new_set_name
+                and card[lotr.CARD_TYPE] not in ('Presentation', 'Rules')]
+
         if not matches:
             set_code = value.lower()
             matches = [card for card in data['data']
@@ -3799,6 +3821,14 @@ Targets removed.
         matches = [card for card in data['data'] if re.sub(
             r'^alep---', '',
             lotr.normalized_name(card[lotr.CARD_SET_NAME])) == set_name]
+
+        if not matches:
+            new_set_name = 'the-{}'.format(set_name)
+            matches = [card for card in data['data'] if re.sub(
+                r'^alep---', '',
+                lotr.normalized_name(card[lotr.CARD_SET_NAME])) ==
+                new_set_name]
+
         if not matches:
             set_code = value.lower()
             matches = [card for card in data['data']
@@ -3989,8 +4019,16 @@ Targets removed.
         matches = [card for card in data['data'] if re.sub(
             r'^alep---', '',
             lotr.normalized_name(card[lotr.CARD_SET_NAME])) == set_name and
-                   card[lotr.CARD_TYPE] != 'Presentation' and
-                   card.get(lotr.CARD_SPHERE) != 'Back']
+            card[lotr.CARD_TYPE] != 'Presentation' and
+            card.get(lotr.CARD_SPHERE) != 'Back']
+
+        if not matches:
+            new_set_name = 'the-{}'.format(set_name)
+            matches = [card for card in data['data'] if re.sub(
+                r'^alep---', '',
+                lotr.normalized_name(card[lotr.CARD_SET_NAME])) == new_set_name
+                and card[lotr.CARD_TYPE] != 'Presentation'
+                and card.get(lotr.CARD_SPHERE) != 'Back']
 
         if not matches:
             set_code = value.lower()
