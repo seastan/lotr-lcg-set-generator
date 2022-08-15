@@ -1418,6 +1418,13 @@ async def get_dragncards_all_plays(quest, start_date):
     matches = [card for card in data['data']
                if card.get(lotr.CARD_ENCOUNTER_SET, '').lower() ==
                quest.lower()]
+
+    if not matches:
+        new_quest = 'the {}'.format(quest.lower())
+        matches = [card for card in data['data']
+                   if card.get(lotr.CARD_ENCOUNTER_SET, '').lower() ==
+                   new_quest]
+
     if not matches:
         return 'quest {} not found'.format(quest)
 
@@ -1442,6 +1449,13 @@ async def get_dragncards_plays_stat(quest, start_date):
     matches = [card for card in data['data']
                if card.get(lotr.CARD_ENCOUNTER_SET, '').lower() ==
                quest.lower()]
+
+    if not matches:
+        new_quest = 'the {}'.format(quest.lower())
+        matches = [card for card in data['data']
+                   if card.get(lotr.CARD_ENCOUNTER_SET, '').lower() ==
+                   new_quest]
+
     if not matches:
         return 'quest {} not found'.format(quest)
 
