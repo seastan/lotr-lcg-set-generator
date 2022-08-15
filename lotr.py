@@ -2198,26 +2198,26 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                 not re.search(
                     r'adds? [0-9X](?:\[pp\])? resources? to [^.]+ pool',
                     paragraph, flags=re.IGNORECASE)):
-            errors.append('"places(?) _ resource token(s) on"')
+            errors.append('"place(s) _ resource token(s) on"')
 
         if re.search(r'adds? [0-9X](?:\[pp\])? resource tokens? to [^.]+ pool',
                      paragraph, flags=re.IGNORECASE):
-            errors.append('"adds(?) _ resource(s) to _ resource pool"')
+            errors.append('"add(s) _ resource(s) to _ resource pool"')
         elif re.search(r'adds? [0-9X](?:\[pp\])? resource tokens? to ',
                        paragraph, flags=re.IGNORECASE):
-            errors.append('"places(?) _ resource token(s) on"')
+            errors.append('"place(s) _ resource token(s) on"')
 
         if re.search(r'places? [0-9X](?:\[pp\])? resources? on [^.]+ pool',
                      paragraph, flags=re.IGNORECASE):
-            errors.append('"adds(?) _ resource(s) to _ resource pool"')
+            errors.append('"add(s) _ resource(s) to _ resource pool"')
         elif re.search(r'places? [0-9X](?:\[pp\])? resources? on ',
                        paragraph, flags=re.IGNORECASE):
-            errors.append('"places(?) _ resource token(s) on"')
+            errors.append('"place(s) _ resource token(s) on"')
 
         if re.search(
                 r'places? [0-9X](?:\[pp\])? resource tokens? on [^.]+ pool',
                 paragraph, flags=re.IGNORECASE):
-            errors.append('"adds(?) _ resource(s) to _ resource pool"')
+            errors.append('"add(s) _ resource(s) to _ resource pool"')
 
         if 'per player' in re.sub(r'limit [^.]+\.', '', paragraph,
                                   flags=re.IGNORECASE):
