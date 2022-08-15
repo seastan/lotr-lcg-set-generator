@@ -641,7 +641,7 @@ def find_card_matches(data, command, this=False):
         else:
             num = 1
 
-        if re.search(r' s:[a-zA-Z][a-zA-Z0-9]+$', command):
+        if re.search(r' s:[A-Za-z][A-Za-z0-9]+$', command):
             parts = command.split(' ')
             name = ' '.join(parts[:-1])
             set_code = parts[-1].replace('s:', '').lower()
@@ -1490,7 +1490,7 @@ def get_rules_precedents(text, field, card, res):  # pylint: disable=R0912
                      flags=re.IGNORECASE):
             data = {'name': card[lotr.CARD_NAME],
                     'field': field,
-                    'text': re.sub(r'\b(they|them|their)\b', '**\\1**',
+                    'text': re.sub(r'\b(they|them|their)\b', '__**\\1**__',
                                    paragraph, flags=re.IGNORECASE),
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('You/your', []).append(data)
@@ -1498,19 +1498,22 @@ def get_rules_precedents(text, field, card, res):  # pylint: disable=R0912
         if re.search(r'\beither\b[^.]+\bor\b', paragraph, flags=re.IGNORECASE):
             data = {'name': card[lotr.CARD_NAME],
                     'field': field,
-                    'text': re.sub(r'\b(either)\b', '**\\1**',
-                                   re.sub(r'\b(or)\b', '**\\1**', paragraph,
-                                          flags=re.IGNORECASE),
+                    'text': re.sub(r'\b(either)\b', '__**\\1**__',
+                                   re.sub(r'\b(or)\b', '__**\\1**__',
+                                          paragraph, flags=re.IGNORECASE),
                                    flags=re.IGNORECASE),
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('Commas in either ... or statements',
                            []).append(data)
 
-        if ' 1[pp]' in paragraph:
+        if re.search(r' 1\[pp\] [a-zàáâãäąæçćĉèéêëęìíîïłñńòóôõöœśßùúûüźż\[]',
+                     paragraph, flags=re.IGNORECASE):
             data = {'name': card[lotr.CARD_NAME],
                     'field': field,
-                    'text': re.sub(r'(?<= 1\[pp\] )([A-Za-z-]+)', '**\\1**',
-                                   paragraph),
+                    'text': re.sub(
+                        r'(?<= 1\[pp\] )([a-zàáâãäąæçćĉèéêëęìíîïłñńòóôõöœśß'
+                        r'ùúûüźż\'\-\[\]\/]+)', '__**\\1**__',
+                        paragraph, flags=re.IGNORECASE),
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('Plural after [pp]', []).append(data)
 
@@ -1519,7 +1522,7 @@ def get_rules_precedents(text, field, card, res):  # pylint: disable=R0912
             data = {'name': card[lotr.CARD_NAME],
                     'field': field,
                     'text': re.sub(r'\b(he|him|his|she|her|it|its)\b',
-                                   '**\\1**', paragraph,
+                                   '__**\\1**__', paragraph,
                                    flags=re.IGNORECASE),
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('Self-referential pronouns', []).append(data)
@@ -1530,7 +1533,7 @@ def get_rules_precedents(text, field, card, res):  # pylint: disable=R0912
                     'field': field,
                     'text': re.sub(
                         r'\b(any\b(?: 1)?)(?! active location| [2-9])',
-                        '**\\1**', paragraph, flags=re.IGNORECASE),
+                        '__**\\1**__', paragraph, flags=re.IGNORECASE),
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('Use of singular "any"', []).append(data)
 
@@ -1539,14 +1542,15 @@ def get_rules_precedents(text, field, card, res):  # pylint: disable=R0912
             data = {'name': card[lotr.CARD_NAME],
                     'field': field,
                     'text': re.sub(r'\b(one|two|three|four|five|six)\b',
-                                   '**\\1**', paragraph, flags=re.IGNORECASE),
+                                   '__**\\1**__', paragraph,
+                                   flags=re.IGNORECASE),
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('Use of numerals', []).append(data)
 
         if re.search(r'\b(?:a|an)\b', paragraph, flags=re.IGNORECASE):
             data = {'name': card[lotr.CARD_NAME],
                     'field': field,
-                    'text': re.sub(r'\b(a|an)\b', '**\\1**', paragraph,
+                    'text': re.sub(r'\b(a|an)\b', '__**\\1**__', paragraph,
                                    flags=re.IGNORECASE),
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('Use of numerals (a/an)', []).append(data)
@@ -1555,8 +1559,8 @@ def get_rules_precedents(text, field, card, res):  # pylint: disable=R0912
                      flags=re.IGNORECASE):
             data = {'name': card[lotr.CARD_NAME],
                     'field': field,
-                    'text': re.sub(r'\b(less|fewer)\b', '**\\1**', paragraph,
-                                   flags=re.IGNORECASE),
+                    'text': re.sub(r'\b(less|fewer)\b', '__**\\1**__',
+                                   paragraph, flags=re.IGNORECASE),
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('Less vs fewer', []).append(data)
 
@@ -1564,8 +1568,8 @@ def get_rules_precedents(text, field, card, res):  # pylint: disable=R0912
                      flags=re.IGNORECASE):
             data = {'name': card[lotr.CARD_NAME],
                     'field': field,
-                    'text': re.sub(r'\b(more|greater)\b', '**\\1**', paragraph,
-                                   flags=re.IGNORECASE),
+                    'text': re.sub(r'\b(more|greater)\b', '__**\\1**__',
+                                   paragraph, flags=re.IGNORECASE),
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('More vs greater', []).append(data)
 
@@ -1573,7 +1577,7 @@ def get_rules_precedents(text, field, card, res):  # pylint: disable=R0912
                      flags=re.IGNORECASE):
             data = {'name': card[lotr.CARD_NAME],
                     'field': field,
-                    'text': re.sub(r'\b(if able)\b', '**\\1**', paragraph,
+                    'text': re.sub(r'\b(if able)\b', '__**\\1**__', paragraph,
                                    flags=re.IGNORECASE),
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('If able', []).append(data)
@@ -1591,8 +1595,8 @@ def get_rules_precedents(text, field, card, res):  # pylint: disable=R0912
             if re.search(r': [A-Z]', paragraph):
                 data = {'name': card[lotr.CARD_NAME],
                         'field': field,
-                        'text': re.sub(r'(: [A-Z][a-z-]+)', '**\\1**',
-                                       paragraph),
+                        'text': re.sub(r'(: [A-Z][A-Za-z\'\-]+)',
+                                       '__**\\1**__', paragraph),
                         'row': card[lotr.ROW_COLUMN]}
                 res.setdefault('Capitalization after a colon', []).append(data)
 

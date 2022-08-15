@@ -413,7 +413,7 @@ SCRATCH_FOLDER = '_Scratch'
 TEXT_CHUNK_FLAG = b'tEXt'
 
 DECK_PREFIX_REGEX = r'^[QN][A-Z0-9][A-Z0-9]\.[0-9][0-9]?[\- ]'
-KEYWORDS_REGEX = (r'^(?: ?[A-Z][a-z]+(?: [0-9X]+(?:\[pp\])?)?\.|'
+KEYWORDS_REGEX = (r'^(?: ?[A-Z][A-Za-z\'\-]+(?: [0-9X]+(?:\[pp\])?)?\.|'
                   r' ?Guarded \(enemy\)\.| ?Guarded \(location\)\.|'
                   r' ?Guarded \(enemy or location\)\.| ?Fate -1\.)+$')
 UUID_REGEX = r'^[0-9a-h]{8}-[0-9a-h]{4}-[0-9a-h]{4}-[0-9a-h]{4}-[0-9a-h]{12}$'
@@ -2102,7 +2102,10 @@ def _get_capitalization_errors(text):  # pylint: disable=R0912
                 errors.append('"use lowercase after \' in {}"'.format(part))
                 break
 
-        for character in re.findall(r'(?<=-).', re.sub(r'-[a-z]+-', '', part)):
+        for character in re.findall(
+                r'(?<=-).',
+                re.sub(r'-[a-zàáâãäąæçćĉèéêëęìíîïłñńòóôõöœśßùúûüźż]+-', '',
+                       part)):
             if character != character.lower():
                 errors.append('"use lowercase after - in {}"'.format(part))
                 break
