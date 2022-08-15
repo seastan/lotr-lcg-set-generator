@@ -1596,7 +1596,7 @@ def get_rules_precedents(text, field, card, res):  # pylint: disable=R0912
             if re.search(r': [A-Z]', paragraph):
                 data = {'name': card[lotr.CARD_NAME],
                         'field': field,
-                        'text': re.sub(r'(: [A-Z][A-Za-z\'\-]+)',
+                        'text': re.sub(r'(?<=: )([A-Z][A-Za-z\'\-]+)',
                                        '__**\\1**__', paragraph),
                         'row': card[lotr.ROW_COLUMN]}
                 res.setdefault('Capitalization after a colon', []).append(data)
