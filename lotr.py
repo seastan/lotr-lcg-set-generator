@@ -839,6 +839,37 @@ def _to_str(value):
     return '' if value is None else str(value)
 
 
+def _detect_unmatched_tags(text):
+    """ Detect unmatched tags.
+    """
+    errors = []
+    text_copy = text
+    for tag in ('center', 'right', 'b', 'i', 'bi', 'u', 'strike', 'red'):
+        text = text_copy
+        text = re.sub(r'\[{}\].+?\[\/{}\]'.format(tag, tag), '', text,  # pylint: disable=W1308
+                      flags=re.DOTALL)
+        open_tag = '[{}]'.format(tag)
+        if open_tag in text:
+            errors.append(open_tag)
+
+        close_tag = '[/{}]'.format(tag)
+        if close_tag in text:
+            errors.append(close_tag)
+
+    for tag in ('lotr', 'lotrheader', 'size'):
+        text = text_copy
+        text = re.sub(r'\[{} .+?\[\/{}\]'.format(tag, tag), '', text,  # pylint: disable=W1308
+                      flags=re.DOTALL)
+        if '[{} '.format(tag) in text:
+            errors.append('[{}]'.format(tag))
+
+        close_tag = '[/{}]'.format(tag)
+        if close_tag in text:
+            errors.append(close_tag)
+
+    return errors
+
+
 def _clean_tags(text):  # pylint: disable=R0915
     """ Clean known tags from the text.
     """
@@ -4660,6 +4691,17 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                'column for row #{}{}'.format(
                                    key.replace('Back_', 'Back '), i, scratch))
                     logging.error(message)
+
+                unmatched_tags = _detect_unmatched_tags(value)
+                if unmatched_tags:
+                    message = ('Unmatched tag(s) in {} column for row #{}{}: '
+                               '{}'.format(key.replace('Back_', 'Back '), i,
+                                           scratch, ', '.join(unmatched_tags)))
+                    logging.error(message)
+                    if not card_scratch:
+                        errors.append(message)
+                    else:
+                        broken_set_ids.add(set_id)
 
         if (card_deck_rules is not None and
                 card_type not in CARD_TYPES_DECK_RULES):
