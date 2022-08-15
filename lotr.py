@@ -2117,7 +2117,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
     """ Detect text rules errors.
     """
     errors = []
-    text = re.sub(r'\[i\].+?\[\/i\]', '', text, flags=re.DOTALL)
+    text = re.sub(r'\[i\](?!\[b\]Rumor).+?\[\/i\]', '', text, flags=re.DOTALL)
     paragraphs = [p.strip() for p in text.split('\n') if p.strip()]
     if not paragraphs:
         return errors
