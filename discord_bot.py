@@ -1671,8 +1671,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                  c.name == ARCHIVE_CATEGORY][0].id)
         except Exception as exc:
             logging.exception(str(exc))
-            create_mail(WARNING_SUBJECT_TEMPLATE.format(
-                'error obtaining archive category: {}'.format(str(exc))))
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(
+                'Error obtaining Archive category: {}'.format(str(exc))))
 
         try:
             self.cron_channel = self.get_channel(
@@ -1681,8 +1681,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                  c.name == CRON_CHANNEL][0].id)
         except Exception as exc:
             logging.exception(str(exc))
-            create_mail(WARNING_SUBJECT_TEMPLATE.format(
-                'error obtaining Cron channel: {}'.format(str(exc))))
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(
+                'Error obtaining Cron channel: {}'.format(str(exc))))
 
         try:
             self.notifications_channel = self.get_channel(
@@ -1691,8 +1691,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                  c.name == NOTIFICATIONS_CHANNEL][0].id)
         except Exception as exc:
             logging.exception(str(exc))
-            create_mail(WARNING_SUBJECT_TEMPLATE.format(
-                'error obtaining Notifications channel: {}'.format(str(exc))))
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(
+                'Error obtaining Notifications channel: {}'.format(str(exc))))
 
         try:
             self.playtest_channel = self.get_channel(
@@ -1701,8 +1701,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                  c.name == PLAYTEST_CHANNEL][0].id)
         except Exception as exc:
             logging.exception(str(exc))
-            create_mail(WARNING_SUBJECT_TEMPLATE.format(
-                'error obtaining Playtest channel: {}'.format(str(exc))))
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(
+                'Error obtaining Playtest channel: {}'.format(str(exc))))
 
         try:
             self.updates_channel = self.get_channel(
@@ -1711,8 +1711,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                  c.name == UPDATES_CHANNEL][0].id)
         except Exception as exc:
             logging.exception(str(exc))
-            create_mail(WARNING_SUBJECT_TEMPLATE.format(
-                'error obtaining Spreadsheet Updates channel: {}'
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(
+                'Error obtaining Spreadsheet Updates channel: {}'
                 .format(str(exc))))
 
         clear_rendered_images()
@@ -1739,8 +1739,10 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                     continue
 
                 if channel.name in categories:
-                    logging.warning(
-                        'Duplicate category name detected: %s', channel.name)
+                    message = 'Duplicate category name detected: {}'.format(
+                        channel.name)
+                    logging.warning(message)
+                    create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
                 else:
                     categories[channel.name] = {
                         'name': channel.name,
@@ -1752,9 +1754,10 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                     continue
 
                 if channel.category.name in general_channels:
-                    logging.warning(
-                        'Duplicate general channel for category "%s" detected',
-                        channel.category.name)
+                    message = ('Duplicate general channel for category "{}" '
+                               'detected'.format(channel.category.name))
+                    logging.warning(message)
+                    create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
                 else:
                     general_channels[channel.category.name] = {
                         'name': channel.category.name,
@@ -1766,12 +1769,14 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                     continue
 
                 if channel.name in channels:
-                    logging.warning(
-                        'Duplicate channel name detected: %s (categories "%s" '
-                        'and "%s")',
-                        channel.name,
-                        channels[channel.name]['category_name'],
-                        channel.category.name)
+                    message = (
+                        'Duplicate channel name detected: {} (categories '
+                        '"{}" and "{}")'.format(
+                            channel.name,
+                            channels[channel.name]['category_name'],
+                            channel.category.name))
+                    logging.warning(message)
+                    create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
                 else:
                     channels[channel.name] = {
                         'name': channel.name,
@@ -2183,7 +2188,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
             return
 
         data = await read_card_data()
-        for change in changes:
+        for change in changes:  # pylint: disable=R1702
             if len(change) != 3:
                 raise FormatError('Incorrect change format: {}'.format(change))
 
@@ -2231,6 +2236,10 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                             logging.error(message)
                             create_mail(ERROR_SUBJECT_TEMPLATE.format(message),
                                         message)
+                            if self.cron_channel:
+                                await self._send_channel(self.cron_channel,
+                                                         message)
+
                             continue
 
                         await self._add_general_channel(
@@ -2330,10 +2339,16 @@ The card has been updated:
                             not in self.general_channels):
                         all_channels = await self.get_all_channels_safe()
                         if CHANNEL_LIMIT - len(all_channels) <= 0:
-                            logging.warning(
+                            message = (
                                 'No free slots to create a new channel '
-                                '"general" in category "%s"',
-                                card[lotr.CARD_DISCORD_CATEGORY])
+                                '"general" in category "{}"'.format(
+                                    card[lotr.CARD_DISCORD_CATEGORY]))
+                            logging.error(message)
+                            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+                            if self.cron_channel:
+                                await self._send_channel(self.cron_channel,
+                                                         message)
+
                             continue
 
                         await self._add_general_channel(
@@ -2371,8 +2386,8 @@ Card "{}" has been updated:
         all_channels = await self.get_all_channels_safe()
         slots = CHANNEL_LIMIT - len(all_channels)
         if slots < 5:
-            logging.warning('Only %s channel slots remain', slots)
-            message = 'only {} channel slots remain'.format(slots)
+            message = 'Only {} channel slots remain'.format(slots)
+            logging.warning(message)
             create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
             if self.cron_channel:
                 await self._send_channel(self.cron_channel,
@@ -2391,12 +2406,15 @@ Card "{}" has been updated:
             if name in channels:
                 if (card[lotr.CARD_DISCORD_CATEGORY] !=
                         channels[name]['category_name']):
-                    logging.warning(
-                        'Card %s (%s) has a wrong channel category: %s '
-                        'instead of %s', card[lotr.CARD_NAME],
-                        card[lotr.CARD_DISCORD_CHANNEL],
-                        channels[name]['category_name'],
-                        card[lotr.CARD_DISCORD_CATEGORY])
+                    message = (
+                        'Card {} ({}) has a wrong channel category: {} '
+                        'instead of {}'.format(
+                            card[lotr.CARD_NAME],
+                            card[lotr.CARD_DISCORD_CHANNEL],
+                            channels[name]['category_name'],
+                            card[lotr.CARD_DISCORD_CATEGORY]))
+                    logging.warning(message)
+                    create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
 
                 del channels[name]
             else:

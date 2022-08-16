@@ -4687,10 +4687,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     cleaned_value = cleaned_value.replace('[...]', '')
 
                 if '[' in cleaned_value or ']' in cleaned_value:
-                    message = ('Possibly unmatched square bracket symbol in {} '
-                               'column for row #{}{}'.format(
+                    message = ('Unmatched square bracket symbol(s) in {} '
+                               'column for row #{}{} (use "[lsb]" and "[rsb]" '
+                               'tags if needed)'.format(
                                    key.replace('Back_', 'Back '), i, scratch))
                     logging.error(message)
+                    if not card_scratch:
+                        errors.append(message)
+                    else:
+                        broken_set_ids.add(set_id)
 
                 unmatched_tags = _detect_unmatched_tags(value)
                 if unmatched_tags:
@@ -4777,9 +4782,10 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
                     if '[' in cleaned_value or ']' in cleaned_value:
                         logging.error(
-                            'Possibly unmatched square bracket symbol in %s '
+                            'Unmatched square bracket symbol(s) in %s '
                             'column for card ID %s in %s translations, '
-                            'row #%s', key.replace('Back_', 'Back '), card_id,
+                            'row #%s (use "[lsb]" and "[rsb]" tags if needed)',
+                            key.replace('Back_', 'Back '), card_id,
                             lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                 if not value and row.get(key):
