@@ -1671,7 +1671,7 @@ def _get_similar_names(card_name, scratch):
     return res
 
 
-def _clean_data(data):  # pylint: disable=R0912,R0915
+def _clean_data(data, lang):  # pylint: disable=R0912,R0915
     """ Clean data from the spreadsheet.
     """
     PRE_SANITY_CHECK.clear()
@@ -1725,9 +1725,10 @@ def _clean_data(data):  # pylint: disable=R0912,R0915
                         if re.search(card_name_regex, prepared_value):
                             error = ('Hardcoded card name instead of [name] '
                                      'in text')
-                            PRE_SANITY_CHECK.setdefault(
-                                (row[ROW_COLUMN], row[CARD_SCRATCH]),
-                                []).append(error)
+                            if lang == 'English':
+                                PRE_SANITY_CHECK.setdefault(
+                                    (row[ROW_COLUMN], row[CARD_SCRATCH]),
+                                    []).append(error)
                     elif (key == CARD_SHADOW and
                           re.search(card_name_regex, value)):
                         prepared_value = value
@@ -1742,9 +1743,10 @@ def _clean_data(data):  # pylint: disable=R0912,R0915
                         if re.search(card_name_regex, prepared_value):
                             error = ('Hardcoded card name instead of [name] '
                                      'in shadow')
-                            PRE_SANITY_CHECK.setdefault(
-                                (row[ROW_COLUMN], row[CARD_SCRATCH]),
-                                []).append(error)
+                            if lang == 'English':
+                                PRE_SANITY_CHECK.setdefault(
+                                    (row[ROW_COLUMN], row[CARD_SCRATCH]),
+                                    []).append(error)
 
                 if card_name_regex_back:
                     if (key == BACK_PREFIX + CARD_TEXT and
@@ -1761,9 +1763,10 @@ def _clean_data(data):  # pylint: disable=R0912,R0915
                         if re.search(card_name_regex_back, prepared_value):
                             error = ('Hardcoded card name instead of [name] '
                                      'in text back')
-                            PRE_SANITY_CHECK.setdefault(
-                                (row[ROW_COLUMN], row[CARD_SCRATCH]),
-                                []).append(error)
+                            if lang == 'English':
+                                PRE_SANITY_CHECK.setdefault(
+                                    (row[ROW_COLUMN], row[CARD_SCRATCH]),
+                                    []).append(error)
                     elif (key == BACK_PREFIX + CARD_SHADOW and
                               re.search(card_name_regex_back, value)):
                         prepared_value = value
@@ -1778,9 +1781,10 @@ def _clean_data(data):  # pylint: disable=R0912,R0915
                         if re.search(card_name_regex_back, prepared_value):
                             error = ('Hardcoded card name instead of [name] '
                                      'in shadow back')
-                            PRE_SANITY_CHECK.setdefault(
-                                (row[ROW_COLUMN], row[CARD_SCRATCH]),
-                                []).append(error)
+                            if lang == 'English':
+                                PRE_SANITY_CHECK.setdefault(
+                                    (row[ROW_COLUMN], row[CARD_SCRATCH]),
+                                    []).append(error)
 
                 if key != CARD_DECK_RULES:
                     if key.startswith(BACK_PREFIX):
@@ -1980,7 +1984,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
     DATA[:] = [row for row in DATA if not _skip_row(row)]
     _extract_all_names(DATA)
     _extract_all_traits(DATA)
-    _clean_data(DATA)
+    _clean_data(DATA, 'English')
 
     SELECTED_CARDS.update({row[CARD_ID] for row in DATA if row[CARD_SELECTED]})
     FOUND_SETS.update({row[CARD_SET] for row in DATA
@@ -2010,13 +2014,13 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
         data = _read_sheet_json(lang)
         if data:
             data = _transform_to_dict(data)
-            _clean_data(data)
             for row in data:
                 row[CARD_SCRATCH] = None
                 if row[CARD_ID] in card_types:
                     row[CARD_TYPE] = card_types[row[CARD_ID]][0]
                     row[BACK_PREFIX + CARD_TYPE] = card_types[row[CARD_ID]][1]
 
+            _clean_data(data, lang)
             _update_data(data)
 
             for row in data:
@@ -4686,8 +4690,18 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 elif key in (CARD_FLAVOUR, BACK_PREFIX + CARD_FLAVOUR):
                     cleaned_value = cleaned_value.replace('[...]', '')
 
-                if '[' in cleaned_value or ']' in cleaned_value:
-                    message = ('Unmatched square bracket symbol(s) in {} '
+                unknown_tags = re.findall(r'\[[^\]\n]+\]', cleaned_value)
+                if unknown_tags:
+                    message = ('Unknown tag(s) in {} column for row #{}{}: {}'
+                               .format(key.replace('Back_', 'Back '), i,
+                                       scratch, ', '.join(unknown_tags)))
+                    logging.error(message)
+                    if not card_scratch:
+                        errors.append(message)
+                    else:
+                        broken_set_ids.add(set_id)
+                elif '[' in cleaned_value or ']' in cleaned_value:
+                    message = ('Unmatched square bracket(s) in {} '
                                'column for row #{}{} (use "[lsb]" and "[rsb]" '
                                'tags if needed)'.format(
                                    key.replace('Back_', 'Back '), i, scratch))
@@ -4780,9 +4794,17 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             r'\[Combat\]|\[Restauration\]) ', '',
                             cleaned_value)
 
-                    if '[' in cleaned_value or ']' in cleaned_value:
+                    unknown_tags = re.findall(r'\[[^\]\n]+\]', cleaned_value)
+                    if unknown_tags:
                         logging.error(
-                            'Unmatched square bracket symbol(s) in %s '
+                            'Unknown tag(s) in %s column for card ID %s in %s '
+                            'translations, row #%s: %s',
+                            key.replace('Back_', 'Back '), card_id, lang,
+                            TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                            ', '.join(unknown_tags))
+                    elif '[' in cleaned_value or ']' in cleaned_value:
+                        logging.error(
+                            'Unmatched square bracket(s) in %s '
                             'column for card ID %s in %s translations, '
                             'row #%s (use "[lsb]" and "[rsb]" tags if needed)',
                             key.replace('Back_', 'Back '), card_id,
