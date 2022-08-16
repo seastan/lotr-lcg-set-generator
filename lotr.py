@@ -2370,6 +2370,9 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                      flags=re.IGNORECASE):
             errors.append('"cards"')
 
+        if re.search(r'^\[b\]Rumor\[\/b\]:', paragraph):
+            errors.append('"Rumor text must be inside [i] tags"')
+
     if (field == CARD_TEXT and card[CARD_TYPE] == 'Quest'
             and str(card[CARD_COST]) == '1'):
         if 'When Revealed' in text:
