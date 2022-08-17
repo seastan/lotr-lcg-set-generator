@@ -1688,7 +1688,7 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0915
         if not card_name_back:
             card_name_back = card_name
 
-        if (card_name and card_name not in ALL_TRAITS and  # pylint: disable=R0916
+        if (lang == 'English' and card_name and card_name not in ALL_TRAITS and  # pylint: disable=R0916
                 (not row[CARD_SCRATCH] or
                  card_name not in ALL_SCRATCH_TRAITS) and
                 row[CARD_TYPE] not in CARD_TYPES_NO_NAME_TAG and
@@ -1698,7 +1698,8 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0915
         else:
             card_name_regex = None
 
-        if (card_name_back and card_name_back not in ALL_TRAITS and  # pylint: disable=R0916
+        if (lang == 'English' and card_name_back and  # pylint: disable=R0916
+                card_name_back not in ALL_TRAITS and
                 (not row[CARD_SCRATCH] or
                  card_name_back not in ALL_SCRATCH_TRAITS) and
                 row[BACK_PREFIX + CARD_TYPE] not in CARD_TYPES_NO_NAME_TAG and
@@ -1725,10 +1726,9 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0915
                         if re.search(card_name_regex, prepared_value):
                             error = ('Hardcoded card name instead of [name] '
                                      'in text')
-                            if lang == 'English':
-                                PRE_SANITY_CHECK.setdefault(
-                                    (row[ROW_COLUMN], row[CARD_SCRATCH]),
-                                    []).append(error)
+                            PRE_SANITY_CHECK.setdefault(
+                                (row[ROW_COLUMN], row[CARD_SCRATCH]),
+                                []).append(error)
                     elif (key == CARD_SHADOW and
                           re.search(card_name_regex, value)):
                         prepared_value = value
@@ -1743,10 +1743,9 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0915
                         if re.search(card_name_regex, prepared_value):
                             error = ('Hardcoded card name instead of [name] '
                                      'in shadow')
-                            if lang == 'English':
-                                PRE_SANITY_CHECK.setdefault(
-                                    (row[ROW_COLUMN], row[CARD_SCRATCH]),
-                                    []).append(error)
+                            PRE_SANITY_CHECK.setdefault(
+                                (row[ROW_COLUMN], row[CARD_SCRATCH]),
+                                []).append(error)
 
                 if card_name_regex_back:
                     if (key == BACK_PREFIX + CARD_TEXT and
@@ -1763,10 +1762,9 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0915
                         if re.search(card_name_regex_back, prepared_value):
                             error = ('Hardcoded card name instead of [name] '
                                      'in text back')
-                            if lang == 'English':
-                                PRE_SANITY_CHECK.setdefault(
-                                    (row[ROW_COLUMN], row[CARD_SCRATCH]),
-                                    []).append(error)
+                            PRE_SANITY_CHECK.setdefault(
+                                (row[ROW_COLUMN], row[CARD_SCRATCH]),
+                                []).append(error)
                     elif (key == BACK_PREFIX + CARD_SHADOW and
                               re.search(card_name_regex_back, value)):
                         prepared_value = value
@@ -1781,10 +1779,9 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0915
                         if re.search(card_name_regex_back, prepared_value):
                             error = ('Hardcoded card name instead of [name] '
                                      'in shadow back')
-                            if lang == 'English':
-                                PRE_SANITY_CHECK.setdefault(
-                                    (row[ROW_COLUMN], row[CARD_SCRATCH]),
-                                    []).append(error)
+                            PRE_SANITY_CHECK.setdefault(
+                                (row[ROW_COLUMN], row[CARD_SCRATCH]),
+                                []).append(error)
 
                 if key != CARD_DECK_RULES:
                     if key.startswith(BACK_PREFIX):
@@ -4796,6 +4793,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             r'\[Qu\u00eate\]|\[Voyage\]|\[Rencontre\]|'
                             r'\[Combat\]|\[Restauration\]) ', '',
                             cleaned_value)
+
+                    unmatched_tags = _detect_unmatched_tags(value)
+                    if unmatched_tags:
+                        logging.error(
+                            'Unmatched tag(s) in %s column for card ID %s in '
+                            '%s translations, row #%s: %s',
+                            key.replace('Back_', 'Back '), card_id, lang,
+                            TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                            ', '.join(unmatched_tags))
 
                     unknown_tags = re.findall(r'\[[^\]\n]+\]', cleaned_value)
                     if unknown_tags:
