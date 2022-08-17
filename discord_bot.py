@@ -1607,15 +1607,18 @@ def get_rules_precedents(text, field, card, res):  # pylint: disable=R0912
             res.setdefault('If able', []).append(data)
 
         if re.search(r': [A-Z]', paragraph):
-            paragraph = re.sub(r'\bQuest Resolution(?: \([^\)]+\))?:', '',
-                               paragraph)
+            paragraph = re.sub(r'\bQuest Resolution(?: \([^\)]+\))?:',
+                               '\\*\\*\\*', paragraph)
             paragraph = re.sub(r'\b(?:Valour )?(?:Resource |Planning |Quest '
                                r'|Travel |Encounter |Combat |Refresh )?'
-                               r'(?:Action):', '', paragraph)
+                               r'(?:Action):', '\\*\\*\\*', paragraph)
             paragraph = re.sub(r'\b(?:When Revealed|Forced|Valour Response'
-                               r'|Response|Travel|Shadow|Resolution):', '',
+                               r'|Response|Travel|Shadow|Resolution):',
+                               '\\*\\*\\*', paragraph)
+            paragraph = re.sub(r'\bSetup(?: \([^\)]+\))?:', '\\*\\*\\*',
                                paragraph)
-            paragraph = re.sub(r'\bSetup(?: \([^\)]+\))?:', '', paragraph)
+            paragraph = re.sub(r'^\[i\]\[b\]Rumor\[\/b\]:', '\\*\\*\\*',
+                               paragraph)
             if re.search(r': [A-Z]', paragraph):
                 data = {'name': card[lotr.CARD_NAME],
                         'field': field,
