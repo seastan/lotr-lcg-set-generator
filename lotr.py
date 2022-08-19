@@ -2145,6 +2145,32 @@ def _get_capitalization_errors(text):  # pylint: disable=R0912
     return errors
 
 
+def _detect_names(text):
+    """ Detect names in the text.
+    """
+    text = (text.replace(' son of ', ' sonof_ ')
+            .replace(' Son of ', ' Sonof_ ')
+            .replace(' son Of ', ' sonOf_ ')
+            .replace(' Son Of ', ' SonOf_ '))
+    words = re.split(r'\s', text)
+    names = {}
+    last_name = []
+    for word in words:
+        cleaned_word = (
+            re.sub(r'^\.\.\.', '',
+                   re.sub(r'(?:\.\.\.|[,.?!\'])$', '',
+                          re.sub(r'^“', '',
+                                 re.sub(r'”$', '', word)))))
+
+        if _is_capitalized(cleaned_word):
+            last_name.append(word)
+        elif cleaned_word.lower() in LOWERCASE_WORDS:
+            if last_name:
+                last_name.append(word)
+
+    return names
+
+
 def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
     """ Detect text rules errors.
     """
@@ -2281,9 +2307,6 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
 
         if 'cancelled' in paragraph:
             errors.append('"canceled"')
-
-        if re.search(r' (?:[+–][0-9X]+|printed) attack\b', paragraph):
-            errors.append('"[attack] as tag"')
 
         if re.search(
                 r' (?:leadership|lore|spirit|tactics|baggins|fellowship)\b',
@@ -4722,6 +4745,31 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     else:
                         broken_set_ids.add(set_id)
 
+                if re.search(r'[0-9X]\[(?:attack|defense|willpower|threat)\]',
+                             value):
+                    message = (
+                        'No space before [attack|defense|willpower|threat] '
+                        'in {} column for row #{}{}: {}'
+                        .format(key.replace('Back_', 'Back '), i, scratch,
+                                ', '.join(unmatched_tags)))
+                    logging.error(message)
+                    if not card_scratch:
+                        errors.append(message)
+                    else:
+                        broken_set_ids.add(set_id)
+
+                if re.search(r'[0-9X] \[pp\]', value):
+                    message = (
+                        'Redundant space before [pp] in {} column for row '
+                        '#{}{}: {}'.format(
+                            key.replace('Back_', 'Back '), i, scratch,
+                            ', '.join(unmatched_tags)))
+                    logging.error(message)
+                    if not card_scratch:
+                        errors.append(message)
+                    else:
+                        broken_set_ids.add(set_id)
+
         if (card_deck_rules is not None and
                 card_type not in CARD_TYPES_DECK_RULES):
             message = 'Redundant deck rules for row #{}{}'.format(i, scratch)
@@ -4794,15 +4842,6 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             r'\[Combat\]|\[Restauration\]) ', '',
                             cleaned_value)
 
-                    unmatched_tags = _detect_unmatched_tags(value)
-                    if unmatched_tags:
-                        logging.error(
-                            'Unmatched tag(s) in %s column for card ID %s in '
-                            '%s translations, row #%s: %s',
-                            key.replace('Back_', 'Back '), card_id, lang,
-                            TRANSLATIONS[lang][card_id][ROW_COLUMN],
-                            ', '.join(unmatched_tags))
-
                     unknown_tags = re.findall(r'\[[^\]\n]+\]', cleaned_value)
                     if unknown_tags:
                         logging.error(
@@ -4818,6 +4857,40 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             'row #%s (use "[lsb]" and "[rsb]" tags if needed)',
                             key.replace('Back_', 'Back '), card_id,
                             lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+                    unmatched_tags = _detect_unmatched_tags(value)
+                    if unmatched_tags:
+                        logging.error(
+                            'Unmatched tag(s) in %s column for card ID %s in '
+                            '%s translations, row #%s: %s',
+                            key.replace('Back_', 'Back '), card_id, lang,
+                            TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                            ', '.join(unmatched_tags))
+
+
+                    if re.search(
+                            r'[0-9X]\[(?:attack|defense|willpower|threat)\]',
+                            value):
+                        logging.error(
+                            'No space before [attack|defense|willpower|threat]'
+                            ' in %s column for card ID %s in %s translations,'
+                            ' row #%s: %s',
+                            key.replace('Back_', 'Back '), card_id, lang,
+                            TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                            ', '.join(unmatched_tags))
+
+                    if re.search(r'[0-9X] \[pp\]', value):
+                        logging.error(
+                            'Redundant space before [pp] in %s column for card'
+                            ' ID %s in %s translations, row #%s: %s',
+                            key.replace('Back_', 'Back '), card_id, lang,
+                            TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                            ', '.join(unmatched_tags))
+                        message = (
+                            'Redundant space before [pp] in {} column for row '
+                            '#{}{}: {}'.format(
+                                key.replace('Back_', 'Back '), i, scratch,
+                                ', '.join(unmatched_tags)))
 
                 if not value and row.get(key):
                     logging.error(
