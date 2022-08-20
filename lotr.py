@@ -2233,7 +2233,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                      flags=re.IGNORECASE):
             errors.append('"discard(s) _ random card(s)"')
 
-        if re.search(r'\(Counts as a (?:\[bi\]|{)?Condition', paragraph):
+        if re.search(r'\(Counts as a (?:\[bi\])?Condition', paragraph):
             errors.append('"Condition attachments"')
 
         if ' by this effect' in paragraph:
@@ -2385,6 +2385,25 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
 
         if 'set-aside' in paragraph:
             errors.append('"set aside"')
+
+        if re.search(r'(?<!the )(?:printed )?\[bi\][^\[]+\[\/bi\]'
+                     r'(?:(?:, | or | and )\[bi\][^\[]+\[\/bi\])* traits?\b',
+                     re.sub(r'the (?:printed )?\[bi\][^\[]+\[\/bi\]'
+                            r'(?:(?:, | or | and )\[bi\][^\[]+\[\/bi\])* '
+                            r'traits?\b', '', paragraph), flags=re.IGNORECASE):
+            errors.append('"the {Trait} trait"')
+
+        if re.search(r'\[\/bi\] Traits?\b', paragraph):
+            errors.append('"lowercase trait after {Trait}"')
+        elif re.search(r'\[\/bi\] \[bi\]traits?\b', paragraph,
+                       flags=re.IGNORECASE):
+            errors.append('"remove tags around trait after {Trait}"')
+
+        if re.search(r'(?<!\[\/bi\] )traits?\b', paragraph):
+            errors.append('"uppercase Trait"')
+        elif re.search(r'(?<!\[\/bi\] )(?<!\[bi\])Traits?\b', paragraph,
+                       flags=re.IGNORECASE):
+            errors.append('"add {} around Trait"')
 
         if re.search(r'(?<!\bstage )[2-90X] card\b', paragraph,
                      flags=re.IGNORECASE):
