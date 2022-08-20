@@ -539,7 +539,7 @@ encounterPortraitRegion['Cave'] = '37,34,35,35';
 encounterPortraitRegion['Encounter Side Quest'] = '478,186,43,43';
 encounterPortraitRegion['Encounter Side Quest SmallTextArea'] = '478,241,43,43';
 encounterPortraitRegion['Enemy'] = '321,265,43,43';
-encounterPortraitRegion['Enemy NoStat'] = '52,379,43,43';
+encounterPortraitRegion['Enemy NoStat'] = '321,379,43,43';
 encounterPortraitRegion['Location'] = '319,265,43,43';
 encounterPortraitRegion['Nightmare'] = '322,263,43,43';
 encounterPortraitRegion['Objective'] = '315,268,43,43';
@@ -558,7 +558,7 @@ encounterNumberRegion['Cave'] = '41,70,26,10';
 encounterNumberRegion['Encounter Side Quest'] = '486,229,26,10';
 encounterNumberRegion['Encounter Side Quest SmallTextArea'] = '486,284,26,10';
 encounterNumberRegion['Enemy'] = '329,313,26,10';
-encounterNumberRegion['Enemy NoStat'] = '61,427,26,10';
+encounterNumberRegion['Enemy NoStat'] = '330,427,26,10';
 encounterNumberRegion['Location'] = '328,314,26,10';
 encounterNumberRegion['Objective'] = '323,316,26,10';
 encounterNumberRegion['Objective Ally'] = '323,316,26,10';
@@ -2151,8 +2151,8 @@ function markUp(value, key, cardType, lang, setID) {
 	value = value.replace(/([^:;,.?!\u2026]) ((?:<\/b>)?(?:<\/i>)?(?:<\/size>)?(?:<\/family>)?(?:<size [^>]+>)?)(<uni>|<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<bag>|<fel>|<mas>|<hon>|<hof>|<hb>|<hw>|<sai>|<eos>|<per>|<pp>)/g, '$1\u00a0$2$3');
 	value = value.replace(/([0-9]+) /g, '$1\u00a0');
 	value = value.replace(/ ([0-9]+)([:;,.?!\)\u2026])/g, '\u00a0$1$2');
-	value = value.replace(/(^|[ \n"\u201c\u201d\(])([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,4})([:;,.?!"\u2026\u201c\u201d\)]*) (["\u201c\u201d\(]*)([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,4})([:;,.?!"\u2026\u201c\u201d\)]+)(\n|$)/g, '$1$2$3\u00a0$4$5$6$7');
-	value = value.replace(/ (["\u201c\u201d\(]*)([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,2})([:;,.?!"\u2026\u201c\u201d\)]+)(\n|$)/g, '\u00a0$1$2$3$4');
+	value = value.replace(/(^|[ \n"\u201c\u201d\(])([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,4})([:;,.?!"\u2026\u201c\u201d\)]*) (["\u201c\u201d\(]*)([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,4})([:;,.?!"\u2026\u201c\u201d\)]+(?:<\/[^>]+>)*)(\n|$)/g, '$1$2$3\u00a0$4$5$6$7');
+	value = value.replace(/ (["\u201c\u201d\(]*)([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,2})([:;,.?!"\u2026\u201c\u201d\)]+(?:<\/[^>]+>)*)(\n|$)/g, '\u00a0$1$2$3$4');
 	value = value.replace(/ ([;:?!])/g, '\u00a0$1');
 
 	var valueOld;
