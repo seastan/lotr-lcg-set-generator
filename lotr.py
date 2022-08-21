@@ -844,7 +844,8 @@ def _detect_unmatched_tags(text):
     """
     errors = []
     text_copy = text
-    for tag in ('center', 'right', 'b', 'i', 'bi', 'u', 'strike', 'red'):
+    # 'right' is removed from the list to make the life of translators easier
+    for tag in ('center', 'b', 'i', 'bi', 'u', 'strike', 'red'):
         text = text_copy
         text = re.sub(r'\[{}\].+?\[\/{}\]'.format(tag, tag), '', text,  # pylint: disable=W1308
                       flags=re.DOTALL)
@@ -1152,6 +1153,7 @@ def extract_keywords(value):
 def _extract_traits(value):
     """ Extract all traits from the string.
     """
+    value = re.sub(r'\[[^\]]+\]', '', value)
     traits = [t.strip() for t in str(value or '').split('.')
               if t.strip() != '']
     return traits
@@ -1570,11 +1572,19 @@ def _extract_all_names(data):
                 ALL_NAMES.add(row[CARD_SIDE_B].strip())
 
 
+def _detect_traits(text):
+    """ Detect names in the text.
+    """
+    traits = re.findall(r'(?<=\[bi\])[^\[]+(?=\[\/bi\])', text)
+    return traits
+
+
 def _extract_all_traits(data):
     """ Collect all traits from the spreadsheet.
     """
     ALL_TRAITS.clear()
     ALL_SCRATCH_TRAITS.clear()
+    text_traits = set()
     for row in data:
         if row[CARD_SCRATCH]:
             if row[CARD_TRAITS]:
@@ -1598,6 +1608,20 @@ def _extract_all_traits(data):
                                 row[BACK_PREFIX + CARD_TRAITS])
                 ALL_TRAITS.update(
                     [t.strip() for t in traits.split('.') if t.strip()])
+
+            if row[CARD_TEXT]:
+                text_traits.update(_detect_traits(row[CARD_TEXT]))
+
+            if row[BACK_PREFIX + CARD_TEXT]:
+                text_traits.update(
+                    _detect_traits(row[BACK_PREFIX + CARD_TEXT]))
+
+            if row[CARD_SHADOW]:
+                text_traits.update(_detect_traits(row[CARD_SHADOW]))
+
+            if row[BACK_PREFIX + CARD_SHADOW]:
+                text_traits.update(
+                    _detect_traits(row[BACK_PREFIX + CARD_SHADOW]))
 
 
 def _clean_value(value):  # pylint: disable=R0915
@@ -4938,7 +4962,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         'Incorrect number of traits for card '
                         'ID %s in %s translations, row #%s', card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
-                elif not card_traits_tr.endswith('.'):
+                elif (not card_traits_tr.endswith('.') and
+                      not card_traits_tr.endswith('.[/size]')):
                     logging.error(
                         'Missing period in traits for card '
                         'ID %s in %s translations, row #%s', card_id,
@@ -4953,7 +4978,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         'Incorrect number of traits back for card '
                         'ID %s in %s translations, row #%s', card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
-                elif not card_traits_back_tr.endswith('.'):
+                elif (not card_traits_back_tr.endswith('.') and
+                      not card_traits_back_tr.endswith('.[/size]')):
                     logging.error(
                         'Missing period in traits back for card '
                         'ID %s in %s translations, row #%s', card_id,
@@ -4969,7 +4995,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         'ID %s in %s translations, row #%s', card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
                 elif not (card_keywords_tr.endswith('.') or
-                          card_keywords_tr.endswith('.[inline]')):
+                          card_keywords_tr.endswith('.[inline]') or
+                          card_keywords_tr.endswith('.[/size]') or
+                          card_keywords_tr.endswith('.[/size][inline]')):
                     logging.error(
                         'Missing period in keywords for card '
                         'ID %s in %s translations, row #%s', card_id,
@@ -4985,7 +5013,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         'ID %s in %s translations, row #%s', card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
                 elif not (card_keywords_back_tr.endswith('.') or
-                          card_keywords_back_tr.endswith('.[inline]')):
+                          card_keywords_back_tr.endswith('.[inline]') or
+                          card_keywords_back_tr.endswith('.[/size]') or
+                          card_keywords_back_tr.endswith('.[/size][inline]')):
                     logging.error(
                         'Missing period in keywords back for card '
                         'ID %s in %s translations, row #%s', card_id,
