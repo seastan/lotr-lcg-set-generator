@@ -1541,12 +1541,23 @@ def get_rules_precedents(text, field, card, res):  # pylint: disable=R0912
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('Plural after [pp]', []).append(data)
 
-        if re.search(r'\b(?:he|him|his|she|her|it|its)\b', paragraph,
+        if re.search(r'\b(?:he|him|his|she|her)\b', paragraph,
                      flags=re.IGNORECASE):
             data = {'name': card[lotr.CARD_NAME],
                     'field': field,
-                    'text': re.sub(r'\b(he|him|his|she|her|it|its)\b',
+                    'text': re.sub(r'\b(he|him|his|she|her)\b',
                                    '__**\\1**__', paragraph,
+                                   flags=re.IGNORECASE),
+                    'row': card[lotr.ROW_COLUMN]}
+            res.setdefault('Self-referential pronouns', []).append(data)
+        elif (re.search(r'\b(?:it|its)\b', paragraph, flags=re.IGNORECASE) and
+              card[lotr.CARD_TYPE] in (
+                'Ally', 'Hero', 'Enemy', 'Objective Ally', 'Objective Hero',
+                'Ship Enemy', 'Ship Objective') and
+              card.get(lotr.CARD_UNIQUE)):
+            data = {'name': card[lotr.CARD_NAME],
+                    'field': field,
+                    'text': re.sub(r'\b(it|its)\b', '__**\\1**__', paragraph,
                                    flags=re.IGNORECASE),
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('Self-referential pronouns', []).append(data)
