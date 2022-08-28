@@ -639,6 +639,8 @@ RESTRICTED_TRANSLATION = {
     'Spanish': 'Restringido'
 }
 
+COMMON_TRAITS = {'Condition', 'Forest', 'Poison', 'Staff', 'Shadow', 'Trait',
+                 'Traits'}
 LOWERCASE_WORDS = {
     'a', 'an', 'the', 'and', 'as', 'at', 'but', 'by', 'for', 'from', 'if',
     'in', 'into', 'nor', 'of', 'on', 'onto', 'or', 'out', 'so', 'than',
@@ -1153,9 +1155,8 @@ def extract_keywords(value):
 def _extract_traits(value):
     """ Extract all traits from the string.
     """
-    value = re.sub(r'\[[^\]]+\]', '', value)
-    traits = [t.strip() for t in str(value or '').split('.')
-              if t.strip() != '']
+    value = re.sub(r'\[[^\]]+\]', '', str(value or ''))
+    traits = [t.strip() for t in value.split('.') if t.strip() != '']
     return traits
 
 
@@ -1622,6 +1623,10 @@ def _extract_all_traits(data):
             if row[BACK_PREFIX + CARD_SHADOW]:
                 text_traits.update(
                     _detect_traits(row[BACK_PREFIX + CARD_SHADOW]))
+
+    text_traits = sorted([t for t in text_traits if t not in ALL_TRAITS and
+                          t not in COMMON_TRAITS])
+    # logging.info(text_traits)
 
 
 def _clean_value(value):  # pylint: disable=R0915
@@ -2225,7 +2230,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
             errors.append('"(Limit 3 times per _.)"')
 
         if ' to travel here' in paragraph:
-            errors.append('"redundant: to travel here"')
+            errors.append('redundant: "to travel here"')
 
         if re.search(r' he (?:or she|commit|controls|deals|(?:just )?discard|'
                      'is eliminated|must|owns|puts|raises)', paragraph):
@@ -2243,42 +2248,44 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
 
         if re.search(r'encounter deck[^.]+from the top of the encounter deck',
                      paragraph):
-            errors.append('"redundant: from the top of the encounter deck"')
+            errors.append('redundant: "from the top of the encounter deck"')
 
         if re.search(r'encounter deck[^.]+from the encounter deck', paragraph):
-            errors.append('"redundant: from the encounter deck"')
+            errors.append('redundant: "from the encounter deck"')
 
         if re.search(r'discards? (?:[^ ]+ )?cards? from the top of the '
                      'encounter deck', paragraph, flags=re.IGNORECASE):
             errors.append('"from the encounter deck"')
 
         if re.search(r' gets? [^+–]', paragraph):
-            errors.append('"gain(s) a non-stat modification"')
+            errors.append('"gain(s)" a non-stat modification')
 
         if re.search(r' gains? [+–]', paragraph):
-            errors.append('"get(s) a stat modification"')
+            errors.append('"get(s)" a stat modification')
 
         if re.search(r'discards? . cards? at random', paragraph,
                      flags=re.IGNORECASE):
             errors.append('"discard(s) _ random card(s)"')
 
         if re.search(r'\(Counts as a (?:\[bi\])?Condition', paragraph):
-            errors.append('"Condition attachments"')
+            errors.append('"While attached... counts as a {Condition} '
+                          'attachment with the text:"')
 
         if ' by this effect' in paragraph:
-            errors.append('"this way"')
+            errors.append('"this way" instead of "by this effect"')
 
         if re.search(r'may trigger this (?:action|response)',
                      paragraph, flags=re.IGNORECASE):
-            errors.append('"Any player may trigger this effect"')
+            errors.append('"may trigger this effect"')
         elif re.search(r'\(any player may trigger this effect',
                      paragraph, flags=re.IGNORECASE):
             errors.append('"Any player may trigger this effect"')
 
-        if ('cannot be chosen as the current quest' in paragraph and
-                not 'cannot be chosen as the current quest during the quest '
-                'phase' in paragraph):
-            errors.append('"during the quest phase"')
+        if ('cannot be chosen as the current quest'
+                in paragraph.replace('cannot be chosen as the current quest '
+                                     'during the quest phase', '')):
+            errors.append('"cannot be chosen as the current quest during '
+                          'the quest phase"')
 
         if 'active quest' in paragraph or 'current quest stage' in paragraph:
             errors.append('"current quest"')
@@ -2315,7 +2322,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
 
         if re.search(r'step is completed?',
                      paragraph.replace('complete rules', '')):
-            errors.append('"redundant: is complete(d)"')
+            errors.append('redundant: "is complete(d)"')
         elif re.search(r'\bcomplete[ds]?\b',
                        paragraph.replace('complete rules', ''),
                        flags=re.IGNORECASE):
@@ -2332,7 +2339,8 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
 
         if re.search(r'play only after',
                      paragraph, flags=re.IGNORECASE):
-            errors.append('"Response: At the end of _"')
+            errors.append('"Response: At the end of _" instead of '
+                          '"play only after"')
 
         if 'cancelled' in paragraph:
             errors.append('"canceled"')
@@ -2410,12 +2418,15 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
             errors.append('"heal _ from"')
 
         if 'quest card' in paragraph:
-            errors.append('"redundant: card(s)"')
+            errors.append('redundant: "card(s)" after "quest"')
 
         if 'set-aside' in paragraph:
             errors.append('"set aside"')
 
-        if re.search(r'(?<!the )(?:printed )?\[bi\][^\[]+\[\/bi\]'
+        if re.search(r'is a \[bi\][^\[]+\[\/bi\](?! trait| \[bi\]trait)',
+                     paragraph, flags=re.IGNORECASE):
+            errors.append('"has the {Trait} trait"')
+        elif re.search(r'(?<!the )(?:printed )?\[bi\][^\[]+\[\/bi\]'
                      r'(?:(?:, | or | and )\[bi\][^\[]+\[\/bi\])* traits?\b',
                      re.sub(r'the (?:printed )?\[bi\][^\[]+\[\/bi\]'
                             r'(?:(?:, | or | and )\[bi\][^\[]+\[\/bi\])* '
@@ -2423,28 +2434,91 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
             errors.append('"the {Trait} trait"')
 
         if re.search(r'\[\/bi\] Traits?\b', paragraph):
-            errors.append('"lowercase trait after {Trait}"')
+            errors.append('lowercase "trait(s)" after "{Trait}"')
         elif re.search(r'\[\/bi\] \[bi\]traits?\b', paragraph,
                        flags=re.IGNORECASE):
-            errors.append('"remove tags around trait after {Trait}"')
+            errors.append('remove tags around "trait(s)" after "{Trait}"')
 
         if re.search(r'(?<!\[\/bi\] )traits?\b', paragraph):
-            errors.append('"uppercase Trait"')
+            errors.append('uppercase "Trait(s)"')
         elif re.search(r'(?<!\[\/bi\] )(?<!\[bi\])Traits?\b', paragraph,
                        flags=re.IGNORECASE):
-            errors.append('"add {} around Trait"')
+            errors.append('add {} around "Trait(s)"')
+
+        if (field in (CARD_SHADOW, BACK_PREFIX + CARD_SHADOW) and
+                re.search(r'defending player\b', paragraph,
+                          flags=re.IGNORECASE)):
+            errors.append('"you" (instead of "defending player")')
+        elif re.search(r'\bshadow\b[^.]+ defending player\b', paragraph,
+                       flags=re.IGNORECASE):
+            errors.append('"you" (instead of "defending player")')
+        elif re.search(
+                r'\b(?:after|when) [^.]+ attacks[^.]+ defending player\b',
+                paragraph, flags=re.IGNORECASE):
+            errors.append('"you" (instead of "defending player")')
+
+        if re.search(r'advance to stage [0-9]+\b', paragraph,
+                     flags=re.IGNORECASE):
+            errors.append('"advance to stage _A(B)")')
 
         if re.search(r'(?<!\bstage )[2-90X] card\b', paragraph,
                      flags=re.IGNORECASE):
-            errors.append('"cards"')
+            errors.append('"cards" not "card"')
 
         if re.search(r'^\[b\]Rumor\[\/b\]:', paragraph):
-            errors.append('"Rumor text must be inside [i] tags"')
+            errors.append('Rumor text must be inside [i] tags')
+
+        if (re.search(r'(?:\[bi\]forced\[\/bi\]|forced|"forced") effect',
+                      paragraph, flags=re.IGNORECASE) or
+                '[b]forced[/b] effect' in paragraph):
+            errors.append('"[b]Forced[/b]"')
+
+        if (re.search(r'(?:\[bi\]travel\[\/bi\]|travel|"travel") effect',
+                      paragraph, flags=re.IGNORECASE) or
+                '[b]travel[/b] effect' in paragraph):
+            errors.append('"[b]Travel[/b]"')
+
+        if (re.search(r'(?:\[bi\]rumor\[\/bi\]|rumor|"rumor") effect',
+                      paragraph, flags=re.IGNORECASE) or
+                '[b]rumor[/b] effect' in paragraph):
+            errors.append('"[b]Rumor[/b]"')
+
+        if (re.search(r'(?:\[bi\]shadow\[\/bi\]|\[b\]shadow\[\/b\]|"shadow") '
+                      r'effect', paragraph, flags=re.IGNORECASE) or
+                re.search(r'(?<!\.) Shadow effect\b', paragraph)):
+            errors.append('"shadow"')
+
+        if (re.search(r'(?:\[bi\]when revealed\[\/bi\]|'
+                      r'\[b\]when revealed\[\/b\]|when revealed) effect',
+                      paragraph, flags=re.IGNORECASE) or
+                '"When Revealed" effect' in paragraph or
+                '"When revealed" effect' in paragraph):
+            errors.append('"when revealed" in double-quotes')
+
+        if 'When revealed:' in paragraph:
+            errors.append('"When Revealed:"')
+
+        updated_paragraph = re.sub(
+            r'\b(?:Valour )?(?:Resource |Planning |Quest |Travel |Encounter '
+            r'|Combat |Refresh )?(?:Action):', '', paragraph)
+        updated_paragraph = re.sub(r'\b(?:Valour Response|Response):', '',
+                                   updated_paragraph)
+
+        if (re.search(r'(?:\[bi\]action\[\/bi\]|\[b\]action\[\/b\]|"action")',
+                      updated_paragraph, flags=re.IGNORECASE) or
+                re.search(r'(?<!\.) Action\b', updated_paragraph)):
+            errors.append('"action"')
+
+        if (re.search(r'(?:\[bi\]response\[\/bi\]|\[b\]response\[\/b\]|'
+                      r'"response")', updated_paragraph,
+                      flags=re.IGNORECASE) or
+                re.search(r'(?<!\.) Response\b', updated_paragraph)):
+            errors.append('"response"')
 
     if (field == CARD_TEXT and card[CARD_TYPE] == 'Quest'
             and str(card[CARD_COST]) == '1'):
         if 'When Revealed' in text:
-            errors.append('"Setup"')
+            errors.append('"Setup" instead of "When Revealed"')
 
     if ((field == CARD_TEXT and
          card[CARD_TYPE] not in CARD_TYPES_NO_KEYWORDS) or
@@ -2454,7 +2528,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                     paragraphs[0].replace('Immune to player card effects.', '')
                     .replace('Cannot have attachments.', '').replace('  ', '')
                     .strip()):
-            errors.append('"first line of the text looks like keyword(s)"')
+            errors.append('first line of the text looks like keyword(s)')
 
     return errors
 
@@ -3921,14 +3995,6 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif card_text is not None and 'When revealed:' in card_text:
-            message = ('Capitalize "When Revealed" in the text for row #{}{}'
-                       .format(i, scratch))
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
         elif (card_text is not None and
               card_type != 'Presentation' and card_sphere != 'Back' and
               not (card_flags and 'IgnoreRules' in extract_flags(card_flags))):
@@ -3982,14 +4048,6 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
               not _verify_period(card_text_back)):
             message = ('Missing period at the end of the text back paragraph '
                        'for row #{}{}'.format(i, scratch))
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-        elif card_text_back is not None and 'When revealed:' in card_text_back:
-            message = ('Capitalize "When Revealed" in the text back for '
-                       'row #{}{}'.format(i, scratch))
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
