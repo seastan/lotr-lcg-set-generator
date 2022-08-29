@@ -2215,18 +2215,19 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         return errors
 
     for paragraph in paragraphs:
-        if (re.search(r'limit once per', paragraph, flags=re.IGNORECASE) and
-                not re.search(r'\(Limit once per .+\.\)”?$', paragraph)):
+        if re.search(r'limit once per',
+                     re.sub(r'\(Limit once per .+\.\)”?$', '', paragraph),
+                     flags=re.IGNORECASE):
             errors.append('"(Limit once per _.)"')
 
-        if (re.search(r'limit (?:twice|two times|2 times) per', paragraph,
-                      flags=re.IGNORECASE) and
-                not re.search(r'\(Limit twice per .+\.\)”?$', paragraph)):
+        if re.search(r'limit (?:twice|two times|2 times) per',
+                     re.sub(r'\(Limit twice per .+\.\)”?$', '', paragraph),
+                     flags=re.IGNORECASE):
             errors.append('"(Limit twice per _.)"')
 
-        if (re.search(r'limit (?:thrice|three times|3 times) per', paragraph,
-                      flags=re.IGNORECASE) and
-                not re.search(r'\(Limit 3 times per .+\.\)”?$', paragraph)):
+        if re.search(r'limit (?:thrice|three times|3 times) per',
+                     re.sub(r'\(Limit 3 times per .+\.\)”?$', '', paragraph),
+                     flags=re.IGNORECASE):
             errors.append('"(Limit 3 times per _.)"')
 
         if ' to travel here' in paragraph:
@@ -2290,11 +2291,10 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if 'active quest' in paragraph or 'current quest stage' in paragraph:
             errors.append('"current quest"')
 
-        if (re.search(r'adds? [0-9X](?:\[pp\])? resources? to ',
-                      paragraph, flags=re.IGNORECASE) and
-                not re.search(
-                    r'adds? [0-9X](?:\[pp\])? resources? to [^.]+ pool',
-                    paragraph, flags=re.IGNORECASE)):
+        if re.search(r'adds? [0-9X](?:\[pp\])? resources? to ',
+                     re.sub(r'adds? [0-9X](?:\[pp\])? resources? to [^.]+ '
+                            r'pool', '', paragraph, flags=re.IGNORECASE),
+                     flags=re.IGNORECASE):
             errors.append('"place(s) _ resource token(s) on"')
 
         if re.search(r'adds? [0-9X](?:\[pp\])? resource tokens? to [^.]+ pool',
