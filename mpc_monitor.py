@@ -39,7 +39,6 @@ DEFAULT_VIEWSTATEGENERATOR = '7D57AF60'
 DEFAULT_HIDDGRECAPTCHAV3TOKEN = \
     '03AGdBq25A2GL4dhQ7lzrQbq4yeJycZQ2Hgi-5zhDei6hpGs3eap2F_eyLtIPSdtMPn5ardl-fTRFaxI8mj12HNBp-ezuEiTdRXRCHnuRt5039oDE1znUCzJhxz1l_R-kqpgGQoaXGPPjXvgOxeTYCaHXUcuq1PgCJrz4LPId18uvY0bZwPM9hdVA6avdiS_K_Ia7eLfWaPrBbuJvrS9L7hwW0uCP3cgaxRQdRF9tpLzo1ZEWEPmDUeYUaz_iHKoW44oZkthNjnb1SbJir0gz3_jmpslf4b-UUQZvO_-JNjkvYPmU9aOPmakhrk0WrdMzl74C5PlDEZSKdHmLUqSGlZ2OhgGu_2N9tbIVDlA5vkxL4koRPD2EQsnFoiDW5WZAmlzjdCzRjeDY79Aphs-PM508cKnl9CrDvvu9zDn36_jqqrRAf_YzJ-Rl1_VfMMoKpa-DAi_mUWleLWURV-Ik3b3YZbuCHe8gxQA'
 
-DISCORD_USERS = '<@!637024738782216212> <@!134863257050677248> <@!464924763312226304>'
 ALERT_SUBJECT_TEMPLATE = 'LotR MPC Monitor ALERT: {}'
 ERROR_SUBJECT_TEMPLATE = 'LotR MPC Monitor ERROR: {}'
 WARNING_SUBJECT_TEMPLATE = 'LotR MPC Monitor WARNING: {}'
@@ -269,11 +268,15 @@ def get_wordpress_content(data):
                 timeout=URL_TIMEOUT)
             res = json.loads(req.content)['content']['rendered']
             break
-        except Exception:
+        except Exception as exc:
             if i < URL_RETRIES - 1:
                 time.sleep(URL_SLEEP)
             else:
-                raise
+                message = ('Error obtaining WordPress content: {}: {}'
+                           .format(type(exc).__name__, str(exc)))
+                logging.exception(message)
+                create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
+                return ''
 
     return res
 
@@ -292,11 +295,14 @@ def update_wordpress_content(data, content):
                 data=json.dumps({'content': content}),
                 timeout=URL_TIMEOUT)
             break
-        except Exception:
+        except Exception as exc:
             if i < URL_RETRIES - 1:
                 time.sleep(URL_SLEEP)
             else:
-                raise
+                message = ('Error updating WordPress content: {}: {}'
+                           .format(type(exc).__name__, str(exc)))
+                logging.exception(message)
+                create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
 
 
 def replace_url(data, old_id, new_id):
@@ -472,7 +478,7 @@ def rename_deck(session, deck_id, deck_name, actual_deck_name):
     return content
 
 
-def fix_deck_rename(session, deck_id, deck_name, actual_deck_name):
+def fix_deck_rename(session, data, deck_id, deck_name, actual_deck_name):
     """ Fix a renamed deck.
     """
     message = ('Deck {} has been renamed to {}! Attempting to '
@@ -483,6 +489,7 @@ Attempting to rename it automatically..."""
     logging.info(message)
     create_mail(ALERT_SUBJECT_TEMPLATE.format(message))
     send_discord(discord_message)
+    discord_users = data['discord_users']
 
     try:
         content = rename_deck(session, deck_id, deck_name, actual_deck_name)
@@ -492,7 +499,7 @@ Attempting to rename it automatically..."""
         logging.exception(message)
         create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
         discord_message = f"""Attempt to rename deck **{actual_deck_name}** automatically failed!
-{DISCORD_USERS}"""
+{discord_users}"""
         send_discord(discord_message)
         return ''
     else:
@@ -501,7 +508,7 @@ Attempting to rename it automatically..."""
         logging.info(message)
         create_mail(ALERT_SUBJECT_TEMPLATE.format(message))
         discord_message = f"""Attempt to rename deck **{actual_deck_name}** automatically succeeded!
-{DISCORD_USERS}"""
+{discord_users}"""
         send_discord(discord_message)
         return content
 
@@ -510,19 +517,20 @@ def fix_deck(session, data, content, deck_id, backup_id, deck_name,  # pylint: d
              actual_deck_name, content_id, actual_content_id):
     """ Fix a corrupted deck.
     """
+    discord_users = data['discord_users']
     if actual_deck_name != deck_name:
         message = ('Deck {} has been changed and renamed to {}! Attempting to '
                    'fix it automatically...'.format(deck_name,
                                                     actual_deck_name))
         discord_message = f"""Deck **{deck_name}** has been changed and renamed to **{actual_deck_name}**!
 Attempting to fix it automatically...
-{DISCORD_USERS}"""
+{discord_users}"""
     else:
         message = ('Deck {} has been changed! Attempting to fix it '
                    'automatically...'.format(deck_name))
         discord_message = f"""Deck **{deck_name}** has been changed!
 Attempting to fix it automatically...
-{DISCORD_USERS}"""
+{discord_users}"""
     logging.info(message)
     create_mail(ALERT_SUBJECT_TEMPLATE.format(message))
     send_discord(discord_message)
@@ -632,7 +640,7 @@ Do the following:
 5. Construct a URL https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id=<ID>
 6. Open https://wordpress.com, login (if needed), click Pages and open "MakePlayingCards Direct Links"
 7. Update the link to that URL
-{DISCORD_USERS}"""
+{discord_users}"""
         send_discord(discord_message)
         return '', ''
     else:
@@ -663,7 +671,7 @@ Do the following:
 1. Open https://wordpress.com, login (if needed), click Pages and open "MakePlayingCards Direct Links"
 2. Update the link to:
 https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id={new_deck_id}
-{DISCORD_USERS}"""
+{discord_users}"""
             send_discord(discord_message)
 
         return content, new_deck_id
@@ -834,7 +842,7 @@ def monitor():  # pylint: disable=R0912,R0914,R0915
                     data['decks'][deck_name]['failed_content_ids'].append(
                         actual_content_id)
         elif actual_deck_name != deck_name:
-            new_content = fix_deck_rename(session, deck_id, deck_name,
+            new_content = fix_deck_rename(session, data, deck_id, deck_name,
                                           actual_deck_name)
             if new_content:
                 content = new_content

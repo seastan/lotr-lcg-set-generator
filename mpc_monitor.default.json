@@ -1,6 +1,7 @@
 {
     "wordpress_token": "<wordpress token>",
     "wordpress_url": "<wordpress url>",
+    "discord_users": "<@!user_id 1> <@!user_id 2>",
     "cookies": "<dictionary of cookies>",
     "decks": {
         "<Deck Name 1>": {
