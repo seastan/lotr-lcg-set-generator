@@ -639,6 +639,8 @@ RESTRICTED_TRANSLATION = {
     'Spanish': 'Restringido'
 }
 
+COMMON_KEYWORDS = {'Devoted', 'Doomed', 'Encounter', 'Guarded', 'Ranged',
+                   'Restricted', 'Secrecy', 'Sentinel', 'Surge'}
 COMMON_TRAITS = {'Condition', 'Forest', 'Poison', 'Staff', 'Shadow', 'Trait',
                  'Traits'}
 LOWERCASE_WORDS = {
@@ -1140,6 +1142,15 @@ def _escape_icon_filename(value):
     value = value.strip()
     value = value.replace(' ', '-')
     return value
+
+
+def simplify_keyword(keyword):
+    """ Simplify a given keyword.
+    """
+    keyword = re.sub(r' \([^)]+\)$', '',
+                     re.sub(r' [0-9X]+$', '',
+                            keyword.replace(' Per Player', '')))
+    return keyword
 
 
 def extract_keywords(value):
