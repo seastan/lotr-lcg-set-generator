@@ -2064,15 +2064,15 @@ function markUp(value, key, cardType, lang, setID) {
 	var tagPrefix;
 	var tagSuffix;
 	if (['Traits', 'BTraits'].indexOf(key + '') > -1) {
-		value = value.replace(/\[bi\](.*?)\[\/bi\]/g, '$1');
-		value = value.replace(/\[b\](.*?)\[\/b\]/g, '$1');
-		value = value.replace(/\[i\](.*?)\[\/i\]/g, '$1');
+		value = value.replace(/\[bi\]((?:.|\n)*?)\[\/bi\]/g, '$1');
+		value = value.replace(/\[b\]((?:.|\n)*?)\[\/b\]/g, '$1');
+		value = value.replace(/\[i\]((?:.|\n)*?)\[\/i\]/g, '$1');
 		tagPrefix = '</b></i></size></family><size ' + iconPointSize + '>';
 		tagSuffix = '</size><family "Times New Roman"><size ' + defaultPointSize + '><i><b>';
 	}
 	else if (['Shadow', 'BShadow', 'Flavour', 'BFlavour'].indexOf(key + '') > -1) {
-		value = value.replace(/\[bi\](.*?)\[\/bi\]/g, '[b]$1[/b]');
-		value = value.replace(/\[i\](.*?)\[\/i\]/g, '$1');
+		value = value.replace(/\[bi\]((?:.|\n)*?)\[\/bi\]/g, '[b]$1[/b]');
+		value = value.replace(/\[i\]((?:.|\n)*?)\[\/i\]/g, '$1');
 		tagPrefix = '</i></size></family><size ' + iconPointSize + '>';
 		tagSuffix = '</size><family "Times New Roman"><size ' + defaultPointSize + '><i>';
 	}
@@ -2080,6 +2080,12 @@ function markUp(value, key, cardType, lang, setID) {
 		tagPrefix = '</size></family><size ' + iconPointSize + '>';
 		tagSuffix = '</size><family "Times New Roman"><size ' + defaultPointSize + '>';
 	}
+
+	function updateItalicIconsReplacer(match, offset, string) {
+		var res = match.replace(/(\[unique\]|\[threat\]|\[attack\]|\[defense\]|\[willpower\]|\[leadership\]|\[lore\]|\[spirit\]|\[tactics\]|\[baggins\]|\[fellowship\]|\[sunny\]|\[cloudy\]|\[rainy\]|\[stormy\]|\[sailing\]|\[eos\]|\[pp\])/g, '[/i]$1[i]');
+		return res;
+	}
+	value = value.replace(/\[i\](?:.|\n)+?\[\/i\]/g, updateItalicIconsReplacer);
 
 	value = value.replace(/\[bi\]\[bi\]/g, '[bi]');
 	value = value.replace(/\[\/bi\]\[\/bi\]/g, '[/bi]');
@@ -2171,14 +2177,14 @@ function markUp(value, key, cardType, lang, setID) {
 		var res = '</size></family>' + updateVafthrudnir(p2, p1, lang) + '<family "Times New Roman"><size ' + defaultPointSize + '>';
 		return res;
 	}
+	value = value.replace(/<lotr ([0-9\.]+)>((?:.|\n)*?)<\/lotr>/g, updateVafthrudnirReplacer);
 
 	function updateLotrHeaderReplacer(match, p1, p2, offset, string) {
 		var res = '</size></family><family "Lord of the Headers"><size ' + p1 + '>' + p2 + '</size></family><family "Times New Roman"><size ' + defaultPointSize + '>';
 		return res;
 	}
+	value = value.replace(/<lotrheader ([0-9\.]+)>((?:.|\n)*?)<\/lotrheader>/g, updateLotrHeaderReplacer);
 
-	value = value.replace(/<lotr ([0-9\.]+)>(.*?)<\/lotr>/g, updateVafthrudnirReplacer);
-	value = value.replace(/<lotrheader ([0-9\.]+)>(.*?)<\/lotrheader>/g, updateLotrHeaderReplacer);
 	value = value.replace(/<size [^>]+><\/size>/g, '');
 	value = value.replace(/<family [^>]+><\/family>/g, '');
 
