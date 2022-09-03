@@ -1503,8 +1503,9 @@ async def get_dragncards_quests_stat(start_date):
 def get_rules_precedents(text, field, card, res, keywords_regex):  # pylint: disable=R0912
     """ Detect text rules precedents.
     """
-    text = re.sub(r'\[i\](?!\[b\]Rumor).+?\[\/i\]', '\\*\\*\\*', text,
-                  flags=re.DOTALL)
+    text = re.sub(r'(^|\n)(?:\[[^\]]+\])*\[i\](?!\[b\]Rumor\[\/b\]|Example:)'
+                  r'.+?\[\/i\](?:\[[^\]]+\])*(?:\n|$)', '\\1\\*\\*\\*',
+                  text, flags=re.DOTALL)
     paragraphs = [p.strip() for p in text.split('\n') if p.strip()]
     if not paragraphs:
         return

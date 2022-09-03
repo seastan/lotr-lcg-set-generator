@@ -639,6 +639,9 @@ RESTRICTED_TRANSLATION = {
     'Spanish': 'Restringido'
 }
 
+COMMON_ACCENTS = {'Annuminas', 'Cuarthol', 'Din', 'Druadan', 'Druedain',
+                  'Dum', 'dum', 'Dunedain', 'Iarion', 'Lorien', 'Mumakil',
+                  'Nazgul', 'Nin', 'Numenor', 'Rhun'}
 COMMON_KEYWORDS = {'Devoted', 'Doomed', 'Encounter', 'Guarded', 'Ranged',
                    'Restricted', 'Secrecy', 'Sentinel', 'Surge'}
 COMMON_TRAITS = {'Condition', 'Forest', 'Poison', 'Staff', 'Shadow', 'Trait',
@@ -652,6 +655,7 @@ CARD_COLUMNS = {}
 SHEET_IDS = {}
 SETS = {}
 DATA = []
+ACCENTS = set()
 ALL_NAMES = set()
 ALL_SCRATCH_NAMES = set()
 ALL_TRAITS = set()
@@ -1640,6 +1644,35 @@ def _extract_all_traits(data):
     # logging.info(text_traits)
 
 
+def _get_accents(name):
+    """ Get words with accents from the name.
+    """
+    words = re.findall(r'\w+', name)
+    words = [unidecode.unidecode(w) for w in words
+             if not re.match(r'^[a-z0-9]+$', w, flags=re.IGNORECASE)]
+    return set(words)
+
+
+def _extract_accents(data):
+    """ Collect known words with accents.
+    """
+    ACCENTS.clear()
+    ACCENTS.update(COMMON_ACCENTS)
+    for name in ALL_NAMES:
+        ACCENTS.update(_get_accents(name))
+
+    for trait in ALL_TRAITS:
+        ACCENTS.update(_get_accents(trait))
+
+    encounter_sets = set()
+    for row in data:
+        if not row[CARD_SCRATCH] and row[CARD_ENCOUNTER_SET]:
+            encounter_sets.add(row[CARD_ENCOUNTER_SET])
+
+    for encounter_set in encounter_sets:
+        ACCENTS.update(_get_accents(encounter_set))
+
+
 def _clean_value(value):  # pylint: disable=R0915
     """ Clean a value from the spreadsheet.
     """
@@ -2026,6 +2059,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
     DATA[:] = [row for row in DATA if not _skip_row(row)]
     _extract_all_names(DATA)
     _extract_all_traits(DATA)
+    _extract_accents(DATA)
     _clean_data(DATA, 'English')
 
     SELECTED_CARDS.update({row[CARD_ID] for row in DATA if row[CARD_SELECTED]})
@@ -2220,7 +2254,9 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
     """ Detect text rules errors.
     """
     errors = []
-    text = re.sub(r'\[i\](?!\[b\]Rumor).+?\[\/i\]', '', text, flags=re.DOTALL)
+    text = re.sub(r'(^|\n)(?:\[[^\]]+\])*\[i\](?!\[b\]Rumor\[\/b\]|Example:)'
+                  r'.+?\[\/i\](?:\[[^\]]+\])*(?:\n|$)', '\\1',
+                  text, flags=re.DOTALL)
     paragraphs = [p.strip() for p in text.split('\n') if p.strip()]
     if not paragraphs:
         return errors
@@ -2562,6 +2598,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
     card_data = DATA[:]
     card_data = sorted(card_data, key=lambda row: (row[CARD_SCRATCH] or 0,
                                                    row[ROW_COLUMN]))
+
+    accents_regex = (r'\b(?:' + '|'.join([re.escape(a) for a in ACCENTS]) +
+                     r')\b')
 
     for row in card_data:  # pylint: disable=R1702
         i = row[ROW_COLUMN]
@@ -4881,6 +4920,19 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         '#{}{}: {}'.format(
                             key.replace('Back_', 'Back '), i, scratch,
                             ', '.join(unmatched_tags)))
+                    logging.error(message)
+                    if not card_scratch:
+                        errors.append(message)
+                    else:
+                        broken_set_ids.add(set_id)
+
+                accents = set(re.findall(accents_regex, value))
+                if accents:
+                    message = (
+                        'Missing accents in {} column for row #{}{}: {} '
+                        '(use IgnoreName flag to ignore)'
+                        .format(key.replace('Back_', 'Back '), i, scratch,
+                                ', '.join(accents)))
                     logging.error(message)
                     if not card_scratch:
                         errors.append(message)
