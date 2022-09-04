@@ -1588,19 +1588,11 @@ def _extract_all_names(data):
                 ALL_NAMES.add(row[CARD_SIDE_B].strip())
 
 
-def _detect_traits(text):
-    """ Detect names in the text.
-    """
-    traits = re.findall(r'(?<=\[bi\])[^\[]+(?=\[\/bi\])', text)
-    return traits
-
-
 def _extract_all_traits(data):
     """ Collect all traits from the spreadsheet.
     """
     ALL_TRAITS.clear()
     ALL_SCRATCH_TRAITS.clear()
-    text_traits = set()
     for row in data:
         if row[CARD_SCRATCH]:
             if row[CARD_TRAITS]:
@@ -1624,24 +1616,6 @@ def _extract_all_traits(data):
                                 row[BACK_PREFIX + CARD_TRAITS])
                 ALL_TRAITS.update(
                     [t.strip() for t in traits.split('.') if t.strip()])
-
-            if row[CARD_TEXT]:
-                text_traits.update(_detect_traits(row[CARD_TEXT]))
-
-            if row[BACK_PREFIX + CARD_TEXT]:
-                text_traits.update(
-                    _detect_traits(row[BACK_PREFIX + CARD_TEXT]))
-
-            if row[CARD_SHADOW]:
-                text_traits.update(_detect_traits(row[CARD_SHADOW]))
-
-            if row[BACK_PREFIX + CARD_SHADOW]:
-                text_traits.update(
-                    _detect_traits(row[BACK_PREFIX + CARD_SHADOW]))
-
-    text_traits = sorted([t for t in text_traits if t not in ALL_TRAITS and
-                          t not in COMMON_TRAITS])
-    # logging.info(text_traits)
 
 
 def _get_accents(name):
@@ -5505,6 +5479,7 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
               'sets': set_names,
               'set_ids': set_ids,
               'set_codes': set_codes,
+              'traits': list(ALL_TRAITS),
               'data': data}
     with open(DISCORD_CARD_DATA_PATH, 'w', encoding='utf-8') as obj:
         res = json.dumps(output, ensure_ascii=False)

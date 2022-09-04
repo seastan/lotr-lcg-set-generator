@@ -1500,7 +1500,14 @@ async def get_dragncards_quests_stat(start_date):
     return res
 
 
-def get_rules_precedents(text, field, card, res, keywords_regex):  # pylint: disable=R0912
+def detect_traits(text):
+    """ Detect trait names in the text.
+    """
+    traits = re.findall(r'(?<=\[bi\])[^\[]+(?=\[\/bi\])', text)
+    return traits
+
+
+def get_rules_precedents(text, field, card, res, keywords_regex, all_traits):  # pylint: disable=R0912,R0913,R0915
     """ Detect text rules precedents.
     """
     text = re.sub(r'(^|\n)(?:\[[^\]]+\])*\[i\](?!\[b\]Rumor\[\/b\]|Example:)'
@@ -1511,6 +1518,19 @@ def get_rules_precedents(text, field, card, res, keywords_regex):  # pylint: dis
         return
 
     for paragraph in paragraphs:
+        traits = detect_traits(paragraph)
+        traits = sorted([t for t in traits if t not in all_traits and
+                         t not in lotr.COMMON_TRAITS])
+        if traits:
+            traits_regex = (r'(?<=\[bi\])(' +
+                            '|'.join([re.escape(t) for t in traits]) +
+                            r')(?=\[\/bi\])')
+            data = {'name': card[lotr.CARD_NAME],
+                    'field': field,
+                    'text': re.sub(traits_regex, '__**\\1**__', paragraph),
+                    'row': card[lotr.ROW_COLUMN]}
+            res.setdefault('Unknown traits', []).append(data)
+
         if re.search(keywords_regex, paragraph.replace('Encounter Cards', '')):
             data = {'name': card[lotr.CARD_NAME],
                     'field': field,
@@ -4098,8 +4118,8 @@ Targets removed.
         keywords = [item for sublist in keywords for item in sublist]
         keywords = {lotr.simplify_keyword(k) for k in keywords}
         keywords.union(lotr.COMMON_KEYWORDS)
-        keywords_regex = r'(?<!\.) (' + '|'.join([re.escape(k)
-                                                  for k in keywords]) + r')\b'
+        keywords_regex = (r'(?<!\.) (' +
+                          '|'.join([re.escape(k) for k in keywords]) + r')\b')
 
         matches.sort(key=lambda card: card[lotr.ROW_COLUMN])
         res = {}
@@ -4107,24 +4127,24 @@ Targets removed.
             if card.get(lotr.CARD_TEXT) is not None:
                 get_rules_precedents(
                     card[lotr.CARD_TEXT], lotr.CARD_TEXT, card, res,
-                    keywords_regex)
+                    keywords_regex, data['traits'])
 
             if card.get(lotr.BACK_PREFIX + lotr.CARD_TEXT) is not None:
                 get_rules_precedents(
                     card[lotr.BACK_PREFIX + lotr.CARD_TEXT],
                          lotr.BACK_PREFIX + lotr.CARD_TEXT, card, res,
-                         keywords_regex)
+                         keywords_regex, data['traits'])
 
             if card.get(lotr.CARD_SHADOW) is not None:
                 get_rules_precedents(
                     card[lotr.CARD_SHADOW], lotr.CARD_SHADOW, card, res,
-                    keywords_regex)
+                    keywords_regex, data['traits'])
 
             if card.get(lotr.BACK_PREFIX + lotr.CARD_SHADOW) is not None:
                 get_rules_precedents(
                     card[lotr.BACK_PREFIX + lotr.CARD_SHADOW],
                          lotr.BACK_PREFIX + lotr.CARD_SHADOW, card, res,
-                         keywords_regex)
+                         keywords_regex, data['traits'])
 
         output = []
         for rule, card_list in res.items():
