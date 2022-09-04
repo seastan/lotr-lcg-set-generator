@@ -4845,7 +4845,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         for key, value in row.items():
             if value == '#REF!':
                 message = ('Reference error in {} column for row '
-                           '#{}{}'.format(key.replace('Back_', 'Back '), i,
+                           '#{}{}'.format(key.replace(BACK_PREFIX, 'Back '), i,
                                           scratch))
                 logging.error(message)
                 if not card_scratch:
@@ -4854,7 +4854,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     broken_set_ids.add(set_id)
             elif isinstance(value, str) and '[unmatched quot]' in value:
                 message = ('Unmatched quote symbol in {} column for row '
-                           '#{}{}'.format(key.replace('Back_', 'Back '), i,
+                           '#{}{}'.format(key.replace(BACK_PREFIX, 'Back '), i,
                                           scratch))
                 logging.error(message)
                 if not card_scratch:
@@ -4872,7 +4872,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 unknown_tags = re.findall(r'\[[^\]\n]+\]', cleaned_value)
                 if unknown_tags:
                     message = ('Unknown tag(s) in {} column for row #{}{}: {}'
-                               .format(key.replace('Back_', 'Back '), i,
+                               .format(key.replace(BACK_PREFIX, 'Back '), i,
                                        scratch, ', '.join(unknown_tags)))
                     logging.error(message)
                     if not card_scratch:
@@ -4883,7 +4883,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     message = ('Unmatched square bracket(s) in {} '
                                'column for row #{}{} (use "[lsb]" and "[rsb]" '
                                'tags if needed)'.format(
-                                   key.replace('Back_', 'Back '), i, scratch))
+                                   key.replace(BACK_PREFIX, 'Back '), i,
+                                   scratch))
                     logging.error(message)
                     if not card_scratch:
                         errors.append(message)
@@ -4893,8 +4894,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 unmatched_tags = _detect_unmatched_tags(value)
                 if unmatched_tags:
                     message = ('Unmatched tag(s) in {} column for row #{}{}: '
-                               '{}'.format(key.replace('Back_', 'Back '), i,
-                                           scratch, ', '.join(unmatched_tags)))
+                               '{}'.format(key.replace(BACK_PREFIX, 'Back '),
+                                           i, scratch,
+                                           ', '.join(unmatched_tags)))
                     logging.error(message)
                     if not card_scratch:
                         errors.append(message)
@@ -4906,7 +4908,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     message = (
                         'No space before [attack|defense|willpower|threat] '
                         'in {} column for row #{}{}: {}'
-                        .format(key.replace('Back_', 'Back '), i, scratch,
+                        .format(key.replace(BACK_PREFIX, 'Back '), i, scratch,
                                 ', '.join(unmatched_tags)))
                     logging.error(message)
                     if not card_scratch:
@@ -4918,7 +4920,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     message = (
                         'Redundant space before [pp] in {} column for row '
                         '#{}{}: {}'.format(
-                            key.replace('Back_', 'Back '), i, scratch,
+                            key.replace(BACK_PREFIX, 'Back '), i, scratch,
                             ', '.join(unmatched_tags)))
                     logging.error(message)
                     if not card_scratch:
@@ -4926,18 +4928,41 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     else:
                         broken_set_ids.add(set_id)
 
-                accents = set(re.findall(accents_regex, value))
-                if accents:
+                if 'Middle-Earth' in value:
                     message = (
-                        'Missing accents in {} column for row #{}{}: {} '
-                        '(use IgnoreName flag to ignore)'
-                        .format(key.replace('Back_', 'Back '), i, scratch,
-                                ', '.join(accents)))
+                        '"Middle-earth" not "Middle-Earth" in {} column for '
+                        'row #{}{}: {}'.format(
+                            key.replace(BACK_PREFIX, 'Back '), i, scratch,
+                            ', '.join(unmatched_tags)))
                     logging.error(message)
                     if not card_scratch:
                         errors.append(message)
                     else:
                         broken_set_ids.add(set_id)
+
+                ignore_accents = False
+                if key.startswith(BACK_PREFIX):
+                    if (card_flags_back and
+                            'IgnoreName' in extract_flags(card_flags_back)):
+                        ignore_accents = True
+                else:
+                    if (card_flags and
+                            'IgnoreName' in extract_flags(card_flags)):
+                        ignore_accents = True
+
+                if not ignore_accents:
+                    accents = set(re.findall(accents_regex, value))
+                    if accents:
+                        message = (
+                            'Missing accents in {} column for row #{}{}: {} '
+                            '(use IgnoreName flag to ignore)'
+                            .format(key.replace(BACK_PREFIX, 'Back '), i, scratch,
+                                    ', '.join(accents)))
+                        logging.error(message)
+                        if not card_scratch:
+                            errors.append(message)
+                        else:
+                            broken_set_ids.add(set_id)
 
         if (card_deck_rules is not None and
                 card_type not in CARD_TYPES_DECK_RULES):
@@ -4990,13 +5015,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 if value == '#REF!':
                     logging.error(
                         'Reference error in %s column for card ID %s in %s '
-                        'translations, row #%s', key.replace('Back_', 'Back '),
+                        'translations, row #%s', key.replace(BACK_PREFIX,
+                                                             'Back '),
                         card_id, lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
                 elif isinstance(value, str) and '[unmatched quot]' in value:
                     logging.error(
                         'Unmatched quote symbol in %s column for card '
                         'ID %s in %s translations, row #%s',
-                        key.replace('Back_', 'Back '), card_id,
+                        key.replace(BACK_PREFIX, 'Back '), card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                 if isinstance(value, str):
@@ -5016,7 +5042,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         logging.error(
                             'Unknown tag(s) in %s column for card ID %s in %s '
                             'translations, row #%s: %s',
-                            key.replace('Back_', 'Back '), card_id, lang,
+                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
                             TRANSLATIONS[lang][card_id][ROW_COLUMN],
                             ', '.join(unknown_tags))
                     elif '[' in cleaned_value or ']' in cleaned_value:
@@ -5024,7 +5050,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             'Unmatched square bracket(s) in %s '
                             'column for card ID %s in %s translations, '
                             'row #%s (use "[lsb]" and "[rsb]" tags if needed)',
-                            key.replace('Back_', 'Back '), card_id,
+                            key.replace(BACK_PREFIX, 'Back '), card_id,
                             lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                     unmatched_tags = _detect_unmatched_tags(value)
@@ -5032,7 +5058,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         logging.error(
                             'Unmatched tag(s) in %s column for card ID %s in '
                             '%s translations, row #%s: %s',
-                            key.replace('Back_', 'Back '), card_id, lang,
+                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
                             TRANSLATIONS[lang][card_id][ROW_COLUMN],
                             ', '.join(unmatched_tags))
 
@@ -5044,7 +5070,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             'No space before [attack|defense|willpower|threat]'
                             ' in %s column for card ID %s in %s translations,'
                             ' row #%s: %s',
-                            key.replace('Back_', 'Back '), card_id, lang,
+                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
                             TRANSLATIONS[lang][card_id][ROW_COLUMN],
                             ', '.join(unmatched_tags))
 
@@ -5052,26 +5078,26 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         logging.error(
                             'Redundant space before [pp] in %s column for card'
                             ' ID %s in %s translations, row #%s: %s',
-                            key.replace('Back_', 'Back '), card_id, lang,
+                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
                             TRANSLATIONS[lang][card_id][ROW_COLUMN],
                             ', '.join(unmatched_tags))
                         message = (
                             'Redundant space before [pp] in {} column for row '
                             '#{}{}: {}'.format(
-                                key.replace('Back_', 'Back '), i, scratch,
+                                key.replace(BACK_PREFIX, 'Back '), i, scratch,
                                 ', '.join(unmatched_tags)))
 
                 if not value and row.get(key):
                     logging.error(
                         'Missing value for %s column for card '
                         'ID %s in %s translations, row #%s',
-                        key.replace('Back_', 'Back '), card_id,
+                        key.replace(BACK_PREFIX, 'Back '), card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
                 elif value and not row.get(key):
                     logging.error(
                         'Redundant value for %s column for card '
                         'ID %s in %s translations, row #%s',
-                        key.replace('Back_', 'Back '), card_id,
+                        key.replace(BACK_PREFIX, 'Back '), card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
             if card_traits is not None:
