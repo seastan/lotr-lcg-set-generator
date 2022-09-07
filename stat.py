@@ -27,9 +27,10 @@ OUTPUT_SCENARIOS_PATH = os.path.join('Output', 'Scripts', 'Scenarios')
 
 EXCLUDE_SETS = {
     'Revised Core Set', 'Angmar Awakened Hero Expansion',
-    'The Bonds of Fellowship', 'Two-Player Limited Edition Starter',
-    'Dwarves of Durin', 'Elves of Lórien', 'Defenders of Gondor',
-    'Riders of Rohan', 'The Massing at Osgiliath', 'The Battle of Lake-town',
+    'Angmar Awakened Campaign Expansion', 'The Fellowship of the RIng',
+    'Two-Player Limited Edition Starter', 'Dwarves of Durin',
+    'Elves of Lórien', 'Defenders of Gondor', 'Riders of Rohan',
+    'The Massing at Osgiliath', 'The Battle of Lake-town',
     'The Stone of Erech', 'Fog on the Barrow-downs', 'The Old Forest',
     'Murder at the Prancing Pony', 'The Ruins of Belegost',
     'The Siege of Annúminas', 'Attack on Dol Guldur', 'The Wizard\'s Quest',
@@ -37,7 +38,7 @@ EXCLUDE_SETS = {
     'First Age', 'Trial Upon the Marches', 'Among the Outlaws',
     'The Betrayal of Mîm', 'The Fall of Nargothrond'}
 PROMO_HEROES_SETS = {'The Scouring of the Shire', 'The Nine are Abroad'}
-FUTURE_SETS = {'Blood in the Isen'}
+FUTURE_SETS = {'Blood in the Isen', 'The Nine are Abroad'}
 
 SCENARIOS_REGEX = r' href="\/LotR\/Scenarios/([^"]+)">'
 
