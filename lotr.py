@@ -6535,6 +6535,16 @@ def _needed_for_frenchdb(card):
             'Promo' not in extract_flags(card[CARD_FLAGS]))
 
 
+def _needed_for_frenchdb_images(card):
+    """ Check whether a card is needed for the French database images or not.
+    """
+    return (card[CARD_TYPE] not in
+            ('Full Art Landscape', 'Full Art Portrait', 'Presentation') and
+            not (card[CARD_TYPE] == 'Rules' and
+                 card[CARD_SPHERE] == 'Back') and
+            'Promo' not in extract_flags(card[CARD_FLAGS]))
+
+
 def _needed_for_spanishdb(card):
     """ Check whether a card is needed for the Spanish database or not.
     """
@@ -10389,7 +10399,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
     elif lang == 'French':  # pylint: disable=R1702
         cards = {}
         for row in card_data:
-            if row[CARD_SET] == set_id and _needed_for_frenchdb(row):
+            if row[CARD_SET] == set_id and _needed_for_frenchdb_images(row):
                 card_number = _to_str(handle_int(row[CARD_NUMBER])).zfill(3)
                 cards[card_number] = row[CARD_NUMBER]
 
@@ -10398,6 +10408,12 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
             for _, _, filenames in os.walk(output_path):
                 for filename in filenames:
                     if not filename.endswith('.png'):
+                        continue
+
+                    if (filename.endswith('-2.png') and
+                            '----' in filename and
+                            filename.split('----')[1][:36]
+                            in empty_rules_backs):
                         continue
 
                     card_number = filename[:3]
