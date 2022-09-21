@@ -4144,8 +4144,9 @@ Targets removed.
                         card[lotr.BACK_PREFIX + lotr.CARD_NAME]):
                 precedent = {'name': card[lotr.CARD_NAME],
                              'field': lotr.BACK_PREFIX + lotr.CARD_NAME,
-                             'text': '__**{}**__'.format(
-                                 card[lotr.BACK_PREFIX + lotr.CARD_NAME]),
+                             'text': '__**{}**__ (instead of *{}*)'.format(
+                                 card[lotr.BACK_PREFIX + lotr.CARD_NAME],
+                                 card[lotr.CARD_NAME]),
                              'row': card[lotr.ROW_COLUMN]}
                 res.setdefault('Different card names on each side',
                                []).append(precedent)
