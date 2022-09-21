@@ -4136,6 +4136,19 @@ Targets removed.
         matches.sort(key=lambda card: card[lotr.ROW_COLUMN])
         res = {}
         for card in matches:
+            if (card.get(lotr.CARD_NAME) is not None and
+                    card.get(lotr.BACK_PREFIX + lotr.CARD_NAME)
+                        is not None and
+                    card[lotr.CARD_NAME] !=
+                        card[lotr.BACK_PREFIX + lotr.CARD_NAME]):
+                precedent = {'name': card[lotr.CARD_NAME],
+                             'field': lotr.BACK_PREFIX + lotr.CARD_NAME,
+                             'text': '__**{}**__'.format(
+                                 card[lotr.BACK_PREFIX + lotr.CARD_NAME]),
+                             'row': card[lotr.ROW_COLUMN]}
+                res.setdefault('Different card names on each side',
+                               []).append(precedent)
+
             if card.get(lotr.CARD_TEXT) is not None:
                 get_rules_precedents(
                     card[lotr.CARD_TEXT], lotr.CARD_TEXT, card, res,
