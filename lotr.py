@@ -1782,15 +1782,14 @@ def _clean_value(value):  # pylint: disable=R0915
     return value
 
 
-def _get_similar_names(card_name, scratch):
+def get_similar_names(value, card_names, scratch_card_names=None):
     """ Get similar card names.
     """
-    card_name_regex = r'\b' + re.escape(card_name) + r'\b'
-    res = {n for n in ALL_CARD_NAMES
-           if re.search(card_name_regex, n) and card_name != n}
-    if scratch:
-        res_scratch = {n for n in ALL_SCRATCH_CARD_NAMES
-                       if re.search(card_name_regex, n) and card_name != n}
+    value_regex = r'\b' + re.escape(value) + r'\b'
+    res = {n for n in card_names if re.search(value_regex, n) and value != n}
+    if scratch_card_names:
+        res_scratch = {n for n in scratch_card_names
+                       if re.search(value_regex, n) and value != n}
         res.update(res_scratch)
 
     return res
@@ -1841,8 +1840,9 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0915
                 if card_name_regex:
                     if key == CARD_TEXT and re.search(card_name_regex, value):
                         prepared_value = value
-                        similar_names = _get_similar_names(card_name,
-                                                           row[CARD_SCRATCH])
+                        similar_names = get_similar_names(
+                            card_name, ALL_CARD_NAMES,
+                            row[CARD_SCRATCH] and ALL_SCRATCH_CARD_NAMES or None)
                         for similar_name in similar_names:
                             similar_name_regex = (
                                 r'(?<!\[bi\])\b' + re.escape(similar_name) +
@@ -1859,8 +1859,9 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0915
                     elif (key == CARD_SHADOW and
                           re.search(card_name_regex, value)):
                         prepared_value = value
-                        similar_names = _get_similar_names(card_name,
-                                                           row[CARD_SCRATCH])
+                        similar_names = get_similar_names(
+                            card_name, ALL_CARD_NAMES,
+                            row[CARD_SCRATCH] and ALL_SCRATCH_CARD_NAMES or None)
                         for similar_name in similar_names:
                             similar_name_regex = (
                                 r'(?<!\[bi\])\b' + re.escape(similar_name) +
@@ -1879,8 +1880,9 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0915
                     if (key == BACK_PREFIX + CARD_TEXT and
                             re.search(card_name_regex_back, value)):
                         prepared_value = value
-                        similar_names = _get_similar_names(card_name_back,
-                                                           row[CARD_SCRATCH])
+                        similar_names = get_similar_names(
+                            card_name_back, ALL_CARD_NAMES,
+                            row[CARD_SCRATCH] and ALL_SCRATCH_CARD_NAMES or None)
                         for similar_name in similar_names:
                             similar_name_regex = (
                                 r'(?<!\[bi\])\b' + re.escape(similar_name) +
@@ -1897,8 +1899,9 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0915
                     elif (key == BACK_PREFIX + CARD_SHADOW and
                               re.search(card_name_regex_back, value)):
                         prepared_value = value
-                        similar_names = _get_similar_names(card_name_back,
-                                                           row[CARD_SCRATCH])
+                        similar_names = get_similar_names(
+                            card_name_back, ALL_CARD_NAMES,
+                            row[CARD_SCRATCH] and ALL_SCRATCH_CARD_NAMES or None)
                         for similar_name in similar_names:
                             similar_name_regex = (
                                 r'(?<!\[bi\])\b' + re.escape(similar_name) +
@@ -5570,6 +5573,7 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
               'sets': set_names,
               'set_ids': set_ids,
               'set_codes': set_codes,
+              'card_names': list(ALL_CARD_NAMES),
               'traits': list(ALL_TRAITS),
               'data': data}
     with open(DISCORD_CARD_DATA_PATH, 'w', encoding='utf-8') as obj:

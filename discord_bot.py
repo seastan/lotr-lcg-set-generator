@@ -1507,7 +1507,8 @@ def detect_traits(text):
     return traits
 
 
-def get_rules_precedents(text, field, card, res, keywords_regex, all_traits):  # pylint: disable=R0912,R0913,R0915
+def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disable=R0912,R0913,R0915
+                         all_card_names, all_traits):
     """ Detect text rules precedents.
     """
     text = re.sub(r'(^|\n)(?:\[[^\]]+\])*\[i\](?!\[b\]Rumor\[\/b\]|Example:)'
@@ -1531,12 +1532,23 @@ def get_rules_precedents(text, field, card, res, keywords_regex, all_traits):  #
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('Unknown traits', []).append(data)
 
-        if re.search(keywords_regex, paragraph.replace('Encounter Cards', '')):
-            data = {'name': card[lotr.CARD_NAME],
-                    'field': field,
-                    'text': re.sub(keywords_regex, ' __**\\1**__', paragraph),
-                    'row': card[lotr.ROW_COLUMN]}
-            res.setdefault('Possibly capitalized keywords', []).append(data)
+        value = paragraph.replace('Encounter Cards', '')
+        match = re.search(keywords_regex, value)
+        if match:
+            similar_names = lotr.get_similar_names(match[0], all_card_names)
+            for similar_name in similar_names:
+                similar_name_regex = (
+                    r'(?<!\[bi\])\b' + re.escape(similar_name) + r'\b')
+                value = re.sub(similar_name_regex, '', value)
+
+            if re.search(keywords_regex, value):
+                data = {'name': card[lotr.CARD_NAME],
+                        'field': field,
+                        'text': re.sub(keywords_regex, ' __**\\1**__',
+                                       paragraph),
+                        'row': card[lotr.ROW_COLUMN]}
+                res.setdefault('Possibly capitalized keywords',
+                               []).append(data)
 
         if re.search(r'\b(?:they|them|their)\b', paragraph,
                      flags=re.IGNORECASE):
@@ -4127,24 +4139,24 @@ Targets removed.
             if card.get(lotr.CARD_TEXT) is not None:
                 get_rules_precedents(
                     card[lotr.CARD_TEXT], lotr.CARD_TEXT, card, res,
-                    keywords_regex, data['traits'])
+                    keywords_regex, data['card_names'], data['traits'])
 
             if card.get(lotr.BACK_PREFIX + lotr.CARD_TEXT) is not None:
                 get_rules_precedents(
                     card[lotr.BACK_PREFIX + lotr.CARD_TEXT],
                          lotr.BACK_PREFIX + lotr.CARD_TEXT, card, res,
-                         keywords_regex, data['traits'])
+                         keywords_regex, data['card_names'], data['traits'])
 
             if card.get(lotr.CARD_SHADOW) is not None:
                 get_rules_precedents(
                     card[lotr.CARD_SHADOW], lotr.CARD_SHADOW, card, res,
-                    keywords_regex, data['traits'])
+                    keywords_regex, data['card_names'], data['traits'])
 
             if card.get(lotr.BACK_PREFIX + lotr.CARD_SHADOW) is not None:
                 get_rules_precedents(
                     card[lotr.BACK_PREFIX + lotr.CARD_SHADOW],
                          lotr.BACK_PREFIX + lotr.CARD_SHADOW, card, res,
-                         keywords_regex, data['traits'])
+                         keywords_regex, data['card_names'], data['traits'])
 
         output = []
         for rule, card_list in res.items():
