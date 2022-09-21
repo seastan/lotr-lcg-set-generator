@@ -1507,7 +1507,7 @@ def detect_traits(text):
     return traits
 
 
-def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disable=R0912,R0913,R0915
+def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disable=R0912,R0913,R0914,R0915
                          all_card_names, all_traits):
     """ Detect text rules precedents.
     """
