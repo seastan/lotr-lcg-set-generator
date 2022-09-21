@@ -211,6 +211,7 @@ List of **!image** commands:
 List of **!edit** commands:
 ` `
 **!edit rules <set name or set code>** - display all text that may be a subject of editing rules for a set (for example: `!edit rules Children of Eorl` or `!edit rules CoE`)
+**!edit traits <set name or set code>** - display all possible trait issues for a set (for example: `!edit traits Children of Eorl` or `!edit traits CoE`)
 """,
     'secret': """
 List of **!secret** commands:
@@ -4096,7 +4097,7 @@ Targets removed.
                 await self._send_channel(message.channel, res)
 
 
-    async def _display_rules(self, value):  # pylint: disable=R0914
+    async def _display_rules(self, value):  # pylint: disable=R0912,R0914
         """ Display all text that may be a subject of editing rules for a set.
         """
         data = await read_card_data()
@@ -4192,6 +4193,116 @@ Targets removed.
         return output
 
 
+    async def _display_traits(self, value):  # pylint: disable=R0912,R0914
+        """ Display all possible trait issues for a set.
+        """
+        data = await read_card_data()
+
+        set_name = re.sub(r'^alep---', '', lotr.normalized_name(value))
+        matches = [card for card in data['data'] if re.sub(
+            r'^alep---', '',
+            lotr.normalized_name(card[lotr.CARD_SET_NAME])) == set_name and
+            card[lotr.CARD_TYPE] != 'Presentation' and
+            card.get(lotr.CARD_SPHERE) != 'Back']
+
+        if not matches:
+            new_set_name = 'the-{}'.format(set_name)
+            matches = [card for card in data['data'] if re.sub(
+                r'^alep---', '',
+                lotr.normalized_name(card[lotr.CARD_SET_NAME])) == new_set_name
+                and card[lotr.CARD_TYPE] != 'Presentation'
+                and card.get(lotr.CARD_SPHERE) != 'Back']
+
+        if not matches:
+            set_code = value.lower()
+            matches = [card for card in data['data']
+                       if card[lotr.CARD_SET_HOB_CODE].lower() == set_code and
+                       card[lotr.CARD_TYPE] != 'Presentation' and
+                       card.get(lotr.CARD_SPHERE) != 'Back']
+            if not matches:
+                return 'no cards found for the set'
+
+        matches.sort(key=lambda card: card[lotr.ROW_COLUMN])
+        res = {}
+        for card in matches:
+            if card.get(lotr.CARD_TRAITS) is not None:
+                traits = lotr.extract_traits(card[lotr.CARD_TRAITS])
+                unknown_traits = sorted(
+                    [t for t in traits if t not in lotr.COMMON_TRAITS])
+                if unknown_traits:
+                    precedent = {
+                        'name': card[lotr.CARD_NAME],
+                        'field': lotr.CARD_TRAITS,
+                        'text': '__**{}**__ in *{}*'.format(
+                            ' '.join(['{}.'.format(t)
+                                      for t in unknown_traits]),
+                            card[lotr.CARD_TRAITS]),
+                        'row': card[lotr.ROW_COLUMN]}
+                    res.setdefault('Unknown traits', []).append(precedent)
+                else:
+                    test = lotr.verify_traits_order(
+                        re.sub(r'\[[^\]]+\]', '', card[lotr.CARD_TRAITS]))
+                    if not test[0]:
+                        precedent = {
+                            'name': card[lotr.CARD_NAME],
+                            'field': lotr.CARD_TRAITS,
+                            'text': '__**{}**__ (instead of *{}*)'.format(
+                                card[lotr.CARD_TRAITS], test[1]),
+                            'row': card[lotr.ROW_COLUMN]}
+                        res.setdefault('Potentially incorrect order of traits',
+                                       []).append(precedent)
+
+            if card.get(lotr.BACK_PREFIX + lotr.CARD_TRAITS) is not None:
+                traits = lotr.extract_traits(
+                    card[lotr.BACK_PREFIX + lotr.CARD_TRAITS])
+                unknown_traits = sorted(
+                    [t for t in traits if t not in lotr.COMMON_TRAITS])
+                if unknown_traits:
+                    precedent = {
+                        'name': card[lotr.CARD_NAME],
+                        'field': lotr.BACK_PREFIX + lotr.CARD_TRAITS,
+                        'text': '__**{}**__ in *{}*'.format(
+                            ' '.join(['{}.'.format(t)
+                                      for t in unknown_traits]),
+                            card[lotr.BACK_PREFIX + lotr.CARD_TRAITS]),
+                        'row': card[lotr.ROW_COLUMN]}
+                    res.setdefault('Unknown traits', []).append(precedent)
+                else:
+                    test = lotr.verify_traits_order(
+                        re.sub(r'\[[^\]]+\]', '',
+                               card[lotr.BACK_PREFIX + lotr.CARD_TRAITS]))
+                    if not test[0]:
+                        precedent = {
+                            'name': card[lotr.CARD_NAME],
+                            'field': lotr.BACK_PREFIX + lotr.CARD_TRAITS,
+                            'text': '__**{}**__ (instead of *{}*)'.format(
+                                card[lotr.BACK_PREFIX + lotr.CARD_TRAITS],
+                                test[1]),
+                            'row': card[lotr.ROW_COLUMN]}
+                        res.setdefault('Potentially incorrect order of traits',
+                                       []).append(precedent)
+
+        output = []
+        for rule, card_list in res.items():
+            rule_output = '__**{}**:__'.format(rule)
+            for card_data in card_list:
+                row_url = '<{}&range=A{}>'.format(data['url'],
+                                                  card_data['row'])
+                rule_output += '\n` `\n*{}* (**{}**):\n{}\n{}'.format(
+                    card_data['name'], card_data['field'].replace('_', ' '),
+                    card_data['text'], row_url)
+
+            output.append(rule_output)
+
+        output = '\n` `\n'.join(sorted(output))
+        if output:
+            output = '{}\n` `\nDone.'.format(output)
+        else:
+            output = 'no trait issue found'
+
+        return output
+
+
     async def _process_edit_command(self, message):
         """ Process an edit command.
         """
@@ -4216,6 +4327,20 @@ Targets removed.
 
             await self._send_channel(message.channel, res)
         elif command.lower() == 'rules':
+            await message.channel.send('please specify the set')
+        elif command.lower().startswith('traits '):
+            try:
+                set_name = re.sub(r'^traits ', '', command,
+                                  flags=re.IGNORECASE)
+                res = await self._display_traits(set_name)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await message.channel.send(
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await self._send_channel(message.channel, res)
+        elif command.lower() == 'traits':
             await message.channel.send('please specify the set')
         else:
             res = HELP['edit']

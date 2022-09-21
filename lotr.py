@@ -1229,7 +1229,7 @@ def extract_keywords(value):
     return keywords
 
 
-def _extract_traits(value):
+def extract_traits(value):
     """ Extract all traits from the string.
     """
     value = re.sub(r'\[[^\]]+\]', '', str(value or ''))
@@ -1673,18 +1673,18 @@ def _extract_all_traits(data):
     for row in data:
         if row[CARD_SCRATCH]:
             if row[CARD_TRAITS]:
-                ALL_SCRATCH_TRAITS.update(_extract_traits(row[CARD_TRAITS]))
+                ALL_SCRATCH_TRAITS.update(extract_traits(row[CARD_TRAITS]))
 
             if row[BACK_PREFIX + CARD_TRAITS]:
                 ALL_SCRATCH_TRAITS.update(
-                    _extract_traits(row[BACK_PREFIX + CARD_TRAITS]))
+                    extract_traits(row[BACK_PREFIX + CARD_TRAITS]))
         else:
             if row[CARD_TRAITS]:
-                ALL_TRAITS.update(_extract_traits(row[CARD_TRAITS]))
+                ALL_TRAITS.update(extract_traits(row[CARD_TRAITS]))
 
             if row[BACK_PREFIX + CARD_TRAITS]:
                 ALL_TRAITS.update(
-                    _extract_traits(row[BACK_PREFIX + CARD_TRAITS]))
+                    extract_traits(row[BACK_PREFIX + CARD_TRAITS]))
 
 
 def _extract_all_names(data):
@@ -5175,8 +5175,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             if card_traits is not None:
                 card_traits_tr = TRANSLATIONS[lang][card_id].get(
                     CARD_TRAITS, '')
-                if (len(_extract_traits(card_traits_tr)) !=
-                        len(_extract_traits(card_traits))):
+                if (len(extract_traits(card_traits_tr)) !=
+                        len(extract_traits(card_traits))):
                     logging.error(
                         'Incorrect number of traits for card '
                         'ID %s in %s translations, row #%s', card_id,
@@ -5191,8 +5191,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             if card_traits_back is not None:
                 card_traits_back_tr = TRANSLATIONS[lang][card_id].get(
                     BACK_PREFIX + CARD_TRAITS, '')
-                if (len(_extract_traits(card_traits_back_tr)) !=
-                        len(_extract_traits(card_traits_back))):
+                if (len(extract_traits(card_traits_back_tr)) !=
+                        len(extract_traits(card_traits_back))):
                     logging.error(
                         'Incorrect number of traits back for card '
                         'ID %s in %s translations, row #%s', card_id,
@@ -7061,8 +7061,8 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
             keywords_original.append('Restricted')
             keywords.append(RESTRICTED_TRANSLATION[lang])
 
-        traits = _extract_traits(translated_row.get(CARD_TRAITS))
-        traits_original = _extract_traits(row.get(CARD_TRAITS))
+        traits = extract_traits(translated_row.get(CARD_TRAITS))
+        traits_original = extract_traits(row.get(CARD_TRAITS))
 
         code = _ringsdb_code(row)
         position = (int(row[CARD_NUMBER])
