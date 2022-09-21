@@ -1513,7 +1513,7 @@ def get_rules_precedents(text, field, card, res, keywords_regex, all_traits):  #
     text = re.sub(r'(^|\n)(?:\[[^\]]+\])*\[i\](?!\[b\]Rumor\[\/b\]|Example:)'
                   r'.+?\[\/i\](?:\[[^\]]+\])*(?:\n|$)', '\\1\\*\\*\\*',
                   text, flags=re.DOTALL)
-    paragraphs = [p.strip() for p in text.split('\n') if p.strip()]
+    paragraphs = [p.strip() for p in re.split(r'\n{2,}', text) if p.strip()]
     if not paragraphs:
         return
 

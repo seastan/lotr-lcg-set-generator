@@ -639,13 +639,74 @@ RESTRICTED_TRANSLATION = {
     'Spanish': 'Restringido'
 }
 
+AUXILIARY_TRAITS = {
+    'Abroad', 'Basic', 'Broken', 'Corrupt', 'Cursed', 'Elite', 'Epic',
+    'Massing', 'Reforged', 'Standard', 'Suspicious', 'Upgraded'}
+DESCRIPTIVE_LAST_TRAITS = {
+    'Boar', 'Boar Clan', 'Captain', 'Flame', 'Raven', 'Raven Clan', 'Wolf',
+    'Wolf Clan', 'Wolf-cult'}
+DESCRIPTIVE_TRAITS = {
+    'Archer', 'Armor', 'Assault', 'Attack', 'Besieger', 'Black Speech',
+    'Brigand', 'Burglar', 'Capture', 'Captured', 'Champion', 'Clue',
+    'Corruption', 'Craftsman', 'Cultist', 'Damaged', 'Defense', 'Despair',
+    'Disaster', 'Doom', 'Enchantment', 'Escape', 'Fear', 'Fellowship', 'Food',
+    'Found', 'Gossip', 'Guardian', 'Hazard', 'Healer', 'Inferno',
+    'Information', 'Instrument', 'Key', 'Light', 'Master', 'Mathom',
+    'Minstrel', 'Mission', 'Mustering', 'Night', 'Olog-hai', 'Panic', 'Party',
+    'Pillager', 'Pipe', 'Pipeweed', 'Plot', 'Poison', 'Raider', 'Ranger',
+    'Record', 'Refuge', 'Ring-bearer', 'Ruffian', 'Sack', 'Scheme', 'Scout',
+    'Scroll', 'Search', 'Servant', 'Shadow', 'Sharkey', 'Shirriff', 'Sorcerer',
+    'Sorcery', 'Spy', 'Staff', 'Stalking', 'Steward', 'Summoned', 'Summoner',
+    'Tantrum', 'Thaurdir', 'Thug', 'Time', 'Tools', 'Traitor', 'Treasure',
+    'Uruk-hai', 'Villain', 'Warden', 'Warrior', 'Weapon', 'Weather', 'Wound'}
+LOCATION_SUBTYPE_TRAITS = {
+    'Battleground', 'Besieged', 'Camp', 'Castle', 'Dark', 'Deck', 'Downs',
+    'Fords', 'Fortification', 'Garrison', 'Gate', 'Hideout', 'Highlands',
+    'Inn', 'Lair', 'Lawn', 'Marsh', 'Marshland', 'Pier', 'Polluted',
+    'Riverland', 'Siege', 'Snow', 'Stair', 'Wasteland'}
+LOCATION_TYPE_FIRST_TRAITS = {
+    'Barrow', 'Blight', 'City', 'Desert', 'Forest', 'Mountain', 'Plains',
+    'Ruins', 'Underground', 'Underwater'}
+LOCATION_TYPE_TRAITS = {
+    'Bridge', 'Cave', 'Coastland', 'Dungeon', 'Grotto', 'Hills', 'Lake',
+    'Ocean', 'River', 'Road', 'Ship', 'Stream', 'Swamp', 'Town', 'Valley',
+    'Village'}
+NOBLE_TRAITS = {'Noble'}
+RACE_FIRST_TRAITS = {'Creature', 'Nazgûl', 'Undead'}
+RACE_TRAITS = {
+    'Balrog', 'Beorning', 'Body', 'Corsair', 'Dale', 'Dorwinion', 'Dragon',
+    'Dúnedain', 'Dunland', 'Dwarf', 'Eagle', 'Easterling', 'Ent', 'Giant',
+    'Goblin', 'Gollum', 'Gondor', 'Harad', 'Hobbit', 'Huorn', 'Insect',
+    'Istari', 'Legend', 'Mearas', 'Mordor', 'Nameless', 'Noldor',
+    'Oathbreaker', 'Orc', 'Outlands', 'Pony', 'Rat', 'Rohan', 'Silvan',
+    'Snaga', 'Spider', 'Spirit', 'Tentacle', 'Tree', 'Troll', 'Uruk', 'Warg',
+    'Werewolf', 'Wight', 'Woodman', 'Wose', 'Wraith'}
+REGION_TRAITS = {
+    'Aldburg', 'Angmar', 'Arnor', 'Blackroot Vale', 'Bree', 'Cair Andros',
+    'Carn Dûm', 'Cirith Ungol', 'Dead Marshes', 'Dol Amroth', 'Dol Guldur',
+    'East Bank', 'Eastfarthing', 'Emyn Muil', 'Enedwaith', 'Erebor',
+    'Esgaroth', 'Ettenmoors', 'Fornost', 'Grey Havens', 'Helm’s Deep',
+    'Isengard', 'Ithilien', 'Lake-town', 'Lossoth', 'Lórien', 'Minas Tirith',
+    'Mirkwood', 'Morgul', 'Osgiliath', 'Ost-in-Edhil', 'Pelennor', 'Shire',
+    'Trollshaws', 'Umbar', 'Underworld', 'Vale', 'West Bank', 'Western Lands',
+    'Westfarthing', 'Westfold', 'Wilderlands'}
+TYPE_FIRST_TRAITS = {
+    'Artifact', 'Item', 'Lieutenant', 'Suspect', 'Stronghold'}
+TYPE_TRAITS = {
+    'Adaptation', 'Assassin', 'Boon', 'Captive', 'Condition', 'Favor', 'Gift',
+    'Mount', 'Ring', 'Signal', 'Skill', 'Song', 'Spell', 'Tale', 'Title',
+    'Trap'}
+TRAITS_ORDER = [TYPE_FIRST_TRAITS, TYPE_TRAITS, RACE_FIRST_TRAITS,
+                RACE_TRAITS, REGION_TRAITS, LOCATION_TYPE_FIRST_TRAITS,
+                LOCATION_TYPE_TRAITS, LOCATION_SUBTYPE_TRAITS, NOBLE_TRAITS,
+                DESCRIPTIVE_TRAITS, DESCRIPTIVE_LAST_TRAITS, AUXILIARY_TRAITS]
+COMMON_TRAITS = set.union(*(TRAITS_ORDER + [{'Trait', 'Traits'}]))
+
 COMMON_ACCENTS = {'Annuminas', 'Cuarthol', 'Din', 'Druadan', 'Druedain',
                   'Dum', 'dum', 'Dunedain', 'Iarion', 'Lorien', 'Mumakil',
                   'Nazgul', 'Nin', 'Numenor', 'Rhun'}
 COMMON_KEYWORDS = {'Devoted', 'Doomed', 'Encounter', 'Guarded', 'Ranged',
                    'Restricted', 'Secrecy', 'Sentinel', 'Surge'}
-COMMON_TRAITS = {'Condition', 'Forest', 'Poison', 'Staff', 'Shadow', 'Trait',
-                 'Traits'}
 LOWERCASE_WORDS = {
     'a', 'an', 'the', 'and', 'as', 'at', 'but', 'by', 'for', 'from', 'if',
     'in', 'into', 'nor', 'of', 'on', 'onto', 'or', 'out', 'so', 'than',
@@ -657,7 +718,8 @@ SETS = {}
 DATA = []
 ACCENTS = set()
 ALL_NAMES = set()
-ALL_SCRATCH_NAMES = set()
+ALL_CARD_NAMES = set()
+ALL_SCRATCH_CARD_NAMES = set()
 ALL_TRAITS = set()
 ALL_SCRATCH_TRAITS = set()
 PRE_SANITY_CHECK = {}
@@ -1175,6 +1237,21 @@ def _extract_traits(value):
     return traits
 
 
+def verify_traits_order(traits):
+    """ Verify the order of card traits.
+    """
+    if not traits:
+        return (True, [])
+
+    traits = [t.strip() for t in traits.split('.') if t.strip()]
+    ordered_traits = []
+    for trait_type in TRAITS_ORDER:
+        ordered_traits.extend(sorted([t for t in traits if t in trait_type]))
+
+    return (traits == ordered_traits,
+            ' '.join(['{}.'.format(t) for t in ordered_traits]))
+
+
 def clear_folder(folder):
     """ Clear the folder.
     """
@@ -1565,27 +1642,27 @@ def _update_discord_category(category):
     return category
 
 
-def _extract_all_names(data):
-    """ Collect all names from the spreadsheet.
+def _extract_all_card_names(data):
+    """ Collect all card names from the spreadsheet.
     """
-    ALL_NAMES.clear()
-    ALL_SCRATCH_NAMES.clear()
+    ALL_CARD_NAMES.clear()
+    ALL_SCRATCH_CARD_NAMES.clear()
     for row in data:
         if row[CARD_TYPE] in CARD_TYPES_NO_NAME_TAG:
             continue
 
         if row[CARD_SCRATCH]:
             if row[CARD_NAME]:
-                ALL_SCRATCH_NAMES.add(row[CARD_NAME].strip())
+                ALL_SCRATCH_CARD_NAMES.add(_clean_value(row[CARD_NAME]))
 
             if row[CARD_SIDE_B]:
-                ALL_SCRATCH_NAMES.add(row[CARD_SIDE_B].strip())
+                ALL_SCRATCH_CARD_NAMES.add(_clean_value(row[CARD_SIDE_B]))
         else:
             if row[CARD_NAME]:
-                ALL_NAMES.add(row[CARD_NAME].strip())
+                ALL_CARD_NAMES.add(_clean_value(row[CARD_NAME]))
 
             if row[CARD_SIDE_B]:
-                ALL_NAMES.add(row[CARD_SIDE_B].strip())
+                ALL_CARD_NAMES.add(_clean_value(row[CARD_SIDE_B]))
 
 
 def _extract_all_traits(data):
@@ -1596,26 +1673,37 @@ def _extract_all_traits(data):
     for row in data:
         if row[CARD_SCRATCH]:
             if row[CARD_TRAITS]:
-                traits = re.sub(r'\[[^\]]+\]', '', row[CARD_TRAITS])
-                ALL_SCRATCH_TRAITS.update(
-                    [t.strip() for t in traits.split('.') if t.strip()])
+                ALL_SCRATCH_TRAITS.update(_extract_traits(row[CARD_TRAITS]))
 
             if row[BACK_PREFIX + CARD_TRAITS]:
-                traits = re.sub(r'\[[^\]]+\]', '',
-                                row[BACK_PREFIX + CARD_TRAITS])
                 ALL_SCRATCH_TRAITS.update(
-                    [t.strip() for t in traits.split('.') if t.strip()])
+                    _extract_traits(row[BACK_PREFIX + CARD_TRAITS]))
         else:
             if row[CARD_TRAITS]:
-                traits = re.sub(r'\[[^\]]+\]', '', row[CARD_TRAITS])
-                ALL_TRAITS.update(
-                    [t.strip() for t in traits.split('.') if t.strip()])
+                ALL_TRAITS.update(_extract_traits(row[CARD_TRAITS]))
 
             if row[BACK_PREFIX + CARD_TRAITS]:
-                traits = re.sub(r'\[[^\]]+\]', '',
-                                row[BACK_PREFIX + CARD_TRAITS])
                 ALL_TRAITS.update(
-                    [t.strip() for t in traits.split('.') if t.strip()])
+                    _extract_traits(row[BACK_PREFIX + CARD_TRAITS]))
+
+
+def _extract_all_names(data):
+    """ Collect all names from the spreadsheet.
+    """
+    ALL_NAMES.clear()
+    ALL_NAMES.update(ALL_CARD_NAMES)
+    ALL_NAMES.update(ALL_TRAITS)
+    for row in data:
+        if not row[CARD_SCRATCH]:
+            if row[CARD_SET_NAME]:
+                ALL_NAMES.add(re.sub(r'^ALeP - ', '', row[CARD_SET_NAME]))
+
+            if row[CARD_ENCOUNTER_SET]:
+                ALL_NAMES.add(row[CARD_ENCOUNTER_SET])
+
+            if (row[CARD_ADVENTURE] and
+                    row[CARD_ADVENTURE] not in ('[space]', '[nobr]')):
+                ALL_NAMES.add(row[CARD_ADVENTURE])
 
 
 def _get_accents(name):
@@ -1627,30 +1715,20 @@ def _get_accents(name):
     return set(words)
 
 
-def _extract_accents(data):
-    """ Collect known words with accents.
+def _extract_all_accents():
+    """ Collect all known words with accents.
     """
     ACCENTS.clear()
     ACCENTS.update(COMMON_ACCENTS)
     for name in ALL_NAMES:
         ACCENTS.update(_get_accents(name))
 
-    for trait in ALL_TRAITS:
-        ACCENTS.update(_get_accents(trait))
-
-    encounter_sets = set()
-    for row in data:
-        if not row[CARD_SCRATCH] and row[CARD_ENCOUNTER_SET]:
-            encounter_sets.add(row[CARD_ENCOUNTER_SET])
-
-    for encounter_set in encounter_sets:
-        ACCENTS.update(_get_accents(encounter_set))
-
 
 def _clean_value(value):  # pylint: disable=R0915
     """ Clean a value from the spreadsheet.
     """
     value = str(value).strip()
+    value = value.replace('\t', ' ')
     value = value.replace('\r\n', '\n')
     value = value.replace('\r', '\n')
     value = value.replace('{', '[bi]')
@@ -1708,10 +1786,10 @@ def _get_similar_names(card_name, scratch):
     """ Get similar card names.
     """
     card_name_regex = r'\b' + re.escape(card_name) + r'\b'
-    res = {n for n in ALL_NAMES
+    res = {n for n in ALL_CARD_NAMES
            if re.search(card_name_regex, n) and card_name != n}
     if scratch:
-        res_scratch = {n for n in ALL_SCRATCH_NAMES
+        res_scratch = {n for n in ALL_SCRATCH_CARD_NAMES
                        if re.search(card_name_regex, n) and card_name != n}
         res.update(res_scratch)
 
@@ -2031,9 +2109,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
             DATA.extend(data)
 
     DATA[:] = [row for row in DATA if not _skip_row(row)]
-    _extract_all_names(DATA)
-    _extract_all_traits(DATA)
-    _extract_accents(DATA)
+    _extract_all_card_names(DATA)
     _clean_data(DATA, 'English')
 
     SELECTED_CARDS.update({row[CARD_ID] for row in DATA if row[CARD_SELECTED]})
@@ -2045,8 +2121,12 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
                     row[CARD_SET] in SETS}
     FOUND_INTERSECTED_SETS.update(FOUND_SETS.intersection(scratch_sets))
     FOUND_SCRATCH_SETS.update(scratch_sets.difference(FOUND_INTERSECTED_SETS))
-
     _update_data(DATA)
+
+    _extract_all_traits(DATA)
+    _extract_all_names(DATA)
+    _extract_all_accents()
+
     card_types = {row[CARD_ID]: (row[CARD_TYPE], row[BACK_PREFIX + CARD_TYPE])
                   for row in DATA}
     DATA[:] = sorted(DATA, key=lambda row: (
@@ -2141,22 +2221,24 @@ def _verify_period(value):
 def _is_capitalized(word):
     """ Check whether the word is capitalized or not.
     """
-    return word and word[0] == word[0].upper()
+    res = word and (word[0] != word[0].lower() or
+                    re.match(r'[0-9_]', word[0]))
+    return res
 
 
 def _get_capitalization_errors(text):  # pylint: disable=R0912
     """ Detect capitalization errors.
     """
     errors = []
-    text = (text.replace(' son of ', ' sonof_ ')
-            .replace(' Son of ', ' Sonof_ ')
-            .replace(' son Of ', ' sonOf_ ')
-            .replace(' Son Of ', ' SonOf_ '))
+    if text in ('[space]', '[nobr]'):
+        return errors
+
+    text = re.sub(r'\[[^\]]+\]', '', text)
+    text = text.replace(' son of ', ' sonof_ ')
     parts = text.split(' ')
-    parts = [re.sub(r'^\.\.\.', '',
-                    re.sub(r'(?:\.\.\.|[,.?!\'])$', '',
-                           re.sub(r'^“', '', re.sub(r'”$', '', p))))
-             for p in parts]
+    parts = [re.sub(r'^[…“]', '',
+                    re.sub(r'[,.?!”…]$', '', p)) for p in parts
+             if p not in ('-', '+')]
     if '' in parts:
         errors.append('"an empty word"')
 
@@ -2175,9 +2257,7 @@ def _get_capitalization_errors(text):  # pylint: disable=R0912
         for part in parts[1:-1]:
             capitalized = _is_capitalized(part)
             if capitalized and part.lower() in LOWERCASE_WORDS:
-                errors.append('"{} should not be capitalized"'.format(
-                    part.replace('Sonof_', 'Son of')
-                    .replace('sonOf_', 'son Of').replace('SonOf_', 'Son Of')))
+                errors.append('"{} should not be capitalized"'.format(part))
             elif not capitalized and part.lower() not in LOWERCASE_WORDS:
                 errors.append('"{} should be capitalized"'.format(part))
 
@@ -2201,26 +2281,41 @@ def _get_capitalization_errors(text):  # pylint: disable=R0912
 def _detect_names(text):
     """ Detect names in the text.
     """
-    text = (text.replace(' son of ', ' sonof_ ')
-            .replace(' Son of ', ' Sonof_ ')
-            .replace(' son Of ', ' sonOf_ ')
-            .replace(' Son Of ', ' SonOf_ '))
-    words = re.split(r'\s', text)
-    names = {}
-    last_name = []
-    for word in words:
-        cleaned_word = (
-            re.sub(r'^\.\.\.', '',
-                   re.sub(r'(?:\.\.\.|[,.?!\'])$', '',
-                          re.sub(r'^“', '',
-                                 re.sub(r'”$', '', word)))))
+    text = re.sub(r'\n{2,}', '[sentence]', text)
+    text = re.sub(r'\n', ' ', text)
+    text = re.sub(r'\[bi\][^\[]+\[\/bi\]', 'word', text)
+    text = re.sub(r'\[[^\]]+\]', '[tag]', text)
+    text = re.sub(r'(?![\-!?, ’“”…]|\w).', '[sentence]', text)
+    text = re.sub(r'(?:[\-!?,’“”…]|\w)*[0-9_]+(?:[\-!?,’“”…]|\w)*', '[]', text)
+    # text = re.sub(r'(?:[\-!?,’“”…]|\w)+\[\](?:[\-!?,’“”…]|\w)+', '[]', text)
+    text = text.replace(' son of ', ' sonof_ ')
+    parts = [p.strip() for p in text.split('[sentence]') if p.strip()]
 
-        if _is_capitalized(cleaned_word):
-            last_name.append(word)
-        elif cleaned_word.lower() in LOWERCASE_WORDS:
-            if last_name:
+    names = []
+    for part in parts:
+        words = re.split(r' +', part)
+        last_name = []
+        for pos, word in enumerate(words):
+            cleaned_word = re.sub(r'[!?,“”…]', '', word)
+            if _is_capitalized(cleaned_word) and cleaned_word != 'X':
                 last_name.append(word)
+            elif cleaned_word.lower() in LOWERCASE_WORDS:
+                if last_name:
+                    last_name.append(word)
+            else:
+                while last_name:
+                    cleaned_word = re.sub(r'[!?,“”…]', '', last_name[-1])
+                    if _is_capitalized(cleaned_word):
+                        break
 
+                    last_name = last_name[:-1]
+
+                if last_name:
+                    names.append(' '.join(last_name))
+                    last_name = []
+
+    names = [re.sub(r',$', '', n) for n in names]
+    names = [n.replace(' sonof_ ', ' son of ') for n in names]
     return names
 
 
@@ -2231,11 +2326,18 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
     text = re.sub(r'(^|\n)(?:\[[^\]]+\])*\[i\](?!\[b\]Rumor\[\/b\]|Example:)'
                   r'.+?\[\/i\](?:\[[^\]]+\])*(?:\n|$)', '\\1',
                   text, flags=re.DOTALL)
-    paragraphs = [p.strip() for p in text.split('\n') if p.strip()]
+    paragraphs = [p.strip() for p in re.split(r'\n{2,}', text) if p.strip()]
     if not paragraphs:
         return errors
 
     for paragraph in paragraphs:
+        ###
+        #if not card[CARD_SCRATCH]:
+        #    names = _detect_names(paragraph)
+        #    if names:
+        #        logging.info(names)
+        ###
+
         if re.search(r'limit once per',
                      re.sub(r'\(Limit once per .+\.\)”?$', '', paragraph),
                      flags=re.IGNORECASE):
@@ -3078,8 +3180,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_traits is not None and
-              card_traits.replace('.', '').replace(' ', '')
-              .replace('[size]', '').replace('[/size]', '') == ''):
+              re.sub(r'\[[^\]]+\]', '', card_traits.replace('.', '')
+                     .replace(' ', '')) == ''):
             message = 'Incorrect traits for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -3090,7 +3192,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_traits is not None and
               not (card_flags and 'IgnoreName' in extract_flags(card_flags))):
             capitalization_errors = _get_capitalization_errors(
-                card_traits.replace('[size]', '').replace('[/size]', ''))
+                re.sub(r'\[[^\]]+\]', '', card_traits))
             if capitalization_errors:
                 message = (
                     'Capitalization error(s) in traits for row #{}{}: {} '
@@ -3148,8 +3250,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_traits_back is not None and
-              card_traits_back.replace('.', '').replace(' ', '')
-              .replace('[size]', '').replace('[/size]', '') == ''):
+              re.sub(r'\[[^\]]+\]', '', card_traits_back.replace('.', '')
+                     .replace(' ', '')) == ''):
             message = 'Incorrect traits back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -3161,7 +3263,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
               not (card_flags_back and
                    'IgnoreName' in extract_flags(card_flags_back))):
             capitalization_errors = _get_capitalization_errors(
-                card_traits_back.replace('[size]', '').replace('[/size]', ''))
+                re.sub(r'\[[^\]]+\]', '', card_traits_back))
             if capitalization_errors:
                 message = (
                     'Capitalization error(s) in traits back for row #{}{}: {} '
@@ -3182,9 +3284,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_keywords is not None and
               not card_keywords.endswith('.') and
-              not card_keywords.endswith('.[/size]') and
-              not card_keywords.endswith('.[inline]') and
-              not card_keywords.endswith('.[/size][inline]')):
+              not card_keywords.endswith('.[inline]')):
             message = 'Missing period in keywords for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -3194,8 +3294,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_keywords is not None and
               card_keywords.replace('[inline]', '').replace('.', '')
-              .replace(' ', '').replace('[size]', '')
-              .replace('[/size]', '') == ''):
+              .replace(' ', '') == ''):
             message = 'Incorrect keywords for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -3204,8 +3303,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_keywords is not None and not
-              re.match(KEYWORDS_REGEX, card_keywords.replace('[inline]', '')
-                       .replace('[size]', '').replace('[/size]', ''))):
+              re.match(KEYWORDS_REGEX,
+                       card_keywords.replace('[inline]', ''))):
             message = 'Incorrect keywords for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -3233,9 +3332,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_keywords_back is not None and
               not card_keywords_back.endswith('.') and
-              not card_keywords_back.endswith('.[/size]') and
-              not card_keywords_back.endswith('.[inline]') and
-              not card_keywords_back.endswith('.[/size][inline]')):
+              not card_keywords_back.endswith('.[inline]')):
             message = 'Missing period in keywords back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -3245,8 +3342,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_keywords_back is not None and
               card_keywords_back.replace('[inline]', '').replace('.', '')
-              .replace(' ', '').replace('[size]', '')
-              .replace('[/size]', '') == ''):
+              .replace(' ', '') == ''):
             message = 'Incorrect keywords back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -3255,9 +3351,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_keywords_back is not None and not
-              re.match(KEYWORDS_REGEX, card_keywords_back
-                       .replace('[inline]', '').replace('[size]', '')
-                       .replace('[/size]', ''))):
+              re.match(KEYWORDS_REGEX,
+                       card_keywords_back.replace('[inline]', ''))):
             message = 'Incorrect keywords back for row #{}{}'.format(
                 i, scratch)
             logging.error(message)
@@ -5116,9 +5211,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         'ID %s in %s translations, row #%s', card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
                 elif not (card_keywords_tr.endswith('.') or
-                          card_keywords_tr.endswith('.[inline]') or
-                          card_keywords_tr.endswith('.[/size]') or
-                          card_keywords_tr.endswith('.[/size][inline]')):
+                          card_keywords_tr.endswith('.[inline]')):
                     logging.error(
                         'Missing period in keywords for card '
                         'ID %s in %s translations, row #%s', card_id,
@@ -5134,9 +5227,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         'ID %s in %s translations, row #%s', card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
                 elif not (card_keywords_back_tr.endswith('.') or
-                          card_keywords_back_tr.endswith('.[inline]') or
-                          card_keywords_back_tr.endswith('.[/size]') or
-                          card_keywords_back_tr.endswith('.[/size][inline]')):
+                          card_keywords_back_tr.endswith('.[inline]')):
                     logging.error(
                         'Missing period in keywords back for card '
                         'ID %s in %s translations, row #%s', card_id,
@@ -5946,9 +6037,10 @@ def _update_card_for_rules(card):
     card[CARD_TYPE] = str(card[CARD_TYPE]).lower() if card[CARD_TYPE] else ''
     card[CARD_SPHERE] = (str(card[CARD_SPHERE]).lower()
                          if card[CARD_SPHERE] else '')
-    card[CARD_TRAITS] = ([t.lower().strip()
-                          for t in str(card[CARD_TRAITS]).split('.') if t]
-                         if card[CARD_TRAITS] else [])
+    card[CARD_TRAITS] = (
+        [t.lower().strip()
+         for t in re.sub(r'\[[^\]]+\]', '', str(card[CARD_TRAITS])).split('.')
+         if t] if card[CARD_TRAITS] else [])
     card[CARD_KEYWORDS] = ([k.lower().strip()
                             for k in str(card[CARD_KEYWORDS]).replace(
                                 '[inline]', '').split('.') if k]
@@ -6569,7 +6661,9 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                 'position': position,
                 'code': _ringsdb_code(row),
                 'name': row[CARD_NAME].replace('’', "'"),
-                'traits': row[CARD_TRAITS],
+                'traits': _update_card_text(row[CARD_TRAITS] or '',
+                                            skip_rules=True,
+                                            fix_linebreaks=False),
                 'text': text,
                 'flavor': flavor,
                 'isUnique': row[CARD_UNIQUE] and int(row[CARD_UNIQUE]),
@@ -6685,7 +6779,7 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
             'unique': _to_str(handle_int(row[CARD_UNIQUE])),
             'type': _to_str(card_type),
             'sphere': _to_str(sphere),
-            'traits': _to_str(row[CARD_TRAITS]),
+            'traits': _update_dragncards_card_text(_to_str(row[CARD_TRAITS])),
             'keywords': _update_dragncards_card_text(_to_str(
                 row[CARD_KEYWORDS])),
             'cost': _to_str(handle_int(row[CARD_COST])),
@@ -6730,7 +6824,8 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
                 'unique': _to_str(handle_int(row[BACK_PREFIX + CARD_UNIQUE])),
                 'type': _to_str(card_type),
                 'sphere': _to_str(sphere),
-                'traits': _to_str(row[BACK_PREFIX + CARD_TRAITS]),
+                'traits': _update_dragncards_card_text(
+                    _to_str(row[BACK_PREFIX + CARD_TRAITS])),
                 'keywords': _update_dragncards_card_text(_to_str(
                     row[BACK_PREFIX + CARD_KEYWORDS])),
                 'cost': _to_str(handle_int(row[BACK_PREFIX + CARD_COST])),
@@ -7206,7 +7301,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                     row[CARD_SPHERE]),
                 'id_sphere_influence': CARD_SPHERE_FRENCH_IDS.get(sphere, 0),
                 'id_octgn': row[CARD_ID],
-                'titre': french_row.get(CARD_NAME, ''),
+                'titre': french_row.get(CARD_NAME) or '',
                 'cout': cost,
                 'menace': threat,
                 'volonte': _update_french_non_int(
@@ -7217,7 +7312,8 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                     handle_int(row[CARD_DEFENSE])),
                 'point_vie': _update_french_non_int(
                     handle_int(row[CARD_HEALTH])),
-                'trait': french_row.get(CARD_TRAITS),
+                'trait': _update_french_card_text(
+                    french_row.get(CARD_TRAITS) or ''),
                 'texte': text,
                 'indic_unique': int(row[CARD_UNIQUE] or 0),
                 'indic_recto_verso': row[BACK_PREFIX + CARD_NAME] is not None
@@ -7287,7 +7383,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 'id_sous_type_carte': CARD_SUBTYPE_FRENCH_IDS.get(
                     row[CARD_SPHERE]),
                 'id_set_rencontre': row[CARD_ENCOUNTER_SET] or '',
-                'titre': french_row.get(CARD_NAME, ''),
+                'titre': french_row.get(CARD_NAME) or '',
                 'cout_engagement': _update_french_non_int(
                     handle_int(row[CARD_ENGAGEMENT])),
                 'menace': _update_french_non_int(
@@ -7300,7 +7396,8 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                     handle_int(row[CARD_QUEST])),
                 'point_vie': _update_french_non_int(
                     handle_int(row[CARD_HEALTH])),
-                'trait': french_row.get(CARD_TRAITS),
+                'trait': _update_french_card_text(
+                    french_row.get(CARD_TRAITS) or ''),
                 'texte': text,
                 'effet_ombre': shadow,
                 'titre_quete': french_row.get(CARD_ADVENTURE),
@@ -7329,7 +7426,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
 
             french_row = TRANSLATIONS['French'].get(row[CARD_ID], {})
 
-            name = french_row.get(CARD_NAME, '')
+            name = french_row.get(CARD_NAME) or ''
             if (french_row.get(BACK_PREFIX + CARD_NAME) and
                     french_row[BACK_PREFIX + CARD_NAME] != name):
                 name = '{} / {}'.format(name,
@@ -7514,7 +7611,8 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 'health': handle_int(row[CARD_HEALTH]),
                 'mision': quest_points,
                 'victory': victory_points,
-                'traits': spanish_row.get(CARD_TRAITS),
+                'traits': _update_card_text(
+                    spanish_row.get(CARD_TRAITS) or ''),
                 'text': text,
                 'sombra': shadow
                 }
@@ -7634,7 +7732,8 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 'position': handle_int(row[CARD_NUMBER]),
                 'code': _spanishdb_code(row),
                 'name': spanish_row.get(CARD_NAME),
-                'traits': spanish_row.get(CARD_TRAITS),
+                'traits': _update_card_text(
+                    spanish_row.get(CARD_TRAITS) or ''),
                 'text': text,
                 'flavor': flavour,
                 'is_unique': int(row[CARD_UNIQUE] or 0),
