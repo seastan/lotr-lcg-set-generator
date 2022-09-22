@@ -809,7 +809,8 @@ def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
     if card_skills:
         card_skills = '\n' + card_skills
 
-    traits = card.get(prefix + lotr.CARD_TRAITS, '')
+    traits = re.sub(r'\[[^\]]+\]', '',
+                    card.get(prefix + lotr.CARD_TRAITS, ''))
     card_traits = '' if traits == '' else '***{}***\n'.format(traits)
 
     keywords = update_text(card.get(prefix + lotr.CARD_KEYWORDS, ''))
@@ -891,7 +892,7 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
         card_custom_back = '**{} Card Back**\n'.format(custom_back)
     elif (card_type in lotr.CARD_TYPES_PLAYER and
           'Encounter' in
-          card.get(lotr.CARD_KEYWORDS, '').replace('. ', '.').split('.')):
+          lotr.extract_keywords(card.get(lotr.CARD_KEYWORDS))):
         card_custom_back = '**Encounter Card Back**\n'
     else:
         card_custom_back = ''
@@ -4237,7 +4238,7 @@ Targets removed.
                         'text': '__**{}**__ in *{}*'.format(
                             ' '.join(['{}.'.format(t)
                                       for t in unknown_traits]),
-                            card[lotr.CARD_TRAITS]),
+                            re.sub(r'\[[^\]]+\]', '', card[lotr.CARD_TRAITS])),
                         'row': card[lotr.ROW_COLUMN]}
                     res.setdefault('Unknown traits', []).append(precedent)
                 else:
@@ -4248,7 +4249,8 @@ Targets removed.
                             'name': card[lotr.CARD_NAME],
                             'field': lotr.CARD_TRAITS,
                             'text': '__**{}**__ (instead of *{}*)'.format(
-                                card[lotr.CARD_TRAITS], test[1]),
+                                re.sub(r'\[[^\]]+\]', '',
+                                       card[lotr.CARD_TRAITS]), test[1]),
                             'row': card[lotr.ROW_COLUMN]}
                         res.setdefault('Potentially incorrect order of traits',
                                        []).append(precedent)
@@ -4265,7 +4267,8 @@ Targets removed.
                         'text': '__**{}**__ in *{}*'.format(
                             ' '.join(['{}.'.format(t)
                                       for t in unknown_traits]),
-                            card[lotr.BACK_PREFIX + lotr.CARD_TRAITS]),
+                            re.sub(r'\[[^\]]+\]', '',
+                                   card[lotr.BACK_PREFIX + lotr.CARD_TRAITS])),
                         'row': card[lotr.ROW_COLUMN]}
                     res.setdefault('Unknown traits', []).append(precedent)
                 else:
@@ -4277,7 +4280,9 @@ Targets removed.
                             'name': card[lotr.CARD_NAME],
                             'field': lotr.BACK_PREFIX + lotr.CARD_TRAITS,
                             'text': '__**{}**__ (instead of *{}*)'.format(
-                                card[lotr.BACK_PREFIX + lotr.CARD_TRAITS],
+                                re.sub(r'\[[^\]]+\]', '',
+                                       card[lotr.BACK_PREFIX +
+                                            lotr.CARD_TRAITS]),
                                 test[1]),
                             'row': card[lotr.ROW_COLUMN]}
                         res.setdefault('Potentially incorrect order of traits',

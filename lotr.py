@@ -3406,8 +3406,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_type not in ('Hero', 'Quest') and card_cost is not None and
-              ('Encounter' in (card_keywords or '').replace(
-                  '. ', '.').split('.') or card_back == 'Encounter') and
+              ('Encounter' in extract_keywords(card_keywords) or
+               card_back == 'Encounter') and
               card_cost != '-'):
             message = 'Incorrect cost value for row #{}{}'.format(
                 i, scratch)
@@ -3470,8 +3470,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_type_back not in ('Hero', 'Quest') and
               card_cost_back is not None and
-              'Encounter' in (card_keywords_back or '').replace(
-                  '. ', '.').split('.') and
+              'Encounter' in extract_keywords(card_keywords_back) and
               card_cost_back != '-'):
             message = 'Incorrect cost back value for row #{}{}'.format(
                 i, scratch)
@@ -4215,8 +4214,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         if (card_shadow is not None and card_type not in CARD_TYPES_SHADOW and
                 not (card_type in CARD_TYPES_SHADOW_ENCOUNTER and
-                     ('Encounter' in
-                      (card_keywords or '').replace('. ', '.').split('.') or
+                     ('Encounter' in extract_keywords(card_keywords) or
                       card_back == 'Encounter'))):
             message = 'Redundant shadow for row #{}{}'.format(i, scratch)
             logging.error(message)
@@ -5803,8 +5801,7 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
         elif card_type in ('Encounter Side Quest', 'Quest'):
             card_size = 'QuestCard'
         elif ((card_type in CARD_TYPES_ENCOUNTER_SIZE or
-               'Encounter' in (row[CARD_KEYWORDS] or ''
-                              ).replace('. ', '.').split('.') or
+               'Encounter' in extract_keywords(row[CARD_KEYWORDS]) or
                row[CARD_BACK] == 'Encounter') and
               row[CARD_BACK] != 'Player'):
             card_size = 'EncounterCard'
@@ -6863,8 +6860,7 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
             }
         else:
             if ((row[CARD_TYPE] in CARD_TYPES_PLAYER and
-                 'Encounter' not in (row[CARD_KEYWORDS] or ''
-                                     ).replace('. ', '.').split('.') and
+                 'Encounter' not in extract_keywords(row[CARD_KEYWORDS]) and
                  row[CARD_BACK] != 'Encounter') or
                     row[CARD_BACK] == 'Player'):
                 default_name = 'player'
@@ -9798,8 +9794,8 @@ def _generate_tts_sheets(deck_path, output_path, image_path, card_dict,  # pylin
                     cards[orientation]['back_custom'].append(
                         {'id': card_id, 'path': back_path})
             elif ((card_dict[card_id][CARD_TYPE] in CARD_TYPES_PLAYER and
-                   'Encounter' not in (card_dict[card_id][CARD_KEYWORDS] or ''
-                                      ).replace('. ', '.').split('.') and
+                   'Encounter' not in extract_keywords(
+                    card_dict[card_id][CARD_KEYWORDS]) and
                    card_dict[card_id][CARD_BACK] != 'Encounter') or
                   card_dict[card_id][CARD_BACK] == 'Player'):
                 for _ in range(int(quantity)):
