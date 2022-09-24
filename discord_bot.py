@@ -2099,113 +2099,89 @@ class MyClient(discord.Client):  # pylint: disable=R0902
         if not changes:
             return
 
-        new_channels = {}
+        for change in changes:
+            if len(change) != 3:
+                raise FormatError('Incorrect change format: {}'.format(change))
+
+            if change[0] not in ('add', 'move', 'remove', 'rename'):
+                raise FormatError('Unknown channel change type: {}'.format(
+                    change[0]))
+
+        for change in changes:
+            if change[0] == 'move':
+                if len(change[1]) != 2:
+                    raise FormatError('Incorrect change format: {}'.format(
+                        change))
+
+                if change[1][0] not in self.channels:
+                    raise DiscordError('Channel "{}" not found'.format(
+                        change[1][0]))
+
+                if change[1][1] not in self.categories:
+                    raise DiscordError('Category "{}" not found'.format(
+                        change[1][1]))
+
+                channel = self.get_channel(self.channels[change[1][0]]['id'])
+                old_category_name = channel.category.name
+                category = self.get_channel(
+                    self.categories[change[1][1]]['id'])
+                await channel.move(category=category, end=True)
+                logging.info('Moved channel "%s" from category "%s" to "%s"',
+                             change[1][0], old_category_name, change[1][1])
+                await channel.send('Moved from category "{}" to "{}"'
+                                   .format(old_category_name, change[1][1]))
+                await asyncio.sleep(CMD_SLEEP_TIME)
+                res = await self._move_artwork_files(
+                    change[2]['card_id'], change[2]['old_set_id'],
+                    change[2]['new_set_id'])
+                if res:
+                    await channel.send(res)
+                    await asyncio.sleep(CMD_SLEEP_TIME)
+
+                await self._copy_image_files(
+                    change[2]['card_id'], change[2]['old_set_id'],
+                    change[2]['new_set_id'])
+                self.channels[change[1][0]] = {
+                    'name': channel.name,
+                    'id': channel.id,
+                    'category_id': channel.category_id,
+                    'category_name': channel.category.name}
+
+        for change in changes:
+            if change[0] == 'remove':
+                if change[1] not in self.channels:
+                    raise DiscordError('Channel "{}" not found'.format(
+                        change[1]))
+
+                if not self.archive_category:
+                    raise DiscordError('Category "{}" not found'.format(
+                        ARCHIVE_CATEGORY))
+
+                channel = self.get_channel(self.channels[change[1]]['id'])
+                old_category_name = channel.category.name
+                await channel.move(category=self.archive_category, end=True)
+                logging.info('The card has been removed from the spreadsheet. '
+                             'Moved channel "%s" from category "%s" to "%s"',
+                             change[1], old_category_name, ARCHIVE_CATEGORY)
+                await channel.send('The card has been removed from the '
+                                   'spreadsheet. Moved from category "{}" to '
+                                   '"{}"'.format(old_category_name,
+                                                 ARCHIVE_CATEGORY))
+                await asyncio.sleep(CMD_SLEEP_TIME)
+                res = await self._move_artwork_files(
+                    change[2]['card_id'], change[2]['old_set_id'],
+                    SCRATCH_FOLDER)
+                if res:
+                    await channel.send(res)
+                    await asyncio.sleep(CMD_SLEEP_TIME)
+
+                del self.channels[change[1]]
+
         old_channel_names = []
+        new_channels = {}
         try:
             for change in changes:
-                if len(change) != 3:
-                    raise FormatError('Incorrect change format: {}'
-                                      .format(change))
-
-                if change[0] == 'add':
-                    if len(change[1]) != 2:
-                        raise FormatError('Incorrect change format: {}'.format(
-                            change))
-
-                    if change[1][1] not in self.categories:
-                        raise DiscordError('Category "{}" not found'.format(
-                            change[1][1]))
-
-                    all_channels = await self.get_all_channels_safe()
-                    if CHANNEL_LIMIT - len(all_channels) <= 0:
-                        raise DiscordError(
-                            'No free slots to create a new channel "{}"'
-                            .format(change[1][0]))
-
-                    category = self.get_channel(
-                        self.categories[change[1][1]]['id'])
-                    channel = await self.guilds[0].create_text_channel(
-                        change[1][0], category=category)
-                    new_channels[change[1][0]] = {
-                        'name': channel.name,
-                        'id': channel.id,
-                        'category_id': channel.category_id,
-                        'category_name': channel.category.name}
-                    logging.info('Created new channel "%s" in category "%s"',
-                                 change[1][0], change[1][1])
-                    await self._check_free_slots()
-                    await asyncio.sleep(CMD_SLEEP_TIME)
-                elif change[0] == 'move':
-                    if len(change[1]) != 2:
-                        raise FormatError('Incorrect change format: {}'.format(
-                            change))
-
-                    if change[1][0] not in self.channels:
-                        raise DiscordError('Channel "{}" not found'.format(
-                            change[1][0]))
-
-                    if change[1][1] not in self.categories:
-                        raise DiscordError('Category "{}" not found'.format(
-                            change[1][1]))
-
-                    channel = self.get_channel(
-                        self.channels[change[1][0]]['id'])
-                    old_category_name = channel.category.name
-                    category = self.get_channel(
-                        self.categories[change[1][1]]['id'])
-                    await channel.move(category=category, end=True)
-                    new_channels[change[1][0]] = {
-                        'name': channel.name,
-                        'id': channel.id,
-                        'category_id': channel.category_id,
-                        'category_name': channel.category.name}
-                    logging.info('Moved channel "%s" from category "%s" to '
-                                 '"%s"', change[1][0], old_category_name,
-                                 change[1][1])
-                    await channel.send('Moved from category "{}" to "{}"'
-                                       .format(old_category_name,
-                                               change[1][1]))
-                    await asyncio.sleep(CMD_SLEEP_TIME)
-                    res = await self._move_artwork_files(
-                        change[2]['card_id'], change[2]['old_set_id'],
-                        change[2]['new_set_id'])
-                    if res:
-                        await channel.send(res)
-                        await asyncio.sleep(CMD_SLEEP_TIME)
-
-                    await self._copy_image_files(
-                        change[2]['card_id'], change[2]['old_set_id'],
-                        change[2]['new_set_id'])
-                elif change[0] == 'remove':
-                    if change[1] not in self.channels:
-                        raise DiscordError('Channel "{}" not found'.format(
-                            change[1]))
-
-                    if not self.archive_category:
-                        raise DiscordError('Category "{}" not found'.format(
-                            ARCHIVE_CATEGORY))
-
-                    channel = self.get_channel(self.channels[change[1]]['id'])
-                    old_category_name = channel.category.name
-                    await channel.move(category=self.archive_category,
-                                       end=True)
-                    old_channel_names.append(change[1])
-                    logging.info('The card has been removed from the '
-                                 'spreadsheet. Moved channel "%s" from '
-                                 'category "%s" to "%s"', change[1],
-                                 old_category_name, ARCHIVE_CATEGORY)
-                    await channel.send('The card has been removed from the '
-                                       'spreadsheet. Moved from category "{}" '
-                                       'to "{}"'.format(old_category_name,
-                                                        ARCHIVE_CATEGORY))
-                    await asyncio.sleep(CMD_SLEEP_TIME)
-                    res = await self._move_artwork_files(
-                        change[2]['card_id'], change[2]['old_set_id'],
-                        SCRATCH_FOLDER)
-                    if res:
-                        await channel.send(res)
-                        await asyncio.sleep(CMD_SLEEP_TIME)
-                elif change[0] == 'rename':
+                if change[0] == 'rename':
                     if len(change[1]) != 2:
                         raise FormatError('Incorrect change format: {}'.format(
                             change))
@@ -2217,25 +2193,52 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                     channel = self.get_channel(
                         self.channels[change[1][0]]['id'])
                     await channel.edit(name=change[1][1])
+                    old_channel_names.append(change[1][0])
                     new_channels[change[1][1]] = {
                         'name': channel.name,
                         'id': channel.id,
                         'category_id': channel.category_id,
                         'category_name': channel.category.name}
-                    old_channel_names.append(change[1][0])
                     logging.info('Renamed channel "%s" to "%s"', change[1][0],
                                  change[1][1])
                     await channel.send('Renamed from "{}" to "{}"'.format(
                         change[1][0], change[1][1]))
                     await asyncio.sleep(CMD_SLEEP_TIME)
-                else:
-                    raise FormatError('Unknown channel change type: {}'.format(
-                        change[0]))
         finally:
             for name in old_channel_names:
                 del self.channels[name]
 
             self.channels.update(new_channels)
+
+        for change in changes:
+            if change[0] == 'add':
+                if len(change[1]) != 2:
+                    raise FormatError('Incorrect change format: {}'.format(
+                        change))
+
+                if change[1][1] not in self.categories:
+                    raise DiscordError('Category "{}" not found'.format(
+                        change[1][1]))
+
+                all_channels = await self.get_all_channels_safe()
+                if CHANNEL_LIMIT - len(all_channels) <= 0:
+                    raise DiscordError(
+                        'No free slots to create a new channel "{}"'
+                        .format(change[1][0]))
+
+                category = self.get_channel(
+                    self.categories[change[1][1]]['id'])
+                channel = await self.guilds[0].create_text_channel(
+                    change[1][0], category=category)
+                logging.info('Created new channel "%s" in category "%s"',
+                             change[1][0], change[1][1])
+                await self._check_free_slots()
+                await asyncio.sleep(CMD_SLEEP_TIME)
+                self.channels[change[1][0]] = {
+                    'name': channel.name,
+                    'id': channel.id,
+                    'category_id': channel.category_id,
+                    'category_name': channel.category.name}
 
 
     async def _process_card_changes(self, data):  #pylint: disable=R0912,R0914,R0915
