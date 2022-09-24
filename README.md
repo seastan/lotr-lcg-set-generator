@@ -275,7 +275,7 @@ and `scheduled_backup.json` (see `scheduled_backup.default.json`).
 
   - `1-59/2 * * * * flock -xn <path>/mpc_monitor.lock -c 'python3 <path>/mpc_monitor.py > /dev/null' 2>&1`
   - `5 11 * * *     python3 <path>/download_ringsdb_stat.py >> <path>/cron.log 2>&1`
-  - `9 */2 * * *    python3 <path>/check_ringsdb_alep_decks.py >> <path>/cron.log 2>&1`
+  - `9 * * * *      python3 <path>/check_ringsdb_alep_decks.py >> <path>/cron.log 2>&1`
   - `36 9 * * *     python3 <path>/monitor_remote_pipeline.py >> <path>/cron.log 2>&1`
   - `* * * * *      <path>/check_discord_bot.sh >> <path>/cron.log 2>&1`
   - `* * * * *      <path>/check_run_before_se_service.sh >> <path>/cron.log 2>&1`
