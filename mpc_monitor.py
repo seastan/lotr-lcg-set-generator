@@ -51,11 +51,13 @@ LOG_PATH = 'mpc_monitor.log'
 MAIL_COUNTER_PATH = 'mpc_monitor.cnt'
 MAILS_PATH = 'mails'
 
+CHUNK_LIMIT = 1900
+LOG_LEVEL = logging.INFO
+MAX_NOT_FOUND_ERRORS = 5
+NEXT_LIMIT = 10
 URL_TIMEOUT = 60
 URL_RETRIES = 1
 URL_SLEEP = 1
-NEXT_LIMIT = 10
-MAX_NOT_FOUND_ERRORS = 5
 
 
 class ConfigurationError(Exception):
@@ -76,7 +78,7 @@ class DiscordResponseError(Exception):
 def init_logging():
     """ Init logging.
     """
-    logging.basicConfig(filename=LOG_PATH, level=logging.INFO,
+    logging.basicConfig(filename=LOG_PATH, level=LOG_LEVEL,
                         format='%(asctime)s %(levelname)s: %(message)s')
 
 
@@ -195,11 +197,16 @@ def send_discord(message):
 
         if conf.get('webhook_url'):
             chunks = []
-            while len(message) > 1900:
-                chunks.append(message[:1900])
-                message = message[1900:]
+            chunk = ''
+            for line in message.split('\n'):
+                if len(chunk + line) + 1 <= CHUNK_LIMIT:
+                    chunk += line + '\n'
+                else:
+                    chunks.append(chunk)
+                    chunk = line + '\n'
 
-            chunks.append(message)
+            chunks.append(chunk)
+
             for i, chunk in enumerate(chunks):
                 if i > 0:
                     time.sleep(1)

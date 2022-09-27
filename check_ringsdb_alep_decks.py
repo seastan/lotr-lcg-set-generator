@@ -16,22 +16,42 @@ import yaml
 
 
 DATA_PATH = 'check_ringsdb_alep_decks.json'
+DISCORD_CARD_DATA_PATH = os.path.join('Discord', 'card_data.json')
 DISCORD_CONF_PATH = 'discord.yaml'
 ERROR_SUBJECT_TEMPLATE = 'RingsDB ALeP Decks Cron ERROR: {}'
 INTERNET_SENSOR_PATH = 'internet_state'
 LOG_PATH = 'check_ringsdb_alep_decks.log'
-LOG_LEVEL = logging.INFO
 MAILS_PATH = 'mails'
-
 RINGSDB_URL = 'http://ringsdb.com/api/public/decklists/by_date/{}'
 
-EMOJIS = {
+CHUNK_LIMIT = 1900
+IO_SLEEP_TIME = 1
+LOG_LEVEL = logging.INFO
+
+SPHERE_EMOJIS = {
     'Leadership': '<:leadership:822573464601886740>',
     'Lore': '<:lore:822573464678301736>',
     'Spirit': '<:spirit:822573464417206273>',
     'Tactics': '<:tactics:822573464593629264>',
     'Baggins': '<:baggins:822573762415296602>',
     'Fellowship': '<:fellowship:822573464586027058>'
+}
+
+TAG_EMOJIS = {
+    '<span class="icon-leadership"></span>':
+        '<:leadership:822573464601886740>',
+    '<span class="icon-lore"></span>': '<:lore:822573464678301736>',
+    '<span class="icon-spirit"></span>': '<:spirit:822573464417206273>',
+    '<span class="icon-tactics"></span>': '<:tactics:822573464593629264>',
+    '<span class="icon-baggins"></span>': '<:baggins:822573762415296602>',
+    '<span class="icon-fellowship"></span>':
+        '<:fellowship:822573464586027058>',
+    '<span class="icon-unique"></span>': '<:unique:822573762474016818>',
+    '<span class="icon-threat"></span>': '<:threat:822572608994148362>',
+    '<span class="icon-attack"></span>': '<:attack:822573464367792221>',
+    '<span class="icon-defense"></span>': '<:defense:822573464615518209>',
+    '<span class="icon-willpower"></span>': '<:willpower:822573464367792170>',
+    '<span class="icon-health"></span>': '<:hitpoints:822572931254714389>'
 }
 
 URL_TIMEOUT = 30
@@ -98,11 +118,16 @@ def send_discord(message):
 
         if conf.get('ringsdb_alep_decks_webhook_url'):
             chunks = []
-            while len(message) > 1900:
-                chunks.append(message[:1900])
-                message = message[1900:]
+            chunk = ''
+            for line in message.split('\n'):
+                if len(chunk + line) + 1 <= CHUNK_LIMIT:
+                    chunk += line + '\n'
+                else:
+                    chunks.append(chunk)
+                    chunk = line + '\n'
 
-            chunks.append(message)
+            chunks.append(chunk)
+
             for i, chunk in enumerate(chunks):
                 if i > 0:
                     time.sleep(1)
@@ -123,6 +148,20 @@ def send_discord(message):
         create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
 
     return False
+
+
+def read_json_data(path):
+    """ Read data from a JSON file.
+    """
+    try:
+        with open(path, 'r', encoding='utf-8') as obj:
+            data = json.load(obj)
+    except Exception:
+        time.sleep(IO_SLEEP_TIME)
+        with open(path, 'r', encoding='utf-8') as obj:
+            data = json.load(obj)
+
+    return data
 
 
 def get_ringsdb_content(url):
@@ -179,6 +218,11 @@ def process_ringsdb_data():  # pylint: disable=R0912,R0914,R0915
     except Exception as exc:
         previous_data = {'previous_decks': []}
 
+    card_data = read_json_data(DISCORD_CARD_DATA_PATH)
+    codes = {r['_RingsDB Code']:'{} ({})'.format(r.get('Name', ''),
+                                                 r.get('_Set Name', ''))
+             for r in card_data['data'] if r.get('_RingsDB Code')}
+
     data.sort(key=lambda d: d['id'])
     new_decks = [d['id'] for d in data]
     previous_decks = set(previous_data['previous_decks'])
@@ -192,29 +236,32 @@ def process_ringsdb_data():  # pylint: disable=R0912,R0914,R0915
             heroes = []
             for hero in deck['heroes_details']:
                 hero_text = '{} {} *({})*'.format(
-                    EMOJIS.get(hero['sphere'], ''),
+                    SPHERE_EMOJIS.get(hero['sphere'],
+                                      '*{}*'.format(hero['sphere'])),
                     hero['name'],
                     hero['pack'])
                 heroes.append(hero_text)
 
-            alep_cards = 0
+            alep_codes = []
             for code in deck['slots']:
-                code = int(code)
-                if (300000 <= code < 400000 or
-                        500000 <= code < 600000 or
-                        99300000 <= code < 99400000 or
-                        99500000 <= code < 99600000):
-                    alep_cards += 1
+                code = str(code)
+                if code in codes:
+                    alep_codes.append(code)
 
-            if alep_cards > 1:
-                alep_cards = '{} ALeP cards'.format(alep_cards)
-            elif alep_cards == 1:
-                alep_cards = '1 ALeP card'
+            if len(alep_codes) > 1:
+                alep_cards_count = '{} ALeP cards'.format(len(alep_codes))
+                alep_cards = 'ALeP cards:\n{}'.format('\n'.join(
+                    ['- {}'.format(codes[c]) for c in sorted(alep_codes)]))
+            elif len(alep_codes) == 1:
+                alep_cards_count = '1 ALeP card'
+                alep_cards = 'ALeP card:\n- {}'.format(codes[alep_codes[0]])
             else:
                 continue
 
             if deck['description_md']:
                 description = deck['description_md']
+                for tag, emoji in TAG_EMOJIS.items():
+                    description = description.replace(tag, emoji)
             else:
                 description = 'no description'
 
@@ -225,12 +272,14 @@ def process_ringsdb_data():  # pylint: disable=R0912,R0914,R0915
 {}
 {}
 {}
+{}
 ` `""".format(deck['name'].replace('*', '').strip(),
               deck['username'],
               deck['starting_threat'],
-              alep_cards,
+              alep_cards_count,
               deck['last_pack'],
               ', '.join(heroes),
+              alep_cards,
               description,
               url)
             logging.info(message)

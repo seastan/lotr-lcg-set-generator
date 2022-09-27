@@ -33,6 +33,8 @@ SANITY_CHECK_SUBJECT_TEMPLATE = 'LotR Cron CHECK: {}'
 WARNING_SUBJECT_TEMPLATE = 'LotR Cron WARNING: {}'
 MAIL_QUOTA = 50
 
+CHUNK_LIMIT = 1900
+LOG_LEVEL = logging.INFO
 
 class DiscordResponseError(Exception):
     """ Discord Response error.
@@ -47,7 +49,7 @@ class RCloneError(Exception):
 def init_logging():
     """ Init logging.
     """
-    logging.basicConfig(filename=LOG_PATH, level=logging.INFO,
+    logging.basicConfig(filename=LOG_PATH, level=LOG_LEVEL,
                         format='%(asctime)s %(levelname)s: %(message)s')
 
 
@@ -99,11 +101,16 @@ def send_discord(message):
 
         if conf.get('webhook_url'):
             chunks = []
-            while len(message) > 1900:
-                chunks.append(message[:1900])
-                message = message[1900:]
+            chunk = ''
+            for line in message.split('\n'):
+                if len(chunk + line) + 1 <= CHUNK_LIMIT:
+                    chunk += line + '\n'
+                else:
+                    chunks.append(chunk)
+                    chunk = line + '\n'
 
-            chunks.append(message)
+            chunks.append(chunk)
+
             for i, chunk in enumerate(chunks):
                 if i > 0:
                     time.sleep(1)

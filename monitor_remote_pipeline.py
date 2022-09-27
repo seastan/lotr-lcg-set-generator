@@ -16,6 +16,7 @@ import yaml
 
 ALERT_SUBJECT_TEMPLATE = 'LotR Remote Pipeline Monitor ALERT: {}'
 ERROR_SUBJECT_TEMPLATE = 'LotR Remote Pipeline Monitor ERROR: {}'
+LOG_LEVEL = logging.INFO
 
 CONFIGURATION_PATH = 'configuration.yaml'
 LOG_PATH = 'monitor_remote_pipeline.log'
@@ -33,7 +34,7 @@ class RCloneError(Exception):
 def init_logging():
     """ Init logging.
     """
-    logging.basicConfig(filename=LOG_PATH, level=logging.INFO,
+    logging.basicConfig(filename=LOG_PATH, level=LOG_LEVEL,
                         format='%(asctime)s %(levelname)s: %(message)s')
 
 

@@ -67,6 +67,7 @@ MAIL_QUOTA = 50
 
 CHANNEL_LIMIT = 500
 CHUNK_LIMIT = 1900
+LOG_LEVEL = logging.INFO
 MAX_PINS = 50
 ARCHIVE_CATEGORY = 'Archive'
 CARD_DECK_SECTION = '_Deck Section'
@@ -338,7 +339,7 @@ class RCloneFolderError(Exception):
 def init_logging():
     """ Init logging.
     """
-    logging.basicConfig(filename=LOG_PATH, level=logging.INFO,
+    logging.basicConfig(filename=LOG_PATH, level=LOG_LEVEL,
                         format='%(asctime)s %(levelname)s: %(message)s')
 
 
