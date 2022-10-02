@@ -169,7 +169,7 @@ List of **!stat** commands:
 **!stat assistants** - display the list of assistants (all Discord users except for those who have a role)
 **!stat channels** - display the number of Discord channels and free channel slots
 **!stat dragncards build** - display information about the latest DragnCards build
-**!stat quest <quest name or set name or set code>** - display the quest statistics (for example: `!stat quest The Battle for the Beacon` or `!stat quest Children of Eorl` or `!stat quest TAP`)
+**!stat quest <quest name or set name or set code>** - display the quest statistics
 ` `
 **!stat player cards <set name or set code>** - display DragnCards player cards statistics for the set
 **!stat player cards <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date
