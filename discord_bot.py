@@ -66,7 +66,7 @@ WARNING_SUBJECT_TEMPLATE = 'LotR Discord Bot WARNING: {}'
 MAIL_QUOTA = 50
 
 CHANNEL_LIMIT = 500
-CHUNK_LIMIT = 1900
+CHUNK_LIMIT = 1980
 LOG_LEVEL = logging.INFO
 MAX_PINS = 50
 ARCHIVE_CATEGORY = 'Archive'
@@ -480,32 +480,40 @@ async def run_and_forget_shell(cmd):
 def split_result(value):
     """ Split result into chunks.
     """
-    res = []
+    chunks = []
     chunk = ''
     for line in value.split('\n'):
         if len(chunk + line) + 1 <= CHUNK_LIMIT:
             chunk += line + '\n'
         else:
-            res.append(chunk)
+            while len(chunk) > CHUNK_LIMIT:
+                pos = chunk[:CHUNK_LIMIT].rfind(' ')
+                if pos == -1:
+                    pos = CHUNK_LIMIT - 1
+
+                chunks.append(chunk[:pos + 1])
+                chunk = chunk[pos + 1:]
+
+            chunks.append(chunk)
             chunk = line + '\n'
 
-    res.append(chunk)
+    chunks.append(chunk)
 
-    for i in range(len(res) - 1):
-        cnt = res[i].count('```')
+    for i in range(len(chunks) - 1):
+        cnt = chunks[i].count('```')
         if cnt % 2 == 0:
             continue
 
-        if res[i].split('```')[-1].startswith('diff'):
-            res[i + 1] = '```diff\n' + res[i + 1]
+        if chunks[i].split('```')[-1].startswith('diff'):
+            chunks[i + 1] = '```diff\n' + chunks[i + 1]
         else:
-            res[i + 1] = '```\n' + res[i + 1]
+            chunks[i + 1] = '```\n' + chunks[i + 1]
 
-        res[i] += '```\n'
+        chunks[i] += '```\n'
 
-    res = [chunk.replace('```diff\n```', '').replace('```\n```', '')
-           for chunk in res]
-    return res
+    chunks = [chunk.replace('```diff\n```', '').replace('```\n```', '')
+           for chunk in chunks]
+    return chunks
 
 
 def format_playtest_message(data):

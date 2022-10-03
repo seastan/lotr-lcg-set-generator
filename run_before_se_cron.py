@@ -33,7 +33,7 @@ SANITY_CHECK_SUBJECT_TEMPLATE = 'LotR Cron CHECK: {}'
 WARNING_SUBJECT_TEMPLATE = 'LotR Cron WARNING: {}'
 MAIL_QUOTA = 50
 
-CHUNK_LIMIT = 1900
+CHUNK_LIMIT = 1980
 LOG_LEVEL = logging.INFO
 
 class DiscordResponseError(Exception):
@@ -95,7 +95,7 @@ def set_sanity_check_message(message):
 def send_discord(message):
     """ Send a message to a Discord channel.
     """
-    try:
+    try:  # pylint: disable=R1702
         with open(DISCORD_CONF_PATH, 'r', encoding='utf-8') as f_conf:
             conf = yaml.safe_load(f_conf)
 
@@ -106,6 +106,14 @@ def send_discord(message):
                 if len(chunk + line) + 1 <= CHUNK_LIMIT:
                     chunk += line + '\n'
                 else:
+                    while len(chunk) > CHUNK_LIMIT:
+                        pos = chunk[:CHUNK_LIMIT].rfind(' ')
+                        if pos == -1:
+                            pos = CHUNK_LIMIT - 1
+
+                        chunks.append(chunk[:pos + 1])
+                        chunk = chunk[pos + 1:]
+
                     chunks.append(chunk)
                     chunk = line + '\n'
 

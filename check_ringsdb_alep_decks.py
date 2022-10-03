@@ -24,7 +24,7 @@ LOG_PATH = 'check_ringsdb_alep_decks.log'
 MAILS_PATH = 'mails'
 RINGSDB_URL = 'http://ringsdb.com/api/public/decklists/by_date/{}'
 
-CHUNK_LIMIT = 1900
+CHUNK_LIMIT = 1980
 IO_SLEEP_TIME = 1
 LOG_LEVEL = logging.INFO
 
@@ -112,7 +112,7 @@ def internet_state():
 def send_discord(message):
     """ Send a message to a Discord channel.
     """
-    try:
+    try:  # pylint: disable=R1702
         with open(DISCORD_CONF_PATH, 'r', encoding='utf-8') as f_conf:
             conf = yaml.safe_load(f_conf)
 
@@ -123,6 +123,14 @@ def send_discord(message):
                 if len(chunk + line) + 1 <= CHUNK_LIMIT:
                     chunk += line + '\n'
                 else:
+                    while len(chunk) > CHUNK_LIMIT:
+                        pos = chunk[:CHUNK_LIMIT].rfind(' ')
+                        if pos == -1:
+                            pos = CHUNK_LIMIT - 1
+
+                        chunks.append(chunk[:pos + 1])
+                        chunk = chunk[pos + 1:]
+
                     chunks.append(chunk)
                     chunk = line + '\n'
 
