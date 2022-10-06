@@ -75,7 +75,7 @@ def get_sanity_check_message():
     """
     try:
         with open(SANITY_CHECK_PATH, 'r', encoding='utf-8') as obj:
-            return obj.read().strip()
+            return obj.read()
     except Exception:
         return ''
 

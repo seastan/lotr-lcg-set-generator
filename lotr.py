@@ -4984,9 +4984,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                              value):
                     message = (
                         'No space before [attack|defense|willpower|threat] '
-                        'in {} column for row #{}{}: {}'
-                        .format(key.replace(BACK_PREFIX, 'Back '), i, row_info,
-                                ', '.join(unmatched_tags)))
+                        'in {} column for row #{}{}'
+                        .format(key.replace(BACK_PREFIX, 'Back '), i, row_info))
                     logging.error(message)
                     if not card_scratch:
                         errors.append(message)
@@ -4996,9 +4995,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 if re.search(r'[0-9X] \[pp\]', value):
                     message = (
                         'Redundant space before [pp] in {} column for row '
-                        '#{}{}: {}'.format(
-                            key.replace(BACK_PREFIX, 'Back '), i, row_info,
-                            ', '.join(unmatched_tags)))
+                        '#{}{}'.format(
+                            key.replace(BACK_PREFIX, 'Back '), i, row_info))
                     logging.error(message)
                     if not card_scratch:
                         errors.append(message)
@@ -5008,9 +5006,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 if 'Middle-Earth' in value:
                     message = (
                         '"Middle-earth" not "Middle-Earth" in {} column for '
-                        'row #{}{}: {}'.format(
-                            key.replace(BACK_PREFIX, 'Back '), i, row_info,
-                            ', '.join(unmatched_tags)))
+                        'row #{}{}'.format(
+                            key.replace(BACK_PREFIX, 'Back '), i, row_info))
                     logging.error(message)
                     if not card_scratch:
                         errors.append(message)
@@ -5146,23 +5143,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         logging.error(
                             'No space before [attack|defense|willpower|threat]'
                             ' in %s column for card ID %s in %s translations,'
-                            ' row #%s: %s',
+                            ' row #%s',
                             key.replace(BACK_PREFIX, 'Back '), card_id, lang,
-                            TRANSLATIONS[lang][card_id][ROW_COLUMN],
-                            ', '.join(unmatched_tags))
+                            TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                     if re.search(r'[0-9X] \[pp\]', value):
                         logging.error(
                             'Redundant space before [pp] in %s column for card'
-                            ' ID %s in %s translations, row #%s: %s',
+                            ' ID %s in %s translations, row #%s',
                             key.replace(BACK_PREFIX, 'Back '), card_id, lang,
-                            TRANSLATIONS[lang][card_id][ROW_COLUMN],
-                            ', '.join(unmatched_tags))
-                        message = (
-                            'Redundant space before [pp] in {} column for row '
-                            '#{}{}: {}'.format(
-                                key.replace(BACK_PREFIX, 'Back '), i, row_info,
-                                ', '.join(unmatched_tags)))
+                            TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                 if not value and row.get(key):
                     logging.error(
