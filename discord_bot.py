@@ -3332,7 +3332,7 @@ Targets removed.
             except Exception as exc:
                 logging.exception(str(exc))
                 await message.channel.send(
-                    'unexpected error: {}'.format(str(exc)))
+                    'unexpected error happened, see the log')
                 return
 
             await self._send_channel(message.channel, 'Done')
