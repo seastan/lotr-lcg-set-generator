@@ -1890,11 +1890,6 @@ function updatePunctuation(value, lang) {
 			value = value.replace(/\u00a0([:;?!][^<]+)>/g, '$1>');
 		}
 		while (value != valueOld);
-
-		function fixLotrHeaderReplacer(match, offset, string) {
-			return match.replace(/\u00a0/g, ' ');
-		}
-		value = value.replace(/<family "Lord of the Headers">.+?<\/family>/g, fixLotrHeaderReplacer);
 	}
 
 	return value;
