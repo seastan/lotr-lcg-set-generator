@@ -51,7 +51,8 @@ TAG_EMOJIS = {
     '<span class="icon-attack"></span>': '<:attack:822573464367792221>',
     '<span class="icon-defense"></span>': '<:defense:822573464615518209>',
     '<span class="icon-willpower"></span>': '<:willpower:822573464367792170>',
-    '<span class="icon-health"></span>': '<:hitpoints:822572931254714389>'
+    '<span class="icon-health"></span>': '<:hitpoints:822572931254714389>',
+    '<span class="icon-neutral"></span>': '*Neutral* '
 }
 
 URL_TIMEOUT = 30
