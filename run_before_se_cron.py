@@ -36,6 +36,7 @@ MAIL_QUOTA = 50
 CHUNK_LIMIT = 1980
 LOG_LEVEL = logging.INFO
 
+
 class DiscordResponseError(Exception):
     """ Discord Response error.
     """

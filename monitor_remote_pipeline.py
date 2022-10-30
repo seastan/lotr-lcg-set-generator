@@ -11,19 +11,29 @@ import time
 import uuid
 import warnings
 
+import requests
 import yaml
 
 
 ALERT_SUBJECT_TEMPLATE = 'LotR Remote Pipeline Monitor ALERT: {}'
 ERROR_SUBJECT_TEMPLATE = 'LotR Remote Pipeline Monitor ERROR: {}'
+
+CHUNK_LIMIT = 1980
 LOG_LEVEL = logging.INFO
+MESSAGE_SLEEP_TIME = 30
 
 CONFIGURATION_PATH = 'configuration.yaml'
+DISCORD_CONF_PATH = 'discord.yaml'
 LOG_PATH = 'monitor_remote_pipeline.log'
 MAILS_PATH = 'mails'
 
 
 warnings.filterwarnings('ignore', category=DeprecationWarning)
+
+
+class DiscordResponseError(Exception):
+    """ Discord Response error.
+    """
 
 
 class RCloneError(Exception):
@@ -88,6 +98,54 @@ def parse_logs(folder):
     return stdout
 
 
+def send_discord(message):
+    """ Send a message to a Discord channel.
+    """
+    try:  # pylint: disable=R1702
+        with open(DISCORD_CONF_PATH, 'r', encoding='utf-8') as f_conf:
+            conf = yaml.safe_load(f_conf)
+
+        if conf.get('webhook_url'):
+            chunks = []
+            chunk = ''
+            for line in message.split('\n'):
+                if len(chunk + line) + 1 <= CHUNK_LIMIT:
+                    chunk += line + '\n'
+                else:
+                    while len(chunk) > CHUNK_LIMIT:
+                        pos = chunk[:CHUNK_LIMIT].rfind(' ')
+                        if pos == -1:
+                            pos = CHUNK_LIMIT - 1
+
+                        chunks.append(chunk[:pos + 1])
+                        chunk = chunk[pos + 1:]
+
+                    chunks.append(chunk)
+                    chunk = line + '\n'
+
+            chunks.append(chunk)
+
+            for i, chunk in enumerate(chunks):
+                if i > 0:
+                    time.sleep(1)
+
+                data = {'content': chunk}
+                res = requests.post(conf['webhook_url'], json=data)
+                res = res.content.decode('utf-8')
+                if res != '':
+                    raise DiscordResponseError(
+                        'Non-empty response: {}'.format(res))
+
+            return True
+    except Exception as exc:
+        message = 'Discord message failed: {}: {}'.format(
+            type(exc).__name__, str(exc))
+        logging.exception(message)
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
+
+    return False
+
+
 def run():
     """ Run the check.
     """
@@ -135,6 +193,13 @@ def run():
         message = 'Incorrect parsing logs result: {}'.format(res)
         logging.error(message)
         create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
+
+    overflow_ids = re.findall(r'(?<=Too long text for card )[0-9a-f-]+',
+                              errors)
+    for overflow_id in overflow_ids:
+        send_discord('Too long text for the card:')
+        send_discord('!alepcard {}'.format(overflow_id))
+        time.sleep(MESSAGE_SLEEP_TIME)
 
 
 def main():
