@@ -197,7 +197,8 @@ def run():
     overflow_ids = re.findall(r'(?<=Too long text for card )[0-9a-f-]+',
                               errors)
     for overflow_id in overflow_ids:
-        send_discord('Too long text for the card:')
+        send_discord('Too long text on the rendered image for the card:')
+        send_discord('!image {}'.format(overflow_id))
         send_discord('!alepcard {}'.format(overflow_id))
         time.sleep(MESSAGE_SLEEP_TIME)
 
