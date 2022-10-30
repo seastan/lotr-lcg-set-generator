@@ -46,6 +46,10 @@ function exportCard(card, fname, setID, lang, simple_back, png300Bleed, png480Bl
 			file = new File(getProjectMember('Export/png800Bleed/').file, fname + '-' + (i + 1) + '.' + setID + '.' + lang + '.' + ImageUtils.FORMAT_PNG);
 			ImageUtils.write(bi, file, ImageUtils.FORMAT_PNG, 1, false, ppi800);
 		}
+		if (card.settings.get('TextOverflow')) {
+			file = new File(getProjectMember('Messages/').file, card.settings.get('Id') + '.overflow');
+			file.createNewFile();
+		}
 	}
 }
 

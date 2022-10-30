@@ -305,6 +305,8 @@ def main():  # pylint: disable=R0912,R0914,R0915
     execute_tasks(conf, tasks)
     execute_tasks(conf, post_tasks)
 
+    lotr.check_messages()
+
     if 'English' in conf['output_languages']:
         updated_sets = [s for s in sets
                         if (s[0], 'English') in actual_sets

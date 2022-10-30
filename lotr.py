@@ -473,6 +473,7 @@ IMAGES_RAW_PATH = os.path.join(PROJECT_FOLDER, 'imagesRaw')
 IMAGES_TTS_PATH = 'imagesTTS'
 IMAGES_ZIP_PATH = '{}/Export/'.format(os.path.split(PROJECT_FOLDER)[-1])
 MAKECARDS_FINISHED_PATH = 'makeCards_FINISHED'
+MESSAGES_ZIP_PATH = '{}/Messages/'.format(os.path.split(PROJECT_FOLDER)[-1])
 OCTGN_ZIP_PATH = 'a21af4e8-be4b-4cda-a6b6-534f9717391f/Sets'
 OUTPUT_PATH = 'Output'
 OUTPUT_DB_PATH = os.path.join(OUTPUT_PATH, 'DB')
@@ -8650,6 +8651,23 @@ def _run_cmd(cmd):
     except subprocess.CalledProcessError as exc:
         raise RuntimeError('Command "{}" returned error with code {}: {}'
                            .format(cmd, exc.returncode, exc.output)) from exc
+
+def check_messages():
+    """ Check messages in the archive and log them.
+    """
+    logging.info('Checking messages in the archive...')
+    timestamp = time.time()
+
+    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+        filelist = [f for f in zip_obj.namelist()
+                    if f.startswith(MESSAGES_ZIP_PATH)
+                    and f.split('.')[-1] == 'overflow']
+        for filename in filelist:
+            logging.error('Too long text for card %s',
+                          filename.split('/')[-1].split('.')[0])
+
+    logging.info('...Checking messages in the archive (%ss)',
+                 round(time.time() - timestamp, 3))
 
 
 def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914

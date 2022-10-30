@@ -577,8 +577,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 suffix = '.B';
             }
             var content = '';
-            if (fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + suffix + '.jpg')) {
-                content = '<img src="' + generatedImagesFolder + data.IdRenderer + suffix + '.jpg" width="100%" height="100%">';
+            if (fs.existsSync(generatedImagesFolderCheck + data.Id + suffix + '.jpg')) {
+                content = '<img src="' + generatedImagesFolder + data.Id + suffix + '.jpg" width="100%" height="100%">';
             }
             return content;
         },
@@ -787,8 +787,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         },
         'PortraitBack-portrait-clip': function(data) {
             var content = '';
-            if (fs.existsSync(generatedImagesFolderCheck + data.IdRenderer + '.B.jpg')) {
-                content = '<img src="' + generatedImagesFolder + data.IdRenderer + '.B.jpg" width="100%" height="100%">';
+            if (fs.existsSync(generatedImagesFolderCheck + data.Id + '.B.jpg')) {
+                content = '<img src="' + generatedImagesFolder + data.Id + '.B.jpg" width="100%" height="100%">';
             }
             return content;
         },
@@ -1035,7 +1035,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
     html = html.replace('{{ SHAPE_CSS }}', shapeCSS);
     html = html.replace('{{ CONTAINER_NAMES }}', containerNames);
     html = html.replace('{{ CONTAINERS }}', containers.join('\n'));
-    fs.writeFileSync('Output/' + prefix + data.IdRenderer + suffix + '.html', html);
+    fs.writeFileSync('Output/' + prefix + data.Id + suffix + '.html', html);
 
     if ((doubleSideTypes.indexOf(data.TypeRenderer) > -1) &&
         ((data.TypeRenderer != 'Contract') || (template == 'DoubleSided'))) {
@@ -1141,7 +1141,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         html = html.replace('{{ SHAPE_CSS }}', shapeCSS);
         html = html.replace('{{ CONTAINER_NAMES }}', containerNamesBack);
         html = html.replace('{{ CONTAINERS }}', containersBack.join('\n'));
-        fs.writeFileSync('Output/' + prefix + data.IdRenderer + suffix + '.html', html);
+        fs.writeFileSync('Output/' + prefix + data.Id + suffix + '.html', html);
     }
 }
 

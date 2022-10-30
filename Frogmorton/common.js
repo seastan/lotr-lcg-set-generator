@@ -1810,6 +1810,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				let fname = (Array(Math.max(0, 4 - (card['Card Number'] + '').length)).join('0') + card['Card Number'] + '-' + copy + '-' +
 					back + '-' + escapeFileName(card['Name']) + Array(50).join('-')).substring(0, 50) + card['octgn'] + suffix;
 
+				s.set('Id', card['octgn']);
 				if (context == 'renderer') {
 					s.set('Bottom-format', '<width semicondensed><family "Times New Roman"><size ' + defaultBottomPointSize + '><b>');
 					s.set('Bottom-formatEnd', '</b></size></family></width>');
@@ -1818,7 +1819,6 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('OptionRight-format', '<width semicondensed>');
 					s.set('OptionRight-formatEnd', '</width>');
 					s.set('TypeRenderer', cardType);
-					s.set('IdRenderer', card['octgn']);
 					s.set('SuffixRenderer', suffix);
 				}
 
