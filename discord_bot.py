@@ -4081,6 +4081,7 @@ Targets removed.
             await message.channel.send('please specify the set')
         elif command.lower() == 'refresh':
             RENDERED_IMAGES.clear()
+            clear_rendered_images()
             await message.channel.send('done')
         elif command.lower() == 'card':
             await message.channel.send('please specify the card')

@@ -20,7 +20,8 @@ ERROR_SUBJECT_TEMPLATE = 'LotR Remote Pipeline Monitor ERROR: {}'
 
 CHUNK_LIMIT = 1980
 LOG_LEVEL = logging.INFO
-MESSAGE_SLEEP_TIME = 30
+MESSAGE_SLEEP_TIME = 10
+IMAGE_MESSAGE_SLEEP_TIME = 30
 
 CONFIGURATION_PATH = 'configuration.yaml'
 DISCORD_CONF_PATH = 'discord.yaml'
@@ -196,11 +197,14 @@ def run():
 
     overflow_ids = re.findall(r'(?<=Too long text for card )[0-9a-f-]+',
                               errors)
-    for overflow_id in overflow_ids:
-        send_discord('Too long text on the rendered image for the card:')
-        send_discord('!image {}'.format(overflow_id))
-        send_discord('!alepcard {}'.format(overflow_id))
+    if overflow_ids:
+        send_discord('!image refresh')
         time.sleep(MESSAGE_SLEEP_TIME)
+        for overflow_id in overflow_ids:
+            send_discord('Too long text on the rendered image for the card:')
+            send_discord('!alepcard {}'.format(overflow_id))
+            send_discord('!image {}'.format(overflow_id))
+            time.sleep(IMAGE_MESSAGE_SLEEP_TIME)
 
 
 def main():
