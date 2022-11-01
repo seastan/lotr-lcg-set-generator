@@ -36,6 +36,7 @@ USERS_LIST_PATH = os.path.join('Discord', 'users.csv')
 
 CRON_ERRORS_CMD = './cron_errors.sh'
 CRON_LOG_CMD = './cron_log.sh'
+MONITOR_REMOTE_PIPELINE_CMD = 'python3 monitor_remote_pipeline.py'
 RCLONE_ART_CMD = "rclone copy '{}' 'ALePCardImages:/'"
 RCLONE_ART_FOLDER_CMD = "rclone lsjson 'ALePCardImages:/{}/'"
 RCLONE_COPY_IMAGE_CMD = "rclone copy 'ALePRenderedImages:/{}/{}' '{}/'"
@@ -2029,6 +2030,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                 self.notifications_channel,
                 'New pixel-perfect card images are available in Discord and '
                 'DragnCards')
+            await run_shell(MONITOR_REMOTE_PIPELINE_CMD)
 
 
     async def _process_category_changes(self, data):  #pylint: disable=R0912
