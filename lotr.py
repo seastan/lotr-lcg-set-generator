@@ -1653,17 +1653,21 @@ def _extract_all_card_names(data):
             continue
 
         if row[CARD_SCRATCH]:
-            if row[CARD_NAME]:
-                ALL_SCRATCH_CARD_NAMES.add(_clean_value(row[CARD_NAME]))
+            clean_value = _clean_value(row[CARD_NAME])
+            if clean_value:
+                ALL_SCRATCH_CARD_NAMES.add(clean_value)
 
-            if row[CARD_SIDE_B]:
-                ALL_SCRATCH_CARD_NAMES.add(_clean_value(row[CARD_SIDE_B]))
+            clean_value = _clean_value(row[CARD_SIDE_B])
+            if clean_value:
+                ALL_SCRATCH_CARD_NAMES.add(clean_value)
         else:
-            if row[CARD_NAME]:
-                ALL_CARD_NAMES.add(_clean_value(row[CARD_NAME]))
+            clean_value = _clean_value(row[CARD_NAME])
+            if clean_value:
+                ALL_CARD_NAMES.add(clean_value)
 
-            if row[CARD_SIDE_B]:
-                ALL_CARD_NAMES.add(_clean_value(row[CARD_SIDE_B]))
+            clean_value = _clean_value(row[CARD_SIDE_B])
+            if clean_value:
+                ALL_CARD_NAMES.add(clean_value)
 
 
 def _extract_all_traits(data):
@@ -1728,6 +1732,9 @@ def _extract_all_accents():
 def _clean_value(value):  # pylint: disable=R0915
     """ Clean a value from the spreadsheet.
     """
+    if not value:
+        return None
+
     value = str(value).strip()
     value = value.replace('\t', ' ')
     value = value.replace('\r\n', '\n')
@@ -1802,11 +1809,11 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0915
     PRE_SANITY_CHECK.clear()
 
     for row in data:  # pylint: disable=R1702
-        card_name = _clean_value(row.get(CARD_NAME) or '') or ''
+        card_name = _clean_value(row.get(CARD_NAME)) or ''
         if len(card_name) == 1:
             card_name = card_name.upper()
 
-        card_name_back = _clean_value(row.get(CARD_SIDE_B) or '') or ''
+        card_name_back = _clean_value(row.get(CARD_SIDE_B)) or ''
         if len(card_name_back) == 1:
             card_name_back = card_name_back.upper()
 
@@ -1836,8 +1843,8 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0915
             card_name_regex_back = None
 
         for key, value in row.items():
+            value = _clean_value(value)
             if isinstance(value, str):
-                value = _clean_value(value)
                 if card_name_regex:
                     if key == CARD_TEXT and re.search(card_name_regex, value):
                         prepared_value = value
@@ -1931,8 +1938,8 @@ def _clean_sets(data):
     """
     for row in data:
         for key, value in row.items():
+            value = _clean_value(value)
             if isinstance(value, str):
-                value = _clean_value(value)
                 row[key] = value
 
 
