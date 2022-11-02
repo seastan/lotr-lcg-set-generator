@@ -2201,6 +2201,11 @@ def get_sets(conf, sheet_changes=True, scratch_changes=True):
         chosen_sets.update(s for s in FOUND_SCRATCH_SETS
                            if not SETS[s][SET_IGNORE])
 
+    unknown_sets = (set(conf['set_ids']) - set(SETS.keys()) -
+                    set(['all', 'all_scratch']))
+    for unknown_set in unknown_sets:
+        logging.error('Unknown set_id in configuration: %s', unknown_set)
+
     chosen_sets = list(chosen_sets)
     chosen_sets = [s for s in chosen_sets if s not in conf['ignore_set_ids']]
     chosen_sets = [[SETS[s][SET_ID], SETS[s][SET_NAME]] for s in chosen_sets]
