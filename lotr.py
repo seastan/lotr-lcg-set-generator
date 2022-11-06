@@ -6745,8 +6745,7 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
     create_folder(output_path)
 
     output_path = os.path.join(
-        output_path,
-        '{}.json'.format(escape_octgn_filename(escape_filename(set_name))))
+        output_path, '{}.json'.format(set_id))
 
     try:
         with open(DRAGNCARDS_TIMESTAMPS_JSON_PATH, 'r',
@@ -12116,12 +12115,11 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
 
                 delete_folder(temp_path)
 
-        for _, set_name in sets:
+        for set_id, set_name in sets:
             output_path = os.path.join(
                 OUTPUT_DRAGNCARDS_PATH,
                 escape_filename(set_name),
-                '{}.json'.format(escape_octgn_filename(
-                    escape_filename(set_name))))
+                '{}.json'.format(set_id))
             if (conf['dragncards_remote_json_path'] and
                     conf['dragncards_json'] and
                     os.path.exists(output_path)):
