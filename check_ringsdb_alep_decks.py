@@ -224,7 +224,7 @@ def process_ringsdb_data():  # pylint: disable=R0912,R0914,R0915
     try:
         with open(DATA_PATH, 'r', encoding='utf-8') as fobj:
             previous_data = json.load(fobj)
-    except Exception as exc:
+    except Exception:
         previous_data = {'previous_decks': []}
 
     card_data = read_json_data(DISCORD_CARD_DATA_PATH)

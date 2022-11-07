@@ -2,6 +2,7 @@
 """ Monitor remote pipeline.
 """
 from email.header import Header
+import hashlib
 import json
 import logging
 import os
@@ -19,10 +20,13 @@ ALERT_SUBJECT_TEMPLATE = 'LotR Remote Pipeline Monitor ALERT: {}'
 ERROR_SUBJECT_TEMPLATE = 'LotR Remote Pipeline Monitor ERROR: {}'
 
 CHUNK_LIMIT = 1980
+IO_SLEEP_TIME = 1
 LOG_LEVEL = logging.INFO
 MESSAGE_SLEEP_TIME = 30
 
 CONFIGURATION_PATH = 'configuration.yaml'
+DATA_PATH = 'monitor_remote_pipeline.json'
+DISCORD_CARD_DATA_PATH = os.path.join('Discord', 'card_data.json')
 DISCORD_CONF_PATH = 'discord.yaml'
 LOG_PATH = 'monitor_remote_pipeline.log'
 MAILS_PATH = 'mails'
@@ -98,6 +102,20 @@ def parse_logs(folder):
     return stdout
 
 
+def read_json_data(path):
+    """ Read data from a JSON file.
+    """
+    try:
+        with open(path, 'r', encoding='utf-8') as obj:
+            data = json.load(obj)
+    except Exception:
+        time.sleep(IO_SLEEP_TIME)
+        with open(path, 'r', encoding='utf-8') as obj:
+            data = json.load(obj)
+
+    return data
+
+
 def send_discord(message):
     """ Send a message to a Discord channel.
     """
@@ -146,14 +164,21 @@ def send_discord(message):
     return False
 
 
-def run():
+def run():  # pylint: disable=R0912,R0914,R0915
     """ Run the check.
     """
+    try:
+        with open(DATA_PATH, 'r', encoding='utf-8') as fobj:
+            previous_data = json.load(fobj)
+    except Exception:
+        previous_data = {'checksum': ''}
+
     with open(CONFIGURATION_PATH, 'r', encoding='utf-8') as f_conf:
         conf = yaml.safe_load(f_conf)
 
     rclone_logs(conf)
     res = parse_logs(conf.get('remote_logs_path', ''))
+
     parts = res.split('\n', 1)
     if len(parts) > 1:
         errors = parts[1]
@@ -165,6 +190,11 @@ def run():
         message = 'Incorrect parsing logs result: {}'.format(res)
         logging.error(message)
         create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
+        return
+
+    new_checksum = hashlib.md5(res.encode('utf-8')).hexdigest()
+    old_checksum = previous_data['checksum']
+    if old_checksum == new_checksum:
         return
 
     code, description = parts
@@ -197,6 +227,12 @@ def run():
     overflow_ids = re.findall(r'(?<=Too long text for card )[0-9a-f-]+',
                               errors)
     if overflow_ids:
+        card_data = read_json_data(DISCORD_CARD_DATA_PATH)
+        card_ids = {r['Card GUID'] for r in card_data['data']}
+        overflow_ids = [card_id for card_id in overflow_ids
+                        if card_id in card_ids]
+
+    if overflow_ids:
         send_discord('!image refresh')
         time.sleep(MESSAGE_SLEEP_TIME)
         for overflow_id in overflow_ids:
@@ -204,6 +240,10 @@ def run():
             send_discord('!alepcard {}'.format(overflow_id))
             send_discord('!image {}'.format(overflow_id))
             time.sleep(MESSAGE_SLEEP_TIME)
+
+    new_data = {'checksum': new_checksum}
+    with open(DATA_PATH, 'w', encoding='utf-8') as fobj:
+        json.dump(new_data, fobj)
 
 
 def main():
