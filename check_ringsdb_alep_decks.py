@@ -271,6 +271,12 @@ def process_ringsdb_data():  # pylint: disable=R0912,R0914,R0915
                 description = deck['description_md']
                 for tag, emoji in TAG_EMOJIS.items():
                     description = description.replace(tag, emoji)
+                    description = description.replace('<b>', '**').replace(
+                        '</b>', '**')
+                    description = description.replace('<i>', '*').replace(
+                        '</i>', '*')
+                    description = description.replace('<u>', '__').replace(
+                        '</u>', '__')
             else:
                 description = 'no description'
 
