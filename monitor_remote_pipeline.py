@@ -233,7 +233,7 @@ def run():  # pylint: disable=R0912,R0914,R0915
                         if card_id in card_ids]
 
     if overflow_ids:
-        send_discord('!image refresh')
+        send_discord('!secret image refresh')
         time.sleep(MESSAGE_SLEEP_TIME)
         for overflow_id in overflow_ids:
             send_discord('Too long text on the rendered image for the card:')

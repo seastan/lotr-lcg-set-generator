@@ -218,6 +218,7 @@ List of **!edit** commands:
     'secret': """
 List of **!secret** commands:
 ` `
+**!secret image refresh** - clear the image cache (if you just uploaded new images to the Google Drive)
 **!secret users** - prepare a list of all Discord users and save it in `Discord/users.csv`
 """
 }
@@ -3326,9 +3327,12 @@ Targets removed.
 
         logging.info('Received secret command: %s', command)
 
-        if command.lower() == 'users':
+        if command.lower() == 'image refresh':
             await message.delete()
-            await message.channel.send('Please wait...')
+            RENDERED_IMAGES.clear()
+            clear_rendered_images()
+        elif command.lower() == 'users':
+            await message.delete()
             try:
                 await self._prepare_users_list()
             except Exception as exc:
@@ -3337,7 +3341,7 @@ Targets removed.
                     'unexpected error happened, see the log')
                 return
 
-            await self._send_channel(message.channel, 'Done')
+            await self._send_channel(message.channel, 'done')
 
 
     async def _prepare_users_list(self):  # pylint: disable=R0914
