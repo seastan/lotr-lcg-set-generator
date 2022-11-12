@@ -425,7 +425,7 @@ nameUniqueRegion['Player Objective'] = '127,45,211,29';
 nameUniqueRegion['Region'] = '80,346,160,25';
 nameUniqueRegion['Ship Enemy'] = '94,325,225,25';
 nameUniqueRegion['Ship Objective'] = '75,45,263,29';
-nameUniqueRegion['Treachery'] = '55,108,26,164';
+nameUniqueRegion['Treachery'] = '54,108,26,164';
 nameUniqueRegion['Treasure'] = '132,43,183,25';
 
 var subtypeRegion = {};
