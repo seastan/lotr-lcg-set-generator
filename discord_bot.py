@@ -2140,14 +2140,16 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                 await channel.move(category=category, end=True)
                 logging.info('Moved channel "%s" from category "%s" to "%s"',
                              change[1][0], old_category_name, change[1][1])
-                await channel.send('Moved from category "{}" to "{}"'
-                                   .format(old_category_name, change[1][1]))
+                await self._send_channel(
+                    channel,
+                    'Moved from category "{}" to "{}"'
+                    .format(old_category_name, change[1][1]))
                 await asyncio.sleep(CMD_SLEEP_TIME)
                 res = await self._move_artwork_files(
                     change[2]['card_id'], change[2]['old_set_id'],
                     change[2]['new_set_id'])
                 if res:
-                    await channel.send(res)
+                    await self._send_channel(channel, res)
                     await asyncio.sleep(CMD_SLEEP_TIME)
 
                 await self._copy_image_files(
@@ -2175,16 +2177,17 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                 logging.info('The card has been removed from the spreadsheet. '
                              'Moved channel "%s" from category "%s" to "%s"',
                              change[1], old_category_name, ARCHIVE_CATEGORY)
-                await channel.send('The card has been removed from the '
-                                   'spreadsheet. Moved from category "{}" to '
-                                   '"{}"'.format(old_category_name,
-                                                 ARCHIVE_CATEGORY))
+                await self._send_channel(
+                    channel,
+                    'The card has been removed from the spreadsheet. Moved '
+                    'from category "{}" to "{}"'.format(old_category_name,
+                                                        ARCHIVE_CATEGORY))
                 await asyncio.sleep(CMD_SLEEP_TIME)
                 res = await self._move_artwork_files(
                     change[2]['card_id'], change[2]['old_set_id'],
                     SCRATCH_FOLDER)
                 if res:
-                    await channel.send(res)
+                    await self._send_channel(channel, res)
                     await asyncio.sleep(CMD_SLEEP_TIME)
 
                 del self.channels[change[1]]
@@ -2213,8 +2216,10 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                         'category_name': channel.category.name}
                     logging.info('Renamed channel "%s" to "%s"', change[1][0],
                                  change[1][1])
-                    await channel.send('Renamed from "{}" to "{}"'.format(
-                        change[1][0], change[1][1]))
+                    await self._send_channel(
+                        channel,
+                        'Renamed from "{}" to "{}"'.format(change[1][0],
+                                                           change[1][1]))
                     await asyncio.sleep(CMD_SLEEP_TIME)
         finally:
             for name in old_channel_names:
@@ -2530,12 +2535,12 @@ Card "{}" has been updated:
 
         logging.info('Received cron command: %s', command)
         if command.lower().startswith('hello'):
-            await message.channel.send('hello')
+            await self._send_channel(message.channel, 'hello')
         elif command.lower().startswith('test'):
-            await message.channel.send('passed')
+            await self._send_channel(message.channel, 'passed')
         elif (command.lower().startswith('thank you') or
               command.lower().startswith('thanks')):
-            await message.channel.send('you are welcome')
+            await self._send_channel(message.channel, 'you are welcome')
         elif command.lower() == 'log':
             res, _ = await run_shell(CRON_LOG_CMD)
             if not res:
@@ -2547,11 +2552,12 @@ Card "{}" has been updated:
                 lotr.trigger_dragncards_build(CONF)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
-            await message.channel.send('done')
+            await self._send_channel(message.channel, 'done')
         elif command.lower() == 'errors':
             res, _ = await run_shell(CRON_ERRORS_CMD)
             if not res:
@@ -2560,14 +2566,15 @@ Card "{}" has been updated:
             await self._send_channel(message.channel, res)
         elif command.lower() == 'trigger':
             delete_sheet_checksums()
-            await message.channel.send('done')
+            await self._send_channel(message.channel, 'done')
         elif command.lower() == 'restart bot':
-            await message.channel.send('restarting...')
+            await self._send_channel(message.channel, 'restarting...')
             try:
                 await restart_bot()
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
         elif command.lower() == 'restart cron':
@@ -2575,11 +2582,12 @@ Card "{}" has been updated:
                 await restart_cron()
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
-            await message.channel.send('done')
+            await self._send_channel(message.channel, 'done')
         else:
             res = HELP['cron']
             await self._send_channel(message.channel, res)
@@ -2908,15 +2916,16 @@ Targets removed.
                 error = await self._new_target(message.content)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
             if error:
-                await message.channel.send(error)
+                await self._send_channel(message.channel, error)
                 return
 
-            await message.channel.send('done')
+            await self._send_channel(message.channel, 'done')
         elif command.lower() == 'view':
             try:
                 res = await self._view_target()
@@ -2924,11 +2933,12 @@ Targets removed.
                     res = 'no previous targets found'
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
-            await message.channel.send(res)
+            await self._send_channel(message.channel, res)
         elif command.lower().startswith('complete '):
             try:
                 num = re.sub(r'^complete ', '', command, flags=re.IGNORECASE)
@@ -2937,15 +2947,16 @@ Targets removed.
                                                     message.jump_url)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
             if error:
-                await message.channel.send(error)
+                await self._send_channel(message.channel, error)
                 return
 
-            await message.channel.send('done')
+            await self._send_channel(message.channel, 'done')
         elif command.lower().startswith('update '):
             try:
                 params = re.sub(r'^update ', '', command, flags=re.IGNORECASE
@@ -2953,29 +2964,31 @@ Targets removed.
                 error = await self._update_target(params)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
             if error:
-                await message.channel.send(error)
+                await self._send_channel(message.channel, error)
                 return
 
-            await message.channel.send('done')
+            await self._send_channel(message.channel, 'done')
         elif command.lower() == 'add':
             try:
                 error = await self._add_target(message.content)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
             if error:
-                await message.channel.send(error)
+                await self._send_channel(message.channel, error)
                 return
 
-            await message.channel.send('done')
+            await self._send_channel(message.channel, 'done')
         elif command.lower().startswith('remove '):
             try:
                 params = re.sub(r'^remove ', '', command, flags=re.IGNORECASE
@@ -2983,22 +2996,24 @@ Targets removed.
                 error = await self._remove_target(params)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
             if error:
-                await message.channel.send(error)
+                await self._send_channel(message.channel, error)
                 return
 
-            await message.channel.send('done')
+            await self._send_channel(message.channel, 'done')
         elif command.lower().startswith('random '):
             num = re.sub(r'^random ', '', command, flags=re.IGNORECASE)
             if lotr.is_positive_int(num):
                 res = random.randint(1, int(num))
-                await message.channel.send(str(res))
+                await self._send_channel(message.channel, str(res))
             else:
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     '"{}" is not a positive integer'.format(num))
         else:
             res = HELP['playtest']
@@ -3090,6 +3105,16 @@ Targets removed.
         return res
 
 
+    async def _get_general_cards(self, category):
+        """ Get IDs of all cards associated with a general channel.
+        """
+        data = await read_card_data()
+        cards = [card[lotr.CARD_ID] for card in data['data']
+                 if card.get(lotr.CARD_DISCORD_CATEGORY) == category
+                 and not card.get(lotr.CARD_DISCORD_CHANNEL)]
+        return cards
+
+
     async def _process_card_command(self, message):
         """ Process a card command.
         """
@@ -3106,6 +3131,27 @@ Targets removed.
             await self._send_channel(message.channel, res)
             return
 
+        if command.lower() == 'this' and message.channel.name == 'general':
+            commands = await self._get_general_cards(
+                message.channel.category.name)
+            if not commands:
+                await self._send_channel(message.channel, 'no cards found')
+                return
+
+            for command in commands:
+                try:
+                    res = await self._get_card(command, False)
+                except Exception as exc:
+                    logging.exception(str(exc))
+                    await self._send_channel(
+                        message.channel,
+                        'unexpected error: {}'.format(str(exc)))
+                    return
+
+                await self._send_channel(message.channel, res)
+
+            return
+
         if command.lower() == 'this':
             command = message.channel.name
             this = True
@@ -3116,7 +3162,8 @@ Targets removed.
             res = await self._get_card(command, this)
         except Exception as exc:
             logging.exception(str(exc))
-            await message.channel.send(
+            await self._send_channel(
+                message.channel,
                 'unexpected error: {}'.format(str(exc)))
             return
 
@@ -3163,13 +3210,15 @@ Targets removed.
                 res = await self.get_quests_stat(quest)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
             await self._send_channel(message.channel, res)
         elif command.lower() == 'quest':
-            await message.channel.send('please specify the quest name')
+            await self._send_channel(message.channel,
+                                     'please specify the quest name')
         elif command.lower() == 'channels':
             try:
                 all_channels = await self.get_all_channels_safe()
@@ -3178,7 +3227,8 @@ Targets removed.
                     num, CHANNEL_LIMIT - num)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
@@ -3188,18 +3238,20 @@ Targets removed.
                 res = self.get_assistants()
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
             await self._send_channel(message.channel, res)
         elif command.lower() == 'dragncards build':
-            await message.channel.send('Please wait...')
+            await self._send_channel(message.channel, 'Please wait...')
             try:
                 res = lotr.get_dragncards_build(CONF)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
@@ -3207,7 +3259,7 @@ Targets removed.
         elif command.lower() == 'player cards help':
             await self._send_channel(message.channel, HELP_STAT_PLAYER_CARDS)
         elif command.lower().startswith('player cards '):
-            await message.channel.send('Please wait...')
+            await self._send_channel(message.channel, 'Please wait...')
             try:
                 set_name = re.sub(r'^player cards ', '', command,
                                   flags=re.IGNORECASE)
@@ -3227,7 +3279,8 @@ Targets removed.
                                                              start_date)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
@@ -3235,7 +3288,7 @@ Targets removed.
         elif command.lower() == 'all plays help':
             await self._send_channel(message.channel, HELP_STAT_ALL_PLAYS)
         elif command.lower().startswith('all plays '):
-            await message.channel.send('Please wait...')
+            await self._send_channel(message.channel, 'Please wait...')
             try:
                 quest = re.sub(r'^all plays ', '', command,
                                flags=re.IGNORECASE)
@@ -3254,7 +3307,8 @@ Targets removed.
                 res = await get_dragncards_all_plays(quest, start_date)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
@@ -3262,7 +3316,7 @@ Targets removed.
         elif command.lower() == 'plays help':
             await self._send_channel(message.channel, HELP_STAT_PLAYS)
         elif command.lower().startswith('plays '):
-            await message.channel.send('Please wait...')
+            await self._send_channel(message.channel, 'Please wait...')
             try:
                 quest = re.sub(r'^plays ', '', command,
                                flags=re.IGNORECASE)
@@ -3281,7 +3335,8 @@ Targets removed.
                 res = await get_dragncards_plays_stat(quest, start_date)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
@@ -3290,7 +3345,7 @@ Targets removed.
             await self._send_channel(message.channel, HELP_STAT_QUESTS)
         elif (command.lower() == 'quests' or
               command.lower().startswith('quests ')):
-            await message.channel.send('Please wait...')
+            await self._send_channel(message.channel, 'Please wait...')
             try:
                 start_date = re.sub(r'^quests ?', '', command,
                                     flags=re.IGNORECASE)
@@ -3309,7 +3364,8 @@ Targets removed.
                     res = await get_dragncards_quests_stat('')
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
@@ -3337,7 +3393,8 @@ Targets removed.
                 await self._prepare_users_list()
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error happened, see the log')
                 return
 
@@ -3843,76 +3900,82 @@ Targets removed.
                 error = await self._save_artwork(message, side, artist)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
             if error:
-                await message.channel.send(error)
+                await self._send_channel(message.channel, error)
                 return
 
-            await message.channel.send('done')
+            await self._send_channel(message.channel, 'done')
         elif command.lower() == 'save':
-            await message.channel.send('please specify the artist')
+            await self._send_channel(message.channel,
+                                     'please specify the artist')
         elif command.lower() == 'savescr':
             try:
                 error = await self._save_scratch_artwork(message)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
             if error:
-                await message.channel.send(error)
+                await self._send_channel(message.channel, error)
                 return
 
-            await message.channel.send('done')
+            await self._send_channel(message.channel, 'done')
         elif command.lower().startswith('savescr '):
             try:
                 artist = re.sub(r'^savescr ', '', command, flags=re.IGNORECASE)
                 error = await self._save_scratch_artwork(message, artist)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
             if error:
-                await message.channel.send(error)
+                await self._send_channel(message.channel, error)
                 return
 
-            await message.channel.send('done')
+            await self._send_channel(message.channel, 'done')
         elif command.lower().startswith('verify '):
-            await message.channel.send('Please wait...')
+            await self._send_channel(message.channel, 'Please wait...')
             try:
                 set_name = re.sub(r'^verify ', '', command,
                                   flags=re.IGNORECASE)
                 res = await self._verify_artwork(set_name)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
             await self._send_channel(message.channel, res)
         elif command.lower() == 'verify':
-            await message.channel.send('please specify the set')
+            await self._send_channel(message.channel, 'please specify the set')
         elif command.lower().startswith('artists '):
-            await message.channel.send('Please wait...')
+            await self._send_channel(message.channel, 'Please wait...')
             try:
                 set_name = re.sub(r'^artists ', '', command,
                                   flags=re.IGNORECASE)
                 res = await self._artwork_artists(set_name)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
             await self._send_channel(message.channel, res)
         elif command.lower() == 'artists':
-            await message.channel.send('please specify the set')
+            await self._send_channel(message.channel, 'please specify the set')
         else:
             res = HELP['art']
             await self._send_channel(message.channel, res)
@@ -3988,7 +4051,8 @@ Targets removed.
                             create_mail(ERROR_SUBJECT_TEMPLATE.format(message),
                                         message)
 
-                        await channel.send(
+                        await self._send_channel(
+                            channel,
                             "Can't download the image from Google Drive")
                         continue
 
@@ -3997,11 +4061,13 @@ Targets removed.
             modified_time = download_time or max(modified_times)
             if (card[lotr.CARD_ID] in TIMESTAMPS['data'] and
                     TIMESTAMPS['data'][card[lotr.CARD_ID]] > modified_time):
-                await channel.send(
+                await self._send_channel(
+                    channel,
                     'Last modified: {} UTC (**Card text was probably '
                     'changed since that time**)'.format(modified_time))
             else:
-                await channel.send(
+                await self._send_channel(
+                    channel,
                     'Last modified: {} UTC'.format(modified_time))
 
         return 'done'
@@ -4049,17 +4115,19 @@ Targets removed.
         modified_time = download_time or max(modified_times)
         if (card[lotr.CARD_ID] in TIMESTAMPS['data'] and
                 TIMESTAMPS['data'][card[lotr.CARD_ID]] > modified_time):
-            await channel.send(
+            await self._send_channel(
+                channel,
                 'Last modified: {} UTC (**Card text was probably '
                 'changed since that time**)'.format(modified_time))
         else:
-            await channel.send(
+            await self._send_channel(
+                channel,
                 'Last modified: {} UTC'.format(modified_time))
 
         return None
 
 
-    async def _process_image_command(self, message):  # pylint: disable=R0912
+    async def _process_image_command(self, message):  # pylint: disable=R0912,R0915
         """ Process an image command.
         """
         if message.content.lower() == '!image':
@@ -4071,45 +4139,70 @@ Targets removed.
         logging.info('Received image command: %s', command)
 
         if command.lower().startswith('set '):
-            await message.channel.send('Please wait...')
+            await self._send_channel(message.channel, 'Please wait...')
             try:
                 set_name = re.sub(r'^set ', '', command,
                                   flags=re.IGNORECASE)
                 res = await self._post_rendered_set(set_name)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
             await self._send_channel(message.channel, res)
         elif command.lower() == 'set':
-            await message.channel.send('please specify the set')
+            await self._send_channel(message.channel, 'please specify the set')
         elif command.lower() == 'refresh':
             RENDERED_IMAGES.clear()
             clear_rendered_images()
-            await message.channel.send('done')
+            await self._send_channel(message.channel, 'done')
         elif command.lower() == 'card':
-            await message.channel.send('please specify the card')
+            await self._send_channel(message.channel,
+                                     'please specify the card')
         elif command.lower() == 'help':
             res = HELP['image']
             await self._send_channel(message.channel, res)
-        else:
-            await message.channel.send('Please wait...')
-            try:
-                card_name = re.sub(r'^card ', '', command,
-                                   flags=re.IGNORECASE)
-                if card_name.lower() == 'this':
-                    card_name = message.channel.name
-                    this = True
-                else:
-                    this = False
+        elif (re.sub(r'^card ', '', command,
+                     flags=re.IGNORECASE).lower() == 'this' and
+              message.channel.name == 'general'):
+            await self._send_channel(message.channel, 'Please wait...')
+            commands = await self._get_general_cards(
+                message.channel.category.name)
+            if not commands:
+                await self._send_channel(message.channel, 'no cards found')
+                return
 
+            for command in commands:
+                try:
+                    res = await self._post_rendered_card(message.channel,
+                                                         command, False)
+                except Exception as exc:
+                    logging.exception(str(exc))
+                    await self._send_channel(
+                        message.channel,
+                        'unexpected error: {}'.format(str(exc)))
+                    return
+
+                if res:
+                    await self._send_channel(message.channel, res)
+        else:
+            await self._send_channel(message.channel, 'Please wait...')
+            command = re.sub(r'^card ', '', command, flags=re.IGNORECASE)
+            if command.lower() == 'this':
+                command = message.channel.name
+                this = True
+            else:
+                this = False
+
+            try:
                 res = await self._post_rendered_card(message.channel,
-                                                     card_name, this)
+                                                     command, this)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
@@ -4346,13 +4439,14 @@ Targets removed.
                 res = await self._display_rules(set_name)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
             await self._send_channel(message.channel, res)
         elif command.lower() == 'rules':
-            await message.channel.send('please specify the set')
+            await self._send_channel(message.channel, 'please specify the set')
         elif command.lower().startswith('traits '):
             try:
                 set_name = re.sub(r'^traits ', '', command,
@@ -4360,13 +4454,14 @@ Targets removed.
                 res = await self._display_traits(set_name)
             except Exception as exc:
                 logging.exception(str(exc))
-                await message.channel.send(
+                await self._send_channel(
+                    message.channel,
                     'unexpected error: {}'.format(str(exc)))
                 return
 
             await self._send_channel(message.channel, res)
         elif command.lower() == 'traits':
-            await message.channel.send('please specify the set')
+            await self._send_channel(message.channel, 'please specify the set')
         else:
             res = HELP['edit']
             await self._send_channel(message.channel, res)
