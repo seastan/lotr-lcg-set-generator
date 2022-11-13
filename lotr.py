@@ -1803,7 +1803,7 @@ def get_similar_names(value, card_names, scratch_card_names=None):
     return res
 
 
-def _clean_data(data, lang):  # pylint: disable=R0912,R0915
+def _clean_data(data, lang):  # pylint: disable=R0912,R0914,R0915
     """ Clean data from the spreadsheet.
     """
     PRE_SANITY_CHECK.clear()
