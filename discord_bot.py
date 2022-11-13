@@ -2524,7 +2524,7 @@ Card "{}" has been updated:
         return first_message
 
 
-    async def _process_cron_command(self, message):  #pylint: disable=R0912
+    async def _process_cron_command(self, message):  #pylint: disable=R0912,R0915
         """ Process a cron command.
         """
         if message.content.lower() == '!cron':
@@ -2546,6 +2546,7 @@ Card "{}" has been updated:
             if not res:
                 res = 'no cron logs found'
 
+            res = res.replace('_', '\\_').replace('*', '\\*')
             await self._send_channel(message.channel, res)
         elif command.lower() == 'dragncards build':
             try:
@@ -2563,6 +2564,7 @@ Card "{}" has been updated:
             if not res:
                 res = 'no cron logs found'
 
+            res = res.replace('_', '\\_').replace('*', '\\*')
             await self._send_channel(message.channel, res)
         elif command.lower() == 'trigger':
             delete_sheet_checksums()
