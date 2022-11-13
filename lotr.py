@@ -1808,7 +1808,8 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0915
     """
     PRE_SANITY_CHECK.clear()
 
-    for row in data:  # pylint: disable=R1702
+    auto_page_rows = []
+    for i, row in enumerate(data):  # pylint: disable=R1702
         card_name = _clean_value(row.get(CARD_NAME)) or ''
         if len(card_name) == 1:
             card_name = card_name.upper()
@@ -1937,6 +1938,23 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0915
                     value = value.replace('[name]', card_name)
 
             row[key] = value
+
+        if row.get(CARD_TYPE) == 'Rules' and row.get(CARD_VICTORY) == 'auto':
+            auto_page_rows.append(i)
+        elif auto_page_rows:
+            _fill_auto_pages(data, auto_page_rows)
+            auto_page_rows = []
+
+    if auto_page_rows:
+        _fill_auto_pages(data, auto_page_rows)
+
+
+def _fill_auto_pages(data, auto_page_rows):
+    """ Automatically fill page numbers.
+    """
+    total = len(auto_page_rows)
+    for page, i in enumerate(auto_page_rows):
+        data[i][CARD_VICTORY] = '{}/{}'.format(page + 1, total)
 
 
 def _clean_sets(data):
