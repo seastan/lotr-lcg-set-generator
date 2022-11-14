@@ -1670,6 +1670,36 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('If able', []).append(data)
 
+        if re.search(r'\bcannot leave the staging area'
+                     r'(?! \(?(?:except|unless) )',
+                     paragraph, flags=re.IGNORECASE):
+            data = {'name': card[lotr.CARD_NAME],
+                    'field': field,
+                    'text': re.sub(r'\b(cannot leave the staging area)\b',
+                                   '__**\\1**__', paragraph,
+                                   flags=re.IGNORECASE),
+                    'row': card[lotr.ROW_COLUMN]}
+            res.setdefault('Cannot leave the staging area (except ...)',
+                           []).append(data)
+
+        if (field in (lotr.CARD_SHADOW, lotr.BACK_PREFIX + lotr.CARD_SHADOW)
+                and re.search(r'\badditional attacks?(?! against you)',
+                              paragraph)):
+            data = {'name': card[lotr.CARD_NAME],
+                    'field': field,
+                    'text': re.sub(r'\b(additional attacks?)\b', '__**\\1**__',
+                                   paragraph),
+                    'row': card[lotr.ROW_COLUMN]}
+            res.setdefault('Additional attack against you', []).append(data)
+
+        if re.search(r'\bForced: When\b', paragraph):
+            data = {'name': card[lotr.CARD_NAME],
+                    'field': field,
+                    'text': re.sub(r'\b(Forced: When)\b', '__**\\1**__',
+                                   paragraph),
+                    'row': card[lotr.ROW_COLUMN]}
+            res.setdefault('Forced: When vs Forced: After', []).append(data)
+
         if re.search(r': [A-Z]', paragraph):
             paragraph = re.sub(r'\bQuest Resolution(?: \([^\)]+\))?:',
                                '\\*\\*\\*', paragraph)
