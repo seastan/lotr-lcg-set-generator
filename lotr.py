@@ -644,22 +644,22 @@ AUXILIARY_TRAITS = {
     'Abroad', 'Basic', 'Broken', 'Corrupt', 'Cursed', 'Elite', 'Epic',
     'Massing', 'Reforged', 'Standard', 'Suspicious', 'Upgraded'}
 DESCRIPTIVE_LAST_TRAITS = {
-    'Boar', 'Boar Clan', 'Captain', 'Flame', 'Raven', 'Raven Clan', 'Wolf',
-    'Wolf Clan', 'Wolf-cult'}
+    'Boar', 'Boar Clan', 'Captain', 'Flame', 'Lieutenant', 'Olog-hai',
+    'Raven', 'Raven Clan', 'Uruk-hai', 'Wolf', 'Wolf Clan', 'Wolf-cult'}
 DESCRIPTIVE_TRAITS = {
-    'Archer', 'Armor', 'Assault', 'Attack', 'Besieger', 'Black Speech',
+    'Archer', 'Assault', 'Attack', 'Besieger', 'Black Speech',
     'Brigand', 'Burglar', 'Capture', 'Captured', 'Champion', 'Clue',
     'Corruption', 'Craftsman', 'Cultist', 'Damaged', 'Defense', 'Despair',
     'Disaster', 'Doom', 'Enchantment', 'Escape', 'Fear', 'Fellowship', 'Food',
     'Found', 'Gossip', 'Guardian', 'Hazard', 'Healer', 'Inferno',
     'Information', 'Instrument', 'Key', 'Light', 'Master', 'Mathom',
-    'Minstrel', 'Mission', 'Mustering', 'Night', 'Olog-hai', 'Panic', 'Party',
+    'Minstrel', 'Mission', 'Mustering', 'Night', 'Panic', 'Party',
     'Pillager', 'Pipe', 'Pipeweed', 'Plot', 'Poison', 'Raider', 'Ranger',
     'Record', 'Refuge', 'Ring-bearer', 'Ruffian', 'Sack', 'Scheme', 'Scout',
-    'Scroll', 'Search', 'Servant', 'Shadow', 'Sharkey', 'Shirriff', 'Sorcerer',
-    'Sorcery', 'Spy', 'Staff', 'Stalking', 'Steward', 'Summoned', 'Summoner',
-    'Tantrum', 'Thaurdir', 'Thug', 'Time', 'Tools', 'Traitor', 'Treasure',
-    'Uruk-hai', 'Villain', 'Warden', 'Warrior', 'Weapon', 'Weather', 'Wound'}
+    'Scroll', 'Search', 'Servant', 'Shadow', 'Sharkey', 'Shirriff', 'Song',
+    'Sorcerer', 'Sorcery', 'Spy', 'Staff', 'Stalking', 'Steward', 'Summoned',
+    'Summoner', 'Tantrum', 'Thaurdir', 'Thug', 'Time', 'Tools', 'Traitor',
+    'Treasure', 'Villain', 'Warden', 'Warrior', 'Weather', 'Wound'}
 LOCATION_SUBTYPE_TRAITS = {
     'Battleground', 'Besieged', 'Camp', 'Castle', 'Dark', 'Deck', 'Downs',
     'Fords', 'Fortification', 'Garrison', 'Gate', 'Hideout', 'Highlands',
@@ -667,36 +667,36 @@ LOCATION_SUBTYPE_TRAITS = {
     'Riverland', 'Siege', 'Snow', 'Stair', 'Wasteland'}
 LOCATION_TYPE_FIRST_TRAITS = {
     'Barrow', 'Blight', 'City', 'Desert', 'Forest', 'Mountain', 'Plains',
-    'Ruins', 'Underground', 'Underwater'}
+    'Ruins', 'Underground', 'Underwater', 'Village'}
 LOCATION_TYPE_TRAITS = {
     'Bridge', 'Cave', 'Coastland', 'Dungeon', 'Grotto', 'Hills', 'Lake',
-    'Ocean', 'River', 'Road', 'Ship', 'Stream', 'Swamp', 'Town', 'Valley',
-    'Village'}
+    'Ocean', 'River', 'Road', 'Ship', 'Stream', 'Swamp', 'Town', 'Vale',
+    'Valley'}
 NOBLE_TRAITS = {'Noble'}
 RACE_FIRST_TRAITS = {'Creature', 'Nazgûl', 'Undead'}
 RACE_TRAITS = {
     'Balrog', 'Beorning', 'Body', 'Corsair', 'Dale', 'Dorwinion', 'Dragon',
     'Dúnedain', 'Dunland', 'Dwarf', 'Eagle', 'Easterling', 'Ent', 'Giant',
     'Goblin', 'Gollum', 'Gondor', 'Harad', 'Hobbit', 'Huorn', 'Insect',
-    'Istari', 'Legend', 'Mearas', 'Mordor', 'Nameless', 'Noldor',
-    'Oathbreaker', 'Orc', 'Outlands', 'Pony', 'Rat', 'Rohan', 'Silvan',
-    'Snaga', 'Spider', 'Spirit', 'Tentacle', 'Tree', 'Troll', 'Uruk', 'Warg',
-    'Werewolf', 'Wight', 'Woodman', 'Wose', 'Wraith'}
+    'Istari', 'Legend', 'Mearas', 'Nameless', 'Noldor', 'Oathbreaker', 'Orc',
+    'Outlands', 'Pony', 'Rat', 'Rohan', 'Silvan', 'Snaga', 'Spider', 'Spirit',
+    'Tentacle', 'Tree', 'Troll', 'Uruk', 'Warg', 'Werewolf', 'Wight',
+    'Woodman', 'Wose', 'Wraith'}
 REGION_TRAITS = {
     'Aldburg', 'Angmar', 'Arnor', 'Blackroot Vale', 'Bree', 'Cair Andros',
     'Carn Dûm', 'Cirith Ungol', 'Dead Marshes', 'Dol Amroth', 'Dol Guldur',
     'East Bank', 'Eastfarthing', 'Emyn Muil', 'Enedwaith', 'Erebor',
     'Esgaroth', 'Ettenmoors', 'Fornost', 'Grey Havens', 'Helm’s Deep',
     'Isengard', 'Ithilien', 'Lake-town', 'Lossoth', 'Lórien', 'Minas Tirith',
-    'Mirkwood', 'Morgul', 'Osgiliath', 'Ost-in-Edhil', 'Pelennor', 'Shire',
-    'Trollshaws', 'Umbar', 'Underworld', 'Vale', 'West Bank', 'Western Lands',
-    'Westfarthing', 'Westfold', 'Wilderlands'}
+    'Mirkwood', 'Mordor', 'Osgiliath', 'Ost-in-Edhil', 'Pelennor',
+    'Shire', 'Trollshaws', 'Umbar', 'Underworld', 'West Bank',
+    'Western Lands', 'Westfarthing', 'Westfold', 'Wilderlands'}
 TYPE_FIRST_TRAITS = {
-    'Artifact', 'Item', 'Lieutenant', 'Suspect', 'Stronghold'}
+    'Artifact', 'Item', 'Suspect', 'Stronghold'}
 TYPE_TRAITS = {
-    'Adaptation', 'Assassin', 'Boon', 'Captive', 'Condition', 'Favor', 'Gift',
-    'Mount', 'Ring', 'Signal', 'Skill', 'Song', 'Spell', 'Tale', 'Title',
-    'Trap'}
+    'Adaptation', 'Armor', 'Assassin', 'Boon', 'Captive', 'Condition', 'Favor',
+    'Gift', 'Morgul', 'Mount', 'Ring', 'Signal', 'Skill', 'Spell', 'Tale',
+    'Title', 'Trap', 'Weapon'}
 TRAITS_ORDER = [TYPE_FIRST_TRAITS, TYPE_TRAITS, RACE_FIRST_TRAITS,
                 RACE_TRAITS, REGION_TRAITS, LOCATION_TYPE_FIRST_TRAITS,
                 LOCATION_TYPE_TRAITS, LOCATION_SUBTYPE_TRAITS, NOBLE_TRAITS,
