@@ -2447,6 +2447,8 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         return errors
 
     for paragraph in paragraphs:
+        paragraph = paragraph.replace('\n', ' ')
+
         ###
         #if not card[CARD_SCRATCH]:
         #    names = _detect_names(paragraph)
