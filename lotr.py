@@ -651,7 +651,7 @@ DESCRIPTIVE_TRAITS = {
     'Brigand', 'Burglar', 'Capture', 'Captured', 'Champion', 'Clue',
     'Corruption', 'Craftsman', 'Cultist', 'Damaged', 'Defense', 'Despair',
     'Disaster', 'Doom', 'Enchantment', 'Escape', 'Fear', 'Fellowship', 'Food',
-    'Found', 'Gossip', 'Guardian', 'Hazard', 'Healer', 'Inferno',
+    'Found', 'Gossip', 'Guardian', 'Hazard', 'Healer', 'Hungry', 'Inferno',
     'Information', 'Instrument', 'Key', 'Light', 'Master', 'Mathom',
     'Minstrel', 'Mission', 'Mustering', 'Night', 'Panic', 'Party',
     'Pillager', 'Pipe', 'Pipeweed', 'Plot', 'Poison', 'Raider', 'Ranger',
@@ -673,12 +673,12 @@ LOCATION_TYPE_TRAITS = {
     'Ocean', 'River', 'Road', 'Ship', 'Stream', 'Swamp', 'Town', 'Vale',
     'Valley'}
 NOBLE_TRAITS = {'Noble'}
-RACE_FIRST_TRAITS = {'Creature', 'Nazgûl', 'Undead'}
+RACE_FIRST_TRAITS = {'Creature', 'Nazgûl', 'Orc', 'Undead'}
 RACE_TRAITS = {
     'Balrog', 'Beorning', 'Body', 'Corsair', 'Dale', 'Dorwinion', 'Dragon',
     'Dúnedain', 'Dunland', 'Dwarf', 'Eagle', 'Easterling', 'Ent', 'Giant',
     'Goblin', 'Gollum', 'Gondor', 'Harad', 'Hobbit', 'Huorn', 'Insect',
-    'Istari', 'Legend', 'Mearas', 'Nameless', 'Noldor', 'Oathbreaker', 'Orc',
+    'Istari', 'Legend', 'Mearas', 'Nameless', 'Noldor', 'Oathbreaker',
     'Outlands', 'Pony', 'Rat', 'Rohan', 'Silvan', 'Snaga', 'Spider', 'Spirit',
     'Tentacle', 'Tree', 'Troll', 'Uruk', 'Warg', 'Werewolf', 'Wight',
     'Woodman', 'Wose', 'Wraith'}
@@ -2743,6 +2743,44 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                       flags=re.IGNORECASE) or
                 re.search(r'(?<!\.) Response\b', updated_paragraph)):
             errors.append('"response"')
+
+        if field == CARD_TEXT and card[CARD_TYPE] == 'Quest':
+            name_regex = (r'(?<!\[bi\])\b' + re.escape(card[CARD_NAME]) +
+                          r'\b(?!\[\/bi\])')
+            if (re.search(name_regex, paragraph) or
+                    re.search(r'\bthis quest\b', paragraph,
+                              flags=re.IGNORECASE)):
+                errors.append('"this stage"')
+
+        if (field == BACK_PREFIX + CARD_TEXT and
+                card[BACK_PREFIX + CARD_TYPE] == 'Quest'):
+            name_regex = (r'(?<!\[bi\])\b' +
+                          re.escape(card[BACK_PREFIX + CARD_NAME]) +
+                          r'\b(?!\[\/bi\])')
+            if (re.search(name_regex, paragraph) or
+                    re.search(r'\bthis quest\b', paragraph,
+                              flags=re.IGNORECASE)):
+                errors.append('"this stage"')
+
+        if (field == CARD_TEXT and card[CARD_TYPE] in
+                ('Encounter Side Quest', 'Player Side Quest')):
+            name_regex = (r'(?<!\[bi\])\b' + re.escape(card[CARD_NAME]) +
+                          r'\b(?!\[\/bi\]| (?:is )?in the victory display)')
+            if (re.search(name_regex, paragraph) or
+                    re.search(r'\bthis stage\b', paragraph,
+                              flags=re.IGNORECASE)):
+                errors.append('"this quest"')
+
+        if (field == BACK_PREFIX + CARD_TEXT and
+                card[BACK_PREFIX + CARD_TYPE] in
+                ('Encounter Side Quest', 'Player Side Quest')):
+            name_regex = (r'(?<!\[bi\])\b' +
+                          re.escape(card[BACK_PREFIX + CARD_NAME]) +
+                          r'\b(?!\[\/bi\]| (?:is )?in the victory display)')
+            if (re.search(name_regex, paragraph) or
+                    re.search(r'\bthis stage\b', paragraph,
+                              flags=re.IGNORECASE)):
+                errors.append('"this quest"')
 
     if (field == CARD_TEXT and card[CARD_TYPE] == 'Quest'
             and str(card[CARD_COST]) == '1'):
