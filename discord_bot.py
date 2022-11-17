@@ -1532,6 +1532,7 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
         return
 
     for paragraph in paragraphs:
+        paragraph = paragraph.replace('\n', ' ')
         traits = detect_traits(paragraph)
         traits = sorted([t for t in traits if t not in all_traits and
                          t not in lotr.COMMON_TRAITS])
