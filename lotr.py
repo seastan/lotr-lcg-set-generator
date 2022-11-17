@@ -133,14 +133,21 @@ DISCORD_IGNORE_COLUMNS = {
     BACK_PREFIX + CARD_SCALE, BACK_PREFIX + CARD_PORTRAIT_SHADOW, CARD_SIDE_B,
     CARD_SELECTED, CARD_CHANGED, CARD_SCRATCH
 }
-
 DISCORD_IGNORE_CHANGES_COLUMNS = {
     CARD_SET, CARD_NUMBER, CARD_SET_NAME, CARD_SET_RINGSDB_CODE,
     CARD_SET_HOB_CODE, CARD_SET_LOCKED, CARD_RINGSDB_CODE, CARD_BOT_DISABLED,
     CARD_NORMALIZED_NAME, BACK_PREFIX + CARD_NORMALIZED_NAME,
     CARD_DISCORD_CHANNEL, CARD_DISCORD_CATEGORY, ROW_COLUMN
 }
-
+ONE_LINE_COLUMNS = {
+    CARD_ENCOUNTER_SET, CARD_NAME, CARD_TRAITS, CARD_KEYWORDS, CARD_VICTORY,
+    CARD_PRINTED_NUMBER, CARD_ENCOUNTER_SET_NUMBER, CARD_ENCOUNTER_SET_ICON,
+    CARD_ARTIST, BACK_PREFIX + CARD_ENCOUNTER_SET, BACK_PREFIX + CARD_NAME,
+    BACK_PREFIX + CARD_TRAITS, BACK_PREFIX + CARD_KEYWORDS,
+    BACK_PREFIX + CARD_VICTORY, BACK_PREFIX + CARD_PRINTED_NUMBER,
+    BACK_PREFIX + CARD_ENCOUNTER_SET_NUMBER,
+    BACK_PREFIX + CARD_ENCOUNTER_SET_ICON, BACK_PREFIX + CARD_ARTIST,
+    CARD_ADDITIONAL_ENCOUNTER_SETS, CARD_ADVENTURE, CARD_ICON, CARD_COPYRIGHT}
 TRANSLATED_COLUMNS = {
     CARD_NAME, CARD_TRAITS, CARD_KEYWORDS, CARD_VICTORY, CARD_TEXT,
     CARD_SHADOW, CARD_FLAVOUR, BACK_PREFIX + CARD_NAME,
@@ -1176,7 +1183,7 @@ def _update_french_non_int(value):
 
 
 def escape_filename(value):
-    """ Escape forbidden symbols in a file name.
+    """ Escape forbidden characters in a file name.
     """
     value = re.sub(r'[<>:\/\\|?*\'"’“”„«»…–—¡¿]', ' ', str(value))
     value = value.encode('ascii', errors='replace').decode().replace('?', ' ')
@@ -1191,7 +1198,7 @@ def escape_octgn_filename(value):
 
 
 def _escape_hallofbeorn_filename(value):
-    """ Escape forbidden symbols in a Hall of Beorn file name.
+    """ Escape forbidden characters in a Hall of Beorn file name.
     """
     value = re.sub(r'[.,!<>:\/\\|?*"“”„«»…¡¿]', '', str(value))
     value = (value.replace(' - ', '-').replace('’', "'").replace('_', '-')
@@ -1203,7 +1210,7 @@ def _escape_hallofbeorn_filename(value):
 
 
 def _escape_icon_filename(value):
-    """ Escape forbidden symbols in an icon file name.
+    """ Escape forbidden characters in an icon file name.
     """
     value = re.sub(r'[<>:\/\\|?*\'"’“”„«»…–—¡¿]', '', str(value))
     value = value.strip()
@@ -5093,7 +5100,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 else:
                     broken_set_ids.add(set_id)
             elif isinstance(value, str) and '[unmatched quot]' in value:
-                message = ('Unmatched quote symbol in {} column for row '
+                message = ('Unmatched quote character in {} column for row '
                            '#{}{}'.format(key.replace(BACK_PREFIX, 'Back '), i,
                                           row_info))
                 logging.error(message)
@@ -5102,7 +5109,17 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 else:
                     broken_set_ids.add(set_id)
 
-            if isinstance(value, str) and key != CARD_DECK_RULES:
+            if (key in ONE_LINE_COLUMNS and isinstance(value, str) and
+                    '\n' in value):
+                message = ('Line break in {} column for row #{}{}'.format(
+                    key.replace(BACK_PREFIX, 'Back '), i, row_info))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
+
+            if key != CARD_DECK_RULES and isinstance(value, str):
                 cleaned_value = _clean_tags(value)
                 if key == CARD_SET:
                     cleaned_value = cleaned_value.replace('[filtered set]', '')
@@ -5257,8 +5274,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         card_id, lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
                 elif isinstance(value, str) and '[unmatched quot]' in value:
                     logging.error(
-                        'Unmatched quote symbol in %s column for card '
+                        'Unmatched quote character in %s column for card '
                         'ID %s in %s translations, row #%s',
+                        key.replace(BACK_PREFIX, 'Back '), card_id,
+                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+                if (key in ONE_LINE_COLUMNS and isinstance(value, str) and
+                        '\n' in value):
+                    logging.error(
+                        'Line break in %s column for card ID %s in %s '
+                        'translations, row #%s',
                         key.replace(BACK_PREFIX, 'Back '), card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
