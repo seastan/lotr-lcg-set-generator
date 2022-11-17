@@ -1249,8 +1249,12 @@ def verify_traits_order(traits):
     for trait_type in TRAITS_ORDER:
         ordered_traits.extend(sorted([t for t in traits if t in trait_type]))
 
-    return (traits == ordered_traits,
-            ' '.join(['{}.'.format(t) for t in ordered_traits]))
+    ordered_traits_formatted = ' '.join(['{}.'.format(t)
+                                         for t in ordered_traits])
+    if not ordered_traits_formatted:
+        ordered_traits_formatted = '-'
+
+    return (traits == ordered_traits, ordered_traits_formatted)
 
 
 def clear_folder(folder):
