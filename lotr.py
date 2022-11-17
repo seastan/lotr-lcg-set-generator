@@ -2679,7 +2679,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
             errors.append('add {} around "Trait(s)"')
 
         if (field in (CARD_SHADOW, BACK_PREFIX + CARD_SHADOW) and
-                re.search(r'defending player\b', paragraph,
+                re.search(r'\bdefending player\b', paragraph,
                           flags=re.IGNORECASE)):
             errors.append('"you" (instead of "defending player")')
         elif re.search(r'\bshadow\b[^.]+ defending player\b', paragraph,
@@ -2689,6 +2689,24 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                 r'\b(?:after|when) [^.]+ attacks[^.]+ defending player\b',
                 paragraph, flags=re.IGNORECASE):
             errors.append('"you" (instead of "defending player")')
+
+        if (field in (CARD_SHADOW, BACK_PREFIX + CARD_SHADOW) and
+                re.search(r'\bafter this attack[^.]* attacking enemy engages '
+                          r'the next player[^.]* makes an immediate attack\b',
+                          paragraph, flags=re.IGNORECASE) and
+                not re.search(r'\bafter this attack, attacking enemy engages '
+                              r'the next player, then makes an immediate '
+                              r'attack\b', paragraph, flags=re.IGNORECASE)):
+            errors.append('"After this attack, attacking enemy engages the '
+                          'next player, then makes an immediate attack"')
+        if (re.search(r'\bshadow\b[^.]+ after this attack[^.]* attacking '
+                      r'enemy engages the next player[^.]* makes an immediate '
+                      r'attack\b', paragraph, flags=re.IGNORECASE) and
+                not re.search(r'\bafter this attack, attacking enemy engages '
+                              r'the next player, then makes an immediate '
+                              r'attack\b', paragraph, flags=re.IGNORECASE)):
+            errors.append('"After this attack, attacking enemy engages the '
+                          'next player, then makes an immediate attack"')
 
         if re.search(r'advance to stage [0-9]+\b', paragraph,
                      flags=re.IGNORECASE):
