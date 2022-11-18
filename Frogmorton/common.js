@@ -1150,6 +1150,9 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					if (['Victory Points', 'BVictory Points'].indexOf(nXml + '') > -1) {
 						if ((cardType != 'Presentation') && (cardType != 'Rules') && vXml.match(/^[0-9]+$/)) {
 							vXml = translate['Victory'][lang].toUpperCase() + ' ' + vXml;
+							if (lang == 'German') {
+								vXml += '.';
+							}
 						}
 					}
 					else if (['Special Icon', 'BSpecial Icon'].indexOf(nXml + '') > -1) {
