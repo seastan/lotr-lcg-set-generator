@@ -726,6 +726,8 @@ SETS = {}
 DATA = []
 ACCENTS = set()
 ALL_NAMES = set()
+ALL_SET_NAMES = set()
+ALL_ENCOUNTER_SET_NAMES = set()
 ALL_CARD_NAMES = set()
 ALL_SCRATCH_CARD_NAMES = set()
 ALL_TRAITS = set()
@@ -1681,6 +1683,30 @@ def _extract_all_card_names(data):
                 ALL_CARD_NAMES.add(clean_value)
 
 
+def _extract_all_set_names(data):
+    """ Collect all set and adventure names from the spreadsheet.
+    """
+    ALL_SET_NAMES.clear()
+    for row in data:
+        if not row[CARD_SCRATCH]:
+            if row[CARD_SET_NAME]:
+                ALL_SET_NAMES.add(re.sub(r'^ALeP - ', '', row[CARD_SET_NAME]))
+
+            if (row[CARD_ADVENTURE] and
+                    row[CARD_ADVENTURE] not in ('[space]', '[nobr]')):
+                ALL_SET_NAMES.add(row[CARD_ADVENTURE])
+
+
+def _extract_all_encounter_set_names(data):
+    """ Collect all encounter set names from the spreadsheet.
+    """
+    ALL_ENCOUNTER_SET_NAMES.clear()
+    for row in data:
+        if not row[CARD_SCRATCH]:
+            if row[CARD_ENCOUNTER_SET]:
+                ALL_ENCOUNTER_SET_NAMES.add(row[CARD_ENCOUNTER_SET])
+
+
 def _extract_all_traits(data):
     """ Collect all traits from the spreadsheet.
     """
@@ -1703,23 +1729,14 @@ def _extract_all_traits(data):
                     extract_traits(row[BACK_PREFIX + CARD_TRAITS]))
 
 
-def _extract_all_names(data):
+def _extract_all_names():
     """ Collect all names from the spreadsheet.
     """
     ALL_NAMES.clear()
     ALL_NAMES.update(ALL_CARD_NAMES)
+    ALL_NAMES.update(ALL_SET_NAMES)
+    ALL_NAMES.update(ALL_ENCOUNTER_SET_NAMES)
     ALL_NAMES.update(ALL_TRAITS)
-    for row in data:
-        if not row[CARD_SCRATCH]:
-            if row[CARD_SET_NAME]:
-                ALL_NAMES.add(re.sub(r'^ALeP - ', '', row[CARD_SET_NAME]))
-
-            if row[CARD_ENCOUNTER_SET]:
-                ALL_NAMES.add(row[CARD_ENCOUNTER_SET])
-
-            if (row[CARD_ADVENTURE] and
-                    row[CARD_ADVENTURE] not in ('[space]', '[nobr]')):
-                ALL_NAMES.add(row[CARD_ADVENTURE])
 
 
 def _get_accents(name):
@@ -2168,8 +2185,10 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
     FOUND_SCRATCH_SETS.update(scratch_sets.difference(FOUND_INTERSECTED_SETS))
     _update_data(DATA)
 
+    _extract_all_set_names(DATA)
+    _extract_all_encounter_set_names(DATA)
     _extract_all_traits(DATA)
-    _extract_all_names(DATA)
+    _extract_all_names()
     _extract_all_accents()
 
     card_types = {row[CARD_ID]: (row[CARD_TYPE], row[BACK_PREFIX + CARD_TYPE])
@@ -2328,21 +2347,30 @@ def _get_capitalization_errors(text):  # pylint: disable=R0912
     return errors
 
 
-def _detect_names(text):  # pylint: disable=R0912
+def _detect_names(text, card_type):  # pylint: disable=R0912
     """ Detect names in the text.
     """
     text = re.sub(r'\n{2,}', ' [] ', text)
     text = text.replace('\n', ' ')
-    text = re.sub(r'\[bi\][^\[]+\[\/bi\]', ' separator ', text)
+    text = re.sub(r'\[red\][^\[]+\[\/red\]', ' [] ', text)
+    text = re.sub(r'\[lotrheader[^\[]+\[\/lotrheader\]', ' [] ', text)
+    text = re.sub(r'\[bi\][^\[]+\[\/bi\]', ' text ', text)
     text = re.sub(r'\[[^\]]+\]', ' separator ', text)
-    text = re.sub(r'[.:]', ' [] ', text)
-    text = re.sub(r'(?![“”!?…,’\- \[\]]|\w).', ' separator ', text)
-    text = re.sub(r'(?:^|[ “])[0-9]+(?:[”, ]|$)', ' separator ', text)
+    text = re.sub(r'\.”|[.:()]', ' [] ', text)
+    text = re.sub(r'(?![“”!?…,’\- \[\]]|\w).', ' unknown ', text)
+    text = re.sub(r' stage [0-9][A-F]\b', ' text ', text)
+    text = re.sub(r'(?:^|[ “])[0-9]+(?:[”, ]|$)', ' text ', text)
+    text = re.sub(r'\bDo not\b', "Don't", text)
     text = text.replace(' son of ', ' sonof_ ')
+
+    if card_type == 'Rules':
+        text = re.sub(r'Adventure Pack in the “[^”]+”', ' text ', text)
+
     parts = [p.strip() for p in text.split('[]') if p.strip()]
 
     names = []
     for part in parts:
+        part = re.sub(r'(?:separator +)+', '', part)
         words = re.split(r' +', part)
         words.append('word')
         last_name = []
@@ -2367,7 +2395,8 @@ def _detect_names(text):  # pylint: disable=R0912
 
                 if last_name:
                     name = ' '.join(last_name)
-                    name = re.sub(r'’s$', '', re.sub(r',$', '', name))
+                    name = re.sub(r'’$', '', re.sub(r'’s$', '',
+                                                    re.sub(r',$', '', name)))
                     name = name.replace(' sonof_ ', ' son of ')
                     if name[0] == '“' and '”' not in name:
                         name = name[1:]
@@ -2377,9 +2406,9 @@ def _detect_names(text):  # pylint: disable=R0912
 
                     if not re.match(
                             r'Condition|Forced|Quest Resolution|Resolution|'
-                            r'Response|Restricted|Setup|Shadow|Travel|Valour Response|'
-                            r'When Revealed|(?:(?:Valour )?(?:Combat |'
-                            r'Encounter |Planning |Quest |Refresh |'
+                            r'Response|Restricted|Setup|Shadow|Travel|'
+                            r'Valour Response|When Revealed|(?:(?:Valour )?'
+                            r'(?:Combat |Encounter |Planning |Quest |Refresh |'
                             r'Resource |Travel )?Action)', name):
                         names.append((first_pos, name))
 
@@ -2389,48 +2418,170 @@ def _detect_names(text):  # pylint: disable=R0912
     return names
 
 
-ALLOWED_FIRST_WORDS = [
+ALLOWED_CAMPAIGN_NAMES = {
+    'Campaign Mode'
+}
+
+ALLOWED_RULES_NAMES = {
+    'Difficulty'
+}
+
+ALLOWED_FIRST_WORDS = {
+    'A',
     'Add',
     'After',
+    'All',
+    'Allies',
+    'Any',
+    'At',
     'Attach',
     'Attached',
+    'Attachments',
     'Attacking',
+    'Before',
+    'Cancel',
+    'Cannot',
+    'Characters',
+    'Choose',
+    'Counts',
+    'Damage',
+    'Deal',
+    'Defending',
     'Discard',
+    "Don't",
+    'Draw',
+    'During',
     'Each',
     'Either',
+    'End',
+    'Enemies',
+    'Engage',
+    'Enters',
+    'Excess',
     'Exhaust',
     'Flip',
+    'For',
+    'Heal',
+    'Heroes',
     'If',
+    'Its',
     'Immune',
+    'Instead',
     'Limit',
+    'Locations',
+    'Make',
+    'Move',
+    'One',
+    'Only',
+    'Otherwise',
+    'Pay',
+    'Place',
+    'Play',
+    'Player',
+    'Players',
+    'Progress',
+    'Put',
+    'Raise',
+    'Randomly',
     'Ready',
+    'Reduce',
+    'Remove',
     'Replace',
+    'Resolve',
+    'Return',
+    'Reveal',
     'Search',
     'Set',
+    'Skip',
     'Shuffle',
+    'The',
+    'Then',
+    'There',
+    'They',
+    'That',
     'This',
+    'Treat',
+    'Turn',
     'Until',
     'When',
-    'While'
-]
+    'While',
+    'You',
+    'Your'
+}
 
 
-def _verify_known_name(pos, name):
+def _verify_known_name(pos, name, card_type):  # pylint: disable=R0911,R0912
     """ Check whether the name is known or not.
     """
-    if name in ALL_NAMES:
+    all_names = ALL_CARD_NAMES.copy()
+    if card_type == 'Rules':
+        all_names.update(ALL_SET_NAMES)
+        all_names.update(['“{}”'.format(n) for n in ALL_SET_NAMES])
+        all_names.update(ALL_ENCOUNTER_SET_NAMES)
+        all_names.update(ALLOWED_RULES_NAMES)
+    elif card_type == 'Campaign':
+        all_names.update(ALL_ENCOUNTER_SET_NAMES)
+        all_names.update(ALLOWED_CAMPAIGN_NAMES)
+    elif card_type == 'Quest':
+        all_names.update(ALL_ENCOUNTER_SET_NAMES)
+
+    if name in all_names:
+        return True
+
+    parts = re.split(r', and |, or |, | and | or ', name)
+    if all(p.strip() in all_names for p in parts):
+        return True
+
+    parts = name.split(' to ')
+    if all(p.strip() in all_names for p in parts):
+        return True
+
+    parts = re.split(r' to |, and |, or |, | and | or ', name)
+    if all(p.strip() in all_names for p in parts):
+        return True
+
+    parts = name.split(' than on ')
+    if all(p.strip() in all_names for p in parts):
+        return True
+
+    parts = re.split(r', | than on ', name)
+    if all(p.strip() in all_names for p in parts):
         return True
 
     if pos == 0:
         parts = name.split(' ')
-        if parts[0] in ALLOWED_FIRST_WORDS:
+        first_word = re.sub(r'^[“…]', '', re.sub(r'[”!?…,]$', '', parts[0]))
+        if first_word in ALLOWED_FIRST_WORDS:
             parts = parts[1:]
             if not parts:
                 return True
 
+            if parts[0] in ('and', 'or', 'to'):
+                parts = parts[1:]
+
             name = ' '.join(parts)
-            if name in ALL_NAMES:
+            if name in all_names:
                 return True
+
+    parts = re.split(r', and |, or |, | and | or ', name)
+    if all(p.strip() in all_names for p in parts):
+        return True
+
+    parts = name.split(' to ')
+    if all(p.strip() in all_names for p in parts):
+        return True
+
+    parts = re.split(r' to |, and |, or |, | and | or ', name)
+    if all(p.strip() in all_names for p in parts):
+        return True
+
+    parts = name.split(' than on ')
+    if all(p.strip() in all_names for p in parts):
+        return True
+
+    parts = re.split(r', | than on ', name)
+    if all(p.strip() in all_names for p in parts):
+        return True
 
     return False
 
@@ -2442,21 +2593,22 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
     text = re.sub(r'(^|\n)(?:\[[^\]]+\])*\[i\](?!\[b\]Rumor\[\/b\]|Example:)'
                   r'.+?\[\/i\](?:\[[^\]]+\])*(?:\n|$)', '\\1',
                   text, flags=re.DOTALL)
+
+    ###
+    if not card[CARD_SCRATCH]:
+        if not 'developed by A Long-extended Party' in text:
+            names = _detect_names(text, card[CARD_TYPE])
+            for pos, name in names:
+                if not _verify_known_name(pos, name, card[CARD_TYPE]):
+                    logging.info((pos, name, card[CARD_NAME]))
+    ###
+
     paragraphs = [p.strip() for p in re.split(r'\n{2,}', text) if p.strip()]
     if not paragraphs:
         return errors
 
     for paragraph in paragraphs:
         paragraph = paragraph.replace('\n', ' ')
-
-        ###
-        #if not card[CARD_SCRATCH]:
-        #    names = _detect_names(paragraph)
-        #    for pos, name in names:
-        #        if not _verify_known_name(pos, name):
-        #            logging.info((pos, name))
-        ###
-
         if re.search(r'limit once per',
                      re.sub(r'\(Limit once per .+\.\)”?$', '', paragraph),
                      flags=re.IGNORECASE):
