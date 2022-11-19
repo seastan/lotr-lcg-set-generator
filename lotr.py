@@ -710,6 +710,98 @@ TRAITS_ORDER = [TYPE_FIRST_TRAITS, TYPE_TRAITS, RACE_FIRST_TRAITS,
                 DESCRIPTIVE_TRAITS, DESCRIPTIVE_LAST_TRAITS, AUXILIARY_TRAITS]
 COMMON_TRAITS = set.union(*(TRAITS_ORDER + [{'Trait', 'Traits'}]))
 
+ALLOWED_CAMPAIGN_NAMES = {
+    'Campaign Mode'
+}
+ALLOWED_RULES_NAMES = {
+    'Difficulty'
+}
+ALLOWED_FIRST_WORDS = {
+    'A',
+    'Add',
+    'After',
+    'All',
+    'Allies',
+    'Any',
+    'At',
+    'Attach',
+    'Attached',
+    'Attachments',
+    'Attacking',
+    'Before',
+    'Cancel',
+    'Cannot',
+    'Characters',
+    'Choose',
+    'Counts',
+    'Damage',
+    'Deal',
+    'Decrease',
+    'Defending',
+    'Discard',
+    'Draw',
+    'During',
+    'Each',
+    'Either',
+    'End',
+    'Enemies',
+    'Engage',
+    'Enters',
+    'Excess',
+    'Exhaust',
+    'Flip',
+    'For',
+    'Heal',
+    'Heroes',
+    'If',
+    'Its',
+    'Immune',
+    'Increase',
+    'Instead',
+    'Limit',
+    'Locations',
+    'Make',
+    'Move',
+    'Name',
+    'One',
+    'Only',
+    'Otherwise',
+    'Pay',
+    'Place',
+    'Play',
+    'Player',
+    'Players',
+    'Progress',
+    'Put',
+    'Raise',
+    'Randomly',
+    'Ready',
+    'Reduce',
+    'Remove',
+    'Replace',
+    'Resolve',
+    'Return',
+    'Reveal',
+    'Search',
+    'Set',
+    'Skip',
+    'Shuffle',
+    'Spend',
+    'The',
+    'Then',
+    'ThenIf',
+    'There',
+    'They',
+    'That',
+    'This',
+    'Treat',
+    'Turn',
+    'Until',
+    'When',
+    'While',
+    'You',
+    'Your'
+}
 COMMON_ACCENTS = {'Annuminas', 'Cuarthol', 'Din', 'Druadan', 'Druedain',
                   'Dum', 'dum', 'Dunedain', 'Iarion', 'Lorien', 'Mumakil',
                   'Nazgul', 'Nin', 'Numenor', 'Rhun'}
@@ -2287,7 +2379,7 @@ def _verify_period(value):
     return res
 
 
-def _is_capitalized(word):
+def is_capitalized(word):
     """ Check whether the word is capitalized or not.
     """
     res = word and (word[0] != word[0].lower() or
@@ -2313,18 +2405,18 @@ def _get_capitalization_errors(text):  # pylint: disable=R0912
 
     parts = [p for p in parts if p]
     if len(parts) > 0:
-        if not _is_capitalized(parts[0]):
+        if not is_capitalized(parts[0]):
             errors.append('"first word ({}) should be capitalized"'
                           .format(parts[0]))
 
     if len(parts) > 1:
-        if not _is_capitalized(parts[-1]):
+        if not is_capitalized(parts[-1]):
             errors.append('"last word ({}) should be capitalized"'
                           .format(parts[-1]))
 
     if len(parts) > 2:
         for part in parts[1:-1]:
-            capitalized = _is_capitalized(part)
+            capitalized = is_capitalized(part)
             if capitalized and part.lower() in LOWERCASE_WORDS:
                 errors.append('"{} should not be capitalized"'.format(part))
             elif not capitalized and part.lower() not in LOWERCASE_WORDS:
@@ -2347,245 +2439,6 @@ def _get_capitalization_errors(text):  # pylint: disable=R0912
     return errors
 
 
-def _detect_names(text, card_type):  # pylint: disable=R0912
-    """ Detect names in the text.
-    """
-    text = re.sub(r'\n{2,}', ' [] ', text)
-    text = text.replace('\n', ' ')
-    text = re.sub(r'\[red\][^\[]+\[\/red\]', ' [] ', text)
-    text = re.sub(r'\[lotrheader[^\[]+\[\/lotrheader\]', ' [] ', text)
-    text = re.sub(r'\[bi\][^\[]+\[\/bi\]', ' text ', text)
-    text = re.sub(r'\[[^\]]+\]', ' separator ', text)
-    text = re.sub(r'\.”|[.:()]', ' [] ', text)
-    text = re.sub(r'(?![“”!?…,’\- \[\]]|\w).', ' unknown ', text)
-    text = re.sub(r' stage [0-9][A-F]\b', ' text ', text)
-    text = re.sub(r'(?:^|[ “])[0-9]+(?:[”, ]|$)', ' text ', text)
-    text = re.sub(r'\bDo not\b', "Don't", text)
-    text = text.replace(' son of ', ' sonof_ ')
-
-    if card_type == 'Rules':
-        text = re.sub(r'Adventure Pack in the “[^”]+”', ' text ', text)
-
-    parts = [p.strip() for p in text.split('[]') if p.strip()]
-
-    names = []
-    for part in parts:
-        part = re.sub(r'(?:separator +)+', '', part)
-        words = re.split(r' +', part)
-        words.append('word')
-        last_name = []
-        first_pos = None
-        for pos, word in enumerate(words):
-            cleaned_word = re.sub(r'[“”!?…,]', '', word)
-            if _is_capitalized(cleaned_word) and cleaned_word != 'X':
-                if not last_name:
-                    first_pos = pos
-
-                last_name.append(word)
-            elif cleaned_word.lower() in LOWERCASE_WORDS:
-                if last_name:
-                    last_name.append(word)
-            else:
-                while last_name:
-                    cleaned_word = re.sub(r'[“”!?…,]', '', last_name[-1])
-                    if _is_capitalized(cleaned_word):
-                        break
-
-                    last_name = last_name[:-1]
-
-                if last_name:
-                    name = ' '.join(last_name)
-                    name = re.sub(r'’$', '', re.sub(r'’s$', '',
-                                                    re.sub(r',$', '', name)))
-                    name = name.replace(' sonof_ ', ' son of ')
-                    if name[0] == '“' and '”' not in name:
-                        name = name[1:]
-
-                    if name[-1] == '”' and '“' not in name:
-                        name = name[:-1]
-
-                    if not re.match(
-                            r'Condition|Forced|Quest Resolution|Resolution|'
-                            r'Response|Restricted|Setup|Shadow|Travel|'
-                            r'Valour Response|When Revealed|(?:(?:Valour )?'
-                            r'(?:Combat |Encounter |Planning |Quest |Refresh |'
-                            r'Resource |Travel )?Action)', name):
-                        names.append((first_pos, name))
-
-                    first_pos = None
-                    last_name = []
-
-    return names
-
-
-ALLOWED_CAMPAIGN_NAMES = {
-    'Campaign Mode'
-}
-
-ALLOWED_RULES_NAMES = {
-    'Difficulty'
-}
-
-ALLOWED_FIRST_WORDS = {
-    'A',
-    'Add',
-    'After',
-    'All',
-    'Allies',
-    'Any',
-    'At',
-    'Attach',
-    'Attached',
-    'Attachments',
-    'Attacking',
-    'Before',
-    'Cancel',
-    'Cannot',
-    'Characters',
-    'Choose',
-    'Counts',
-    'Damage',
-    'Deal',
-    'Defending',
-    'Discard',
-    "Don't",
-    'Draw',
-    'During',
-    'Each',
-    'Either',
-    'End',
-    'Enemies',
-    'Engage',
-    'Enters',
-    'Excess',
-    'Exhaust',
-    'Flip',
-    'For',
-    'Heal',
-    'Heroes',
-    'If',
-    'Its',
-    'Immune',
-    'Instead',
-    'Limit',
-    'Locations',
-    'Make',
-    'Move',
-    'One',
-    'Only',
-    'Otherwise',
-    'Pay',
-    'Place',
-    'Play',
-    'Player',
-    'Players',
-    'Progress',
-    'Put',
-    'Raise',
-    'Randomly',
-    'Ready',
-    'Reduce',
-    'Remove',
-    'Replace',
-    'Resolve',
-    'Return',
-    'Reveal',
-    'Search',
-    'Set',
-    'Skip',
-    'Shuffle',
-    'The',
-    'Then',
-    'There',
-    'They',
-    'That',
-    'This',
-    'Treat',
-    'Turn',
-    'Until',
-    'When',
-    'While',
-    'You',
-    'Your'
-}
-
-
-def _verify_known_name(pos, name, card_type):  # pylint: disable=R0911,R0912
-    """ Check whether the name is known or not.
-    """
-    all_names = ALL_CARD_NAMES.copy()
-    if card_type == 'Rules':
-        all_names.update(ALL_SET_NAMES)
-        all_names.update(['“{}”'.format(n) for n in ALL_SET_NAMES])
-        all_names.update(ALL_ENCOUNTER_SET_NAMES)
-        all_names.update(ALLOWED_RULES_NAMES)
-    elif card_type == 'Campaign':
-        all_names.update(ALL_ENCOUNTER_SET_NAMES)
-        all_names.update(ALLOWED_CAMPAIGN_NAMES)
-    elif card_type == 'Quest':
-        all_names.update(ALL_ENCOUNTER_SET_NAMES)
-
-    if name in all_names:
-        return True
-
-    parts = re.split(r', and |, or |, | and | or ', name)
-    if all(p.strip() in all_names for p in parts):
-        return True
-
-    parts = name.split(' to ')
-    if all(p.strip() in all_names for p in parts):
-        return True
-
-    parts = re.split(r' to |, and |, or |, | and | or ', name)
-    if all(p.strip() in all_names for p in parts):
-        return True
-
-    parts = name.split(' than on ')
-    if all(p.strip() in all_names for p in parts):
-        return True
-
-    parts = re.split(r', | than on ', name)
-    if all(p.strip() in all_names for p in parts):
-        return True
-
-    if pos == 0:
-        parts = name.split(' ')
-        first_word = re.sub(r'^[“…]', '', re.sub(r'[”!?…,]$', '', parts[0]))
-        if first_word in ALLOWED_FIRST_WORDS:
-            parts = parts[1:]
-            if not parts:
-                return True
-
-            if parts[0] in ('and', 'or', 'to'):
-                parts = parts[1:]
-
-            name = ' '.join(parts)
-            if name in all_names:
-                return True
-
-    parts = re.split(r', and |, or |, | and | or ', name)
-    if all(p.strip() in all_names for p in parts):
-        return True
-
-    parts = name.split(' to ')
-    if all(p.strip() in all_names for p in parts):
-        return True
-
-    parts = re.split(r' to |, and |, or |, | and | or ', name)
-    if all(p.strip() in all_names for p in parts):
-        return True
-
-    parts = name.split(' than on ')
-    if all(p.strip() in all_names for p in parts):
-        return True
-
-    parts = re.split(r', | than on ', name)
-    if all(p.strip() in all_names for p in parts):
-        return True
-
-    return False
-
-
 def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
     """ Detect text rules errors.
     """
@@ -2593,15 +2446,6 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
     text = re.sub(r'(^|\n)(?:\[[^\]]+\])*\[i\](?!\[b\]Rumor\[\/b\]|Example:)'
                   r'.+?\[\/i\](?:\[[^\]]+\])*(?:\n|$)', '\\1',
                   text, flags=re.DOTALL)
-
-    ###
-    if not card[CARD_SCRATCH]:
-        if not 'developed by A Long-extended Party' in text:
-            names = _detect_names(text, card[CARD_TYPE])
-            for pos, name in names:
-                if not _verify_known_name(pos, name, card[CARD_TYPE]):
-                    logging.info((pos, name, card[CARD_NAME]))
-    ###
 
     paragraphs = [p.strip() for p in re.split(r'\n{2,}', text) if p.strip()]
     if not paragraphs:
@@ -5910,6 +5754,8 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
               'sets': set_names,
               'set_ids': set_ids,
               'set_codes': set_codes,
+              'set_names': list(ALL_SET_NAMES),
+              'encounter_set_names': list(ALL_ENCOUNTER_SET_NAMES),
               'card_names': list(ALL_CARD_NAMES),
               'traits': list(ALL_TRAITS),
               'data': data}

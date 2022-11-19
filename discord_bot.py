@@ -211,7 +211,8 @@ List of **!image** commands:
 """,
     'edit': """
 List of **!edit** commands:
-` `
+
+**!edit names <set name or set code>** - display all potentially unknown or misspelled names (for example: `!edit names Children of Eorl` or `!edit names CoE`)` `
 **!edit rules <set name or set code>** - display all text that may be a subject of editing rules for a set (for example: `!edit rules Children of Eorl` or `!edit rules CoE`)
 **!edit traits <set name or set code>** - display all possible trait issues for a set (for example: `!edit traits Children of Eorl` or `!edit traits CoE`)
 """,
@@ -1518,6 +1519,181 @@ def detect_traits(text):
     """
     traits = re.findall(r'(?<=\[bi\])[^\[]+(?=\[\/bi\])', text)
     return traits
+
+
+def detect_names(text, card_type):  # pylint: disable=R0912
+    """ Detect names in the text.
+    """
+    text = re.sub(r'\n{2,}', ' [] ', text)
+    text = text.replace('\n', ' ')
+    text = re.sub(r'\[red\][^\[]+\[\/red\]', ' [] ', text)
+    text = re.sub(r'\[lotrheader[^\[]+\[\/lotrheader\]', ' [] ', text)
+    text = re.sub(r'\[bi\][^\[]+\[\/bi\]', ' text ', text)
+    text = re.sub(r'\[[^\]]+\]', ' separator ', text)
+    text = re.sub(r'\.”|[.:()]', ' [] ', text)
+    text = re.sub(r'(?![“”!?…,’\- \[\]]|\w).', ' unknown ', text)
+    text = re.sub(r' stage [0-9][A-F]\b', ' text ', text)
+    text = re.sub(r'(?:^|[ “])[0-9]+(?:[”, ]|$)', ' text ', text)
+    text = text.replace(' son of ', ' sonof_ ')
+
+    if card_type == 'Rules':
+        text = re.sub(r'Adventure Pack in the “[^”]+”', ' text ', text)
+
+    parts = [p.strip() for p in text.split('[]') if p.strip()]
+
+    names = []
+    for part in parts:
+        part = re.sub(r'(?:separator +)+', '', part)
+        words = re.split(r' +', part)
+        words.append('word')
+        last_name = []
+        first_pos = None
+        for pos, word in enumerate(words):
+            cleaned_word = re.sub(r'[“”!?…,]', '', word)
+            if lotr.is_capitalized(cleaned_word) and cleaned_word != 'X':
+                if not last_name:
+                    first_pos = pos
+
+                last_name.append(word)
+            elif cleaned_word.lower() in lotr.LOWERCASE_WORDS:
+                if last_name:
+                    last_name.append(word)
+            else:
+                while last_name:
+                    cleaned_word = re.sub(r'[“”!?…,]', '', last_name[-1])
+                    if lotr.is_capitalized(cleaned_word):
+                        break
+
+                    last_name = last_name[:-1]
+
+                if last_name:
+                    name = ' '.join(last_name)
+                    name = re.sub(r'’$', '', re.sub(r'’s$', '',
+                                                    re.sub(r',$', '', name)))
+                    name = name.replace(' sonof_ ', ' son of ')
+                    if name[0] == '“' and '”' not in name:
+                        name = name[1:]
+
+                    if name[-1] == '”' and '“' not in name:
+                        name = name[:-1]
+
+                    if not re.match(
+                            r'Condition|Forced|Quest Resolution|Resolution|'
+                            r'Response|Restricted|Setup|Shadow|Travel|'
+                            r'Valour Response|When Revealed|(?:(?:Valour )?'
+                            r'(?:Combat |Encounter |Planning |Quest |Refresh |'
+                            r'Resource |Travel )?Action)', name):
+                        names.append((first_pos, name))
+
+                    first_pos = None
+                    last_name = []
+
+    return names
+
+
+def verify_known_name(pos, name, card_type, all_card_names, all_set_names,  # pylint: disable=R0911,R0912,R0913
+                      all_encounter_set_names):
+    """ Check whether the name is known or not.
+    """
+    all_names = set(all_card_names)
+    if card_type == 'Rules':
+        all_names.update(all_set_names)
+        all_names.update(['“{}”'.format(n) for n in all_set_names])
+        all_names.update(all_encounter_set_names)
+        all_names.update(lotr.ALLOWED_RULES_NAMES)
+    elif card_type == 'Campaign':
+        all_names.update(all_encounter_set_names)
+        all_names.update(lotr.ALLOWED_CAMPAIGN_NAMES)
+    elif card_type == 'Quest':
+        all_names.update(all_encounter_set_names)
+
+    if name in all_names:
+        return True
+
+    parts = re.split(r', and |, or |, | and | or ', name)
+    if all(p.strip() in all_names for p in parts):
+        return True
+
+    parts = name.split(' to ')
+    if all(p.strip() in all_names for p in parts):
+        return True
+
+    parts = re.split(r' to |, and |, or |, | and | or ', name)
+    if all(p.strip() in all_names for p in parts):
+        return True
+
+    parts = name.split(' than on ')
+    if all(p.strip() in all_names for p in parts):
+        return True
+
+    parts = re.split(r', | than on ', name)
+    if all(p.strip() in all_names for p in parts):
+        return True
+
+    if pos == 0:
+        parts = name.split(' ')
+        first_word = re.sub(r'^[“…]', '', re.sub(r'[”!?…,]$', '', parts[0]))
+        if first_word in lotr.ALLOWED_FIRST_WORDS:
+            parts = parts[1:]
+            if not parts:
+                return True
+
+            if parts[0] in ('and', 'or', 'to'):
+                parts = parts[1:]
+
+            name = ' '.join(parts)
+            if name in all_names:
+                return True
+
+    parts = re.split(r', and |, or |, | and | or ', name)
+    if all(p.strip() in all_names for p in parts):
+        return True
+
+    parts = name.split(' to ')
+    if all(p.strip() in all_names for p in parts):
+        return True
+
+    parts = re.split(r' to |, and |, or |, | and | or ', name)
+    if all(p.strip() in all_names for p in parts):
+        return True
+
+    parts = name.split(' than on ')
+    if all(p.strip() in all_names for p in parts):
+        return True
+
+    parts = re.split(r', | than on ', name)
+    if all(p.strip() in all_names for p in parts):
+        return True
+
+    return False
+
+
+def get_unknown_names(text, field, card, res, all_card_names, all_set_names,  # pylint: disable=R0913
+                      all_encounter_set_names):
+    """ Detect unknown names in the text.
+    """
+    text = re.sub(r'(^|\n)(?:\[[^\]]+\])*\[i\](?!\[b\]Rumor\[\/b\]|Example:)'
+                  r'.+?\[\/i\](?:\[[^\]]+\])*(?:\n|$)', '\\1',
+                  text, flags=re.DOTALL)
+
+    if 'developed by A Long-extended Party' in text:
+        return
+
+    unknown_names = set()
+    names = detect_names(text, card[lotr.CARD_TYPE])
+    for pos, name in names:
+        if not verify_known_name(pos, name, card[lotr.CARD_TYPE],
+                                 all_card_names, all_set_names,
+                                 all_encounter_set_names):
+            unknown_names.add(name)
+
+    if unknown_names:
+        data = {'name': card[lotr.CARD_NAME],
+                'field': field,
+                'text': '\n'.join(sorted(unknown_names)),
+                'row': card[lotr.ROW_COLUMN]}
+        res.setdefault('Potentially unknown or misspelled names', []).append(
+            data)
 
 
 def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disable=R0912,R0913,R0914,R0915
@@ -4243,6 +4419,85 @@ Targets removed.
                 await self._send_channel(message.channel, res)
 
 
+    async def _display_names(self, value):
+        """ Display all potentially unknown or misspelled names for a set.
+        """
+        data = await read_card_data()
+
+        set_name = re.sub(r'^alep---', '', lotr.normalized_name(value))
+        matches = [card for card in data['data'] if re.sub(
+            r'^alep---', '',
+            lotr.normalized_name(card[lotr.CARD_SET_NAME])) == set_name and
+            card[lotr.CARD_TYPE] != 'Presentation' and
+            card.get(lotr.CARD_SPHERE) != 'Back']
+
+        if not matches:
+            new_set_name = 'the-{}'.format(set_name)
+            matches = [card for card in data['data'] if re.sub(
+                r'^alep---', '',
+                lotr.normalized_name(card[lotr.CARD_SET_NAME])) == new_set_name
+                and card[lotr.CARD_TYPE] != 'Presentation'
+                and card.get(lotr.CARD_SPHERE) != 'Back']
+
+        if not matches:
+            set_code = value.lower()
+            matches = [card for card in data['data']
+                       if card[lotr.CARD_SET_HOB_CODE].lower() == set_code and
+                       card[lotr.CARD_TYPE] != 'Presentation' and
+                       card.get(lotr.CARD_SPHERE) != 'Back']
+            if not matches:
+                return 'no cards found for the set'
+
+        matches.sort(key=lambda card: card[lotr.ROW_COLUMN])
+        res = {}
+        for card in matches:
+            if card.get(lotr.CARD_TEXT) is not None:
+                get_unknown_names(
+                    card[lotr.CARD_TEXT], lotr.CARD_TEXT, card, res,
+                    data['card_names'], data['set_names'],
+                    data['encounter_set_names'])
+
+            if card.get(lotr.BACK_PREFIX + lotr.CARD_TEXT) is not None:
+                get_unknown_names(
+                    card[lotr.BACK_PREFIX + lotr.CARD_TEXT],
+                         lotr.BACK_PREFIX + lotr.CARD_TEXT, card, res,
+                         data['card_names'], data['set_names'],
+                         data['encounter_set_names'])
+
+            if card.get(lotr.CARD_SHADOW) is not None:
+                get_unknown_names(
+                    card[lotr.CARD_SHADOW], lotr.CARD_SHADOW, card, res,
+                    data['card_names'], data['set_names'],
+                    data['encounter_set_names'])
+
+            if card.get(lotr.BACK_PREFIX + lotr.CARD_SHADOW) is not None:
+                get_unknown_names(
+                    card[lotr.BACK_PREFIX + lotr.CARD_SHADOW],
+                         lotr.BACK_PREFIX + lotr.CARD_SHADOW, card, res,
+                         data['card_names'], data['set_names'],
+                         data['encounter_set_names'])
+
+        output = []
+        for rule, card_list in res.items():
+            rule_output = '__**{}**:__'.format(rule)
+            for card_data in card_list:
+                row_url = '<{}&range=A{}>'.format(data['url'],
+                                                  card_data['row'])
+                rule_output += '\n` `\n*{}* (**{}**):\n{}\n{}'.format(
+                    card_data['name'], card_data['field'].replace('_', ' '),
+                    card_data['text'], row_url)
+
+            output.append(rule_output)
+
+        output = '\n` `\n'.join(sorted(output))
+        if output:
+            output = '{}\n` `\nDone.'.format(output)
+        else:
+            output = 'no unknown names found'
+
+        return output
+
+
     async def _display_rules(self, value):  # pylint: disable=R0912,R0914
         """ Display all text that may be a subject of editing rules for a set.
         """
@@ -4449,7 +4704,7 @@ Targets removed.
         if output:
             output = '{}\n` `\nDone.'.format(output)
         else:
-            output = 'no trait issue found'
+            output = 'no trait issues found'
 
         return output
 
@@ -4465,7 +4720,22 @@ Targets removed.
 
         logging.info('Received edit command: %s', command)
 
-        if command.lower().startswith('rules '):
+        if command.lower().startswith('names '):
+            try:
+                set_name = re.sub(r'^names ', '', command,
+                                  flags=re.IGNORECASE)
+                res = await self._display_names(set_name)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await self._send_channel(
+                    message.channel,
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await self._send_channel(message.channel, res)
+        elif command.lower() == 'names':
+            await self._send_channel(message.channel, 'please specify the set')
+        elif command.lower().startswith('rules '):
             try:
                 set_name = re.sub(r'^rules ', '', command,
                                   flags=re.IGNORECASE)
