@@ -671,8 +671,9 @@ def find_card_matches(data, command, this=False):
             for card in data['data']] if m[1] > 0]
 
         if set_code:
-            matches = [m for m in matches
-                       if m[0][lotr.CARD_SET_HOB_CODE].lower() == set_code]
+            matches = [
+                m for m in matches
+                if m[0].get(lotr.CARD_SET_HOB_CODE, '').lower() == set_code]
 
     matches.sort(key=lambda m: (
         m[1],
@@ -1388,11 +1389,11 @@ async def get_dragncards_player_cards_stat(set_name, start_date):
 
     if not matches:
         set_code = set_name.lower()
-        matches = [card for card in data['data']
-                   if card[lotr.CARD_SET_HOB_CODE].lower() == set_code and
-                   card[lotr.CARD_TYPE] in lotr.CARD_TYPES_PLAYER and
-                   'Promo' not in
-                   lotr.extract_flags(card.get(lotr.CARD_FLAGS))]
+        matches = [
+            card for card in data['data']
+            if card.get(lotr.CARD_SET_HOB_CODE, '').lower() == set_code and
+            card[lotr.CARD_TYPE] in lotr.CARD_TYPES_PLAYER and
+            'Promo' not in lotr.extract_flags(card.get(lotr.CARD_FLAGS))]
         if not matches:
             return 'no cards found for the set'
 
@@ -1876,6 +1877,19 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
                                    paragraph),
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('Forced: When vs Forced: After', []).append(data)
+
+        if (card[lotr.CARD_TYPE] in lotr.CARD_TYPES_ENCOUNTER_SET and
+                re.search(
+                    r'\bcost\b',
+                    re.sub(r'\b(?:no|engagement|printed(?: resource)?) cost\b',
+                           '', paragraph, flags=re.IGNORECASE),
+                    flags=re.IGNORECASE)):
+            data = {'name': card[lotr.CARD_NAME],
+                    'field': field,
+                    'text': re.sub(r'\b(cost)\b', '__**\\1**__',
+                                   paragraph, flags=re.IGNORECASE),
+                    'row': card[lotr.ROW_COLUMN]}
+            res.setdefault('Printed cost', []).append(data)
 
         if re.search(r': [A-Z]', paragraph):
             paragraph = re.sub(r'\bQuest Resolution(?: \([^\)]+\))?:',
@@ -3909,9 +3923,10 @@ Targets removed.
 
         if not matches:
             set_code = value.lower()
-            matches = [card for card in data['data']
-                       if card[lotr.CARD_SET_HOB_CODE].lower() == set_code and
-                       card[lotr.CARD_TYPE] not in ('Presentation', 'Rules')]
+            matches = [
+                card for card in data['data']
+                if card.get(lotr.CARD_SET_HOB_CODE, '').lower() == set_code and
+                card[lotr.CARD_TYPE] not in ('Presentation', 'Rules')]
             if not matches:
                 return 'no cards found for the set'
 
@@ -4019,10 +4034,10 @@ Targets removed.
 
         if not matches:
             set_code = value.lower()
-            matches = [card for card in data['data']
-                       if card[lotr.CARD_SET_HOB_CODE].lower() == set_code
-                       and card[lotr.CARD_TYPE] not in ('Presentation',
-                                                        'Rules')]
+            matches = [
+                card for card in data['data']
+                if card.get(lotr.CARD_SET_HOB_CODE, '').lower() == set_code and
+                card[lotr.CARD_TYPE] not in ('Presentation', 'Rules')]
             if not matches:
                 return 'no cards found for the set'
 
@@ -4209,8 +4224,9 @@ Targets removed.
 
         if not matches:
             set_code = value.lower()
-            matches = [card for card in data['data']
-                       if card[lotr.CARD_SET_HOB_CODE].lower() == set_code]
+            matches = [
+                card for card in data['data']
+                if card.get(lotr.CARD_SET_HOB_CODE, '').lower() == set_code]
 
             if not matches:
                 return 'no cards found for the set'
@@ -4441,10 +4457,11 @@ Targets removed.
 
         if not matches:
             set_code = value.lower()
-            matches = [card for card in data['data']
-                       if card[lotr.CARD_SET_HOB_CODE].lower() == set_code and
-                       card[lotr.CARD_TYPE] != 'Presentation' and
-                       card.get(lotr.CARD_SPHERE) != 'Back']
+            matches = [
+                card for card in data['data']
+                if card.get(lotr.CARD_SET_HOB_CODE, '').lower() == set_code and
+                card[lotr.CARD_TYPE] != 'Presentation' and
+                card.get(lotr.CARD_SPHERE) != 'Back']
             if not matches:
                 return 'no cards found for the set'
 
@@ -4520,10 +4537,11 @@ Targets removed.
 
         if not matches:
             set_code = value.lower()
-            matches = [card for card in data['data']
-                       if card[lotr.CARD_SET_HOB_CODE].lower() == set_code and
-                       card[lotr.CARD_TYPE] != 'Presentation' and
-                       card.get(lotr.CARD_SPHERE) != 'Back']
+            matches = [
+                card for card in data['data']
+                if card.get(lotr.CARD_SET_HOB_CODE, '').lower() == set_code and
+                card[lotr.CARD_TYPE] != 'Presentation' and
+                card.get(lotr.CARD_SPHERE) != 'Back']
             if not matches:
                 return 'no cards found for the set'
 
@@ -4617,10 +4635,11 @@ Targets removed.
 
         if not matches:
             set_code = value.lower()
-            matches = [card for card in data['data']
-                       if card[lotr.CARD_SET_HOB_CODE].lower() == set_code and
-                       card[lotr.CARD_TYPE] != 'Presentation' and
-                       card.get(lotr.CARD_SPHERE) != 'Back']
+            matches = [
+                card for card in data['data']
+                if card.get(lotr.CARD_SET_HOB_CODE, '').lower() == set_code and
+                card[lotr.CARD_TYPE] != 'Presentation' and
+                card.get(lotr.CARD_SPHERE) != 'Back']
             if not matches:
                 return 'no cards found for the set'
 
