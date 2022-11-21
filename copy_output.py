@@ -2,6 +2,7 @@
 """ Script to copy all set outputs to a destination folder.
 """
 import os
+import re
 import shutil
 import sys
 
@@ -103,6 +104,17 @@ def main():  # pylint: disable=R0912
             continue
 
         shutil.copytree(path, destination_path)
+
+        if subfolder == 'DragnCards':
+            for _, _, filenames in os.walk(destination_path):
+                for filename in filenames:
+                    if filename.endswith('json.release'):
+                        shutil.move(
+                            os.path.join(destination_path, filename),
+                            os.path.join(destination_path,
+                                         re.sub(r'\.release$', '', filename)))
+
+                break
 
 
 if __name__ == '__main__':
