@@ -1705,9 +1705,8 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
 
         data = [row[:none_index] for row in data]
         data = [[_fix_csv_value(v) for v in row] for row in data]
-        if data:
-            while not any(data[-1]):
-                data.pop()
+        while data and not any(data[-1]):
+            data.pop()
 
         JSON_CACHE[sheet] = data
         res = json.dumps(data)
