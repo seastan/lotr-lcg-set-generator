@@ -1592,14 +1592,15 @@ def detect_names(text, card_type):  # pylint: disable=R0912
     return names
 
 
-def verify_known_name(pos, name, card_type, all_card_names, all_set_names,  # pylint: disable=R0911,R0912,R0913
-                      all_encounter_set_names):
+def verify_known_name(pos, name, card_type, all_card_names,  # pylint: disable=R0911,R0912,R0913
+                      all_set_and_quest_names, all_encounter_set_names):
     """ Check whether the name is known or not.
     """
     all_names = set(all_card_names)
     if card_type == 'Rules':
-        all_names.update(all_set_names)
-        all_names.update(['“{}”'.format(n) for n in all_set_names])
+        all_names.update(all_set_and_quest_names)
+        all_names.update(
+            ['“{}”'.format(n) for n in all_set_and_quest_names])
         all_names.update(all_encounter_set_names)
         all_names.update(lotr.ALLOWED_RULES_NAMES)
     elif card_type == 'Campaign':
@@ -1669,8 +1670,8 @@ def verify_known_name(pos, name, card_type, all_card_names, all_set_names,  # py
     return False
 
 
-def get_unknown_names(text, field, card, res, all_card_names, all_set_names,  # pylint: disable=R0913
-                      all_encounter_set_names):
+def get_unknown_names(text, field, card, res, all_card_names,  # pylint: disable=R0913
+                      all_set_and_quest_names, all_encounter_set_names):
     """ Detect unknown names in the text.
     """
     text = re.sub(r'(^|\n)(?:\[[^\]]+\])*\[i\](?!\[b\]Rumor\[\/b\]|Example:)'
@@ -1684,7 +1685,7 @@ def get_unknown_names(text, field, card, res, all_card_names, all_set_names,  # 
     names = detect_names(text, card[lotr.CARD_TYPE])
     for pos, name in names:
         if not verify_known_name(pos, name, card[lotr.CARD_TYPE],
-                                 all_card_names, all_set_names,
+                                 all_card_names, all_set_and_quest_names,
                                  all_encounter_set_names):
             unknown_names.add(name)
 
@@ -4471,27 +4472,27 @@ Targets removed.
             if card.get(lotr.CARD_TEXT) is not None:
                 get_unknown_names(
                     card[lotr.CARD_TEXT], lotr.CARD_TEXT, card, res,
-                    data['card_names'], data['set_names'],
+                    data['card_names'], data['set_and_quest_names'],
                     data['encounter_set_names'])
 
             if card.get(lotr.BACK_PREFIX + lotr.CARD_TEXT) is not None:
                 get_unknown_names(
                     card[lotr.BACK_PREFIX + lotr.CARD_TEXT],
                          lotr.BACK_PREFIX + lotr.CARD_TEXT, card, res,
-                         data['card_names'], data['set_names'],
+                         data['card_names'], data['set_and_quest_names'],
                          data['encounter_set_names'])
 
             if card.get(lotr.CARD_SHADOW) is not None:
                 get_unknown_names(
                     card[lotr.CARD_SHADOW], lotr.CARD_SHADOW, card, res,
-                    data['card_names'], data['set_names'],
+                    data['card_names'], data['set_and_quest_names'],
                     data['encounter_set_names'])
 
             if card.get(lotr.BACK_PREFIX + lotr.CARD_SHADOW) is not None:
                 get_unknown_names(
                     card[lotr.BACK_PREFIX + lotr.CARD_SHADOW],
                          lotr.BACK_PREFIX + lotr.CARD_SHADOW, card, res,
-                         data['card_names'], data['set_names'],
+                         data['card_names'], data['set_and_quest_names'],
                          data['encounter_set_names'])
 
         output = []

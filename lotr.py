@@ -818,7 +818,7 @@ SETS = {}
 DATA = []
 ACCENTS = set()
 ALL_NAMES = set()
-ALL_SET_NAMES = set()
+ALL_SET_AND_QUEST_NAMES = set()
 ALL_ENCOUNTER_SET_NAMES = set()
 ALL_CARD_NAMES = set()
 ALL_SCRATCH_CARD_NAMES = set()
@@ -1774,18 +1774,20 @@ def _extract_all_card_names(data):
                 ALL_CARD_NAMES.add(clean_value)
 
 
-def _extract_all_set_names(data):
-    """ Collect all set and adventure names from the spreadsheet.
+def _extract_all_set_and_quest_names(data):
+    """ Collect all set and quest names from the spreadsheet.
     """
-    ALL_SET_NAMES.clear()
+    ALL_SET_AND_QUEST_NAMES.clear()
     for row in data:
         if not row[CARD_SCRATCH]:
             if row[CARD_SET_NAME]:
-                ALL_SET_NAMES.add(re.sub(r'^ALeP - ', '', row[CARD_SET_NAME]))
+                ALL_SET_AND_QUEST_NAMES.add(re.sub(r'^ALeP - ', '',
+                                                   row[CARD_SET_NAME]))
 
             if (row[CARD_ADVENTURE] and
-                    row[CARD_ADVENTURE] not in ('[space]', '[nobr]')):
-                ALL_SET_NAMES.add(row[CARD_ADVENTURE])
+                    row[CARD_ADVENTURE] not in ('[space]', '[nobr]') and
+                    row[CARD_TYPE] != 'Campaign'):
+                ALL_SET_AND_QUEST_NAMES.add(row[CARD_ADVENTURE])
 
 
 def _extract_all_encounter_set_names(data):
@@ -1825,7 +1827,7 @@ def _extract_all_names():
     """
     ALL_NAMES.clear()
     ALL_NAMES.update(ALL_CARD_NAMES)
-    ALL_NAMES.update(ALL_SET_NAMES)
+    ALL_NAMES.update(ALL_SET_AND_QUEST_NAMES)
     ALL_NAMES.update(ALL_ENCOUNTER_SET_NAMES)
     ALL_NAMES.update(ALL_TRAITS)
 
@@ -2276,7 +2278,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
     FOUND_SCRATCH_SETS.update(scratch_sets.difference(FOUND_INTERSECTED_SETS))
     _update_data(DATA)
 
-    _extract_all_set_names(DATA)
+    _extract_all_set_and_quest_names(DATA)
     _extract_all_encounter_set_names(DATA)
     _extract_all_traits(DATA)
     _extract_all_names()
@@ -5753,7 +5755,7 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
               'sets': set_names,
               'set_ids': set_ids,
               'set_codes': set_codes,
-              'set_names': list(ALL_SET_NAMES),
+              'set_and_quest_names': list(ALL_SET_AND_QUEST_NAMES),
               'encounter_set_names': list(ALL_ENCOUNTER_SET_NAMES),
               'card_names': list(ALL_CARD_NAMES),
               'traits': list(ALL_TRAITS),
