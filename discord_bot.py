@@ -52,6 +52,7 @@ REMOTE_CRON_TIMESTAMP_CMD = './remote_cron_timestamp.sh "{}"'
 RESTART_BOT_CMD = './restart_discord_bot.sh'
 RESTART_CRON_CMD = './restart_run_before_se_service.sh'
 
+CHANNEL_ID_REGEX = r'^<#[0-9]+>$'
 DIRECT_URL_REGEX = r'itemJson: \[[^,]+,"[^"]+","([^"]+)"'
 PREVIEW_URL = 'https://drive.google.com/file/d/{}/preview'
 
@@ -194,11 +195,13 @@ List of **!stat** commands:
 List of **!art** commands:
 ` `
 **!art artists <set name or set code>** - display a copy-pasteable list of artist names (for example: `!art artists Children of Eorl` or `!art artists CoE`)
-**!art save <artist>** (as a reply to a message with an image attachment) - save the image as the channel's card artwork for the front side (for example: `!art save Alan Lee`)
-**!art save <card id> <artist>** (as a reply to a message with an image attachment) - save the image as the artwork for the front side of the card with a given id (for example: `!art save fd9da66d-06cd-430e-b6d2-9da2aa5bc52c Alan Lee`)
-**!art saveb <artist>** (as a reply to a message with an image attachment) - save the image as the channel's card artwork for the back side (for example: `!art saveb John Howe`)
-**!art saveb <card id> <artist>** (as a reply to a message with an image attachment) - save the image as the artwork for the back side of the card with a given id (for example: `!art saveb fd9da66d-06cd-430e-b6d2-9da2aa5bc52c John Howe`)
-**!art savescr <artist>** (as a reply to a message with an image attachment) - save the image to the scratch folder, <artist> is optional (for example: `!art savescr Ted Nasmith` or `!art savescr`)
+**!art save <artist>** (as a reply to a message with an image attachment) - save image as the channel's card front artwork (for example: `!art save Alan Lee`)
+**!art save <card id> <artist>** (as a reply to a message with an image attachment) - save image as the front artwork of the card with the given id (for example: `!art save fd9da66d-06cd-430e-b6d2-9da2aa5bc52c Alan Lee`)
+**!art save <channel> <artist>** (as a reply to a message with an image attachment) - save image as the front artwork of the card from the given channel (for example: `!art save #hunting-dogs Alan Lee`)
+**!art saveb <artist>** (as a reply to a message with an image attachment) - save image as the channel's card back artwork (for example: `!art saveb John Howe`)
+**!art saveb <card id> <artist>** (as a reply to a message with an image attachment) - save image as the back artwork of the card with the given id (for example: `!art saveb fd9da66d-06cd-430e-b6d2-9da2aa5bc52c John Howe`)
+**!art saveb <channel> <artist>** (as a reply to a message with an image attachment) - save image as the back artwork of the card from the given channel (for example: `!art saveb #hunting-dogs Alan Lee`)
+**!art savescr <artist>** (as a reply to a message with an image attachment) - save image to the scratch folder, <artist> is optional (for example: `!art savescr Ted Nasmith` or `!art savescr`)
 **!art verify <set name or set code>** - verify artwork for a set (for example: `!art verify Children of Eorl` or `!art verify CoE`)
 **!art help** - display this help message
 """,
@@ -1932,6 +1935,16 @@ class MyClient(discord.Client):  # pylint: disable=R0902
     categories = {}
     channels = {}
     general_channels = {}
+
+
+    def get_channel_name_by_id(self, channel_id):
+        """ Get channel name by its ID.
+        """
+        for channel in self.channels.values():
+            if channel['id'] == channel_id:
+                return channel['name']
+
+        return None
 
 
     async def get_all_channels_safe(self):
@@ -3681,7 +3694,8 @@ Targets removed.
                 writer.writerow(row)
 
 
-    async def _save_artwork(self, message, side, card_id, artist):  # pylint: disable=R0911,R0912,R0914
+    async def _save_artwork(self, message, side, artist, card_id,  # pylint: disable=R0911,R0912,R0913,R0914,R0915
+                            channel_id):
         """ Save an artwork image for the card.
         """
         data = await read_card_data()
@@ -3690,6 +3704,23 @@ Targets removed.
                 return 'card id not found or is locked'
 
             card = data['artwork_ids'][card_id]
+        elif channel_id:
+            channel_name = self.get_channel_name_by_id(channel_id)
+            if not channel_name:
+                return 'card channel not found'
+
+            matches = [
+                card for card in data['data']
+                if card.get(lotr.CARD_DISCORD_CHANNEL, '') == channel_name]
+            if not matches:
+                return 'no card found for the channel'
+
+            card = matches[0]
+            if card.get(lotr.CARD_SET_LOCKED):
+                return 'set {} is locked for modifications'.format(
+                    card[lotr.CARD_SET_NAME])
+
+            card_id = card[lotr.CARD_ID]
         else:
             channel_name = message.channel.name
             matches = [
@@ -3699,7 +3730,6 @@ Targets removed.
                 return 'no card found for this channel'
 
             card = matches[0]
-
             if card.get(lotr.CARD_SET_LOCKED):
                 return 'set {} is locked for modifications'.format(
                     card[lotr.CARD_SET_NAME])
@@ -4133,7 +4163,8 @@ Targets removed.
             try:
                 side = 'B' if command.lower().startswith('saveb ') else 'A'
                 artist = re.sub(r'^saveb? ', '', command, flags=re.IGNORECASE)
-                if re.match(lotr.UUID_REGEX, artist):
+                if (re.match(lotr.UUID_REGEX, artist) or
+                        re.match(CHANNEL_ID_REGEX, artist)):
                     await self._send_channel(message.channel,
                                              'please specify the artist')
                     return
@@ -4141,12 +4172,18 @@ Targets removed.
                 parts = artist.split(' ')
                 if len(parts) > 1 and re.match(lotr.UUID_REGEX, parts[0]):
                     card_id = parts[0]
+                    channel_id = None
+                    artist = ' '.join(parts[1:])
+                elif len(parts) > 1 and re.match(CHANNEL_ID_REGEX, parts[0]):
+                    card_id = None
+                    channel_id = int(parts[0][2:-1])
                     artist = ' '.join(parts[1:])
                 else:
                     card_id = None
+                    channel_id = None
 
-                error = await self._save_artwork(message, side, card_id,
-                                                 artist)
+                error = await self._save_artwork(message, side, artist,
+                                                 card_id, channel_id)
             except Exception as exc:
                 logging.exception(str(exc))
                 await self._send_channel(
