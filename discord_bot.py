@@ -194,9 +194,11 @@ List of **!stat** commands:
 List of **!art** commands:
 ` `
 **!art artists <set name or set code>** - display a copy-pasteable list of artist names (for example: `!art artists Children of Eorl` or `!art artists CoE`)
-**!art save <artist>** (as a reply to a message with an image attachment) - save the image as a card's artwork for the front side (for example: `!art save Ted Nasmith`)
-**!art saveb <artist>** (as a reply to a message with an image attachment) - save the image as a card's artwork for the back side (for example: `!art saveb John Howe`)
-**!art savescr** (or **!art savescr <artist>**) (as a reply to a message with an image attachment) - save the image to the scratch folder
+**!art save <artist>** (as a reply to a message with an image attachment) - save the image as the channel's card artwork for the front side (for example: `!art save Alan Lee`)
+**!art save <card id> <artist>** (as a reply to a message with an image attachment) - save the image as the artwork for the front side of the card with a given id (for example: `!art save fd9da66d-06cd-430e-b6d2-9da2aa5bc52c Alan Lee`)
+**!art saveb <artist>** (as a reply to a message with an image attachment) - save the image as the channel's card artwork for the back side (for example: `!art saveb John Howe`)
+**!art saveb <card id> <artist>** (as a reply to a message with an image attachment) - save the image as the artwork for the back side of the card with a given id (for example: `!art saveb fd9da66d-06cd-430e-b6d2-9da2aa5bc52c John Howe`)
+**!art savescr <artist>** (as a reply to a message with an image attachment) - save the image to the scratch folder, <artist> is optional (for example: `!art savescr Ted Nasmith` or `!art savescr`)
 **!art verify <set name or set code>** - verify artwork for a set (for example: `!art verify Children of Eorl` or `!art verify CoE`)
 **!art help** - display this help message
 """,
@@ -3679,21 +3681,30 @@ Targets removed.
                 writer.writerow(row)
 
 
-    async def _save_artwork(self, message, side, artist):  # pylint: disable=R0911,R0912,R0914
+    async def _save_artwork(self, message, side, card_id, artist):  # pylint: disable=R0911,R0912,R0914
         """ Save an artwork image for the card.
         """
         data = await read_card_data()
+        if card_id:
+            if card_id not in data['artwork_ids']:
+                return 'card id not found or is locked'
 
-        channel_name = message.channel.name
-        matches = [card for card in data['data']
-                   if card.get(lotr.CARD_DISCORD_CHANNEL, '') == channel_name]
-        if not matches:
-            return 'no card found for this channel'
+            card = data['artwork_ids'][card_id]
+        else:
+            channel_name = message.channel.name
+            matches = [
+                card for card in data['data']
+                if card.get(lotr.CARD_DISCORD_CHANNEL, '') == channel_name]
+            if not matches:
+                return 'no card found for this channel'
 
-        card = matches[0]
-        if card.get(lotr.CARD_SET_LOCKED):
-            return 'set {} is locked for modifications'.format(
-                card[lotr.CARD_SET_NAME])
+            card = matches[0]
+
+            if card.get(lotr.CARD_SET_LOCKED):
+                return 'set {} is locked for modifications'.format(
+                    card[lotr.CARD_SET_NAME])
+
+            card_id = card[lotr.CARD_ID]
 
         if side == 'B' and not card.get(lotr.BACK_PREFIX + lotr.CARD_NAME):
             return 'no side B found for the card'
@@ -3729,7 +3740,7 @@ Targets removed.
         content = await get_attachment_content(message)
         folder = os.path.join(artwork_destination_path, card[lotr.CARD_SET])
         filename = '{}_{}_{}_Artist_{}.{}'.format(
-            card[lotr.CARD_ID],
+            card_id,
             side,
             lotr.escape_filename(card[lotr.CARD_NAME]),
             artist,
@@ -3744,7 +3755,7 @@ Targets removed.
             for _, _, filenames in os.walk(folder):
                 for filename in filenames:
                     if filename.startswith(
-                            '{}_{}'.format(card[lotr.CARD_ID], side)):
+                            '{}_{}'.format(card_id, side)):
                         os.remove(os.path.join(folder, filename))
 
                 break
@@ -4122,7 +4133,20 @@ Targets removed.
             try:
                 side = 'B' if command.lower().startswith('saveb ') else 'A'
                 artist = re.sub(r'^saveb? ', '', command, flags=re.IGNORECASE)
-                error = await self._save_artwork(message, side, artist)
+                if re.match(lotr.UUID_REGEX, artist):
+                    await self._send_channel(message.channel,
+                                             'please specify the artist')
+                    return
+
+                parts = artist.split(' ')
+                if len(parts) > 1 and re.match(lotr.UUID_REGEX, parts[0]):
+                    card_id = parts[0]
+                    artist = ' '.join(parts[1:])
+                else:
+                    card_id = None
+
+                error = await self._save_artwork(message, side, card_id,
+                                                 artist)
             except Exception as exc:
                 logging.exception(str(exc))
                 await self._send_channel(

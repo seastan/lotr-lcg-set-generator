@@ -5751,6 +5751,19 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
     set_codes = {
         (SETS[set_id][SET_HOB_CODE] or '').lower():SETS[set_id][SET_NAME]
         for set_id in FOUND_SETS}
+    artwork_ids = {
+        row[CARD_ID]:{
+            CARD_SET: row[CARD_SET],
+            CARD_NAME: row[CARD_NAME],
+            BACK_PREFIX + CARD_NAME: row[BACK_PREFIX + CARD_NAME]}
+        for row in DATA if row[CARD_ID] is not None and
+        row[CARD_NAME] is not None and row[CARD_NAME] is not None and
+        row[CARD_TYPE] not in CARD_TYPES_NO_ARTWORK and
+        not SETS[row[CARD_SET]].get(SET_LOCKED)}
+    for card_id in artwork_ids:
+        if not artwork_ids[card_id][BACK_PREFIX + CARD_NAME]:
+            del artwork_ids[card_id][BACK_PREFIX + CARD_NAME]
+
     output = {'url': url,
               'sets': set_names,
               'set_ids': set_ids,
@@ -5759,6 +5772,7 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
               'encounter_set_names': list(ALL_ENCOUNTER_SET_NAMES),
               'card_names': list(ALL_CARD_NAMES),
               'traits': list(ALL_TRAITS),
+              'artwork_ids': artwork_ids,
               'data': data}
     with open(DISCORD_CARD_DATA_PATH, 'w', encoding='utf-8') as obj:
         res = json.dumps(output, ensure_ascii=False)
