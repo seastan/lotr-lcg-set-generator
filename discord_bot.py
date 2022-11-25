@@ -39,11 +39,12 @@ CRON_LOG_CMD = './cron_log.sh'
 MONITOR_REMOTE_PIPELINE_CMD = 'python3 monitor_remote_pipeline.py'
 RCLONE_ART_CMD = "rclone copy '{}' 'ALePCardImages:/'"
 RCLONE_ART_FOLDER_CMD = "rclone lsjson 'ALePCardImages:/{}/'"
+RCLONE_COPY_KEEP_ART_CMD = \
+    "rclone copy 'ALePCardImages:/{}/{}/' '{}/{}/{}/'"
 RCLONE_COPY_IMAGE_CMD = "rclone copy 'ALePRenderedImages:/{}/{}' '{}/'"
 RCLONE_COPY_CLOUD_IMAGE_CMD = \
     "rclone copy 'ALePRenderedImages:/{}/{}' 'ALePRenderedImages:/{}/'"
 RCLONE_LOGS_CMD = "rclone copy 'ALePLogs:/' '{}/'"
-RCLONE_IMAGE_FOLDER_CMD = "rclone lsjson 'ALePRenderedImages:/{}/'"
 RCLONE_MOVE_CLOUD_ART_CMD = \
     "rclone move 'ALePCardImages:/{}/{}' 'ALePCardImages:/{}/'"
 RCLONE_RENDERED_FOLDER_CMD = "rclone lsjson 'ALePRenderedImages:/{}/'"
@@ -76,8 +77,9 @@ CARD_DECK_SECTION = '_Deck Section'
 CRON_CHANNEL = 'cron'
 NOTIFICATIONS_CHANNEL = 'notifications'
 PLAYTEST_CHANNEL = 'checklist'
-SCRATCH_FOLDER = '_Scratch'
 UPDATES_CHANNEL = 'spreadsheet-updates'
+KEEP_FOLDER = '_Keep'
+SCRATCH_FOLDER = '_Scratch'
 GENERAL_CATEGORIES = {
     'Text Channels', 'Division of Labor', 'Player Card Design', 'Printing',
     'Rules', 'Voice Channels', 'Archive'
@@ -195,6 +197,12 @@ List of **!stat** commands:
 List of **!art** commands:
 ` `
 **!art artists <set name or set code>** - display a copy-pasteable list of artist names (for example: `!art artists Children of Eorl` or `!art artists CoE`)
+**!art keep <artist>** (as a reply to a message with an image attachment) - keep image for the channel's card (for example: `!art keep Alan Lee`)
+**!art keep <card id> <artist>** (as a reply to a message with an image attachment) - keep image for the card with the given id (for example: `!art keep fd9da66d-06cd-430e-b6d2-9da2aa5bc52c Alan Lee`)
+**!art keep <channel> <artist>** (as a reply to a message with an image attachment) - keep image for the card from the given channel (for example: `!art keep #hunting-dogs Alan Lee`)
+**!art keep** - display all kept images for the channel's card
+**!art keep <card id>** - display all kept images for the card with the given id (for example: `!art keep fd9da66d-06cd-430e-b6d2-9da2aa5bc52c`)
+**!art keep <channel>** - display all kept images for the card from the given channel (for example: `!art keep #hunting-dogs`)
 **!art save <artist>** (as a reply to a message with an image attachment) - save image as the channel's card front artwork (for example: `!art save Alan Lee`)
 **!art save <card id> <artist>** (as a reply to a message with an image attachment) - save image as the front artwork of the card with the given id (for example: `!art save fd9da66d-06cd-430e-b6d2-9da2aa5bc52c Alan Lee`)
 **!art save <channel> <artist>** (as a reply to a message with an image attachment) - save image as the front artwork of the card from the given channel (for example: `!art save #hunting-dogs Alan Lee`)
@@ -3694,6 +3702,173 @@ Targets removed.
                 writer.writerow(row)
 
 
+    async def _display_artwork(self, message, card_id, channel_id):  # pylint: disable=R0911,R0912,R0914
+        """ Display all artwork images kept for the card.
+        """
+        data = await read_card_data()
+        if card_id:
+            if card_id not in data['artwork_ids']:
+                return 'card id not found or is locked'
+        elif channel_id:
+            channel_name = self.get_channel_name_by_id(channel_id)
+            if not channel_name:
+                return 'card channel not found'
+
+            matches = [
+                card for card in data['data']
+                if card.get(lotr.CARD_DISCORD_CHANNEL, '') == channel_name]
+            if not matches:
+                return 'no card found for the channel'
+
+            card = matches[0]
+            if card.get(lotr.CARD_SET_LOCKED):
+                return 'set {} is locked for modifications'.format(
+                    card[lotr.CARD_SET_NAME])
+
+            card_id = card[lotr.CARD_ID]
+        else:
+            channel_name = message.channel.name
+            matches = [
+                card for card in data['data']
+                if card.get(lotr.CARD_DISCORD_CHANNEL, '') == channel_name]
+            if not matches:
+                return 'no card found for this channel'
+
+            card = matches[0]
+            if card.get(lotr.CARD_SET_LOCKED):
+                return 'set {} is locked for modifications'.format(
+                    card[lotr.CARD_SET_NAME])
+
+            card_id = card[lotr.CARD_ID]
+
+        artwork_path = CONF.get('artwork_path')
+        if not artwork_path:
+            raise RCloneFolderError('no artwork folder specified on the '
+                                    'server')
+
+        root_folder = os.path.join(artwork_path, KEEP_FOLDER)
+        folder = os.path.join(root_folder, card_id)
+        async with art_lock:
+            if not os.path.exists(root_folder):
+                os.mkdir(root_folder)
+
+            if not os.path.exists(folder):
+                os.mkdir(folder)
+
+        images_found = False
+        _, _ = await run_shell(
+            RCLONE_COPY_KEEP_ART_CMD.format(KEEP_FOLDER, card_id, artwork_path,
+                                            KEEP_FOLDER, card_id))
+        for _, _, filenames in os.walk(folder):
+            for filename in filenames:
+                if filename.endswith('.png') or filename.endswith('.jpg'):
+                    images_found = True
+                    path = os.path.join(folder, filename)
+                    await message.channel.send(file=discord.File(path))
+                    artist = ' '.join(
+                        '.'.join(filename.split('.')[:-1]).split('_')[1:])
+                    await self._send_channel(message.channel,
+                                             'Artist: {}'.format(artist))
+
+            break
+
+        async with art_lock:
+            shutil.rmtree(folder, ignore_errors=True)
+
+        if not images_found:
+            return 'no artwork images found'
+
+        return ''
+
+
+    async def _keep_artwork(self, message, artist, card_id, channel_id):  # pylint: disable=R0911,R0912,R0914,R0915
+        """ Keep an artwork image for the card.
+        """
+        data = await read_card_data()
+        if card_id:
+            if card_id not in data['artwork_ids']:
+                return 'card id not found or is locked'
+        elif channel_id:
+            channel_name = self.get_channel_name_by_id(channel_id)
+            if not channel_name:
+                return 'card channel not found'
+
+            matches = [
+                card for card in data['data']
+                if card.get(lotr.CARD_DISCORD_CHANNEL, '') == channel_name]
+            if not matches:
+                return 'no card found for the channel'
+
+            card = matches[0]
+            if card.get(lotr.CARD_SET_LOCKED):
+                return 'set {} is locked for modifications'.format(
+                    card[lotr.CARD_SET_NAME])
+
+            card_id = card[lotr.CARD_ID]
+        else:
+            channel_name = message.channel.name
+            matches = [
+                card for card in data['data']
+                if card.get(lotr.CARD_DISCORD_CHANNEL, '') == channel_name]
+            if not matches:
+                return 'no card found for this channel'
+
+            card = matches[0]
+            if card.get(lotr.CARD_SET_LOCKED):
+                return 'set {} is locked for modifications'.format(
+                    card[lotr.CARD_SET_NAME])
+
+            card_id = card[lotr.CARD_ID]
+
+        artwork_destination_path = CONF.get('artwork_destination_path')
+        if not artwork_destination_path:
+            raise RCloneFolderError('no artwork folder specified on the '
+                                    'server')
+
+        if not message.reference or not message.reference.resolved:
+            return 'please reply to a message with an image attachment'
+
+        if not (message.reference.resolved.attachments or
+                message.reference.resolved.embeds):
+            return 'please reply to a message with an image attachment'
+
+        if message.reference.resolved.attachments:
+            attachment = message.reference.resolved.attachments[0]
+            if (attachment.content_type == 'image/png' or
+                    attachment.filename.lower().endswith('png')):
+                filetype = 'png'
+            else:
+                filetype = 'jpg'
+        else:
+            url = message.reference.resolved.embeds[0].url
+            filename = re.sub(r'\/$', '', url.split('#')[0].split('?')[0]
+                             ).split('/')[-1].lower()
+            if filename.endswith('png'):
+                filetype = 'png'
+            else:
+                filetype = 'jpg'
+
+        content = await get_attachment_content(message)
+        root_folder = os.path.join(artwork_destination_path, KEEP_FOLDER)
+        folder = os.path.join(root_folder, card_id)
+        filename = '{}_{}.{}'.format(uuid.uuid4(), artist, filetype)
+        filename = filename.replace(' ', '_')
+        path = os.path.join(folder, filename)
+
+        async with art_lock:
+            if not os.path.exists(root_folder):
+                os.mkdir(root_folder)
+
+            if not os.path.exists(folder):
+                os.mkdir(folder)
+
+            with open(path, 'wb') as f_obj:
+                f_obj.write(content)
+
+            self.rclone_art = True
+
+        return ''
+
     async def _save_artwork(self, message, side, artist, card_id,  # pylint: disable=R0911,R0912,R0913,R0914,R0915
                             channel_id):
         """ Save an artwork image for the card.
@@ -3871,7 +4046,7 @@ Targets removed.
         """ Get the list of rendered images for the set.
         """
         stdout, stderr = await run_shell(
-            RCLONE_IMAGE_FOLDER_CMD.format(set_folder))
+            RCLONE_RENDERED_FOLDER_CMD.format(set_folder))
         try:
             filenames = [f['Name'] for f in json.loads(stdout)]
         except Exception as exc:
@@ -4158,7 +4333,71 @@ Targets removed.
 
         logging.info('Received art command: %s', command)
 
-        if (command.lower().startswith('save ') or
+        if command.lower().startswith('keep '):
+            try:
+                artist = re.sub(r'^keep ', '', command, flags=re.IGNORECASE)
+                if re.match(lotr.UUID_REGEX, artist):
+                    if message.reference and message.reference.resolved:
+                        error = 'please specify the artist'
+                    else:
+                        card_id = artist
+                        error = await self._display_artwork(message, card_id,
+                                                            None)
+                elif re.match(CHANNEL_ID_REGEX, artist):
+                    if message.reference and message.reference.resolved:
+                        error = 'please specify the artist'
+                    else:
+                        channel_id = int(artist[2:-1])
+                        error = await self._display_artwork(message, None,
+                                                            channel_id)
+                else:
+                    parts = artist.split(' ')
+                    if len(parts) > 1 and re.match(lotr.UUID_REGEX, parts[0]):
+                        card_id = parts[0]
+                        channel_id = None
+                        artist = ' '.join(parts[1:])
+                    elif (len(parts) > 1 and re.match(CHANNEL_ID_REGEX,
+                                                      parts[0])):
+                        card_id = None
+                        channel_id = int(parts[0][2:-1])
+                        artist = ' '.join(parts[1:])
+                    else:
+                        card_id = None
+                        channel_id = None
+
+                    error = await self._keep_artwork(message, artist, card_id,
+                                                     channel_id)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await self._send_channel(
+                    message.channel,
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            if error:
+                await self._send_channel(message.channel, error)
+                return
+
+            await self._send_channel(message.channel, 'done')
+        elif command.lower() == 'keep':
+            try:
+                if message.reference and message.reference.resolved:
+                    error = 'please specify the artist'
+                else:
+                    error = await self._display_artwork(message, None, None)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await self._send_channel(
+                    message.channel,
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            if error:
+                await self._send_channel(message.channel, error)
+                return
+
+            await self._send_channel(message.channel, 'done')
+        elif (command.lower().startswith('save ') or
                 command.lower().startswith('saveb ')):
             try:
                 side = 'B' if command.lower().startswith('saveb ') else 'A'

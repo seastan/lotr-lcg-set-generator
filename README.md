@@ -46,7 +46,7 @@ Choose `My Drive` and click `Add Shortcut`.
 
     ```
     <set ID>/
-    <set ID>/<card ID>_<"A" or "B" or "Top" or "Bottom">_<card name and artist, format is not strict>.<"jpg" or "png">
+    <set ID>/<card ID>_<"A"|"B"|"Top"|"Bottom">_<card name and artist, format is not strict>.<"jpg" or "png">
     <set ID>/custom/
     <set ID>/custom/<custom image>
     custom/
@@ -55,9 +55,14 @@ Choose `My Drive` and click `Add Shortcut`.
     generated/<generated lightweight card image>
     icons/
     icons/<icon image>
+    _Keep/
+    _Keep/<card ID>/
+    _Keep/<card ID>/<image ID>_<artist>.<"jpg" or "png">
     _Scratch/
     _Scratch/<backup image>
     ```
+
+    Make sure that top-level folders `custom`, `generated`, `icons`, `_Keep`, and `_Scratch`  exist , even if they are empty.
 
     For example:
 
@@ -74,6 +79,8 @@ Choose `My Drive` and click `Add Shortcut`.
     generated/e904fc83-7bb9-4868-8d80-60c89ade0ce2.jpg
     icons/
     icons/Ambush-at-Erelas.png
+    _Keep/
+    _Keep/53dcedb3-3640-4655-a150-9d0dd534a126/d683951a-e2a9-4e6f-81aa-2943ff6c0a31_John_Howe.png
     _Scratch/
     _Scratch/untitled.png
     ```

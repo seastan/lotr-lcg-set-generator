@@ -7,6 +7,9 @@ ringsdb_url:
 # Discord token
 token: 
 
+# Path to card artwork folder
+artwork_path: 
+
 # Path to card artwork destination folder
 artwork_destination_path: 
 
