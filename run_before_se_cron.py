@@ -279,6 +279,8 @@ def run(conf=None):  # pylint: disable=R0912,R0915
     try:  # pylint: disable=R1702
         if not internet_state():
             logging.warning('Internet is not available right now, exiting')
+            sheet_changes = False
+            scratch_changes = False
             return
 
         sheet_changes, scratch_changes = main(conf)
