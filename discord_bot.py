@@ -3702,7 +3702,7 @@ Targets removed.
                 writer.writerow(row)
 
 
-    async def _display_artwork(self, message, card_id, channel_id):  # pylint: disable=R0911,R0912,R0914
+    async def _display_artwork(self, message, card_id, channel_id):  # pylint: disable=R0911,R0912,R0914,R0915
         """ Display all artwork images kept for the card.
         """
         data = await read_card_data()
@@ -3741,10 +3741,36 @@ Targets removed.
 
             card_id = card[lotr.CARD_ID]
 
+        artwork_destination_path = CONF.get('artwork_destination_path')
+        if not artwork_destination_path:
+            raise RCloneFolderError('no artwork folder specified on the '
+                                    'server')
+
         artwork_path = CONF.get('artwork_path')
         if not artwork_path:
             raise RCloneFolderError('no artwork folder specified on the '
                                     'server')
+
+        found_images = set()
+        local_folder = os.path.join(artwork_destination_path, KEEP_FOLDER,
+                                    card_id)
+        async with art_lock:
+            if os.path.exists(local_folder):
+                for _, _, filenames in os.walk(local_folder):
+                    for filename in filenames:
+                        if (not filename.endswith('.png') and
+                                not filename.endswith('.jpg')):
+                            continue
+
+                        found_images.add(filename)
+                        path = os.path.join(local_folder, filename)
+                        await message.channel.send(file=discord.File(path))
+                        artist = ' '.join(
+                            '.'.join(filename.split('.')[:-1]).split('_')[1:])
+                        await self._send_channel(message.channel,
+                                                 'Artist: {}'.format(artist))
+
+                    break
 
         root_folder = os.path.join(artwork_path, KEEP_FOLDER)
         folder = os.path.join(root_folder, card_id)
@@ -3755,27 +3781,32 @@ Targets removed.
             if not os.path.exists(folder):
                 os.mkdir(folder)
 
-        images_found = False
         _, _ = await run_shell(
             RCLONE_COPY_KEEP_ART_CMD.format(KEEP_FOLDER, card_id, artwork_path,
                                             KEEP_FOLDER, card_id))
         for _, _, filenames in os.walk(folder):
             for filename in filenames:
-                if filename.endswith('.png') or filename.endswith('.jpg'):
-                    images_found = True
-                    path = os.path.join(folder, filename)
-                    await message.channel.send(file=discord.File(path))
-                    artist = ' '.join(
-                        '.'.join(filename.split('.')[:-1]).split('_')[1:])
-                    await self._send_channel(message.channel,
-                                             'Artist: {}'.format(artist))
+                if filename in found_images:
+                    continue
+
+                if (not filename.endswith('.png') and not
+                        filename.endswith('.jpg')):
+                    continue
+
+                found_images.add(filename)
+                path = os.path.join(folder, filename)
+                await message.channel.send(file=discord.File(path))
+                artist = ' '.join(
+                    '.'.join(filename.split('.')[:-1]).split('_')[1:])
+                await self._send_channel(message.channel,
+                                         'Artist: {}'.format(artist))
 
             break
 
         async with art_lock:
             shutil.rmtree(folder, ignore_errors=True)
 
-        if not images_found:
+        if not found_images:
             return 'no artwork images found'
 
         return ''
