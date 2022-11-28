@@ -1713,11 +1713,16 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
         new_checksums[sheet] = hashlib.md5(res.encode('utf-8')).hexdigest()
         if new_checksums[sheet] != old_checksums.get(sheet, ''):
             logging.info('Sheet %s changed', sheet)
-            if sheet != SCRATCH_SHEET:
-                changes = True
 
-            if sheet in (SET_SHEET, SCRATCH_SHEET):
-                scratch_changes = True
+            # we can't do that, because we need to include scratch artwork ids
+            # into card_data.json
+            # if sheet != SCRATCH_SHEET:
+            #     changes = True
+            # if sheet in (SET_SHEET, SCRATCH_SHEET):
+            #    scratch_changes = True
+
+            changes = True
+            scratch_changes = True
 
             path = os.path.join(DOWNLOAD_PATH, '{}.json'.format(sheet))
             with open(path, 'w', encoding='utf-8') as fobj:

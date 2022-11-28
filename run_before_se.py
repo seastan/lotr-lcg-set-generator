@@ -97,7 +97,7 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
     lotr.extract_data(conf, sheet_changes, scratch_changes)
     sets = lotr.get_sets(conf, sheet_changes, scratch_changes)
     sets = lotr.sanity_check(conf, sets)
-    if sheet_changes:
+    if sheet_changes or scratch_changes:
         lotr.save_data_for_bot(conf)
 
     if conf['output_languages']:
