@@ -4,6 +4,8 @@ Discord/users.csv
 Discord/*.json
 Discord/Changes/*.json
 Discord/Images/*/*
+Discord/Temp/*.jpg
+Discord/Temp/*.png
 Download/*.json
 Frogmorton/imagesCustom/*.jpg
 Frogmorton/imagesCustom/*.png

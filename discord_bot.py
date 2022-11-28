@@ -32,10 +32,13 @@ MAIL_COUNTER_PATH = 'discord_bot.cnt'
 MAILS_PATH = 'mails'
 PLAYTEST_PATH = os.path.join('Discord', 'playtest.json')
 RINGSDB_STAT_PATH = 'ringsdb_stat.json'
+TEMP_PATH = os.path.join('Discord', 'Temp')
 USERS_LIST_PATH = os.path.join('Discord', 'users.csv')
 
 CRON_ERRORS_CMD = './cron_errors.sh'
 CRON_LOG_CMD = './cron_log.sh'
+MAGICK_GENERATE_CMD = \
+    'convert -resize {}x{} -gravity center -background black -extent {}x{} -crop {}x{}+0+0 {} {}'
 MONITOR_REMOTE_PIPELINE_CMD = 'python3 monitor_remote_pipeline.py'
 RCLONE_ART_CMD = "rclone copy '{}' 'ALePCardImages:/'"
 RCLONE_ART_FOLDER_CMD = "rclone lsjson 'ALePCardImages:/{}/'"
@@ -109,6 +112,31 @@ EMOJIS = {
     '[pp]': '<:pp:823008093898145792>',
     '[hitpoints]': '<:hitpoints:822572931254714389>',
     '[progress]': '<:progress:823007871494520872>'
+}
+
+PORTRAIT = {
+    'Ally': '87,0,326,330',
+    'Attachment': '40,50,333,280',
+    'Campaign': '0,0,413,245',
+    'Contract': '0,0,413,315',
+    'Encounter Side Quest': '0,0,563,413',
+    'Enemy': '87,0,326,330',
+    'Enemy NoStat': '0,0,413,563',
+    'Event': '60,0,353,330',
+    'Hero': '87,0,326,330',
+    'Location': '0,60,413,268',
+    'Nightmare': '0,77,413,245',
+    'Objective': '0,69,413,300',
+    'Objective Ally': '78,81,335,268',
+    'Objective Hero': '78,81,335,268',
+    'Objective Location': '0,69,413,300',
+    'Player Objective': '0,69,413,300',
+    'Player Side Quest': '0,0,563,413',
+    'Quest': '0,0,563,413',
+    'Ship Enemy': '87,0,326,330',
+    'Ship Objective': '78,81,335,268',
+    'Treachery': '60,0,353,330',
+    'Treasure': '0,61,413,265'
 }
 
 HELP = {
@@ -330,6 +358,7 @@ rclone_art_lock = asyncio.Lock()
 remote_cron_timestamp_lock = asyncio.Lock()
 playtest_lock = asyncio.Lock()
 art_lock = asyncio.Lock()
+generate_lock = asyncio.Lock()
 
 
 class CommunicationError(Exception):
@@ -4011,7 +4040,53 @@ Targets removed.
 
             self.rclone_art = True
 
+#        async with generate_lock:
+#            await self._generate_artwork(card, filetype, side, content)
+
+#            if (side == 'A' and card.get(lotr.BACK_PREFIX + lotr.CARD_NAME) and
+#                    card[lotr.CARD_TYPE] in ('Quest', 'Contract')):
+#                await self._generate_artwork(card, filetype, 'B', content)
+
         return ''
+
+
+    async def _generate_artwork(self, card, filetype, side, content):  # pylint: disable=R0914
+        """ Generate light-weight artwork for the card.
+        """
+        filename = '{}{}.{}'.format(card[lotr.CARD_ID],
+                                    side == 'B' and '.B' or '',
+                                    filetype)
+        path = os.path.join(TEMP_PATH, filename)
+        output_path = os.path.join(lotr.RENDERER_GENERATED_IMAGES_PATH,
+                                   filename)
+        with open(path, 'wb') as f_obj:
+            f_obj.write(content)
+
+        if side == 'A':
+            card_type = card[lotr.CARD_TYPE]
+        else:
+            card_type = card.get(lotr.BACK_PREFIX + lotr.CARD_TYPE, '')
+
+        portrait = PORTRAIT.get(card_type)
+        if not portrait:
+            return
+
+        portrait = portrait.split(',')
+        width = float(round(int(portrait[2]) * 2 / 1.75))
+        height = float(round(int(portrait[3]) * 2 / 1.75))
+        max_dim = max(width, height)
+        command = MAGICK_GENERATE_CMD.format(
+            max_dim, max_dim, max_dim, max_dim, width, height, path, path)
+        stdout, stderr = await run_shell(command)
+
+        if os.path.exists(path):
+            logging.info('Generate light-weight artwork file: %s', filename)
+#            shutil.move(path, output_path)
+        else:
+            message = ('Command "{}" failed, stdout: {}, stderr: {}'
+                       .format(command, stdout, stderr))
+            logging.error(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
 
 
     async def _save_scratch_artwork(self, message, artist=None):

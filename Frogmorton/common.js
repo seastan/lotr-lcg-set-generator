@@ -264,6 +264,7 @@ artistRegion['Ship Objective'] = '63,527,100,15';
 artistRegion['Treachery'] = '63,527,100,15';
 artistRegion['Treasure'] = '63,527,100,15';
 
+// UPDATE discord_bot.py and scripts.py
 var portraitRegion = {};
 portraitRegion['Ally'] = '87,0,326,330';
 portraitRegion['Attachment'] = '40,50,333,280';

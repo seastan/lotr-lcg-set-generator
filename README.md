@@ -254,7 +254,7 @@ Additional steps:
 1. Install additional dependencies:
 
   - `pip install discord.py==1.7.3 aiohttp`
-  - `sudo apt-get install nodejs npm`
+  - `sudo apt-get install nodejs npm imagemagick`
   - Download the latest stable `wkhtmltopdf` package for your platform from https://wkhtmltopdf.org/downloads.html and run `sudo apt-get install <path to the package file>`.
   - `cd Renderer/; npm install fast-xml-parser he; cd ..`
 
