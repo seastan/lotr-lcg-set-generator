@@ -1755,6 +1755,16 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
                 res.setdefault('Possibly capitalized keywords',
                                []).append(data)
 
+        if re.search(r'\bsearch[^.]+?\bdeck(?!.+?\bshuffle)', paragraph,
+                     flags=re.IGNORECASE):
+            data = {'name': card[lotr.CARD_NAME],
+                    'field': field,
+                    'text': re.sub(r'\b(search[^ ]*)(?=[^.]+?\bdeck)',
+                                   '__**\\1**__', paragraph,
+                                   flags=re.IGNORECASE),
+                    'row': card[lotr.ROW_COLUMN]}
+            res.setdefault('Shuffle after search', []).append(data)
+
         if re.search(r'\b(?:they|them|their)\b', paragraph,
                      flags=re.IGNORECASE):
             data = {'name': card[lotr.CARD_NAME],
@@ -4828,7 +4838,9 @@ Targets removed.
 
         output = []
         for rule, card_list in res.items():
-            rule_output = '__**{}**:__'.format(rule)
+            rule_output = (
+                '\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\n**{}**:\n'
+                '\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_'.format(rule))
             for card_data in card_list:
                 row_url = '<{}&range=A{}>'.format(data['url'],
                                                   card_data['row'])
@@ -4926,7 +4938,9 @@ Targets removed.
 
         output = []
         for rule, card_list in res.items():
-            rule_output = '__**{}**:__'.format(rule)
+            rule_output = (
+                '\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\n**{}**:\n'
+                '\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_'.format(rule))
             for card_data in card_list:
                 row_url = '<{}&range=A{}>'.format(data['url'],
                                                   card_data['row'])
@@ -5041,7 +5055,9 @@ Targets removed.
 
         output = []
         for rule, card_list in res.items():
-            rule_output = '__**{}**:__'.format(rule)
+            rule_output = (
+                '\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\n**{}**:\n'
+                '\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_'.format(rule))
             for card_data in card_list:
                 row_url = '<{}&range=A{}>'.format(data['url'],
                                                   card_data['row'])
