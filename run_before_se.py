@@ -100,6 +100,8 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
     if sheet_changes or scratch_changes:
         lotr.save_data_for_bot(conf)
 
+    lotr.expire_dragncards_hashes()
+
     if conf['output_languages']:
         lotr.verify_images(conf)
         lotr.reset_project_folders(conf)

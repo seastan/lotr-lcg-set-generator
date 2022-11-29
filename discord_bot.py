@@ -37,8 +37,9 @@ USERS_LIST_PATH = os.path.join('Discord', 'users.csv')
 
 CRON_ERRORS_CMD = './cron_errors.sh'
 CRON_LOG_CMD = './cron_log.sh'
-MAGICK_GENERATE_CMD = \
-    'convert -resize {}x{} -gravity center -background black -extent {}x{} -crop {}x{}+0+0 {} {}'
+MAGICK_GENERATE_CMD = (
+    'convert -resize {}x{} -gravity center -background black -extent {}x{} '
+    '-crop {}x{}+0+0 -format jpg {} {}')
 MONITOR_REMOTE_PIPELINE_CMD = 'python3 monitor_remote_pipeline.py'
 RCLONE_ART_CMD = "rclone copy '{}' 'ALePCardImages:/'"
 RCLONE_ART_FOLDER_CMD = "rclone lsjson 'ALePCardImages:/{}/'"
@@ -3949,6 +3950,7 @@ Targets removed.
                 return 'card id not found or is locked'
 
             card = data['artwork_ids'][card_id]
+            card[lotr.CARD_ID] = card_id
         elif channel_id:
             channel_name = self.get_channel_name_by_id(channel_id)
             if not channel_name:
@@ -3964,8 +3966,6 @@ Targets removed.
             if card.get(lotr.CARD_SET_LOCKED):
                 return 'set {} is locked for modifications'.format(
                     card[lotr.CARD_SET_NAME])
-
-            card_id = card[lotr.CARD_ID]
         else:
             channel_name = message.channel.name
             matches = [
@@ -3978,8 +3978,6 @@ Targets removed.
             if card.get(lotr.CARD_SET_LOCKED):
                 return 'set {} is locked for modifications'.format(
                     card[lotr.CARD_SET_NAME])
-
-            card_id = card[lotr.CARD_ID]
 
         if side == 'B' and not card.get(lotr.BACK_PREFIX + lotr.CARD_NAME):
             return 'no side B found for the card'
@@ -4015,7 +4013,7 @@ Targets removed.
         content = await get_attachment_content(message)
         folder = os.path.join(artwork_destination_path, card[lotr.CARD_SET])
         filename = '{}_{}_{}_Artist_{}.{}'.format(
-            card_id,
+            card[lotr.CARD_ID],
             side,
             lotr.escape_filename(card[lotr.CARD_NAME]),
             artist,
@@ -4030,7 +4028,7 @@ Targets removed.
             for _, _, filenames in os.walk(folder):
                 for filename in filenames:
                     if filename.startswith(
-                            '{}_{}'.format(card_id, side)):
+                            '{}_{}'.format(card[lotr.CARD_ID], side)):
                         os.remove(os.path.join(folder, filename))
 
                 break
@@ -4040,12 +4038,12 @@ Targets removed.
 
             self.rclone_art = True
 
-#        async with generate_lock:
-#            await self._generate_artwork(card, filetype, side, content)
+        async with generate_lock:
+            await self._generate_artwork(card, filetype, side, content)
 
-#            if (side == 'A' and card.get(lotr.BACK_PREFIX + lotr.CARD_NAME) and
-#                    card[lotr.CARD_TYPE] in ('Quest', 'Contract')):
-#                await self._generate_artwork(card, filetype, 'B', content)
+            if (side == 'A' and card.get(lotr.BACK_PREFIX + lotr.CARD_NAME) and
+                    card[lotr.CARD_TYPE] in ('Quest', 'Contract')):
+                await self._generate_artwork(card, filetype, 'B', content)
 
         return ''
 
@@ -4053,15 +4051,6 @@ Targets removed.
     async def _generate_artwork(self, card, filetype, side, content):  # pylint: disable=R0914
         """ Generate light-weight artwork for the card.
         """
-        filename = '{}{}.{}'.format(card[lotr.CARD_ID],
-                                    side == 'B' and '.B' or '',
-                                    filetype)
-        path = os.path.join(TEMP_PATH, filename)
-        output_path = os.path.join(lotr.RENDERER_GENERATED_IMAGES_PATH,
-                                   filename)
-        with open(path, 'wb') as f_obj:
-            f_obj.write(content)
-
         if side == 'A':
             card_type = card[lotr.CARD_TYPE]
         else:
@@ -4071,22 +4060,52 @@ Targets removed.
         if not portrait:
             return
 
+        filename = '{}{}.temp.{}'.format(card[lotr.CARD_ID],
+                                         side == 'B' and '.B' or '',
+                                         filetype)
+        path = os.path.join(TEMP_PATH, filename)
+        output_filename = re.sub(r'\.temp\.(?:jpg|png)$', '.jpg', filename)
+        output_path = os.path.join(TEMP_PATH, output_filename)
+        destination_path = os.path.join(lotr.RENDERER_GENERATED_IMAGES_PATH,
+                                        output_filename)
+        with open(path, 'wb') as f_obj:
+            f_obj.write(content)
+
         portrait = portrait.split(',')
         width = float(round(int(portrait[2]) * 2 / 1.75))
         height = float(round(int(portrait[3]) * 2 / 1.75))
         max_dim = max(width, height)
         command = MAGICK_GENERATE_CMD.format(
-            max_dim, max_dim, max_dim, max_dim, width, height, path, path)
+            max_dim, max_dim, max_dim, max_dim, width, height, path,
+            output_path)
         stdout, stderr = await run_shell(command)
 
-        if os.path.exists(path):
-            logging.info('Generate light-weight artwork file: %s', filename)
-#            shutil.move(path, output_path)
+        if os.path.exists(output_path):
+            logging.info('Generated light-weight artwork file: %s', filename)
+            shutil.move(output_path, destination_path)
+
+            try:
+                with open(lotr.EXPIRE_DRAGNCARDS_JSON_PATH, 'r',
+                          encoding='utf-8') as fobj:
+                    expired_hashes = json.load(fobj)
+            except Exception:
+                expired_hashes = []
+
+            expired_hashes.append(card[lotr.CARD_ID])
+
+            with open(lotr.EXPIRE_DRAGNCARDS_JSON_PATH, 'w',
+                      encoding='utf-8') as fobj:
+                json.dump(expired_hashes, fobj)
+
+            delete_sheet_checksums()
         else:
             message = ('Command "{}" failed, stdout: {}, stderr: {}'
                        .format(command, stdout, stderr))
             logging.error(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
+
+        if os.path.exists(path):
+            os.remove(path)
 
 
     async def _save_scratch_artwork(self, message, artist=None):

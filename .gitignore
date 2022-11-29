@@ -46,6 +46,7 @@ download_time.txt
 dragncards.json
 dragncards_folder.txt
 dragncards_timestamps.json
+expire_dragncards.json
 generate_dragncards.json
 id_rsa
 last_remote_cron_timestamp

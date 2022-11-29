@@ -468,6 +468,7 @@ DOWNLOAD_TIME_PATH = 'download_time.txt'
 DRAGNCARDS_JSON_PATH = 'dragncards.json'
 DRAGNCARDS_FOLDER_PATH = 'dragncards_folder.txt'
 DRAGNCARDS_TIMESTAMPS_JSON_PATH = 'dragncards_timestamps.json'
+EXPIRE_DRAGNCARDS_JSON_PATH = 'expire_dragncards.json'
 GENERATE_DRAGNCARDS_JSON_PATH = 'generate_dragncards.json'
 GENERATE_DRAGNCARDS_LOG_PATH = os.path.join('Renderer', 'Output',
                                             'generate_dragncards.txt')
@@ -5760,7 +5761,9 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
         row[CARD_ID]:{
             CARD_SET: row[CARD_SET],
             CARD_NAME: row[CARD_NAME],
-            BACK_PREFIX + CARD_NAME: row[BACK_PREFIX + CARD_NAME]}
+            CARD_TYPE: row[CARD_TYPE],
+            BACK_PREFIX + CARD_NAME: row[BACK_PREFIX + CARD_NAME],
+            BACK_PREFIX + CARD_TYPE: row[BACK_PREFIX + CARD_TYPE]}
         for row in DATA if row[CARD_ID] is not None and
         row[CARD_NAME] is not None and row[CARD_NAME] is not None and
         row[CARD_TYPE] not in CARD_TYPES_NO_ARTWORK and
@@ -5768,6 +5771,9 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
     for card_id in artwork_ids:
         if not artwork_ids[card_id][BACK_PREFIX + CARD_NAME]:
             del artwork_ids[card_id][BACK_PREFIX + CARD_NAME]
+
+        if not artwork_ids[card_id][BACK_PREFIX + CARD_TYPE]:
+            del artwork_ids[card_id][BACK_PREFIX + CARD_TYPE]
 
     output = {'url': url,
               'sets': set_names,
@@ -8544,6 +8550,43 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
     tree.write(xml_path)
     logging.info('[%s, %s] ...Updating the xml file with additional data '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
+
+
+def expire_dragncards_hashes():
+    """ Expire Dragncards hashes requested by Discord bot.
+    """
+    logging.info('Expiring Dragncards hashes')
+    timestamp = time.time()
+
+    try:
+        with open(EXPIRE_DRAGNCARDS_JSON_PATH, 'r',
+                  encoding='utf-8') as fobj:
+            expired_hashes = json.load(fobj)
+            if not expired_hashes:
+                return
+    except Exception:
+        return
+
+    try:
+        with open(GENERATE_DRAGNCARDS_JSON_PATH, 'r',
+                  encoding='utf-8') as fobj:
+            dragncards_hashes = json.load(fobj)
+    except Exception:
+        return
+    else:
+        for card_id in expired_hashes:
+            if card_id in dragncards_hashes:
+                dragncards_hashes[card_id] = 'expired'
+
+        with open(GENERATE_DRAGNCARDS_JSON_PATH, 'w',
+                  encoding='utf-8') as fobj:
+            json.dump(dragncards_hashes, fobj)
+
+    if os.path.exists(EXPIRE_DRAGNCARDS_JSON_PATH):
+        os.remove(EXPIRE_DRAGNCARDS_JSON_PATH)
+
+    logging.info(' ...Expiring Dragncards hashes (%ss)',
+                 round(time.time() - timestamp, 3))
 
 
 def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0912,R0914
