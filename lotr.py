@@ -8562,28 +8562,33 @@ def expire_dragncards_hashes():
         with open(EXPIRE_DRAGNCARDS_JSON_PATH, 'r',
                   encoding='utf-8') as fobj:
             expired_hashes = json.load(fobj)
-            if not expired_hashes:
-                return
     except Exception:
-        return
+        expired_hashes = []
 
-    try:
-        with open(GENERATE_DRAGNCARDS_JSON_PATH, 'r',
-                  encoding='utf-8') as fobj:
-            dragncards_hashes = json.load(fobj)
-    except Exception:
-        return
-    else:
-        for card_id in expired_hashes:
-            if card_id in dragncards_hashes:
-                dragncards_hashes[card_id] = 'expired'
+    if expired_hashes:
+        try:
+            with open(GENERATE_DRAGNCARDS_JSON_PATH, 'r',
+                      encoding='utf-8') as fobj:
+                dragncards_hashes = json.load(fobj)
+        except Exception:
+            pass
+        else:
+            for card_id in expired_hashes:
+                if card_id in dragncards_hashes:
+                    dragncards_hashes[card_id] = 'expired'
 
-        with open(GENERATE_DRAGNCARDS_JSON_PATH, 'w',
-                  encoding='utf-8') as fobj:
-            json.dump(dragncards_hashes, fobj)
+            if os.path.exists(GENERATE_DRAGNCARDS_JSON_PATH):
+                shutil.copyfile(
+                    GENERATE_DRAGNCARDS_JSON_PATH,
+                    re.sub(r'\.json$', '.json.backup',
+                           GENERATE_DRAGNCARDS_JSON_PATH))
 
-    if os.path.exists(EXPIRE_DRAGNCARDS_JSON_PATH):
-        os.remove(EXPIRE_DRAGNCARDS_JSON_PATH)
+            with open(GENERATE_DRAGNCARDS_JSON_PATH, 'w',
+                      encoding='utf-8') as fobj:
+                json.dump(dragncards_hashes, fobj)
+
+        if os.path.exists(EXPIRE_DRAGNCARDS_JSON_PATH):
+            os.remove(EXPIRE_DRAGNCARDS_JSON_PATH)
 
     logging.info(' ...Expiring Dragncards hashes (%ss)',
                  round(time.time() - timestamp, 3))
@@ -8827,6 +8832,12 @@ def generate_dragncards_proxies(sets):
                     old_cards = json.load(fobj)
             except Exception:
                 old_cards = {}
+
+            if os.path.exists(GENERATE_DRAGNCARDS_JSON_PATH):
+                shutil.copyfile(
+                    GENERATE_DRAGNCARDS_JSON_PATH,
+                    re.sub(r'\.json$', '.json.backup',
+                           GENERATE_DRAGNCARDS_JSON_PATH))
 
             cards = {**old_cards, **cards}
             with open(GENERATE_DRAGNCARDS_JSON_PATH, 'w',

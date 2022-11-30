@@ -48,6 +48,7 @@ RCLONE_COPY_KEEP_ART_CMD = \
 RCLONE_COPY_IMAGE_CMD = "rclone copy 'ALePRenderedImages:/{}/{}' '{}/'"
 RCLONE_COPY_CLOUD_IMAGE_CMD = \
     "rclone copy 'ALePRenderedImages:/{}/{}' 'ALePRenderedImages:/{}/'"
+RCLONE_GENERATED_CMD = "rclone copy '{}' 'ALePCardImages:/generated/'"
 RCLONE_LOGS_CMD = "rclone copy 'ALePLogs:/' '{}/'"
 RCLONE_MOVE_CLOUD_ART_CMD = \
     "rclone move 'ALePCardImages:/{}/{}' 'ALePCardImages:/{}/'"
@@ -4082,8 +4083,16 @@ Targets removed.
 
         if os.path.exists(output_path):
             logging.info('Generated light-weight artwork file: %s', filename)
-            shutil.move(output_path, destination_path)
+            stdout, stderr = await run_shell(
+                RCLONE_GENERATED_CMD.format(output_path))
+            if stdout or stderr:
+                message = (
+                    'RClone failed (generated artwork), stdout: {}, stderr: {}'
+                    .format(stdout, stderr))
+                logging.error(message)
+                create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
 
+            shutil.move(output_path, destination_path)
             try:
                 with open(lotr.EXPIRE_DRAGNCARDS_JSON_PATH, 'r',
                           encoding='utf-8') as fobj:
