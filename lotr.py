@@ -8660,7 +8660,8 @@ def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0912,R0914
 
         for card in root[0]:
             if (old_hashes.get(card.attrib['id']) == card.attrib['hash'] and
-                    card.attrib['id'] not in changed_cards):
+                    card.attrib['id'] not in changed_cards and
+                    old_dragncards_hashes.get(card.attrib['id']) != 'expired'):
                 skip_ids.add(card.attrib['id'])
                 card.set('skip', '1')
 
