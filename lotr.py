@@ -5566,7 +5566,7 @@ def _get_card_diffs(old_card, new_card):
     return diffs
 
 
-def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
+def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
     """ Save the data for the Discord bot.
     """
     logging.info('Saving the data for the Discord bot...')
@@ -5757,6 +5757,7 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
     set_codes = {
         (SETS[set_id][SET_HOB_CODE] or '').lower():SETS[set_id][SET_NAME]
         for set_id in FOUND_SETS}
+    valid_set_ids = {s[0] for s in sets}
     artwork_ids = {
         row[CARD_ID]:{
             CARD_SET: row[CARD_SET],
@@ -5764,8 +5765,7 @@ def save_data_for_bot(conf):  # pylint: disable=R0912,R0914,R0915
             CARD_TYPE: row[CARD_TYPE],
             BACK_PREFIX + CARD_NAME: row[BACK_PREFIX + CARD_NAME],
             BACK_PREFIX + CARD_TYPE: row[BACK_PREFIX + CARD_TYPE]}
-        for row in DATA if row[CARD_ID] is not None and
-        row[CARD_NAME] is not None and row[CARD_NAME] is not None and
+        for row in DATA if row[CARD_SET] in valid_set_ids and
         row[CARD_TYPE] not in CARD_TYPES_NO_ARTWORK and
         not SETS[row[CARD_SET]].get(SET_LOCKED)}
     for card_id in artwork_ids:
