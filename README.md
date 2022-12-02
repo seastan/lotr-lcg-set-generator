@@ -260,8 +260,8 @@ Additional steps:
 
 2. Create `discord.yaml` (see `discord.default.yaml`).
 
-3. Create `mpc_monitor.json` (see `mpc_monitor.default.json`), `ringsdb_prod_cookies.json` (see `ringsdb_prod_cookies.default.json`)
-and `scheduled_backup.json` (see `scheduled_backup.default.json`).
+3. Create `mpc_monitor.json` (see `mpc_monitor.default.json`), `ringsdb_prod_cookies.json` (see `ringsdb_prod_cookies.default.json`),
+`scheduled_backup.json` (see `scheduled_backup.default.json`) and `mail.yaml` (see `mail.default.json`).
 
 4. Setup rclone:
 
@@ -286,6 +286,7 @@ and `scheduled_backup.json` (see `scheduled_backup.default.json`).
   - `36 9 * * *     python3 <path>/monitor_remote_pipeline.py >> <path>/cron.log 2>&1`
   - `36 8 * * *     python3 <path>/monitor_wordpress.py >> <path>/cron.log 2>&1`
   - `* * * * *      <path>/check_discord_bot.sh >> <path>/cron.log 2>&1`
+  - `* * * * *      <path>/check_mail.sh >> <path>/cron.log 2>&1`
   - `* * * * *      <path>/check_run_before_se_service.sh >> <path>/cron.log 2>&1`
   - `7 0 * * *      <path>/rclone_backup.sh "<local Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
   - `22,52 * * * *  <path>/rclone_renderer.sh >> <path>/cron.log 2>&1`
@@ -306,14 +307,7 @@ are not needed and may be deleted).  Find a `ttf` file for the `Times New Roman`
 `c:\Windows\Fonts` folder on a Windows machine or download from Internet) and put it in
 `lotr-lcg-set-generator/Renderer/Fonts` folder as `times.ttf`.
 
-7. The pipeline relies on an external service to send emails and it's your responsibility to implement it :)
-
-    In the root folder either create `mails` subfolder or a symlink to some external folder.  That external service
-    should expect in this folder JSON files in the following format:
-
-    {"subject": "`<email subject>`", "body": "`<email body>`", "html": `<true (html) or false (text)>`}
-
-8. Optionally, you may introduce an Internet sensor to be notified when the Internet is not available (so the scripts
+7. Optionally, you may introduce an Internet sensor to be notified when the Internet is not available (so the scripts
 that depend on Internet connectivity won't spam with redundant error messages).  If in the root folder there is a file
 called `internet_state` (it may be a symlink) and it contains `off` then the scripts will assume that there is no
 Internet connectivity.
@@ -321,6 +315,7 @@ Internet connectivity.
 If you want to manually restart the scripts, run:
 
 - `./restart_discord_bot.sh`
+- `./restart_mail.sh`
 - `./restart_run_before_se_service.sh`
 
 If you want to add a new MakePlayingCards deck to monitoring, run:
