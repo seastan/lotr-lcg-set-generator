@@ -15,8 +15,6 @@ Frogmorton/imagesRaw/*.png
 Frogmorton/XML/*.xml
 imagesEons/*/*/*
 imagesTTS/*/*
-internet_state
-mails
 Output/*/*/*
 Output/Scripts/*.csv
 Output/Scripts/*.json
@@ -50,8 +48,10 @@ expire_dragncards.json
 generate_dragncards.json
 generate_dragncards.json.backup
 id_rsa
+internet_state
 last_remote_cron_timestamp
 mail.yaml
+mails
 makeCards_FINISHED
 monitor_discord_changes_TRIGGERED
 monitor_remote_pipeline.json
