@@ -308,11 +308,6 @@ are not needed and may be deleted).  Find a `ttf` file for the `Times New Roman`
 `c:\Windows\Fonts` folder on a Windows machine or download from Internet) and put it in
 `lotr-lcg-set-generator/Renderer/Fonts` folder as `times.ttf`.
 
-7. Optionally, you may introduce an Internet sensor to be notified when the Internet is not available (so the scripts
-that depend on Internet connectivity won't spam with redundant error messages).  If in the root folder there is a file
-called `internet_state` (it may be a symlink) and it contains `off` then the scripts will assume that there is no
-Internet connectivity.
-
 If you want to manually restart the scripts, run:
 
 - `./restart_discord_bot.sh`
