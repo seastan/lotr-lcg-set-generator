@@ -1091,9 +1091,10 @@ def format_matches(matches, num):
 
 
 def delete_sheet_checksums():
-    """ Delete existing spredsheet checksums.
+    """ Delete existing spreadsheet checksums.
     """
-    os.remove(lotr.SHEETS_JSON_PATH)
+    if os.path.exists(lotr.SHEETS_JSON_PATH):
+        os.remove(lotr.SHEETS_JSON_PATH)
 
 
 async def restart_bot():
