@@ -276,6 +276,7 @@ def run(conf=None):  # pylint: disable=R0912,R0915
 
     sheet_changes = True
     scratch_changes = True
+    timestamp = time.time()
     try:  # pylint: disable=R1702
         if not internet_state():
             logging.warning('Internet is not available right now, exiting')
@@ -303,6 +304,7 @@ def run(conf=None):  # pylint: disable=R0912,R0915
     except SanityCheckError as exc:
         message = str(exc)[:LOG_LIMIT]
         logging.error(message)
+        logging.info('Done (%ss)', round(time.time() - timestamp, 3))
         if message != get_sanity_check_message():
             try:
                 if send_discord(message):
