@@ -278,7 +278,9 @@ Additional steps:
   - `ALePOCTGN` (points to `Playtesting/OCTGN Files`)
   - `ALePRenderedImages` (points to `RenderedImages`)
 
-5. Setup crons:
+5. In the root folder create `id_rsa` to upload files to DragnCards.
+
+6. Setup crons:
 
   - `*/5 * * * * flock -xn <path>/mpc_monitor.lock -c 'python3 <path>/mpc_monitor.py > /dev/null' 2>&1`
   - `5 11 * * *     python3 <path>/download_ringsdb_stat.py >> <path>/cron.log 2>&1`
@@ -304,7 +306,7 @@ Additional steps:
     Replace `<path>` with the absolute path to the root folder.  `cron.log` may be located either in the root folder
     or in some external folder (if you already have other crons).  Set `<backup folder>` to your actual backup folder.
 
-6. Copy all `ttf` files from `lotr-lcg-se-plugin/TheLordOfTheRingsLCG-B/resources/TheLordOfTheRingsLCG/font/` folder
+7. Copy all `ttf` files from `lotr-lcg-se-plugin/TheLordOfTheRingsLCG-B/resources/TheLordOfTheRingsLCG/font/` folder
 including `VAFTHRUD.TTF` to `lotr-lcg-set-generator/Renderer/Fonts` folder (`LRLfont.ttf` and `LRLwindlass.ttf`
 are not needed and may be deleted).  Find a `ttf` file for the `Times New Roman` font (you may find it in
 `c:\Windows\Fonts` folder on a Windows machine or download from Internet) and put it in
