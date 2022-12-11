@@ -285,9 +285,11 @@ Additional steps:
   - `9 * * * *      python3 <path>/check_ringsdb_alep_decks.py >> <path>/cron.log 2>&1`
   - `36 9 * * *     python3 <path>/monitor_remote_pipeline.py >> <path>/cron.log 2>&1`
   - `36 8 * * *     python3 <path>/monitor_wordpress.py >> <path>/cron.log 2>&1`
+  - `*/5 * * * *    <path>/check_cron.sh >> <path>/cron.log 2>&1`
   - `* * * * *      <path>/check_discord_bot.sh >> <path>/cron.log 2>&1`
   - `* * * * *      <path>/check_internet_state.sh >> <path>/cron.log 2>&1`
   - `* * * * *      <path>/check_mail.sh >> <path>/cron.log 2>&1`
+  - `*/10 * * * *   <path>/check_mpc_monitor.sh >> <path>/cron.log 2>&1`
   - `* * * * *      <path>/check_run_before_se_service.sh >> <path>/cron.log 2>&1`
   - `7 0 * * *      <path>/rclone_backup.sh "<local Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
   - `22,52 * * * *  <path>/rclone_renderer.sh >> <path>/cron.log 2>&1`
