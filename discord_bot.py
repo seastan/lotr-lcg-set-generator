@@ -1334,13 +1334,14 @@ async def get_rendered_images(set_name):  # pylint: disable=R0914
     lotr.clear_folder(local_path)
     lotr.create_folder(local_path)
 
+    download_time_file = os.path.split(lotr.DOWNLOAD_TIME_PATH)[-1]
     folder = '{}.English'.format(lotr.escape_filename(set_name))
     stdout, stderr = await run_shell(RCLONE_RENDERED_FOLDER_CMD.format(folder))
     try:
         items = sorted(json.loads(stdout),
                        key=lambda i: i['Name']
                        if (i['Name'].endswith('-2.png')
-                           or i['Name'] == lotr.DOWNLOAD_TIME_PATH)
+                           or i['Name'] == download_time_file)
                        else re.sub(r'\.png$', '-1.png', i['Name']))
     except Exception:
         message = ('RClone failed (rendered images), stdout: {}, stderr: {}'
@@ -1363,7 +1364,7 @@ async def get_rendered_images(set_name):  # pylint: disable=R0914
     download_time = None
     for item in items:
         filename = item['Name']
-        if filename == lotr.DOWNLOAD_TIME_PATH:
+        if filename == download_time_file:
             file_path = os.path.join(local_path, filename)
             stdout, stderr = await run_shell(
                 RCLONE_COPY_IMAGE_CMD.format(folder, filename, local_path))

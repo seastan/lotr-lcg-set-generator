@@ -6,7 +6,7 @@ import yaml
 from lotr import CONFIGURATION_PATH
 
 
-LOG_PATH_FILE = 'remote_logs_path'
+LOG_PATH_FILE = 'remote_logs_path.txt'
 
 
 if __name__ == '__main__':

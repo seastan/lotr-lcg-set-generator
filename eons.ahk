@@ -1,4 +1,4 @@
-FileRead, LogPath, remote_logs_path
+FileRead, LogPath, remote_logs_path.txt
 LogPath := LogPath "\autohotkey.log"
 
 WriteLog(LogPath, "starting")

@@ -5,5 +5,5 @@ if [[ ! "$DECK" ]]; then
   echo 'No deck name specified'
   exit 1
 fi
-flock -x /home/homeassistant/lotr-lcg-set-generator/mpc_monitor.lock -c "python3 /home/homeassistant/lotr-lcg-set-generator/mpc_monitor.py \"$DECK\""
+flock -x mpc_monitor.lock -c "python3 mpc_monitor.py \"$DECK\""
 echo 'Done'

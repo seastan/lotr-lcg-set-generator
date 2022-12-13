@@ -459,6 +459,8 @@ CARD_BACKS = {'player': {'mpc': ['playerBackOfficialMPC.png',
                             'genericpng': ['encounterBackOfficial.png',
                                            'encounterBackUnofficial.png']}}
 
+TEMP_ROOT_PATH = 'Temp'
+
 CONFIGURATION_PATH = 'configuration.yaml'
 DISCORD_PATH = 'Discord'
 DISCORD_CARD_DATA_PATH = os.path.join(DISCORD_PATH, 'card_data.json')
@@ -466,9 +468,10 @@ DISCORD_TIMESTAMPS_PATH = os.path.join(DISCORD_PATH, 'timestamps.json')
 DOWNLOAD_PATH = 'Download'
 DOWNLOAD_TIME_PATH = 'download_time.txt'
 DRAGNCARDS_JSON_PATH = 'dragncards.json'
-DRAGNCARDS_FOLDER_PATH = 'dragncards_folder.txt'
+DRAGNCARDS_FOLDER_PATH = os.path.join(TEMP_ROOT_PATH, 'dragncards_folder.txt')
 DRAGNCARDS_TIMESTAMPS_JSON_PATH = 'dragncards_timestamps.json'
-EXPIRE_DRAGNCARDS_JSON_PATH = 'expire_dragncards.json'
+EXPIRE_DRAGNCARDS_JSON_PATH = os.path.join(TEMP_ROOT_PATH,
+                                           'expire_dragncards.json')
 GENERATE_DRAGNCARDS_JSON_PATH = 'generate_dragncards.json'
 GENERATE_DRAGNCARDS_LOG_PATH = os.path.join('Renderer', 'Output',
                                             'generate_dragncards.txt')
@@ -514,14 +517,13 @@ PROJECT_CREATED_PATH = 'setGenerator_CREATED'
 RENDERER_GENERATED_IMAGES_PATH = os.path.join('Renderer', 'GeneratedImages')
 RENDERER_OUTPUT_PATH = os.path.join('Renderer', 'Output')
 REPROCESS_ALL_PATH = 'REPROCESS_ALL'
-REPROCESS_COUNT_PATH = 'reprocess.cnt'
+REPROCESS_COUNT_PATH = os.path.join(TEMP_ROOT_PATH, 'reprocess_count.json')
 RINGSDB_COOKIES_PATH = 'ringsdb_cookies.json'
 RINGSDB_JSON_PATH = 'ringsdb.json'
 RUN_BEFORE_SE_STARTED_PATH = 'runBeforeSE_STARTED'
 SET_EONS_PATH = 'setEons'
 SET_OCTGN_PATH = 'setOCTGN'
 SHEETS_JSON_PATH = 'sheets.json'
-TEMP_ROOT_PATH = 'Temp'
 URL_CACHE_PATH = 'urlCache'
 XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
 XML_ZIP_PATH = '{}/XML/'.format(os.path.split(PROJECT_FOLDER)[-1])
@@ -12170,6 +12172,7 @@ def _read_remote_dragncards_folder():
     with open(DRAGNCARDS_FOLDER_PATH, 'r', encoding='utf-8') as fobj:
         remote_folder = fobj.read()
 
+    os.remove(DRAGNCARDS_FOLDER_PATH)
     if not remote_folder:
         raise DragnCardsError(
             'Error reading remote DragnCards folder from the local file')

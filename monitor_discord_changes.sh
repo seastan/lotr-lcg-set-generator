@@ -6,13 +6,13 @@ if [[ "$LAST_TIME_RAW" ]]; then
   CURRENT_TS=`date +"%s"`
   let "DIFF = $CURRENT_TS - $LAST_TS"
   if [ $DIFF -ge 120 ]; then
-    if [ ! -f monitor_discord_changes_TRIGGERED ]; then
+    if [ ! -f Temp/monitor_discord_changes.txt ]; then
       python3 create_mail.py "Discord Changes Monitoring Alert: there are unprocessed JSON files in the queue" "" > /dev/null
-      touch monitor_discord_changes_TRIGGERED
+      touch Temp/monitor_discord_changes.txt
     fi
   else
-    rm -rf monitor_discord_changes_TRIGGERED
+    rm -rf Temp/monitor_discord_changes.txt
   fi
 else
-  rm -rf monitor_discord_changes_TRIGGERED
+  rm -rf Temp/monitor_discord_changes.txt
 fi
