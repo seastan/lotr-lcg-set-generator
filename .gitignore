@@ -56,6 +56,7 @@ makeCards_FINISHED
 monitor_discord_changes_TRIGGERED
 monitor_remote_pipeline.json
 mpc_monitor.json
+mpc_monitor_cookies.json
 pipeline_STARTED
 remote_logs_path
 reprocess.cnt

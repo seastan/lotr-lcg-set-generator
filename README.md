@@ -260,8 +260,9 @@ Additional steps:
 
 2. Create `discord.yaml` (see `discord.default.yaml`).
 
-3. Create `mpc_monitor.json` (see `mpc_monitor.default.json`), `ringsdb_prod_cookies.json` (see `ringsdb_prod_cookies.default.json`),
-`scheduled_backup.json` (see `scheduled_backup.default.json`) and `mail.yaml` (see `mail.default.json`).
+3. Create `mpc_monitor.json` (see `mpc_monitor.default.json`), `mpc_monitor_cookies.json` (see `mpc_monitor_cookies.default.json`),
+`ringsdb_prod_cookies.json` (see `ringsdb_prod_cookies.default.json`), `scheduled_backup.json` (see `scheduled_backup.default.json`) and
+`mail.yaml` (see `mail.default.json`).
 
 4. Setup rclone:
 

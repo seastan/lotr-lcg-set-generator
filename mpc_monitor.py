@@ -45,6 +45,7 @@ WARNING_SUBJECT_TEMPLATE = 'LotR MPC Monitor WARNING: {}'
 MAIL_QUOTA = 50
 
 CONF_PATH = 'mpc_monitor.json'
+COOKIES_PATH = 'mpc_monitor_cookies.json'
 DISCORD_CONF_PATH = 'discord.yaml'
 INTERNET_SENSOR_PATH = 'internet_state'
 LOG_PATH = 'mpc_monitor.log'
@@ -702,16 +703,19 @@ def add_deck(deck_name):
         logging.error('No configuration found')
         return
 
+    try:
+        with open(COOKIES_PATH, 'r', encoding='utf-8') as fobj:
+            cookies = json.load(fobj)
+    except Exception:
+        logging.error('No cookies found')
+        return
+
     if 'decks' in data and deck_name in data['decks']:
         logging.info('Deck %s already added to monitoring', deck_name)
         return
 
-    if not data.get('cookies'):
-        logging.error('No cookies found')
-        return
-
     logging.info('Adding deck %s to monitoring...', deck_name)
-    session = init_session(data['cookies'])
+    session = init_session(cookies)
     content = get_decks(session)
     if not content:
         logging.info('The site is undergoing system upgrade')
@@ -752,9 +756,12 @@ def add_deck(deck_name):
         'deck_id': deck_id,
         'failed_content_ids': []
     }
-    data['cookies'] = session.cookies.get_dict()
     with open(CONF_PATH, 'w', encoding='utf-8') as fobj:
         json.dump(data, fobj, indent=4)
+
+    cookies = session.cookies.get_dict()
+    with open(COOKIES_PATH, 'w', encoding='utf-8') as fobj:
+        json.dump(cookies, fobj, indent=4)
 
     deck_url = (
         'https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id={}'
@@ -775,10 +782,13 @@ def monitor():  # pylint: disable=R0912,R0914,R0915
     except Exception as exc:
         raise ConfigurationError('No configuration found') from exc
 
-    if not data.get('cookies'):
-        raise ConfigurationError('No cookies found')
+    try:
+        with open(COOKIES_PATH, 'r', encoding='utf-8') as fobj:
+            cookies = json.load(fobj)
+    except Exception as exc:
+        raise ConfigurationError('No cookies found') from exc
 
-    session = init_session(data['cookies'])
+    session = init_session(cookies)
     content = get_decks(session)
     if not content:
         logging.info('The site is undergoing system upgrade')
@@ -862,9 +872,12 @@ def monitor():  # pylint: disable=R0912,R0914,R0915
             if new_content:
                 content = new_content
 
-    data['cookies'] = session.cookies.get_dict()
     with open(CONF_PATH, 'w', encoding='utf-8') as fobj:
         json.dump(data, fobj, indent=4)
+
+    cookies = session.cookies.get_dict()
+    with open(COOKIES_PATH, 'w', encoding='utf-8') as fobj:
+        json.dump(cookies, fobj, indent=4)
 
 
 def main():
