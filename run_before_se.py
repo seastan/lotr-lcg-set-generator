@@ -43,8 +43,8 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
     with open(lotr.RUN_BEFORE_SE_STARTED_PATH, 'w', encoding='utf-8'):
         pass
 
-    if os.path.exists(lotr.PROJECT_CREATED_PATH):
-        os.remove(lotr.PROJECT_CREATED_PATH)
+    if os.path.exists(lotr.SEPROJECT_CREATED_PATH):
+        os.remove(lotr.SEPROJECT_CREATED_PATH)
 
     if not conf:
         if len(sys.argv) > 1:
@@ -198,7 +198,7 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
 
     if changes:
         lotr.create_project()
-        with open(lotr.PROJECT_CREATED_PATH, 'w', encoding='utf-8'):
+        with open(lotr.SEPROJECT_CREATED_PATH, 'w', encoding='utf-8'):
             pass
     else:
         if not conf['renderer_artwork']:

@@ -460,6 +460,7 @@ CARD_BACKS = {'player': {'mpc': ['playerBackOfficialMPC.png',
 
 DATA_PATH = 'Data'
 DISCORD_PATH = 'Discord'
+DOCS_PATH = 'Docs'
 OUTPUT_PATH = 'Output'
 PROJECT_PATH = 'Frogmorton'
 RENDERER_PATH = 'Renderer'
@@ -474,6 +475,7 @@ DRAGNCARDS_FILES_JSON_PATH = os.path.join(DATA_PATH, 'dragncards_files.json')
 DRAGNCARDS_FOLDER_PATH = os.path.join(TEMP_ROOT_PATH, 'dragncards_folder.txt')
 DRAGNCARDS_TIMESTAMPS_JSON_PATH = os.path.join(DATA_PATH,
                                                'dragncards_timestamps.json')
+DRIVETHRUCARDS_PDF = os.path.join(DOCS_PATH, 'DriveThruCards.pdf')
 EXPIRE_DRAGNCARDS_JSON_PATH = os.path.join(TEMP_ROOT_PATH,
                                            'expire_dragncards.json')
 GENERATE_DRAGNCARDS_JSON_PATH = os.path.join(DATA_PATH,
@@ -489,6 +491,8 @@ IMAGES_RAW_PATH = os.path.join(PROJECT_PATH, 'imagesRaw')
 IMAGES_TTS_PATH = 'imagesTTS'
 IMAGES_ZIP_PATH = '{}/Export/'.format(os.path.split(PROJECT_PATH)[-1])
 MAKECARDS_FINISHED_PATH = 'makeCards_FINISHED'
+MAKEPLAYINGCARDS_PDF = os.path.join(DOCS_PATH, 'MakePlayingCards.pdf')
+MBPRINT_PDF = os.path.join(DOCS_PATH, 'MBPrint.pdf')
 MESSAGES_ZIP_PATH = '{}/Messages/'.format(os.path.split(PROJECT_PATH)[-1])
 OCTGN_ZIP_PATH = 'a21af4e8-be4b-4cda-a6b6-534f9717391f/Sets'
 OUTPUT_DB_PATH = os.path.join(OUTPUT_PATH, 'DB')
@@ -516,8 +520,6 @@ OUTPUT_SPANISHDB_PATH = os.path.join(OUTPUT_PATH, 'SpanishDB')
 OUTPUT_SPANISHDB_IMAGES_PATH = os.path.join(OUTPUT_PATH, 'SpanishDBImages')
 OUTPUT_TTS_PATH = os.path.join(OUTPUT_PATH, 'TTS')
 PIPELINE_STARTED_PATH = 'pipeline_STARTED'
-PROJECT_PATH = 'setGenerator.seproject'
-PROJECT_CREATED_PATH = 'setGenerator_CREATED'
 RENDERER_GENERATED_IMAGES_PATH = os.path.join(RENDERER_PATH, 'GeneratedImages')
 RENDERER_OUTPUT_PATH = os.path.join(RENDERER_PATH, 'Output')
 REPROCESS_ALL_PATH = 'REPROCESS_ALL'
@@ -525,6 +527,8 @@ REPROCESS_COUNT_PATH = os.path.join(TEMP_ROOT_PATH, 'reprocess_count.json')
 RINGSDB_COOKIES_PATH = 'ringsdb_test_cookies.json'
 RINGSDB_JSON_PATH = os.path.join(DATA_PATH, 'ringsdb_sets.json')
 RUN_BEFORE_SE_STARTED_PATH = 'runBeforeSE_STARTED'
+SEPROJECT_PATH = 'setGenerator.seproject'
+SEPROJECT_CREATED_PATH = 'setGenerator_CREATED'
 SET_EONS_PATH = 'setEons'
 SET_OCTGN_PATH = 'setOCTGN'
 SHEETS_JSON_PATH = os.path.join(DATA_PATH, 'sheets.json')
@@ -8864,7 +8868,7 @@ def create_project():
     if os.path.exists(MAKECARDS_FINISHED_PATH):
         os.remove(MAKECARDS_FINISHED_PATH)
 
-    with zipfile.ZipFile(PROJECT_PATH, 'w') as zip_obj:
+    with zipfile.ZipFile(SEPROJECT_PATH, 'w') as zip_obj:
         for root, _, filenames in os.walk(PROJECT_PATH):
             for filename in filenames:
                 zip_obj.write(os.path.join(root, filename))
@@ -8895,7 +8899,7 @@ def get_actual_sets():
     """ Get actual sets from the project.
     """
     res = set()
-    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+    with zipfile.ZipFile(SEPROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith(XML_ZIP_PATH)
                     and f.split('.')[-1] == 'xml']
@@ -8925,7 +8929,7 @@ def check_messages():
     logging.info('Checking messages in the archive...')
     timestamp = time.time()
 
-    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+    with zipfile.ZipFile(SEPROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith(MESSAGES_ZIP_PATH)
                     and f.split('.')[-1] == 'overflow']
@@ -8957,7 +8961,7 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
     clear_folder(temp_path2)
 
     input_cnt = 0
-    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+    with zipfile.ZipFile(SEPROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
                                                   PNG300BLEED))
@@ -9035,7 +9039,7 @@ def generate_png480_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
     clear_folder(temp_path2)
 
     input_cnt = 0
-    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+    with zipfile.ZipFile(SEPROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
                                                   PNG480BLEED))
@@ -9115,7 +9119,7 @@ def generate_png800_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
     clear_folder(temp_path2)
 
     input_cnt = 0
-    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+    with zipfile.ZipFile(SEPROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
                                                   PNG800BLEED))
@@ -9388,7 +9392,7 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
     clear_folder(temp_path2)
 
     input_cnt = 0
-    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+    with zipfile.ZipFile(SEPROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
                                                   PNG300BLEED))
@@ -9436,7 +9440,7 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
     clear_folder(temp_path3)
 
     input_cnt = 0
-    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+    with zipfile.ZipFile(SEPROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
                                                   PNG300BLEED))
@@ -9521,7 +9525,7 @@ def generate_png800_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
     clear_folder(temp_path2)
 
     input_cnt = 0
-    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+    with zipfile.ZipFile(SEPROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
                                                   PNG800BLEED))
@@ -9569,7 +9573,7 @@ def generate_png800_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
     clear_folder(temp_path3)
 
     input_cnt = 0
-    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+    with zipfile.ZipFile(SEPROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
                                                   PNG800BLEED))
@@ -9655,7 +9659,7 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
     clear_folder(temp_path2)
 
     input_cnt = 0
-    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+    with zipfile.ZipFile(SEPROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
                                                   PNG800BLEED))
@@ -9732,7 +9736,7 @@ def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint:
     clear_folder(temp_path2)
 
     input_cnt = 0
-    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+    with zipfile.ZipFile(SEPROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
                                                   PNG300BLEED))
@@ -9812,7 +9816,7 @@ def generate_jpg800_bleedmbprint(conf, set_id, set_name, lang, skip_ids):  # pyl
     clear_folder(temp_path2)
 
     input_cnt = 0
-    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+    with zipfile.ZipFile(SEPROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
                                                   PNG800BLEED))
@@ -9891,7 +9895,7 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
     clear_folder(temp_path2)
 
     input_cnt = 0
-    with zipfile.ZipFile(PROJECT_PATH) as zip_obj:
+    with zipfile.ZipFile(SEPROJECT_PATH) as zip_obj:
         filelist = [f for f in zip_obj.namelist()
                     if f.startswith('{}{}'.format(IMAGES_ZIP_PATH,
                                                   PNG800BLEED))
@@ -11577,7 +11581,7 @@ def generate_mpc(conf, set_id, set_name, lang, card_data):
                                  escape_filename(set_name), lang)),
                 'w') as obj:
             _prepare_mpc_printing_archive(temp_path, obj)
-            obj.write('MakePlayingCards.pdf', 'MakePlayingCards.pdf')
+            obj.write(MAKEPLAYINGCARDS_PDF, 'MakePlayingCards.pdf')
 
     if 'makeplayingcards_7z' in conf['outputs'][lang]:
         with py7zr.SevenZipFile(
@@ -11586,7 +11590,7 @@ def generate_mpc(conf, set_id, set_name, lang, card_data):
                                  escape_filename(set_name), lang)),
                 'w', filters=PY7ZR_FILTERS) as obj:
             _prepare_mpc_printing_archive(temp_path, obj)
-            obj.write('MakePlayingCards.pdf', 'MakePlayingCards.pdf')
+            obj.write(MAKEPLAYINGCARDS_PDF, 'MakePlayingCards.pdf')
 
     delete_folder(temp_path)
     logging.info('[%s, %s] ...Generating MakePlayingCards outputs (%ss)',
@@ -11630,7 +11634,7 @@ def generate_dtc(conf, set_id, set_name, lang, card_data):
                                  escape_filename(set_name), lang)),
                 'w') as obj:
             _prepare_dtc_printing_archive(temp_path, obj)
-            obj.write('DriveThruCards.pdf', 'DriveThruCards.pdf')
+            obj.write(DRIVETHRUCARDS_PDF, 'DriveThruCards.pdf')
 
     if 'drivethrucards_7z' in conf['outputs'][lang]:
         with py7zr.SevenZipFile(
@@ -11639,7 +11643,7 @@ def generate_dtc(conf, set_id, set_name, lang, card_data):
                                  escape_filename(set_name), lang)),
                 'w', filters=PY7ZR_FILTERS) as obj:
             _prepare_dtc_printing_archive(temp_path, obj)
-            obj.write('DriveThruCards.pdf', 'DriveThruCards.pdf')
+            obj.write(DRIVETHRUCARDS_PDF, 'DriveThruCards.pdf')
 
     delete_folder(temp_path)
     logging.info('[%s, %s] ...Generating DriveThruCards outputs (%ss)',
@@ -11686,7 +11690,7 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):  # pylint: disabl
                                      escape_filename(set_name), lang)),
                     'w') as obj:
                 _prepare_mbprint_printing_archive(temp_path, obj)
-                obj.write('MBPrint.pdf', 'MBPrint.pdf')
+                obj.write(MBPRINT_PDF, 'MBPrint.pdf')
 
         if 'mbprint_7z' in conf['outputs'][lang]:
             with py7zr.SevenZipFile(
@@ -11695,7 +11699,7 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):  # pylint: disabl
                                      escape_filename(set_name), lang)),
                     'w', filters=PY7ZR_FILTERS) as obj:
                 _prepare_mbprint_printing_archive(temp_path, obj)
-                obj.write('MBPrint.pdf', 'MBPrint.pdf')
+                obj.write(MBPRINT_PDF, 'MBPrint.pdf')
 
     if ('mbprint_pdf_zip' in conf['outputs'][lang] or
             'mbprint_pdf_7z' in conf['outputs'][lang]):
