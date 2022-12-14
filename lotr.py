@@ -458,6 +458,7 @@ CARD_BACKS = {'player': {'mpc': ['playerBackOfficialMPC.png',
                             'genericpng': ['encounterBackOfficial.png',
                                            'encounterBackUnofficial.png']}}
 
+DATA_PATH = 'Data'
 DISCORD_PATH = 'Discord'
 OUTPUT_PATH = 'Output'
 PROJECT_PATH = 'Frogmorton'
@@ -468,13 +469,15 @@ CONFIGURATION_PATH = 'configuration.yaml'
 DISCORD_CARD_DATA_PATH = os.path.join(DISCORD_PATH, 'Data', 'card_data.json')
 DISCORD_TIMESTAMPS_PATH = os.path.join(DISCORD_PATH, 'Data', 'timestamps.json')
 DOWNLOAD_PATH = 'Download'
-DOWNLOAD_TIME_PATH = 'download_time.txt'
-DRAGNCARDS_JSON_PATH = 'dragncards.json'
+DOWNLOAD_TIME_PATH = os.path.join(DATA_PATH, 'download_time.txt')
+DRAGNCARDS_FILES_JSON_PATH = os.path.join(DATA_PATH, 'dragncards_files.json')
 DRAGNCARDS_FOLDER_PATH = os.path.join(TEMP_ROOT_PATH, 'dragncards_folder.txt')
-DRAGNCARDS_TIMESTAMPS_JSON_PATH = 'dragncards_timestamps.json'
+DRAGNCARDS_TIMESTAMPS_JSON_PATH = os.path.join(DATA_PATH,
+                                               'dragncards_timestamps.json')
 EXPIRE_DRAGNCARDS_JSON_PATH = os.path.join(TEMP_ROOT_PATH,
                                            'expire_dragncards.json')
-GENERATE_DRAGNCARDS_JSON_PATH = 'generate_dragncards.json'
+GENERATE_DRAGNCARDS_JSON_PATH = os.path.join(DATA_PATH,
+                                             'generate_dragncards.json')
 GENERATE_DRAGNCARDS_LOG_PATH = os.path.join(RENDERER_PATH, 'Output',
                                             'generate_dragncards.txt')
 IMAGES_BACK_PATH = 'imagesBack'
@@ -519,12 +522,12 @@ RENDERER_GENERATED_IMAGES_PATH = os.path.join(RENDERER_PATH, 'GeneratedImages')
 RENDERER_OUTPUT_PATH = os.path.join(RENDERER_PATH, 'Output')
 REPROCESS_ALL_PATH = 'REPROCESS_ALL'
 REPROCESS_COUNT_PATH = os.path.join(TEMP_ROOT_PATH, 'reprocess_count.json')
-RINGSDB_COOKIES_PATH = 'ringsdb_cookies.json'
-RINGSDB_JSON_PATH = 'ringsdb.json'
+RINGSDB_COOKIES_PATH = 'ringsdb_test_cookies.json'
+RINGSDB_JSON_PATH = os.path.join(DATA_PATH, 'ringsdb_sets.json')
 RUN_BEFORE_SE_STARTED_PATH = 'runBeforeSE_STARTED'
 SET_EONS_PATH = 'setEons'
 SET_OCTGN_PATH = 'setOCTGN'
-SHEETS_JSON_PATH = 'sheets.json'
+SHEETS_JSON_PATH = os.path.join(DATA_PATH, 'sheets.json')
 URL_CACHE_PATH = 'urlCache'
 XML_PATH = os.path.join(PROJECT_PATH, 'XML')
 XML_ZIP_PATH = '{}/XML/'.format(os.path.split(PROJECT_PATH)[-1])
@@ -12309,7 +12312,7 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
     """ Uploading decks and JSON files to DragnCards.
     """
     try:
-        with open(DRAGNCARDS_JSON_PATH, 'r', encoding='utf-8') as fobj:
+        with open(DRAGNCARDS_FILES_JSON_PATH, 'r', encoding='utf-8') as fobj:
             checksums = json.load(fobj)
     except Exception:
         checksums = {}
@@ -12395,7 +12398,7 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
             pass
 
     if changes:
-        with open(DRAGNCARDS_JSON_PATH, 'w', encoding='utf-8') as fobj:
+        with open(DRAGNCARDS_FILES_JSON_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(checksums, fobj)
 
     return changes

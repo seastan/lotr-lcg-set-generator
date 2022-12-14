@@ -25,7 +25,7 @@ LOG_LEVEL = logging.INFO
 MESSAGE_SLEEP_TIME = 30
 
 CONFIGURATION_PATH = 'configuration.yaml'
-DATA_PATH = 'monitor_remote_pipeline.json'
+DATA_PATH = os.path.join('Data', 'monitor_remote_pipeline.json')
 DISCORD_CARD_DATA_PATH = os.path.join('Discord', 'Data', 'card_data.json')
 DISCORD_CONF_PATH = 'discord.yaml'
 LOG_PATH = 'monitor_remote_pipeline.log'

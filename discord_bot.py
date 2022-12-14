@@ -28,10 +28,10 @@ CHANGES_PATH = os.path.join(lotr.DISCORD_PATH, 'Changes')
 CONF_PATH = 'discord.yaml'
 IMAGES_PATH = os.path.join(lotr.DISCORD_PATH, 'Images')
 LOG_PATH = 'discord_bot.log'
-MAIL_COUNTER_PATH = 'discord_bot.cnt'
+MAIL_COUNTER_PATH = os.path.join(lotr.DATA_PATH, 'discord_bot.cnt')
 MAILS_PATH = 'mails'
 PLAYTEST_PATH = os.path.join(lotr.DISCORD_PATH, 'Data', 'playtest.json')
-RINGSDB_STAT_PATH = 'ringsdb_stat.json'
+RINGSDB_STAT_PATH = os.path.join(lotr.DATA_PATH, 'ringsdb_stat.json')
 TEMP_PATH = os.path.join(lotr.DISCORD_PATH, 'Temp')
 USERS_LIST_PATH = os.path.join(lotr.DISCORD_PATH, 'Data', 'users.csv')
 

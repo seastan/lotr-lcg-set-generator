@@ -17,7 +17,7 @@ ERROR_SUBJECT_TEMPLATE = 'Download RingsDB Stat Cron ERROR: {}'
 LOG_PATH = 'download_ringsdb_stat.log'
 LOG_LEVEL = logging.INFO
 MAILS_PATH = 'mails'
-OUTPUT_PATH = 'ringsdb_stat.json'
+OUTPUT_PATH = os.path.join('Data', 'ringsdb_stat.json')
 
 RINGSDB_COOKIES_PATH = 'ringsdb_prod_cookies.json'
 RINGSDB_URL = 'https://ringsdb.com/admin/stat_packs'

@@ -49,7 +49,7 @@ COOKIES_PATH = 'mpc_monitor_cookies.json'
 DISCORD_CONF_PATH = 'discord.yaml'
 INTERNET_SENSOR_PATH = 'internet_state'
 LOG_PATH = 'mpc_monitor.log'
-MAIL_COUNTER_PATH = 'mpc_monitor.cnt'
+MAIL_COUNTER_PATH = os.path.join('Data', 'mpc_monitor.cnt')
 MAILS_PATH = 'mails'
 
 CHUNK_LIMIT = 1980
