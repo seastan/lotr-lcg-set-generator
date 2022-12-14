@@ -415,7 +415,6 @@ IMAGES_CUSTOM_FOLDER = 'custom'
 IMAGES_ICONS_FOLDER = 'icons'
 OCTGN_SET_XML = 'set.xml'
 PLAYTEST_SUFFIX = '-Playtest'
-PROJECT_FOLDER = 'Frogmorton'
 SCRATCH_FOLDER = '_Scratch'
 TEXT_CHUNK_FLAG = b'tEXt'
 
@@ -459,12 +458,15 @@ CARD_BACKS = {'player': {'mpc': ['playerBackOfficialMPC.png',
                             'genericpng': ['encounterBackOfficial.png',
                                            'encounterBackUnofficial.png']}}
 
+DISCORD_PATH = 'Discord'
+OUTPUT_PATH = 'Output'
+PROJECT_PATH = 'Frogmorton'
+RENDERER_PATH = 'Renderer'
 TEMP_ROOT_PATH = 'Temp'
 
 CONFIGURATION_PATH = 'configuration.yaml'
-DISCORD_PATH = 'Discord'
-DISCORD_CARD_DATA_PATH = os.path.join(DISCORD_PATH, 'card_data.json')
-DISCORD_TIMESTAMPS_PATH = os.path.join(DISCORD_PATH, 'timestamps.json')
+DISCORD_CARD_DATA_PATH = os.path.join(DISCORD_PATH, 'Data', 'card_data.json')
+DISCORD_TIMESTAMPS_PATH = os.path.join(DISCORD_PATH, 'Data', 'timestamps.json')
 DOWNLOAD_PATH = 'Download'
 DOWNLOAD_TIME_PATH = 'download_time.txt'
 DRAGNCARDS_JSON_PATH = 'dragncards.json'
@@ -473,20 +475,19 @@ DRAGNCARDS_TIMESTAMPS_JSON_PATH = 'dragncards_timestamps.json'
 EXPIRE_DRAGNCARDS_JSON_PATH = os.path.join(TEMP_ROOT_PATH,
                                            'expire_dragncards.json')
 GENERATE_DRAGNCARDS_JSON_PATH = 'generate_dragncards.json'
-GENERATE_DRAGNCARDS_LOG_PATH = os.path.join('Renderer', 'Output',
+GENERATE_DRAGNCARDS_LOG_PATH = os.path.join(RENDERER_PATH, 'Output',
                                             'generate_dragncards.txt')
 IMAGES_BACK_PATH = 'imagesBack'
-IMAGES_CUSTOM_PATH = os.path.join(PROJECT_FOLDER, 'imagesCustom')
-IMAGES_ICONS_PATH = os.path.join(PROJECT_FOLDER, 'imagesIcons')
+IMAGES_CUSTOM_PATH = os.path.join(PROJECT_PATH, 'imagesCustom')
+IMAGES_ICONS_PATH = os.path.join(PROJECT_PATH, 'imagesIcons')
 IMAGES_EONS_PATH = 'imagesEons'
 IMAGES_OTHER_PATH = 'imagesOther'
-IMAGES_RAW_PATH = os.path.join(PROJECT_FOLDER, 'imagesRaw')
+IMAGES_RAW_PATH = os.path.join(PROJECT_PATH, 'imagesRaw')
 IMAGES_TTS_PATH = 'imagesTTS'
-IMAGES_ZIP_PATH = '{}/Export/'.format(os.path.split(PROJECT_FOLDER)[-1])
+IMAGES_ZIP_PATH = '{}/Export/'.format(os.path.split(PROJECT_PATH)[-1])
 MAKECARDS_FINISHED_PATH = 'makeCards_FINISHED'
-MESSAGES_ZIP_PATH = '{}/Messages/'.format(os.path.split(PROJECT_FOLDER)[-1])
+MESSAGES_ZIP_PATH = '{}/Messages/'.format(os.path.split(PROJECT_PATH)[-1])
 OCTGN_ZIP_PATH = 'a21af4e8-be4b-4cda-a6b6-534f9717391f/Sets'
-OUTPUT_PATH = 'Output'
 OUTPUT_DB_PATH = os.path.join(OUTPUT_PATH, 'DB')
 OUTPUT_DRAGNCARDS_PATH = os.path.join(OUTPUT_PATH, 'DragnCards')
 OUTPUT_DRAGNCARDS_HQ_PATH = os.path.join(OUTPUT_PATH, 'DragnCardsHQ')
@@ -514,8 +515,8 @@ OUTPUT_TTS_PATH = os.path.join(OUTPUT_PATH, 'TTS')
 PIPELINE_STARTED_PATH = 'pipeline_STARTED'
 PROJECT_PATH = 'setGenerator.seproject'
 PROJECT_CREATED_PATH = 'setGenerator_CREATED'
-RENDERER_GENERATED_IMAGES_PATH = os.path.join('Renderer', 'GeneratedImages')
-RENDERER_OUTPUT_PATH = os.path.join('Renderer', 'Output')
+RENDERER_GENERATED_IMAGES_PATH = os.path.join(RENDERER_PATH, 'GeneratedImages')
+RENDERER_OUTPUT_PATH = os.path.join(RENDERER_PATH, 'Output')
 REPROCESS_ALL_PATH = 'REPROCESS_ALL'
 REPROCESS_COUNT_PATH = os.path.join(TEMP_ROOT_PATH, 'reprocess_count.json')
 RINGSDB_COOKIES_PATH = 'ringsdb_cookies.json'
@@ -525,8 +526,8 @@ SET_EONS_PATH = 'setEons'
 SET_OCTGN_PATH = 'setOCTGN'
 SHEETS_JSON_PATH = 'sheets.json'
 URL_CACHE_PATH = 'urlCache'
-XML_PATH = os.path.join(PROJECT_FOLDER, 'XML')
-XML_ZIP_PATH = '{}/XML/'.format(os.path.split(PROJECT_FOLDER)[-1])
+XML_PATH = os.path.join(PROJECT_PATH, 'XML')
+XML_ZIP_PATH = '{}/XML/'.format(os.path.split(PROJECT_PATH)[-1])
 
 TTS_COLUMNS = 10
 TTS_SHEET_SIZE = 69
@@ -8861,7 +8862,7 @@ def create_project():
         os.remove(MAKECARDS_FINISHED_PATH)
 
     with zipfile.ZipFile(PROJECT_PATH, 'w') as zip_obj:
-        for root, _, filenames in os.walk(PROJECT_FOLDER):
+        for root, _, filenames in os.walk(PROJECT_PATH):
             for filename in filenames:
                 zip_obj.write(os.path.join(root, filename))
 

@@ -1,8 +1,12 @@
 .ipynb_checkpoints/
 __pycache__/
-Discord/users.csv
-Discord/*.json
+Data/*.cnt
+Data/*.json
+Data/*.json.backup
+Data/*.txt
 Discord/Changes/*.json
+Discord/Data/*.csv
+Discord/Data/*.json
 Discord/Images/*/*
 Discord/Temp/*.jpg
 Discord/Temp/*.png
@@ -34,14 +38,11 @@ setEons/*.xml
 setEons/*.xml.old
 setOCTGN/*.xml
 setOCTGN/*.xml.old
-Temp/dragncards_folder.txt
-Temp/expire_dragncards.json
-Temp/monitor_discord_changes.txt
-Temp/reprocess_count.json
+Temp/*.json
+Temp/*.txt
 Temp/*/*
 urlCache/*.cache
 
-check_ringsdb_alep_decks.json
 configuration.yaml
 discord.yaml
 download_time.txt

@@ -15,8 +15,8 @@ import requests
 import yaml
 
 
-DATA_PATH = 'check_ringsdb_alep_decks.json'
-DISCORD_CARD_DATA_PATH = os.path.join('Discord', 'card_data.json')
+DATA_PATH = os.path.join('Data', 'check_ringsdb_alep_decks.json')
+DISCORD_CARD_DATA_PATH = os.path.join('Discord', 'Data', 'card_data.json')
 DISCORD_CONF_PATH = 'discord.yaml'
 ERROR_SUBJECT_TEMPLATE = 'RingsDB ALeP Decks Cron ERROR: {}'
 INTERNET_SENSOR_PATH = 'internet_state'

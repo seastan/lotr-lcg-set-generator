@@ -24,16 +24,16 @@ import yaml
 import lotr
 
 
-CHANGES_PATH = os.path.join('Discord', 'Changes')
+CHANGES_PATH = os.path.join(lotr.DISCORD_PATH, 'Changes')
 CONF_PATH = 'discord.yaml'
-IMAGES_PATH = os.path.join('Discord', 'Images')
+IMAGES_PATH = os.path.join(lotr.DISCORD_PATH, 'Images')
 LOG_PATH = 'discord_bot.log'
 MAIL_COUNTER_PATH = 'discord_bot.cnt'
 MAILS_PATH = 'mails'
-PLAYTEST_PATH = os.path.join('Discord', 'playtest.json')
+PLAYTEST_PATH = os.path.join(lotr.DISCORD_PATH, 'Data', 'playtest.json')
 RINGSDB_STAT_PATH = 'ringsdb_stat.json'
-TEMP_PATH = os.path.join('Discord', 'Temp')
-USERS_LIST_PATH = os.path.join('Discord', 'users.csv')
+TEMP_PATH = os.path.join(lotr.DISCORD_PATH, 'Temp')
+USERS_LIST_PATH = os.path.join(lotr.DISCORD_PATH, 'Data', 'users.csv')
 
 CRON_ERRORS_CMD = './cron_errors.sh'
 CRON_LOG_CMD = './cron_log.sh'
@@ -263,8 +263,8 @@ List of **!edit** commands:
 List of **!secret** commands:
 ` `
 **!secret image refresh** - clear the image cache (if you just uploaded new images to the Google Drive)
-**!secret users** - prepare a list of all Discord users and save it in `Discord/users.csv`
-"""
+**!secret users** - prepare a list of all Discord users and save it in `{}`
+""".format(USERS_LIST_PATH)
 }
 HELP_STAT_PLAYER_CARDS = """
 **!stat player cards <set name or set code>** - display DragnCards player cards statistics for the set
