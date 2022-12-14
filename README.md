@@ -321,6 +321,27 @@ If you want to manually restart the scripts, run:
 - `./restart_mail.sh`
 - `./restart_run_before_se_service.sh`
 
+If you want to migrate the pipeline to a different host, do the following steps:
+
+1. Setup the pipeline on the new host, but comment out all crons.  You may copy all configuration and cookie files
+from the old host and only apply changes where needed (for example, different local paths).
+The list of files may be found in `configuration_backup.sh`.  Also, copy `id_rsa` from the old host.
+
+2. Comment out all crons on the old host and make sure all running crons have been finished
+(you may just wait for up to 5 minutes).
+
+3. Run `tail -f run_before_se.log`.  After another iteration has been finished, kill `python3 run_before_se_service.py`
+process (use `ps aux | grep run_before_se` and `kill <process id>` commands).
+
+4. Wait until no files remain in `Discord/Changes`, `Discord/Images` and `Discord/Temp` folders and kill
+`python3 discord_bot.py` process (use `ps aux | grep discord` and `kill <process id>` commands).
+
+5. Run `./rclone_data_remotely.sh`.
+
+6. On the new host, run `./rclone_data_locally.sh`.
+
+7. Uncomment all crons.
+
 If you want to add a new MakePlayingCards deck to monitoring, run:
 
 - `./mpc_add.sh "<deck name>"`
