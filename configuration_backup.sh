@@ -9,7 +9,6 @@ fi
 
 cp configuration.yaml "$FOLDER"
 cp discord.yaml "$FOLDER"
-cp mail.yaml "$FOLDER"
 cp mpc_monitor.json "$FOLDER"
 cp mpc_monitor_cookies.json "$FOLDER"
 cp ringsdb_prod_cookies.json "$FOLDER"

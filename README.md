@@ -125,7 +125,7 @@ into the root folder of this repo.
 
 11. Install AutoHotkey from https://autohotkey.com/download/.
 
-12. Install the latest Python 3 version from https://www.python.org/downloads/.  The minimum supported version is 3.7.
+12. Install the latest Python 3 version (see https://www.python.org/downloads/).  The minimum supported version is 3.7.
 Optionally, install VirtualEnv (see https://help.dreamhost.com/hc/en-us/articles/115000695551-Installing-and-using-virtualenv-with-Python-3
 for details).
 
@@ -141,7 +141,7 @@ or `bash` (Mac/Linux).  To navigate to a right folder inside your CLI you can us
 
   - `pip install jupyter`
 
-14. Copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
+14. Create `configuration.yaml`: copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
   - `sheet_gdid`: Google Sheets ID of the cards spreadsheet
   - `artwork_path`: local path to the artwork folder (don't use for that any existing folder in this repo)
@@ -189,7 +189,7 @@ For debugging purposes, you may add an additional value:
 
   - `offline_mode`: use a cached spreadsheet when possible (true or false)
 
-Also, see `configuration.release.yaml` for another configuration example.
+See `configuration.release.yaml` for a configuration example.
 
 **Usage**
 
@@ -247,15 +247,41 @@ If you want to set up a Windows cron job, do the following:
 
 **Cron Job Pipeline**
 
-See `configuration.cron.yaml` for a configuration example.
+Of the Setup steps described above, you need only these:
+
+1. Clone this repo to a new local folder:
+
+    ```
+    git clone https://github.com/seastan/lotr-lcg-set-generator.git .
+    ```
+
+2. Install the latest Python 3 version (if it's not yet installed, the minimum supported version is 3.7).
+
+3. Create `configuration.yaml`.  Use `configuration.cron.yaml` as a template.  Replace `/home/user/Drive/`
+with an actual path to a local `Drive` folder (create a new folder either in the root folder of this repo
+or somewhere else).  It should have the following structure:
+
+    ```
+    CardImages/
+    CardImagesTemp/
+    LinksBackup/
+    Logs/
+    Playtesting/
+    Playtesting/OCTGN Files/
+    Playtesting/OCTGN Files/Encounter Decks/
+    Playtesting/OCTGN Files/Scratch Encounter Decks/
+    Playtesting/OCTGN Files/Scratch Set Folders/
+    Playtesting/OCTGN Files/Set Folders/
+    ```
 
 Additional steps:
 
-1. Install additional dependencies:
+1. Install all dependencies:
 
+  - `pip install -r requirements.txt`
   - `pip install discord.py==1.7.3 aiohttp`
   - `sudo apt-get install nodejs npm imagemagick`
-  - Download the latest stable `wkhtmltopdf` package for your platform from https://wkhtmltopdf.org/downloads.html and run `sudo apt-get install <path to the package file>`.
+  - Download the latest stable `wkhtmltopdf` package for your platform from https://wkhtmltopdf.org/downloads.html and run `sudo apt-get install <absolute path to the package file>`.
   - `cd Renderer/; npm install fast-xml-parser he; cd ..`
 
 2. Create `discord.yaml` (see `discord.default.yaml`).
@@ -266,7 +292,7 @@ Additional steps:
 
 4. Setup rclone:
 
-  - `curl -L https://raw.github.com/pageauc/rclone4pi/master/rclone-install.sh | bash`
+  - `curl https://rclone.org/install.sh | sudo bash`
   - `rclone config`
 
     You will need to set up the following remotes:
@@ -280,40 +306,41 @@ Additional steps:
   - `ALePOCTGN` (points to `Playtesting/OCTGN Files`)
   - `ALePRenderedImages` (points to `RenderedImages`)
 
-5. In the root folder create `id_rsa` to upload files to DragnCards.
+5. In the root folder of this repo create `id_rsa` to upload files to DragnCards.
 
 6. Setup crons:
 
-  - `*/5 * * * * flock -xn <path>/mpc_monitor.lock -c 'python3 <path>/mpc_monitor.py > /dev/null' 2>&1`
-  - `5 11 * * *     python3 <path>/download_ringsdb_stat.py >> <path>/cron.log 2>&1`
-  - `9 * * * *      python3 <path>/check_ringsdb_alep_decks.py >> <path>/cron.log 2>&1`
-  - `36 9 * * *     python3 <path>/monitor_remote_pipeline.py >> <path>/cron.log 2>&1`
-  - `36 8 * * *     python3 <path>/monitor_wordpress.py >> <path>/cron.log 2>&1`
-  - `*/5 * * * *    <path>/check_cron.sh >> <path>/cron.log 2>&1`
-  - `* * * * *      <path>/check_discord_bot.sh >> <path>/cron.log 2>&1`
-  - `* * * * *      <path>/check_internet_state.sh >> <path>/cron.log 2>&1`
-  - `* * * * *      <path>/check_mail.sh >> <path>/cron.log 2>&1`
-  - `*/10 * * * *   <path>/check_mpc_monitor.sh >> <path>/cron.log 2>&1`
-  - `* * * * *      <path>/check_run_before_se_service.sh >> <path>/cron.log 2>&1`
-  - `7 0 * * *      <path>/rclone_backup.sh "<local Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
-  - `12,42 * * * *  <path>/rclone_data_remotely.sh >> <path>/cron.log 2>&1`
-  - `22,52 * * * *  <path>/rclone_renderer.sh >> <path>/cron.log 2>&1`
-  - `0 8 * * 1      <path>/remind_backup.sh >> <path>/cron.log 2>&1`
-  - `5 8 2 * *      <path>/remind_stat_monthly.sh >> <path>/cron.log 2>&1`
-  - `*/2 * * * *    <path>/monitor_discord_changes.sh >> <path>/cron.log 2>&1`
-  - `0 1 * * *      <path>/monitor_wordpress_token.sh >> <path>/cron.log 2>&1`
-  - `0 12 * * *     <path>/remote_player_cards_stat_monitor.sh >> <path>/cron.log 2>&1`
-  - `19 8 * * *     <path>/scheduled_backup.sh "<local Links Backup path>" >> <path>/cron.log 2>&1`
-  - `7 1 * * *      <path>/configuration_backup.sh "<path to a local configuration backup folder>" >> <path>/cron.log 2>&1`
+  - `*/5 * * * *   flock -xn <path>/mpc_monitor.lock -c 'python3 <path>/mpc_monitor.py > /dev/null' 2>&1`
+  - `5 11 * * *    python3 <path>/download_ringsdb_stat.py >> <path>/cron.log 2>&1`
+  - `9 * * * *     python3 <path>/check_ringsdb_alep_decks.py >> <path>/cron.log 2>&1`
+  - `36 9 * * *    python3 <path>/monitor_remote_pipeline.py >> <path>/cron.log 2>&1`
+  - `36 8 * * *    python3 <path>/monitor_wordpress.py >> <path>/cron.log 2>&1`
+  - `*/5 * * * *   <path>/check_cron.sh >> <path>/cron.log 2>&1`
+  - `* * * * *     <path>/check_discord_bot.sh >> <path>/cron.log 2>&1`
+  - `* * * * *     <path>/check_internet_state.sh >> <path>/cron.log 2>&1`
+  - `* * * * *     <path>/check_mail.sh >> <path>/cron.log 2>&1`
+  - `*/10 * * * *  <path>/check_mpc_monitor.sh >> <path>/cron.log 2>&1`
+  - `* * * * *     <path>/check_run_before_se_service.sh >> <path>/cron.log 2>&1`
+  - `7 0 * * *     <path>/rclone_backup.sh "<local Drive/Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
+  - `12,42 * * * * <path>/rclone_data_remotely.sh >> <path>/cron.log 2>&1`
+  - `22,52 * * * * <path>/rclone_renderer.sh >> <path>/cron.log 2>&1`
+  - `0 8 * * 1     <path>/remind_backup.sh >> <path>/cron.log 2>&1`
+  - `5 8 2 * *     <path>/remind_stat_monthly.sh >> <path>/cron.log 2>&1`
+  - `*/2 * * * *   <path>/monitor_discord_changes.sh >> <path>/cron.log 2>&1`
+  - `0 1 * * *     <path>/monitor_wordpress_token.sh >> <path>/cron.log 2>&1`
+  - `0 12 * * *    <path>/remote_player_cards_stat_monitor.sh >> <path>/cron.log 2>&1`
+  - `19 8 * * *    <path>/scheduled_backup.sh "<local Drive/LinksBackup path>" >> <path>/cron.log 2>&1`
+  - `7 1 * * *     <path>/configuration_backup.sh "<path to a local configuration backup folder>" >> <path>/cron.log 2>&1`
 
-    Replace `<path>` with the absolute path to the root folder.  `cron.log` may be located either in the root folder
-    or in some external folder (if you already have other crons).  Set `<backup folder>` to your actual backup folder.
+    Replace `<path>` with the absolute path to the root folder of this repo.  `cron.log` may be located either in the root folder
+    or in some external folder (if you already have other crons).  Set `<path to a local configuration backup folder>`
+    to some backup folder outside of the root folder.
 
-7. Copy all `ttf` files from `lotr-lcg-se-plugin/TheLordOfTheRingsLCG-B/resources/TheLordOfTheRingsLCG/font/` folder
-including `VAFTHRUD.TTF` to `lotr-lcg-set-generator/Renderer/Fonts` folder (`LRLfont.ttf` and `LRLwindlass.ttf`
-are not needed and may be deleted).  Find a `ttf` file for the `Times New Roman` font (you may find it in
-`c:\Windows\Fonts` folder on a Windows machine or download from Internet) and put it in
-`lotr-lcg-set-generator/Renderer/Fonts` folder as `times.ttf`.
+7. Copy `LOTRHeader.ttf`, `LRLsymbols.ttf` and `Vafthaurdir.ttf` from
+https://github.com/seastan/lotr-lcg-se-plugin/tree/master/TheLordOfTheRingsLCG-B/resources/TheLordOfTheRingsLCG/font
+to `Renderer/Fonts` folder .  Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir, extract the archive and
+put `VAFTHRUD.TTF` into `Renderer/Fonts` folder too.  Find a `ttf` file for the `Times New Roman` font (you may find it in
+`c:\Windows\Fonts` folder on a Windows machine or download from Internet) and put it into `Renderer/Fonts` folder as `times.ttf`.
 
 If you want to manually restart the scripts, run:
 
@@ -323,9 +350,11 @@ If you want to manually restart the scripts, run:
 
 If you want to migrate the pipeline to a different host, do the following steps:
 
-1. Setup the pipeline on the new host, but comment out all crons.  You may copy all configuration and cookie files
+1. Setup the pipeline on the new host, but comment out all crons.  You may copy configuration and cookie files
 from the old host and only apply changes where needed (for example, different local paths).
-The list of files may be found in `configuration_backup.sh`.  Also, copy `id_rsa` from the old host.
+See the list of files in `configuration_backup.sh`.  Additionally, you may copy `mail.yaml` and `id_rsa`.
+Instead of configuring `rclone` from scratch, you may also copy its configuration file.  Run `rclone config file`
+to find its location on each host.
 
 2. Comment out all crons on the old host and make sure all running crons have been finished
 (you may just wait for up to 5 minutes).

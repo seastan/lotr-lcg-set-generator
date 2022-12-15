@@ -33,6 +33,7 @@ Renderer/Output/generate_dragncards.txt
 Renderer/Output/*.html
 Renderer/Output/*.jpg
 Renderer/node_modules/
+Renderer/package.json
 Renderer/package-lock.json
 setEons/*.xml
 setEons/*.xml.old
@@ -45,6 +46,7 @@ urlCache/*.cache
 
 configuration.yaml
 discord.yaml
+Drive
 id_rsa
 internet_state
 mail.yaml
@@ -64,6 +66,7 @@ runBeforeSE_STARTED
 scheduled_backup.json
 setGenerator.seproject
 setGenerator_CREATED
+
 *.icc
 *.log
 *.swp
