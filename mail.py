@@ -141,14 +141,22 @@ def main():
         logging.error('No configuration found')
         return
 
-    accounts = [
-        {'email': conf.get('email', ''),
-         'password': conf.get('password', ''),
-         'server': conf.get('server', '')},
-        {'email': conf.get('email_backup', ''),
-         'password': conf.get('password_backup', ''),
-         'server': conf.get('server_backup', '')}
-    ]
+    accounts = []
+    if conf.get('email'):
+        accounts.append(
+            {'email': conf['email'],
+             'password': conf.get('password', ''),
+             'server': conf.get('server', '')})
+
+    if conf.get('email_backup'):
+        accounts.append(
+            {'email': conf['email_backup'],
+             'password': conf.get('password_backup', ''),
+             'server': conf.get('server_backup', '')})
+
+    if not accounts:
+        logging.error('No email accounts found')
+        return
 
     if not os.path.exists(MAILS_PATH):
         os.mkdir(MAILS_PATH)

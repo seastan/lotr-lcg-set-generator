@@ -7,13 +7,13 @@ password:
 # Server
 server: 
 
-# Email (Backup)
+# Email (backup, may be empty)
 email_backup: 
 
-# Password (Backup)
+# Password (backup, may be empty)
 password_backup: 
 
-# Server (Backup)
+# Server (backup, may be empty)
 server_backup: 
 
 # To address
