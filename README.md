@@ -353,7 +353,7 @@ If you want to migrate the pipeline to a different host, do the following steps:
 1. Setup the pipeline on the new host, but comment out all crons.  You might adjust the hours column in the crontab
 according to the new timezone.  Copy configuration and cookie files from the old host and only apply changes where needed
 (for example, different local paths).  See the list of files in `configuration_backup.sh`.  Additionally, you may copy
-`mail.yaml` and `id_rsa`. Instead of configuring `rclone` from scratch, you may also copy its configuration file.
+`mail.yaml` and `id_rsa`. Instead of configuring `rclone` from scratch, you may copy its configuration file.
 Run `rclone config file` to find its location on each host.
 
 2. Comment out all crons on the old host and make sure all running crons have been finished
