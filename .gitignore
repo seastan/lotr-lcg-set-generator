@@ -47,6 +47,7 @@ urlCache/*.cache
 configuration.yaml
 discord.yaml
 Drive
+env_health_check.txt
 id_rsa
 internet_state
 mail.yaml

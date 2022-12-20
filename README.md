@@ -321,6 +321,7 @@ Additional steps:
   - `* * * * *     <path>/check_mail.sh >> <path>/cron.log 2>&1`
   - `*/10 * * * *  <path>/check_mpc_monitor.sh >> <path>/cron.log 2>&1`
   - `* * * * *     <path>/check_run_before_se_service.sh >> <path>/cron.log 2>&1`
+  - `* * * * *     <path>/env_health_check.sh >> <path>/cron.log 2>&1`
   - `7 0 * * *     <path>/rclone_backup.sh "<local Drive/Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
   - `12,42 * * * * <path>/rclone_data_remotely.sh >> <path>/cron.log 2>&1`
   - `22,52 * * * * <path>/rclone_renderer.sh >> <path>/cron.log 2>&1`
