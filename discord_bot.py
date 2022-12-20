@@ -5251,6 +5251,7 @@ Targets removed.
                             if key not in ('playtest', 'secret')])
         help_keys.append('playtest')
         res = ''.join(HELP[key] for key in help_keys)
+        await asyncio.sleep(CMD_SLEEP_TIME)
         await self._send_channel(message.channel, res)
 
 
