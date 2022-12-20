@@ -37,6 +37,9 @@ def create_mail(subject, body='', html='false'):
             body = body[:10 * 1000 * 1000]
 
         html = html.lower() == 'true'
+        if not os.path.exists(MAILS_PATH):
+            os.mkdir(MAILS_PATH)
+
         path = os.path.join(MAILS_PATH,
                             '{}_{}'.format(int(time.time()), uuid.uuid4()))
         with open(path, 'w', encoding='utf-8') as fobj:
