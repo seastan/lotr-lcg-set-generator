@@ -1,5 +1,6 @@
 #!/bin/bash
 cd "$(dirname "$0")"
+./env_test.sh || exit
 
 FOLDER="$1"
 if [ ! -d "$FOLDER" ]; then

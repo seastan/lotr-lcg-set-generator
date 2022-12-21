@@ -354,24 +354,26 @@ If you want to migrate the pipeline to a different host, do the following steps:
 1. Setup the pipeline on the new host, but comment out all crons.  You might adjust the hours column in the crontab
 according to the new timezone.  Also, you may copy `id_rsa` and configuration files from the old host and only apply
 changes where needed (for example, different local paths).  Instead of configuring `rclone` from scratch,
-you may copy its configuration file (run `rclone config file` to find its location on each host).
+you may copy its configuration file from the old host (run `rclone config file` to find its location on each host).
 
 2. Comment out all crons on the old host and make sure all running crons have been finished
 (you may just wait for up to 5 minutes).
 
-3. Run `tail -f run_before_se.log`.  After another iteration has been finished, kill `python3 run_before_se_service.py`
-process (use `ps aux | grep run_before_se` and `kill <process id>` commands).
+3. Run `tail -f run_before_se.log` on the old host.  After another iteration has been finished,
+kill `python3 run_before_se_service.py` process (use `ps aux | grep run_before_se` and `kill <process id>` commands).
 
-4. Wait until no files remain in `Discord/Changes`, `Discord/Images` and `Discord/Temp` folders and kill
+4. Wait until no files remain in `Discord/Changes`, `Discord/Images` and `Discord/Temp` folders on the old host and kill
 `python3 discord_bot.py` process (use `ps aux | grep discord` and `kill <process id>` commands).
 
-5. Run `./rclone_data_remotely.sh`.
+5. Run `./rclone_data_remotely.sh` on the old host.
 
 6. Copy `mpc_monitor_cookies.json`, `ringsdb_prod_cookies.json` and `ringsdb_test_cookies.json` to the new host.
 
 7. On the new host, run `./rclone_data_locally.sh`.
 
-8. Uncomment all crons.
+8. On the new host, delete `env_health_check.txt` if it exists.
+
+9. On the new host, uncomment all crons.
 
 If you want to add a new MakePlayingCards deck to monitoring, run:
 
