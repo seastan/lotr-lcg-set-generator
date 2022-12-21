@@ -48,6 +48,8 @@ configuration.yaml
 discord.yaml
 Drive
 env_health_check.txt
+env_uuid.txt
+env_uuid_remote.txt
 id_rsa
 internet_state
 mail.yaml
