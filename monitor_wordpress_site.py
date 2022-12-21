@@ -17,7 +17,7 @@ ALERT_SUBJECT_TEMPLATE = 'LotR Wordpress Monitor ALERT: {}'
 ERROR_SUBJECT_TEMPLATE = 'LotR Wordpress Monitor ERROR: {}'
 LOG_LEVEL = logging.INFO
 CONFIGURATION_PATH = 'mpc_monitor.json'
-LOG_PATH = 'monitor_wordpress.log'
+LOG_PATH = 'monitor_wordpress_site.log'
 MAILS_PATH = 'mails'
 
 

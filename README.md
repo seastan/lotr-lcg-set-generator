@@ -317,21 +317,21 @@ Additional steps:
   - `*/10 * * * *  <path>/check_mpc_monitor.sh >> <path>/cron.log 2>&1`
   - `9 * * * *     <path>/check_ringsdb_alep_decks.sh >> <path>/cron.log 2>&1`
   - `* * * * *     <path>/check_run_before_se_service.sh >> <path>/cron.log 2>&1`
+  - `7 1 * * *     <path>/configuration_backup.sh "<path to a local configuration backup folder>" >> <path>/cron.log 2>&1`
   - `5 11 * * *    <path>/download_ringsdb_stat.sh >> <path>/cron.log 2>&1`
   - `* * * * *     <path>/env_health_check.sh >> <path>/cron.log 2>&1`
+  - `*/2 * * * *   <path>/monitor_discord_changes.sh >> <path>/cron.log 2>&1`
   - `36 9 * * *    <path>/monitor_remote_pipeline.sh >> <path>/cron.log 2>&1`
-  - `36 8 * * *    <path>/monitor_wordpress.sh >> <path>/cron.log 2>&1`
+  - `36 8 * * *    <path>/monitor_wordpress_site.sh >> <path>/cron.log 2>&1`
+  - `0 1 * * *     <path>/monitor_wordpress_token.sh >> <path>/cron.log 2>&1`
   - `*/5 * * * *   <path>/mpc_monitor.sh >> <path>/cron.log 2>&1`
   - `7 0 * * *     <path>/rclone_backup.sh "<local Drive/Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
   - `12,42 * * * * <path>/rclone_data_remotely.sh >> <path>/cron.log 2>&1`
   - `22,52 * * * * <path>/rclone_renderer.sh >> <path>/cron.log 2>&1`
   - `0 8 * * 1     <path>/remind_backup.sh >> <path>/cron.log 2>&1`
   - `5 8 2 * *     <path>/remind_stat_monthly.sh >> <path>/cron.log 2>&1`
-  - `*/2 * * * *   <path>/monitor_discord_changes.sh >> <path>/cron.log 2>&1`
-  - `0 1 * * *     <path>/monitor_wordpress_token.sh >> <path>/cron.log 2>&1`
   - `0 12 * * *    <path>/remote_player_cards_stat_monitor.sh >> <path>/cron.log 2>&1`
   - `19 8 * * *    <path>/scheduled_backup.sh "<local Drive/LinksBackup path>" >> <path>/cron.log 2>&1`
-  - `7 1 * * *     <path>/configuration_backup.sh "<path to a local configuration backup folder>" >> <path>/cron.log 2>&1`
 
     Replace `<path>` with the absolute path to the root folder of this repo.  `cron.log` may be located either in the root folder
     or in some external folder (if you already have other crons).  Set `<path to a local configuration backup folder>`
