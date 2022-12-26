@@ -468,6 +468,8 @@ TEMP_ROOT_PATH = 'Temp'
 
 CONFIGURATION_PATH = 'configuration.yaml'
 DISCORD_CARD_DATA_PATH = os.path.join(DISCORD_PATH, 'Data', 'card_data.json')
+DISCORD_CARD_DATA_FULL_PATH = os.path.join(DISCORD_PATH, 'Data',
+                                           'card_data_full.json')
 DISCORD_TIMESTAMPS_PATH = os.path.join(DISCORD_PATH, 'Data', 'timestamps.json')
 DOWNLOAD_PATH = 'Download'
 DOWNLOAD_TIME_PATH = os.path.join(DATA_PATH, 'download_time.txt')
@@ -5587,6 +5589,9 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
         .format(conf['sheet_gdid'], SHEET_IDS[CARD_SHEET]))
     data = [{key: value for key, value in row.items() if value is not None}
             for row in DATA if not row[CARD_SCRATCH]]
+    data_full = [
+        {key: value for key, value in row.items() if value is not None}
+        for row in DATA]
     channels = set()
 
     for row in data:
@@ -5643,6 +5648,12 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
             old_data = json.load(obj)['data']
     except Exception:
         old_data = None
+
+    try:
+        with open(DISCORD_CARD_DATA_FULL_PATH, 'r', encoding='utf-8') as obj:
+            old_data_full = json.load(obj)['data']
+    except Exception:
+        old_data_full = None
 
     modified_card_ids = []
     card_changes = []
@@ -5722,6 +5733,19 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 old_categories.remove(category)
                 new_categories.remove(category)
 
+    set_changes = {}
+    if old_data_full:
+        old_dict = {row[CARD_ID]:row for row in old_data_full}
+        new_dict = {row[CARD_ID]:row for row in data_full}
+        for card_id in new_dict:
+            if (card_id in old_dict and
+                    old_dict[card_id][CARD_SET] !=
+                    new_dict[card_id][CARD_SET]):
+                set_changes.setdefault(
+                    '{}|{}'.format(old_dict[card_id][CARD_SET],
+                                   new_dict[card_id][CARD_SET]),
+                    []).append(card_id)
+
     category_changes = []
     for new_category in new_categories:
         for old_category in list(old_categories):
@@ -5745,28 +5769,21 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
                   'new_set_id': diff[2][2]}))
         elif diff[0][0] == diff[1][0]:
             if ('rename', (diff[0][1], diff[1][1])) not in category_changes:
-                channel_changes.append(
-                    ('move', diff[1],
-                     {'card_id': diff[2][0],
-                      'old_set_id': diff[2][1],
-                      'new_set_id': diff[2][2]}))
+                channel_changes.append(('move', diff[1], None))
         elif diff[0][1] == diff[1][1]:
             channel_changes.append(('rename', (diff[0][0], diff[1][0]), None))
         else:
             if ('rename', (diff[0][1], diff[1][1])) not in category_changes:
                 channel_changes.append(
-                    ('move', (diff[0][0], diff[1][1]),
-                     {'card_id': diff[2][0],
-                      'old_set_id': diff[2][1],
-                      'new_set_id': diff[2][2]}))
+                    ('move', (diff[0][0], diff[1][1]), None))
 
             channel_changes.append(('rename', (diff[0][0], diff[1][0]), None))
 
-    set_names = [SETS[set_id][SET_NAME] for set_id in FOUND_SETS]
-    set_ids = {set_id:SETS[set_id][SET_NAME] for set_id in FOUND_SETS}
+    set_names = [s[SET_NAME] for s in SETS.values()]
+    set_ids = {s[SET_ID]:s[SET_NAME] for s in SETS.values()}
     set_codes = {
-        (SETS[set_id][SET_HOB_CODE] or '').lower():SETS[set_id][SET_NAME]
-        for set_id in FOUND_SETS}
+        s[SET_HOB_CODE].lower():s[SET_NAME] for s in SETS.values()
+        if s[SET_HOB_CODE]}
     valid_set_ids = {s[0] for s in sets}
     artwork_ids = {
         row[CARD_ID]:{
@@ -5799,12 +5816,18 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
         res = json.dumps(output, ensure_ascii=False)
         obj.write(res)
 
+    output = {'data': data_full}
+    with open(DISCORD_CARD_DATA_FULL_PATH, 'w', encoding='utf-8') as obj:
+        res = json.dumps(output, ensure_ascii=False)
+        obj.write(res)
+
     utc_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-    if (category_changes or channel_changes or card_changes or
+    if (category_changes or channel_changes or card_changes or set_changes or
             modified_card_ids):
         output = {'categories': category_changes,
                   'channels': channel_changes,
                   'cards': card_changes,
+                  'sets': set_changes,
                   'card_ids': modified_card_ids,
                   'utc_time': utc_time}
         path = os.path.join(

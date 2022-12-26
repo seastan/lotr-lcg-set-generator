@@ -2245,6 +2245,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                         await self._process_category_changes(data)
                         await self._process_channel_changes(data)
                         await self._process_card_changes(data)
+                        await self._process_set_changes(data)
                     except Exception as exc:
                         logging.exception(str(exc))
                         message = 'error processing {}: {}'.format(
@@ -2433,16 +2434,6 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                     'Moved from category "{}" to "{}"'
                     .format(old_category_name, change[1][1]))
                 await asyncio.sleep(CMD_SLEEP_TIME)
-                res = await self._move_artwork_files(
-                    change[2]['card_id'], change[2]['old_set_id'],
-                    change[2]['new_set_id'])
-                if res:
-                    await self._send_channel(channel, res)
-                    await asyncio.sleep(CMD_SLEEP_TIME)
-
-                await self._copy_image_files(
-                    change[2]['card_id'], change[2]['old_set_id'],
-                    change[2]['new_set_id'])
                 self.channels[change[1][0]] = {
                     'name': channel.name,
                     'id': channel.id,
@@ -2471,13 +2462,9 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                     'from category "{}" to "{}"'.format(old_category_name,
                                                         ARCHIVE_CATEGORY))
                 await asyncio.sleep(CMD_SLEEP_TIME)
-                res = await self._move_artwork_files(
-                    change[2]['card_id'], change[2]['old_set_id'],
+                await self._move_artwork_files(
+                    [change[2]['card_id']], change[2]['old_set_id'],
                     SCRATCH_FOLDER)
-                if res:
-                    await self._send_channel(channel, res)
-                    await asyncio.sleep(CMD_SLEEP_TIME)
-
                 del self.channels[change[1]]
 
         old_channel_names = []
@@ -2729,6 +2716,21 @@ Card "{}" has been updated:
             else:
                 raise FormatError('Unknown card change type: {}'.format(
                     change[0]))
+
+
+    async def _process_set_changes(self, data):
+        set_changes = data.get('sets', {})
+        if not set_changes:
+            return
+
+        for key, card_ids in set_changes.items():
+            parts = key.split('|')
+            if len(parts) != 2:
+                raise FormatError('Incorrect set change key: {}'.format(key))
+
+            old_set_id, new_set_id = parts
+            await self._move_artwork_files(card_ids, old_set_id, new_set_id)
+            await self._copy_image_files(card_ids, old_set_id, new_set_id)
 
 
     async def _add_general_channel(self, category_name):
@@ -4208,16 +4210,15 @@ Targets removed.
         return filenames
 
 
-    async def _move_artwork_files(self, card_id, old_set_id, new_set_id):
-        """ Move artwork files for the card.
+    async def _move_artwork_files(self, card_ids, old_set_id, new_set_id):
+        """ Move artwork files for the cards.
         """
-        return_message = ''
         if old_set_id == new_set_id:
-            return return_message
+            return
 
         filenames = await self._get_artwork_files(old_set_id)
         for filename in filenames:
-            if filename.split('_')[0] != card_id:
+            if filename.split('_')[0] not in card_ids:
                 continue
 
             stdout, stderr = await run_shell(
@@ -4228,16 +4229,10 @@ Targets removed.
                            .format(stdout, stderr))
                 logging.error(message)
                 create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
-                return_message = 'Failing to move artwork files for the card'
                 break
 
-            return_message = \
-                'Artwork files for the card were successfully moved'
 
-        return return_message
-
-
-    async def _copy_image_files(self, card_id, old_set_id, new_set_id):
+    async def _copy_image_files(self, card_ids, old_set_id, new_set_id):
         """ Copy rendered images for the card.
         """
         data = await read_card_data()
@@ -4252,7 +4247,7 @@ Targets removed.
 
         filenames = await self._get_image_files(old_set_folder)
         for filename in filenames:
-            if '-{}'.format(card_id) not in filename:
+            if re.sub(r'(?:\-2)?\.png$', '', filename)[-36:] not in card_ids:
                 continue
 
             stdout, stderr = await run_shell(
