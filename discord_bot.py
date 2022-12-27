@@ -2273,19 +2273,19 @@ class MyClient(discord.Client):  # pylint: disable=R0902
         if not self.rclone_art:
             return
 
+        artwork_destination_path = CONF.get('artwork_destination_path')
+        if not artwork_destination_path:
+            return
+
         self.rclone_art = False
         stdout, stderr = await run_shell(
-            RCLONE_ART_CMD.format(CONF.get('artwork_destination_path')))
+            RCLONE_ART_CMD.format(artwork_destination_path))
         if stdout or stderr:
             message = ('RClone failed (artwork), stdout: {}, stderr: {}'
                        .format(stdout, stderr))
             logging.error(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
             self.rclone_art = True
-            return
-
-        artwork_destination_path = CONF.get('artwork_destination_path')
-        if not artwork_destination_path:
             return
 
         async with art_lock:
@@ -4215,6 +4215,9 @@ Targets removed.
         """
         if old_set_id == new_set_id:
             return
+
+        async with rclone_art_lock:
+            await self._rclone_art()
 
         filenames = await self._get_artwork_files(old_set_id)
         for filename in filenames:
