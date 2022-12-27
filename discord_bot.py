@@ -21,6 +21,7 @@ import aiohttp
 import discord
 import yaml
 
+import common
 import lotr
 
 
@@ -60,7 +61,6 @@ RESTART_CRON_CMD = './restart_run_before_se_service.sh'
 
 CHANNEL_ID_REGEX = r'^<#[0-9]+>$'
 DIRECT_URL_REGEX = r'itemJson: \[[^,]+,"[^"]+","([^"]+)"'
-PREVIEW_URL = 'https://drive.google.com/file/d/{}/preview'
 
 CMD_SLEEP_TIME = 2
 COMMUNICATION_SLEEP_TIME = 5
@@ -71,25 +71,26 @@ WATCH_SLEEP_TIME = 5
 
 ERROR_SUBJECT_TEMPLATE = 'LotR Discord Bot ERROR: {}'
 WARNING_SUBJECT_TEMPLATE = 'LotR Discord Bot WARNING: {}'
-MAIL_QUOTA = 50
 
-CHANNEL_LIMIT = 500
-CHUNK_LIMIT = 1980
-LOG_LEVEL = logging.INFO
-MAX_PINS = 50
-ARCHIVE_CATEGORY = 'Archive'
-CARD_DECK_SECTION = '_Deck Section'
 CRON_CHANNEL = 'cron'
 NOTIFICATIONS_CHANNEL = 'notifications'
 PLAYTEST_CHANNEL = 'checklist'
 UPDATES_CHANNEL = 'spreadsheet-updates'
+
 KEEP_FOLDER = '_Keep'
 SCRATCH_FOLDER = '_Scratch'
+
+ARCHIVE_CATEGORY = 'Archive'
+CARD_DECK_SECTION = '_Deck Section'
+CHANNEL_LIMIT = 500
 GENERAL_CATEGORIES = {
     'Text Channels', 'Division of Labor', 'Player Card Design', 'Printing',
     'Rules', 'Voice Channels', 'Archive'
 }
-
+LOG_LEVEL = logging.INFO
+MAIL_QUOTA = 50
+MAX_PINS = 50
+PREVIEW_URL = 'https://drive.google.com/file/d/{}/preview'
 RENDERED_IMAGES_TTL = 600
 
 EMOJIS = {
@@ -522,45 +523,6 @@ async def run_and_forget_shell(cmd):
         cmd,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE)
-
-
-def split_result(value):
-    """ Split result into chunks.
-    """
-    chunks = []
-    chunk = ''
-    for line in value.split('\n'):
-        if len(chunk + line) + 1 <= CHUNK_LIMIT:
-            chunk += line + '\n'
-        else:
-            while len(chunk) > CHUNK_LIMIT:
-                pos = chunk[:CHUNK_LIMIT].rfind(' ')
-                if pos == -1:
-                    pos = CHUNK_LIMIT - 1
-
-                chunks.append(chunk[:pos + 1])
-                chunk = chunk[pos + 1:]
-
-            chunks.append(chunk)
-            chunk = line + '\n'
-
-    chunks.append(chunk)
-
-    for i in range(len(chunks) - 1):
-        cnt = chunks[i].count('```')
-        if cnt % 2 == 0:
-            continue
-
-        if chunks[i].split('```')[-1].startswith('diff'):
-            chunks[i + 1] = '```diff\n' + chunks[i + 1]
-        else:
-            chunks[i + 1] = '```\n' + chunks[i + 1]
-
-        chunks[i] += '```\n'
-
-    chunks = [chunk.replace('```diff\n```', '').replace('```\n```', '')
-           for chunk in chunks]
-    return chunks
 
 
 def format_playtest_message(data):
@@ -2803,7 +2765,7 @@ Card "{}" has been updated:
 
     async def _send_channel(self, channel, content):
         first_message = None
-        for i, chunk in enumerate(split_result(content)):
+        for i, chunk in enumerate(common.split_result(content)):
             if i > 0:
                 await asyncio.sleep(1)
 
