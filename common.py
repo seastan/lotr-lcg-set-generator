@@ -70,7 +70,8 @@ def split_result(value):  # pylint: disable=R0912
             char = chunk[pos]
             pos += 1
             if char == '*':
-                if pos < len(chunk) and chunk[pos] == '*':
+                if (pos < len(chunk) and chunk[pos] == '*' and
+                        state not in ('bi', 'i')):
                     char = 'b'
                     pos += 1
                 else:
