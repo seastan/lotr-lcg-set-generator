@@ -315,6 +315,7 @@ Additional steps:
   - `* * * * *     <path>/check_internet_state.sh >> <path>/cron.log 2>&1`
   - `* * * * *     <path>/check_mail.sh >> <path>/cron.log 2>&1`
   - `*/10 * * * *  <path>/check_mpc_monitor.sh >> <path>/cron.log 2>&1`
+  - `19 * * *      <path>/check_playtesting_sets.sh >> <path>/cron.log 2>&1`
   - `9 * * * *     <path>/check_ringsdb_alep_decks.sh >> <path>/cron.log 2>&1`
   - `* * * * *     <path>/check_run_before_se_service.sh >> <path>/cron.log 2>&1`
   - `7 1 * * *     <path>/configuration_backup.sh "<path to a local configuration backup folder>" >> <path>/cron.log 2>&1`

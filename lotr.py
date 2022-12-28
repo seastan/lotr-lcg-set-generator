@@ -391,6 +391,8 @@ DRAGNCARDS_IMAGES_FINISH_COMMAND = \
     '/var/www/dragncards.com/dragncards/frontend/imagesFinish.sh'
 DRAGNCARDS_IMAGES_START_COMMAND = \
     '/var/www/dragncards.com/dragncards/frontend/imagesStart.sh'
+DRAGNCARDS_FILES_COMMAND = \
+    'ls /var/www/dragncards.com/dragncards/frontend/src/cardDB/ALeP/'
 GENERATE_DRAGNCARDS_COMMAND = './generate_dragncards.sh {}'
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}{}*.jpg"'
@@ -5780,10 +5782,12 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
             channel_changes.append(('rename', (diff[0][0], diff[1][0]), None))
 
     set_names = [s[SET_NAME] for s in SETS.values()]
-    set_ids = {s[SET_ID]:s[SET_NAME] for s in SETS.values()}
-    set_codes = {
+    sets_by_id = {s[SET_ID]:s[SET_NAME] for s in SETS.values()}
+    sets_by_code = {
         s[SET_HOB_CODE].lower():s[SET_NAME] for s in SETS.values()
         if s[SET_HOB_CODE]}
+    playtesting_set_ids = [s[SET_ID] for s in SETS.values()
+                           if not s[SET_IGNORE] or s[SET_LOCKED]]
     valid_set_ids = {s[0] for s in sets}
     artwork_ids = {
         row[CARD_ID]:{
@@ -5803,9 +5807,10 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
             del artwork_ids[card_id][BACK_PREFIX + CARD_TYPE]
 
     output = {'url': url,
-              'sets': set_names,
-              'set_ids': set_ids,
-              'set_codes': set_codes,
+              'set_names': set_names,
+              'sets_by_id': sets_by_id,
+              'sets_by_code': sets_by_code,
+              'playtesting_set_ids': playtesting_set_ids,
               'set_and_quest_names': list(ALL_SET_AND_QUEST_NAMES),
               'encounter_set_names': list(ALL_ENCOUNTER_SET_NAMES),
               'card_names': list(ALL_CARD_NAMES),
@@ -8586,9 +8591,9 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
 
 
 def expire_dragncards_hashes():
-    """ Expire Dragncards hashes requested by Discord bot.
+    """ Expire DragnCards hashes requested by Discord bot.
     """
-    logging.info('Expiring Dragncards hashes')
+    logging.info('Expiring DragnCards hashes')
     timestamp = time.time()
 
     try:
@@ -8623,7 +8628,7 @@ def expire_dragncards_hashes():
         if os.path.exists(EXPIRE_DRAGNCARDS_JSON_PATH):
             os.remove(EXPIRE_DRAGNCARDS_JSON_PATH)
 
-    logging.info(' ...Expiring Dragncards hashes (%ss)',
+    logging.info(' ...Expiring DragnCards hashes (%ss)',
                  round(time.time() - timestamp, 3))
 
 
@@ -8824,6 +8829,19 @@ def copy_xml(set_id, set_name, lang):
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
+def run_cmd(cmd):
+    """ Run bash command.
+    """
+    logging.info('Running the command: %s', cmd)
+    try:
+        res = subprocess.run(cmd, stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT, shell=True, check=True)
+        return res
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError('Command "{}" returned error with code {}: {}'
+                           .format(cmd, exc.returncode, exc.output)) from exc
+
+
 def generate_dragncards_proxies(sets):
     """ Generate DragnCards proxies.
     """
@@ -8831,7 +8849,7 @@ def generate_dragncards_proxies(sets):
     timestamp = time.time()
 
     cmd = GENERATE_DRAGNCARDS_COMMAND.format(','.join(sets))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info(res)
 
     if os.path.exists(GENERATE_DRAGNCARDS_LOG_PATH):
@@ -8936,16 +8954,6 @@ def get_actual_sets():
     return res
 
 
-def _run_cmd(cmd):
-    logging.info('Running the command: %s', cmd)
-    try:
-        res = subprocess.run(cmd, stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT, shell=True, check=True)
-        return res
-    except subprocess.CalledProcessError as exc:
-        raise RuntimeError('Command "{}" returned error with code {}: {}'
-                           .format(cmd, exc.returncode, exc.output)) from exc
-
 def check_messages():
     """ Check messages in the archive and log them.
     """
@@ -9004,7 +9012,7 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
         'python-cut-bleed-margins-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9082,7 +9090,7 @@ def generate_png480_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
         'python-cut-bleed-margins-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9162,7 +9170,7 @@ def generate_png800_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
         'python-cut-bleed-margins-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9241,7 +9249,7 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disab
         'python-prepare-db-output-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9436,7 +9444,7 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
         'python-prepare-pdf-back-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9484,7 +9492,7 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
         'python-prepare-pdf-front-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path3.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9569,7 +9577,7 @@ def generate_png800_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
         'python-prepare-pdf-back-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9617,7 +9625,7 @@ def generate_png800_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
         'python-prepare-pdf-front-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path3.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9702,7 +9710,7 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
         'python-prepare-makeplayingcards-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9779,7 +9787,7 @@ def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint:
         'python-prepare-drivethrucards-jpg-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9859,7 +9867,7 @@ def generate_jpg800_bleedmbprint(conf, set_id, set_name, lang, skip_ids):  # pyl
         'python-prepare-mbprint-jpg-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9938,7 +9946,7 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
         'python-prepare-generic-png-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9988,7 +9996,7 @@ def _make_low_quality(conf, input_path):
     if input_cnt:
         cmd = MAGICK_COMMAND_LOW.format(conf['magick_path'], input_path,
                                         os.sep)
-        res = _run_cmd(cmd)
+        res = run_cmd(cmd)
         logging.info(res)
 
     output_cnt = 0
@@ -10020,7 +10028,7 @@ def _make_jpg(conf, input_path, min_size):
     if input_cnt:
         cmd = MAGICK_COMMAND_JPG.format(conf['magick_path'], input_path,
                                         os.sep)
-        res = _run_cmd(cmd)
+        res = run_cmd(cmd)
         logging.info(res)
 
     output_cnt = 0
@@ -10182,7 +10190,7 @@ def generate_tts(conf, set_id, set_name, lang, card_dict, scratch):  # pylint: d
             'python-prepare-tts-folder',
             temp_path.replace('\\', '\\\\'),
             output_path.replace('\\', '\\\\'))
-        res = _run_cmd(cmd)
+        res = run_cmd(cmd)
         logging.info('[%s, %s] %s', set_name, lang, res)
 
         output_cnt = 0
@@ -10372,7 +10380,7 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
             'python-generate-renderer-artwork',
             json_path.replace('\\', '\\\\'),
             temp_path.replace('\\', '\\\\'))
-        res = _run_cmd(cmd)
+        res = run_cmd(cmd)
         logging.info('[%s] %s', set_name, res)
 
         output_cnt = 0
@@ -10421,7 +10429,7 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
                 'python-generate-renderer-custom-image-folder',
                 temp_path.replace('\\', '\\\\'),
                 temp_path.replace('\\', '\\\\'))
-            res = _run_cmd(cmd)
+            res = run_cmd(cmd)
             logging.info('[%s] %s', set_name, res)
 
             for _, _, filenames in os.walk(temp_path):
@@ -10696,7 +10704,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                         'python-glue-ringsdb-images',
                         front_path.replace('\\', '\\\\'),
                         back_path.replace('\\', '\\\\'))
-                    res = _run_cmd(cmd)
+                    res = run_cmd(cmd)
                     logging.info('[%s, %s] %s', set_name, lang, res)
 
                 break
@@ -10957,7 +10965,7 @@ def generate_rules_pdf(conf, set_id, set_name, lang):
     pdf_path = os.path.join(output_path, pdf_filename)
     cmd = MAGICK_COMMAND_RULES_PDF.format(conf['magick_path'], input_path,
                                           os.sep, pdf_path)
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info(res)
 
     logging.info('[%s, %s] ...Generating Rules PDF outputs (%ss)',
@@ -11245,7 +11253,7 @@ def _make_cmyk(conf, input_path, min_size):
     if input_cnt:
         cmd = MAGICK_COMMAND_CMYK.format(conf['magick_path'], input_path,
                                          os.sep)
-        res = _run_cmd(cmd)
+        res = run_cmd(cmd)
         logging.info(res)
 
     output_cnt = 0
@@ -11731,7 +11739,7 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):  # pylint: disabl
         pdf_path = os.path.join(temp_path, pdf_filename)
         cmd = MAGICK_COMMAND_MBPRINT_PDF.format(conf['magick_path'], temp_path,
                                                 os.sep, pdf_path)
-        res = _run_cmd(cmd)
+        res = run_cmd(cmd)
         logging.info(res)
 
         output_path = os.path.join(OUTPUT_MBPRINT_PDF_PATH, '{}.{}'.format(
@@ -12040,6 +12048,22 @@ def _get_ssh_client(conf):
                    key_filename=conf.get('dragncards_id_rsa_path', ''),
                    timeout=30)
     return client
+
+
+def list_dragncards_files(conf):
+    """ List playtesting JSON files on the DragnCards host.
+    """
+    logging.info('Running remote command: %s', DRAGNCARDS_FILES_COMMAND)
+    client = _get_ssh_client(conf)
+    try:
+        _, res, _ = client.exec_command(DRAGNCARDS_FILES_COMMAND, timeout=30)
+        res = res.read().decode('utf-8').strip()
+        return res
+    finally:
+        try:
+            client.close()
+        except Exception:
+            pass
 
 
 def trigger_dragncards_build(conf):

@@ -3278,12 +3278,12 @@ Targets removed.
         """ Get statistics for all found quests.
         """
         data = await read_card_data()
-        if quest.lower() in data['set_codes']:
-            quest = data['set_codes'][quest.lower()].replace('ALeP - ', '')
+        if quest.lower() in data['sets_by_code']:
+            quest = data['sets_by_code'][quest.lower()].replace('ALeP - ', '')
 
         quest_folder = lotr.escape_filename(quest).lower()
         quest_file = lotr.escape_octgn_filename(quest_folder)
-        set_folders = {lotr.escape_filename(s) for s in data['sets']}
+        set_folders = {lotr.escape_filename(s) for s in data['set_names']}
         quests = {}
         for _, subfolders, _ in os.walk(lotr.OUTPUT_OCTGN_DECKS_PATH):  # pylint: disable=R1702
             for subfolder in subfolders:
@@ -4201,14 +4201,14 @@ Targets removed.
         """ Copy rendered images for the card.
         """
         data = await read_card_data()
-        if (old_set_id not in data['set_ids'] or
-                new_set_id not in data['set_ids']):
+        if (old_set_id not in data['sets_by_id'] or
+                new_set_id not in data['sets_by_id']):
             return
 
         old_set_folder = '{}.English'.format(
-            lotr.escape_filename(data['set_ids'][old_set_id]))
+            lotr.escape_filename(data['sets_by_id'][old_set_id]))
         new_set_folder = '{}.English'.format(
-            lotr.escape_filename(data['set_ids'][new_set_id]))
+            lotr.escape_filename(data['sets_by_id'][new_set_id]))
 
         filenames = await self._get_image_files(old_set_folder)
         for filename in filenames:
