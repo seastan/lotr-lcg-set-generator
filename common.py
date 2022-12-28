@@ -63,8 +63,7 @@ def split_result(value):  # pylint: disable=R0912
     chunks = [chunk.replace('```diff\n```', '').replace('```\n```', '')
            for chunk in chunks]
 
-    for i in range(len(chunks) - 1):
-        chunk = chunks[i]
+    for i, chunk in enumerate(chunks):
         state = ''
         pos = 0
         while pos < len(chunk):
@@ -81,7 +80,8 @@ def split_result(value):  # pylint: disable=R0912
 
         missing = CHUNK_MISSING[state]
         chunks[i] = chunks[i] + missing
-        chunks[i + 1] = missing + chunks[i + 1]
+        if i < len(chunks) - 1:
+            chunks[i + 1] = missing + chunks[i + 1]
 
     chunks = [re.sub(r'(\n+)(\*+)$', '\\2\\1',
                      re.sub(r'^(\*+)(\n+)', '\\2\\1', chunk))
