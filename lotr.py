@@ -12470,7 +12470,7 @@ def upload_dragncards_lightweight_outputs(conf, sets):
                  round(time.time() - timestamp, 3))
 
 
-def update_ringsdb(conf, sets):
+def update_ringsdb(conf, sets):  # pylint: disable=R0914
     """ Update ringsdb.com.
     """
     logging.info('Updating ringsdb.com...')
@@ -12478,14 +12478,15 @@ def update_ringsdb(conf, sets):
 
     try:
         with open(RINGSDB_JSON_PATH, 'r', encoding='utf-8') as fobj:
-            checksums = json.load(fobj)
+            data = json.load(fobj)
     except Exception:
-        checksums = {}
+        data = {}
 
     changes = False
     sets = [s for s in sets if s[0] in FOUND_SETS]
     for set_id, set_name in sets:
-        if not SETS[set_id].get(SET_HOB_CODE):
+        code = SETS[set_id].get(SET_HOB_CODE)
+        if not code:
             continue
 
         path = os.path.join(OUTPUT_RINGSDB_PATH, escape_filename(set_name),
@@ -12496,16 +12497,20 @@ def update_ringsdb(conf, sets):
         with open(path, 'rb') as fobj:
             content = fobj.read()
 
-        checksum = hashlib.md5(content).hexdigest()
-        if checksum == checksums.get(set_id):
-            continue
-
         if (len([p for p in content.decode('utf-8').split('\n')
                 if p.strip()]) <= 1):
             continue
 
+        checksum = hashlib.md5(content).hexdigest()
+        old_code, old_checksum = data.get(set_id, [None, None])
+        if checksum == old_checksum and code == old_code:
+            continue
+
         changes = True
-        checksums[set_id] = checksum
+        data[set_id] = [code, checksum]
+
+        if not old_code:
+            old_code = code
 
         logging.info('Uploading %s to %s', set_name, conf['ringsdb_url'])
         cookies = _read_ringsdb_cookies(conf)
@@ -12518,7 +12523,7 @@ def update_ringsdb(conf, sets):
             res = session.post(
                 '{}/admin/csv/upload'.format(conf['ringsdb_url']),
                 files={'upfile': fobj},
-                data={'code': SETS[set_id][SET_HOB_CODE], 'name': set_name})
+                data={'code': code, 'old_code': old_code, 'name': set_name})
 
         res = res.content.decode('utf-8').strip()
         if res != 'Done':
@@ -12530,7 +12535,7 @@ def update_ringsdb(conf, sets):
 
     if changes:
         with open(RINGSDB_JSON_PATH, 'w', encoding='utf-8') as fobj:
-            json.dump(checksums, fobj)
+            json.dump(data, fobj)
 
     logging.info('...Updating ringsdb.com (%ss)',
                  round(time.time() - timestamp, 3))
