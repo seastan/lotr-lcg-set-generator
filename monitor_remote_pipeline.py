@@ -15,11 +15,12 @@ import warnings
 import requests
 import yaml
 
+import common
+
 
 ALERT_SUBJECT_TEMPLATE = 'LotR Remote Pipeline Monitor ALERT: {}'
 ERROR_SUBJECT_TEMPLATE = 'LotR Remote Pipeline Monitor ERROR: {}'
 
-CHUNK_LIMIT = 1980
 IO_SLEEP_TIME = 1
 LOG_LEVEL = logging.INFO
 MESSAGE_SLEEP_TIME = 30
@@ -124,26 +125,7 @@ def send_discord(message):
             conf = yaml.safe_load(f_conf)
 
         if conf.get('webhook_url'):
-            chunks = []
-            chunk = ''
-            for line in message.split('\n'):
-                if len(chunk + line) + 1 <= CHUNK_LIMIT:
-                    chunk += line + '\n'
-                else:
-                    while len(chunk) > CHUNK_LIMIT:
-                        pos = chunk[:CHUNK_LIMIT].rfind(' ')
-                        if pos == -1:
-                            pos = CHUNK_LIMIT - 1
-
-                        chunks.append(chunk[:pos + 1])
-                        chunk = chunk[pos + 1:]
-
-                    chunks.append(chunk)
-                    chunk = line + '\n'
-
-            chunks.append(chunk)
-
-            for i, chunk in enumerate(chunks):
+            for i, chunk in enumerate(common.split_result(message)):
                 if i > 0:
                     time.sleep(1)
 

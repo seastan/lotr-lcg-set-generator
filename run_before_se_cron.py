@@ -17,6 +17,7 @@ import uuid
 import requests
 import yaml
 
+import common
 from lotr import DATA_PATH, LOG_LIMIT, SanityCheckError, read_conf
 from run_before_se import main
 
@@ -33,7 +34,6 @@ SANITY_CHECK_SUBJECT_TEMPLATE = 'LotR Cron CHECK: {}'
 WARNING_SUBJECT_TEMPLATE = 'LotR Cron WARNING: {}'
 MAIL_QUOTA = 50
 
-CHUNK_LIMIT = 1980
 LOG_LEVEL = logging.INFO
 
 
@@ -101,26 +101,7 @@ def send_discord(message):
             conf = yaml.safe_load(f_conf)
 
         if conf.get('webhook_url'):
-            chunks = []
-            chunk = ''
-            for line in message.split('\n'):
-                if len(chunk + line) + 1 <= CHUNK_LIMIT:
-                    chunk += line + '\n'
-                else:
-                    while len(chunk) > CHUNK_LIMIT:
-                        pos = chunk[:CHUNK_LIMIT].rfind(' ')
-                        if pos == -1:
-                            pos = CHUNK_LIMIT - 1
-
-                        chunks.append(chunk[:pos + 1])
-                        chunk = chunk[pos + 1:]
-
-                    chunks.append(chunk)
-                    chunk = line + '\n'
-
-            chunks.append(chunk)
-
-            for i, chunk in enumerate(chunks):
+            for i, chunk in enumerate(common.split_result(message)):
                 if i > 0:
                     time.sleep(1)
 

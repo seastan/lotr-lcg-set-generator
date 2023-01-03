@@ -391,6 +391,8 @@ DRAGNCARDS_IMAGES_FINISH_COMMAND = \
     '/var/www/dragncards.com/dragncards/frontend/imagesFinish.sh'
 DRAGNCARDS_IMAGES_START_COMMAND = \
     '/var/www/dragncards.com/dragncards/frontend/imagesStart.sh'
+DRAGNCARDS_FILES_COMMAND = \
+    'ls /var/www/dragncards.com/dragncards/frontend/src/cardDB/ALeP/'
 GENERATE_DRAGNCARDS_COMMAND = './generate_dragncards.sh {}'
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}{}*.jpg"'
@@ -468,6 +470,8 @@ TEMP_ROOT_PATH = 'Temp'
 
 CONFIGURATION_PATH = 'configuration.yaml'
 DISCORD_CARD_DATA_PATH = os.path.join(DISCORD_PATH, 'Data', 'card_data.json')
+DISCORD_CARD_DATA_FULL_PATH = os.path.join(DISCORD_PATH, 'Data',
+                                           'card_data_full.json')
 DISCORD_TIMESTAMPS_PATH = os.path.join(DISCORD_PATH, 'Data', 'timestamps.json')
 DOWNLOAD_PATH = 'Download'
 DOWNLOAD_TIME_PATH = os.path.join(DATA_PATH, 'download_time.txt')
@@ -5649,6 +5653,9 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
         .format(conf['sheet_gdid'], SHEET_IDS[CARD_SHEET]))
     data = [{key: value for key, value in row.items() if value is not None}
             for row in DATA if not row[CARD_SCRATCH]]
+    data_full = [
+        {key: value for key, value in row.items() if value is not None}
+        for row in DATA]
     channels = set()
 
     for row in data:
@@ -5705,6 +5712,12 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
             old_data = json.load(obj)['data']
     except Exception:
         old_data = None
+
+    try:
+        with open(DISCORD_CARD_DATA_FULL_PATH, 'r', encoding='utf-8') as obj:
+            old_data_full = json.load(obj)['data']
+    except Exception:
+        old_data_full = None
 
     modified_card_ids = []
     card_changes = []
@@ -5784,6 +5797,19 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 old_categories.remove(category)
                 new_categories.remove(category)
 
+    set_changes = {}
+    if old_data_full:
+        old_dict = {row[CARD_ID]:row for row in old_data_full}
+        new_dict = {row[CARD_ID]:row for row in data_full}
+        for card_id in new_dict:
+            if (card_id in old_dict and
+                    old_dict[card_id][CARD_SET] !=
+                    new_dict[card_id][CARD_SET]):
+                set_changes.setdefault(
+                    '{}|{}'.format(old_dict[card_id][CARD_SET],
+                                   new_dict[card_id][CARD_SET]),
+                    []).append(card_id)
+
     category_changes = []
     for new_category in new_categories:
         for old_category in list(old_categories):
@@ -5807,28 +5833,23 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
                   'new_set_id': diff[2][2]}))
         elif diff[0][0] == diff[1][0]:
             if ('rename', (diff[0][1], diff[1][1])) not in category_changes:
-                channel_changes.append(
-                    ('move', diff[1],
-                     {'card_id': diff[2][0],
-                      'old_set_id': diff[2][1],
-                      'new_set_id': diff[2][2]}))
+                channel_changes.append(('move', diff[1], None))
         elif diff[0][1] == diff[1][1]:
             channel_changes.append(('rename', (diff[0][0], diff[1][0]), None))
         else:
             if ('rename', (diff[0][1], diff[1][1])) not in category_changes:
                 channel_changes.append(
-                    ('move', (diff[0][0], diff[1][1]),
-                     {'card_id': diff[2][0],
-                      'old_set_id': diff[2][1],
-                      'new_set_id': diff[2][2]}))
+                    ('move', (diff[0][0], diff[1][1]), None))
 
             channel_changes.append(('rename', (diff[0][0], diff[1][0]), None))
 
-    set_names = [SETS[set_id][SET_NAME] for set_id in FOUND_SETS]
-    set_ids = {set_id:SETS[set_id][SET_NAME] for set_id in FOUND_SETS}
-    set_codes = {
-        (SETS[set_id][SET_HOB_CODE] or '').lower():SETS[set_id][SET_NAME]
-        for set_id in FOUND_SETS}
+    set_names = [s[SET_NAME] for s in SETS.values()]
+    sets_by_id = {s[SET_ID]:s[SET_NAME] for s in SETS.values()}
+    sets_by_code = {
+        s[SET_HOB_CODE].lower():s[SET_NAME] for s in SETS.values()
+        if s[SET_HOB_CODE]}
+    playtesting_set_ids = [s[SET_ID] for s in SETS.values()
+                           if not s[SET_IGNORE] or s[SET_LOCKED]]
     valid_set_ids = {s[0] for s in sets}
     artwork_ids = {
         row[CARD_ID]:{
@@ -5848,9 +5869,10 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
             del artwork_ids[card_id][BACK_PREFIX + CARD_TYPE]
 
     output = {'url': url,
-              'sets': set_names,
-              'set_ids': set_ids,
-              'set_codes': set_codes,
+              'set_names': set_names,
+              'sets_by_id': sets_by_id,
+              'sets_by_code': sets_by_code,
+              'playtesting_set_ids': playtesting_set_ids,
               'set_and_quest_names': list(ALL_SET_AND_QUEST_NAMES),
               'encounter_set_names': list(ALL_ENCOUNTER_SET_NAMES),
               'card_names': list(ALL_CARD_NAMES),
@@ -5861,12 +5883,18 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
         res = json.dumps(output, ensure_ascii=False)
         obj.write(res)
 
+    output = {'data': data_full}
+    with open(DISCORD_CARD_DATA_FULL_PATH, 'w', encoding='utf-8') as obj:
+        res = json.dumps(output, ensure_ascii=False)
+        obj.write(res)
+
     utc_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-    if (category_changes or channel_changes or card_changes or
+    if (category_changes or channel_changes or card_changes or set_changes or
             modified_card_ids):
         output = {'categories': category_changes,
                   'channels': channel_changes,
                   'cards': card_changes,
+                  'sets': set_changes,
                   'card_ids': modified_card_ids,
                   'utc_time': utc_time}
         path = os.path.join(
@@ -8625,9 +8653,9 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
 
 
 def expire_dragncards_hashes():
-    """ Expire Dragncards hashes requested by Discord bot.
+    """ Expire DragnCards hashes requested by Discord bot.
     """
-    logging.info('Expiring Dragncards hashes')
+    logging.info('Expiring DragnCards hashes')
     timestamp = time.time()
 
     try:
@@ -8662,7 +8690,7 @@ def expire_dragncards_hashes():
         if os.path.exists(EXPIRE_DRAGNCARDS_JSON_PATH):
             os.remove(EXPIRE_DRAGNCARDS_JSON_PATH)
 
-    logging.info(' ...Expiring Dragncards hashes (%ss)',
+    logging.info(' ...Expiring DragnCards hashes (%ss)',
                  round(time.time() - timestamp, 3))
 
 
@@ -8863,6 +8891,19 @@ def copy_xml(set_id, set_name, lang):
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
+def run_cmd(cmd):
+    """ Run bash command.
+    """
+    logging.info('Running the command: %s', cmd)
+    try:
+        res = subprocess.run(cmd, stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT, shell=True, check=True)
+        return res
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError('Command "{}" returned error with code {}: {}'
+                           .format(cmd, exc.returncode, exc.output)) from exc
+
+
 def generate_dragncards_proxies(sets):
     """ Generate DragnCards proxies.
     """
@@ -8870,7 +8911,7 @@ def generate_dragncards_proxies(sets):
     timestamp = time.time()
 
     cmd = GENERATE_DRAGNCARDS_COMMAND.format(','.join(sets))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info(res)
 
     if os.path.exists(GENERATE_DRAGNCARDS_LOG_PATH):
@@ -8975,16 +9016,6 @@ def get_actual_sets():
     return res
 
 
-def _run_cmd(cmd):
-    logging.info('Running the command: %s', cmd)
-    try:
-        res = subprocess.run(cmd, stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT, shell=True, check=True)
-        return res
-    except subprocess.CalledProcessError as exc:
-        raise RuntimeError('Command "{}" returned error with code {}: {}'
-                           .format(cmd, exc.returncode, exc.output)) from exc
-
 def check_messages():
     """ Check messages in the archive and log them.
     """
@@ -9043,7 +9074,7 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
         'python-cut-bleed-margins-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9121,7 +9152,7 @@ def generate_png480_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
         'python-cut-bleed-margins-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9201,7 +9232,7 @@ def generate_png800_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
         'python-cut-bleed-margins-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9280,7 +9311,7 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disab
         'python-prepare-db-output-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9475,7 +9506,7 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
         'python-prepare-pdf-back-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9523,7 +9554,7 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
         'python-prepare-pdf-front-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path3.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9608,7 +9639,7 @@ def generate_png800_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
         'python-prepare-pdf-back-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9656,7 +9687,7 @@ def generate_png800_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
         'python-prepare-pdf-front-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path3.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9741,7 +9772,7 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
         'python-prepare-makeplayingcards-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9818,7 +9849,7 @@ def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint:
         'python-prepare-drivethrucards-jpg-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9898,7 +9929,7 @@ def generate_jpg800_bleedmbprint(conf, set_id, set_name, lang, skip_ids):  # pyl
         'python-prepare-mbprint-jpg-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -9977,7 +10008,7 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
         'python-prepare-generic-png-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info('[%s, %s] %s', set_name, lang, res)
 
     output_cnt = 0
@@ -10027,7 +10058,7 @@ def _make_low_quality(conf, input_path):
     if input_cnt:
         cmd = MAGICK_COMMAND_LOW.format(conf['magick_path'], input_path,
                                         os.sep)
-        res = _run_cmd(cmd)
+        res = run_cmd(cmd)
         logging.info(res)
 
     output_cnt = 0
@@ -10059,7 +10090,7 @@ def _make_jpg(conf, input_path, min_size):
     if input_cnt:
         cmd = MAGICK_COMMAND_JPG.format(conf['magick_path'], input_path,
                                         os.sep)
-        res = _run_cmd(cmd)
+        res = run_cmd(cmd)
         logging.info(res)
 
     output_cnt = 0
@@ -10221,7 +10252,7 @@ def generate_tts(conf, set_id, set_name, lang, card_dict, scratch):  # pylint: d
             'python-prepare-tts-folder',
             temp_path.replace('\\', '\\\\'),
             output_path.replace('\\', '\\\\'))
-        res = _run_cmd(cmd)
+        res = run_cmd(cmd)
         logging.info('[%s, %s] %s', set_name, lang, res)
 
         output_cnt = 0
@@ -10411,7 +10442,7 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
             'python-generate-renderer-artwork',
             json_path.replace('\\', '\\\\'),
             temp_path.replace('\\', '\\\\'))
-        res = _run_cmd(cmd)
+        res = run_cmd(cmd)
         logging.info('[%s] %s', set_name, res)
 
         output_cnt = 0
@@ -10460,7 +10491,7 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
                 'python-generate-renderer-custom-image-folder',
                 temp_path.replace('\\', '\\\\'),
                 temp_path.replace('\\', '\\\\'))
-            res = _run_cmd(cmd)
+            res = run_cmd(cmd)
             logging.info('[%s] %s', set_name, res)
 
             for _, _, filenames in os.walk(temp_path):
@@ -10735,7 +10766,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                         'python-glue-ringsdb-images',
                         front_path.replace('\\', '\\\\'),
                         back_path.replace('\\', '\\\\'))
-                    res = _run_cmd(cmd)
+                    res = run_cmd(cmd)
                     logging.info('[%s, %s] %s', set_name, lang, res)
 
                 break
@@ -10996,7 +11027,7 @@ def generate_rules_pdf(conf, set_id, set_name, lang):
     pdf_path = os.path.join(output_path, pdf_filename)
     cmd = MAGICK_COMMAND_RULES_PDF.format(conf['magick_path'], input_path,
                                           os.sep, pdf_path)
-    res = _run_cmd(cmd)
+    res = run_cmd(cmd)
     logging.info(res)
 
     logging.info('[%s, %s] ...Generating Rules PDF outputs (%ss)',
@@ -11284,7 +11315,7 @@ def _make_cmyk(conf, input_path, min_size):
     if input_cnt:
         cmd = MAGICK_COMMAND_CMYK.format(conf['magick_path'], input_path,
                                          os.sep)
-        res = _run_cmd(cmd)
+        res = run_cmd(cmd)
         logging.info(res)
 
     output_cnt = 0
@@ -11770,7 +11801,7 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):  # pylint: disabl
         pdf_path = os.path.join(temp_path, pdf_filename)
         cmd = MAGICK_COMMAND_MBPRINT_PDF.format(conf['magick_path'], temp_path,
                                                 os.sep, pdf_path)
-        res = _run_cmd(cmd)
+        res = run_cmd(cmd)
         logging.info(res)
 
         output_path = os.path.join(OUTPUT_MBPRINT_PDF_PATH, '{}.{}'.format(
@@ -12079,6 +12110,22 @@ def _get_ssh_client(conf):
                    key_filename=conf.get('dragncards_id_rsa_path', ''),
                    timeout=30)
     return client
+
+
+def list_dragncards_files(conf):
+    """ List playtesting JSON files on the DragnCards host.
+    """
+    logging.info('Running remote command: %s', DRAGNCARDS_FILES_COMMAND)
+    client = _get_ssh_client(conf)
+    try:
+        _, res, _ = client.exec_command(DRAGNCARDS_FILES_COMMAND, timeout=30)
+        res = res.read().decode('utf-8').strip()
+        return res
+    finally:
+        try:
+            client.close()
+        except Exception:
+            pass
 
 
 def trigger_dragncards_build(conf):
@@ -12485,7 +12532,7 @@ def upload_dragncards_lightweight_outputs(conf, sets):
                  round(time.time() - timestamp, 3))
 
 
-def update_ringsdb(conf, sets):
+def update_ringsdb(conf, sets):  # pylint: disable=R0914
     """ Update ringsdb.com.
     """
     logging.info('Updating ringsdb.com...')
@@ -12493,14 +12540,15 @@ def update_ringsdb(conf, sets):
 
     try:
         with open(RINGSDB_JSON_PATH, 'r', encoding='utf-8') as fobj:
-            checksums = json.load(fobj)
+            data = json.load(fobj)
     except Exception:
-        checksums = {}
+        data = {}
 
     changes = False
     sets = [s for s in sets if s[0] in FOUND_SETS]
     for set_id, set_name in sets:
-        if not SETS[set_id].get(SET_HOB_CODE):
+        code = SETS[set_id].get(SET_HOB_CODE)
+        if not code:
             continue
 
         path = os.path.join(OUTPUT_RINGSDB_PATH, escape_filename(set_name),
@@ -12511,16 +12559,20 @@ def update_ringsdb(conf, sets):
         with open(path, 'rb') as fobj:
             content = fobj.read()
 
-        checksum = hashlib.md5(content).hexdigest()
-        if checksum == checksums.get(set_id):
-            continue
-
         if (len([p for p in content.decode('utf-8').split('\n')
                 if p.strip()]) <= 1):
             continue
 
+        checksum = hashlib.md5(content).hexdigest()
+        old_code, old_checksum = data.get(set_id, [None, None])
+        if checksum == old_checksum and code == old_code:
+            continue
+
         changes = True
-        checksums[set_id] = checksum
+        data[set_id] = [code, checksum]
+
+        if not old_code:
+            old_code = code
 
         logging.info('Uploading %s to %s', set_name, conf['ringsdb_url'])
         cookies = _read_ringsdb_cookies(conf)
@@ -12533,7 +12585,7 @@ def update_ringsdb(conf, sets):
             res = session.post(
                 '{}/admin/csv/upload'.format(conf['ringsdb_url']),
                 files={'upfile': fobj},
-                data={'code': SETS[set_id][SET_HOB_CODE], 'name': set_name})
+                data={'code': code, 'old_code': old_code, 'name': set_name})
 
         res = res.content.decode('utf-8').strip()
         if res != 'Done':
@@ -12545,7 +12597,7 @@ def update_ringsdb(conf, sets):
 
     if changes:
         with open(RINGSDB_JSON_PATH, 'w', encoding='utf-8') as fobj:
-            json.dump(checksums, fobj)
+            json.dump(data, fobj)
 
     logging.info('...Updating ringsdb.com (%ss)',
                  round(time.time() - timestamp, 3))

@@ -21,6 +21,7 @@ import aiohttp
 import discord
 import yaml
 
+import common
 import lotr
 
 
@@ -60,7 +61,6 @@ RESTART_CRON_CMD = './restart_run_before_se_service.sh'
 
 CHANNEL_ID_REGEX = r'^<#[0-9]+>$'
 DIRECT_URL_REGEX = r'itemJson: \[[^,]+,"[^"]+","([^"]+)"'
-PREVIEW_URL = 'https://drive.google.com/file/d/{}/preview'
 
 CMD_SLEEP_TIME = 2
 COMMUNICATION_SLEEP_TIME = 5
@@ -71,25 +71,26 @@ WATCH_SLEEP_TIME = 5
 
 ERROR_SUBJECT_TEMPLATE = 'LotR Discord Bot ERROR: {}'
 WARNING_SUBJECT_TEMPLATE = 'LotR Discord Bot WARNING: {}'
-MAIL_QUOTA = 50
 
-CHANNEL_LIMIT = 500
-CHUNK_LIMIT = 1980
-LOG_LEVEL = logging.INFO
-MAX_PINS = 50
-ARCHIVE_CATEGORY = 'Archive'
-CARD_DECK_SECTION = '_Deck Section'
 CRON_CHANNEL = 'cron'
 NOTIFICATIONS_CHANNEL = 'notifications'
 PLAYTEST_CHANNEL = 'checklist'
 UPDATES_CHANNEL = 'spreadsheet-updates'
+
 KEEP_FOLDER = '_Keep'
 SCRATCH_FOLDER = '_Scratch'
+
+ARCHIVE_CATEGORY = 'Archive'
+CARD_DECK_SECTION = '_Deck Section'
+CHANNEL_LIMIT = 500
 GENERAL_CATEGORIES = {
     'Text Channels', 'Division of Labor', 'Player Card Design', 'Printing',
     'Rules', 'Voice Channels', 'Archive'
 }
-
+LOG_LEVEL = logging.INFO
+MAIL_QUOTA = 50
+MAX_PINS = 50
+PREVIEW_URL = 'https://drive.google.com/file/d/{}/preview'
 RENDERED_IMAGES_TTL = 600
 
 EMOJIS = {
@@ -522,45 +523,6 @@ async def run_and_forget_shell(cmd):
         cmd,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE)
-
-
-def split_result(value):
-    """ Split result into chunks.
-    """
-    chunks = []
-    chunk = ''
-    for line in value.split('\n'):
-        if len(chunk + line) + 1 <= CHUNK_LIMIT:
-            chunk += line + '\n'
-        else:
-            while len(chunk) > CHUNK_LIMIT:
-                pos = chunk[:CHUNK_LIMIT].rfind(' ')
-                if pos == -1:
-                    pos = CHUNK_LIMIT - 1
-
-                chunks.append(chunk[:pos + 1])
-                chunk = chunk[pos + 1:]
-
-            chunks.append(chunk)
-            chunk = line + '\n'
-
-    chunks.append(chunk)
-
-    for i in range(len(chunks) - 1):
-        cnt = chunks[i].count('```')
-        if cnt % 2 == 0:
-            continue
-
-        if chunks[i].split('```')[-1].startswith('diff'):
-            chunks[i + 1] = '```diff\n' + chunks[i + 1]
-        else:
-            chunks[i + 1] = '```\n' + chunks[i + 1]
-
-        chunks[i] += '```\n'
-
-    chunks = [chunk.replace('```diff\n```', '').replace('```\n```', '')
-           for chunk in chunks]
-    return chunks
 
 
 def format_playtest_message(data):
@@ -2245,6 +2207,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                         await self._process_category_changes(data)
                         await self._process_channel_changes(data)
                         await self._process_card_changes(data)
+                        await self._process_set_changes(data)
                     except Exception as exc:
                         logging.exception(str(exc))
                         message = 'error processing {}: {}'.format(
@@ -2272,19 +2235,19 @@ class MyClient(discord.Client):  # pylint: disable=R0902
         if not self.rclone_art:
             return
 
+        artwork_destination_path = CONF.get('artwork_destination_path')
+        if not artwork_destination_path:
+            return
+
         self.rclone_art = False
         stdout, stderr = await run_shell(
-            RCLONE_ART_CMD.format(CONF.get('artwork_destination_path')))
+            RCLONE_ART_CMD.format(artwork_destination_path))
         if stdout or stderr:
             message = ('RClone failed (artwork), stdout: {}, stderr: {}'
                        .format(stdout, stderr))
             logging.error(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
             self.rclone_art = True
-            return
-
-        artwork_destination_path = CONF.get('artwork_destination_path')
-        if not artwork_destination_path:
             return
 
         async with art_lock:
@@ -2433,16 +2396,6 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                     'Moved from category "{}" to "{}"'
                     .format(old_category_name, change[1][1]))
                 await asyncio.sleep(CMD_SLEEP_TIME)
-                res = await self._move_artwork_files(
-                    change[2]['card_id'], change[2]['old_set_id'],
-                    change[2]['new_set_id'])
-                if res:
-                    await self._send_channel(channel, res)
-                    await asyncio.sleep(CMD_SLEEP_TIME)
-
-                await self._copy_image_files(
-                    change[2]['card_id'], change[2]['old_set_id'],
-                    change[2]['new_set_id'])
                 self.channels[change[1][0]] = {
                     'name': channel.name,
                     'id': channel.id,
@@ -2471,13 +2424,9 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                     'from category "{}" to "{}"'.format(old_category_name,
                                                         ARCHIVE_CATEGORY))
                 await asyncio.sleep(CMD_SLEEP_TIME)
-                res = await self._move_artwork_files(
-                    change[2]['card_id'], change[2]['old_set_id'],
+                await self._move_artwork_files(
+                    [change[2]['card_id']], change[2]['old_set_id'],
                     SCRATCH_FOLDER)
-                if res:
-                    await self._send_channel(channel, res)
-                    await asyncio.sleep(CMD_SLEEP_TIME)
-
                 del self.channels[change[1]]
 
         old_channel_names = []
@@ -2731,6 +2680,21 @@ Card "{}" has been updated:
                     change[0]))
 
 
+    async def _process_set_changes(self, data):
+        set_changes = data.get('sets', {})
+        if not set_changes:
+            return
+
+        for key, card_ids in set_changes.items():
+            parts = key.split('|')
+            if len(parts) != 2:
+                raise FormatError('Incorrect set change key: {}'.format(key))
+
+            old_set_id, new_set_id = parts
+            await self._move_artwork_files(card_ids, old_set_id, new_set_id)
+            await self._copy_image_files(card_ids, old_set_id, new_set_id)
+
+
     async def _add_general_channel(self, category_name):
         category = self.get_channel(self.categories[category_name]['id'])
         channel = await self.guilds[0].create_text_channel(
@@ -2801,7 +2765,7 @@ Card "{}" has been updated:
 
     async def _send_channel(self, channel, content):
         first_message = None
-        for i, chunk in enumerate(split_result(content)):
+        for i, chunk in enumerate(common.split_result(content)):
             if i > 0:
                 await asyncio.sleep(1)
 
@@ -3314,12 +3278,12 @@ Targets removed.
         """ Get statistics for all found quests.
         """
         data = await read_card_data()
-        if quest.lower() in data['set_codes']:
-            quest = data['set_codes'][quest.lower()].replace('ALeP - ', '')
+        if quest.lower() in data['sets_by_code']:
+            quest = data['sets_by_code'][quest.lower()].replace('ALeP - ', '')
 
         quest_folder = lotr.escape_filename(quest).lower()
         quest_file = lotr.escape_octgn_filename(quest_folder)
-        set_folders = {lotr.escape_filename(s) for s in data['sets']}
+        set_folders = {lotr.escape_filename(s) for s in data['set_names']}
         quests = {}
         for _, subfolders, _ in os.walk(lotr.OUTPUT_OCTGN_DECKS_PATH):  # pylint: disable=R1702
             for subfolder in subfolders:
@@ -4208,16 +4172,18 @@ Targets removed.
         return filenames
 
 
-    async def _move_artwork_files(self, card_id, old_set_id, new_set_id):
-        """ Move artwork files for the card.
+    async def _move_artwork_files(self, card_ids, old_set_id, new_set_id):
+        """ Move artwork files for the cards.
         """
-        return_message = ''
         if old_set_id == new_set_id:
-            return return_message
+            return
+
+        async with rclone_art_lock:
+            await self._rclone_art()
 
         filenames = await self._get_artwork_files(old_set_id)
         for filename in filenames:
-            if filename.split('_')[0] != card_id:
+            if filename.split('_')[0] not in card_ids:
                 continue
 
             stdout, stderr = await run_shell(
@@ -4228,31 +4194,25 @@ Targets removed.
                            .format(stdout, stderr))
                 logging.error(message)
                 create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
-                return_message = 'Failing to move artwork files for the card'
                 break
 
-            return_message = \
-                'Artwork files for the card were successfully moved'
 
-        return return_message
-
-
-    async def _copy_image_files(self, card_id, old_set_id, new_set_id):
+    async def _copy_image_files(self, card_ids, old_set_id, new_set_id):
         """ Copy rendered images for the card.
         """
         data = await read_card_data()
-        if (old_set_id not in data['set_ids'] or
-                new_set_id not in data['set_ids']):
+        if (old_set_id not in data['sets_by_id'] or
+                new_set_id not in data['sets_by_id']):
             return
 
         old_set_folder = '{}.English'.format(
-            lotr.escape_filename(data['set_ids'][old_set_id]))
+            lotr.escape_filename(data['sets_by_id'][old_set_id]))
         new_set_folder = '{}.English'.format(
-            lotr.escape_filename(data['set_ids'][new_set_id]))
+            lotr.escape_filename(data['sets_by_id'][new_set_id]))
 
         filenames = await self._get_image_files(old_set_folder)
         for filename in filenames:
-            if '-{}'.format(card_id) not in filename:
+            if re.sub(r'(?:\-2)?\.png$', '', filename)[-36:] not in card_ids:
                 continue
 
             stdout, stderr = await run_shell(
@@ -5251,6 +5211,7 @@ Targets removed.
                             if key not in ('playtest', 'secret')])
         help_keys.append('playtest')
         res = ''.join(HELP[key] for key in help_keys)
+        await asyncio.sleep(CMD_SLEEP_TIME)
         await self._send_channel(message.channel, res)
 
 

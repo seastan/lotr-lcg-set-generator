@@ -1,5 +1,6 @@
 #!/bin/bash
 cd "$(dirname "$0")"
+./env_test.sh || exit
 
 FOLDER="$1"
 if [ ! -d "$FOLDER" ]; then
@@ -9,7 +10,6 @@ fi
 
 cp configuration.yaml "$FOLDER"
 cp discord.yaml "$FOLDER"
-cp mail.yaml "$FOLDER"
 cp mpc_monitor.json "$FOLDER"
 cp mpc_monitor_cookies.json "$FOLDER"
 cp ringsdb_prod_cookies.json "$FOLDER"
