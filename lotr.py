@@ -470,8 +470,8 @@ TEMP_ROOT_PATH = 'Temp'
 
 CONFIGURATION_PATH = 'configuration.yaml'
 DISCORD_CARD_DATA_PATH = os.path.join(DISCORD_PATH, 'Data', 'card_data.json')
-DISCORD_CARD_DATA_FULL_PATH = os.path.join(DISCORD_PATH, 'Data',
-                                           'card_data_full.json')
+DISCORD_CARD_DATA_RAW_PATH = os.path.join(DISCORD_PATH, 'Data',
+                                          'card_data_raw.json')
 DISCORD_TIMESTAMPS_PATH = os.path.join(DISCORD_PATH, 'Data', 'timestamps.json')
 DOWNLOAD_PATH = 'Download'
 DOWNLOAD_TIME_PATH = os.path.join(DATA_PATH, 'download_time.txt')
@@ -1947,16 +1947,20 @@ def get_similar_names(value, card_names, scratch_card_names=None):
     return res
 
 
-def parse_flavour(value):
+def parse_flavour(value):  # pylint: disable=R0912
     """ Parse the flavour text and detect possible issues.
     """
     separator = ' '
     is_valid_quote = False
     errors = []
-    if (value.count('—') > 1 or re.search(r'\s-', value) or
-            re.search(r'-\s', value)):
+    if value.count('—') > 1:
         parts = [value]
-        errors.append('Incorrectly formatted flavour text: {}'.format(value))
+        errors.append('Too many em dashes')
+        return (parts, errors, is_valid_quote, separator)
+
+    if re.search(r'\s-', value) or re.search(r'-\s', value):
+        parts = [value]
+        errors.append('Incorrectly used short dashes')
         return (parts, errors, is_valid_quote, separator)
 
     parts = re.split(r'[—–]', value[::-1], maxsplit=1)
@@ -1972,14 +1976,13 @@ def parse_flavour(value):
             if false_split:
                 parts = [value]
             else:
-                errors.append(
-                    'Incorrectly formatted flavour text: {}'.format(value))
+                errors.append('Too many commas in the quote source')
         else:
             if source_parts[-1] not in KNOWN_BOOKS:
                 if false_split:
                     parts = [value]
                 else:
-                    errors.append('Unknown book: {}'.format(value))
+                    errors.append('Unknown source book')
                     if len(source_parts) == 2:
                         parts = [parts[0], source_parts[0], source_parts[1]]
             else:
@@ -5642,6 +5645,15 @@ def _get_card_diffs(old_card, new_card):
     return diffs
 
 
+def _fix_flavour_for_discord(value):
+    """ Remove redundant tags from the flavour text for the Discord bot.
+    """
+    parts = value.split('—')
+    parts[-1] = parts[-1].replace('[nobr]', ' ')
+    value = '—'.join(parts)
+    return value
+
+
 def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
     """ Save the data for the Discord bot.
     """
@@ -5653,7 +5665,7 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
         .format(conf['sheet_gdid'], SHEET_IDS[CARD_SHEET]))
     data = [{key: value for key, value in row.items() if value is not None}
             for row in DATA if not row[CARD_SCRATCH]]
-    data_full = [
+    data_raw = [
         {key: value for key, value in row.items() if value is not None}
         for row in DATA]
     channels = set()
@@ -5697,6 +5709,13 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
         category = _update_discord_category(category)
         row[CARD_DISCORD_CATEGORY] = category
 
+        if row.get(CARD_FLAVOUR):
+            row[CARD_FLAVOUR] = _fix_flavour_for_discord(row[CARD_FLAVOUR])
+
+        if row.get(BACK_PREFIX + CARD_FLAVOUR):
+            row[BACK_PREFIX + CARD_FLAVOUR] = _fix_flavour_for_discord(
+                row[BACK_PREFIX + CARD_FLAVOUR])
+
         for key in list(row.keys()):
             if key in DISCORD_IGNORE_COLUMNS:
                 del row[key]
@@ -5714,10 +5733,10 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
         old_data = None
 
     try:
-        with open(DISCORD_CARD_DATA_FULL_PATH, 'r', encoding='utf-8') as obj:
-            old_data_full = json.load(obj)['data']
+        with open(DISCORD_CARD_DATA_RAW_PATH, 'r', encoding='utf-8') as obj:
+            old_data_raw = json.load(obj)['data']
     except Exception:
-        old_data_full = None
+        old_data_raw = None
 
     modified_card_ids = []
     card_changes = []
@@ -5798,9 +5817,9 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 new_categories.remove(category)
 
     set_changes = {}
-    if old_data_full:
-        old_dict = {row[CARD_ID]:row for row in old_data_full}
-        new_dict = {row[CARD_ID]:row for row in data_full}
+    if old_data_raw:
+        old_dict = {row[CARD_ID]:row for row in old_data_raw}
+        new_dict = {row[CARD_ID]:row for row in data_raw}
         for card_id in new_dict:
             if (card_id in old_dict and
                     old_dict[card_id][CARD_SET] !=
@@ -5883,8 +5902,8 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
         res = json.dumps(output, ensure_ascii=False)
         obj.write(res)
 
-    output = {'data': data_full}
-    with open(DISCORD_CARD_DATA_FULL_PATH, 'w', encoding='utf-8') as obj:
+    output = {'data': data_raw}
+    with open(DISCORD_CARD_DATA_RAW_PATH, 'w', encoding='utf-8') as obj:
         res = json.dumps(output, ensure_ascii=False)
         obj.write(res)
 
