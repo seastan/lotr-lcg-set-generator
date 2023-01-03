@@ -1976,7 +1976,7 @@ def parse_flavour(value):  # pylint: disable=R0912
             if false_split:
                 parts = [value]
             else:
-                errors.append('Too many commas in the quote source')
+                errors.append('Too many commas in the source')
         else:
             if source_parts[-1] not in KNOWN_BOOKS:
                 if false_split:
@@ -1989,6 +1989,12 @@ def parse_flavour(value):  # pylint: disable=R0912
                 is_valid_quote = True
                 if len(source_parts) == 2:
                     parts = [parts[0], source_parts[0], source_parts[1]]
+                    if (not parts[0].startswith('“') and
+                            not parts[0].endswith('”')):
+                        errors.append('Missing double quotes')
+                elif (parts[0].startswith('“') or
+                      parts[0].endswith('”')):
+                    errors.append('Possibly redundant double quotes')
 
     return (parts, errors, is_valid_quote, separator)
 

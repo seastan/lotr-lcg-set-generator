@@ -2172,6 +2172,7 @@ function markUp(value, key, cardType, lang, setID) {
 	}
 	while (value != valueOld);
 
+	value = value.replace(/\u2014/g, '\u2014</size><size 0.01>\u00a0</size><size ' + defaultPointSize + '>');
 	value = value.replace(/<\/i>(?! )/g, '</size><size 0.01></i>\u00a0</size><size ' + defaultPointSize + '>');
 	value = value.replace(/<\/i>(?= )/g, '</size><size 0.01></i> </size><size ' + defaultPointSize + '>');
 	value = value.replace(/\n+$/g, '');
