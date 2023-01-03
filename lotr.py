@@ -658,6 +658,9 @@ RESTRICTED_TRANSLATION = {
     'Spanish': 'Restringido'
 }
 
+KNOWN_BOOKS = {
+    'The Hobbit', 'The Fellowship of the Ring', 'The Two Towers',
+    'The Return of the King', 'The Silmarillion', 'The Fall of Gondolin'}
 AUXILIARY_TRAITS = {
     'Abroad', 'Basic', 'Broken', 'Corrupt', 'Cursed', 'Elite', 'Epic',
     'Massing', 'Reforged', 'Standard', 'Suspicious', 'Upgraded'}
@@ -1940,6 +1943,49 @@ def get_similar_names(value, card_names, scratch_card_names=None):
     return res
 
 
+def parse_flavour(value):
+    """ Parse the flavour text and detect possible issues.
+    """
+    separator = ' '
+    is_valid_quote = False
+    errors = []
+    if (value.count('—') > 1 or re.search(r'\s-', value) or
+            re.search(r'-\s', value)):
+        parts = [value]
+        errors.append('Incorrectly formatted flavour text: {}'.format(value))
+        return (parts, errors, is_valid_quote, separator)
+
+    parts = re.split(r'[—–]', value[::-1], maxsplit=1)
+    parts = [p[::-1] for p in parts][::-1]
+    if len(parts) == 2 and parts[0].endswith('\n'):
+        separator = '\n'
+
+    parts = [p.strip() for p in parts]
+    if len(parts) == 2:
+        false_split = '—' not in value and re.search(r' –\s[a-z][^–]+$', value)
+        source_parts = [p.strip() for p in parts[-1].split(', ')]
+        if len(source_parts) > 2:
+            if false_split:
+                parts = [value]
+            else:
+                errors.append(
+                    'Incorrectly formatted flavour text: {}'.format(value))
+        else:
+            if source_parts[-1] not in KNOWN_BOOKS:
+                if false_split:
+                    parts = [value]
+                else:
+                    errors.append('Unknown book: {}'.format(value))
+                    if len(source_parts) == 2:
+                        parts = [parts[0], source_parts[0], source_parts[1]]
+            else:
+                is_valid_quote = True
+                if len(source_parts) == 2:
+                    parts = [parts[0], source_parts[0], source_parts[1]]
+
+    return (parts, errors, is_valid_quote, separator)
+
+
 def _clean_data(data, lang):  # pylint: disable=R0912,R0914,R0915
     """ Clean data from the spreadsheet.
     """
@@ -2073,6 +2119,22 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0914,R0915
                     value = value.replace('[name]', card_name_back)
                 else:
                     value = value.replace('[name]', card_name)
+
+            if (lang == 'English' and
+                    key in (CARD_FLAVOUR, BACK_PREFIX + CARD_FLAVOUR)):
+                parts, _, is_valid_quote, separator = parse_flavour(value)
+                if is_valid_quote:
+                    if len(parts) == 2:
+                        value = '{}{}—{}'.format(
+                            parts[0],
+                            separator,
+                            re.sub(r'\s', '[nobr]', parts[1]))
+                    elif len(parts) == 3:
+                        value = '{}{}—{},[nobr]{}'.format(
+                            parts[0],
+                            separator,
+                            re.sub(r'\s', '[nobr]', parts[1]),
+                            re.sub(r'\s', '[nobr]', parts[2]))
 
             row[key] = value
 
@@ -7915,25 +7977,25 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 text = ('<p><b>Lado A.</b></p>\n{}\n<p><b>Lado B.</b></p>\n{}'
                         .format(text, text_back))
 
-            flavour = _update_card_text(spanish_row.get(CARD_FLAVOUR) or '',
-                                        lang='Spanish',
-                                        skip_rules=True,
-                                        fix_linebreaks=False).strip()
-            if flavour:
-                flavour = '<p>{}</p>'.format(flavour.replace('\n', '</p><p>'))
+            flavor = _update_card_text(spanish_row.get(CARD_FLAVOUR) or '',
+                                       lang='Spanish',
+                                       skip_rules=True,
+                                       fix_linebreaks=False).strip()
+            if flavor:
+                flavor = '<p>{}</p>'.format(flavor.replace('\n', '</p><p>'))
 
             if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL and
                     spanish_row.get(BACK_PREFIX + CARD_FLAVOUR)):
-                flavour_back = _update_card_text(
+                flavor_back = _update_card_text(
                     spanish_row[BACK_PREFIX + CARD_FLAVOUR], lang='Spanish',
                     skip_rules=True, fix_linebreaks=False).strip()
-                if flavour_back:
-                    flavour_back = '<p>{}</p>'.format(
-                        flavour_back.replace('\n', '</p><p>'))
+                if flavor_back:
+                    flavor_back = '<p>{}</p>'.format(
+                        flavor_back.replace('\n', '</p><p>'))
 
-                flavour = (
+                flavor = (
                     '<p><b>Lado A.</b></p>\n{}\n<p><b>Lado B.</b></p>\n{}'
-                    .format(flavour, flavour_back))
+                    .format(flavor, flavor_back))
 
             if row[CARD_TYPE] == 'Rules':
                 victory_points = None
@@ -7965,7 +8027,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 'traits': _update_card_text(
                     spanish_row.get(CARD_TRAITS) or ''),
                 'text': text,
-                'flavor': flavour,
+                'flavor': flavor,
                 'is_unique': int(row[CARD_UNIQUE] or 0),
                 'cost': cost,
                 'threat': threat,
