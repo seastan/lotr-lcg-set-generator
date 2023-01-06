@@ -258,7 +258,7 @@ List of **!edit** commands:
 ` `
 **!edit flavour <set name or set code>** - display all possible flavour text issues (for example: `!edit flavour Children of Eorl` or `!edit flavour CoE`)
 **!edit names <set name or set code>** - display all potentially unknown or misspelled names (for example: `!edit names Children of Eorl` or `!edit names CoE`)
-**!edit rules <set name or set code>** - display all text that may be a subject of editing rules for a set (for example: `!edit rules Children of Eorl` or `!edit rules CoE`)
+**!edit text <set name or set code>** - display all text that may be a subject of editing rules for a set (for example: `!edit text Children of Eorl` or `!edit text CoE`)
 **!edit traits <set name or set code>** - display all possible trait issues for a set (for example: `!edit traits Children of Eorl` or `!edit traits CoE`)
 **!edit all <set name or set code>** - display results of all commands above (for example: `!edit all Children of Eorl` or `!edit all CoE`)
 """,
@@ -4998,7 +4998,7 @@ Targets removed.
         return output
 
 
-    async def _display_rules(self, value):  # pylint: disable=R0912,R0914
+    async def _display_text(self, value):  # pylint: disable=R0912,R0914
         """ Display all text that may be a subject of editing rules for a set.
         """
         data = await read_card_data()
@@ -5093,7 +5093,7 @@ Targets removed.
         if output:
             output = '{}\n` `\nDone.'.format(output)
         else:
-            output = 'no rules precedents found'
+            output = 'no text rules precedents found'
 
         return output
 
@@ -5251,11 +5251,11 @@ Targets removed.
             await self._send_channel(message.channel, res)
         elif command.lower() == 'names':
             await self._send_channel(message.channel, 'please specify the set')
-        elif command.lower().startswith('rules '):
+        elif command.lower().startswith('text '):
             try:
-                set_name = re.sub(r'^rules ', '', command,
+                set_name = re.sub(r'^text ', '', command,
                                   flags=re.IGNORECASE)
-                res = await self._display_rules(set_name)
+                res = await self._display_text(set_name)
             except Exception as exc:
                 logging.exception(str(exc))
                 await self._send_channel(
@@ -5264,7 +5264,7 @@ Targets removed.
                 return
 
             await self._send_channel(message.channel, res)
-        elif command.lower() == 'rules':
+        elif command.lower() == 'text':
             await self._send_channel(message.channel, 'please specify the set')
         elif command.lower().startswith('traits '):
             try:
@@ -5288,7 +5288,7 @@ Targets removed.
                 res = []
                 res.append(await self._display_flavour(set_name))
                 res.append(await self._display_names(set_name))
-                res.append(await self._display_rules(set_name))
+                res.append(await self._display_text(set_name))
                 res.append(await self._display_traits(set_name))
                 res = '\n` `\n'.join(res)
             except Exception as exc:
