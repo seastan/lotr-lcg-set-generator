@@ -5673,7 +5673,7 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
             for row in DATA if not row[CARD_SCRATCH]]
     data_raw = [
         {key: value for key, value in row.items() if value is not None}
-        for row in DATA]
+        for row in DATA if row.get(CARD_ID) and row.get(CARD_SET)]
     channels = set()
 
     for row in data:
