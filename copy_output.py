@@ -115,6 +115,15 @@ def main():  # pylint: disable=R0912
                                          re.sub(r'\.release$', '', filename)))
 
                 break
+        elif subfolder == 'OCTGNDecks':
+            for _, _, filenames in os.walk(destination_path):
+                for filename in filenames:
+                    if filename.startswith('Player-'):
+                        os.remove(os.path.join(destination_path, filename))
+
+                break
+
+    print('Done')
 
 
 if __name__ == '__main__':
