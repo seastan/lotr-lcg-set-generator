@@ -7,7 +7,7 @@ if [[ "$LAST_TIME_RAW" ]]; then
   LAST_TS=`date -d "$LAST_TIME_RAW" +"%s"`
   CURRENT_TS=`date +"%s"`
   let "DIFF = $CURRENT_TS - $LAST_TS"
-  if [ $DIFF -ge 120 ]; then
+  if [ $DIFF -ge 300 ]; then
     if [ ! -f $FLAG_FILE ]; then
       python3 create_mail.py "Discord Changes Monitoring Alert: there are unprocessed JSON files in the queue" "" > /dev/null
       touch $FLAG_FILE
