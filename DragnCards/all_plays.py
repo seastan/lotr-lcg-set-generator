@@ -33,23 +33,26 @@ def get_replays(quest, start_date, end_date):
     """ Get all replays for the quest from the database.
     """
     query = """
-SELECT inserted_at,
-  uuid,
-  num_players,
-  rounds,
-  CASE WHEN outcome != '' THEN outcome ELSE 'incomplete' END AS outcome,
-  game_json::json->>'playerData' AS player_data,
-  player1_heroes,
-  player2_heroes,
-  player3_heroes,
-  player4_heroes
-FROM replays
-WHERE encounter ILIKE %s
-  AND inserted_at >= %s
-  AND inserted_at < %s
-  AND rounds > 0
-  AND (rounds > 1 OR outcome IN ('victory', 'defeat', 'incomplete'))
-ORDER BY inserted_at DESC
+SELECT r.inserted_at,
+  r.uuid,
+  u.alias,
+  r.num_players,
+  r.rounds,
+  CASE WHEN r.outcome != '' THEN r.outcome ELSE 'incomplete' END AS outcome,
+  r.game_json::json->>'playerData' AS player_data,
+  r.player1_heroes,
+  r.player2_heroes,
+  r.player3_heroes,
+  r.player4_heroes
+FROM replays r
+JOIN users u
+  ON r.user = u.id
+WHERE r.encounter ILIKE %s
+  AND r.inserted_at >= %s
+  AND r.inserted_at < %s
+  AND r.rounds > 0
+  AND (r.rounds > 1 OR r.outcome IN ('victory', 'defeat', 'incomplete'))
+ORDER BY r.inserted_at DESC
 LIMIT %s
     """
 
@@ -71,7 +74,7 @@ LIMIT %s
         conn.close()
 
 
-def main():  # pylint: disable=R0912,R0915
+def main():  # pylint: disable=R0912,R0914,R0915
     """ Main function.
     """
     if len(sys.argv) <= 1 or not sys.argv[1]:
@@ -138,6 +141,12 @@ def main():  # pylint: disable=R0912,R0915
         print(res)
         return
 
+    max_alias_length = max(len(r['alias'][:12].strip()) for r in filtered)
+    alias_header = 'user'
+    if len(alias_header) < max_alias_length:
+        alias_header = (alias_header +
+                        ' ' * (max_alias_length - len(alias_header)))
+
     max_num_players = max(r['num_players'] for r in filtered)
     if max_num_players == 4:
         max_threat_length = 11
@@ -152,7 +161,7 @@ def main():  # pylint: disable=R0912,R0915
                          ' ' * (max_threat_length - len(threat_header)))
 
     headers = ['date       ', 'replay_id                           ',
-               'P ', 'R ', 'res ', threat_header, 'heroes']
+               alias_header, 'P ', 'R ', 'res ', threat_header, 'heroes']
     headers = ' '.join(headers)
 
     res = []
@@ -178,6 +187,11 @@ def main():  # pylint: disable=R0912,R0915
             replay['outcome'] = 'loss'
         else:
             replay['outcome'] = '-   '
+
+        replay['alias'] = replay['alias'][:12].strip()
+        if len(replay['alias']) < max_alias_length:
+            replay['alias'] = (replay['alias'] + ' ' *
+                               (max_alias_length - len(replay['alias'])))
 
         replay['rounds'] = str(replay['rounds'])
         if len(replay['rounds']) < 2:
@@ -220,6 +234,7 @@ def main():  # pylint: disable=R0912,R0915
 
         values = [replay['inserted_at'],
                   replay['uuid'],
+                  replay['alias'],
                   replay['num_players'],
                   replay['rounds'],
                   replay['outcome'],

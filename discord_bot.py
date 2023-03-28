@@ -294,8 +294,9 @@ HELP_STAT_ALL_PLAYS = """
 **!stat all plays help** - display this help message
 ` `
 **Columns:**
-`date      ` date of the plays
+`date      ` date of the play
 `replay_id ` replay ID.  You may replay any play by using a URL like `https://www.dragncards.com/newroom/replay/8da313ce-2f3a-4671-bd97-5ab379d39133`
+`user      ` user name
 `P         ` number of players
 `R         ` number of rounds
 `res       ` outcome of the play.  "win" means victory, "loss" means defeat, and "-" means an incomplete play.
@@ -317,6 +318,9 @@ HELP_STAT_PLAYS = """
 `thr_min   ` minimum player's threat at the end of the play
 `thr_max   ` maximum player's threat at the end of the play
 `thr_avg   ` average player's threat at the end of the play
+
+`plays     ` total number of plays arranged by a user
+`user      ` user name
 """
 HELP_STAT_QUESTS = """
 **!stat quests** - display aggregated DragnCards statistics for all released ALeP quests
@@ -970,7 +974,7 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
 
     if card.get(lotr.CARD_RINGSDB_CODE):
         ringsdb_url = '<{}/card/{}>\n'.format(
-            CONF.get('ringsdb_url', ''), card[lotr.CARD_RINGSDB_CODE])
+            CONF.get('ringsdb_url') or '', card[lotr.CARD_RINGSDB_CODE])
     else:
         ringsdb_url = ''
 
@@ -1436,7 +1440,7 @@ async def get_dragncards_player_cards_stat(set_name, start_date):
     return res
 
 
-async def get_dragncards_all_plays(quest, start_date):
+async def get_dragncards_all_plays(quest, start_date):  # pylint: disable=R0914
     """ Get information about all DragnCards plays for the quest.
     """
     data = await read_card_data()
@@ -1463,7 +1467,33 @@ async def get_dragncards_all_plays(quest, start_date):
         end_date = ''
 
     res = lotr.get_dragncards_all_plays(CONF, quest, start_date, end_date)
-    res = '```\n{}```'.format(res.expandtabs())
+    res = res.expandtabs()
+
+    ignore_playtesters = {
+        u.strip()[:12].strip()
+        for u in (CONF.get('ignore_playtesters') or '').split(',')}
+    ignore_playtesters = [' {} '.format(p) for p in ignore_playtesters if p]
+
+    if res and ignore_playtesters:
+        filtered = []
+        res = res.split('\n')
+        header = res.pop(0)
+        pos = header.find(' user ')
+        filtered.append(header)
+
+        for row in res:
+            for playtester in ignore_playtesters:
+                if pos > -1 and row.find(playtester) == pos:
+                    row = '{} [private]'.format(row.split(' ')[0])
+                    break
+
+            filtered.append(row)
+
+        filtered = '\n'.join(filtered)
+    else:
+        filtered = res
+
+    res = '```\n{}```'.format(filtered)
     return res
 
 
@@ -1494,7 +1524,28 @@ async def get_dragncards_plays_stat(quest, start_date):
         end_date = ''
 
     res = lotr.get_dragncards_plays_stat(CONF, quest, start_date, end_date)
-    res = '```\n{}```'.format(res.expandtabs())
+    res = res.expandtabs()
+
+    ignore_playtesters = {
+        u.strip() for u in (CONF.get('ignore_playtesters') or '').split(',')}
+    ignore_playtesters = ['  {}'.format(p) for p in ignore_playtesters if p]
+
+    if res and ignore_playtesters:
+        filtered = []
+        res = res.split('\n')
+        for row in res:
+            for playtester in ignore_playtesters:
+                if re.match(r'^[1-9]', row) and row.endswith(playtester):
+                    row = row.replace(playtester, '  [private]')
+                    break
+
+            filtered.append(row)
+
+        filtered = '\n'.join(filtered)
+    else:
+        filtered = res
+
+    res = '```\n{}```'.format(filtered)
     return res
 
 
@@ -3441,8 +3492,9 @@ Targets removed.
     def get_assistants(self):
         """ Get the list of Discord assistants.
         """
-        ignore_assistants = {u.strip()
-                             for u in CONF.get('ignore_assistants').split(',')}
+        ignore_assistants = {
+            u.strip()
+            for u in (CONF.get('ignore_assistants') or '').split(',')}
         assistants = [m.display_name for m in self.guilds[0].members
                      if m.display_name not in ignore_assistants]
         assistants = [re.sub(r'[^\u0000-\uffff]+', '', u).strip()
@@ -3673,7 +3725,8 @@ Targets removed.
         """ Prepare a list of all Discord users and save it in the CSV file.
 
         """
-        ignore_users = {u.strip() for u in CONF.get('ignore_users').split(',')}
+        ignore_users = {
+            u.strip() for u in (CONF.get('ignore_users') or '').split(',')}
         role_names = sorted([r.name.replace(' Assistant', '')
                              for r in self.guilds[0].roles
                              if r.name.endswith(' Assistant')])
