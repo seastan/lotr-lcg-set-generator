@@ -32,20 +32,23 @@ def get_replays(quest, start_date, end_date):
     """ Get all replays for the quest from the database.
     """
     query = """
-SELECT num_players,
-  rounds,
-  CASE WHEN outcome != '' THEN outcome ELSE 'incomplete' END AS outcome,
-  game_json::json->>'playerData' AS player_data,
-  player1_heroes,
-  player2_heroes,
-  player3_heroes,
-  player4_heroes
-FROM replays
-WHERE encounter ILIKE %s
-  AND inserted_at >= %s
-  AND inserted_at < %s
-  AND rounds > 0
-  AND (rounds > 1 OR outcome IN ('victory', 'defeat', 'incomplete'))
+SELECT r.num_players,
+  r.rounds,
+  CASE WHEN r.outcome != '' THEN r.outcome ELSE 'incomplete' END AS outcome,
+  r.game_json::json->>'playerData' AS player_data,
+  r.player1_heroes,
+  r.player2_heroes,
+  r.player3_heroes,
+  r.player4_heroes,
+  u.alias
+FROM replays r
+JOIN users u
+  ON r.user = u.id
+WHERE r.encounter ILIKE %s
+  AND r.inserted_at >= %s
+  AND r.inserted_at < %s
+  AND r.rounds > 0
+  AND (r.rounds > 1 OR r.outcome IN ('victory', 'defeat', 'incomplete'))
     """
 
     conn = psycopg2.connect(user=DRAGNCARDS_USER,
@@ -98,6 +101,19 @@ def prepare_row(replays, players, outcome):
               round(sum(threats) / len(threats), 1)
               ]
     res = '\t'.join([str(v) for v in values])
+    return res
+
+
+def get_user_stat(replays):
+    """ Get user statistics.
+    """
+    res = {}
+    for replay in replays:
+        res[replay['alias']] = res.get(replay['alias'], 0) + 1
+
+    res = sorted(tuple(res.items()), key=lambda r: (-r[1], r[0].lower()))
+    res = ['{}\t{}'.format(r[1], r[0]) for r in res]
+    res = ['', 'plays\tuser'] + res
     return res
 
 
@@ -192,7 +208,8 @@ def main():  # pylint: disable=R0912,R0915
             if row:
                 res.append(row)
 
-    res = '\n'.join([headers] + res)
+    user_stat = get_user_stat(filtered)
+    res = '\n'.join([headers] + res + user_stat)
     logging.info(res)
     print(res)
 
