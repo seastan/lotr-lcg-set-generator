@@ -1734,7 +1734,7 @@ def verify_known_name(pos, name, card_type, all_card_names,  # pylint: disable=R
 def get_flavour_errors(text, field, card, res):
     """ Detect possible flavour text issues.
     """
-    errors, _, _, _, _ = lotr.parse_flavour(text, 'English')
+    errors, _, _, _ = lotr.parse_flavour(text, 'English')
     for error in errors:
         data = {'name': card[lotr.CARD_NAME],
                 'field': field,
