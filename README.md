@@ -219,7 +219,6 @@ To run the workflow as one script, run:
 Please note, this script is for the Windows platform only.  It uses AutoHotkey to emulate UI commands
 and is not 100% reliable (it may be stuck on the manual step).  To minimize the risks:
 
-- Don't leave the design tool open.
 - Make sure the design tool window was maximized when you closed it.
 - Make sure the screen is not locked (and doesn't lock automatically).
 - If the script started, don't touch the keyboard or mouse.
