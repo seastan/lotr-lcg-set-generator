@@ -307,6 +307,7 @@ function convertTags(value) {
     value = value.replace(/project:imagesCustom\/[0-9a-f\-]+_Spacer\.png/g, imagesFolder + 'empty.png');
     value = value.replace(/project:imagesCustom\/[0-9a-f\-]+_Do-Not-Read-the-Following\.png/g, imagesFolder + 'donotread.png');
     value = value.replace(/project:imagesCustom\/[0-9a-f\-]+_Text-Divider-Black\.png/g, imagesFolder + 'textdividerblack.png');
+    value = value.replace(/project:imagesCustom\/[0-9a-f\-]+_Text-Divider-Black-Official\.png/g, imagesFolder + 'textdividerblackofficial.png');
     value = value.replace(/project:imagesCustom\//g, generatedImagesFolder);
     value = value.replace(/project:imagesIcons\//g, iconsFolder);
     value = value.replace(/<image ([^ >]+)>/g, '<img src="$1">');
@@ -315,6 +316,7 @@ function convertTags(value) {
     value = value.replace(/<img src="([^"]+?\/shadow\.png)"[^>]*>/g, '<img src="$1" width="266" height="21">');
     value = value.replace(/<img src="([^"]+?\/donotread\.png)"[^>]*>/g, '<img src="$1" width="249" height="64">');
     value = value.replace(/<img src="([^"]+?\/textdividerblack\.png)"[^>]*>/g, '<img src="$1" width="343" height="5">');
+    value = value.replace(/<img src="([^"]+?\/textdividerblackofficial\.png)"[^>]*>/g, '<img src="$1" width="343" height="5">');
     value = value.replace(/<img src="([^"]+?\/empty\.png)"/g, '<emptyimg src="$1"');
     value = value.replace(/<img ([^>]+)>/g, '<img $1 style="display: block; margin-left: auto; margin-right: auto">');
     value = value.replace(/<emptyimg /g, '<img ');
