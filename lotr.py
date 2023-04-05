@@ -352,7 +352,7 @@ CARD_TYPES_THREE_COPIES = {'Ally', 'Attachment', 'Event', 'Player Objective',
 CARD_TYPES_BOON = {'Ally', 'Attachment', 'Event', 'Objective Ally'}
 CARD_TYPES_BURDEN = {'Encounter Side Quest', 'Enemy', 'Objective', 'Treachery'}
 CARD_TYPES_NIGHTMARE = {'Encounter Side Quest', 'Enemy', 'Location',
-                        'Objective', 'Ship Enemy', 'Treachery', 'Quest'}
+                        'Objective', 'Quest', 'Ship Enemy', 'Treachery'}
 CARD_TYPES_NOSTAT = {'Enemy'}
 CARD_TYPES_NO_DISCORD_CHANNEL = {'Full Art Landscape', 'Full Art Portrait',
                                  'Rules', 'Presentation'}
@@ -663,8 +663,26 @@ RESTRICTED_TRANSLATION = {
 }
 
 KNOWN_BOOKS = {
-    'The Hobbit', 'The Fellowship of the Ring', 'The Two Towers',
-    'The Return of the King', 'The Silmarillion', 'The Fall of Gondolin'}
+    'English': {
+        'The Hobbit', 'The Fellowship of the Ring', 'The Two Towers',
+        'The Return of the King', 'The Silmarillion', 'The Fall of Gondolin'},
+    'French': {
+        'Le Hobbit', 'La Communauté de l’Anneau', 'Les Deux Tours',
+        'Le Retour du Roi', 'Le Silmarillion', 'La Chute de Gondolin'},
+    'German': {
+        'Der kleine Hobbit', 'Die Gefährten', 'Die zwei Türme',
+        'Die Rückkehr des Königs', 'Das Silmarillion',
+        'Der Fall von Gondolin'},
+    'Italian': {
+        'Lo Hobbit', 'La Compagnia dell’Anello', 'Le Due Torri',
+        'Il Ritorno del Re', 'Il Silmarillion', 'La Caduta di Gondolin'},
+    'Polish': {
+        'Hobbit', 'Drużyna Pierścienia', 'Dwie Wieże',
+        'Powrót Króla', 'Silmarillion', 'Upadek Gondolinu'},
+    'Spanish': {
+        'El Hobbit', 'La Comunidad del Anillo', 'Las Dos Torres',
+        'El Retorno del Rey', 'El Silmarillion', 'La Caída de Gondolin'},
+    }
 AUXILIARY_TRAITS = {
     'Abroad', 'Basic', 'Broken', 'Corrupt', 'Cursed', 'Elite', 'Epic',
     'Massing', 'Reforged', 'Standard', 'Suspicious', 'Upgraded'}
@@ -842,7 +860,7 @@ ALL_CARD_NAMES = set()
 ALL_SCRATCH_CARD_NAMES = set()
 ALL_TRAITS = set()
 ALL_SCRATCH_TRAITS = set()
-PRE_SANITY_CHECK = {}
+PRE_SANITY_CHECK = {'name': {}, 'flavour': {}}
 TRANSLATIONS = {}
 SELECTED_CARDS = set()
 FOUND_SETS = set()
@@ -1893,8 +1911,7 @@ def _clean_value(value):  # pylint: disable=R0915
     value = value.replace('---', '—')
     value = value.replace('--', '–')
     value = value.replace('−', '-')
-    value = re.sub(r' -(?=[0-9X])', ' –', value)
-    value = re.sub(r' —(?=[0-9X])', ' –', value)
+    value = re.sub(r'(?<![A-Za-z0-9])[-—](?=[0-9]|X\b)', '–', value)
     value = value.replace('[hyphen]', '-')
     value = value.replace("'", '’')
     value = value.replace('“', '"')
@@ -1947,48 +1964,86 @@ def get_similar_names(value, card_names, scratch_card_names=None):
     return res
 
 
-def parse_flavour(value):  # pylint: disable=R0912
+def parse_flavour(value, lang):  # pylint: disable=R0912,R0915
     """ Parse the flavour text and detect possible issues.
     """
-    separator = ' '
-    is_valid_quote = False
     errors = []
-    if value.count('—') > 1:
-        parts = [value]
-        errors.append('Too many em dashes')
-        return (parts, errors, is_valid_quote, separator)
+    value = value.strip()
+    value = re.sub(r'\n +', '\n', value)
+    original_value = value
+    if lang in ('German', 'Polish', 'Spanish'):
+        value = re.sub(r'\[right\](\s*[—–].+?)(?:\[\/right\])?$', '\\1', value,
+                       flags=re.DOTALL)
 
-    if re.search(r'\s-', value) or re.search(r'-\s', value):
-        parts = [value]
+    if lang in ('French', 'Polish'):
+        value = re.sub(r'([—–])\[nobr\]([^—–]+)$', '\\1 \\2', value)
+
+    if (lang not in ('German', 'Italian') and
+            (re.search(r'\s-', value) or re.search(r'-\s', value))):
         errors.append('Incorrectly used short dashes')
-        return (parts, errors, is_valid_quote, separator)
+
+    if lang in ('Italian', 'Spanish'):
+        default_separator = '\n'
+    else:
+        default_separator = ' '
 
     parts = re.split(r'[—–]', value[::-1], maxsplit=1)
     parts = [p[::-1] for p in parts][::-1]
-    if len(parts) == 2 and parts[0].endswith('\n'):
-        separator = '\n'
+    if len(parts) == 2:
+        if parts[0].endswith('\n\n'):
+            separator = '\n\n'
+        elif parts[0].endswith('\n'):
+            separator = '\n'
+        elif parts[0].endswith('[nobr]'):
+            separator = '[nobr]'
+        else:
+            separator = default_separator
+    else:
+        separator = default_separator
+
+    if lang in ('English', 'Italian', 'Spanish'):
+        false_split = '—' not in value and re.search(r'\s–\s[^–]+$', value)
+    else:
+        false_split = False
 
     parts = [p.strip() for p in parts]
+    if len(parts) == 2 and parts[1].count(', ') > 1:
+        parts = [original_value]
+        if not false_split:
+            errors.append('Too many commas in the source')
+
     if len(parts) == 2:
-        false_split = '—' not in value and re.search(r' –\s[a-z][^–]+$', value)
-        source_parts = [p.strip() for p in parts[-1].split(', ')]
-        if len(source_parts) > 2:
-            if false_split:
-                parts = [value]
-            else:
-                errors.append('Too many commas in the source')
+        source_parts = parts[1][::-1].split(' ,', maxsplit=1)
+        source_parts = [p[::-1].strip() for p in source_parts][::-1]
+        if not KNOWN_BOOKS.get(lang):
+            parts = [original_value]
+        elif (re.sub(r'\[[^\]]+\]$', '', source_parts[-1])
+              not in KNOWN_BOOKS[lang]):
+            parts = [original_value]
+            if not false_split:
+                errors.append('Possibly unknown source book')
         else:
-            if source_parts[-1] not in KNOWN_BOOKS:
-                if false_split:
-                    parts = [value]
-                else:
-                    errors.append('Unknown source book')
-                    if len(source_parts) == 2:
-                        parts = [parts[0], source_parts[0], source_parts[1]]
+            if len(source_parts) == 2:
+                parts = [parts[0], source_parts[0], source_parts[1]]
+
+            parts[0] = re.sub(r'\[nobr\]$', '',
+                              re.sub(r'^\[nobr\]', '', parts[0])).strip()
+            parts[1] = re.sub(r'\[nobr\]$', '',
+                              re.sub(r'^\[nobr\]', '', parts[1])).strip()
+            parts[1] = re.sub(r'\s+', '[nobr]', parts[1])
+            if len(parts) > 2:
+                parts[2] = re.sub(r'\[nobr\]$', '',
+                                  re.sub(r'^\[nobr\]', '', parts[2])).strip()
+                parts[2] = re.sub(r'\s+', '[nobr]', parts[2])
+
+            if lang == 'Polish':
+                if not parts[0].startswith('“'):
+                    parts[0] = '“{}'.format(parts[0])
+
+                if not parts[0].endswith('”'):
+                    parts[0] = '{}”'.format(parts[0])
             else:
-                is_valid_quote = True
                 if len(source_parts) == 2:
-                    parts = [parts[0], source_parts[0], source_parts[1]]
                     if (not parts[0].startswith('“') and
                             not parts[0].endswith('”')):
                         errors.append('Missing double quotes')
@@ -1996,14 +2051,37 @@ def parse_flavour(value):  # pylint: disable=R0912
                       parts[0].endswith('”')):
                     errors.append('Possibly redundant double quotes')
 
-    return (parts, errors, is_valid_quote, separator)
+            if lang == 'English':
+                parts[0] = parts[0].replace('—', '–')
+            elif lang == 'Italian':
+                parts[0] = parts[0].replace('—', '-')
+
+    if lang == 'German':
+        dash = '–'
+    else:
+        dash = '—'
+
+    if lang in ('French', 'Polish'):
+        dash = '{}[nobr]'.format(dash)
+
+    if (lang in ('German', 'Polish', 'Spanish') and
+            separator in ('\n\n', '\n') and len(parts) >= 2):
+        dash = '[right]{}'.format(dash)
+        parts[-1] = '{}[/right]'.format(parts[-1])
+
+    if lang in ('English', 'German'):
+        parts[0] = parts[0].replace('—', '–')
+    elif lang in ('French', 'Spanish'):
+        parts[0] = parts[0].replace('–', '—')
+    elif lang == 'Italian':
+        parts[0] = parts[0].replace('–', '-')
+
+    return (errors, parts, separator, dash)
 
 
-def _clean_data(data, lang):  # pylint: disable=R0912,R0914,R0915
+def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
     """ Clean data from the spreadsheet.
     """
-    PRE_SANITY_CHECK.clear()
-
     auto_page_rows = []
     for i, row in enumerate(data):  # pylint: disable=R1702
         card_name = _clean_value(row.get(CARD_NAME)) or ''
@@ -2064,7 +2142,7 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0914,R0915
                     if re.search(card_name_regex, prepared_value):
                         error = ('Hardcoded card name instead of [name] '
                                  'in text')
-                        PRE_SANITY_CHECK.setdefault(
+                        PRE_SANITY_CHECK['name'].setdefault(
                             (row[ROW_COLUMN], row[CARD_SCRATCH]),
                             []).append(error)
                 elif (key == CARD_SHADOW and
@@ -2083,7 +2161,7 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0914,R0915
                     if re.search(card_name_regex, prepared_value):
                         error = ('Hardcoded card name instead of [name] '
                                  'in shadow')
-                        PRE_SANITY_CHECK.setdefault(
+                        PRE_SANITY_CHECK['name'].setdefault(
                             (row[ROW_COLUMN], row[CARD_SCRATCH]),
                             []).append(error)
 
@@ -2104,7 +2182,7 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0914,R0915
                     if re.search(card_name_regex_back, prepared_value):
                         error = ('Hardcoded card name instead of [name] '
                                  'in text back')
-                        PRE_SANITY_CHECK.setdefault(
+                        PRE_SANITY_CHECK['name'].setdefault(
                             (row[ROW_COLUMN], row[CARD_SCRATCH]),
                             []).append(error)
                 elif (key == BACK_PREFIX + CARD_SHADOW and
@@ -2123,7 +2201,7 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0914,R0915
                     if re.search(card_name_regex_back, prepared_value):
                         error = ('Hardcoded card name instead of [name] '
                                  'in shadow back')
-                        PRE_SANITY_CHECK.setdefault(
+                        PRE_SANITY_CHECK['name'].setdefault(
                             (row[ROW_COLUMN], row[CARD_SCRATCH]),
                             []).append(error)
 
@@ -2133,21 +2211,32 @@ def _clean_data(data, lang):  # pylint: disable=R0912,R0914,R0915
                 else:
                     value = value.replace('[name]', card_name)
 
-            if (lang == 'English' and
-                    key in (CARD_FLAVOUR, BACK_PREFIX + CARD_FLAVOUR)):
-                parts, _, is_valid_quote, separator = parse_flavour(value)
-                if is_valid_quote:
-                    if len(parts) == 2:
-                        value = '{}{}—{}'.format(
-                            parts[0],
-                            separator,
-                            re.sub(r'\s', '[nobr]', parts[1]))
-                    elif len(parts) == 3:
-                        value = '{}{}—{},[nobr]{}'.format(
-                            parts[0],
-                            separator,
-                            re.sub(r'\s', '[nobr]', parts[1]),
-                            re.sub(r'\s', '[nobr]', parts[2]))
+            if key in (CARD_FLAVOUR, BACK_PREFIX + CARD_FLAVOUR):
+                errors, parts, separator, dash = parse_flavour(value, lang)
+                if errors and lang in conf['output_languages']:
+                    for error in errors:
+                        error = '{} in {}'.format(
+                            error,
+                            'flavour' if key == CARD_FLAVOUR else 'flavour back')
+                        PRE_SANITY_CHECK['flavour'].setdefault(
+                            (row[ROW_COLUMN], row[CARD_SCRATCH], lang),
+                            []).append(error)
+
+                if len(parts) == 3:
+                    value = '{}{}{}{},[nobr]{}'.format(
+                        parts[0],
+                        separator,
+                        dash,
+                        parts[1],
+                        parts[2])
+                elif len(parts) == 2:
+                    value = '{}{}{}{}'.format(
+                        parts[0],
+                        separator,
+                        dash,
+                        parts[1])
+                else:
+                    value = parts[0]
 
             row[key] = value
 
@@ -2356,7 +2445,9 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
 
     DATA[:] = [row for row in DATA if not _skip_row(row)]
     _extract_all_card_names(DATA)
-    _clean_data(DATA, 'English')
+    PRE_SANITY_CHECK['name'].clear()
+    PRE_SANITY_CHECK['flavour'].clear()
+    _clean_data(conf, DATA, 'English')
 
     SELECTED_CARDS.update({row[CARD_ID] for row in DATA if row[CARD_SELECTED]})
     FOUND_SETS.update({row[CARD_SET] for row in DATA
@@ -2398,7 +2489,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
                     row[CARD_TYPE] = card_types[row[CARD_ID]][0]
                     row[BACK_PREFIX + CARD_TYPE] = card_types[row[CARD_ID]][1]
 
-            _clean_data(data, lang)
+            _clean_data(conf, data, lang)
             _update_data(data)
 
             for row in data:
@@ -3070,13 +3161,17 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         if not conf['run_sanity_check_for_all_sets'] and set_id not in set_ids:
             continue
 
-        if (i, card_scratch) in PRE_SANITY_CHECK:
-            for error in PRE_SANITY_CHECK[(i, card_scratch)]:
-                message = ('{} for row #{}{} (use IgnoreName flag to ignore)'
-                           .format(error, i, row_info))
-                logging.error(message)
-                if not card_scratch:
-                    errors.append(message)
+        for error in PRE_SANITY_CHECK['name'].get((i, card_scratch), []):
+            message = ('{} for row #{}{} (use IgnoreName flag to ignore)'
+                       .format(error, i, row_info))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+
+        for error in PRE_SANITY_CHECK['flavour'].get(
+                (i, card_scratch, 'English'), []):
+            message = ('{} for row #{}{}'.format(error, i, row_info))
+            logging.warning(message)
 
         if card_number is None:
             message = 'No card number for row #{}{}'.format(i, row_info)
@@ -5351,6 +5446,13 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 logging.error(
                     'No card ID %s in %s translations', card_id, lang)
                 continue
+
+            for error in PRE_SANITY_CHECK['flavour'].get(
+                    (TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                     card_scratch, lang), []):
+                logging.warning(
+                    '%s for card ID %s in %s translations, row #%s', error,
+                    card_id, lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
             for key, value in TRANSLATIONS[lang][card_id].items():
                 if key not in TRANSLATED_COLUMNS:
