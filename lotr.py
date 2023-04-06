@@ -2739,7 +2739,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
 
         if 'per player' in re.sub(r'limit [^.]+\.', '', paragraph,
                                   flags=re.IGNORECASE):
-            errors.append('"[pp]"')
+            errors.append('"[pp]" instead of "per player"')
 
         if re.search(r'step is completed?',
                      paragraph.replace('complete rules', '')):
@@ -2942,6 +2942,14 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
             r'|Combat |Refresh )?(?:Action):', '', paragraph)
         updated_paragraph = re.sub(r'\b(?:Valour Response|Response):', '',
                                    updated_paragraph)
+
+        updated_paragraph = re.sub(
+            r'\[b\](?:Valour )?(?:Resource |Planning |Quest |Travel '
+            r'|Encounter |Combat |Refresh )?(?:Action)\[\/b\]:', '',
+            updated_paragraph)
+        updated_paragraph = re.sub(
+            r'\[b\](?:Valour Response|Response)\[\/b\]:', '',
+            updated_paragraph)
 
         if (re.search(r'(?:\[bi\]action\[\/bi\]|\[b\]action\[\/b\]|"action")',
                       updated_paragraph, flags=re.IGNORECASE) or
@@ -5357,6 +5365,17 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     else:
                         broken_set_ids.add(set_id)
 
+                if re.search(r'[0-9X ]pp[ .]', value):
+                    message = (
+                        '"[pp]" instead of "pp" in {} column for row '
+                        '#{}{}'.format(
+                            key.replace(BACK_PREFIX, 'Back '), i, row_info))
+                    logging.error(message)
+                    if not card_scratch:
+                        errors.append(message)
+                    else:
+                        broken_set_ids.add(set_id)
+
                 if re.search(r'[0-9X] \[pp\]', value):
                     message = (
                         'Redundant space before [pp] in {} column for row '
@@ -5373,6 +5392,17 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         '"Middle-earth" not "Middle-Earth" in {} column for '
                         'row #{}{}'.format(
                             key.replace(BACK_PREFIX, 'Back '), i, row_info))
+                    logging.error(message)
+                    if not card_scratch:
+                        errors.append(message)
+                    else:
+                        broken_set_ids.add(set_id)
+
+                if ':[/b] ' in value:
+                    message = (
+                        '"[/b]:" not ":[/b]" in {} column for row #{}{}'
+                        .format(key.replace(BACK_PREFIX, 'Back '), i,
+                                row_info))
                     logging.error(message)
                     if not card_scratch:
                         errors.append(message)
@@ -5527,10 +5557,24 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             key.replace(BACK_PREFIX, 'Back '), card_id, lang,
                             TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
+                    if re.search(r'[0-9X ]pp[ .]', value):
+                        logging.error(
+                            '"[pp]" instead of "pp" in %s column for card'
+                            ' ID %s in %s translations, row #%s',
+                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
+                            TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
                     if re.search(r'[0-9X] \[pp\]', value):
                         logging.error(
                             'Redundant space before [pp] in %s column for card'
                             ' ID %s in %s translations, row #%s',
+                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
+                            TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+                    if ':[/b] ' in value:
+                        logging.error(
+                            '"[/b]:" not ":[/b]" in %s column for card ID %s '
+                            'in %s translations, row #%s',
                             key.replace(BACK_PREFIX, 'Back '), card_id, lang,
                             TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
