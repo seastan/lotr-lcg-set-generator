@@ -258,6 +258,7 @@ List of **!edit** commands:
 ` `
 **!edit flavour <set name or set code>** - display all possible flavour text issues (for example: `!edit flavour Children of Eorl` or `!edit flavour CoE`)
 **!edit names <set name or set code>** - display all potentially unknown or misspelled names (for example: `!edit names Children of Eorl` or `!edit names CoE`)
+**!edit numbers <set name or set code>** - display all potentially incorrect card numbers (for example: `!edit numbers Children of Eorl` or `!edit numbers CoE`)
 **!edit text <set name or set code>** - display all text that may be a subject of editing rules for a set (for example: `!edit text Children of Eorl` or `!edit text CoE`)
 **!edit traits <set name or set code>** - display all possible trait issues for a set (for example: `!edit traits Children of Eorl` or `!edit traits CoE`)
 **!edit all <set name or set code>** - display results of all commands above (for example: `!edit all Children of Eorl` or `!edit all CoE`)
@@ -529,6 +530,28 @@ async def run_and_forget_shell(cmd):
         cmd,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE)
+
+
+def get_next_card_number(old_value):
+    """ Get the next card number.
+    """
+    old_value = str(old_value)
+    if lotr.is_positive_int(old_value):
+        new_value = str(int(old_value) + 1)
+    elif old_value.startswith('0.') and len(old_value) == 3:
+        old_value = old_value[-1]
+        if old_value in '12345678':
+            new_value = '0.{}'.format(str(int(old_value) + 1))
+        elif old_value == '9':
+            new_value = '0.A'
+        elif old_value in 'ABCDEFGHIJKLMNOPQRSTUVWXY':
+            new_value = '0.{}'.format(chr(ord(old_value) + 1))
+        else:
+            new_value = None
+    else:
+        new_value = None
+
+    return new_value
 
 
 def format_playtest_message(data):
@@ -5051,6 +5074,147 @@ Targets removed.
         return output
 
 
+    async def _display_numbers(self, value):  # pylint: disable=R0912,R0914,R0915
+        """ Display all potentially incorrect card numbers for a set.
+        """
+        data = await read_card_data()
+
+        set_name = re.sub(r'^alep---', '', lotr.normalized_name(value))
+        matches = [card for card in data['data'] if re.sub(
+            r'^alep---', '',
+            lotr.normalized_name(card[lotr.CARD_SET_NAME])) == set_name]
+
+        if not matches:
+            new_set_name = 'the-{}'.format(set_name)
+            matches = [card for card in data['data'] if re.sub(
+                r'^alep---', '',
+                lotr.normalized_name(card[lotr.CARD_SET_NAME])) ==
+                new_set_name]
+
+        if not matches:
+            set_code = value.lower()
+            matches = [
+                card for card in data['data']
+                if card.get(lotr.CARD_SET_HOB_CODE, '').lower() == set_code]
+            if not matches:
+                return 'no cards found for the set'
+
+        matches.sort(key=lambda card: card[lotr.ROW_COLUMN])
+        res = {}
+        state = 'intro'  # intro|cards|outro
+        next_intro_number = '0.1'
+        next_cards_number = None
+        for card in matches:
+            if (card[lotr.CARD_TYPE] == 'Presentation' or
+                    (card[lotr.CARD_TYPE] == 'Rules' and
+                     card.get(lotr.CARD_SPHERE) != 'Back') or
+                    'Promo' in lotr.extract_flags(card.get(lotr.CARD_FLAGS))):
+                if state != 'intro':
+                    precedent = {
+                        'name': card[lotr.CARD_NAME],
+                        'field': lotr.CARD_NUMBER,
+                        'text': 'Should be put before other cards',
+                        'row': card[lotr.ROW_COLUMN]}
+                    res.setdefault(
+                        'Card is out of place', []).append(precedent)
+                elif str(card[lotr.CARD_NUMBER]) != next_intro_number:
+                    precedent = {
+                        'name': card[lotr.CARD_NAME],
+                        'field': lotr.CARD_NUMBER,
+                        'text': 'Should be **{}** instead of **{}**'.format(
+                            next_intro_number, card[lotr.CARD_NUMBER]),
+                        'row': card[lotr.ROW_COLUMN]}
+                    res.setdefault(
+                        'Incorrect card number', []).append(precedent)
+                    next_intro_number = get_next_card_number(next_intro_number)
+                else:
+                    next_intro_number = get_next_card_number(
+                        card[lotr.CARD_NUMBER])
+            elif card.get(lotr.CARD_SPHERE) == 'Back':
+                if state != 'cards':
+                    precedent = {
+                        'name': card[lotr.CARD_NAME],
+                        'field': lotr.CARD_NUMBER,
+                        'text': 'Should be put after other cards',
+                        'row': card[lotr.ROW_COLUMN]}
+                    res.setdefault(
+                        'Card is out of place', []).append(precedent)
+                elif str(card[lotr.CARD_NUMBER]) != '999':
+                    precedent = {
+                        'name': card[lotr.CARD_NAME],
+                        'field': lotr.CARD_NUMBER,
+                        'text': 'Should be **999** instead of **{}**'.format(
+                            card[lotr.CARD_NUMBER]),
+                        'row': card[lotr.ROW_COLUMN]}
+                    res.setdefault(
+                        'Incorrect card number', []).append(precedent)
+                    state = 'outro'
+                else:
+                    state = 'outro'
+            else:
+                if state not in ('intro', 'cards'):
+                    precedent = {
+                        'name': card[lotr.CARD_NAME],
+                        'field': lotr.CARD_NUMBER,
+                        'text': 'Should be put before the back card',
+                        'row': card[lotr.ROW_COLUMN]}
+                    res.setdefault(
+                        'Card is out of place', []).append(precedent)
+                elif (next_cards_number and
+                      str(card[lotr.CARD_NUMBER]) != next_cards_number):
+                    precedent = {
+                        'name': card[lotr.CARD_NAME],
+                        'field': lotr.CARD_NUMBER,
+                        'text': 'Should be **{}** instead of **{}**'.format(
+                            next_cards_number, card[lotr.CARD_NUMBER]),
+                        'row': card[lotr.ROW_COLUMN]}
+                    res.setdefault(
+                        'Incorrect card number', []).append(precedent)
+                    next_cards_number = get_next_card_number(
+                        card[lotr.CARD_NUMBER])
+                    state = 'cards'
+                elif next_cards_number:
+                    next_cards_number = get_next_card_number(
+                        card[lotr.CARD_NUMBER])
+                    state = 'cards'
+                elif not lotr.is_positive_int(card[lotr.CARD_NUMBER]):
+                    precedent = {
+                        'name': card[lotr.CARD_NAME],
+                        'field': lotr.CARD_NUMBER,
+                        'text': '**{}** is an incorrect card number'.format(
+                            card[lotr.CARD_NUMBER]),
+                        'row': card[lotr.ROW_COLUMN]}
+                    res.setdefault(
+                        'Incorrect card number', []).append(precedent)
+                    state = 'cards'
+                else:
+                    next_cards_number = get_next_card_number(
+                        card[lotr.CARD_NUMBER])
+                    state = 'cards'
+
+        output = []
+        for rule, card_list in res.items():
+            rule_output = (
+                '\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\n**{}**:\n'
+                '\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_'.format(rule))
+            for card_data in card_list:
+                row_url = '<{}&range=A{}>'.format(data['url'],
+                                                  card_data['row'])
+                rule_output += '\n` `\n*{}* (**{}**):\n{}\n{}'.format(
+                    card_data['name'], card_data['field'].replace('_', ' '),
+                    card_data['text'], row_url)
+
+            output.append(rule_output)
+
+        output = '\n` `\n'.join(sorted(output))
+        if output:
+            output = '{}\n` `\nDone.'.format(output)
+        else:
+            output = 'all card numbers are correct'
+
+        return output
+
+
     async def _display_text(self, value):  # pylint: disable=R0912,R0914
         """ Display all text that may be a subject of editing rules for a set.
         """
@@ -5304,6 +5468,21 @@ Targets removed.
             await self._send_channel(message.channel, res)
         elif command.lower() == 'names':
             await self._send_channel(message.channel, 'please specify the set')
+        elif command.lower().startswith('numbers '):
+            try:
+                set_name = re.sub(r'^numbers ', '', command,
+                                  flags=re.IGNORECASE)
+                res = await self._display_numbers(set_name)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await self._send_channel(
+                    message.channel,
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await self._send_channel(message.channel, res)
+        elif command.lower() == 'numbers':
+            await self._send_channel(message.channel, 'please specify the set')
         elif command.lower().startswith('text '):
             try:
                 set_name = re.sub(r'^text ', '', command,
@@ -5341,6 +5520,7 @@ Targets removed.
                 res = []
                 res.append(await self._display_flavour(set_name))
                 res.append(await self._display_names(set_name))
+                res.append(await self._display_numbers(set_name))
                 res.append(await self._display_text(set_name))
                 res.append(await self._display_traits(set_name))
                 res = '\n` `\n'.join(res)
