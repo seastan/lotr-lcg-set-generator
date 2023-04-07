@@ -2238,6 +2238,12 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                 else:
                     value = parts[0]
 
+            if (lang == 'English' and
+                    key in (CARD_SHADOW, BACK_PREFIX + CARD_SHADOW) and
+                    not re.search(r'^(?:\[[^\]]+\])?Shadow(?:\[[^\]]+\])?:',
+                                  value)):
+                value = 'Shadow: {}'.format(value)
+
             row[key] = value
 
         if row.get(CARD_TYPE) == 'Rules' and row.get(CARD_VICTORY) == 'auto':
