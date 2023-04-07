@@ -256,11 +256,11 @@ List of **!image** commands:
     'edit': """
 List of **!edit** commands:
 ` `
-**!edit flavour <set name or set code>** - display all possible flavour text issues (for example: `!edit flavour Children of Eorl` or `!edit flavour CoE`)
-**!edit names <set name or set code>** - display all potentially unknown or misspelled names (for example: `!edit names Children of Eorl` or `!edit names CoE`)
-**!edit numbers <set name or set code>** - display all potentially incorrect card numbers (for example: `!edit numbers Children of Eorl` or `!edit numbers CoE`)
-**!edit text <set name or set code>** - display all text that may be a subject of editing rules for a set (for example: `!edit text Children of Eorl` or `!edit text CoE`)
-**!edit traits <set name or set code>** - display all possible trait issues for a set (for example: `!edit traits Children of Eorl` or `!edit traits CoE`)
+**!edit flavour <set name or set code>** - display possible flavour text issues (for example: `!edit flavour Children of Eorl` or `!edit flavour CoE`)
+**!edit names <set name or set code>** - display potentially unknown or misspelled names (for example: `!edit names Children of Eorl` or `!edit names CoE`)
+**!edit numbers <set name or set code>** - display potentially incorrect card numbers (for example: `!edit numbers Children of Eorl` or `!edit numbers CoE`)
+**!edit text <set name or set code>** - display text that may be a subject of editing rules for a set (for example: `!edit text Children of Eorl` or `!edit text CoE`)
+**!edit traits <set name or set code>** - display possible trait issues for a set (for example: `!edit traits Children of Eorl` or `!edit traits CoE`)
 **!edit all <set name or set code>** - display results of all commands above (for example: `!edit all Children of Eorl` or `!edit all CoE`)
 """,
     'secret': """
@@ -4933,7 +4933,7 @@ Targets removed.
 
 
     async def _display_flavour(self, value):
-        """ Display all possible flavour text issues for a set.
+        """ Display possible flavour text issues for a set.
         """
         data = await read_card_data()
 
@@ -4993,7 +4993,7 @@ Targets removed.
 
 
     async def _display_names(self, value):
-        """ Display all potentially unknown or misspelled names for a set.
+        """ Display potentially unknown or misspelled names for a set.
         """
         data = await read_card_data()
 
@@ -5075,7 +5075,7 @@ Targets removed.
 
 
     async def _display_numbers(self, value):  # pylint: disable=R0912,R0914,R0915
-        """ Display all potentially incorrect card numbers for a set.
+        """ Display potentially incorrect card numbers for a set.
         """
         data = await read_card_data()
 
@@ -5104,6 +5104,8 @@ Targets removed.
         state = 'intro'  # intro|cards|outro
         next_intro_number = '0.1'
         next_cards_number = None
+        intro_type_order = [None, 'Presentation', 'Rules', 'Hero']
+        last_intro_type = None
         for card in matches:
             if (card[lotr.CARD_TYPE] == 'Presentation' or
                     (card[lotr.CARD_TYPE] == 'Rules' and
@@ -5112,34 +5114,44 @@ Targets removed.
                 if state != 'intro':
                     precedent = {
                         'name': card[lotr.CARD_NAME],
-                        'field': lotr.CARD_NUMBER,
-                        'text': 'Should be put before other cards',
+                        'field': 'card order',
+                        'text': '{} cards should be put before other cards'
+                            .format('Promo Hero'
+                                    if card[lotr.CARD_TYPE] == 'Hero'
+                                    else card[lotr.CARD_TYPE]),
                         'row': card[lotr.ROW_COLUMN]}
                     res.setdefault(
                         'Card is out of place', []).append(precedent)
-                elif str(card[lotr.CARD_NUMBER]) != next_intro_number:
-                    precedent = {
-                        'name': card[lotr.CARD_NAME],
-                        'field': lotr.CARD_NUMBER,
-                        'text': 'Should be **{}** instead of **{}**'.format(
-                            next_intro_number, card[lotr.CARD_NUMBER]),
-                        'row': card[lotr.ROW_COLUMN]}
-                    res.setdefault(
-                        'Incorrect card number', []).append(precedent)
-                    next_intro_number = get_next_card_number(next_intro_number)
                 else:
+                    if (card[lotr.CARD_TYPE] in intro_type_order and
+                          intro_type_order.index(card[lotr.CARD_TYPE]) <
+                          intro_type_order.index(last_intro_type)):
+                        precedent = {
+                            'name': card[lotr.CARD_NAME],
+                            'field': 'card order',
+                            'text': '{} cards should be put before {} cards'
+                                .format(card[lotr.CARD_TYPE], last_intro_type),
+                            'row': card[lotr.ROW_COLUMN]}
+                        res.setdefault(
+                            'Card is out of place', []).append(precedent)
+
+                    if str(card[lotr.CARD_NUMBER]) != next_intro_number:
+                        precedent = {
+                            'name': card[lotr.CARD_NAME],
+                            'field': lotr.CARD_NUMBER,
+                            'text': 'Should be **{}** instead of **{}**'
+                                .format(next_intro_number,
+                                        card[lotr.CARD_NUMBER]),
+                            'row': card[lotr.ROW_COLUMN]}
+                        res.setdefault(
+                            'Incorrect card number', []).append(precedent)
+
                     next_intro_number = get_next_card_number(
                         card[lotr.CARD_NUMBER])
+                    if card[lotr.CARD_TYPE] in intro_type_order:
+                        last_intro_type = card[lotr.CARD_TYPE]
             elif card.get(lotr.CARD_SPHERE) == 'Back':
-                if state != 'cards':
-                    precedent = {
-                        'name': card[lotr.CARD_NAME],
-                        'field': lotr.CARD_NUMBER,
-                        'text': 'Should be put after other cards',
-                        'row': card[lotr.ROW_COLUMN]}
-                    res.setdefault(
-                        'Card is out of place', []).append(precedent)
-                elif str(card[lotr.CARD_NUMBER]) != '999':
+                if str(card[lotr.CARD_NUMBER]) != '999':
                     precedent = {
                         'name': card[lotr.CARD_NAME],
                         'field': lotr.CARD_NUMBER,
@@ -5148,18 +5160,28 @@ Targets removed.
                         'row': card[lotr.ROW_COLUMN]}
                     res.setdefault(
                         'Incorrect card number', []).append(precedent)
-                    state = 'outro'
-                else:
-                    state = 'outro'
+
+                state = 'outro'
             else:
                 if state not in ('intro', 'cards'):
                     precedent = {
                         'name': card[lotr.CARD_NAME],
-                        'field': lotr.CARD_NUMBER,
+                        'field': 'card order',
                         'text': 'Should be put before the back card',
                         'row': card[lotr.ROW_COLUMN]}
                     res.setdefault(
                         'Card is out of place', []).append(precedent)
+                elif (not next_cards_number and
+                      not lotr.is_positive_int(card[lotr.CARD_NUMBER])):
+                    precedent = {
+                        'name': card[lotr.CARD_NAME],
+                        'field': lotr.CARD_NUMBER,
+                        'text': '**{}** is an incorrect card number'.format(
+                            card[lotr.CARD_NUMBER]),
+                        'row': card[lotr.ROW_COLUMN]}
+                    res.setdefault(
+                        'Incorrect card number', []).append(precedent)
+                    state = 'cards'
                 elif (next_cards_number and
                       str(card[lotr.CARD_NUMBER]) != next_cards_number):
                     precedent = {
@@ -5172,20 +5194,6 @@ Targets removed.
                         'Incorrect card number', []).append(precedent)
                     next_cards_number = get_next_card_number(
                         card[lotr.CARD_NUMBER])
-                    state = 'cards'
-                elif next_cards_number:
-                    next_cards_number = get_next_card_number(
-                        card[lotr.CARD_NUMBER])
-                    state = 'cards'
-                elif not lotr.is_positive_int(card[lotr.CARD_NUMBER]):
-                    precedent = {
-                        'name': card[lotr.CARD_NAME],
-                        'field': lotr.CARD_NUMBER,
-                        'text': '**{}** is an incorrect card number'.format(
-                            card[lotr.CARD_NUMBER]),
-                        'row': card[lotr.ROW_COLUMN]}
-                    res.setdefault(
-                        'Incorrect card number', []).append(precedent)
                     state = 'cards'
                 else:
                     next_cards_number = get_next_card_number(
@@ -5210,13 +5218,13 @@ Targets removed.
         if output:
             output = '{}\n` `\nDone.'.format(output)
         else:
-            output = 'all card numbers are correct'
+            output = 'card numbers are correct'
 
         return output
 
 
     async def _display_text(self, value):  # pylint: disable=R0912,R0914
-        """ Display all text that may be a subject of editing rules for a set.
+        """ Display text that may be a subject of editing rules for a set.
         """
         data = await read_card_data()
 
@@ -5316,7 +5324,7 @@ Targets removed.
 
 
     async def _display_traits(self, value):  # pylint: disable=R0912,R0914
-        """ Display all possible trait issues for a set.
+        """ Display possible trait issues for a set.
         """
         data = await read_card_data()
 
