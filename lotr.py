@@ -350,7 +350,8 @@ CARD_TYPES_ONE_COPY = {'Campaign', 'Contract', 'Encounter Side Quest',
 CARD_TYPES_THREE_COPIES = {'Ally', 'Attachment', 'Event', 'Player Objective',
                            'Player Side Quest'}
 CARD_TYPES_BOON = {'Ally', 'Attachment', 'Event', 'Objective Ally'}
-CARD_TYPES_BURDEN = {'Encounter Side Quest', 'Enemy', 'Objective', 'Treachery'}
+CARD_TYPES_BURDEN = {'Encounter Side Quest', 'Enemy', 'Objective',
+                     'Ship Enemy', 'Treachery'}
 CARD_TYPES_NIGHTMARE = {'Encounter Side Quest', 'Enemy', 'Location',
                         'Objective', 'Quest', 'Ship Enemy', 'Treachery'}
 CARD_TYPES_NOSTAT = {'Enemy'}

@@ -992,6 +992,10 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						cardSphere = 'ShipNightmare';
 						card['Sphere'] = cardSphere;
 					}
+					else if ((cardType == 'Ship Enemy') && (card['Sphere'] + '' == 'Burden')) {
+						cardSphere = 'ShipBurden';
+						card['Sphere'] = cardSphere;
+					}
 
 					keywords = card['Keywords'];
 					suffix = '';
@@ -1083,6 +1087,10 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 					else if ((cardType == 'Ship Enemy') && (card['BSphere'] + '' == 'Nightmare')) {
 						cardSphere = 'ShipNightmare';
+						card['BSphere'] = cardSphere;
+					}
+					else if ((cardType == 'Ship Enemy') && (card['BSphere'] + '' == 'Burden')) {
+						cardSphere = 'ShipBurden';
 						card['BSphere'] = cardSphere;
 					}
 
@@ -1965,8 +1973,7 @@ function markUp(value, key, cardType, lang, setID) {
 			lowerSize = namePointSize[cardType];
 		}
 
-		res = updateVafthrudnir(value, lowerSize, lang);
-		return res;
+		return updateVafthrudnir(value, lowerSize, lang);
 	}
 	else if ((['Victory Points', 'BVictory Points'].indexOf(key + '') > -1) && (['Presentation', 'Rules'].indexOf(cardType) == -1)) {
 		return updateVafthrudnir(value, 3.69, lang);
