@@ -62,8 +62,6 @@ Choose `My Drive` and click `Add Shortcut`.
     _Scratch/<backup image>
     ```
 
-    Make sure that top-level folders `custom`, `generated`, `icons`, `_Keep`, and `_Scratch`  exist , even if they are empty.
-
     For example:
 
     ```
@@ -78,12 +76,16 @@ Choose `My Drive` and click `Add Shortcut`.
     generated/
     generated/e904fc83-7bb9-4868-8d80-60c89ade0ce2.jpg
     icons/
-    icons/Ambush-at-Erelas.png
+    icons/Vafthrudnir-Encounter-Set-01.png
     _Keep/
     _Keep/53dcedb3-3640-4655-a150-9d0dd534a126/d683951a-e2a9-4e6f-81aa-2943ff6c0a31_John_Howe.png
     _Scratch/
     _Scratch/untitled.png
     ```
+
+    Make sure that top-level folders `custom`, `generated`, `icons`, `_Keep`, and `_Scratch`  exist, even if they are empty.
+    If you are starting a new project from scratch, copy all images from `imagesCustom` and `imagesIcons` folders in the root
+    of this repo to `custom` and `icons` folders in the root of the Google Drive folder.
 
 4. If you are using the artwork from Google Drive, make sure that the Google Drive application is installed (install it if needed).
 If the artwork folder is a shortcut, click on the shortcut and copy the actual path to the virtual folder (it might look like

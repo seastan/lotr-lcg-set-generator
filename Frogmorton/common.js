@@ -1352,7 +1352,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						}
 					}
 					else {
-						s.set('Portrait-external-path', 'project:imagesOther/white.jpg');
+						s.set('Portrait-external-path', 'project:imagesDefault/white.jpg');
 					}
 					if ((cardType == 'Quest') || (cardType == 'Contract')) {
 						if (card['BArtwork'] && (card['BArtwork'] != card['Artwork'])) {
@@ -1374,7 +1374,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 							}
 						}
 						else {
-							s.set('PortraitBack-external-path', 'project:imagesOther/white.jpg');
+							s.set('PortraitBack-external-path', 'project:imagesDefault/white.jpg');
 						}
 					}
 				}
@@ -1391,7 +1391,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						}
 					}
 					else {
-						s.set('Portrait-external-path', 'project:imagesOther/white.jpg');
+						s.set('Portrait-external-path', 'project:imagesDefault/white.jpg');
 					}
 				}
 
