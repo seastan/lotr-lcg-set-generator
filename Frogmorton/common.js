@@ -1182,14 +1182,6 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 							vXml = keywordsBack + '\n\n' + vXml;
 						}
 					}
-					else if (nXml == 'Card Number') {
-						if ((sides.length > 1) && (side == 'front')) {
-							vXml = vXml + 'a';
-						}
-						else if ((sides.length > 1) && (side == 'back')) {
-							vXml = vXml + 'b';
-						}
-					}
 					else if ((nXml == 'Adventure') && (cardType != 'Campaign')) {
 						vXml = vXml.toUpperCase();
 					}

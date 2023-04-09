@@ -2274,9 +2274,10 @@ def _clean_sets(data):
                 row[key] = _clean_value(value)
 
 
-def _update_data(data):
+def _update_data(data):  # pylint: disable=R0912
     """ Update card data from the spreadsheet.
     """
+    selected_card_numbers = {}
     for row in data:
         row[CARD_SET_NAME] = SETS.get(row[CARD_SET], {}).get(SET_NAME, '')
         row[CARD_SET_HOB_CODE] = SETS.get(row[CARD_SET],
@@ -2310,6 +2311,42 @@ def _update_data(data):
             row[CARD_SIDE_B] = row[CARD_NAME]
 
         row[BACK_PREFIX + CARD_NAME] = row[CARD_SIDE_B]
+
+        if (row[CARD_TYPE] not in CARD_TYPES_DOUBLESIDE_OPTIONAL and
+                row[BACK_PREFIX + CARD_TYPE] is not None and
+                row[CARD_NUMBER] is not None and
+                row[CARD_PRINTED_NUMBER] is None and
+                row[BACK_PREFIX + CARD_PRINTED_NUMBER] is None):
+            row[CARD_PRINTED_NUMBER] = '{}a'.format(row[CARD_NUMBER])
+            row[BACK_PREFIX + CARD_PRINTED_NUMBER] = '{}b'.format(
+                row[CARD_NUMBER])
+
+        if row[CARD_SELECTED] in SETS and row[CARD_SET] != '[filtered set]':
+            if (row[CARD_TYPE] not in CARD_TYPES_NO_ICON and
+                    row[CARD_ICON] is None):
+                if SETS.get(row[CARD_SET], {}).get(SET_COLLECTION_ICON):
+                    row[CARD_ICON] = SETS[row[CARD_SET]][SET_COLLECTION_ICON]
+                elif SETS.get(row[CARD_SET], {}).get(SET_NAME):
+                    row[CARD_ICON] = SETS[row[CARD_SET]][SET_NAME]
+
+            if (row[CARD_TYPE] not in CARD_TYPES_NO_COPYRIGHT and
+                    row[CARD_COPYRIGHT] is None):
+                if SETS.get(row[CARD_SET], {}).get(SET_COPYRIGHT):
+                    row[CARD_COPYRIGHT] = SETS[row[CARD_SET]][SET_COPYRIGHT]
+
+            if (row[CARD_TYPE] not in CARD_TYPES_NO_PRINTED_NUMBER and
+                    row[CARD_PRINTED_NUMBER] is None):
+                row[CARD_PRINTED_NUMBER] = row[CARD_NUMBER]
+
+            if (row[CARD_TYPE] not in CARD_TYPES_NO_PRINTED_NUMBER_BACK and
+                    row[BACK_PREFIX + CARD_TYPE] is not None and
+                    row[BACK_PREFIX + CARD_PRINTED_NUMBER] is None):
+                row[BACK_PREFIX + CARD_PRINTED_NUMBER] = row[CARD_NUMBER]
+
+            row[CARD_SET] = row[CARD_SELECTED]
+            row[CARD_SET_NAME] = SETS[row[CARD_SET]].get(SET_NAME, '')
+            row[CARD_NUMBER] = selected_card_numbers.get(row[CARD_SELECTED], 1)
+            selected_card_numbers[row[CARD_SELECTED]] = row[CARD_NUMBER] + 1
 
 
 def _skip_row(row):
