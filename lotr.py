@@ -121,6 +121,8 @@ CARD_NORMALIZED_NAME = '_Normalized Name'
 CARD_DISCORD_CHANNEL = '_Discord Channel'
 CARD_DISCORD_CATEGORY = '_Discord Category'
 
+CARD_PRINTED_NUMBER_AUTO = '_Printed Card Number Auto'
+
 CARD_DOUBLESIDE = '_Card Side'
 CARD_ORIGINAL_NAME = '_Original Name'
 
@@ -137,7 +139,8 @@ DISCORD_IGNORE_CHANGES_COLUMNS = {
     CARD_SET, CARD_NUMBER, CARD_SET_NAME, CARD_SET_RINGSDB_CODE,
     CARD_SET_HOB_CODE, CARD_SET_LOCKED, CARD_RINGSDB_CODE, CARD_BOT_DISABLED,
     CARD_NORMALIZED_NAME, BACK_PREFIX + CARD_NORMALIZED_NAME,
-    CARD_DISCORD_CHANNEL, CARD_DISCORD_CATEGORY, ROW_COLUMN
+    CARD_DISCORD_CHANNEL, CARD_DISCORD_CATEGORY, CARD_PRINTED_NUMBER_AUTO,
+    ROW_COLUMN
 }
 ONE_LINE_COLUMNS = {
     CARD_ENCOUNTER_SET, CARD_NAME, CARD_TRAITS, CARD_KEYWORDS, CARD_VICTORY,
@@ -2320,6 +2323,7 @@ def _update_data(data):  # pylint: disable=R0912
             row[CARD_PRINTED_NUMBER] = '{}a'.format(row[CARD_NUMBER])
             row[BACK_PREFIX + CARD_PRINTED_NUMBER] = '{}b'.format(
                 row[CARD_NUMBER])
+            row[CARD_PRINTED_NUMBER_AUTO] = True
 
         if row[CARD_SELECTED] in SETS and row[CARD_SET] != '[filtered set]':
             if (row[CARD_TYPE] not in CARD_TYPES_NO_ICON and
@@ -3222,7 +3226,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         for error in PRE_SANITY_CHECK['flavour'].get(
                 (i, card_scratch, 'English'), []):
-            message = ('{} for row #{}{}'.format(error, i, row_info))
+            message = '{} for row #{}{}'.format(error, i, row_info)
             logging.warning(message)
 
         if card_number is None:
@@ -5837,6 +5841,23 @@ def _get_card_diffs(old_card, new_card):
     diffs = []
     old_card = old_card.copy()
     new_card = new_card.copy()
+
+    if (CARD_PRINTED_NUMBER in old_card and
+            old_card.get(CARD_PRINTED_NUMBER_AUTO)):
+        del old_card[CARD_PRINTED_NUMBER]
+
+    if (BACK_PREFIX + CARD_PRINTED_NUMBER in old_card and
+            old_card.get(CARD_PRINTED_NUMBER_AUTO)):
+        del old_card[BACK_PREFIX + CARD_PRINTED_NUMBER]
+
+    if (CARD_PRINTED_NUMBER in new_card and
+            new_card.get(CARD_PRINTED_NUMBER_AUTO)):
+        del new_card[CARD_PRINTED_NUMBER]
+
+    if (BACK_PREFIX + CARD_PRINTED_NUMBER in new_card and
+            new_card.get(CARD_PRINTED_NUMBER_AUTO)):
+        del new_card[BACK_PREFIX + CARD_PRINTED_NUMBER]
+
     for key in old_card:
         if (key in DISCORD_IGNORE_CHANGES_COLUMNS or
                 key in DISCORD_IGNORE_COLUMNS):
@@ -5848,8 +5869,11 @@ def _get_card_diffs(old_card, new_card):
             diffs.append((key, old_card[key], new_card[key]))
 
     for key in new_card:
-        if (key not in DISCORD_IGNORE_CHANGES_COLUMNS and
-                key not in DISCORD_IGNORE_COLUMNS and key not in old_card):
+        if (key in DISCORD_IGNORE_CHANGES_COLUMNS or
+                key in DISCORD_IGNORE_COLUMNS):
+            continue
+
+        if key not in old_card:
             diffs.append((key, None, new_card[key]))
 
     diffs.sort(key=lambda d:
@@ -5881,7 +5905,10 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
             for row in DATA if not row[CARD_SCRATCH]]
     data_raw = [
         {key: value for key, value in row.items() if value is not None}
-        for row in DATA if row.get(CARD_ID) and row.get(CARD_SET)]
+        for row in DATA if row.get(CARD_ID) and row.get(CARD_SET) and
+        row[CARD_SET] in SETS and
+        not (SETS[row[CARD_SET]][SET_IGNORE] and
+             SETS[row[CARD_SET]][SET_ID] in FOUND_SCRATCH_SETS)]
     channels = set()
 
     for row in data:
@@ -6076,11 +6103,14 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
             channel_changes.append(('rename', (diff[0][0], diff[1][0]), None))
 
-    set_names = [s[SET_NAME] for s in SETS.values()]
-    sets_by_id = {s[SET_ID]:s[SET_NAME] for s in SETS.values()}
+    set_names = [s[SET_NAME] for s in SETS.values()
+                 if not (s[SET_IGNORE] and s[SET_ID] in FOUND_SCRATCH_SETS)]
+    sets_by_id = {s[SET_ID]:s[SET_NAME] for s in SETS.values()
+                  if not (s[SET_IGNORE] and s[SET_ID] in FOUND_SCRATCH_SETS)}
     sets_by_code = {
         s[SET_HOB_CODE].lower():s[SET_NAME] for s in SETS.values()
-        if s[SET_HOB_CODE]}
+        if s[SET_HOB_CODE] and not (s[SET_IGNORE] and
+                                    s[SET_ID] in FOUND_SCRATCH_SETS)}
     playtesting_set_ids = [s[SET_ID] for s in SETS.values()
                            if not s[SET_IGNORE] or s[SET_LOCKED]]
     valid_set_ids = {s[0] for s in sets}
