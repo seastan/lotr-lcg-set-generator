@@ -121,6 +121,8 @@ CARD_NORMALIZED_NAME = '_Normalized Name'
 CARD_DISCORD_CHANNEL = '_Discord Channel'
 CARD_DISCORD_CATEGORY = '_Discord Category'
 
+CARD_ENCOUNTER_SET_NUMBER_START = '_Encounter Set Number Start'
+CARD_ENCOUNTER_SET_TOTAL = '_Encounter Set Total'
 CARD_PRINTED_NUMBER_AUTO = '_Printed Card Number Auto'
 
 CARD_DOUBLESIDE = '_Card Side'
@@ -133,7 +135,8 @@ DISCORD_IGNORE_COLUMNS = {
     CARD_PANX, CARD_PANY, CARD_SCALE, CARD_PORTRAIT_SHADOW,
     BACK_PREFIX + CARD_PANX, BACK_PREFIX + CARD_PANY,
     BACK_PREFIX + CARD_SCALE, BACK_PREFIX + CARD_PORTRAIT_SHADOW, CARD_SIDE_B,
-    CARD_SELECTED, CARD_CHANGED, CARD_SCRATCH
+    CARD_SELECTED, CARD_CHANGED, CARD_SCRATCH, CARD_ENCOUNTER_SET_NUMBER_START,
+    CARD_ENCOUNTER_SET_TOTAL
 }
 DISCORD_IGNORE_CHANGES_COLUMNS = {
     CARD_SET, CARD_NUMBER, CARD_SET_NAME, CARD_SET_RINGSDB_CODE,
@@ -2280,7 +2283,7 @@ def _clean_sets(data):
 def _update_data(data):  # pylint: disable=R0912
     """ Update card data from the spreadsheet.
     """
-    selected_card_numbers = {}
+    encounter_sets = {}
     for row in data:
         row[CARD_SET_NAME] = SETS.get(row[CARD_SET], {}).get(SET_NAME, '')
         row[CARD_SET_HOB_CODE] = SETS.get(row[CARD_SET],
@@ -2325,7 +2328,35 @@ def _update_data(data):  # pylint: disable=R0912
                 row[CARD_NUMBER])
             row[CARD_PRINTED_NUMBER_AUTO] = True
 
-        if row[CARD_SELECTED] in SETS and row[CARD_SET] != '[filtered set]':
+        if (row[CARD_SET] is not None and
+                row[CARD_ENCOUNTER_SET] is not None and
+                is_positive_int(row[CARD_QUANTITY]) and
+                row[CARD_TYPE] in CARD_TYPES_ENCOUNTER_SET_NUMBER and
+                row[CARD_SPHERE] not in ('Boon', 'Burden')):
+            row[CARD_ENCOUNTER_SET_NUMBER_START] = (
+                encounter_sets.get((row[CARD_SET],
+                                    row[CARD_ENCOUNTER_SET]), 0) + 1)
+            encounter_sets[(row[CARD_SET], row[CARD_ENCOUNTER_SET])] = (
+                encounter_sets.get((row[CARD_SET],
+                                    row[CARD_ENCOUNTER_SET]), 0) +
+                row[CARD_QUANTITY])
+        else:
+            row[CARD_ENCOUNTER_SET_NUMBER_START] = None
+            row[CARD_ENCOUNTER_SET_TOTAL] = None
+
+    for row in data:
+        if (row[CARD_SET] is not None and
+                row[CARD_ENCOUNTER_SET] is not None and
+                is_positive_int(row[CARD_QUANTITY]) and
+                row[CARD_TYPE] in CARD_TYPES_ENCOUNTER_SET_NUMBER and
+                row[CARD_SPHERE] not in ('Boon', 'Burden')):
+            row[CARD_ENCOUNTER_SET_TOTAL] = encounter_sets.get(
+                (row[CARD_SET], row[CARD_ENCOUNTER_SET]), 0)
+
+    selected_card_numbers = {}
+    for row in data:
+        if (row[CARD_SELECTED] in SETS and
+                row[CARD_SET] not in (None, '[filtered set]')):
             if (row[CARD_TYPE] not in CARD_TYPES_NO_ICON and
                     row[CARD_ICON] is None):
                 if SETS.get(row[CARD_SET], {}).get(SET_COLLECTION_ICON):
@@ -8467,7 +8498,9 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                      CARD_FLAGS, CARD_ARTIST, CARD_PANX, CARD_PANY, CARD_SCALE,
                      CARD_PORTRAIT_SHADOW, CARD_EASY_MODE,
                      CARD_ADDITIONAL_ENCOUNTER_SETS, CARD_ADVENTURE, CARD_ICON,
-                     CARD_COPYRIGHT, CARD_BACK, CARD_VERSION):
+                     CARD_COPYRIGHT, CARD_BACK, CARD_VERSION,
+                     CARD_ENCOUNTER_SET_NUMBER_START,
+                     CARD_ENCOUNTER_SET_TOTAL):
             value = _get_xml_property_value(row, name, card_type)
             if value != '':
                 properties.append((name, value))
@@ -8659,8 +8692,6 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
     tree = ET.parse(xml_path)
     root = tree.getroot()
     _set_outputs(conf, lang, root)
-    encounter_sets = {}
-    encounter_cards = {}
 
     external_data = {}
     external_path = os.path.join(RENDERER_GENERATED_IMAGES_PATH,
@@ -8681,18 +8712,6 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
         properties = [p for p in card]  # pylint: disable=R1721
         if properties:
             properties[-1].tail = '{}  '.format(properties[-1].tail)
-
-        if (card_type not in ('Campaign', 'Nightmare', 'Quest', 'Rules',
-                              'Treasure')
-                and card_sphere not in ('Boon', 'Burden') and encounter_set):
-            encounter_cards[card.attrib['id']] = encounter_set
-            prop = _get_property(card, 'Encounter Set Number Start')
-            prop.set('value', str(encounter_sets.get(encounter_set, 0) + 1))
-            prop.tail = '\n      '
-            quantity = int(
-                _find_properties(card, 'Quantity')[0].attrib['value'])
-            encounter_sets[encounter_set] = (
-                encounter_sets.get(encounter_set, 0) + quantity)
 
         image_id = '{}_{}'.format(card.attrib['id'], 'A')
         if image_id in images:
@@ -8893,12 +8912,6 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
         logging.error('Unused image detected: %s', filename)
 
     for card in root[0]:
-        if card.attrib['id'] in encounter_cards:
-            prop = _get_property(card, 'Encounter Set Total')
-            prop.set('value', str(
-                encounter_sets[encounter_cards[card.attrib['id']]]))
-            prop.tail = '\n      '
-
         properties = [p for p in card]  # pylint: disable=R1721
         if properties:
             properties[-1].tail = re.sub(r'  $', '', properties[-1].tail)

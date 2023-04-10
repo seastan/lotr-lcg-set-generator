@@ -1444,15 +1444,15 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 				}
 
-				if (card['Encounter Set Number Start']) {
-					s.set('EncounterSetNumber', parseInt(card['Encounter Set Number Start']) + j);
+				if (card['_Encounter Set Number Start']) {
+					s.set('EncounterSetNumber', parseInt(card['_Encounter Set Number Start']) + j);
 				}
 				else {
 					s.set('EncounterSetNumber', 0);
 				}
 
-				if (card['Encounter Set Total']) {
-					s.set('EncounterSetTotal', card['Encounter Set Total']);
+				if (card['_Encounter Set Total']) {
+					s.set('EncounterSetTotal', card['_Encounter Set Total']);
 				}
 				else {
 					s.set('EncounterSetTotal', 0);
