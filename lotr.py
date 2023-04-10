@@ -2319,6 +2319,8 @@ def _update_data(data):  # pylint: disable=R0912
         row[BACK_PREFIX + CARD_NAME] = row[CARD_SIDE_B]
 
         if (row[CARD_TYPE] not in CARD_TYPES_DOUBLESIDE_OPTIONAL and
+                row[CARD_TYPE] not in CARD_TYPES_NO_PRINTED_NUMBER and
+                row[CARD_TYPE] not in CARD_TYPES_NO_PRINTED_NUMBER_BACK and
                 row[BACK_PREFIX + CARD_TYPE] is not None and
                 row[CARD_NUMBER] is not None and
                 row[CARD_PRINTED_NUMBER] is None and
