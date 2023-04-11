@@ -212,6 +212,19 @@ For debugging purposes you can also run the steps above using the Jupyter notebo
 - `jupyter notebook`
 - Open `setGenerator.ipynb` in the browser.
 
+To generate only a subset of cards (produce separate artifacts for each set):
+
+- Set `selected_only: true` in `configuration.yaml`.
+- Uncomment all the needed sets in `configuration.yaml`.
+- In the spreadsheet, set `Selected` column to 1 for all the needed cards.
+
+To generate only a subset of cards (produce one artifact regardless of the sets):
+
+- Set `selected_only: true` in `configuration.yaml`.
+- In the spreadsheet, on the `Sets` tab add a new set like `Selected Cards`.
+- Add that new set and comment out all other sets in `configuration.yaml`.
+- In the spreadsheet, set `Selected` column to the ID of that new set for all the needed cards.
+
 **Automatic Pipeline**
 
 To run the workflow as one script, run:

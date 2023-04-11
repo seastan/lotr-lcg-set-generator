@@ -872,7 +872,6 @@ TRANSLATIONS = {}
 SELECTED_CARDS = set()
 FOUND_SETS = set()
 FOUND_SCRATCH_SETS = set()
-FOUND_INTERSECTED_SETS = set()
 IMAGE_CACHE = {}
 JSON_CACHE = {}
 XML_CACHE = {}
@@ -2280,10 +2279,9 @@ def _clean_sets(data):
                 row[key] = _clean_value(value)
 
 
-def _update_data(data):  # pylint: disable=R0912
+def _update_data(data):
     """ Update card data from the spreadsheet.
     """
-    encounter_sets = {}
     for row in data:
         row[CARD_SET_NAME] = SETS.get(row[CARD_SET], {}).get(SET_NAME, '')
         row[CARD_SET_HOB_CODE] = SETS.get(row[CARD_SET],
@@ -2294,9 +2292,6 @@ def _update_data(data):  # pylint: disable=R0912
             int(set_ringsdb_code)
             if is_positive_or_zero_int(set_ringsdb_code)
             else 0)
-
-        if row[CARD_SCRATCH] and row[CARD_SET] in FOUND_INTERSECTED_SETS:
-            row[CARD_SET] = '[filtered set]'
 
         if ((row[CARD_QUANTITY] is None or row[CARD_QUANTITY] in ('0', 0)) and
                 row[CARD_TYPE] == 'Rules'):
@@ -2330,7 +2325,13 @@ def _update_data(data):  # pylint: disable=R0912
                 row[CARD_NUMBER])
             row[CARD_PRINTED_NUMBER_AUTO] = True
 
-        if (row[CARD_SET] is not None and
+
+def _set_encounter_set_numbers(data):
+    """ Set encounter set numbers.
+    """
+    encounter_sets = {}
+    for row in data:
+        if (row[CARD_SET] not in (None, '[filtered set]') and
                 row[CARD_ENCOUNTER_SET] is not None and
                 is_positive_int(row[CARD_QUANTITY]) and
                 row[CARD_TYPE] in CARD_TYPES_ENCOUNTER_SET_NUMBER and
@@ -2347,7 +2348,7 @@ def _update_data(data):  # pylint: disable=R0912
             row[CARD_ENCOUNTER_SET_TOTAL] = None
 
     for row in data:
-        if (row[CARD_SET] is not None and
+        if (row[CARD_SET] not in (None, '[filtered set]') and
                 row[CARD_ENCOUNTER_SET] is not None and
                 is_positive_int(row[CARD_QUANTITY]) and
                 row[CARD_TYPE] in CARD_TYPES_ENCOUNTER_SET_NUMBER and
@@ -2355,6 +2356,10 @@ def _update_data(data):  # pylint: disable=R0912
             row[CARD_ENCOUNTER_SET_TOTAL] = encounter_sets.get(
                 (row[CARD_SET], row[CARD_ENCOUNTER_SET]), 0)
 
+
+def _update_selected_rows(data):
+    """ Update selected rows.
+    """
     selected_card_numbers = {}
     for row in data:
         if (row[CARD_SELECTED] in SETS and
@@ -2463,7 +2468,6 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
     SETS.clear()
     FOUND_SETS.clear()
     FOUND_SCRATCH_SETS.clear()
-    FOUND_INTERSECTED_SETS.clear()
     DATA[:] = []
     TRANSLATIONS.clear()
     SELECTED_CARDS.clear()
@@ -2537,24 +2541,29 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
     scratch_sets = {row[CARD_SET] for row in DATA
                     if row[CARD_SET] and row[CARD_SCRATCH] and
                     row[CARD_SET] in SETS}
-    FOUND_INTERSECTED_SETS.update(FOUND_SETS.intersection(scratch_sets))
-    FOUND_SCRATCH_SETS.update(scratch_sets.difference(FOUND_INTERSECTED_SETS))
+    intersected_sets = FOUND_SETS.intersection(scratch_sets)
+    FOUND_SCRATCH_SETS.update(scratch_sets.difference(intersected_sets))
+    for row in DATA:
+        if row[CARD_SCRATCH] and row[CARD_SET] in intersected_sets:
+            row[CARD_SET] = '[filtered set]'
+
     _update_data(DATA)
-
-    _extract_all_set_and_quest_names(DATA)
-    _extract_all_encounter_set_names(DATA)
-    _extract_all_traits(DATA)
-    _extract_all_names()
-    _extract_all_accents()
-
-    card_types = {row[CARD_ID]: (row[CARD_TYPE], row[BACK_PREFIX + CARD_TYPE])
-                  for row in DATA}
     DATA[:] = sorted(DATA, key=lambda row: (
         row[CARD_SET_RINGSDB_CODE],
         is_positive_or_zero_int(row[CARD_NUMBER])
         and int(row[CARD_NUMBER]) or 0,
         str(row[CARD_NUMBER]),
         str(row[CARD_NAME])))
+    _set_encounter_set_numbers(DATA)
+    if conf['selected_only']:
+        _update_selected_rows(DATA)
+
+    _extract_all_set_and_quest_names(DATA)
+    _extract_all_encounter_set_names(DATA)
+    _extract_all_traits(DATA)
+    _extract_all_names()
+    _extract_all_accents()
+    card_types = {row[CARD_ID]: row[CARD_TYPE] for row in DATA}
 
     for lang in conf['languages']:
         if lang == 'English':
@@ -2566,19 +2575,20 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
             data = _transform_to_dict(data)
             for row in data:
                 row[CARD_SCRATCH] = None
-                if row[CARD_ID] in card_types:
-                    row[CARD_TYPE] = card_types[row[CARD_ID]][0]
-                    row[BACK_PREFIX + CARD_TYPE] = card_types[row[CARD_ID]][1]
 
             _clean_data(conf, data, lang)
-            _update_data(data)
-
             for row in data:
                 if row[CARD_ID] in TRANSLATIONS[lang]:
                     logging.error(
                         'Duplicate card ID %s for row #%s in %s translations, '
                         'ignoring', row[CARD_ID], row[ROW_COLUMN], lang)
                 else:
+                    if (card_types.get(row[CARD_ID]) in
+                            CARD_TYPES_DOUBLESIDE_MANDATORY and
+                            row[CARD_SIDE_B] is None):
+                        row[CARD_SIDE_B] = row[CARD_NAME]
+
+                    row[BACK_PREFIX + CARD_NAME] = row[CARD_SIDE_B]
                     TRANSLATIONS[lang][row[CARD_ID]] = row
 
     logging.info('...Extracting data from the spreadsheet (%ss)',
@@ -6265,9 +6275,7 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
         return value
 
     if name in (CARD_TYPE, BACK_PREFIX + CARD_TYPE):
-        if card_type == 'Presentation':
-            value = 'Rules'
-        elif card_type in CARD_TYPES_DOUBLESIDE_MANDATORY:
+        if card_type in CARD_TYPES_DOUBLESIDE_MANDATORY:
             value = card_type
         elif value == 'Encounter Side Quest':
             value = 'Side Quest'
