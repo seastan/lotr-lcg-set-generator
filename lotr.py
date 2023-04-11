@@ -8903,16 +8903,6 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                     int(os.path.getmtime(icon_images[image]))))
                 prop.tail = '\n      '
 
-    for filename, is_used in images.values():
-        if is_used:
-            continue
-
-        parts = filename.split('_')
-        if len(parts) == 3 and parts[2] != lang:
-            continue
-
-        logging.error('Unused image detected: %s', filename)
-
     for card in root[0]:
         properties = [p for p in card]  # pylint: disable=R1721
         if properties:
@@ -8925,6 +8915,17 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                 root[0].remove(card)
 
     tree.write(xml_path)
+
+    for filename, is_used in images.values():
+        if is_used:
+            continue
+
+        parts = filename.split('_')
+        if len(parts) == 3 and parts[2] != lang:
+            continue
+
+        logging.error('Unused image detected: %s', filename)
+
     logging.info('[%s, %s] ...Updating the xml file with additional data '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
