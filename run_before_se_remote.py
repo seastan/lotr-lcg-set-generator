@@ -23,9 +23,13 @@ def init_logging():
         conf = yaml.safe_load(f_conf)
 
     log_path = conf.get('remote_logs_path', '')
-    logging.basicConfig(filename=os.path.join(log_path, LOG_FILE),
-                        level=logging.INFO,
-                        format='%(asctime)s %(levelname)s: %(message)s')
+    logging.basicConfig(
+        handlers=[logging.FileHandler(
+            filename=os.path.join(log_path, LOG_FILE),
+            encoding='utf-8',
+            mode='a')],
+        level=logging.INFO,
+        format='%(asctime)s %(levelname)s: %(message)s')
 
 
 def run():
