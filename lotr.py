@@ -2331,7 +2331,7 @@ def _set_encounter_set_numbers(data):
     """
     encounter_sets = {}
     for row in data:
-        if (row[CARD_SET] not in (None, '[filtered set]') and
+        if (row[CARD_SET] in SETS and
                 row[CARD_ENCOUNTER_SET] is not None and
                 is_positive_int(row[CARD_QUANTITY]) and
                 row[CARD_TYPE] in CARD_TYPES_ENCOUNTER_SET_NUMBER and
@@ -2348,7 +2348,7 @@ def _set_encounter_set_numbers(data):
             row[CARD_ENCOUNTER_SET_TOTAL] = None
 
     for row in data:
-        if (row[CARD_SET] not in (None, '[filtered set]') and
+        if (row[CARD_SET] in SETS and
                 row[CARD_ENCOUNTER_SET] is not None and
                 is_positive_int(row[CARD_QUANTITY]) and
                 row[CARD_TYPE] in CARD_TYPES_ENCOUNTER_SET_NUMBER and
@@ -2360,10 +2360,21 @@ def _set_encounter_set_numbers(data):
 def _update_selected_rows(data):
     """ Update selected rows.
     """
+    selected_sets = {row[CARD_SELECTED] for row in data
+                     if row[CARD_SELECTED] in SETS and
+                     row[CARD_SET] in SETS and
+                     not row[CARD_SCRATCH]}
+    scratch_sets = {row[CARD_SELECTED] for row in data
+                    if row[CARD_SELECTED] in SETS and row[CARD_SET] in SETS and
+                    row[CARD_SCRATCH]}
+    intersected_sets = selected_sets.intersection(scratch_sets)
+    selected_scratch_sets = scratch_sets.difference(intersected_sets)
     selected_card_numbers = {}
     for row in data:
-        if (row[CARD_SELECTED] in SETS and
-                row[CARD_SET] not in (None, '[filtered set]')):
+        if row[CARD_SELECTED] in SETS and row[CARD_SET] in SETS:
+            if row[CARD_SCRATCH] and row[CARD_SELECTED] in intersected_sets:
+                continue
+
             if (row[CARD_TYPE] not in CARD_TYPES_NO_ICON and
                     row[CARD_ICON] is None):
                 if SETS.get(row[CARD_SET], {}).get(SET_COLLECTION_ICON):
@@ -2389,6 +2400,8 @@ def _update_selected_rows(data):
             row[CARD_SET_NAME] = SETS[row[CARD_SET]].get(SET_NAME, '')
             row[CARD_NUMBER] = selected_card_numbers.get(row[CARD_SELECTED], 1)
             selected_card_numbers[row[CARD_SELECTED]] = row[CARD_NUMBER] + 1
+
+    return selected_sets, selected_scratch_sets
 
 
 def _skip_row(row):
@@ -2536,11 +2549,9 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
 
     SELECTED_CARDS.update({row[CARD_ID] for row in DATA if row[CARD_SELECTED]})
     FOUND_SETS.update({row[CARD_SET] for row in DATA
-                       if row[CARD_SET] and not row[CARD_SCRATCH] and
-                       row[CARD_SET] in SETS})
+                       if row[CARD_SET] in SETS and not row[CARD_SCRATCH]})
     scratch_sets = {row[CARD_SET] for row in DATA
-                    if row[CARD_SET] and row[CARD_SCRATCH] and
-                    row[CARD_SET] in SETS}
+                    if row[CARD_SET] in SETS and row[CARD_SCRATCH]}
     intersected_sets = FOUND_SETS.intersection(scratch_sets)
     FOUND_SCRATCH_SETS.update(scratch_sets.difference(intersected_sets))
     for row in DATA:
@@ -2556,7 +2567,9 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
         str(row[CARD_NAME])))
     _set_encounter_set_numbers(DATA)
     if conf['selected_only']:
-        _update_selected_rows(DATA)
+        selected_sets, selected_scratch_sets = _update_selected_rows(DATA)
+        FOUND_SETS.update(selected_sets)
+        FOUND_SCRATCH_SETS.update(selected_scratch_sets)
 
     _extract_all_set_and_quest_names(DATA)
     _extract_all_encounter_set_names(DATA)
