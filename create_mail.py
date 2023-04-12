@@ -31,7 +31,7 @@ def create_mail(subject, body='', html='false'):
             subject = subject[:200] + '...'
 
         if is_non_ascii(subject):
-            subject = Header(subject, 'utf8').encode()
+            subject = Header(subject, 'utf-8').encode()
 
         if len(body) > 10 * 1000 * 1000:
             body = body[:10 * 1000 * 1000]

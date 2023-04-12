@@ -140,7 +140,7 @@ def create_mail(subject, body='', skip_check=False):
         subject = subject[:200] + '...'
 
     if is_non_ascii(subject):
-        subject = Header(subject, 'utf8').encode()
+        subject = Header(subject, 'utf-8').encode()
 
     path = os.path.join(MAILS_PATH,
                         '{}_{}'.format(int(time.time()), uuid.uuid4()))
