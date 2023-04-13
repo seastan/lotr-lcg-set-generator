@@ -3220,6 +3220,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_back = row[CARD_BACK]
         card_deck_rules = row[CARD_DECK_RULES]
         card_scratch = row[CARD_SCRATCH]
+        card_selected = row[CARD_SELECTED]
         row_info = '{}{}{}'.format(
             ', {}'.format(card_name) if card_name else '',
             ' ({})'.format(row[CARD_SET_NAME]) if row[CARD_SET_NAME] else '',
@@ -5556,8 +5557,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_deck_rules is not None and
-              card_type in CARD_TYPES_DECK_RULES):
+        elif card_deck_rules is not None and set_id != card_selected:
             quest_id = (set_id, card_adventure or card_name)
             if quest_id in deck_rules:
                 message = (
