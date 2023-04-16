@@ -225,9 +225,9 @@ To generate only a subset of cards (produce one artifact regardless of the sets)
 - Add that new set to `configuration.yaml` and comment out any other sets.
 - In the spreadsheet, set `Selected` column to the ID of that new set for all the needed cards.
 - In the artwork folder, temporarily create a new folder named as the new set ID and copy all images and subfolders
-from the folders with the set IDs that you refer to in your selected cards (there should be no naming conflicts between files
-from the different folders).  After you finished generating the cards, you can safely delete this folder.
-Also, when running the scripts you can ignore any `Unused image detected` errors.
+  from the folders with the set IDs that you refer to in your selected cards (there should be no naming conflicts between files
+  from the different folders).  After you finished generating the cards, you can safely delete this folder.
+  Also, when running the scripts you can ignore any `Unused image detected` errors.
 
 **Automatic Pipeline**
 
@@ -407,21 +407,23 @@ The scripts will generate the following outputs:
 - `Output/DragnCardsHQ/<set name>/`: 480 dpi JPG images for DragnCards.
 - `Output/FrenchDB/<set name>/`: CSV files for French database sda.cgbuilder.fr.
 - `Output/FrenchDBImages/<set name>.<language>/`: 300 dpi PNG images for French database (the same as `Output/DB`, but differently named).
-- `Output/GenericPNG/<set name>.<language>/`: a `7z` archive of generic 800 dpi PNG images.
-- `Output/GenericPNGPDF/<set name>.<language>/`: `7z` archives of PDF files in `A4` and `letter` format (800 dpi PNG).
+- `Output/GenericPNG/<set name>.<language>/`: a `7z` archive of generic 800 dpi PNG images with bleed margins.
+- `Output/GenericPNGPDF/<set name>.<language>/`: `7z` archives of PDF files in `A4` and `letter` format (800 dpi PNG images with bleed margins).
 - `Output/HallOfBeorn/<set name>.<language>/<set name>.json`: an output file for Hall of Beorn.
 - `Output/HallOfBeornImages/<set name>.<language>/`: 300 dpi PNG images for Hall of Beorn (the same as `Output/DB`, but differently named).
-- `Output/MakePlayingCards/<set name>.<language>/`: a `7z` archive of 800 dpi PNG images to be printed on MakePlayingCards.com.
-- `Output/MBPrint/<set name>.<language>/`: a `7z` archive of 800 dpi CMYK JPG images to be printed on MBPrint.pl.
-- `Output/MBPrintPDF/<set name>.<language>/`: a `7z` archive of a PDF file to be printed on MBPrint.pl (800 dpi CMYK JPG).
+- `Output/MakePlayingCards/<set name>.<language>/`: a `7z` archive of 800 dpi PNG images with bleed margins to be printed on MakePlayingCards.com.
+- `Output/MBPrint/<set name>.<language>/`: a `7z` archive of 800 dpi CMYK (U.S. Web Coated (SWOP) v2) JPG images with bleed margins to be printed
+  on MBPrint.pl or some other printing service.
+- `Output/MBPrintPDF/<set name>.<language>/`: a `7z` archive of a PDF file to be printed on MBPrint.pl (800 dpi CMYK (U.S. Web Coated (SWOP) v2)
+  JPG images with bleed margins).
 - `Output/OCTGN/<set name>/<octgn id>/set.xml`: an output file for OCTGN.
 - `Output/OCTGNDecks/<set name>/<deck name>.o8d`: quest decks for OCTGN and DragnCards.
-- `Output/OCTGNImages/<set name>.<language>/<set name>.<language>.o8c`: image packs for OCTGN and DragnCards (600x429 JPG).
-- `Output/PDF/<set name>.<language>/`: PDF files in `A4` and `letter` format for home printing (300 dpi PNG).
+- `Output/OCTGNImages/<set name>.<language>/<set name>.<language>.o8c`: image packs for OCTGN and DragnCards (600x429 JPG images).
+- `Output/PDF/<set name>.<language>/`: PDF files in `A4` and `letter` format for home printing (300 dpi PNG images with bleed margins).
 - `Output/PreviewImages/<set name>.<language>/`: 600x429 JPG images for preview purposes.
 - `Output/RingsDB/<set name>/<set name>.csv`: an output file for RIngsDB.
 - `Output/RingsDBImages/<set name>/`: 300 dpi PNG images for RingsDB (the same as `Output/DB`, but player cards only and differently named).
-- `Output/RulesPDF/<set name>.<language>/Rules.<set name>.<language>.pdf`: a PDF file with all Rules pages (300 dpi PNG).
+- `Output/RulesPDF/<set name>.<language>/Rules.<set name>.<language>.pdf`: a PDF file with all Rules pages (800 dpi JPG images).
 - `Output/SpanishDB/<set name>/`: CSV files for Spanish database susurrosdelbosqueviejo.com.
 - `Output/SpanishDBImages/<set name>.<language>/`: 300 dpi PNG images for Spanish database (the same as `Output/DB`, but differently named).
 - `Output/TTS/<set name>.<language>/`: 300 dpi JPG image sheets for TTS.

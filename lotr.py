@@ -406,7 +406,7 @@ MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}{}*.jpg"'
 MAGICK_COMMAND_JPG = '"{}" mogrify -format jpg "{}{}*.png"'
 MAGICK_COMMAND_LOW = '"{}" mogrify -resize 600x600 -format jpg "{}{}*.png"'
 MAGICK_COMMAND_MBPRINT_PDF = '"{}" convert "{}{}*o.jpg" "{}"'
-MAGICK_COMMAND_RULES_PDF = '"{}" convert "{}{}*.png" "{}"'
+MAGICK_COMMAND_RULES_PDF = '"{}" convert "{}{}*.jpg" "{}"'
 
 JPG_PREVIEW_MIN_SIZE = 20000
 JPG_300_MIN_SIZE = 50000
@@ -440,7 +440,6 @@ PNG300DB = 'png300DB'
 PNG300NOBLEED = 'png300NoBleed'
 PNG300OCTGN = 'png300OCTGN'
 PNG300PDF = 'png300PDF'
-PNG300RULES = 'png300Rules'
 PNG480BLEED = 'png480Bleed'
 PNG480DRAGNCARDSHQ = 'png480DragnCardsHQ'
 PNG480NOBLEED = 'png480NoBleed'
@@ -449,6 +448,7 @@ PNG800BLEEDMPC = 'png800BleedMPC'
 PNG800BLEEDGENERIC = 'png800BleedGeneric'
 PNG800NOBLEED = 'png800NoBleed'
 PNG800PDF = 'png800PDF'
+PNG800RULES = 'png800Rules'
 
 CARD_BACKS = {'player': {'mpc': ['playerBackOfficialMPC.png',
                                  'playerBackUnofficialMPC.png'],
@@ -1482,7 +1482,7 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
                                 if conf['outputs'][lang]]
     conf['nobleed_300'] = {}
     conf['nobleed_480'] = {}
-    conf['nobleed_800'] = {}  # not used at the moment
+    conf['nobleed_800'] = {}
 
     if not conf['set_ids']:
         conf['set_ids'] = []
@@ -1546,10 +1546,9 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
             conf['validate_missing_images'] = True
 
         conf['nobleed_300'][lang] = ('db' in conf['outputs'][lang]
-                                     or 'octgn' in conf['outputs'][lang]
-                                     or 'rules_pdf' in conf['outputs'][lang])
+                                     or 'octgn' in conf['outputs'][lang])
         conf['nobleed_480'][lang] = 'dragncards_hq' in conf['outputs'][lang]
-        conf['nobleed_800'][lang] = False
+        conf['nobleed_800'][lang] = 'rules_pdf' in conf['outputs'][lang]
 
     logging.info('...Reading project configuration (%ss)',
                  round(time.time() - timestamp, 3))
@@ -8673,7 +8672,8 @@ def _set_outputs(conf, lang, root):
     if conf['nobleed_480'].get(lang):
         root.set('png480Bleed', '1')
 
-    if ('makeplayingcards' in (conf['outputs'][lang] or [])
+    if (conf['nobleed_800'].get(lang)
+            or 'makeplayingcards' in (conf['outputs'][lang] or [])
             or 'mbprint' in (conf['outputs'][lang] or [])
             or 'genericpng' in (conf['outputs'][lang] or [])
             or 'genericpng_pdf' in (conf['outputs'][lang] or [])):
@@ -9405,7 +9405,6 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
 
     delete_folder(temp_path)
     delete_folder(temp_path2)
-
     logging.info('[%s, %s] ...Generating PNG 300 dpi images without bleed '
                  'margins (%ss)', set_name, lang,
                  round(time.time() - timestamp, 3))
@@ -9483,7 +9482,6 @@ def generate_png480_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
 
     delete_folder(temp_path)
     delete_folder(temp_path2)
-
     logging.info('[%s, %s] ...Generating PNG 480 dpi images without bleed '
                  'margins (%ss)', set_name, lang,
                  round(time.time() - timestamp, 3))
@@ -9492,7 +9490,6 @@ def generate_png480_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
 def generate_png800_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0914
     """ Generate PNG 800 dpi images without bleed margins.
 
-    NOT USED AT THE MOMENT
     """
     logging.info('[%s, %s] Generating PNG 800 dpi images without bleed '
                  'margins...', set_name, lang)
@@ -9563,7 +9560,6 @@ def generate_png800_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
 
     delete_folder(temp_path)
     delete_folder(temp_path2)
-
     logging.info('[%s, %s] ...Generating PNG 800 dpi images without bleed '
                  'margins (%ss)', set_name, lang,
                  round(time.time() - timestamp, 3))
@@ -9642,7 +9638,6 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disab
 
     delete_folder(temp_path)
     delete_folder(temp_path2)
-
     logging.info('[%s, %s] ...Generating images for all DB outputs '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
@@ -9713,19 +9708,19 @@ def generate_png300_octgn(set_id, set_name, lang, skip_ids):
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
 
-def generate_png300_rules_pdf(set_id, set_name, lang, skip_ids, card_data):  # pylint: disable=R0914
+def generate_png800_rules_pdf(set_id, set_name, lang, skip_ids, card_data):  # pylint: disable=R0914
     """ Generate images for Rules PDF outputs.
     """
     logging.info('[%s, %s] Generating images for Rules PDF outputs...',
                  set_name, lang)
     timestamp = time.time()
 
-    output_path = os.path.join(IMAGES_EONS_PATH, PNG300RULES,
+    output_path = os.path.join(IMAGES_EONS_PATH, PNG800RULES,
                                '{}.{}'.format(set_id, lang))
     create_folder(output_path)
     _clear_modified_images(output_path, skip_ids)
 
-    input_path = os.path.join(IMAGES_EONS_PATH, PNG300NOBLEED,
+    input_path = os.path.join(IMAGES_EONS_PATH, PNG800NOBLEED,
                               '{}.{}'.format(set_id, lang))
     known_keys = set()
     rules_cards = {c[CARD_ID]:c for c in card_data
@@ -9761,8 +9756,8 @@ def generate_png300_rules_pdf(set_id, set_name, lang, skip_ids, card_data):  # p
 
         break
 
-    logging.info('[%s, %s] ...Generating images for Rules PDF outputs '
-                 '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
+    logging.info('[%s, %s] ...Generating images for Rules PDF outputs (%ss)',
+                 set_name, lang, round(time.time() - timestamp, 3))
 
 
 def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disable=R0912,R0914,R0915
@@ -9893,7 +9888,6 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
     delete_folder(temp_path)
     delete_folder(temp_path2)
     delete_folder(temp_path3)
-
     logging.info('[%s, %s] ...Generating images for PDF outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 
@@ -10026,7 +10020,6 @@ def generate_png800_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
     delete_folder(temp_path)
     delete_folder(temp_path2)
     delete_folder(temp_path3)
-
     logging.info('[%s, %s] ...Generating images for generic PNG PDF outputs '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
@@ -10103,7 +10096,6 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
 
     delete_folder(temp_path)
     delete_folder(temp_path2)
-
     logging.info('[%s, %s] ...Generating images for MakePlayingCards outputs '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
@@ -10183,7 +10175,6 @@ def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint:
 
     delete_folder(temp_path)
     delete_folder(temp_path2)
-
     logging.info('[%s, %s] ...Generating images for DriveThruCards outputs '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
@@ -10263,7 +10254,6 @@ def generate_jpg800_bleedmbprint(conf, set_id, set_name, lang, skip_ids):  # pyl
 
     delete_folder(temp_path)
     delete_folder(temp_path2)
-
     logging.info('[%s, %s] ...Generating images for MBPrint outputs '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
@@ -10339,7 +10329,6 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
 
     delete_folder(temp_path)
     delete_folder(temp_path2)
-
     logging.info('[%s, %s] ...Generating generic PNG images (%ss)', set_name,
                  lang, round(time.time() - timestamp, 3))
 
@@ -10573,7 +10562,6 @@ def generate_tts(conf, set_id, set_name, lang, card_dict, scratch):  # pylint: d
                             .format(output_cnt, input_cnt))
 
     delete_folder(temp_path)
-
     logging.info('[%s, %s] ...Generating TTS outputs (%ss)', set_name, lang,
                  round(time.time() - timestamp, 3))
 
@@ -10814,7 +10802,6 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
                     os.path.join(output_path, artists_filename))
 
     delete_folder(temp_path)
-
     logging.info('[%s] ...Generating artwork and artist names for DragnCards '
                  'proxy images (%ss)', set_name,
                  round(time.time() - timestamp, 3))
@@ -11223,7 +11210,6 @@ def generate_dragncards_hq(conf, set_id, set_name, lang, card_data):  # pylint: 
         break
 
     delete_folder(temp_path)
-
     logging.info('[%s, %s] ...Generating DragnCards HQ image outputs '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
@@ -11294,7 +11280,6 @@ def generate_octgn(conf, set_id, set_name, lang, card_data):  # pylint: disable=
         break
 
     delete_folder(temp_path)
-
     logging.info('[%s, %s] ...Generating OCTGN and DragnCards image outputs '
                  '(%ss)', set_name, lang, round(time.time() - timestamp, 3))
 
@@ -11302,13 +11287,15 @@ def generate_octgn(conf, set_id, set_name, lang, card_data):  # pylint: disable=
 def generate_rules_pdf(conf, set_id, set_name, lang):
     """ Generate Rules PDF outputs.
     """
-    logging.info('[%s, %s] Generating Rules PDF outputs...',
-                 set_name, lang)
+    logging.info('[%s, %s] Generating Rules PDF outputs...', set_name, lang)
     timestamp = time.time()
 
+    temp_path = os.path.join(
+        TEMP_ROOT_PATH, 'generate_rules_pdf.{}.{}'.format(set_id, lang))
     input_path = os.path.join(IMAGES_EONS_PATH,
-                              PNG300RULES,
+                              PNG800RULES,
                               '{}.{}'.format(set_id, lang))
+
     for _, _, filenames in os.walk(input_path):
         if not filenames:
             logging.error('[%s, %s] No cards found', set_name, lang)
@@ -11316,7 +11303,20 @@ def generate_rules_pdf(conf, set_id, set_name, lang):
                          set_name, lang, round(time.time() - timestamp, 3))
             return
 
+        create_folder(temp_path)
+        clear_folder(temp_path)
+        for filename in filenames:
+            if not filename.endswith('.png'):
+                continue
+
+            shutil.copyfile(os.path.join(input_path, filename),
+                            os.path.join(temp_path, filename))
+
         break
+
+    cmd = MAGICK_COMMAND_JPG.format(conf['magick_path'], temp_path, os.sep)
+    res = run_cmd(cmd)
+    logging.info(res)
 
     output_path = os.path.join(OUTPUT_RULES_PDF_PATH, '{}.{}'.format(
         escape_filename(set_name), lang))
@@ -11324,11 +11324,12 @@ def generate_rules_pdf(conf, set_id, set_name, lang):
     pdf_filename = 'Rules.{}.{}.pdf'.format(escape_filename(set_name),
                                             lang)
     pdf_path = os.path.join(output_path, pdf_filename)
-    cmd = MAGICK_COMMAND_RULES_PDF.format(conf['magick_path'], input_path,
+    cmd = MAGICK_COMMAND_RULES_PDF.format(conf['magick_path'], temp_path,
                                           os.sep, pdf_path)
     res = run_cmd(cmd)
     logging.info(res)
 
+    delete_folder(temp_path)
     logging.info('[%s, %s] ...Generating Rules PDF outputs (%ss)',
                  set_name, lang, round(time.time() - timestamp, 3))
 
@@ -12281,7 +12282,6 @@ def copy_octgn_outputs(conf, sets):
             chosen_scratch_sets)
 
     delete_folder(temp_path)
-
     logging.info('...Copying OCTGN outputs to the destination folder (%ss)',
                  round(time.time() - timestamp, 3))
 

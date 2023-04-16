@@ -96,7 +96,7 @@ def generate_octgn(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint
 def generate_rules_pdf(conf, set_id, set_name, lang, skip_ids, card_data):  # pylint: disable=R0913
     """ Generate Rules PDF outputs.
     """
-    lotr.generate_png300_rules_pdf(set_id, set_name, lang, skip_ids, card_data)
+    lotr.generate_png800_rules_pdf(set_id, set_name, lang, skip_ids, card_data)
     lotr.generate_rules_pdf(conf, set_id, set_name, lang)
 
 
