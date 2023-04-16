@@ -110,8 +110,108 @@ function getColumnByName(columnName) {
   return col;
 }
 
+function cellDifferences(oldValue, newValue) {
+  // Display human-readable differences for the cells
+  var oldLines = oldValue.trim().split('\n').map(function(line) {
+    line = line.replace(/^\-/, ' -').replace(/^\+/, ' +');
+    return line;
+  });
+  var newLines = newValue.trim().split('\n').map(function(line) {
+    line = line.replace(/^\-/, ' -').replace(/^\+/, ' +');
+    return line;
+  });
+
+  var matches = 0;
+  var left = [];
+  var right = [];
+  for (let i = 0; i < oldLines.length; i++) {
+    let leftLine = oldLines[i];
+    if (newLines.includes(leftLine)) {
+      while (newLines.length) {
+        let rightLine = newLines.shift();
+        if (leftLine == rightLine) {
+          left.push(leftLine);
+          right.push(rightLine);
+          matches += 1;
+          break;
+        }
+        right.push('+ ' + rightLine);
+      }
+    }
+    else {
+      left.push('- '+ leftLine);
+    }
+  }
+
+  for (let i = 0; i < newLines.length; i++) {
+    right.push('+ ' + newLines[i]);
+  }
+
+  var leftValue = left.join('\n').trim();
+  if (!leftValue) {
+    leftValue = ' ';
+  }
+  var rightValue = right.join('\n').trim();
+  if (!rightValue) {
+    rightValue = ' ';
+  }
+
+  var oldLines = oldValue.trim().split('\n').map(function(line) {
+    line = line.replace(/^\-/, ' -').replace(/^\+/, ' +');
+    return line;
+  });
+  var newLines = newValue.trim().split('\n').map(function(line) {
+    line = line.replace(/^\-/, ' -').replace(/^\+/, ' +');
+    return line;
+  });
+
+  var matchesAlt = 0;
+  var leftAlt = [];
+  var rightAlt = [];
+  for (let i = 0; i < newLines.length; i++) {
+    let rightLine = newLines[i];
+    if (oldLines.includes(rightLine)) {
+      while (oldLines.length) {
+        let leftLine = oldLines.shift();
+        if (rightLine == leftLine) {
+          rightAlt.push(rightLine);
+          leftAlt.push(leftLine);
+          matchesAlt += 1;
+          break;
+        }
+        leftAlt.push('- ' + leftLine);
+      }
+    }
+    else {
+      rightAlt.push('+ ' + rightLine);
+    }
+  }
+
+  for (let i = 0; i < oldLines.length; i++) {
+    leftAlt.push('- ' + oldLines[i]);
+  }
+
+  var leftValueAlt = leftAlt.join('\n').trim();
+  if (!leftValueAlt) {
+    leftValueAlt = ' ';
+  }
+  var rightValueAlt = rightAlt.join('\n').trim();
+  if (!rightValueAlt) {
+    rightValueAlt = ' ';
+  }
+
+  var res;
+  if (matchesAlt > matches) {
+    res = [leftValueAlt, rightValueAlt];
+  }
+  else {
+    res = [leftValue, rightValue];
+  }
+  return res;
+}
+
 function differences(value1, value2) {
-  // Display human-readable differences
+  // Display human-readable differences for the rows
   var columns = ['Name', 'Traits', 'Keywords', 'Victory Points', 'Text', 'Shadow', 'Flavour',
                  'Side B', 'Traits (Side B)', 'Keywords (Side B)', 'Victory Points (Side B)',
                  'Text (Side B)', 'Shadow (Side B)', 'Flavour (Side B)', 'Adventure (Side B)'];
@@ -136,37 +236,8 @@ function differences(value1, value2) {
       continue;
     }
     res += columns[i] + ':\n';
-    let valueSubArr1 = valueArr1[i].split('\n');
-    let valueSubArr2 = valueArr2[i].split('\n');
-    while (valueSubArr1.length > valueSubArr2.length) {
-      valueSubArr2.push('');
-    }
-    while (valueSubArr2.length > valueSubArr1.length) {
-      valueSubArr1.push('');
-    }
-    let oldValues = [];
-    let newValues = [];
-    for (let j = 0; j < valueSubArr1.length; j++) {
-      if (valueSubArr1[j].trim() == valueSubArr2[j].trim()) {
-        if (oldValues.length > 0) {
-          res += 'OLD: ' + oldValues.join('\n').trim() + '\n';
-          res += '\n';
-          res += 'NEW: ' + newValues.join('\n').trim() + '\n';
-          res += '\n';
-          oldValues = [];
-          newValues = [];
-        }
-        continue;
-      }
-      oldValues.push(valueSubArr1[j].trim());
-      newValues.push(valueSubArr2[j].trim());
-    }
-    if (oldValues.length > 0) {
-      res += 'OLD: ' + oldValues.join('\n').trim() + '\n';
-      res += '\n';
-      res += 'NEW: ' + newValues.join('\n').trim() + '\n';
-      res += '\n';
-    }
+    let diffs = cellDifferences(valueArr1[i], valueArr2[i]);
+    res += '  OLD\n' + diffs[0] + '\n  NEW\n' + diffs[1] + '\n\n';
   }
   return res.trim();
 }
