@@ -60,6 +60,7 @@ mpc_monitor.lock
 mpc_monitor_cookies.json
 pipeline_STARTED
 remote_logs_path.txt
+replace_cmyk_card_backs.txt
 REPROCESS_ALL
 ringsdb_prod_cookies.json
 ringsdb_test_cookies.json

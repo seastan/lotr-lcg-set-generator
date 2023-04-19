@@ -706,6 +706,7 @@ Staging Setup: The Carrock
 - `copy_output.py`: Script to copy all set outputs to a destination folder.  For example:
   `python copy_output.py "c:\\ALeP\\Output\\" "ALeP - Children of Eorl" "French"`
 - `make_unique_png.py`: Script to make unique PNG files for MakePlayingCards.
+- `replace_cmyk_card_backs.py`: Script to replace CMYK card backs in existing image archives.
 - `stat.py`: Collect various data from Hall of Beorn and RingsDB and put outputs into `Output/Scripts` folder.
 
 **GIMP Plugins**
