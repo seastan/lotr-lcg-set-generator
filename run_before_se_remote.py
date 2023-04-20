@@ -14,6 +14,7 @@ import run_before_se
 
 LOG_FILE = 'run_before_se_remote.log'
 RETRY_SLEEP_TIME = 300
+SANITY_CHECK_ERROR_SLEEP_TIME = 3600
 
 
 def init_logging():
@@ -40,16 +41,23 @@ def run():
     try:
         run_before_se.main()
     except Exception as exc:  # pylint: disable=W0703
+        exception_type = type(exc).__name__
         message = 'Script failed, retrying: {}: {}'.format(
-            type(exc).__name__, str(exc))[:LOG_LIMIT]
+            exception_type, str(exc))[:LOG_LIMIT]
         logging.exception(message)
-        time.sleep(RETRY_SLEEP_TIME)
+        if exception_type == 'SanityCheckError':
+            logging.info('Sleeping before retrying a sanity check error')
+            time.sleep(SANITY_CHECK_ERROR_SLEEP_TIME)
+        else:
+            logging.info('Sleeping before retrying')
+            time.sleep(RETRY_SLEEP_TIME)
 
         try:
             run_before_se.main()
         except Exception as exc_child:  # pylint: disable=W0703
+            exception_type = type(exc_child).__name__
             message = 'Script failed, exiting: {}: {}'.format(
-                type(exc_child).__name__, str(exc_child))[:LOG_LIMIT]
+                exception_type, str(exc_child))[:LOG_LIMIT]
             logging.exception(message)
     finally:
         logging.info('Finished: %s', execution_id)
