@@ -47,6 +47,8 @@ RCLONE_ART_FOLDER_CMD = "rclone lsjson 'ALePCardImages:/{}/'"
 RCLONE_COPY_KEEP_ART_CMD = \
     "rclone copy 'ALePCardImages:/{}/{}/' '{}/{}/{}/'"
 RCLONE_COPY_IMAGE_CMD = "rclone copy 'ALePRenderedImages:/{}/{}' '{}/'"
+RCLONE_COPY_CLOUD_FOLDER_CMD = \
+    "rclone copy 'ALePRenderedImages:/{}/' 'ALePRenderedImages:/{}/'"
 RCLONE_COPY_CLOUD_IMAGE_CMD = \
     "rclone copy 'ALePRenderedImages:/{}/{}' 'ALePRenderedImages:/{}/'"
 RCLONE_GENERATED_CMD = "rclone copy '{}' 'ALePCardImages:/generated/'"
@@ -2295,6 +2297,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                         await self._process_category_changes(data)
                         await self._process_channel_changes(data)
                         await self._process_card_changes(data)
+                        await self._process_set_name_changes(data)
                         await self._process_set_changes(data)
                     except Exception as exc:
                         logging.exception(str(exc))
@@ -2766,6 +2769,27 @@ Card "{}" has been updated:
             else:
                 raise FormatError('Unknown card change type: {}'.format(
                     change[0]))
+
+
+    async def _process_set_name_changes(self, data):
+        set_name_changes = data.get('set_names', {})
+        if not set_name_changes:
+            return
+
+        for old_set_name, new_set_name in set_name_changes:
+            old_folder_name = '{}.English'.format(
+                lotr.escape_filename(old_set_name))
+            new_folder_name = '{}.English'.format(
+                lotr.escape_filename(new_set_name))
+            stdout, stderr = await run_shell(
+                RCLONE_COPY_CLOUD_FOLDER_CMD.format(old_folder_name,
+                                                    new_folder_name))
+            if (stdout or stderr) and 'directory not found' not in stderr:
+                message = ('RClone failed (set names), stdout: {}, '
+                           'stderr: {}'.format(stdout, stderr))
+                logging.error(message)
+                create_mail(ERROR_SUBJECT_TEMPLATE.format(message),
+                            message)
 
 
     async def _process_set_changes(self, data):

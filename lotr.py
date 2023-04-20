@@ -6024,9 +6024,12 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
     try:
         with open(DISCORD_CARD_DATA_PATH, 'r', encoding='utf-8') as obj:
-            old_data = json.load(obj)['data']
+            old_dict = json.load(obj)
+            old_data = old_dict['data']
+            old_sets_by_id = old_dict['sets_by_id']
     except Exception:
         old_data = None
+        old_sets_by_id = None
 
     try:
         with open(DISCORD_CARD_DATA_RAW_PATH, 'r', encoding='utf-8') as obj:
@@ -6186,6 +6189,14 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
         if not artwork_ids[card_id][BACK_PREFIX + CARD_TYPE]:
             del artwork_ids[card_id][BACK_PREFIX + CARD_TYPE]
 
+    set_name_changes = []
+    if old_sets_by_id:
+        for set_id in sets_by_id:
+            if (set_id in old_sets_by_id and
+                    sets_by_id[set_id] != old_sets_by_id[set_id]):
+                set_name_changes.append([old_sets_by_id[set_id],
+                                         sets_by_id[set_id]])
+
     output = {'url': url,
               'set_names': set_names,
               'sets_by_id': sets_by_id,
@@ -6207,11 +6218,12 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
         obj.write(res)
 
     utc_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-    if (category_changes or channel_changes or card_changes or set_changes or
-            modified_card_ids):
+    if (category_changes or channel_changes or card_changes or set_changes or  # pylint: disable=R0916
+            modified_card_ids or set_name_changes):
         output = {'categories': category_changes,
                   'channels': channel_changes,
                   'cards': card_changes,
+                  'set_names': set_name_changes,
                   'sets': set_changes,
                   'card_ids': modified_card_ids,
                   'utc_time': utc_time}
