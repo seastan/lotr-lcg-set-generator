@@ -96,47 +96,18 @@ def fix_content():
     shutil.copyfile(DOC_PATH, os.path.join(TEMP_FOLDER, 'MBPrint.pdf'))
 
 
-def create_images_archive(url):
-    """ Create a new image archive.
+def move_image_files():
+    """ Move image files to the root folder.
     """
-    archive_filename = url.split('/')[-2].replace('_', ' ')
-    with py7zr.SevenZipFile(os.path.join(TEMP_FOLDER, archive_filename), 'w',
-                            filters=lotr.PY7ZR_FILTERS) as obj:
-        folder_path = os.path.join(TEMP_FOLDER, 'front')
-        for _, _, filenames in os.walk(folder_path):
-            for filename in filenames:
-                obj.write(os.path.join(folder_path, filename),
-                          'front/{}'.format(filename))
-
-            break
-
-        folder_path = os.path.join(TEMP_FOLDER, 'back_official')
-        for _, _, filenames in os.walk(folder_path):
-            for filename in filenames:
-                obj.write(os.path.join(folder_path, filename),
-                          'back_official/{}'.format(filename))
-
-            break
-
-        folder_path = os.path.join(TEMP_FOLDER, 'back_unofficial')
-        for _, _, filenames in os.walk(folder_path):
-            for filename in filenames:
-                obj.write(os.path.join(folder_path, filename),
-                          'back_unofficial/{}'.format(filename))
-
-            break
-
-        obj.write(os.path.join(TEMP_FOLDER, 'MBPrint.pdf'), 'MBPrint.pdf')
-
-
-def create_pdf(url):
-    """ Create a new PDF file.
-    """
-    pdf_filename = url.split('/')[-2].replace('_', ' ').replace(
-        'images.7z', 'pdf')
-    logging.info(pdf_filename)
-
     folder_path = os.path.join(TEMP_FOLDER, 'back_official')
+    for _, _, filenames in os.walk(folder_path):
+        for filename in filenames:
+            shutil.move(os.path.join(folder_path, filename),
+                        os.path.join(TEMP_FOLDER, filename))
+
+        break
+
+    folder_path = os.path.join(TEMP_FOLDER, 'back_unofficial')
     for _, _, filenames in os.walk(folder_path):
         for filename in filenames:
             shutil.move(os.path.join(folder_path, filename),
@@ -152,6 +123,38 @@ def create_pdf(url):
 
         break
 
+
+def create_images_archive(url):
+    """ Create a new image archive.
+    """
+    archive_filename = url.split('/')[-2].replace('_', ' ')
+    with py7zr.SevenZipFile(os.path.join(TEMP_FOLDER, archive_filename), 'w',
+                            filters=lotr.PY7ZR_FILTERS) as obj:
+        for _, _, filenames in os.walk(TEMP_FOLDER):
+            for filename in filenames:
+                if filename.endswith('-1o.jpg'):
+                    obj.write(os.path.join(TEMP_FOLDER, filename),
+                              'front/{}'.format(filename))
+                elif filename.endswith('-2o.jpg'):
+                    obj.write(os.path.join(TEMP_FOLDER, filename),
+                              'back_official/{}'.format(filename))
+                elif filename.endswith('-2u.jpg'):
+                    obj.write(os.path.join(TEMP_FOLDER, filename),
+                              'back_unofficial/{}'.format(filename))
+
+            break
+
+        obj.write(os.path.join(TEMP_FOLDER, 'MBPrint.pdf'), 'MBPrint.pdf')
+
+    shutil.move(os.path.join(TEMP_FOLDER, archive_filename),
+                os.path.join(OUTPUT_PATH, archive_filename))
+
+
+def create_pdf(url):
+    """ Create a new PDF file.
+    """
+    pdf_filename = url.split('/')[-2].replace('_', ' ').replace(
+        'images.7z', 'pdf')
     cmd = lotr.MAGICK_COMMAND_MBPRINT_PDF.format(
         MAGICK_PATH, TEMP_FOLDER, os.sep,
         os.path.join(TEMP_FOLDER, pdf_filename))
@@ -170,15 +173,20 @@ def create_pdf_archive(url):
         obj.write(os.path.join(TEMP_FOLDER, pdf_filename), pdf_filename)
 
 
+    shutil.move(os.path.join(TEMP_FOLDER, archive_filename),
+                os.path.join(OUTPUT_PATH, archive_filename))
+
+
 def process_archive(url):
     """ Process an image archive.
     """
     download_archive(url)
     extract_archive()
     fix_content()
+    move_image_files()
     create_images_archive(url)
-#    create_pdf(url)
-#    create_pdf_archive(url)
+    create_pdf(url)
+    create_pdf_archive(url)
 
 
 def main():
@@ -186,18 +194,18 @@ def main():
     """
     urls = read_urls()
     if urls:
-        lotr.create_folder(TEMP_FOLDER)
-#        lotr.clear_folder(TEMP_FOLDER)
         logging.info('Processing %s URL(s) from the file...', len(urls))
 
     while urls:
+        lotr.delete_folder(TEMP_FOLDER)
+        lotr.create_folder(TEMP_FOLDER)
         url = urls.pop(0)
         logging.info('Processing %s...', url)
         process_archive(url)
-        break  # remove
-#        write_urls(urls)
+        write_urls(urls)
+        logging.info('...finished')
 
-#    lotr.delete_folder(TEMP_FOLDER)
+    lotr.delete_folder(TEMP_FOLDER)
     logging.info('Done')
 
 
