@@ -18,7 +18,8 @@ import requests
 import yaml
 
 import common
-from lotr import DATA_PATH, LOG_LIMIT, SanityCheckError, read_conf
+from lotr import (DATA_PATH, LOG_LIMIT, SANITY_CHECK_PATH, SanityCheckError,
+                  read_conf)
 from run_before_se import main
 
 
@@ -27,7 +28,6 @@ INTERNET_SENSOR_PATH = 'internet_state'
 LOG_PATH = 'run_before_se.log'
 MAIL_COUNTER_PATH = os.path.join(DATA_PATH, 'run_before_se.cnt')
 MAILS_PATH = 'mails'
-SANITY_CHECK_PATH = os.path.join(DATA_PATH, 'sanity_check.txt')
 
 ERROR_SUBJECT_TEMPLATE = 'LotR Cron ERROR: {}'
 SANITY_CHECK_SUBJECT_TEMPLATE = 'LotR Cron CHECK: {}'

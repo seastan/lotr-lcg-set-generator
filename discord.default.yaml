@@ -22,6 +22,9 @@ dragncards_id_rsa_path:
 # DragnCards hostname (username@hostname)
 dragncards_hostname: 
 
+# Discord users or roles to mention when notifying about sanity check issues
+sanity_check_users: 
+
 # Assistants to ignore (a comma-separated list)
 ignore_assistants: 
 

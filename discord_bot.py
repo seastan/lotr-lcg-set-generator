@@ -69,7 +69,9 @@ COMMUNICATION_SLEEP_TIME = 5
 IO_SLEEP_TIME = 1
 RCLONE_ART_SLEEP_TIME = 300
 REMOTE_CRON_TIMESTAMP_SLEEP_TIME = 1800
-WATCH_SLEEP_TIME = 5
+SANITY_CHECK_WAIT_TIME = 3600
+WATCH_CHANGES_SLEEP_TIME = 5
+WATCH_SANITY_CHECK_SLEEP_TIME = 300
 
 ERROR_SUBJECT_TEMPLATE = 'LotR Discord Bot ERROR: {}'
 WARNING_SUBJECT_TEMPLATE = 'LotR Discord Bot WARNING: {}'
@@ -368,6 +370,7 @@ incremental_id = _incremental_id()
 watch_changes_lock = asyncio.Lock()
 rclone_art_lock = asyncio.Lock()
 remote_cron_timestamp_lock = asyncio.Lock()
+watch_sanity_check_lock = asyncio.Lock()
 playtest_lock = asyncio.Lock()
 art_lock = asyncio.Lock()
 generate_lock = asyncio.Lock()
@@ -2029,12 +2032,14 @@ class MyClient(discord.Client):  # pylint: disable=R0902
     watch_changes_schedule_id = None
     rclone_art_schedule_id = None
     remote_cron_timestamp_schedule_id = None
+    watch_sanity_check_schedule_id = None
     archive_category = None
     cron_channel = None
     notifications_channel = None
     playtest_channel = None
     updates_channel = None
     rclone_art = False
+    last_sanity_check_mtime = None
     categories = {}
     channels = {}
     general_channels = {}
@@ -2130,6 +2135,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
         self.loop.create_task(self._watch_changes_schedule())
         self.loop.create_task(self._rclone_art_schedule())
         self.loop.create_task(self._remote_cron_timestamp_schedule())
+        self.loop.create_task(self._watch_sanity_check_schedule())
         read_external_data()
         await read_card_data()
         await load_timestamps_data()
@@ -2213,7 +2219,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
 
                 await self._watch_changes()
 
-            await asyncio.sleep(WATCH_SLEEP_TIME)
+            await asyncio.sleep(WATCH_CHANGES_SLEEP_TIME)
 
 
     async def _rclone_art_schedule(self):
@@ -2258,6 +2264,28 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                 await self._remote_cron_timestamp()
 
             await asyncio.sleep(REMOTE_CRON_TIMESTAMP_SLEEP_TIME)
+
+
+    async def _watch_sanity_check_schedule(self):
+        logging.info('Starting watch sanity check schedule...')
+        my_id = incremental_id()
+        while True:
+            async with watch_sanity_check_lock:
+                if (not self.watch_sanity_check_schedule_id or
+                        self.watch_sanity_check_schedule_id < my_id):
+                    self.watch_sanity_check_schedule_id = my_id
+                    logging.info('Acquiring watch sanity check schedule id: '
+                                 '%s', my_id)
+                elif self.watch_sanity_check_schedule_id > my_id:
+                    logging.info(
+                        'Detected a new watch sanity check schedule id: %s, '
+                        'exiting with the old id: %s',
+                        self.watch_sanity_check_schedule_id, my_id)
+                    break
+
+                await self._watch_sanity_check()
+
+            await asyncio.sleep(WATCH_SANITY_CHECK_SLEEP_TIME)
 
 
     async def _watch_changes(self):
@@ -2374,6 +2402,28 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                 'New pixel-perfect card images are available in Discord and '
                 'DragnCards')
             await run_shell(MONITOR_REMOTE_PIPELINE_CMD)
+
+
+    async def _watch_sanity_check(self):
+        if not os.path.exists(lotr.SANITY_CHECK_PATH):
+            return
+
+        size = os.path.getsize(lotr.SANITY_CHECK_PATH)
+        if size == 0:
+            return
+
+        mtime = os.path.getmtime(lotr.SANITY_CHECK_PATH)
+        if mtime == self.last_sanity_check_mtime:
+            return
+
+        if time.time() > mtime + SANITY_CHECK_WAIT_TIME:
+            self.last_sanity_check_mtime = mtime
+
+            sanity_check_users = CONF.get('sanity_check_users') or ''
+            await self._send_channel(
+                self.cron_channel,
+                '{} Please take a look at the sanity check issues above'
+                .format(sanity_check_users).strip())
 
 
     async def _process_category_changes(self, data):  #pylint: disable=R0912

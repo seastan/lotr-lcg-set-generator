@@ -538,6 +538,7 @@ REPROCESS_COUNT_PATH = os.path.join(TEMP_ROOT_PATH, 'reprocess_count.json')
 RINGSDB_COOKIES_PATH = 'ringsdb_test_cookies.json'
 RINGSDB_JSON_PATH = os.path.join(DATA_PATH, 'ringsdb_sets.json')
 RUN_BEFORE_SE_STARTED_PATH = 'runBeforeSE_STARTED'
+SANITY_CHECK_PATH = os.path.join(DATA_PATH, 'sanity_check.txt')
 SEPROJECT_PATH = 'setGenerator.seproject'
 SEPROJECT_CREATED_PATH = 'setGenerator_CREATED'
 SET_EONS_PATH = 'setEons'
