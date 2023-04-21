@@ -348,7 +348,7 @@ Additional steps:
   - `12,42 * * * * <path>/rclone_data_remotely.sh >> <path>/cron.log 2>&1`
   - `22,52 * * * * <path>/rclone_renderer.sh >> <path>/cron.log 2>&1`
   - `0 8 * * 1     <path>/remind_backup.sh >> <path>/cron.log 2>&1`
-  - `5 8 2 * *     <path>/remind_stat_monthly.sh >> <path>/cron.log 2>&1`
+  - `5 8 2 * *     <path>/remind_monthly.sh >> <path>/cron.log 2>&1`
   - `0 12 * * *    <path>/remote_player_cards_stat_monitor.sh >> <path>/cron.log 2>&1`
   - `19 8 * * *    <path>/scheduled_backup.sh "<local Drive/LinksBackup path>" >> <path>/cron.log 2>&1`
 
