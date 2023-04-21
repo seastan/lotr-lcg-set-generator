@@ -5295,25 +5295,41 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_additional_encounter_sets is not None and
-                card_type not in CARD_TYPES_ADDITIONAL_ENCOUNTER_SETS):
-            message = ('Redundant additional encounter sets for row #{}{}'
-                       .format(i, row_info))
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
+        if card_additional_encounter_sets is not None:
+            all_sets = [
+                s.strip() for s in card_additional_encounter_sets.split(';')
+                if s.strip()]
+            if card_type not in CARD_TYPES_ADDITIONAL_ENCOUNTER_SETS:
+                message = ('Redundant additional encounter sets for row #{}{}'
+                           .format(i, row_info))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
+            elif len(all_sets) > 5:
+                message = ('Too many additional encounter sets for row #{}{}'
+                           .format(i, row_info))
+                logging.error(message)
+                if not card_scratch:
+                    errors.append(message)
+                else:
+                    broken_set_ids.add(set_id)
             else:
-                broken_set_ids.add(set_id)
-        elif (card_additional_encounter_sets is not None and
-              len([s.strip() for s in card_additional_encounter_sets.split(';')
-                   if s.strip()]) > 5):
-            message = ('Too many additional encounter sets for row #{}{}'
-                       .format(i, row_info))
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
+                unknown_sets = [
+                    s for s in all_sets if s not in ALL_ENCOUNTER_SET_NAMES]
+                if (unknown_sets and
+                        not (card_flags and
+                             'IgnoreName' in extract_flags(card_flags))):
+                    message = (
+                        'Unknown additional encounter sets for row #{}{}: {} '
+                        '(use IgnoreName flag to ignore)'.format(
+                            i, row_info, '; '.join(unknown_sets)))
+                    logging.error(message)
+                    if not card_scratch:
+                        errors.append(message)
+                    else:
+                        broken_set_ids.add(set_id)
 
         if (card_adventure is not None and
                 card_type not in CARD_TYPES_ADVENTURE and
