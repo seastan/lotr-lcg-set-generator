@@ -2736,9 +2736,23 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                                        .format(change[1]))
 
                 for diff in change[2]:
-                    diff[0] = diff[0].replace(lotr.BACK_PREFIX + lotr.CARD_NAME,
-                                              lotr.CARD_SIDE_B).replace(
-                                                  lotr.BACK_PREFIX, '[Back] ')
+                    if diff[0] == lotr.BACK_PREFIX + lotr.CARD_NAME:
+                        diff[0] = lotr.CARD_SIDE_B
+
+                    if card[lotr.CARD_TYPE] == 'Quest':
+                        if diff[0] in (lotr.CARD_COST,
+                                       lotr.BACK_PREFIX + lotr.CARD_COST):
+                            diff[0] = '{} (Quest Stage)'.format(diff[0])
+                        elif diff[0] in (
+                                lotr.CARD_ENGAGEMENT,
+                                lotr.BACK_PREFIX + lotr.CARD_ENGAGEMENT):
+                            diff[0] = '{} (Stage Letter)'.format(diff[0])
+                    elif card[lotr.CARD_TYPE] in ('Presentation', 'Rules'):
+                        if diff[0] in (lotr.CARD_VICTORY,
+                                       lotr.BACK_PREFIX + lotr.CARD_VICTORY):
+                            diff[0] = '{} (Page)'.format(diff[0])
+
+                    diff[0] = diff[0].replace(lotr.BACK_PREFIX, '[Back] ')
                     diff[1] = str(diff[1]) if diff[1] is not None else ''
                     diff[2] = str(diff[2]) if diff[2] is not None else ''
                     diff[1], diff[2] = format_diffs(diff[1], diff[2])
