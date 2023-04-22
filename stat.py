@@ -548,8 +548,8 @@ def create_ringsdb_csv(pack_name, pack_code):
                 if isinstance(value, str):
                     row[key] = value.replace('\r\n', '\n')
 
-            if row['type_name'] in ('Contract', 'Player Objective'):
-                type_name = 'Other'
+            if row['type_name'] == 'Player Objective':
+                type_name = 'Attachment'
             elif (row['type_name'] == 'Treasure' or
                   row.get('subtype_code') in ('Boon', 'Burden')):
                 type_name = 'Campaign'
@@ -631,9 +631,7 @@ def create_dragncards_json(pack_name, pack_id):  # pylint: disable=R0912,R0914
     sh_data = ''
     for row in data:
         card_type = row['type_name']
-        if card_type == 'Other':
-            card_type = 'Contract'
-        elif card_type == 'Campaign':
+        if card_type == 'Campaign':
             card_type = 'Treasure'
 
         if 'cost' in row:
