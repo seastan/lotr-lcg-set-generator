@@ -3,6 +3,7 @@
 """
 import logging
 import os
+import re
 import shutil
 
 import py7zr
@@ -55,10 +56,13 @@ def write_urls(urls):
 def download_archive(url):
     """ Download an image archive.
     """
-    content = lotr.get_content(url)
     path = os.path.join(TEMP_FOLDER, SEVENZ_SOURCE_FILENAME)
-    with open(path, 'wb') as fobj:
-        fobj.write(content)
+    if re.match(r'^https?:', url):
+        content = lotr.get_content(url)
+        with open(path, 'wb') as fobj:
+            fobj.write(content)
+    else:
+        shutil.copyfile(url, path)
 
 
 def extract_archive():
@@ -124,10 +128,9 @@ def move_image_files():
         break
 
 
-def create_images_archive(url):
+def create_images_archive(archive_filename):
     """ Create a new image archive.
     """
-    archive_filename = url.split('/')[-2].replace('_', ' ')
     with py7zr.SevenZipFile(os.path.join(TEMP_FOLDER, archive_filename), 'w',
                             filters=lotr.PY7ZR_FILTERS) as obj:
         for _, _, filenames in os.walk(TEMP_FOLDER):
@@ -150,11 +153,10 @@ def create_images_archive(url):
                 os.path.join(OUTPUT_PATH, archive_filename))
 
 
-def create_pdf(url):
+def create_pdf(archive_filename):
     """ Create a new PDF file.
     """
-    pdf_filename = url.split('/')[-2].replace('_', ' ').replace(
-        'images.7z', 'pdf')
+    pdf_filename = archive_filename.replace('images.7z', 'pdf')
     cmd = lotr.MAGICK_COMMAND_MBPRINT_PDF.format(
         MAGICK_PATH, TEMP_FOLDER, os.sep,
         os.path.join(TEMP_FOLDER, pdf_filename))
@@ -162,11 +164,10 @@ def create_pdf(url):
     logging.info(res)
 
 
-def create_pdf_archive(url):
+def create_pdf_archive(archive_filename):
     """ Create a new image archive.
     """
-    pdf_filename = url.split('/')[-2].replace('_', ' ').replace(
-        'images.7z', 'pdf')
+    pdf_filename = archive_filename.replace('images.7z', 'pdf')
     archive_filename = '{}.7z'.format(pdf_filename)
     with py7zr.SevenZipFile(os.path.join(TEMP_FOLDER, archive_filename), 'w',
                             filters=lotr.PY7ZR_FILTERS) as obj:
@@ -184,9 +185,11 @@ def process_archive(url):
     extract_archive()
     fix_content()
     move_image_files()
-    create_images_archive(url)
-    create_pdf(url)
-    create_pdf_archive(url)
+    archive_filename = re.sub(r'\/(?:file)?$', '', url).replace(
+        '\\', '/').split('/')[-1].replace('_', ' ')
+    create_images_archive(archive_filename)
+    create_pdf(archive_filename)
+    create_pdf_archive(archive_filename)
 
 
 def main():
