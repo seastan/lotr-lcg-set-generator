@@ -376,58 +376,58 @@ bodyBackRegion['Quest'] = '51,249,461,114';
 bodyBackRegion['Rules'] = '48,73,317,418';
 
 var nameRegion = {};
-nameRegion['Ally'] = '100,329,213,25';
-nameRegion['Attachment'] = '132,38,183,25';
-nameRegion['Campaign'] = '108,43,197,25';
-nameRegion['Cave'] = '80,43,160,25';
-nameRegion['Contract'] = '84,245,245,29';
-nameRegion['Encounter Side Quest'] = '100,42,363,29';
-nameRegion['Encounter Side Quest SmallTextArea'] = '100,42,363,29';
-nameRegion['Enemy'] = '94,327,225,25';
-nameRegion['Enemy NoStat'] = '94,440,225,25';
+nameRegion['Ally'] = '99,326,215,30';
+nameRegion['Attachment'] = '131,36,185,30';
+nameRegion['Campaign'] = '107,41,199,30';
+nameRegion['Cave'] = '79,41,162,30';
+nameRegion['Contract'] = '83,243,247,33';
+nameRegion['Encounter Side Quest'] = '99,40,365,33';
+nameRegion['Encounter Side Quest SmallTextArea'] = '99,40,365,33';
+nameRegion['Enemy'] = '93,325,227,30';
+nameRegion['Enemy NoStat'] = '93,438,227,30';
 nameRegion['Event'] = '57,86,26,178';
-nameRegion['Hero'] = '100,327,213,25';
-nameRegion['Hero Promo'] = '103,418,206,25';
-nameRegion['Location'] = '108,43,197,25';
-nameRegion['Nightmare'] = '95,40,225,34';
-nameRegion['Objective'] = '75,48,263,29';
-nameRegion['Objective Ally'] = '75,48,263,29';
-nameRegion['Objective Hero'] = '75,48,263,29';
-nameRegion['Objective Location'] = '75,48,263,29';
-nameRegion['Player Objective'] = '127,48,211,29';
-nameRegion['Player Side Quest'] = '144,44,368,29';
-nameRegion['Quest'] = '144,44,368,29';
-nameRegion['Region'] = '80,349,160,25';
-nameRegion['Ship Enemy'] = '94,327,225,25';
-nameRegion['Ship Objective'] = '75,48,263,29';
+nameRegion['Hero'] = '99,325,215,30';
+nameRegion['Hero Promo'] = '102,414,208,30';
+nameRegion['Location'] = '107,40,199,30';
+nameRegion['Nightmare'] = '94,45,227,33';
+nameRegion['Objective'] = '74,46,265,33';
+nameRegion['Objective Ally'] = '74,46,265,33';
+nameRegion['Objective Hero'] = '74,46,265,33';
+nameRegion['Objective Location'] = '74,46,265,33';
+nameRegion['Player Objective'] = '126,46,213,33';
+nameRegion['Player Side Quest'] = '143,42,370,33';
+nameRegion['Quest'] = '143,42,370,33';
+nameRegion['Region'] = '79,347,162,30';
+nameRegion['Ship Enemy'] = '93,325,227,30';
+nameRegion['Ship Objective'] = '74,46,265,33';
 nameRegion['Treachery'] = '55,108,26,164';
-nameRegion['Treasure'] = '132,45,183,25';
+nameRegion['Treasure'] = '131,42,185,30';
 
 var nameBackRegion = {};
-nameBackRegion['Contract'] = '84,245,245,29';
-nameBackRegion['Quest'] = '144,44,368,29';
+nameBackRegion['Contract'] = '83,243,247,33';
+nameBackRegion['Quest'] = '143,42,370,33';
 
 var nameUniqueRegion = {};
-nameUniqueRegion['Ally'] = '100,326,213,25';
-nameUniqueRegion['Attachment'] = '132,36,183,25';
-nameUniqueRegion['Cave'] = '80,40,160,25';
-nameUniqueRegion['Encounter Side Quest'] = '100,39,363,29';
-nameUniqueRegion['Encounter Side Quest SmallTextArea'] = '100,39,363,29';
-nameUniqueRegion['Enemy'] = '94,325,225,25';
-nameUniqueRegion['Enemy NoStat'] = '94,438,225,25';
-nameUniqueRegion['Hero'] = '100,325,213,25';
-nameUniqueRegion['Hero Promo'] = '103,416,206,25';
-nameUniqueRegion['Location'] = '108,40,197,25';
-nameUniqueRegion['Objective'] = '75,45,263,29';
-nameUniqueRegion['Objective Ally'] = '75,45,263,29';
-nameUniqueRegion['Objective Hero'] = '75,45,263,29';
-nameUniqueRegion['Objective Location'] = '75,45,263,29';
-nameUniqueRegion['Player Objective'] = '127,45,211,29';
-nameUniqueRegion['Region'] = '80,346,160,25';
-nameUniqueRegion['Ship Enemy'] = '94,325,225,25';
-nameUniqueRegion['Ship Objective'] = '75,45,263,29';
-nameUniqueRegion['Treachery'] = '54,108,26,164';
-nameUniqueRegion['Treasure'] = '132,43,183,25';
+nameUniqueRegion['Ally'] = '99,324,215,31';
+nameUniqueRegion['Attachment'] = '131,34,185,31';
+nameUniqueRegion['Cave'] = '79,39,162,31';
+nameUniqueRegion['Encounter Side Quest'] = '99,38,365,34';
+nameUniqueRegion['Encounter Side Quest SmallTextArea'] = '99,38,365,34';
+nameUniqueRegion['Enemy'] = '93,323,227,31';
+nameUniqueRegion['Enemy NoStat'] = '93,436,227,31';
+nameUniqueRegion['Hero'] = '99,323,215,31';
+nameUniqueRegion['Hero Promo'] = '102,414,208,31';
+nameUniqueRegion['Location'] = '107,38,199,31';
+nameUniqueRegion['Objective'] = '74,44,265,34';
+nameUniqueRegion['Objective Ally'] = '74,44,265,34';
+nameUniqueRegion['Objective Hero'] = '74,44,265,34';
+nameUniqueRegion['Objective Location'] = '74,44,265,34';
+nameUniqueRegion['Player Objective'] = '126,44,213,34';
+nameUniqueRegion['Region'] = '79,345,162,31';
+nameUniqueRegion['Ship Enemy'] = '93,323,227,31';
+nameUniqueRegion['Ship Objective'] = '74,44,265,34';
+nameUniqueRegion['Treachery'] = '52,108,29,164';
+nameUniqueRegion['Treasure'] = '131,40,185,31';
 
 var subtypeRegion = {};
 subtypeRegion['Ally'] = '146,301,124,20';
@@ -733,7 +733,7 @@ namePointSize['Event'] = 6.5;
 namePointSize['Hero'] = 6.5;
 namePointSize['Hero Promo'] = 6.5;
 namePointSize['Location'] = 6.5;
-namePointSize['Nightmare'] = 6.5;
+namePointSize['Nightmare'] = 7.5;
 namePointSize['Objective'] = 7.5;
 namePointSize['Objective Ally'] = 7.5;
 namePointSize['Objective Hero'] = 7.5;
@@ -1580,7 +1580,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				s.set('Body-style', 'FAMILY: {"Times New Roman"}');
 				s.set('BodyRight-style', 'FAMILY: {"Times New Roman"}');
 				s.set('Trait-style', 'FAMILY: {"Times New Roman"}');
-				s.set('Name-style', 'FAMILY: {"Vafthrudnir"}');
+				s.set('Name-style', 'FAMILY: {"Vafthaurdir"}');
 				s.set('Subtype-style', 'FAMILY: {"Vafthrudnir"}');
 				s.set('Type-style', 'FAMILY: {"Vafthrudnir"}');
 				s.set('Adventure-style', 'FAMILY: {"Vafthrudnir"}');
@@ -1965,6 +1965,15 @@ function markUp(value, key, cardType, lang, setID) {
 			lowerSize = namePointSize[cardType];
 		}
 
+		if (lang == 'French') {
+			value = value.replace(/ /g, '\u00a0');
+			let valueOld;
+			do {
+				valueOld = value;
+				value = value.replace(/\u00a0([^<]+)>/g, ' $1>');
+			}
+			while (value != valueOld);
+		}
 		return updateVafthrudnir(value, lowerSize, lang);
 	}
 	else if ((['Victory Points', 'BVictory Points'].indexOf(key + '') > -1) && (['Presentation', 'Rules'].indexOf(cardType) == -1)) {
