@@ -189,6 +189,10 @@ function updateRegion(key, value) {
         regions[i] = Math.round((regions[i] * 2 - bleed) / 1.75);
     }
 
+    if ((key == 'Name-region') || (key == 'NameBack-region')) {
+        regions[1] += 2;
+    }
+
     var sizeKey = key.replace(/-region$/, '');
     if ((sizeKey in containerFontSize) &&
         (['Artist', 'CollectionInfo', 'CollectionNumber', 'Copyright'].indexOf(sizeKey) == -1)) {
