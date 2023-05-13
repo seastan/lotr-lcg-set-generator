@@ -232,28 +232,32 @@ List of **!stat** commands:
 List of **!art** commands:
 ` `
 **!art artists <set name or set code>** - display a copy-pasteable list of artist names (for example: `!art artists Children of Eorl` or `!art artists CoE`)
-**!art keep <artist>** (as a reply to a message with an image attachment) - keep image for the channel's card (for example: `!art keep Alan Lee`)
-**!art keep <card id> <artist>** (as a reply to a message with an image attachment) - keep image for the card with the given id (for example: `!art keep fd9da66d-06cd-430e-b6d2-9da2aa5bc52c Alan Lee`)
-**!art keep <channel> <artist>** (as a reply to a message with an image attachment) - keep image for the card from the given channel (for example: `!art keep #hunting-dogs Alan Lee`)
+**!art keep <artist>** (as a reply to a message with an image attachment, empty artist means "Midjourney") - keep image for the channel's card (for example: `!art keep Alan Lee`)
+**!art keep <card id> <artist>** (as a reply to a message with an image attachment, empty artist means "Midjourney") - keep image for the card with the given id (for example: `!art keep fd9da66d-06cd-430e-b6d2-9da2aa5bc52c Alan Lee`)
+**!art keep <channel> <artist>** (as a reply to a message with an image attachment, empty artist means "Midjourney") - keep image for the card from the given channel (for example: `!art keep #hunting-dogs Alan Lee`)
 **!art keep** - display all kept images for the channel's card
 **!art keep <card id>** - display all kept images for the card with the given id (for example: `!art keep fd9da66d-06cd-430e-b6d2-9da2aa5bc52c`)
 **!art keep <channel>** - display all kept images for the card from the given channel (for example: `!art keep #hunting-dogs`)
-**!art save <artist>** (as a reply to a message with an image attachment) - save image as the channel's card front artwork (for example: `!art save Alan Lee`)
-**!art save <card id> <artist>** (as a reply to a message with an image attachment) - save image as the front artwork of the card with the given id (for example: `!art save fd9da66d-06cd-430e-b6d2-9da2aa5bc52c Alan Lee`)
-**!art save <channel> <artist>** (as a reply to a message with an image attachment) - save image as the front artwork of the card from the given channel (for example: `!art save #hunting-dogs Alan Lee`)
-**!art saveb <artist>** (as a reply to a message with an image attachment) - save image as the channel's card back artwork (for example: `!art saveb John Howe`)
-**!art saveb <card id> <artist>** (as a reply to a message with an image attachment) - save image as the back artwork of the card with the given id (for example: `!art saveb fd9da66d-06cd-430e-b6d2-9da2aa5bc52c John Howe`)
-**!art saveb <channel> <artist>** (as a reply to a message with an image attachment) - save image as the back artwork of the card from the given channel (for example: `!art saveb #hunting-dogs Alan Lee`)
-**!art savescr <artist>** (as a reply to a message with an image attachment) - save image to the scratch folder, <artist> is optional (for example: `!art savescr Ted Nasmith` or `!art savescr`)
+**!art save <artist>** (as a reply to a message with an image attachment, empty artist means "Midjourney") - save image as the channel's card front artwork (for example: `!art save Alan Lee`)
+**!art save <card id> <artist>** (as a reply to a message with an image attachment, empty artist means "Midjourney") - save image as the front artwork of the card with the given id (for example: `!art save fd9da66d-06cd-430e-b6d2-9da2aa5bc52c Alan Lee`)
+**!art save <channel> <artist>** (as a reply to a message with an image attachment, empty artist means "Midjourney") - save image as the front artwork of the card from the given channel (for example: `!art save #hunting-dogs Alan Lee`)
+**!art saveb <artist>** (as a reply to a message with an image attachment, empty artist means "Midjourney") - save image as the channel's card back artwork (for example: `!art saveb John Howe`)
+**!art saveb <card id> <artist>** (as a reply to a message with an image attachment, empty artist means "Midjourney") - save image as the back artwork of the card with the given id (for example: `!art saveb fd9da66d-06cd-430e-b6d2-9da2aa5bc52c John Howe`)
+**!art saveb <channel> <artist>** (as a reply to a message with an image attachment, empty artist means "Midjourney") - save image as the back artwork of the card from the given channel (for example: `!art saveb #hunting-dogs Alan Lee`)
+**!art savescr <artist>** (as a reply to a message with an image attachment, empty artist means "Midjourney") - save image to the scratch folder, <artist> is optional (for example: `!art savescr Ted Nasmith` or `!art savescr`)
 **!art verify <set name or set code>** - verify artwork for a set (for example: `!art verify Children of Eorl` or `!art verify CoE`)
+**!asm** - alias for **!art save Midjourney** (see above)
+**!asbm** - alias for **!art saveb Midjourney** (see above)
 **!art help** - display this help message
 """,
     'image': """
 List of **!image** commands:
 ` `
 **!image set <set name or set code>** - post the last rendered images for all cards from a set (for example: `!image set The Aldburg Plot` or `!image set TAP`)
-**!image card <card name>** (or **!image <card name>**) - post the last rendered images for the first card matching a given card name (for example: `!image card Gavin`)
-**!image card this** (or **!image this**) - if in a card channel, post the last rendered images for the card
+**!image card <card name>** - post the last rendered images for the first card matching a given card name (for example: `!image card Gavin`)
+**!image card this** - if in a card channel, post the last rendered images for the card
+**!image <card name>** - alias for **!image card <card name>** (see above)
+**!image this** - alias for **!image card this** (see above)
 **!image refresh** - clear the image cache (if you just uploaded new images to the Google Drive)
 **!image help** - display this help message
 """,
@@ -4261,7 +4265,7 @@ Targets removed.
             os.remove(path)
 
 
-    async def _save_scratch_artwork(self, message, artist=None):
+    async def _save_scratch_artwork(self, message, artist):
         """ Save an artwork image to the scratch folder.
         """
         artwork_destination_path = CONF.get('artwork_destination_path')
@@ -4285,9 +4289,7 @@ Targets removed.
                              ).split('/')[-1]
 
         filename = lotr.escape_filename(filename)
-        if artist:
-            filename = '{}_{}'.format(artist, filename)
-
+        filename = '{}_{}'.format(artist, filename)
         filename = filename.replace(' ', '_')
 
         content = await get_attachment_content(message)
@@ -4611,25 +4613,47 @@ Targets removed.
         """
         if message.content.lower() == '!art':
             command = 'help'
+        elif message.content.lower() == '!asm':
+            command = 'save Midjourney'
+        elif message.content.lower() == '!asbm':
+            command = 'saveb Midjourney'
         else:
             command = re.sub(r'^!art ', '', message.content,
                              flags=re.IGNORECASE).split('\n')[0].strip()
 
         logging.info('Received art command: %s', command)
 
-        if command.lower().startswith('keep '):
+        if (command.lower().startswith('keep ') or
+                (command.lower() == 'keep' and message.reference and
+                 message.reference.resolved)):
             try:
-                artist = re.sub(r'^keep ', '', command, flags=re.IGNORECASE)
+                if command.lower() == 'keep':
+                    await self._send_channel(message.channel,
+                                             'assuming Midjourney artist')
+                    artist = 'Midjourney'
+                else:
+                    artist = re.sub(r'^keep ', '', command, flags=re.IGNORECASE)
+
                 if re.match(lotr.UUID_REGEX, artist):
                     if message.reference and message.reference.resolved:
-                        error = 'please specify the artist'
+                        await self._send_channel(message.channel,
+                                                 'assuming Midjourney artist')
+                        card_id = artist
+                        artist = 'Midjourney'
+                        error = await self._keep_artwork(message, artist,
+                                                         card_id, None)
                     else:
                         card_id = artist
                         error = await self._display_artwork(message, card_id,
                                                             None)
                 elif re.match(CHANNEL_ID_REGEX, artist):
                     if message.reference and message.reference.resolved:
-                        error = 'please specify the artist'
+                        await self._send_channel(message.channel,
+                                                 'assuming Midjourney artist')
+                        channel_id = int(artist[2:-1])
+                        artist = 'Midjourney'
+                        error = await self._keep_artwork(message, artist, None,
+                                                         channel_id)
                     else:
                         channel_id = int(artist[2:-1])
                         error = await self._display_artwork(message, None,
@@ -4665,10 +4689,7 @@ Targets removed.
             await self._send_channel(message.channel, 'done')
         elif command.lower() == 'keep':
             try:
-                if message.reference and message.reference.resolved:
-                    error = 'please specify the artist'
-                else:
-                    error = await self._display_artwork(message, None, None)
+                error = await self._display_artwork(message, None, None)
             except Exception as exc:
                 logging.exception(str(exc))
                 await self._send_channel(
@@ -4681,16 +4702,24 @@ Targets removed.
                 return
 
             await self._send_channel(message.channel, 'done')
-        elif (command.lower().startswith('save ') or
-                command.lower().startswith('saveb ')):
+        elif (command.lower() == 'save' or command.lower() == 'saveb' or
+              command.lower().startswith('save ') or
+              command.lower().startswith('saveb ')):
             try:
-                side = 'B' if command.lower().startswith('saveb ') else 'A'
-                artist = re.sub(r'^saveb? ', '', command, flags=re.IGNORECASE)
-                if (re.match(lotr.UUID_REGEX, artist) or
-                        re.match(CHANNEL_ID_REGEX, artist)):
+                side = 'B' if (command.lower() == 'saveb' or
+                               command.lower().startswith('saveb ')) else 'A'
+                if command.lower() == 'save' or command.lower() == 'saveb':
                     await self._send_channel(message.channel,
-                                             'please specify the artist')
-                    return
+                                             'assuming Midjourney artist')
+                    artist = 'Midjourney'
+                else:
+                    artist = re.sub(r'^saveb? ', '', command,
+                                    flags=re.IGNORECASE)
+                    if (re.match(lotr.UUID_REGEX, artist) or
+                            re.match(CHANNEL_ID_REGEX, artist)):
+                        await self._send_channel(message.channel,
+                                                 'assuming Midjourney artist')
+                        artist = '{} Midjourney'.format(artist)
 
                 parts = artist.split(' ')
                 if len(parts) > 1 and re.match(lotr.UUID_REGEX, parts[0]):
@@ -4719,27 +4748,17 @@ Targets removed.
                 return
 
             await self._send_channel(message.channel, 'done')
-        elif command.lower() == 'save':
-            await self._send_channel(message.channel,
-                                     'please specify the artist')
-        elif command.lower() == 'savescr':
+        elif (command.lower() == 'savescr' or
+              command.lower().startswith('savescr ')):
             try:
-                error = await self._save_scratch_artwork(message)
-            except Exception as exc:
-                logging.exception(str(exc))
-                await self._send_channel(
-                    message.channel,
-                    'unexpected error: {}'.format(str(exc)))
-                return
+                if command.lower() == 'savescr':
+                    await self._send_channel(message.channel,
+                                             'assuming Midjourney artist')
+                    artist = 'Midjourney'
+                else:
+                    artist = re.sub(r'^savescr ', '', command,
+                                    flags=re.IGNORECASE)
 
-            if error:
-                await self._send_channel(message.channel, error)
-                return
-
-            await self._send_channel(message.channel, 'done')
-        elif command.lower().startswith('savescr '):
-            try:
-                artist = re.sub(r'^savescr ', '', command, flags=re.IGNORECASE)
                 error = await self._save_scratch_artwork(message, artist)
             except Exception as exc:
                 logging.exception(str(exc))
@@ -5665,7 +5684,9 @@ Targets removed.
                   message.content.lower() == '!cron'):
                 await self._process_cron_command(message)
             elif (message.content.lower().startswith('!art ') or
-                  message.content.lower() == '!art'):
+                  message.content.lower() == '!art' or
+                  message.content.lower() == '!asm' or
+                  message.content.lower() == '!asbm'):
                 await self._process_art_command(message)
             elif (message.content.lower().startswith('!image ') or
                   message.content.lower() == '!image'):
