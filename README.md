@@ -370,7 +370,7 @@ If you want to manually restart the scripts, run:
 
 If you want to migrate the pipeline to a different host, do the following steps:
 
-1. Setup the pipeline on the new host, but comment out all crons.  You might adjust the hours column in the crontab
+1. Setup the pipeline on the new host, but comment out all crons.  You might want to adjust the hours column in the crontab
 according to the new timezone.  Also, you may copy `id_rsa` and configuration files from the old host and only apply
 changes where needed (for example, different local paths).  Instead of configuring `rclone` from scratch,
 you may copy its configuration file from the old host (run `rclone config file` to find its location on each host).
