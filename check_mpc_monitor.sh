@@ -6,7 +6,7 @@ if [ $(ls mpc_monitor.log 2>/dev/null) ]; then
   LOG_TS=`date -d "$LOG_RAW" +"%s"`
   CURRENT_TS=`date +"%s"`
   let "DIFF = $CURRENT_TS - $LOG_TS"
-  if [ $DIFF -ge 1800 ]; then
+  if [ $DIFF -ge 3600 ]; then
     python3 create_mail.py "There are $DIFF seconds since the last MPC Monitor activity" "" > /dev/null
   fi
 fi
