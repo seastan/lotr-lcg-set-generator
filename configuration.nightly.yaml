@@ -138,7 +138,7 @@ outputs:
 #    - genericpng_pdf_a4_7z
 #    - genericpng_pdf_letter_7z
 #    - rules_pdf
-    - tts
+#    - tts
   German:
 #    - db
 #    - dragncards_hq
