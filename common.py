@@ -88,4 +88,5 @@ def split_result(value):  # pylint: disable=R0912
                      re.sub(r'^(\*+)(\n+)', '\\2\\1', chunk))
               for chunk in chunks]
 
+    chunks = [chunk.strip() for chunk in chunks if chunk.strip()]
     return chunks

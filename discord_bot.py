@@ -2584,8 +2584,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                             change))
 
                     if change[1][0] not in self.channels:
-                        raise DiscordError('Channel {} not found'.format(
-                            change[1][0]))
+                        logging.warning('Channel "%s" not found', change[1][0])
+                        continue
 
                     channel = self.get_channel(
                         self.channels[change[1][0]]['id'])
