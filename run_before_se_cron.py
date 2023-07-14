@@ -283,7 +283,7 @@ def run(conf=None):  # pylint: disable=R0912,R0915
             rclone_scratch(conf)
 
     except SanityCheckError as exc:
-        message = str(exc)[:LOG_LIMIT]
+        message = str(exc)
         logging.error(message)
         logging.info('Done (%ss)', round(time.time() - timestamp, 3))
         if message != get_sanity_check_message():
