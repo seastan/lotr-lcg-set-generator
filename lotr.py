@@ -3067,7 +3067,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
             errors.append('"response"')
 
         if field == CARD_TEXT and card[CARD_TYPE] == 'Quest':
-            name_regex = (r'(?<!\[bi\])\b' + re.escape(card[CARD_NAME]) +
+            name_regex = (r'(?<!\[bi\])\b' + re.escape(card[CARD_NAME] or '') +
                           r'\b(?!\[\/bi\])')
             if (re.search(name_regex, paragraph) or
                     re.search(r'\bthis quest\b', paragraph,
@@ -3077,7 +3077,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if (field == BACK_PREFIX + CARD_TEXT and
                 card[BACK_PREFIX + CARD_TYPE] == 'Quest'):
             name_regex = (r'(?<!\[bi\])\b' +
-                          re.escape(card[BACK_PREFIX + CARD_NAME]) +
+                          re.escape(card[BACK_PREFIX + CARD_NAME] or '') +
                           r'\b(?!\[\/bi\])')
             if (re.search(name_regex, paragraph) or
                     re.search(r'\bthis quest\b', paragraph,
@@ -3086,7 +3086,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
 
         if (field == CARD_TEXT and card[CARD_TYPE] in
                 ('Encounter Side Quest', 'Player Side Quest')):
-            name_regex = (r'(?<!\[bi\])\b' + re.escape(card[CARD_NAME]) +
+            name_regex = (r'(?<!\[bi\])\b' + re.escape(card[CARD_NAME] or '') +
                           r'\b(?!\[\/bi\]| (?:is )?in the victory display)')
             if (re.search(name_regex, paragraph) or
                     re.search(r'\bthis stage\b', paragraph,
@@ -3097,7 +3097,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                 card[BACK_PREFIX + CARD_TYPE] in
                 ('Encounter Side Quest', 'Player Side Quest')):
             name_regex = (r'(?<!\[bi\])\b' +
-                          re.escape(card[BACK_PREFIX + CARD_NAME]) +
+                          re.escape(card[BACK_PREFIX + CARD_NAME] or '') +
                           r'\b(?!\[\/bi\]| (?:is )?in the victory display)')
             if (re.search(name_regex, paragraph) or
                     re.search(r'\bthis stage\b', paragraph,
