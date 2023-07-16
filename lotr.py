@@ -7382,10 +7382,88 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                  set_name, round(time.time() - timestamp, 3))
 
 
-def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R0915
-    """ Generate JSON file for DragnCards.
+def _generate_tsv_from_json(json_data, output_path):
+    """ Generate DragnCards TSV from JSON.
     """
-    logging.info('[%s] Generating JSON file for DragnCards...', set_name)
+    with open(output_path, 'w', newline='', encoding='utf-8') as obj:
+        fieldnames = ['databaseId', 'name', 'imageUrl', 'cardBack', 'type',
+                      'packName', 'deckbuilderQuantity', 'setUuid',
+                      'numberInPack', 'encounterSet', 'unique', 'sphere',
+                      'traits', 'keywords', 'cost', 'engagementCost', 'threat',
+                      'willpower', 'attack', 'defense', 'hitPoints',
+                      'questPoints', 'victoryPoints', 'text', 'shadow']
+        writer = csv.DictWriter(obj, delimiter='\t', fieldnames=fieldnames)
+        writer.writeheader()
+        for row in sorted(json_data.values(), key=lambda r: r['cardnumber']):
+            if row['sides']['B']['name'] in ('player', 'encounter'):
+                card_back = row['sides']['B']['name']
+            else:
+                card_back = 'multi_sided'
+
+            tsv_row = {
+                'databaseId': row['cardid'],
+                'name': row['sides']['A']['printname'],
+                'imageUrl': '{}.jpg'.format(row['cardid']),
+                'cardBack': card_back,
+                'type': row['sides']['A']['type'],
+                'packName': row['cardpackname'],
+                'deckbuilderQuantity': row['cardquantity'],
+                'setUuid': row['cardsetid'],
+                'numberInPack': row['cardnumber'],
+                'encounterSet': row['cardencounterset'],
+                'unique': row['sides']['A']['unique'],
+                'sphere': row['sides']['A']['sphere'],
+                'traits': row['sides']['A']['traits'],
+                'keywords': row['sides']['A']['keywords'],
+                'cost': row['sides']['A']['cost'],
+                'engagementCost': row['sides']['A']['engagementcost'],
+                'threat': row['sides']['A']['threat'],
+                'willpower': row['sides']['A']['willpower'],
+                'attack': row['sides']['A']['attack'],
+                'defense': row['sides']['A']['defense'],
+                'hitPoints': row['sides']['A']['hitpoints'],
+                'questPoints': row['sides']['A']['questpoints'],
+                'victoryPoints': row['sides']['A']['victorypoints'],
+                'text': row['sides']['A']['text'].replace('\n', ' '),
+                'shadow': row['sides']['A']['shadow'].replace('\n', ' ')
+            }
+            writer.writerow(tsv_row)
+            if card_back == 'multi_sided':
+                tsv_row = {
+                    'databaseId': row['cardid'],
+                    'name': row['sides']['B']['printname'],
+                    'imageUrl': '{}.B.jpg'.format(row['cardid']),
+                    'cardBack': card_back,
+                    'type': row['sides']['B']['type'],
+                    'packName': row['cardpackname'],
+                    'deckbuilderQuantity': row['cardquantity'],
+                    'setUuid': row['cardsetid'],
+                    'numberInPack': row['cardnumber'],
+                    'encounterSet': row['cardencounterset'],
+                    'unique': row['sides']['B']['unique'],
+                    'sphere': row['sides']['B']['sphere'],
+                    'traits': row['sides']['B']['traits'],
+                    'keywords': row['sides']['B']['keywords'],
+                    'cost': row['sides']['B']['cost'],
+                    'engagementCost': row['sides']['B']['engagementcost'],
+                    'threat': row['sides']['B']['threat'],
+                    'willpower': row['sides']['B']['willpower'],
+                    'attack': row['sides']['B']['attack'],
+                    'defense': row['sides']['B']['defense'],
+                    'hitPoints': row['sides']['B']['hitpoints'],
+                    'questPoints': row['sides']['B']['questpoints'],
+                    'victoryPoints': row['sides']['B']['victorypoints'],
+                    'text': row['sides']['B']['text'].replace('\n', ' '),
+                    'shadow': row['sides']['B']['shadow'].replace('\n', ' ')
+                }
+                writer.writerow(tsv_row)
+
+
+def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R0915
+    """ Generate JSON and TSV files for DragnCards.
+    """
+    logging.info('[%s] Generating JSON and TSV files for DragnCards...',
+                 set_name)
     timestamp = time.time()
 
     output_path = os.path.join(OUTPUT_DRAGNCARDS_PATH,
@@ -7572,6 +7650,8 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
         res = json.dumps(json_data, ensure_ascii=True, indent=4)
         obj.write(res)
 
+    _generate_tsv_from_json(json_data, re.sub(r'\.json$', '.tsv', output_path))
+
     for card in json_data.values():
         if 'playtest' in card:
             del card['playtest']
@@ -7587,7 +7667,7 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
     with open(DRAGNCARDS_TIMESTAMPS_JSON_PATH, 'w', encoding='utf-8') as fobj:
         json.dump(dragncards_timestamps, fobj)
 
-    logging.info('[%s] ...Generating JSON file for DragnCards (%ss)',
+    logging.info('[%s] ...Generating JSON and TSV files for DragnCards (%ss)',
                  set_name, round(time.time() - timestamp, 3))
 
 
