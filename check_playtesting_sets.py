@@ -107,7 +107,7 @@ def get_dragncards_set_ids():
 
     res = list_dragncards_files(conf)
     filenames = re.split(r'\s+', res)
-    set_ids = [re.sub(r'\.json$', '', f) for f in filenames]
+    set_ids = [re.sub(r'\.(?:json|tsv)$', '', f) for f in filenames]
     set_ids = [s for s in set_ids if re.match(UUID_REGEX, s)]
     set_ids = set(set_ids)
     return set_ids
