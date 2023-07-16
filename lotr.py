@@ -7382,7 +7382,7 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                  set_name, round(time.time() - timestamp, 3))
 
 
-def _generate_tsv_from_json(json_data, output_path):
+def _generate_tsv_from_json(json_data, output_path, release):
     """ Generate DragnCards TSV from JSON.
     """
     with open(output_path, 'w', newline='', encoding='utf-8') as obj:
@@ -7392,9 +7392,13 @@ def _generate_tsv_from_json(json_data, output_path):
                       'traits', 'keywords', 'cost', 'engagementCost', 'threat',
                       'willpower', 'attack', 'defense', 'hitPoints',
                       'questPoints', 'victoryPoints', 'text', 'shadow']
+        if not release:
+            fieldnames.append('modifiedTimeUtc')
+
         writer = csv.DictWriter(obj, delimiter='\t', fieldnames=fieldnames)
         writer.writeheader()
-        for row in sorted(json_data.values(), key=lambda r: r['cardnumber']):
+        for row in sorted(json_data.values(),
+                          key=lambda r: str(r['cardnumber']).zfill(3)):
             if row['sides']['B']['name'] in ('player', 'encounter'):
                 card_back = row['sides']['B']['name']
             else:
@@ -7427,6 +7431,12 @@ def _generate_tsv_from_json(json_data, output_path):
                 'text': row['sides']['A']['text'].replace('\n', ' '),
                 'shadow': row['sides']['A']['shadow'].replace('\n', ' ')
             }
+            if not release:
+                if 'modifiedtimeutc' in row:
+                    tsv_row['modifiedTimeUtc'] = row['modifiedtimeutc']
+                else:
+                    tsv_row['modifiedTimeUtc'] = ''
+
             writer.writerow(tsv_row)
             if card_back == 'multi_sided':
                 tsv_row = {
@@ -7456,6 +7466,12 @@ def _generate_tsv_from_json(json_data, output_path):
                     'text': row['sides']['B']['text'].replace('\n', ' '),
                     'shadow': row['sides']['B']['shadow'].replace('\n', ' ')
                 }
+                if not release:
+                    if 'modifiedtimeutc' in row:
+                        tsv_row['modifiedTimeUtc'] = row['modifiedtimeutc']
+                    else:
+                        tsv_row['modifiedTimeUtc'] = ''
+
                 writer.writerow(tsv_row)
 
 
@@ -7650,7 +7666,8 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
         res = json.dumps(json_data, ensure_ascii=True, indent=4)
         obj.write(res)
 
-    _generate_tsv_from_json(json_data, re.sub(r'\.json$', '.tsv', output_path))
+    tsv_path = re.sub(r'\.json$', '.tsv', output_path)
+    _generate_tsv_from_json(json_data, tsv_path, release=False)
 
     for card in json_data.values():
         if 'playtest' in card:
@@ -7663,6 +7680,9 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
     with open(output_path, 'w', encoding='utf-8') as obj:
         res = json.dumps(json_data, ensure_ascii=True, indent=4)
         obj.write(res)
+
+    tsv_path = '{}.release'.format(tsv_path)
+    _generate_tsv_from_json(json_data, tsv_path, release=True)
 
     with open(DRAGNCARDS_TIMESTAMPS_JSON_PATH, 'w', encoding='utf-8') as fobj:
         json.dump(dragncards_timestamps, fobj)
