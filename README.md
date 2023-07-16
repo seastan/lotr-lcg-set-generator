@@ -173,7 +173,7 @@ or `bash` (Mac/Linux).  To navigate to a right folder inside your CLI you can us
   - `octgn_set_xml`: creating `set.xml` files for OCTGN (true or false)
   - `octgn_o8d`: creating `.o8d` files for OCTGN and DragnCards (true or false)
   - `ringsdb_csv`: creating CSV files for RingsDB (true or false)
-  - `dragncards_json`: creating JSON files for DragnCards (true or false)
+  - `dragncards_json`: creating JSON and TSV files for DragnCards (true or false)
   - `hallofbeorn_json`: creating JSON files for Hall of Beorn (true or false)
   - `frenchdb_csv`: creating CSV files for the French database sda.cgbuilder.fr (true or false)
   - `spanishdb_csv`: creating CSV files for the Spanish database susurrosdelbosqueviejo.com (true or false)

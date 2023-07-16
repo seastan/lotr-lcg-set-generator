@@ -88,7 +88,7 @@ octgn_o8d: true
 # Creating CSV files for RingsDB (true or false)
 ringsdb_csv: true
 
-# Creating JSON files for DragnCards (true or false)
+# Creating JSON and TSV files for DragnCards (true or false)
 dragncards_json: true
 
 # Creating JSON files for Hall of Beorn (true or false)
