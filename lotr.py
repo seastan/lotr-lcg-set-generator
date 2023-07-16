@@ -3041,6 +3041,14 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if 'When revealed:' in paragraph:
             errors.append('"When Revealed:"')
 
+        if 'to a minimum of 0' in paragraph:
+            errors.append('"to a minimum of 0" is redundant')
+        elif re.search(r'[^\(]to a minimum of ', paragraph,
+                       flags=re.IGNORECASE):
+            errors.append('"to a minimum of _" should be in parenthesis')
+        elif 'To a minimum of ' in paragraph:
+            errors.append('"to a minimum of _" should be lowercase')
+
         updated_paragraph = re.sub(
             r'\b(?:Valour )?(?:Resource |Planning |Quest |Travel |Encounter '
             r'|Combat |Refresh )?(?:Action):', '', paragraph)

@@ -127,7 +127,7 @@ into the root folder of this repo.
 
 11. Install AutoHotkey from https://autohotkey.com/download/.
 
-12. Install the latest Python 3 version (see https://www.python.org/downloads/).  The minimum supported version is 3.7.
+12. Install the latest Python 3 version (see https://www.python.org/downloads/).  The minimum version that was tested is 3.7.
 Optionally, install VirtualEnv (see https://help.dreamhost.com/hc/en-us/articles/115000695551-Installing-and-using-virtualenv-with-Python-3
 for details).
 
