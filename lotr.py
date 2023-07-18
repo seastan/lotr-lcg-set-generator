@@ -7382,7 +7382,7 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                  set_name, round(time.time() - timestamp, 3))
 
 
-def _generate_tsv_from_json(json_data, output_path, release):
+def _generate_tsv_from_json(json_data, output_path, release):  # pylint: disable=R0912
     """ Generate DragnCards TSV from JSON.
     """
     with open(output_path, 'w', newline='', encoding='utf-8') as obj:
@@ -7391,7 +7391,7 @@ def _generate_tsv_from_json(json_data, output_path, release):
                       'numberInPack', 'encounterSet', 'unique', 'sphere',
                       'traits', 'keywords', 'cost', 'engagementCost', 'threat',
                       'willpower', 'attack', 'defense', 'hitPoints',
-                      'questPoints', 'victoryPoints', 'text', 'shadow']
+                      'questPoints', 'victoryPoints', 'text', 'shadow', 'side']
         if not release:
             fieldnames.append('modifiedTimeUtc')
 
@@ -7403,6 +7403,13 @@ def _generate_tsv_from_json(json_data, output_path, release):
                 card_back = row['sides']['B']['name']
             else:
                 card_back = 'multi_sided'
+
+            if row['sides']['A']['type'] == 'Quest':
+                engagement_cost = ''
+                side = row['sides']['A']['engagementcost']
+            else:
+                engagement_cost = row['sides']['A']['engagementcost']
+                side = ''
 
             tsv_row = {
                 'databaseId': row['cardid'],
@@ -7420,7 +7427,7 @@ def _generate_tsv_from_json(json_data, output_path, release):
                 'traits': row['sides']['A']['traits'],
                 'keywords': row['sides']['A']['keywords'],
                 'cost': row['sides']['A']['cost'],
-                'engagementCost': row['sides']['A']['engagementcost'],
+                'engagementCost': engagement_cost,
                 'threat': row['sides']['A']['threat'],
                 'willpower': row['sides']['A']['willpower'],
                 'attack': row['sides']['A']['attack'],
@@ -7429,7 +7436,8 @@ def _generate_tsv_from_json(json_data, output_path, release):
                 'questPoints': row['sides']['A']['questpoints'],
                 'victoryPoints': row['sides']['A']['victorypoints'],
                 'text': row['sides']['A']['text'].replace('\n', ' '),
-                'shadow': row['sides']['A']['shadow'].replace('\n', ' ')
+                'shadow': row['sides']['A']['shadow'].replace('\n', ' '),
+                'side': side
             }
             if not release:
                 if 'modifiedtimeutc' in row:
@@ -7439,6 +7447,13 @@ def _generate_tsv_from_json(json_data, output_path, release):
 
             writer.writerow(tsv_row)
             if card_back == 'multi_sided':
+                if row['sides']['B']['type'] == 'Quest':
+                    engagement_cost = ''
+                    side = row['sides']['B']['engagementcost']
+                else:
+                    engagement_cost = row['sides']['B']['engagementcost']
+                    side = ''
+
                 tsv_row = {
                     'databaseId': row['cardid'],
                     'name': row['sides']['B']['printname'],
@@ -7455,7 +7470,7 @@ def _generate_tsv_from_json(json_data, output_path, release):
                     'traits': row['sides']['B']['traits'],
                     'keywords': row['sides']['B']['keywords'],
                     'cost': row['sides']['B']['cost'],
-                    'engagementCost': row['sides']['B']['engagementcost'],
+                    'engagementCost': engagement_cost,
                     'threat': row['sides']['B']['threat'],
                     'willpower': row['sides']['B']['willpower'],
                     'attack': row['sides']['B']['attack'],
@@ -7464,7 +7479,8 @@ def _generate_tsv_from_json(json_data, output_path, release):
                     'questPoints': row['sides']['B']['questpoints'],
                     'victoryPoints': row['sides']['B']['victorypoints'],
                     'text': row['sides']['B']['text'].replace('\n', ' '),
-                    'shadow': row['sides']['B']['shadow'].replace('\n', ' ')
+                    'shadow': row['sides']['B']['shadow'].replace('\n', ' '),
+                    'side': side
                 }
                 if not release:
                     if 'modifiedtimeutc' in row:
