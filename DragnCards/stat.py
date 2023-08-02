@@ -68,7 +68,8 @@ PACK_ALIAS = {
     'Ringmaker': 'The Dunland Trap',
     'Angmar Awakened': 'The Wastes of Eriador',
     'Dream-chaser': 'Flight of the Stormcaller',
-    'Dreamchaser': 'Flight of the Stormcaller'
+    'Dreamchaser': 'Flight of the Stormcaller',
+    'Dream-chaser Campaign Expansion': 'The City of Corsairs'
 }
 
 
