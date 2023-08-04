@@ -909,17 +909,16 @@ class RingsDBError(Exception):
     """
 
 
-class TLSAdapter(requests.adapters.HTTPAdapter):
+class TLSAdapter(requests.adapters.HTTPAdapter):  # pylint: disable=R0903
     """ TLS adapter to workaround SSL errors.
     """
 
-    def init_poolmanager(self, connections, maxsize, block=False,
-                         **pool_kwargs):
+    def init_poolmanager(self, connections, maxsize, block=False, **_):
         """ Create and initialize the urllib3 PoolManager.
         """
         ctx = ssl.create_default_context()
         ctx.set_ciphers('DEFAULT@SECLEVEL=1')
-        self.poolmanager = urllib3.poolmanager.PoolManager(
+        self.poolmanager = urllib3.poolmanager.PoolManager(  # pylint: disable=W0201
             num_pools=connections,
             maxsize=maxsize,
             block=block,
@@ -2653,8 +2652,11 @@ def _verify_period(value):
     """
     res = True
     paragraphs = value.split('\n\n')
-    for paragraph in paragraphs:
+    for pos, paragraph in enumerate(paragraphs):
         paragraph = paragraph.replace('[/size]', '')
+        if pos != len(paragraphs) - 1:
+            paragraph = paragraph.replace(':', '.')
+
         if not (re.search(
                     r'\.\)?”?(?:\[\/b\]|\[\/i\]|\[\/bi\])?$', paragraph) or
                 re.search(
