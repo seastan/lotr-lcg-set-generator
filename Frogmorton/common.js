@@ -423,6 +423,7 @@ nameUniqueRegion['Objective Ally'] = '74,44,265,34';
 nameUniqueRegion['Objective Hero'] = '74,44,265,34';
 nameUniqueRegion['Objective Location'] = '74,44,265,34';
 nameUniqueRegion['Player Objective'] = '126,44,213,34';
+nameUniqueRegion['Player Side Quest'] = '143,40,370,34';
 nameUniqueRegion['Region'] = '79,345,162,31';
 nameUniqueRegion['Ship Enemy'] = '93,323,227,31';
 nameUniqueRegion['Ship Objective'] = '74,44,265,34';
