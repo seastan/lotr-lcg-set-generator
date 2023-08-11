@@ -877,27 +877,27 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         data['EncounterSetBack-portrait-clip-region'] = data['EncounterSet-portrait-clip-region'];
     }
 
-    if (data['Artist-region'] && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
+    if (data['Artist-region'] && data.DoubleSide && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
         data['ArtistBack-region'] = data['Artist-region'];
     }
 
-    if (data['Copyright-region'] && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
+    if (data['Copyright-region'] && data.DoubleSide && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
         data['CopyrightBack-region'] = data['Copyright-region'];
     }
 
-    if (data['Collection-portrait-clip-region'] && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
+    if (data['Collection-portrait-clip-region'] && data.DoubleSide && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
         data['CollectionBack-portrait-clip-region'] = data['Collection-portrait-clip-region'];
     }
 
-    if (data['CollectionNumber-region'] && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
+    if (data['CollectionNumber-region'] && data.DoubleSide && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
         data['CollectionNumberBack-region'] = data['CollectionNumber-region'];
     }
 
-    if (data['CollectionInfo-region'] && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
+    if (data['CollectionInfo-region'] && data.DoubleSide && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
         data['CollectionInfoBack-region'] = data['CollectionInfo-region'];
     }
 
-    if (data['Asterisk-region'] && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
+    if (data['Asterisk-region'] && data.DoubleSide && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
         data['AsteriskBack-region'] = data['Asterisk-region'];
     }
 
@@ -905,11 +905,11 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         data['PageInBack-region'] = data['PageIn-region'];
     }
 
-    if (data['Side-region'] && (data.TypeRenderer == 'Contract')) {
+    if (data['Side-region'] && data.DoubleSide && (data.TypeRenderer == 'Contract')) {
         data['SideBack-region'] = data['Side-region'];
     }
 
-    if (data['Type-region'] && (data.TypeRenderer == 'Contract')) {
+    if (data['Type-region'] && data.DoubleSide && (data.TypeRenderer == 'Contract')) {
         data['TypeBack-region'] = data['Type-region'];
     }
     else if (data['Type-region'] && (data.TypeRenderer == 'Nightmare')) {
@@ -1043,8 +1043,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
     html = html.replace('{{ CONTAINERS }}', containers.join('\n'));
     fs.writeFileSync('Output/' + prefix + data.Id + suffix + '.html', html);
 
-    if ((doubleSideTypes.indexOf(data.TypeRenderer) > -1) &&
-        ((data.TypeRenderer != 'Contract') || (template == 'DoubleSided'))) {
+    if (data.DoubleSide) {
         var containerNamesBack = [];
         for (let key in containerRulesBack) {
             if (containerRulesBack.hasOwnProperty(key) && (key in containerFontSize)) {

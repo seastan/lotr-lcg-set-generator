@@ -923,9 +923,11 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
     """
     card_type = card[lotr.CARD_TYPE]
     res_a = format_side(card, '')
-    if (card.get(lotr.BACK_PREFIX + lotr.CARD_NAME) and
+    if (card.get(lotr.BACK_PREFIX + lotr.CARD_NAME) and  # pylint: disable=R0916
             card_type != 'Presentation' and
             (card_type not in ('Rules', 'Campaign', 'Contract', 'Nightmare') or
+             (card_type == 'Contract' and
+              card.get(lotr.BACK_PREFIX + lotr.CARD_TYPE) != 'Contract') or
              card.get(lotr.BACK_PREFIX + lotr.CARD_TEXT))):
         res_b = '\n\n`SIDE B`\n\n{}'.format(format_side(card, lotr.BACK_PREFIX))
     else:
@@ -4191,7 +4193,9 @@ Targets removed.
             await self._generate_artwork(card, filetype, side, content)
 
             if (side == 'A' and card.get(lotr.BACK_PREFIX + lotr.CARD_NAME) and
-                    card[lotr.CARD_TYPE] in ('Quest', 'Contract')):
+                    (card[lotr.CARD_TYPE] == 'Quest' or
+                     card[lotr.CARD_TYPE] == card.get(
+                         lotr.BACK_PREFIX + lotr.CARD_TYPE) == 'Contract')):
                 await self._generate_artwork(card, filetype, 'B', content)
 
         return ''
@@ -4467,8 +4471,9 @@ Targets removed.
             sides = ['A']
             if (card.get(lotr.BACK_PREFIX + lotr.CARD_NAME) and
                     (card.get(lotr.BACK_PREFIX + lotr.CARD_ARTIST) or
-                     card.get(lotr.CARD_TYPE) not in
-                     lotr.CARD_TYPES_DOUBLESIDE_OPTIONAL)):
+                     not lotr.is_doubleside(
+                         card.get(lotr.CARD_TYPE),
+                         card.get(lotr.BACK_PREFIX + lotr.CARD_TYPE)))):
                 sides.append('B')
 
             for side in sides:

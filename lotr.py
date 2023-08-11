@@ -173,8 +173,6 @@ CARD_TYPES_LANDSCAPE = {'Encounter Side Quest', 'Full Art Landscape',
                         'Player Side Quest', 'Quest'}
 CARD_TYPES_DOUBLESIDE_MANDATORY = {'Campaign', 'Nightmare', 'Presentation',
                                    'Quest', 'Rules'}
-CARD_TYPES_DOUBLESIDE_OPTIONAL = {'Campaign', 'Contract', 'Nightmare',
-                                  'Presentation', 'Quest', 'Rules'}
 CARD_TYPES_PLAYER = {'Ally', 'Attachment', 'Contract', 'Event', 'Hero',
                      'Player Objective', 'Player Side Quest', 'Treasure'}
 CARD_TYPES_PLAYER_DECK = {'Ally', 'Attachment', 'Event', 'Player Objective',
@@ -2278,6 +2276,18 @@ def _clean_sets(data):
                 row[key] = _clean_value(value)
 
 
+def is_doubleside(card_type, card_type_back):
+    """ Check whether the card is double-sided or not.
+    """
+    if card_type in CARD_TYPES_DOUBLESIDE_MANDATORY:
+        return True
+
+    if card_type == card_type_back == 'Contract':
+        return True
+
+    return False
+
+
 def _update_data(data):
     """ Update card data from the spreadsheet.
     """
@@ -2312,7 +2322,7 @@ def _update_data(data):
 
         row[BACK_PREFIX + CARD_NAME] = row[CARD_SIDE_B]
 
-        if (row[CARD_TYPE] not in CARD_TYPES_DOUBLESIDE_OPTIONAL and  # pylint: disable=R0916
+        if (not is_doubleside(row[CARD_TYPE], row[BACK_PREFIX + CARD_TYPE]) and  # pylint: disable=R0916
                 row[CARD_TYPE] not in CARD_TYPES_NO_PRINTED_NUMBER and
                 row[CARD_TYPE] not in CARD_TYPES_NO_PRINTED_NUMBER_BACK and
                 row[BACK_PREFIX + CARD_TYPE] is not None and
@@ -2330,11 +2340,14 @@ def _set_encounter_set_numbers(data):
     """
     encounter_sets = {}
     for row in data:
-        if (row[CARD_SET] in SETS and
+        if (row[CARD_SET] in SETS and  # pylint: disable=R0916
                 row[CARD_ENCOUNTER_SET] is not None and
                 is_positive_int(row[CARD_QUANTITY]) and
-                row[CARD_TYPE] in CARD_TYPES_ENCOUNTER_SET_NUMBER and
-                row[CARD_SPHERE] not in ('Boon', 'Burden')):
+                ((row[CARD_TYPE] in CARD_TYPES_ENCOUNTER_SET_NUMBER and
+                  row[CARD_SPHERE] not in ('Boon', 'Burden')) or
+                 (row[BACK_PREFIX + CARD_TYPE] in
+                  CARD_TYPES_ENCOUNTER_SET_NUMBER and
+                  row[BACK_PREFIX + CARD_SPHERE] not in ('Boon', 'Burden')))):
             row[CARD_ENCOUNTER_SET_NUMBER_START] = (
                 encounter_sets.get((row[CARD_SET],
                                     row[CARD_ENCOUNTER_SET]), 0) + 1)
@@ -2347,11 +2360,14 @@ def _set_encounter_set_numbers(data):
             row[CARD_ENCOUNTER_SET_TOTAL] = None
 
     for row in data:
-        if (row[CARD_SET] in SETS and
+        if (row[CARD_SET] in SETS and  # pylint: disable=R0916
                 row[CARD_ENCOUNTER_SET] is not None and
                 is_positive_int(row[CARD_QUANTITY]) and
-                row[CARD_TYPE] in CARD_TYPES_ENCOUNTER_SET_NUMBER and
-                row[CARD_SPHERE] not in ('Boon', 'Burden')):
+                ((row[CARD_TYPE] in CARD_TYPES_ENCOUNTER_SET_NUMBER and
+                  row[CARD_SPHERE] not in ('Boon', 'Burden')) or
+                 (row[BACK_PREFIX + CARD_TYPE] in
+                  CARD_TYPES_ENCOUNTER_SET_NUMBER and
+                  row[BACK_PREFIX + CARD_SPHERE] not in ('Boon', 'Burden')))):
             row[CARD_ENCOUNTER_SET_TOTAL] = encounter_sets.get(
                 (row[CARD_SET], row[CARD_ENCOUNTER_SET]), 0)
 
@@ -3520,7 +3536,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL
+        elif (card_type in CARD_TYPES_DOUBLESIDE_MANDATORY
               and card_type_back is not None and card_type_back != card_type):
             message = 'Incorrect card type back for row #{}{}'.format(
                 i, row_info)
@@ -3529,8 +3545,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL
-              and card_type_back in CARD_TYPES_DOUBLESIDE_OPTIONAL):
+        elif (card_type not in CARD_TYPES_DOUBLESIDE_MANDATORY
+              and card_type_back in CARD_TYPES_DOUBLESIDE_MANDATORY):
             message = 'Incorrect card type back for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -3583,7 +3599,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL:
+        if not is_doubleside(card_type, card_type_back):
             if card_type_back == 'Ship Objective':
                 spheres_back = SPHERES_SHIP_OBJECTIVE.copy()
             elif card_type_back in CARD_TYPES_PLAYER_SPHERE:
@@ -6491,7 +6507,8 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
                   or row[BACK_PREFIX + CARD_NAME])
         if card_type in ('Campaign', 'Nightmare'):
             properties.append((CARD_ENGAGEMENT, 'A'))
-        elif card_type == 'Contract' and side_b:
+        elif (card_type == 'Contract' and
+              row[BACK_PREFIX + CARD_TYPE] == 'Contract'):
             properties.append((CARD_ENGAGEMENT, 'A'))
 
         fix_linebreaks = card_type not in ('Presentation', 'Rules')
@@ -6534,7 +6551,10 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 if value != '':
                     properties.append((name, value))
 
-            if card_type in ('Campaign', 'Nightmare', 'Contract'):
+            if card_type in ('Campaign', 'Nightmare'):
+                properties.append((CARD_ENGAGEMENT, 'B'))
+            elif (card_type == 'Contract' and
+                  row[BACK_PREFIX + CARD_TYPE] == 'Contract'):
                 properties.append((CARD_ENGAGEMENT, 'B'))
 
             if properties:
@@ -7727,7 +7747,8 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
     card_data = DATA[:]
     for row in DATA:
         if (row[BACK_PREFIX + CARD_NAME] is not None and
-                row[CARD_TYPE] not in CARD_TYPES_DOUBLESIDE_OPTIONAL):
+                not is_doubleside(row[CARD_TYPE],
+                                  row[BACK_PREFIX + CARD_TYPE])):
             new_row = row.copy()
             new_row[CARD_NAME] = new_row[BACK_PREFIX + CARD_NAME]
             new_row[CARD_DOUBLESIDE] = 'B'
@@ -7815,7 +7836,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
         if row.get(CARD_DOUBLESIDE) is not None:
             card_side = row[CARD_DOUBLESIDE]
         elif (row[BACK_PREFIX + CARD_NAME] is not None and
-              card_type not in CARD_TYPES_DOUBLESIDE_OPTIONAL):
+              not is_doubleside(card_type, row[BACK_PREFIX + CARD_TYPE])):
             card_side = 'A'
         else:
             card_side = None
@@ -7823,7 +7844,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
         if (translated_row.get(BACK_PREFIX + CARD_NAME) is not None and
                 translated_row[BACK_PREFIX + CARD_NAME] !=
                 translated_row.get(CARD_NAME, '') and
-                card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL):
+                is_doubleside(card_type, row[BACK_PREFIX + CARD_TYPE])):
             opposite_title = translated_row[BACK_PREFIX + CARD_NAME]
         else:
             opposite_title = None
@@ -7872,7 +7893,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
 
         if card_type in ('Presentation', 'Rules'):
             victory_points = None
-        elif card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL:
+        elif is_doubleside(card_type, row[BACK_PREFIX + CARD_TYPE]):
             victory_points = (
                 _handle_int_str(translated_row.get(CARD_VICTORY))
                 or _handle_int_str(translated_row.get(
@@ -7912,7 +7933,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
                  (card_type in ('Presentation', 'Rules')
                   and translated_row.get(BACK_PREFIX + CARD_VICTORY)
                   is not None)) and
-                card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL):
+                is_doubleside(card_type, row[BACK_PREFIX + CARD_TYPE])):
             text_back = _update_card_text(
                 translated_row.get(BACK_PREFIX + CARD_TEXT) or '',
                 fix_linebreaks=fix_linebreaks
@@ -7930,7 +7951,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
                                     ).replace('\n', '\r\n').strip())
         if (translated_row.get(BACK_PREFIX + CARD_NAME) is not None and
                 translated_row.get(BACK_PREFIX + CARD_FLAVOUR) is not None and
-                card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL):
+                is_doubleside(card_type, row[BACK_PREFIX + CARD_TYPE])):
             flavor_back = _update_card_text(
                 translated_row[BACK_PREFIX + CARD_FLAVOUR],
                 skip_rules=True,
@@ -8061,7 +8082,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 french_row.get(CARD_KEYWORDS) or '',
                 french_row.get(CARD_TEXT) or '')).strip()
 
-            if ((row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL or
+            if ((is_doubleside(row[CARD_TYPE], row[BACK_PREFIX + CARD_TYPE]) or
                  row[BACK_PREFIX + CARD_NAME] is not None) and
                     french_row.get(BACK_PREFIX + CARD_TEXT)):
                 text_back = _update_french_card_text('{}\n\n{}'.format(
@@ -8142,7 +8163,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 french_row.get(CARD_KEYWORDS) or '',
                 french_row.get(CARD_TEXT) or '')).strip()
 
-            if ((row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL
+            if ((is_doubleside(row[CARD_TYPE], row[BACK_PREFIX + CARD_TYPE])
                  or row[BACK_PREFIX + CARD_NAME] is not None) and
                     french_row.get(BACK_PREFIX + CARD_TEXT)):
                 text_back = _update_french_card_text('{}\n\n{}'.format(
@@ -8280,7 +8301,8 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
     data = DATA[:]
     for row in DATA:
         if (row[BACK_PREFIX + CARD_NAME] is not None and
-                row[CARD_TYPE] not in CARD_TYPES_DOUBLESIDE_OPTIONAL):
+                not is_doubleside(row[CARD_TYPE],
+                                  row[BACK_PREFIX + CARD_TYPE])):
             new_row = row.copy()
             new_row[CARD_NAME] = new_row[BACK_PREFIX + CARD_NAME]
             new_row[CARD_DOUBLESIDE] = 'B'
@@ -8325,7 +8347,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                             spanish_row[key])
 
             name = spanish_row.get(CARD_NAME)
-            if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL and
+            if (is_doubleside(row[CARD_TYPE], row[BACK_PREFIX + CARD_TYPE]) and
                     spanish_row.get(BACK_PREFIX + CARD_NAME) and
                     spanish_row[BACK_PREFIX + CARD_NAME] != name):
                 name = '{} / {}'.format(name,
@@ -8348,7 +8370,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 engagement = handle_int(row[CARD_ENGAGEMENT])
                 threat = handle_int(row[CARD_THREAT])
 
-            if row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL:
+            if is_doubleside(row[CARD_TYPE], row[BACK_PREFIX + CARD_TYPE]):
                 victory_points = (
                     handle_int(spanish_row.get(BACK_PREFIX + CARD_VICTORY))
                     if spanish_row.get(BACK_PREFIX + CARD_VICTORY) is not None
@@ -8366,7 +8388,8 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
             if spanish_row.get(CARD_SHADOW) is not None:
                 shadow = _update_card_text(spanish_row.get(CARD_SHADOW),
                                            lang='Spanish').strip()
-            elif (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL and
+            elif (is_doubleside(row[CARD_TYPE],
+                                row[BACK_PREFIX + CARD_TYPE]) and
                   spanish_row.get(BACK_PREFIX + CARD_TEXT) is not None):
                 shadow = _update_card_text('{}\n\n{}'.format(
                     spanish_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
@@ -8456,7 +8479,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
             if text:
                 text = '<p>{}</p>'.format(text.replace('\n', '</p><p>'))
 
-            if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL and
+            if (is_doubleside(row[CARD_TYPE], row[BACK_PREFIX + CARD_TYPE]) and
                     spanish_row.get(BACK_PREFIX + CARD_TEXT)):
                 text_back = _update_card_text('{}\n\n{}'.format(
                     spanish_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
@@ -8482,7 +8505,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
             if flavor:
                 flavor = '<p>{}</p>'.format(flavor.replace('\n', '</p><p>'))
 
-            if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_OPTIONAL and
+            if (is_doubleside(row[CARD_TYPE], row[BACK_PREFIX + CARD_TYPE]) and
                     spanish_row.get(BACK_PREFIX + CARD_FLAVOUR)):
                 flavor_back = _update_card_text(
                     spanish_row[BACK_PREFIX + CARD_FLAVOUR], lang='Spanish',
@@ -10823,17 +10846,24 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
             alternate = alternate[0]
             custom_images = custom_images.union(
                 _extract_custom_images(alternate))
+            card_type_back = _find_properties(alternate, 'Type')
+            card_type_back = (card_type_back[0].attrib['value']
+                              if card_type_back
+                              else '')
             data_back = _extract_image_properties(alternate)
             if data_back:
                 images['{}.B'.format(card_id)] = data_back
-            elif data and data['card_type'] in ('Quest', 'Contract'):
+            elif (data and
+                  (data['card_type'] == 'Quest' or
+                   data['card_type'] == card_type_back == 'Contract')):
                 images['{}.B'.format(card_id)] = data.copy()
 
             artist_back = _extract_artist_name(alternate)
             if artist_back:
                 artists['{}.B'.format(card_id)] = artist_back
             elif (artist and data and
-                  data['card_type'] in ('Quest', 'Contract')):
+                  (data['card_type'] == 'Quest' or
+                   data['card_type'] == card_type_back == 'Contract')):
                 artists['{}.B'.format(card_id)] = artist
 
     old_xml_path = os.path.join(SET_EONS_PATH,
@@ -10851,9 +10881,14 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
             alternate = [a for a in card if a.attrib.get('type') == 'B']
             if alternate and '{}.B'.format(card_id) in images:
                 alternate = alternate[0]
+                card_type_back = _find_properties(alternate, 'Type')
+                card_type_back = (card_type_back[0].attrib['value']
+                                  if card_type_back
+                                  else '')
                 data_back = _extract_image_properties(alternate)
                 if (not data_back and data and
-                        data['card_type'] in ('Quest', 'Contract')):
+                        (data['card_type'] == 'Quest' or
+                         data['card_type'] == card_type_back == 'Contract')):
                     data_back = data
 
                 if (data_back and data_back['snapshot'] ==
@@ -11086,7 +11121,9 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                 card_id = filename.split('----')[1][:36]
                 if filename.endswith('-2.png'):
                     card_type = card_dict[card_id][BACK_PREFIX + CARD_TYPE]
-                    if card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL:
+                    if is_doubleside(
+                            card_dict[card_id][CARD_TYPE],
+                            card_dict[card_id][BACK_PREFIX + CARD_TYPE]):
                         card_name = card_dict[card_id][CARD_NAME]
                         side = (
                             card_dict[card_id][BACK_PREFIX + CARD_ENGAGEMENT]
@@ -11099,7 +11136,9 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                       and card_id not in empty_rules_backs):
                     card_type = card_dict[card_id][CARD_TYPE]
                     card_name = card_dict[card_id][CARD_NAME]
-                    if card_type in CARD_TYPES_DOUBLESIDE_OPTIONAL:
+                    if is_doubleside(
+                            card_dict[card_id][CARD_TYPE],
+                            card_dict[card_id][BACK_PREFIX + CARD_TYPE]):
                         side = (card_dict[card_id][CARD_ENGAGEMENT] or ''
                                 if card_type == 'Quest' else 'A')
                     else:
@@ -11122,7 +11161,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                     card_suffix = CARD_TYPE_SUFFIX_HALLOFBEORN.get(card_type,
                                                                    '')
 
-                if card_suffix and side:
+                if side and card_suffix:
                     output_filename = '{}-{}{}.png'.format(
                         card_name, card_suffix, side)
                 else:

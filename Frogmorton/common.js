@@ -1,4 +1,4 @@
-var doubleSideTypes = ['Campaign', 'Contract', 'Nightmare', 'Presentation', 'Quest', 'Rules'];
+var doubleSideTypes = ['Campaign', 'Nightmare', 'Presentation', 'Quest', 'Rules'];
 var playerTypes = ['Ally', 'Attachment', 'Contract', 'Event', 'Full Art Landscape', 'Full Art Portrait', 'Hero', 'Hero Promo', 'Player Objective', 'Player Side Quest', 'Treasure'];
 var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Objective', 'Player Side Quest'];
 var landscapeTypes = ['Cave', 'Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Full Art Landscape', 'Player Side Quest', 'Region', 'Quest'];
@@ -892,6 +892,8 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 			}
 		}
 
+		let doubleSide = isDoubleSide(card['Type'], card['BType']);
+
 		if (card['Type'] == 'Quest' && card['BQuest Points']) {
 			card['Quest Points'] = card['BQuest Points'];
 		}
@@ -900,7 +902,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 			card['Text'] = ' ';
 		}
 
-		if ((doubleSideTypes.indexOf(card['Type'] + '') == -1) && card['BName'] && !card['BText']) {
+		if (!doubleSide && card['BName'] && !card['BText']) {
 			card['BText'] = ' ';
 		}
 
@@ -908,7 +910,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 			card['Artist'] = 'Unknown Artist';
 		}
 
-		if ((doubleSideTypes.indexOf(card['Type'] + '') == -1) && card['BName'] && !card['BArtist']) {
+		if (!doubleSide && card['BName'] && !card['BArtist']) {
 			card['BArtist'] = 'Unknown Artist';
 		}
 
@@ -944,7 +946,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 			}
 
 			let sides = ['front'];
-			if ((doubleSideTypes.indexOf(card['Type'] + '') == -1) && card['BName']) {
+			if (!doubleSide && card['BName']) {
 				sides.push('back');
 			}
 			for (let idx = 0; idx < sides.length; idx++) {
@@ -1032,7 +1034,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						['CollectionInfo', 'Version'],
 						['EncounterSetNumberOverwrite', 'Encounter Set Number']
 					];
-					if (doubleSideTypes.indexOf(cardType) > -1) {
+					if (doubleSide) {
 						keywordsBack = card['BKeywords'];
 						cardNameBack = card['BName'];
 						mapping = mapping.concat([
@@ -1303,7 +1305,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('SideA', markUp(translate['Side'][lang].toUpperCase() + ' A', 'Side', cardType, lang, setID));
 					s.set('SideB', markUp(translate['Side'][lang].toUpperCase() + ' B', 'Side', cardType, lang, setID));
 
-					if (card['BName']) {
+					if (card['BType'] + '' == 'Contract') {
 						s.set('Template', 'DoubleSided');
 					}
 					else {
@@ -1347,7 +1349,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					else {
 						s.set('Portrait-external-path', 'project:imagesDefault/white.jpg');
 					}
-					if ((cardType == 'Quest') || (cardType == 'Contract')) {
+					if ((cardType == 'Quest') || ((cardType == 'Contract') && (card['BType'] + '' == 'Contract'))) {
 						if (card['BArtwork'] && (card['BArtwork'] != card['Artwork'])) {
 							s.set('PortraitBack-external-path', 'project:imagesRaw/' + card['BArtwork']);
 							s.set('PortraitShare', 0);
@@ -1782,17 +1784,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					back = '-';
 					simple_back = true;
 				}
-				else if (cardType == 'Contract') {
-					if (card['BName']) {
-						back = '-';
-						simple_back = false;
-					}
-					else {
-						back = 'p';
-						simple_back = true;
-					}
-				}
-				else if (doubleSideTypes.indexOf(cardType) > -1) {
+				else if (doubleSide) {
 					back = '-';
 					simple_back = false;
 				}
@@ -1824,6 +1816,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('OptionRight-format', '<width semicondensed>');
 					s.set('OptionRight-formatEnd', '</width>');
 					s.set('TypeRenderer', cardType);
+					s.set('DoubleSide', doubleSide);
 					s.set('SuffixRenderer', suffix);
 				}
 
@@ -1836,6 +1829,18 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 		}
 	}
 	return;
+}
+
+function isDoubleSide(cardType, cardTypeBack) {
+	if (doubleSideTypes.indexOf(cardType + '') > -1) {
+		return true;
+	}
+	else if ((cardType + '' == 'Contract') && (cardTypeBack + '' == 'Contract')) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 function capitalizeWord(value) {
