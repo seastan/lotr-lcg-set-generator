@@ -832,6 +832,10 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
     var data = settings.settings;
     for (let key in data) {
         if (data.hasOwnProperty(key)) {
+            if ((data[key] == true) || (data[key] == false)) {
+                continue;
+            }
+
             if (key.match(/-region$/) || key.match(/-Body-shape$/)) {
                 data[key] = updateRegion(key, data[key]);
             }
