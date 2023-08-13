@@ -6037,7 +6037,7 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
             discord_prefix = '{} '.format(discord_prefix)
 
         category = row.get(CARD_ENCOUNTER_SET, '')
-        if not category:
+        if not category or row.get(CARD_TYPE) in CARD_TYPES_PLAYER:
             category = 'Player - {}{}'.format(discord_prefix, card_set)
         elif category != card_set:
             category = '{} ({}{})'.format(category, discord_prefix,
