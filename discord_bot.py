@@ -3680,6 +3680,7 @@ Targets removed.
                     'unexpected error: {}'.format(str(exc)))
                 return
 
+            res = res.replace('_', '\\_').replace('*', '\\*')
             await self._send_channel(message.channel, res)
         elif command.lower() == 'dragncards build':
             await self._send_channel(message.channel, 'Please wait...')
