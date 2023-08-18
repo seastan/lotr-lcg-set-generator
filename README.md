@@ -298,6 +298,7 @@ Additional steps:
 
   - `pip install -r requirements.txt`
   - `pip install discord.py==1.7.3 aiohttp`
+  - Patch discord.py package: find the folder where it's installed (something like `/usr/local/lib/python<version of Python>/dist-packages/discord`) and run: `sudo cp _discord_1_7_3_patch/* <discord.py folder>/`.
   - `sudo apt-get install nodejs npm imagemagick`
   - Download the latest stable `wkhtmltopdf` package for your platform from https://wkhtmltopdf.org/downloads.html and run `sudo apt-get install <absolute path to the package file>`.
   - `cd Renderer/; npm install fast-xml-parser he; cd ..`
