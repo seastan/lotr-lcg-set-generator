@@ -7560,7 +7560,7 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
                     and row[CARD_ID] not in SELECTED_CARDS)):
             continue
 
-        if row[CARD_TYPE] == 'Encounter Side Quest':
+        if row[CARD_TYPE] in ('Encounter Side Quest', 'Player Side Quest'):
             card_type = 'Side Quest'
         else:
             card_type = row[CARD_TYPE]
