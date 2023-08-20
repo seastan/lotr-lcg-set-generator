@@ -25,6 +25,9 @@ dragncards_hostname:
 # Discord users or roles to mention when notifying about sanity check issues
 sanity_check_users: 
 
+# Assistants to add (a comma-separated list)
+add_assistants:
+
 # Assistants to ignore (a comma-separated list)
 ignore_assistants: 
 

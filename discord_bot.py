@@ -3612,8 +3612,12 @@ Targets removed.
         ignore_assistants = {
             u.strip()
             for u in (CONF.get('ignore_assistants') or '').split(',')}
+        add_assistants = [
+            u.strip()
+            for u in (CONF.get('add_assistants') or '').split(',')]
         assistants = [m.display_name for m in self.guilds[0].members
                      if m.display_name not in ignore_assistants]
+        assistants.extend(add_assistants)
         assistants = [re.sub(r'[^\u0000-\uffff]+', '', u).strip()
                       for u in assistants]
         assistants = [re.sub(r'[,./<>?;\':"\[\]\|{}]$', '', u).strip()
