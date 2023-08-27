@@ -2022,7 +2022,8 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
                                paragraph)
             paragraph = re.sub(r'^\[i\]\[b\]Rumor\[\/b\]:', '\\*\\*\\*',
                                paragraph)
-            if re.search(r': [A-Z]', paragraph):
+            if re.search(r': [A-Z]',
+                         paragraph.replace(card[lotr.CARD_NAME], '\\*\\*\\*')):
                 data = {'name': card[lotr.CARD_NAME],
                         'field': field,
                         'text': re.sub(r'(?<=: )([A-Z][A-Za-z\'\-]+)',
