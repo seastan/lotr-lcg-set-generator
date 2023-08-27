@@ -2809,7 +2809,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
 
         if re.search(r'discards? . cards? at random', paragraph,
                      flags=re.IGNORECASE):
-            errors.append('"discard(s) _ random card(s)"')
+            errors.append('"discard(s) .. random card(s)"')
 
         if re.search(r'\(Counts as a (?:\[bi\])?Condition', paragraph):
             errors.append('"While attached... counts as a {Condition} '
@@ -2838,26 +2838,26 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                      re.sub(r'adds? [0-9X](?:\[pp\])? resources? to [^.]+ '
                             r'pool', '', paragraph, flags=re.IGNORECASE),
                      flags=re.IGNORECASE):
-            errors.append('"place(s) _ resource token(s) on"')
+            errors.append('"place(s) .. resource token(s) on"')
 
         if re.search(r'adds? [0-9X](?:\[pp\])? resource tokens? to [^.]+ pool',
                      paragraph, flags=re.IGNORECASE):
-            errors.append('"add(s) _ resource(s) to _ resource pool"')
+            errors.append('"add(s) .. resource(s) to .. resource pool"')
         elif re.search(r'adds? [0-9X](?:\[pp\])? resource tokens? to ',
                        paragraph, flags=re.IGNORECASE):
-            errors.append('"place(s) _ resource token(s) on"')
+            errors.append('"place(s) .. resource token(s) on"')
 
         if re.search(r'places? [0-9X](?:\[pp\])? resources? on [^.]+ pool',
                      paragraph, flags=re.IGNORECASE):
-            errors.append('"add(s) _ resource(s) to _ resource pool"')
+            errors.append('"add(s) .. resource(s) to .. resource pool"')
         elif re.search(r'places? [0-9X](?:\[pp\])? resources? on ',
                        paragraph, flags=re.IGNORECASE):
-            errors.append('"place(s) _ resource token(s) on"')
+            errors.append('"place(s) .. resource token(s) on"')
 
         if re.search(
                 r'places? [0-9X](?:\[pp\])? resource tokens? on [^.]+ pool',
                 paragraph, flags=re.IGNORECASE):
-            errors.append('"add(s) _ resource(s) to _ resource pool"')
+            errors.append('"add(s) .. resource(s) to .. resource pool"')
 
         if 'per player' in re.sub(r'limit [^.]+\.', '', paragraph,
                                   flags=re.IGNORECASE):
@@ -2901,7 +2901,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                               re.sub(r'cannot[^.]+unless', '', paragraph,
                                      flags=re.IGNORECASE),
                               flags=re.IGNORECASE)):
-            errors.append('"_ or more (greater)"')
+            errors.append('".. or more (greater)"')
         elif (re.search(
                 r'greater than [0-9]+(?!\[pp\])', paragraph,
                 flags=re.IGNORECASE) and
@@ -2909,7 +2909,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                               re.sub(r'cannot[^.]+unless', '', paragraph,
                                      flags=re.IGNORECASE),
                               flags=re.IGNORECASE)):
-            errors.append('"_ or more (greater)"')
+            errors.append('".. or more (greater)"')
 
         if (re.search(r'fewer than [0-9]+(?!\[pp\])', paragraph,
                       flags=re.IGNORECASE) and
@@ -2917,14 +2917,14 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                               re.sub(r'cannot[^.]+unless', '', paragraph,
                                      flags=re.IGNORECASE),
                               flags=re.IGNORECASE)):
-            errors.append('"_ or fewer (less)"')
+            errors.append('".. or fewer (less)"')
         elif (re.search(r'less than [0-9]+(?!\[pp\])', paragraph,
                         flags=re.IGNORECASE) and
                 not re.search(r'cannot[^.]+less than [0-9]+(?!\[pp\])',
                               re.sub(r'cannot[^.]+unless', '', paragraph,
                                      flags=re.IGNORECASE),
                               flags=re.IGNORECASE)):
-            errors.append('"_ or fewer (less)"')
+            errors.append('".. or fewer (less)"')
 
         if (re.search(r'cannot[^.]+ [0-9]+ or (?:more|greater)',
                       re.sub(r'cannot[^.]+unless', '', paragraph,
@@ -2958,7 +2958,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                      re.sub(r'\bfrom\b[^.]+?\bon\b', '', paragraph,
                             flags=re.IGNORECASE),
                      flags=re.IGNORECASE):
-            errors.append('"heal _ from"')
+            errors.append('"heal .. from"')
 
         if 'quest card' in paragraph:
             errors.append('redundant: "card(s)" after "quest"')
