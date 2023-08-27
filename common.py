@@ -66,10 +66,11 @@ def split_result(value):  # pylint: disable=R0912
     for i, chunk in enumerate(chunks):
         state = ''
         pos = 0
+        previous_char = ''
         while pos < len(chunk):
             char = chunk[pos]
             pos += 1
-            if char == '*':
+            if char == '*' and previous_char != '\\':
                 if (pos < len(chunk) and chunk[pos] == '*' and
                         state not in ('bi', 'i')):
                     char = 'b'
@@ -78,6 +79,8 @@ def split_result(value):  # pylint: disable=R0912
                     char = 'i'
 
                 state = CHUNK_STATE[(state, char)]
+
+            previous_char = char
 
         missing = CHUNK_MISSING[state]
         chunks[i] = chunks[i] + missing
