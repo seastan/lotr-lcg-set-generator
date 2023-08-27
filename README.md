@@ -160,7 +160,8 @@ or `bash` (Mac/Linux).  To navigate to a right folder inside your CLI you can us
   - `tts_destination_path`: path to TTS destination folder (may be empty)
   - `dragncards_remote_image_path`: remote DragnCards path to image folder
   - `dragncards_remote_json_path`: remote DragnCards path to JSON folder
-  - `dragncards_remote_deck_path`: remote DragnCards path to .o8d folder
+  - `dragncards_remote_tsv_path`: remote DragnCards path to TSV folder
+  - `dragncards_remote_deck_path`: remote DragnCards path to .O8D folder
   - `reprocess_all`: whether to reprocess all cards (`true`) or update only the cards, changed since the previous script run (`false`)
   - `reprocess_all_on_error`: whether to reprocess all cards even when reprocess_all=false if the previous script run didn't succeed (true or false)
   - `selected_only`: process only "selected" rows (true or false)

@@ -480,7 +480,7 @@ DISCORD_CARD_DATA_RAW_PATH = os.path.join(DISCORD_PATH, 'Data',
 DISCORD_TIMESTAMPS_PATH = os.path.join(DISCORD_PATH, 'Data', 'timestamps.json')
 DOWNLOAD_PATH = 'Download'
 DOWNLOAD_TIME_PATH = os.path.join(DATA_PATH, 'download_time.txt')
-DRAGNCARDS_FILES_JSON_PATH = os.path.join(DATA_PATH, 'dragncards_files.json')
+DRAGNCARDS_FILES_CHECKSUM_PATH = os.path.join(DATA_PATH, 'dragncards_files.json')
 DRAGNCARDS_FOLDER_PATH = os.path.join(TEMP_ROOT_PATH, 'dragncards_folder.txt')
 DRAGNCARDS_TIMESTAMPS_JSON_PATH = os.path.join(DATA_PATH,
                                                'dragncards_timestamps.json')
@@ -12918,7 +12918,8 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
     """ Uploading decks and JSON files to DragnCards.
     """
     try:
-        with open(DRAGNCARDS_FILES_JSON_PATH, 'r', encoding='utf-8') as fobj:
+        with open(DRAGNCARDS_FILES_CHECKSUM_PATH, 'r',
+                  encoding='utf-8') as fobj:
             checksums = json.load(fobj)
     except Exception:
         checksums = {}
@@ -12997,6 +12998,31 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
                     conf,
                     output_path,
                     conf['dragncards_remote_json_path'])
+
+        for set_id, set_name in sets:
+            output_path = os.path.join(
+                OUTPUT_DRAGNCARDS_PATH,
+                escape_filename(set_name),
+                '{}.tsv'.format(set_id))
+            if (conf['dragncards_remote_tsv_path'] and
+                    conf['dragncards_json'] and
+                    os.path.exists(output_path)):
+                with open(output_path, 'rb') as fobj:
+                    content = fobj.read()
+
+                checksum = hashlib.md5(content).hexdigest()
+                if checksum == checksums.get(output_path):
+                    continue
+
+                changes = True
+                checksums[output_path] = checksum
+
+                client, scp_client = _scp_upload(
+                    client,
+                    scp_client,
+                    conf,
+                    output_path,
+                    conf['dragncards_remote_tsv_path'])
     finally:
         try:
             client.close()
@@ -13004,7 +13030,8 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
             pass
 
     if changes:
-        with open(DRAGNCARDS_FILES_JSON_PATH, 'w', encoding='utf-8') as fobj:
+        with open(DRAGNCARDS_FILES_CHECKSUM_PATH, 'w',
+                  encoding='utf-8') as fobj:
             json.dump(checksums, fobj)
 
     return changes
