@@ -7203,9 +7203,8 @@ def generate_octgn_o8d(conf, set_id, set_name):
 def _needed_for_ringsdb(card):
     """ Check whether a card is needed for RingsDB or not.
     """
-    return ((card.get(CARD_TYPE) in CARD_TYPES_PLAYER or
-             card.get(CARD_SPHERE) in ('Boon', 'Burden')) and
-            'Promo' not in extract_flags(card.get(CARD_FLAGS)))
+    return (card.get(CARD_TYPE) in CARD_TYPES_PLAYER or
+             card.get(CARD_SPHERE) in ('Boon', 'Burden'))
 
 
 def _needed_for_frenchdb(card):
@@ -7240,9 +7239,14 @@ def _needed_for_spanishdb(card):
 def _ringsdb_code(row):
     """ Return the card's RingsDB code.
     """
-    card_number = (str(int(row[CARD_NUMBER])).zfill(3)
-                   if is_positive_or_zero_int(row[CARD_NUMBER])
-                   else '000')
+    if is_positive_or_zero_int(row[CARD_NUMBER]):
+        card_number = str(int(row[CARD_NUMBER])).zfill(3)
+    elif re.match(r'^0\.[0-9a-h]$', str(row[CARD_NUMBER]),
+                  flags=re.IGNORECASE):
+        card_number = str(
+            999 - 16 + int(str(row[CARD_NUMBER])[-1], 16)).zfill(3)
+    else:
+        card_number = '000'
     code = '{}{}'.format(row[CARD_SET_RINGSDB_CODE], card_number)
     return code
 
@@ -7343,19 +7347,13 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                     fix_linebreaks=False)
                 flavor = '{}\n{}'.format(flavor, flavor_back)
 
-            position = (int(row[CARD_NUMBER])
-                        if is_positive_or_zero_int(row[CARD_NUMBER]) else 0)
-            position = (row[CARD_PRINTED_NUMBER]
-                        if (row[CARD_PRINTED_NUMBER] is not None and
-                            is_positive_or_zero_int(row[CARD_PRINTED_NUMBER]))
-                        else position)
-
+            ringsdb_code = _ringsdb_code(row)
             csv_row = {
                 'pack': set_name,
                 'type': card_type,
                 'sphere': sphere,
-                'position': position,
-                'code': _ringsdb_code(row),
+                'position': int(ringsdb_code[-3:]),
+                'code': ringsdb_code,
                 'name': row[CARD_NAME].replace('’', "'"),
                 'traits': _update_card_text(row[CARD_TRAITS] or '',
                                             skip_rules=True,
