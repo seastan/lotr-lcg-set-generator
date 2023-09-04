@@ -6436,8 +6436,7 @@ def _needed_for_octgn(card):
 def _needed_for_dragncards(card):
     """ Check whether a card is needed for DragnCards or not.
     """
-    return ('Promo' not in extract_flags(card[CARD_FLAGS]) and
-            card[CARD_TYPE] not in ('Full Art Landscape',
+    return (card[CARD_TYPE] not in ('Full Art Landscape',
                                     'Full Art Portrait', 'Presentation') and
             not (card[CARD_TYPE] == 'Rules' and card[CARD_SPHERE] == 'Back'))
 
@@ -6922,7 +6921,8 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                     'sets', 'encounter sets', 'prefix', 'external xml',
                     'remove', 'second quest deck', 'special',
                     'second special', 'setup', 'active setup',
-                    'staging setup', 'player'):
+                    'staging setup', 'player', 'main quest', 'extra1',
+                    'extra2', 'extra3', 'extra4'):
                 errors.append('Unknown key "{}"'.format(key))
                 continue
 
@@ -7022,12 +7022,17 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
             attachment_cards = []
             event_cards = []
             side_quest_cards = []
+            main_quest_cards = []
+            extra1_cards = []
+            extra2_cards = []
+            extra3_cards = []
+            extra4_cards = []
             for card in cards:
                 if not card[CARD_ENCOUNTER_SET]:
                     other_cards.append(_update_card_for_rules(card.copy()))
                 elif card[CARD_TYPE] in ('Campaign', 'Nightmare', 'Quest'):
                     quest_cards.append(_update_card_for_rules(card.copy()))
-                elif card[CARD_TYPE] in ('Presentation', 'Rules'):
+                elif card[CARD_TYPE] == 'Rules':
                     default_setup_cards.append(
                         _update_card_for_rules(card.copy()))
                 elif mode == EASY_PREFIX and card[CARD_EASY_MODE]:
@@ -7068,8 +7073,42 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                 elif key == 'player':
                     mode_errors.extend(_apply_rules(
                         other_cards, chosen_player_cards, value, key))
+                elif key == 'main quest':
+                    mode_errors.extend(_apply_rules(
+                        quest_cards, main_quest_cards, value, key))
+                elif key == 'extra1':
+                    mode_errors.extend(_apply_rules(
+                        quest_cards + default_setup_cards + encounter_cards +
+                        other_cards, setup_cards, value, key))
+                elif key == 'extra2':
+                    mode_errors.extend(_apply_rules(
+                        quest_cards + default_setup_cards + encounter_cards +
+                        other_cards, setup_cards, value, key))
+                elif key == 'extra3':
+                    mode_errors.extend(_apply_rules(
+                        quest_cards + default_setup_cards + encounter_cards +
+                        other_cards, setup_cards, value, key))
+                elif key == 'extra4':
+                    mode_errors.extend(_apply_rules(
+                        quest_cards + default_setup_cards + encounter_cards +
+                        other_cards, setup_cards, value, key))
 
             setup_cards.extend(default_setup_cards)
+
+            if len(main_quest_cards) > 1:
+                mode_errors.append('More than one card in Main Quest section')
+
+            quest_cards.extend(main_quest_cards)
+            main_quest_cards = []
+
+            corrected_setup_cards = []
+            for card in setup_cards:
+                if card[CARD_TYPE] == 'quest':
+                    quest_cards.append(card)
+                else:
+                    corrected_setup_cards.append(card)
+
+            setup_cards = corrected_setup_cards
 
             for section in (
                     encounter_cards, special_cards, second_special_cards,
@@ -11362,7 +11401,7 @@ def generate_dragncards_hq(conf, set_id, set_name, lang, card_data):  # pylint: 
 
     card_ids = {row[CARD_ID] for row in card_data
                 if row[CARD_SET] == set_id
-                and _needed_for_octgn(row)}
+                and _needed_for_dragncards(row)}
 
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:
@@ -11425,7 +11464,7 @@ def generate_octgn(conf, set_id, set_name, lang, card_data):  # pylint: disable=
 
     card_ids = {row[CARD_ID] for row in card_data
                 if row[CARD_SET] == set_id
-                and _needed_for_octgn(row)}
+                and (_needed_for_octgn(row) or _needed_for_dragncards(row))}
 
     for _, _, filenames in os.walk(input_path):
         for filename in filenames:

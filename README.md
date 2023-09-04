@@ -590,14 +590,14 @@ List of available sphere values:
 
 **Deck Rules**
 
-OCTGN `.o8d` files are generated automatically for each scenario detected on `Quest` and `Nightmare` cards.
-By default, the deck includes all cards, which share both the set and encounter set from the
-"parent" `Quest` or `Nightmare` card (including encounter sets from `Additional Encounter Sets` column).
-All `Quest`, `Nightmare`, and `Campaign` cards are put into `Quest` section, all `Rules`
-cards are put into `Setup` section and all encounter cards are put into `Encounter` section.
-The filename of the deck is the same as `Adventure` value (`Quest` cards) or `Name` value (`Nightmare` cards)
-with all spaces replaced with `-`.  Easy mode version is generated automatically if any card included
-in the deck has a different quantity for the normal and easy modes.
+OCTGN `.o8d` and DragnCards `.json` deck files are generated automatically for each scenario detected
+on `Quest` and `Nightmare` cards.  By default, the deck includes all cards, which share both the set
+and encounter set from the "parent" `Quest` or `Nightmare` card (including encounter sets from
+`Additional Encounter Sets` column).  All `Quest`, `Nightmare`, and `Campaign` cards are put into
+`Quest` section, all `Rules` cards are put into `Setup` section and all encounter cards are put into
+`Encounter` section.  The filename of the deck is the same as `Adventure` value (`Quest` cards) or
+`Name` value (`Nightmare` cards) with all spaces replaced with `-`.  Easy mode version is generated
+automatically if any card included in the deck has a different quantity for the normal and easy modes.
 
 To adjust the deck, you need to describe the rules in `Deck Rules` column (for a corresponding `Quest`
 or `Nightmare` card).  The rules are separated by a line break.  If you want to create several decks
@@ -638,7 +638,10 @@ Below is a list of all supported rules:
 - `Remove`: List of filters to select cards that need to be removed from the deck.  For example:
   `Remove: Type:Campaign` (remove any cards with `Campaign` type from the normal deck).
 - `Second Quest Deck`, `Special`, `Second Special`, `Setup`, `Staging Setup`, and `Active Setup`:
-  List of filters to select cards for that section.  For example: `Setup: Saruman; Grima; Brandywine Gate`.
+  List of filters to select cards for that OCTGN section.  For example: `Setup: Saruman; Grima; Brandywine Gate`.
+- `Main Quest`, `Extra1`, `Extra2`, `Extra3`, and `Extra4`: List of filters to select cards for that DragnCards-only section.
+  For example: `Main Quest: Drive Them Away`.  Please note that all `Main Quest` cards are put into `Quest` OCTGN section and
+  all `ExtraN` cards are put into either `Quest` or `Setup` OCTGN sections, depending on the card type.
 - `Player`: List of filters to select cards for `Hero`, `Ally`, `Attachment`, `Event`, and `Side Quest`
   sections (exact section is defined automatically).  For example: `Player: Frodo Baggins`.
 
