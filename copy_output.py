@@ -108,7 +108,8 @@ def main():  # pylint: disable=R0912
         if subfolder == 'DragnCards':
             for _, _, filenames in os.walk(destination_path):
                 for filename in filenames:
-                    if filename.endswith('json.release'):
+                    if (filename.endswith('json.release') or
+                            filename.endswith('tsv.release')):
                         shutil.move(
                             os.path.join(destination_path, filename),
                             os.path.join(destination_path,
