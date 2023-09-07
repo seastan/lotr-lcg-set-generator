@@ -9802,7 +9802,7 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disab
     known_keys = set()
     input_cnt = 0
     for _, _, filenames in os.walk(input_path):
-        filenames = sorted(filenames)
+        filenames = sorted(filenames, key=lambda f: f.rsplit('.', 1)[0])
         for filename in filenames:
             if not filename.endswith('.png'):
                 continue
@@ -9873,7 +9873,7 @@ def generate_png480_dragncards_hq(set_id, set_name, lang, skip_ids):
                               '{}.{}'.format(set_id, lang))
     known_keys = set()
     for _, _, filenames in os.walk(input_path):
-        filenames = sorted(filenames)
+        filenames = sorted(filenames, key=lambda f: f.rsplit('.', 1)[0])
         for filename in filenames:
             if not filename.endswith('.png'):
                 continue
@@ -9906,7 +9906,7 @@ def generate_png300_octgn(set_id, set_name, lang, skip_ids):
                               '{}.{}'.format(set_id, lang))
     known_keys = set()
     for _, _, filenames in os.walk(input_path):
-        filenames = sorted(filenames)
+        filenames = sorted(filenames, key=lambda f: f.rsplit('.', 1)[0])
         for filename in filenames:
             if not filename.endswith('.png'):
                 continue
@@ -9942,7 +9942,7 @@ def generate_png800_rules_pdf(set_id, set_name, lang, skip_ids, card_data):  # p
                    if c[CARD_SET] == set_id and
                    c[CARD_TYPE] == 'Rules' and c[CARD_SPHERE] != 'Back'}
     for _, _, filenames in os.walk(input_path):
-        filenames = sorted(filenames)
+        filenames = sorted(filenames, key=lambda f: f.rsplit('.', 1)[0])
         for filename in filenames:
             if not filename.endswith('.png'):
                 continue
@@ -11054,7 +11054,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
 
         create_folder(output_path)
         clear_folder(output_path)
-        filenames = sorted(filenames)
+        filenames = sorted(filenames, key=lambda f: f.rsplit('.', 1)[0])
         for filename in filenames:
             if not filename.endswith('.png'):
                 continue
@@ -11148,6 +11148,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
 
         known_output_filenames = set()
         for _, _, filenames in os.walk(output_path):
+            filenames = sorted(filenames, key=lambda f: f.rsplit('.', 1)[0])
             for filename in filenames:
                 if not filename.endswith('.png'):
                     continue
@@ -11425,7 +11426,7 @@ def generate_dragncards_hq(conf, set_id, set_name, lang, card_data):  # pylint: 
             break
 
         create_folder(output_path)
-        filenames = sorted(filenames)
+        filenames = sorted(filenames, key=lambda f: f.rsplit('.', 1)[0])
         for filename in filenames:
             if filename.split('.')[-1] != 'jpg':
                 continue
@@ -11492,7 +11493,7 @@ def generate_octgn(conf, set_id, set_name, lang, card_data):  # pylint: disable=
             break
 
         create_folder(output_path)
-        filenames = sorted(filenames)
+        filenames = sorted(filenames, key=lambda f: f.rsplit('.', 1)[0])
         with zipfile.ZipFile(pack_path, 'w') as zip_obj:
             for filename in filenames:
                 if filename.split('.')[-1] != 'jpg':
