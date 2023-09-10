@@ -10805,9 +10805,17 @@ def _extract_image_properties(root):
     card_type = card_type[0].attrib['value'] if card_type else ''
     card_sphere = _find_properties(root, 'Sphere')
     card_sphere = card_sphere[0].attrib['value'] if card_sphere else ''
+    flags = _find_properties(root, 'Flags')
+    if (flags and 'Promo' in [
+            f.strip() for f in flags[0].attrib['value'].split(';')]):
+        flags = 'Promo'
+    else:
+        flags = ''
+
     data = {'path': artwork_path,
             'card_type': card_type,
             'card_sphere': card_sphere,
+            'flags': flags,
             'panx': panx,
             'pany': pany,
             'scale': scale,
@@ -11426,6 +11434,7 @@ def generate_dragncards_hq(conf, set_id, set_name, lang, card_data):  # pylint: 
             break
 
         create_folder(output_path)
+        clear_folder(output_path)
         filenames = sorted(filenames, key=lambda f: f.rsplit('.', 1)[0])
         for filename in filenames:
             if filename.split('.')[-1] != 'jpg':

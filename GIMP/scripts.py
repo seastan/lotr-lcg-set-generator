@@ -697,6 +697,7 @@ def generate_renderer_artwork(json_path, output_folder):  # pylint: disable=R091
     portrait['Enemy NoStat'] = '0,0,413,563'
     portrait['Event'] = '60,0,353,330'
     portrait['Hero'] = '87,0,326,330'
+    portrait['Hero Promo'] = '0,0,413,563'
     portrait['Location'] = '0,60,413,268'
     portrait['Nightmare'] = '0,77,413,245'
     portrait['Objective'] = '0,69,413,300'
@@ -725,7 +726,9 @@ def generate_renderer_artwork(json_path, output_folder):  # pylint: disable=R091
     for card_id, data in images.items():
         card_type = data['card_type']
         if data['card_sphere'] == 'NoStat':
-            card_type = '{} {}'.format(card_type, data['card_sphere'])
+            card_type = '%s %s' % (card_type, data['card_sphere'])
+        elif data['flags'] == 'Promo':
+            card_type = '%s Promo' % (card_type,)
 
         if card_type not in portrait:
             print('ERROR: incorrect card type: %s' % (card_type,))
