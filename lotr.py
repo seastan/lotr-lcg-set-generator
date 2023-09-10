@@ -7280,7 +7280,7 @@ def _ringsdb_code(row):
     """
     if is_positive_or_zero_int(row[CARD_NUMBER]):
         card_number = str(int(row[CARD_NUMBER])).zfill(3)
-    elif re.match(r'^0\.[0-9a-h]$', str(row[CARD_NUMBER]),
+    elif re.match(r'^0\.[0-9a-f]$', str(row[CARD_NUMBER]),
                   flags=re.IGNORECASE):
         card_number = str(
             999 - 16 + int(str(row[CARD_NUMBER])[-1], 16)).zfill(3)
