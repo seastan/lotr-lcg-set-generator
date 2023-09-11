@@ -172,7 +172,7 @@ function round(value, digits) {
     return +value.toFixed(digits);
 }
 
-function updateRegion(key, value) {
+function updateRegion(key, value, card_type) {
     var regions = value.split(',');
     if (regions.length == 5) {
         regions = [regions[1], regions[2], regions[3], regions[4]];
@@ -199,6 +199,10 @@ function updateRegion(key, value) {
         regions[0] -= 1;
         regions[2] += 2;
         regions[3] += 1;
+    }
+
+    if ((sizeKey == 'Type') && (card_type == 'Hero Promo')) {
+        regions[2] += 10;
     }
 
     return regions;
@@ -349,6 +353,11 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
+            if (data.TypeRenderer == 'Hero Promo') {
+                return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['Artist-region'][3] + 'px">' +
+                    data['Bottom-format'] + data['LRL-IllustratorShort'] + ' ' + data.Artist + data['Bottom-formatEnd'] + '</div>';
+            }
+
             return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['Artist-region'][3] + 'px">' +
                 data['Bottom-format'] + data['LRL-IllustratorShort'] + ' ' + data.Artist + data['Bottom-formatEnd'] + '</div>';
         },
@@ -411,12 +420,22 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
+            if (data.TypeRenderer == 'Hero Promo') {
+                return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionInfo-region'][3] + 'px">' +
+                    data['Bottom-format'] + data.CollectionInfo + data['Bottom-formatEnd'] + '</div>';
+            }
+
             return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionInfo-region'][3] + 'px">' +
                 data['Bottom-format'] + data.CollectionInfo + data['Bottom-formatEnd'] + '</div>';
         },
         'CollectionNumber': function(data) {
             if ((data.CollectionNumberCustom + '' == '') && (data.CollectionNumberCustomOverwrite + '' == '')) {
                 return '';
+            }
+
+            if (data.TypeRenderer == 'Hero Promo') {
+                return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionNumber-region'][3] + 'px; padding-left: 2px">' +
+                    data['Bottom-format'] + (data.CollectionNumberCustomOverwrite + '' || data.CollectionNumberCustom) + data['Bottom-formatEnd'] + '</div>';
             }
 
             return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionNumber-region'][3] + 'px">' +
@@ -429,6 +448,11 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
             if (parseInt(data.NoCopyright) == 1) {
                 return '';
+            }
+
+            if (data.TypeRenderer == 'Hero Promo') {
+                return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['Copyright-region'][3] + 'px">' +
+                    data['Bottom-format'] + data.Copyright + data['Bottom-formatEnd'] + '</div>';
             }
 
             return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['Copyright-region'][3] + 'px">' +
@@ -837,7 +861,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             }
 
             if (key.match(/-region$/) || key.match(/-Body-shape$/)) {
-                data[key] = updateRegion(key, data[key]);
+                data[key] = updateRegion(key, data[key], data.TypeRenderer);
             }
             else {
                 data[key] = convertTags(data[key]);
