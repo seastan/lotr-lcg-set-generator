@@ -172,7 +172,7 @@ or `bash` (Mac/Linux).  To navigate to a right folder inside your CLI you can us
   - `ignore_set_ids`: list of set IDs to ignore
   - `set_ids_octgn_image_destination`: list of set IDs to copy to OCTGN image destination
   - `octgn_set_xml`: creating `set.xml` files for OCTGN (true or false)
-  - `octgn_o8d`: creating `.o8d` files for OCTGN and DragnCards (true or false)
+  - `octgn_o8d`: creating O8D and JSON files for OCTGN and DragnCards (true or false)
   - `ringsdb_csv`: creating CSV files for RingsDB (true or false)
   - `dragncards_json`: creating JSON and TSV files for DragnCards (true or false)
   - `hallofbeorn_json`: creating JSON files for Hall of Beorn (true or false)
@@ -405,7 +405,8 @@ If you want to add a new MakePlayingCards deck to monitoring, run:
 The scripts will generate the following outputs:
 
 - `Output/DB/<set name>.<language>/`: 300 dpi PNG images for general purposes (including TTS).
-- `Output/DragnCards/<set name>/<set name>.json`: an output file for DragnCards.
+- `Output/DragnCards/<set name>/<set name>.json`: a JSON output file for DragnCards.
+- `Output/DragnCards/<set name>/<set name>.tsv`: a TSV output file for DragnCards.
 - `Output/DragnCardsHQ/<set name>/`: 480 dpi JPG images for DragnCards.
 - `Output/FrenchDB/<set name>/`: CSV files for French database sda.cgbuilder.fr.
 - `Output/FrenchDBImages/<set name>.<language>/`: 300 dpi PNG images for French database (the same as `Output/DB`, but differently named).
@@ -419,6 +420,7 @@ The scripts will generate the following outputs:
 - `Output/MBPrintPDF/<set name>.<language>/`: a `7z` archive of a PDF file to be printed on MBPrint.pl (800 dpi CMYK (U.S. Web Coated (SWOP) v2)
   JPG images with bleed margins).
 - `Output/OCTGN/<set name>/<octgn id>/set.xml`: an output file for OCTGN.
+- `Output/OCTGNDecks/<set name>/<deck name>.json`: quest decks for DragnCards.
 - `Output/OCTGNDecks/<set name>/<deck name>.o8d`: quest decks for OCTGN and DragnCards.
 - `Output/OCTGNImages/<set name>.<language>/<set name>.<language>.o8c`: image packs for OCTGN and DragnCards (600x429 JPG images).
 - `Output/PDF/<set name>.<language>/`: PDF files in `A4` and `letter` format for home printing (300 dpi PNG images with bleed margins).
@@ -590,7 +592,7 @@ List of available sphere values:
 
 **Deck Rules**
 
-OCTGN `.o8d` and DragnCards `.json` deck files are generated automatically for each scenario detected
+OCTGN/DragnCards `.o8d` and DragnCards `.json` deck files are generated automatically for each scenario detected
 on `Quest` and `Nightmare` cards.  By default, the deck includes all cards, which share both the set
 and encounter set from the "parent" `Quest` or `Nightmare` card (including encounter sets from
 `Additional Encounter Sets` column).  All `Quest`, `Nightmare`, and `Campaign` cards are put into

@@ -425,7 +425,7 @@ PLAYTEST_SUFFIX = '-Playtest'
 SCRATCH_FOLDER = '_Scratch'
 TEXT_CHUNK_FLAG = b'tEXt'
 
-DECK_PREFIX_REGEX = r'^[QN][A-Z0-9][A-Z0-9]\.[0-9][0-9]?[\- ]'
+DECK_PREFIX_REGEX = r'^[QN][A-Z0-9][A-Z0-9]\.[0-9][0-9]?(?:[\- ]|$)'
 KEYWORDS_REGEX = (r'^(?: ?[A-Z][A-Za-z\'\-]+(?: [0-9X]+(?:\[pp\])?)?\.|'
                   r' ?Guarded \(enemy\)\.| ?Guarded \(location\)\.|'
                   r' ?Guarded \(enemy or location\)\.| ?Fate -1\.)+$')
@@ -6735,7 +6735,20 @@ def _update_card_for_rules(card):
     return card
 
 
-def _append_cards(parent, cards):
+def _append_cards(res, cards, group_name):
+    """ Append cards for the section.
+    """
+    cards = [c for c in cards if is_int(c[CARD_QUANTITY]) and
+             c[CARD_QUANTITY] > 0]
+    for card in cards:
+        res.append({'databaseId': card[CARD_ID],
+                    'quantity': int(card[CARD_QUANTITY]),
+                    'loadGroupId': group_name,
+                    '_name': card[CARD_ORIGINAL_NAME]
+                    })
+
+
+def _append_cards_octgn(parent, cards):
     """ Append card elements to the section element.
     """
     cards = [c for c in cards if is_int(c[CARD_QUANTITY]) and
@@ -6837,37 +6850,6 @@ def _apply_rules(source_cards, target_cards, rules, rule_type):
     return errors
 
 
-def _generate_octgn_o8d_player(conf, set_id, set_name):
-    """ Generate .o8d file with player cards for OCTGN.
-    """
-    rows = [row for row in DATA
-            if row[CARD_ID] is not None
-            and _needed_for_octgn(row)
-            and row[CARD_SET] == set_id
-            and row[CARD_TYPE] in CARD_TYPES_PLAYER
-            and (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)]
-    if not rows:
-        return
-
-    cards = [_update_card_for_rules(r.copy()) for r in rows]
-    root = ET.fromstring(O8D_TEMPLATE)
-    _append_cards(root.findall("./section[@name='Hero']")[0], cards)
-
-    output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
-                               escape_filename(set_name))
-    create_folder(output_path)
-    filename = escape_octgn_filename(
-        'Player-{}.o8d'.format(escape_filename(set_name)))
-    with open(
-            os.path.join(output_path, filename),
-            'w', encoding='utf-8') as obj:
-        res = ET.tostring(root, encoding='utf-8').decode('utf-8')
-        res = res.replace('<notes />', '<notes><![CDATA[]]></notes>')
-        obj.write('<?xml version="1.0" encoding="utf-8" standalone="yes"?>')
-        obj.write('\n')
-        obj.write(res)
-
-
 def _filter_section_cards(section):
     """ Group similar cards and remove cards with quantity=0.
     """
@@ -6885,8 +6867,39 @@ def _filter_section_cards(section):
     section[:] = list(cards.values())
 
 
+def _generate_octgn_o8d_player(conf, set_id, set_name):
+    """ Generate O8D file with player cards for OCTGN.
+    """
+    rows = [row for row in DATA
+            if row[CARD_ID] is not None
+            and _needed_for_octgn(row)
+            and row[CARD_SET] == set_id
+            and row[CARD_TYPE] in CARD_TYPES_PLAYER
+            and (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)]
+    if not rows:
+        return
+
+    cards = [_update_card_for_rules(r.copy()) for r in rows]
+    root = ET.fromstring(O8D_TEMPLATE)
+    _append_cards_octgn(root.findall("./section[@name='Hero']")[0], cards)
+
+    output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
+                               escape_filename(set_name))
+    create_folder(output_path)
+    filename = escape_octgn_filename(
+        'Player-{}.o8d'.format(escape_filename(set_name)))
+    with open(
+            os.path.join(output_path, filename),
+            'w', encoding='utf-8') as obj:
+        res = ET.tostring(root, encoding='utf-8').decode('utf-8')
+        res = res.replace('<notes />', '<notes><![CDATA[]]></notes>')
+        res = """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+{}""".format(res)
+        obj.write(res)
+
+
 def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
-    """ Generate .o8d file for the quest(s).
+    """ Generate O8D and JSON files for the quest(s).
     """
     errors = []
     files = []
@@ -6956,7 +6969,7 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
             rules[(key.lower(), key_count[key.lower()])] = value
 
         if rules.get(('prefix', 0)):
-            quest['prefix'] = rules[('prefix', 0)][0] + ' '
+            quest['prefix'] = rules[('prefix', 0)][0]
             quest['prefix'] = quest['prefix'][:6].upper() + quest['prefix'][6:]
 
         if not quest['prefix']:
@@ -7096,57 +7109,54 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                 elif key == 'extra1':
                     mode_errors.extend(_apply_rules(
                         quest_cards + default_setup_cards + encounter_cards +
-                        other_cards, setup_cards, value, key))
+                        other_cards, extra1_cards, value, key))
                 elif key == 'extra2':
                     mode_errors.extend(_apply_rules(
                         quest_cards + default_setup_cards + encounter_cards +
-                        other_cards, setup_cards, value, key))
+                        other_cards, extra2_cards, value, key))
                 elif key == 'extra3':
                     mode_errors.extend(_apply_rules(
                         quest_cards + default_setup_cards + encounter_cards +
-                        other_cards, setup_cards, value, key))
+                        other_cards, extra3_cards, value, key))
                 elif key == 'extra4':
                     mode_errors.extend(_apply_rules(
                         quest_cards + default_setup_cards + encounter_cards +
-                        other_cards, setup_cards, value, key))
+                        other_cards, extra4_cards, value, key))
 
             setup_cards.extend(default_setup_cards)
 
             if len(main_quest_cards) > 1:
                 mode_errors.append('More than one card in Main Quest section')
 
-            quest_cards.extend(main_quest_cards)
-            main_quest_cards = []
+            quest_cards_octgn = copy.deepcopy(quest_cards)
+            quest_cards_octgn.extend(main_quest_cards)
+            main_quest_cards = copy.deepcopy(main_quest_cards)
 
-            corrected_setup_cards = []
-            for card in setup_cards:
+            setup_cards_octgn = copy.deepcopy(setup_cards)
+            for card in (extra1_cards + extra2_cards + extra3_cards +
+                         extra4_cards):
                 if card[CARD_TYPE] == 'quest':
-                    quest_cards.append(card)
+                    quest_cards_octgn.append(card)
                 else:
-                    corrected_setup_cards.append(card)
+                    setup_cards_octgn.append(card)
 
-            setup_cards = corrected_setup_cards
+            extra1_cards = copy.deepcopy(extra1_cards)
+            extra2_cards = copy.deepcopy(extra2_cards)
+            extra3_cards = copy.deepcopy(extra3_cards)
+            extra4_cards = copy.deepcopy(extra4_cards)
 
             for section in (
-                    encounter_cards, special_cards, second_special_cards,
-                    setup_cards, staging_setup_cards, active_setup_cards,
-                    chosen_player_cards):
+                    quest_cards, second_quest_cards, encounter_cards,
+                    special_cards, second_special_cards, setup_cards,
+                    staging_setup_cards, active_setup_cards, main_quest_cards,
+                    extra1_cards, extra2_cards, extra3_cards, extra4_cards,
+                    chosen_player_cards, quest_cards_octgn, setup_cards_octgn):
                 _filter_section_cards(section)
                 section.sort(key=lambda card: (
-                    card[CARD_TYPE] not in ('presentation', 'rules'),
-                    card[CARD_TYPE],
-                    card[CARD_SET_NAME],
-                    is_positive_or_zero_int(card[CARD_NUMBER])
-                    and int(card[CARD_NUMBER]) or 0,
-                    card[CARD_NUMBER],
-                    card[CARD_NAME]))
-
-            for section in (quest_cards, second_quest_cards):
-                _filter_section_cards(section)
-                section.sort(key=lambda card: (
+                    card[CARD_TYPE] != 'rules',
                     card[CARD_TYPE] not in ('campaign', 'nightmare'),
                     card[CARD_TYPE],
-                    card[CARD_COST] or 0,
+                    card[CARD_TYPE] == 'quest' and (card[CARD_COST] or 0) or 0,
                     card[CARD_SET_NAME],
                     is_positive_or_zero_int(card[CARD_NUMBER])
                     and int(card[CARD_NUMBER]) or 0,
@@ -7171,45 +7181,62 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                                 card[CARD_TYPE].title()))
 
             root = ET.fromstring(O8D_TEMPLATE)
-            _append_cards(root.findall("./section[@name='Quest']")[0],
-                          quest_cards)
-            _append_cards(
-                root.findall("./section[@name='Second Quest Deck']")[0],
-                second_quest_cards)
-            _append_cards(root.findall("./section[@name='Encounter']")[0],
-                          encounter_cards)
-            _append_cards(root.findall("./section[@name='Special']")[0],
-                          special_cards)
-            _append_cards(root.findall("./section[@name='Second Special']")[0],
-                          second_special_cards)
-            _append_cards(root.findall("./section[@name='Setup']")[0],
-                          setup_cards)
-            _append_cards(root.findall("./section[@name='Staging Setup']")[0],
-                          staging_setup_cards)
-            _append_cards(root.findall("./section[@name='Active Setup']")[0],
-                          active_setup_cards)
-            _append_cards(root.findall("./section[@name='Hero']")[0],
-                          hero_cards)
-            _append_cards(root.findall("./section[@name='Ally']")[0],
-                          ally_cards)
-            _append_cards(root.findall("./section[@name='Attachment']")[0],
-                          attachment_cards)
-            _append_cards(root.findall("./section[@name='Event']")[0],
-                          event_cards)
-            _append_cards(root.findall("./section[@name='Side Quest']")[0],
-                          side_quest_cards)
+            for path, section in (
+                    ("./section[@name='Hero']", hero_cards),
+                    ("./section[@name='Ally']", ally_cards),
+                    ("./section[@name='Attachment']", attachment_cards),
+                    ("./section[@name='Event']", event_cards),
+                    ("./section[@name='Side Quest']", side_quest_cards),
+                    ("./section[@name='Quest']", quest_cards_octgn),
+                    ("./section[@name='Second Quest Deck']",
+                     second_quest_cards),
+                    ("./section[@name='Encounter']", encounter_cards),
+                    ("./section[@name='Special']", special_cards),
+                    ("./section[@name='Second Special']",
+                     second_special_cards),
+                    ("./section[@name='Setup']", setup_cards_octgn),
+                    ("./section[@name='Staging Setup']", staging_setup_cards),
+                    ("./section[@name='Active Setup']", active_setup_cards)):
+                _append_cards_octgn(root.findall(path)[0], section)
 
             if mode == EASY_PREFIX and quest['prefix'].startswith('Q'):
-                filename = escape_octgn_filename(
-                    '{}{}{}.o8d'.format('E', quest['prefix'][1:],
-                                        escape_filename(quest['name'])))
+                prefix = '{}{}'.format('E', quest['prefix'][1:])
             else:
-                filename = escape_octgn_filename(
-                    '{}{}{}.o8d'.format(mode, quest['prefix'],
-                                        escape_filename(quest['name'])))
+                prefix = '{}{}'.format(mode, quest['prefix'])
 
+            filename = escape_octgn_filename(
+                '{} {}.o8d'.format(prefix, escape_filename(quest['name'])))
             res = ET.tostring(root, encoding='utf-8').decode('utf-8')
             res = res.replace('<notes />', '<notes><![CDATA[]]></notes>')
+            res = """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+{}""".format(res)
+            files.append((filename, res))
+
+            filename = re.sub(r'\.o8d$', '.json', filename)
+            res = []
+            for section, group_name in (
+                    (chosen_player_cards, 'player1Play1'),
+                    (main_quest_cards, 'sharedMainQuest'),
+                    (quest_cards, 'sharedQuestDeck'),
+                    (second_quest_cards, 'sharedQuestDeck2'),
+                    (encounter_cards, 'sharedEncounterDeck'),
+                    (special_cards, 'sharedEncounterDeck2'),
+                    (second_special_cards, 'sharedEncounterDeck3'),
+                    (setup_cards, 'sharedSetAside'),
+                    (extra1_cards, 'sharedExtra1'),
+                    (extra2_cards, 'sharedExtra2'),
+                    (extra3_cards, 'sharedExtra3'),
+                    (extra4_cards, 'sharedExtra4'),
+                    (staging_setup_cards, 'sharedStagingArea'),
+                    (active_setup_cards, 'sharedActiveLocation')):
+                _append_cards(res, section, group_name)
+
+            res = {'preBuiltDecks': {
+                prefix: {'label': quest['name'], 'cards': res}}}
+            res = json.dumps(res, ensure_ascii=True, indent=4)
+            res = re.sub(r'(?<=,)\n                    ([^\n]+)', ' \\1', res)
+            res = res.replace('{\n                    ', '{')
+            res = res.replace('\n                }', '}')
             files.append((filename, res))
 
             if mode == EASY_PREFIX:
@@ -7222,10 +7249,10 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
 
 
 def generate_octgn_o8d(conf, set_id, set_name):
-    """ Generate .o8d files for OCTGN and DragnCards.
+    """ Generate O8D and JSON files for OCTGN and DragnCards.
     """
-    logging.info('[%s] Generating .o8d files for OCTGN and DragnCards...',
-                 set_name)
+    logging.info('[%s] Generating O8D and JSON files for OCTGN and '
+                 'DragnCards...', set_name)
     timestamp = time.time()
 
     files = []
@@ -7247,15 +7274,13 @@ def generate_octgn_o8d(conf, set_id, set_name):
         with open(
                 os.path.join(output_path, filename),
                 'w', encoding='utf-8') as obj:
-            obj.write(
-                '<?xml version="1.0" encoding="utf-8" standalone="yes"?>')
-            obj.write('\n')
             obj.write(res)
 
     _generate_octgn_o8d_player(conf, set_id, set_name)
 
-    logging.info('[%s] ...Generating .o8d files for OCTGN and DragnCards '
-                 '(%ss)', set_name, round(time.time() - timestamp, 3))
+    logging.info('[%s] ...Generating O8D and JSON files for OCTGN and '
+                 'DragnCards (%ss)', set_name,
+                 round(time.time() - timestamp, 3))
 
 
 def _needed_for_ringsdb(card):
@@ -12469,7 +12494,7 @@ def _copy_octgn_set_xml_outputs(temp_path, destination_path, sets):
 
 
 def _copy_octgn_o8d_outputs(temp_path, destination_path, sets):
-    """ Copy OCTGN .o8d files to the destination folder.
+    """ Copy OCTGN O8D files to the destination folder.
     """
     set_folders = {escape_filename(SETS[s]['Name']) for s in sets}
     archive_path = os.path.join(temp_path, 'copy_octgn_o8d_outputs.zip')
@@ -12981,7 +13006,7 @@ def _upload_dragncards_rendered_images(conf):
 
 
 def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R0914,R0915
-    """ Uploading decks and JSON files to DragnCards.
+    """ Uploading O8D, JSON and TSV files to DragnCards.
     """
     try:
         with open(DRAGNCARDS_FILES_CHECKSUM_PATH, 'r',

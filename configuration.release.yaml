@@ -85,7 +85,7 @@ set_ids_octgn_image_destination:
 # Creating set.xml files for OCTGN (true or false)
 octgn_set_xml: true
 
-# Creating .o8d files for OCTGN and DragnCards (true or false)
+# Creating O8D and JSON files for OCTGN and DragnCards (true or false)
 octgn_o8d: true
 
 # Creating CSV files for RingsDB (true or false)
