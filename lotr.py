@@ -6868,6 +6868,23 @@ def _generate_octgn_o8d_player(conf, set_id, set_name):
         obj.write(res)
 
 
+def _filter_section_cards(section):
+    """ Group similar cards and remove cards with quantity=0.
+    """
+    cards = {}
+    for card in section:
+        if card[CARD_QUANTITY] <= 0:
+            continue
+
+        if card[CARD_ID] in cards:
+            cards[card[CARD_ID]][CARD_QUANTITY] += card[CARD_QUANTITY]
+            continue
+
+        cards[card[CARD_ID]] = card
+
+    section[:] = list(cards.values())
+
+
 def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
     """ Generate .o8d file for the quest(s).
     """
@@ -7114,6 +7131,7 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                     encounter_cards, special_cards, second_special_cards,
                     setup_cards, staging_setup_cards, active_setup_cards,
                     chosen_player_cards):
+                _filter_section_cards(section)
                 section.sort(key=lambda card: (
                     card[CARD_TYPE] not in ('presentation', 'rules'),
                     card[CARD_TYPE],
@@ -7124,6 +7142,7 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                     card[CARD_NAME]))
 
             for section in (quest_cards, second_quest_cards):
+                _filter_section_cards(section)
                 section.sort(key=lambda card: (
                     card[CARD_TYPE] not in ('campaign', 'nightmare'),
                     card[CARD_TYPE],
