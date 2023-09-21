@@ -388,6 +388,7 @@ DRAGNCARDS_PLAYS_STAT_COMMAND = \
     '/home/webhost/python/AR/plays_stat.sh "{}" "{}" "{}"'
 DRAGNCARDS_QUESTS_STAT_COMMAND = \
     '/home/webhost/python/AR/quests_stat.sh "{}"'
+DRAGNCARDS_FILES_COMMAND = '/home/webhost/python/AR/list_files.sh'
 DRAGNCARDS_BUILD_STAT_COMMAND = \
     '/var/www/dragncards.com/dragncards/frontend/buildStat.sh'
 DRAGNCARDS_BUILD_TRIGGER_COMMAND = \
@@ -396,8 +397,6 @@ DRAGNCARDS_IMAGES_FINISH_COMMAND = \
     '/var/www/dragncards.com/dragncards/frontend/imagesFinish.sh'
 DRAGNCARDS_IMAGES_START_COMMAND = \
     '/var/www/dragncards.com/dragncards/frontend/imagesStart.sh'
-DRAGNCARDS_FILES_COMMAND = \
-    'ls /var/www/dragncards.com/dragncards/frontend/src/cardDB/ALeP/'
 GENERATE_DRAGNCARDS_COMMAND = './generate_dragncards.sh {}'
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}{}*.jpg"'
@@ -12725,12 +12724,15 @@ def copy_tts_outputs(conf, sets):
                  round(time.time() - timestamp, 3))
 
 
-def _get_ssh_client(conf):
+def _get_ssh_client(conf, beta=False):
     """ Get SCP client.
     """
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     parts = conf.get('dragncards_hostname', '').split('@')
+    if beta:
+        parts[1] = 'beta.{}'.format(parts[1])
+
     client.connect(parts[1], username=parts[0],
                    key_filename=conf.get('dragncards_id_rsa_path', ''),
                    timeout=30)
@@ -12922,7 +12924,8 @@ def _read_remote_dragncards_folder():
     return remote_folder
 
 
-def _scp_upload(client, scp_client, conf, source_path, destination_path):
+def _scp_upload(client, scp_client, conf, source_path, destination_path,  # pylint: disable=R0913
+                beta=False):
     """ Upload a file to DragnCards host using SCP.
     """
     logging.info('Uploading %s', source_path)
@@ -12938,7 +12941,7 @@ def _scp_upload(client, scp_client, conf, source_path, destination_path):
                     pass
 
                 time.sleep(SCP_SLEEP * (i + 1))
-                client = _get_ssh_client(conf)
+                client = _get_ssh_client(conf, beta=beta)
                 scp_client = SCPClient(client.get_transport())
             else:
                 raise
@@ -13130,7 +13133,15 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
                     conf,
                     output_path,
                     conf['dragncards_remote_json_path'])
+    finally:
+        try:
+            client.close()
+        except Exception:
+            pass
 
+    client = _get_ssh_client(conf, beta=True)
+    try:
+        scp_client = SCPClient(client.get_transport())
         for set_id, set_name in sets:
             output_path = os.path.join(
                 OUTPUT_DRAGNCARDS_PATH,
@@ -13154,7 +13165,8 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
                     scp_client,
                     conf,
                     output_path,
-                    conf['dragncards_remote_tsv_path'])
+                    conf['dragncards_remote_tsv_path'],
+                    beta=True)
     finally:
         try:
             client.close()

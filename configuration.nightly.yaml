@@ -40,14 +40,17 @@ tts_destination_path: C:\Google Drive\TTS
 # Remote DragnCards path to image folder
 dragncards_remote_image_path: /mnt/volume_postgres/cards/English/
 
-# Remote DragnCards path to JSON folder
+# Remote DragnCards 1.0 path to set JSON folder
 dragncards_remote_json_path: /var/www/dragncards.com/dragncards/frontend/src/cardDB/ALeP/
 
-# Remote DragnCards path to TSV folder
-dragncards_remote_tsv_path: /mnt/volume_postgres/tsv/unreleased/
+# Remote DragnCards 2.0 path to set TSV folder
+dragncards_remote_tsv_path: /var/www/dragncards.com/dragncards-lotrlcg-plugin-alep/tsvs/
 
-# Remote DragnCards path to .O8D folder
+# Remote DragnCards 1.0 path to deck O8D folder
 dragncards_remote_deck_path: /var/www/dragncards.com/Lord-of-the-Rings/o8g/Decks/Quests/QPT-AleP-Playtest/
+
+# Remote DragnCards 2.0 path to deck JSON folder
+dragncards_remote_deck_json_path: /var/www/dragncards.com/dragncards-lotrlcg-plugin-alep/jsons/
 
 # Whether to reprocess all cards (true)
 # or update only the cards, changed since the previous script run (false)
