@@ -7238,8 +7238,16 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                     (active_setup_cards, 'sharedActiveLocation')):
                 _append_cards(res, section, group_name)
 
+            if prefix[0] == 'E':
+                name_suffix = ' (Easy)'
+            elif prefix[0] == 'N':
+                name_suffix = ' (Nightmare)'
+            else:
+                name_suffix = ''
+
             res = {'preBuiltDecks': {
-                prefix: {'label': quest_name, 'cards': res}}}
+                prefix: {'label': '{}{}'.format(quest_name, name_suffix),
+                         'cards': res}}}
             res = json.dumps(res, ensure_ascii=True, indent=4)
             res = re.sub(r'(?<=,)\n                    ([^\n]+)', ' \\1', res)
             res = res.replace('{\n                    ', '{')
