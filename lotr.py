@@ -13063,6 +13063,7 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
     client = _get_ssh_client(conf)
     try:  # pylint: disable=R1702
         scp_client = SCPClient(client.get_transport())
+
         for _, set_name in sets:
             output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
                                        escape_filename(set_name))
@@ -13140,8 +13141,43 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
             pass
 
     client = _get_ssh_client(conf, beta=True)
-    try:
+    try:  # pylint: disable=R1702
         scp_client = SCPClient(client.get_transport())
+
+        for _, set_name in sets:
+            output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
+                                       escape_filename(set_name))
+            if (conf['dragncards_remote_deck_json_path'] and
+                    conf['octgn_o8d'] and os.path.exists(output_path)):
+                for _, _, filenames in os.walk(output_path):
+                    for filename in filenames:
+                        if not filename.endswith('.json'):
+                            continue
+
+                        if filename.startswith('Player-'):
+                            continue
+
+                        file_path = os.path.join(output_path, filename)
+                        with open(file_path, 'rb') as fobj:
+                            content = fobj.read()
+
+                        checksum = hashlib.md5(content).hexdigest()
+                        if checksum == checksums.get(file_path):
+                            continue
+
+                        changes = True
+                        checksums[file_path] = checksum
+
+                        client, scp_client = _scp_upload(
+                            client,
+                            scp_client,
+                            conf,
+                            file_path,
+                            conf['dragncards_remote_deck_json_path'],
+                            beta=True)
+
+                    break
+
         for set_id, set_name in sets:
             output_path = os.path.join(
                 OUTPUT_DRAGNCARDS_PATH,
