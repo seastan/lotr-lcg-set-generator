@@ -630,7 +630,7 @@ Setup: Saruman; Grima; Brandywine Gate
 Below is a list of all supported rules:
 
 - `Prefix`: A **mandatory** filename prefix.  It must start with:
-  `<either "Q" (normal mode) or "N" (nightmare mode)><two capital letters and/or numbers>.<one or two numbers><end of string, space or dash>`.
+  `<either "Q" (normal mode) or "N" (nightmare mode)><two capital letters and/or numbers>.<one or two numbers><end of string or dash>`.
   For example, `Prefix: Q0B.19-Standalone` will result in a filename like `Q0B.19-Standalone-The-Scouring-of-the-Shire.o8d`.
 - `Sets`: Additional sets to be included.  For example: `Sets: ALeP - Children of Eorl`.
 - `Encounter Sets`: Additional encounter sets to be included.  For example:
@@ -699,7 +699,7 @@ Player: Frodo Baggins
 ```
 
 ```
-Prefix: N01.5 Nightmare
+Prefix: N01.5-Nightmare
 External XML: https://raw.githubusercontent.com/seastan/Lord-of-the-Rings/master/o8g/Sets/Core%20Set/set.xml; https://raw.githubusercontent.com/seastan/Lord-of-the-Rings/master/o8g/Sets/Conflict%20at%20the%20Carrock/set.xml; https://raw.githubusercontent.com/seastan/Lord-of-the-Rings/master/o8g/Sets/Shadows%20of%20Mirkwood%20-%20Nightmare/set.xml
 Sets: Core Set; Conflict at the Carrock; Shadows of Mirkwood - Nightmare
 Encounter Sets: Journey Down the Anduin; Wilderlands; Conflict at the Carrock; Conflict at the Carrock - Nightmare

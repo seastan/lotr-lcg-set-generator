@@ -416,6 +416,7 @@ PNG_300_MIN_SIZE = 50000
 PNG_480_MIN_SIZE = 300000
 PNG_800_MIN_SIZE = 2000000
 
+DRAGNCARDS_MENU_LABEL = 'ALeP - Playtest'
 EASY_PREFIX = 'Easy '
 GENERATED_FOLDER = 'generated'
 IMAGES_CUSTOM_FOLDER = 'custom'
@@ -425,7 +426,7 @@ PLAYTEST_SUFFIX = '-Playtest'
 SCRATCH_FOLDER = '_Scratch'
 TEXT_CHUNK_FLAG = b'tEXt'
 
-DECK_PREFIX_REGEX = r'^[QN][A-Z0-9][A-Z0-9]\.[0-9][0-9]?(?:[\- ]|$)'
+DECK_PREFIX_REGEX = r'^[QN][A-Z0-9][A-Z0-9]\.[0-9][0-9]?(?:-|$)'
 KEYWORDS_REGEX = (r'^(?: ?[A-Z][A-Za-z\'\-]+(?: [0-9X]+(?:\[pp\])?)?\.|'
                   r' ?Guarded \(enemy\)\.| ?Guarded \(location\)\.|'
                   r' ?Guarded \(enemy or location\)\.| ?Fate -1\.)+$')
@@ -5614,7 +5615,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 deck_rules.add(quest_id)
 
-            deck_rules_errors = _generate_octgn_o8d_quest(row)[1]
+            deck_rules_errors = _generate_octgn_o8d_quest(row)[2]
             for error in deck_rules_errors:
                 message = '{} in deck rules in row #{}{}'.format(
                     error, i, row_info)
@@ -6933,6 +6934,7 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
             quests.append(new_quest)
 
     prefixes = set()
+    menus = {}
     for quest in quests:
         rules_list = [r.split(':', 1)
                       for r in str(quest['rules']).split('\n')]
@@ -7031,7 +7033,7 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                           .format(item))
 
         if [c for c in cards if c[CARD_EASY_MODE]]:
-            quest['modes'].append(EASY_PREFIX)
+            quest['modes'].insert(0, EASY_PREFIX)
 
         for mode in quest['modes']:
             mode_errors = []
@@ -7204,8 +7206,13 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
             else:
                 prefix = '{}{}'.format(mode, quest['prefix'])
 
-            filename = escape_octgn_filename(
-                '{} {}.o8d'.format(prefix, escape_filename(quest['name'])))
+            parts = prefix.split('-', 1)
+            prefix = parts[0]
+            name_prefix = '{} '.format(parts[1]) if len(parts) == 2 else ''
+            quest_name = '{}{}'.format(name_prefix, quest['name'])
+
+            filename = escape_octgn_filename(escape_filename(
+                '{} {}.o8d'.format(prefix, quest_name)))
             res = ET.tostring(root, encoding='utf-8').decode('utf-8')
             res = res.replace('<notes />', '<notes><![CDATA[]]></notes>')
             res = """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
@@ -7232,12 +7239,27 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                 _append_cards(res, section, group_name)
 
             res = {'preBuiltDecks': {
-                prefix: {'label': quest['name'], 'cards': res}}}
+                prefix: {'label': quest_name, 'cards': res}}}
             res = json.dumps(res, ensure_ascii=True, indent=4)
             res = re.sub(r'(?<=,)\n                    ([^\n]+)', ' \\1', res)
             res = res.replace('{\n                    ', '{')
             res = res.replace('\n                }', '}')
             files.append((filename, res))
+
+            if prefix[0] == 'E':
+                label = 'id:easy'
+            elif prefix[0] == 'N':
+                label = 'id:nightmare'
+            else:
+                label = 'id:normal'
+
+            if quest_name in menus:
+                menus[quest_name]['deckLists'].append(
+                    {'label': label, 'deckListId': prefix})
+            else:
+                menus[quest_name]= {
+                    'label': quest_name,
+                    'deckLists': [{'label': label, 'deckListId': prefix}]}
 
             if mode == EASY_PREFIX:
                 mode_errors = ['{} in easy mode'.format(e)
@@ -7245,7 +7267,8 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
 
             errors.extend(mode_errors)
 
-    return (files, errors)
+    menus = list(menus.values())
+    return (files, menus, errors)
 
 
 def generate_octgn_o8d(conf, set_id, set_name):
@@ -7256,18 +7279,21 @@ def generate_octgn_o8d(conf, set_id, set_name):
     timestamp = time.time()
 
     files = []
+    menus = []
     rows = [row for row in DATA
             if row[CARD_SET] == set_id
             and row[CARD_TYPE] in CARD_TYPES_DECK_RULES
             and row[CARD_DECK_RULES]
             and (not conf['selected_only'] or row[CARD_ID] in SELECTED_CARDS)]
     for row in rows:
-        files.extend(_generate_octgn_o8d_quest(row)[0])
+        res = _generate_octgn_o8d_quest(row)
+        files.extend(res[0])
+        menus.extend(res[1])
 
     output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
                                escape_filename(set_name))
     clear_folder(output_path)
-    if files:
+    if files or menus:
         create_folder(output_path)
 
     for filename, res in files:
@@ -7275,6 +7301,13 @@ def generate_octgn_o8d(conf, set_id, set_name):
                 os.path.join(output_path, filename),
                 'w', encoding='utf-8') as obj:
             obj.write(res)
+
+    if menus:
+        json_data = {'deckMenu': {
+            'subMenus': [{'label': DRAGNCARDS_MENU_LABEL, 'subMenus': menus}]}}
+        with open(os.path.join(output_path, '{}.menu.json'.format(set_id)),
+                  'w', encoding='utf-8') as obj:
+            json.dump(json_data, obj, ensure_ascii=True, indent=4)
 
     _generate_octgn_o8d_player(conf, set_id, set_name)
 
