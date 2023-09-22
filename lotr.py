@@ -9683,7 +9683,7 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
             output_cnt += 1
             if os.path.getsize(os.path.join(temp_path2, filename)
                                ) < PNG_300_MIN_SIZE:
-                raise GIMPError('GIMP failed for {}'.format(
+                raise GIMPError('Suspicious output file size for {}'.format(
                     os.path.join(temp_path2, filename)))
 
         break
@@ -9760,7 +9760,7 @@ def generate_png480_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
             output_cnt += 1
             if os.path.getsize(os.path.join(temp_path2, filename)
                                ) < PNG_480_MIN_SIZE:
-                raise GIMPError('GIMP failed for {}'.format(
+                raise GIMPError('Suspicious output file size for {}'.format(
                     os.path.join(temp_path2, filename)))
 
         break
@@ -9838,7 +9838,7 @@ def generate_png800_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
             output_cnt += 1
             if os.path.getsize(os.path.join(temp_path2, filename)
                                ) < PNG_800_MIN_SIZE:
-                raise GIMPError('GIMP failed for {}'.format(
+                raise GIMPError('Suspicious output file size for {}'.format(
                     os.path.join(temp_path2, filename)))
 
         break
@@ -9916,7 +9916,7 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disab
             output_cnt += 1
             if os.path.getsize(os.path.join(temp_path2, filename)
                                ) < PNG_300_MIN_SIZE:
-                raise GIMPError('GIMP failed for {}'.format(
+                raise GIMPError('Suspicious output file size for {}'.format(
                     os.path.join(temp_path2, filename)))
 
         break
@@ -10110,7 +10110,7 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
             output_cnt += 1
             if os.path.getsize(os.path.join(temp_path2, filename)
                                ) < PNG_300_MIN_SIZE:
-                raise GIMPError('GIMP failed for {}'.format(
+                raise GIMPError('Suspicious output file size for {}'.format(
                     os.path.join(temp_path2, filename)))
 
         break
@@ -10158,7 +10158,7 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
             output_cnt += 1
             if os.path.getsize(os.path.join(temp_path3, filename)
                                ) < PNG_300_MIN_SIZE:
-                raise GIMPError('GIMP failed for {}'.format(
+                raise GIMPError('Suspicious output file size for {}'.format(
                     os.path.join(temp_path3, filename)))
 
         break
@@ -10242,7 +10242,7 @@ def generate_png800_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
             output_cnt += 1
             if os.path.getsize(os.path.join(temp_path2, filename)
                                ) < PNG_800_MIN_SIZE:
-                raise GIMPError('GIMP failed for {}'.format(
+                raise GIMPError('Suspicious output file size for {}'.format(
                     os.path.join(temp_path2, filename)))
 
         break
@@ -10290,7 +10290,7 @@ def generate_png800_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
             output_cnt += 1
             if os.path.getsize(os.path.join(temp_path3, filename)
                                ) < PNG_800_MIN_SIZE:
-                raise GIMPError('GIMP failed for {}'.format(
+                raise GIMPError('Suspicious output file size for {}'.format(
                     os.path.join(temp_path3, filename)))
 
         break
@@ -10374,7 +10374,7 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
             output_cnt += 1
             if os.path.getsize(os.path.join(temp_path2, filename)
                                ) < PNG_800_MIN_SIZE:
-                raise GIMPError('GIMP failed for {}'.format(
+                raise GIMPError('Suspicious output file size for {}'.format(
                     os.path.join(temp_path2, filename)))
 
         break
@@ -10450,7 +10450,7 @@ def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint:
             output_cnt += 1
             if os.path.getsize(os.path.join(temp_path2, filename)
                                ) < JPG_300_MIN_SIZE:
-                raise GIMPError('GIMP failed for {}'.format(
+                raise GIMPError('Suspicious output file size for {}'.format(
                     os.path.join(temp_path2, filename)))
 
         break
@@ -10529,7 +10529,7 @@ def generate_jpg800_bleedmbprint(conf, set_id, set_name, lang, skip_ids):  # pyl
             output_cnt += 1
             if os.path.getsize(os.path.join(temp_path2, filename)
                                ) < JPG_800_MIN_SIZE:
-                raise GIMPError('GIMP failed for {}'.format(
+                raise GIMPError('Suspicious output file size for {}'.format(
                     os.path.join(temp_path2, filename)))
 
         break
@@ -10607,7 +10607,7 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
             output_cnt += 1
             if os.path.getsize(os.path.join(temp_path2, filename)
                                ) < PNG_800_MIN_SIZE:
-                raise GIMPError('GIMP failed for {}'.format(
+                raise GIMPError('Suspicious output file size for {}'.format(
                     os.path.join(temp_path2, filename)))
 
         break
@@ -10853,8 +10853,9 @@ def generate_tts(conf, set_id, set_name, lang, card_dict, scratch):  # pylint: d
                 output_cnt += 1
                 if os.path.getsize(os.path.join(output_path, filename)
                                    ) < JPG_300_MIN_SIZE:
-                    raise GIMPError('GIMP failed for {}'.format(
-                        os.path.join(output_path, filename)))
+                    raise GIMPError(
+                        'Suspicious output file size for {}'.format(
+                            os.path.join(output_path, filename)))
 
             break
 
