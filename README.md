@@ -346,6 +346,7 @@ Additional steps:
   - `*/2 * * * *   <path>/monitor_discord_changes.sh >> <path>/cron.log 2>&1`
   - `36 9 * * *    <path>/monitor_remote_pipeline.sh >> <path>/cron.log 2>&1`
   - `36 8 * * *    <path>/monitor_wordpress_site.sh >> <path>/cron.log 2>&1`
+  - `36 7 * * *    <path>/monitor_mpc_url_format.sh >> <path>/cron.log 2>&1`
   - `0 1 * * *     <path>/monitor_wordpress_token.sh >> <path>/cron.log 2>&1`
   - `*/5 * * * *   <path>/mpc_monitor.sh >> <path>/cron.log 2>&1`
   - `7 0 * * *     <path>/rclone_backup.sh "<local Drive/Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
