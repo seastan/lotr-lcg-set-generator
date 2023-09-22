@@ -16,6 +16,7 @@ from lotr import monitor_images_upload
 
 
 DISCORD_CONF_PATH = 'discord.yaml'
+ALERT_SUBJECT_TEMPLATE = 'Images Upload Monitoring Cron ALERT: {}'
 ERROR_SUBJECT_TEMPLATE = 'Images Upload Monitoring Cron ERROR: {}'
 LOG_PATH = 'monitor_images_upload.log'
 MAILS_PATH = 'mails'
@@ -66,14 +67,14 @@ def get_images_upload_errors():
 def main():
     """ Main function.
     """
-    timestamp = time.time()
+    logging.info('Started')
     try:
         errors = get_images_upload_errors()
         if errors:
             message = 'Found images upload errors'
             logging.info(message)
             logging.info(errors)
-            create_mail(ERROR_SUBJECT_TEMPLATE.format(message), errors)
+            create_mail(ALERT_SUBJECT_TEMPLATE.format(message), errors)
         else:
             logging.info('No errors found')
     except Exception as exc:
@@ -84,7 +85,7 @@ def main():
         except Exception as exc_new:
             logging.exception(str(exc_new))
     finally:
-        logging.info('Done (%ss)', round(time.time() - timestamp, 3))
+        logging.info('Finished')
 
 
 if __name__ == '__main__':
