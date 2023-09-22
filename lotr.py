@@ -397,6 +397,8 @@ DRAGNCARDS_IMAGES_FINISH_COMMAND = \
     '/var/www/dragncards.com/dragncards/frontend/imagesFinish.sh'
 DRAGNCARDS_IMAGES_START_COMMAND = \
     '/var/www/dragncards.com/dragncards/frontend/imagesStart.sh'
+DRAGNCARDS_MONITOR_IMAGES_UPLOAD_COMMAND = \
+    '/var/www/dragncards.com/dragncards/frontend/monitorImagesUpload.sh'
 GENERATE_DRAGNCARDS_COMMAND = './generate_dragncards.sh {}'
 GIMP_COMMAND = '"{}" -i -b "({} 1 \\"{}\\" \\"{}\\")" -b "(gimp-quit 0)"'
 MAGICK_COMMAND_CMYK = '"{}" mogrify -profile USWebCoatedSWOP.icc "{}{}*.jpg"'
@@ -12746,6 +12748,24 @@ def list_dragncards_files(conf):
     client = _get_ssh_client(conf)
     try:
         _, res, _ = client.exec_command(DRAGNCARDS_FILES_COMMAND, timeout=30)
+        res = res.read().decode('utf-8').strip()
+        return res
+    finally:
+        try:
+            client.close()
+        except Exception:
+            pass
+
+
+def monitor_images_upload(conf):
+    """ Monitor uploading images to S3 on the DragnCards host.
+    """
+    logging.info('Running remote command: %s',
+                 DRAGNCARDS_MONITOR_IMAGES_UPLOAD_COMMAND)
+    client = _get_ssh_client(conf)
+    try:
+        _, res, _ = client.exec_command(
+            DRAGNCARDS_MONITOR_IMAGES_UPLOAD_COMMAND, timeout=30)
         res = res.read().decode('utf-8').strip()
         return res
     finally:
