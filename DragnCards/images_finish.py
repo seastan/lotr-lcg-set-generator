@@ -65,12 +65,14 @@ def main():  # pylint: disable=R0912
                     logging.info('Overwriting existing file %s',
                                  destination_path)
                     shutil.move(source_path, destination_path)
+                    os.utime(destination_path)
                 else:
                     logging.info('Skipping more recent file %s',
                                  destination_path)
             else:
                 logging.info('Moving new file %s', destination_path)
                 shutil.move(source_path, destination_path)
+                os.utime(destination_path)
 
         break
 

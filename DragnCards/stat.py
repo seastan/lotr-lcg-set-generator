@@ -158,8 +158,7 @@ def run_dragncards_query(cursor, month, next_month, offset):
     FROM replays
     WHERE inserted_at BETWEEN '{}-01' AND '{}-01'
       AND rounds > 0
-      AND (rounds > 1 OR
-           game_json::json->>'victoryState' IN ('victory', 'defeat', 'incomplete'))
+      AND (rounds > 1 OR outcome IN ('victory', 'defeat', 'incomplete'))
     ORDER BY id
     OFFSET {} limit {}
     """.format(month, next_month, offset, QUERY_LIMIT)
