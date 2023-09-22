@@ -718,7 +718,7 @@ Staging Setup: The Carrock
   `python make_unique_png.py "c:\\ALeP\\CustomPNG\\"
 - `replace_cmyk_card_backs.py`: Script to replace card backs in existing image archives.  Expects `replace_cmyk_card_backs.txt`
   with a list of direct Mediafire URLs or local file paths to `MBPrint` 7z archives.
-- `stat.py`: Collect various data from Hall of Beorn and RingsDB and put outputs into `Output/Scripts` folder.
+- `card_stat.py`: Collect various data from Hall of Beorn and RingsDB and put outputs into `Output/Scripts` folder.
 
 **GIMP Plugins**
 
