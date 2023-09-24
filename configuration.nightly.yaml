@@ -4,6 +4,9 @@ sheet_gdid: ***
 # Local path to the artwork folder
 artwork_path: C:\Google Drive\CardImages
 
+# Local path to the stable data folder
+stable_data_path: C:\Google Drive\StableData
+
 # Path to GIMP console executable
 gimp_console_path: C:\Program Files\GIMP 2\bin\gimp-console-2.10.exe
 
@@ -70,6 +73,12 @@ run_sanity_check_for_all_sets: false
 
 # Number of parallel processes to use ("default" means "cpu_count() - 1", but not more than 4)
 parallelism: default
+
+# How to use the stable data:
+# - "none" (don't use stable data)
+# - "reader" (read the latest stable data when sanity check failed)
+# - "writer" (write the stable data when sanity check passed)
+stable_data_user: reader
 
 # List of set IDs to work on
 set_ids:

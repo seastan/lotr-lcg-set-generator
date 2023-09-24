@@ -147,6 +147,7 @@ or `bash` (Mac/Linux).  To navigate to a right folder inside your CLI you can us
 
   - `sheet_gdid`: Google Sheets ID of the cards spreadsheet
   - `artwork_path`: local path to the artwork folder (don't use for that any existing folder in this repo)
+  - `stable_data_path`: local path to the stable data folder
   - `gimp_console_path`: path to GIMP console executable
   - `magick_path`: path to ImageMagick executable
   - `dragncards_id_rsa_path`: path to id_rsa key to upload files to DragnCards (may be empty)
@@ -169,6 +170,7 @@ or `bash` (Mac/Linux).  To navigate to a right folder inside your CLI you can us
   - `exit_if_no_spreadsheet_changes`: stop processing if there are no spreadsheet changes (true or false)
   - `run_sanity_check_for_all_sets`: run sanity check for all sets (true or false)
   - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`, but not more than 4)
+  - `stable_data_user`: how to use the stable data: "none" (don't use stable data), "reader" (read the latest stable data when sanity check failed), "writer" (write the stable data when sanity check passed)
   - `set_ids`: list of set IDs to work on (you can use `all` and `all_scratch` aliases to select all non-scratch and all scratch sets sutomatically)
   - `ignore_set_ids`: list of set IDs to ignore
   - `set_ids_octgn_image_destination`: list of set IDs to copy to OCTGN image destination
