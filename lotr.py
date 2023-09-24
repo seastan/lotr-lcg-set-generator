@@ -13030,17 +13030,17 @@ def upload_dragncards_images(conf, sets):
                         if filenames:
                             images_uploaded = True
 
-                        if not client:
-                            client = _get_ssh_client(conf)
-                            scp_client = SCPClient(client.get_transport())
+                            if not client:
+                                client = _get_ssh_client(conf)
+                                scp_client = SCPClient(client.get_transport())
 
-                        for filename in filenames:
-                            client, scp_client = _scp_upload(
-                                client,
-                                scp_client,
-                                conf,
-                                os.path.join(output_path, filename),
-                                remote_folder)
+                            for filename in filenames:
+                                client, scp_client = _scp_upload(
+                                    client,
+                                    scp_client,
+                                    conf,
+                                    os.path.join(output_path, filename),
+                                    remote_folder)
 
                         break
 
@@ -13076,18 +13076,18 @@ def _upload_dragncards_rendered_images(conf):
             if filenames:
                 images_uploaded = True
 
-            if not client:
-                client = _get_ssh_client(conf)
-                scp_client = SCPClient(client.get_transport())
+                if not client:
+                    client = _get_ssh_client(conf)
+                    scp_client = SCPClient(client.get_transport())
 
-            for filename in filenames:
-                client, scp_client = _scp_upload(
-                    client,
-                    scp_client,
-                    conf,
-                    os.path.join(RENDERER_OUTPUT_PATH, filename),
-                    conf['dragncards_remote_image_path'])
-                os.remove(os.path.join(RENDERER_OUTPUT_PATH, filename))
+                for filename in filenames:
+                    client, scp_client = _scp_upload(
+                        client,
+                        scp_client,
+                        conf,
+                        os.path.join(RENDERER_OUTPUT_PATH, filename),
+                        conf['dragncards_remote_image_path'])
+                    os.remove(os.path.join(RENDERER_OUTPUT_PATH, filename))
 
             break
     finally:
