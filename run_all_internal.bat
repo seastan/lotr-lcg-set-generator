@@ -3,7 +3,7 @@ for /f "usebackq tokens=*" %%i in (`python date.py`) do set date_correct=%%i
 set retry=0
 
 :start
-if %retry%==2 (
+if %retry%==3 (
   echo %date_correct% %time% exiting
   exit /b
 )
