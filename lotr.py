@@ -427,6 +427,7 @@ PLAYTEST_SUFFIX = '-Playtest'
 SCRATCH_FOLDER = '_Scratch'
 TEXT_CHUNK_FLAG = b'tEXt'
 
+CARD_NAME_REFERENCE_REGEX = r'\[\[([^\]]+)\]\]'
 DECK_PREFIX_REGEX = r'^[QN][A-Z0-9][A-Z0-9]\.[0-9][0-9]?(?:-|$)'
 KEYWORDS_REGEX = (r'^(?: ?[A-Z][A-Za-z\'\-]+(?: [0-9X]+(?:\[pp\])?)?\.|'
                   r' ?Guarded \(enemy\)\.| ?Guarded \(location\)\.|'
@@ -868,7 +869,7 @@ ALL_CARD_NAMES = set()
 ALL_SCRATCH_CARD_NAMES = set()
 ALL_TRAITS = set()
 ALL_SCRATCH_TRAITS = set()
-PRE_SANITY_CHECK = {'name': {}, 'flavour': {}}
+PRE_SANITY_CHECK = {'name': {}, 'ref': {}, 'flavour': {}}
 TRANSLATIONS = {}
 SELECTED_CARDS = set()
 FOUND_SETS = set()
@@ -2131,6 +2132,19 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                 row[key] = value
                 continue
 
+            if lang == 'English':
+                refs = re.findall(CARD_NAME_REFERENCE_REGEX, value)
+                for ref in refs:
+                    if ref not in ALL_CARD_NAMES:
+                        error = ('Invalid reference [[{}]] in {} column'
+                                 .format(ref,
+                                         key.replace(BACK_PREFIX, 'Back ')))
+                        PRE_SANITY_CHECK['ref'].setdefault(
+                            (row[ROW_COLUMN], row[CARD_SCRATCH]),
+                            []).append(error)
+
+            value = re.sub(CARD_NAME_REFERENCE_REGEX, '\\1', value)
+
             if card_name_regex:
                 if key == CARD_TEXT and re.search(card_name_regex, value):
                     prepared_value = value
@@ -2210,11 +2224,10 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                             (row[ROW_COLUMN], row[CARD_SCRATCH]),
                             []).append(error)
 
-            if key != CARD_DECK_RULES:
-                if key.startswith(BACK_PREFIX):
-                    value = value.replace('[name]', card_name_back)
-                else:
-                    value = value.replace('[name]', card_name)
+            if key.startswith(BACK_PREFIX):
+                value = value.replace('[name]', card_name_back)
+            else:
+                value = value.replace('[name]', card_name)
 
             if key in (CARD_FLAVOUR, BACK_PREFIX + CARD_FLAVOUR):
                 errors, parts, separator, dash = parse_flavour(value, lang)
@@ -2561,6 +2574,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
     DATA[:] = [row for row in DATA if not _skip_row(row)]
     _extract_all_card_names(DATA)
     PRE_SANITY_CHECK['name'].clear()
+    PRE_SANITY_CHECK['ref'].clear()
     PRE_SANITY_CHECK['flavour'].clear()
     _clean_data(conf, DATA, 'English')
 
@@ -3305,6 +3319,12 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         for error in PRE_SANITY_CHECK['name'].get((i, card_scratch), []):
             message = ('{} for row #{}{} (use IgnoreName flag to ignore)'
                        .format(error, i, row_info))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+
+        for error in PRE_SANITY_CHECK['ref'].get((i, card_scratch), []):
+            message = ('{} for row #{}{}'.format(error, i, row_info))
             logging.error(message)
             if not card_scratch:
                 errors.append(message)

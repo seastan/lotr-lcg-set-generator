@@ -464,8 +464,6 @@ Please note that all tags are case-sensitive.
 - `[vspace]`: vertical spacing
 - `[tab]`: tab symbol
 - `[nobr]`: non-breakable space
-- `[inline]`: put it at the end of the `Keywords` field, to place the keywords on the same line as the first line of text
-- `[name]`: actual card name
 - `[lsb]`: [
 - `[rsb]`: ]
 - `[lfb]`: {
@@ -477,7 +475,10 @@ Please note that all tags are case-sensitive.
 - `[quot]`: "
 - `[apos]`: '
 - `[hyphen]`: -
+- `[inline]`: put it at the end of the `Keywords` field, to place the keywords on the same line as the first line of text
 - `[split]`: split the text between different regions (only for `Cave`)
+- `[name]`: this card's name (never hardcode the name itself)
+- `[[Name]]`: reference to a different card name (allows to apply a check for unknown names)
 - `{Trait}`: an alias for `[bi]Trait[/bi]`
 - `--`: en dash
 - `---`: em dash
