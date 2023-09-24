@@ -12998,9 +12998,9 @@ def upload_dragncards_images(conf, sets):
 
     remote_folder = _read_remote_dragncards_folder()
     images_uploaded = False
-    client = _get_ssh_client(conf)
+    client = None
+    scp_client = None
     try:  # pylint: disable=R1702
-        scp_client = SCPClient(client.get_transport())
         for set_id, set_name in sets:
             output_path = os.path.join(
                 OUTPUT_OCTGN_IMAGES_PATH,
@@ -13030,6 +13030,10 @@ def upload_dragncards_images(conf, sets):
                         if filenames:
                             images_uploaded = True
 
+                        if not client:
+                            client = _get_ssh_client(conf)
+                            scp_client = SCPClient(client.get_transport())
+
                         for filename in filenames:
                             client, scp_client = _scp_upload(
                                 client,
@@ -13051,7 +13055,8 @@ def upload_dragncards_images(conf, sets):
 
     finally:
         try:
-            client.close()
+            if client:
+                client.close()
         except Exception:
             pass
 
@@ -13063,13 +13068,17 @@ def _upload_dragncards_rendered_images(conf):
     """ Uploading rendered images to DragnCards.
     """
     images_uploaded = False
-    client = _get_ssh_client(conf)
+    client = None
+    scp_client = None
     try:
-        scp_client = SCPClient(client.get_transport())
         for _, _, filenames in os.walk(RENDERER_OUTPUT_PATH):
             filenames = [f for f in filenames if f.endswith('.jpg')]
             if filenames:
                 images_uploaded = True
+
+            if not client:
+                client = _get_ssh_client(conf)
+                scp_client = SCPClient(client.get_transport())
 
             for filename in filenames:
                 client, scp_client = _scp_upload(
@@ -13083,7 +13092,8 @@ def _upload_dragncards_rendered_images(conf):
             break
     finally:
         try:
-            client.close()
+            if client:
+                client.close()
         except Exception:
             pass
 
@@ -13101,10 +13111,9 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
         checksums = {}
 
     changes = False
-    client = _get_ssh_client(conf)
+    client = None
+    scp_client = None
     try:  # pylint: disable=R1702
-        scp_client = SCPClient(client.get_transport())
-
         for _, set_name in sets:
             output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
                                        escape_filename(set_name))
@@ -13140,6 +13149,11 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
                                               filename)
                         shutil.copyfile(file_path,
                                         os.path.join(temp_path, new_filename))
+
+                        if not client:
+                            client = _get_ssh_client(conf)
+                            scp_client = SCPClient(client.get_transport())
+
                         client, scp_client = _scp_upload(
                             client,
                             scp_client,
@@ -13169,6 +13183,10 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
                 changes = True
                 checksums[output_path] = checksum
 
+                if not client:
+                    client = _get_ssh_client(conf)
+                    scp_client = SCPClient(client.get_transport())
+
                 client, scp_client = _scp_upload(
                     client,
                     scp_client,
@@ -13177,14 +13195,14 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
                     conf['dragncards_remote_json_path'])
     finally:
         try:
-            client.close()
+            if client:
+                client.close()
         except Exception:
             pass
 
-    client = _get_ssh_client(conf, beta=True)
+    client = None
+    scp_client = None
     try:  # pylint: disable=R1702
-        scp_client = SCPClient(client.get_transport())
-
         for _, set_name in sets:
             output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
                                        escape_filename(set_name))
@@ -13208,6 +13226,10 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
 
                         changes = True
                         checksums[file_path] = checksum
+
+                        if not client:
+                            client = _get_ssh_client(conf, beta=True)
+                            scp_client = SCPClient(client.get_transport())
 
                         client, scp_client = _scp_upload(
                             client,
@@ -13237,6 +13259,10 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
                 changes = True
                 checksums[output_path] = checksum
 
+                if not client:
+                    client = _get_ssh_client(conf, beta=True)
+                    scp_client = SCPClient(client.get_transport())
+
                 client, scp_client = _scp_upload(
                     client,
                     scp_client,
@@ -13246,7 +13272,8 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
                     beta=True)
     finally:
         try:
-            client.close()
+            if client:
+                client.close()
         except Exception:
             pass
 
