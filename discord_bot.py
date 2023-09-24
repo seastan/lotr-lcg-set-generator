@@ -264,6 +264,7 @@ List of **!image** commands:
     'edit': """
 List of **!edit** commands:
 ` `
+**!edit check traits <a dot-separated list of traits>** - display the correct order of traits (for example: `!edit check traits Goblin. Orc.`)
 **!edit flavour <set name or set code>** - display possible flavour text issues (for example: `!edit flavour Children of Eorl` or `!edit flavour CoE`)
 **!edit names <set name or set code>** - display potentially unknown or misspelled names (for example: `!edit names Children of Eorl` or `!edit names CoE`)
 **!edit numbers <set name or set code>** - display potentially incorrect card numbers (for example: `!edit numbers Children of Eorl` or `!edit numbers CoE`)
@@ -5553,7 +5554,7 @@ Targets removed.
         return output
 
 
-    async def _process_edit_command(self, message):  # pylint: disable=R0912,R0915
+    async def _process_edit_command(self, message):  # pylint: disable=R0911,R0912,R0915
         """ Process an edit command.
         """
         if message.content.lower() == '!edit':
@@ -5564,7 +5565,23 @@ Targets removed.
 
         logging.info('Received edit command: %s', command)
 
-        if command.lower().startswith('flavour '):
+        if command.lower().startswith('check traits '):
+            try:
+                traits = re.sub(r'^check traits ', '', command,
+                                flags=re.IGNORECASE)
+                res = lotr.verify_traits_order(traits)[1]
+            except Exception as exc:
+                logging.exception(str(exc))
+                await self._send_channel(
+                    message.channel,
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await self._send_channel(message.channel, res)
+        elif command.lower() == 'check traits':
+            await self._send_channel(message.channel,
+                                     'please specify the traits')
+        elif command.lower().startswith('flavour '):
             try:
                 set_name = re.sub(r'^flavour ', '', command,
                                   flags=re.IGNORECASE)
