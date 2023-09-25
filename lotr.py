@@ -1786,10 +1786,52 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
 def upload_stable_data():
     """ Upload the latest stable data to Google Drive.
     """
+    logging.info('Uploading the latest stable data to Google Drive...')
+    timestamp = time.time()
+
     cmd = COPY_STABLE_DATA_COMMAND.format(
         os.path.join(DOWNLOAD_PATH, '{}.json'.format(CARD_SHEET)))
     res = run_cmd(cmd)
     logging.info(res)
+
+    logging.info('...Uploading the latest stable data to Google Drive (%ss)',
+                 round(time.time() - timestamp, 3))
+
+
+def read_stable_data(conf):
+    """ Read the latest stable data.
+    """
+    logging.info('Reading the latest stable data...')
+    timestamp = time.time()
+
+    stable_data_path = os.path.join(conf['stable_data_path'],
+                                    '{}.json'.format(CARD_SHEET))
+    try:
+        with open(stable_data_path, 'r', encoding='utf-8') as fobj:
+            stable_data = fobj.read()
+    except Exception as exc:
+        raise SheetError("Can't read stable data from {}"
+                         .format(stable_data_path)) from exc
+
+    JSON_CACHE[CARD_SHEET] = json.loads(stable_data)
+    download_path = os.path.join(DOWNLOAD_PATH,
+                                 '{}.json'.format(CARD_SHEET))
+    shutil.copyfile(stable_data_path, download_path)
+
+    try:
+        with open(SHEETS_JSON_PATH, 'r', encoding='utf-8') as fobj:
+            checksums = json.load(fobj)
+    except Exception:
+        checksums = {}
+
+    checksums[CARD_SHEET] = hashlib.md5(
+        stable_data.encode('utf-8')).hexdigest()
+
+    with open(SHEETS_JSON_PATH, 'w', encoding='utf-8') as fobj:
+        json.dump(checksums, fobj)
+
+    logging.info('...Reading the latest stable data (%ss)',
+                 round(time.time() - timestamp, 3))
 
 
 def _update_discord_category(category):

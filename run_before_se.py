@@ -96,7 +96,21 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
 
     lotr.extract_data(conf, sheet_changes, scratch_changes)
     sets = lotr.get_sets(conf, sheet_changes, scratch_changes)
-    sets = lotr.sanity_check(conf, sets)
+
+    if conf['stable_data_user'] == 'reader':
+        try:
+            sets = lotr.sanity_check(conf, sets)
+        except lotr.SanityCheckError as exc:
+            logging.error(str(exc))
+            logging.info(
+                'Sanity check failed, retrying with the latest stable data...')
+            lotr.read_stable_data(conf)
+            sheet_changes = True
+            lotr.extract_data(conf, sheet_changes, scratch_changes)
+            sets = lotr.get_sets(conf, sheet_changes, scratch_changes)
+            sets = lotr.sanity_check(conf, sets)
+    else:
+        sets = lotr.sanity_check(conf, sets)
 
     if conf['stable_data_user'] == 'writer':
         lotr.upload_stable_data()
