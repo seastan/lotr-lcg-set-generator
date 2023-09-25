@@ -1914,6 +1914,9 @@ function updateVafthrudnir(value, lowerSize, lang) {
 	value = updatePunctuation(value, lang);
 	for (let i = 0; i < value.length; i++) {
 		let ch = value[i];
+		if (ch == '\u00df') {
+			ch = 'ss';
+		}
 		if (ch == '<') {
 			res += ch;
 			tag = true;
