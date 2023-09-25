@@ -328,6 +328,7 @@ Additional steps:
   - `ALePLogs` (points to `Logs`)
   - `ALePOCTGN` (points to `Playtesting/OCTGN Files`)
   - `ALePRenderedImages` (points to `RenderedImages`)
+  - `ALePStableData` (points to `StableData`)
 
 5. In the root folder of this repo create `id_rsa` to upload files to DragnCards.
 

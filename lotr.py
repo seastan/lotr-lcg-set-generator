@@ -380,6 +380,7 @@ SPHERES_SIDE_QUEST = {'Cave', 'NoProgress', 'Region', 'SmallTextArea'}
 SPECIAL_ICONS = {'eye of sauron', 'eye of sauronx2', 'eye of sauronx3',
                  'sailing', 'sailingx2'}
 
+COPY_STABLE_DATA_COMMAND = "rclone copy '{}' 'ALePStableData:/'"
 DRAGNCARDS_PLAYER_CARDS_STAT_COMMAND = \
     '/home/webhost/python/AR/player_cards_stat.sh "{}" "{}" "{}"'
 DRAGNCARDS_ALL_PLAYS_COMMAND = \
@@ -1780,6 +1781,15 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
     logging.info('...Downloading cards spreadsheet from Google Sheets (%ss)',
                  round(time.time() - timestamp, 3))
     return (changes, scratch_changes)
+
+
+def upload_stable_data():
+    """ Upload the latest stable data to Google Drive.
+    """
+    cmd = COPY_STABLE_DATA_COMMAND.format(
+        os.path.join(DOWNLOAD_PATH, '{}.json'.format(CARD_SHEET)))
+    res = run_cmd(cmd)
+    logging.info(res)
 
 
 def _update_discord_category(category):
