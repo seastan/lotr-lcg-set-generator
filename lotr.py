@@ -866,7 +866,7 @@ ACCENTS = set()
 ALL_NAMES = set()
 ALL_SET_AND_QUEST_NAMES = set()
 ALL_ENCOUNTER_SET_NAMES = set()
-ALL_CARD_NAMES = set()
+ALL_CARD_NAMES = {'English': set()}
 ALL_SCRATCH_CARD_NAMES = set()
 ALL_TRAITS = set()
 ALL_SCRATCH_TRAITS = set()
@@ -1804,31 +1804,37 @@ def _update_discord_category(category):
     return category
 
 
-def _extract_all_card_names(data):
+def _extract_all_card_names(data, lang):
     """ Collect all card names from the spreadsheet.
     """
-    ALL_CARD_NAMES.clear()
-    ALL_SCRATCH_CARD_NAMES.clear()
+    ALL_CARD_NAMES[lang] = set()
     for row in data:
         if row[CARD_TYPE] in CARD_TYPES_NO_NAME_TAG:
             continue
 
-        if row[CARD_SCRATCH]:
+        if not row[CARD_SCRATCH]:
             clean_value = _clean_value(row[CARD_NAME])
             if clean_value:
-                ALL_SCRATCH_CARD_NAMES.add(clean_value)
+                ALL_CARD_NAMES[lang].add(clean_value)
 
             clean_value = _clean_value(row[CARD_SIDE_B])
             if clean_value:
-                ALL_SCRATCH_CARD_NAMES.add(clean_value)
-        else:
-            clean_value = _clean_value(row[CARD_NAME])
-            if clean_value:
-                ALL_CARD_NAMES.add(clean_value)
+                ALL_CARD_NAMES[lang].add(clean_value)
 
-            clean_value = _clean_value(row[CARD_SIDE_B])
-            if clean_value:
-                ALL_CARD_NAMES.add(clean_value)
+    if lang == 'English':
+        ALL_SCRATCH_CARD_NAMES.clear()
+        for row in data:
+            if row[CARD_TYPE] in CARD_TYPES_NO_NAME_TAG:
+                continue
+
+            if row[CARD_SCRATCH]:
+                clean_value = _clean_value(row[CARD_NAME])
+                if clean_value:
+                    ALL_SCRATCH_CARD_NAMES.add(clean_value)
+
+                clean_value = _clean_value(row[CARD_SIDE_B])
+                if clean_value:
+                    ALL_SCRATCH_CARD_NAMES.add(clean_value)
 
 
 def _extract_all_set_and_quest_names(data):
@@ -1883,7 +1889,7 @@ def _extract_all_names():
     """ Collect all names from the spreadsheet.
     """
     ALL_NAMES.clear()
-    ALL_NAMES.update(ALL_CARD_NAMES)
+    ALL_NAMES.update(ALL_CARD_NAMES['English'])
     ALL_NAMES.update(ALL_SET_AND_QUEST_NAMES)
     ALL_NAMES.update(ALL_ENCOUNTER_SET_NAMES)
     ALL_NAMES.update(ALL_TRAITS)
@@ -2142,15 +2148,15 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                 row[key] = value
                 continue
 
-            if lang == 'English':
+            if ALL_CARD_NAMES.get(lang):
                 refs = re.findall(CARD_NAME_REFERENCE_REGEX, value)
                 for ref in refs:
-                    if ref not in ALL_CARD_NAMES:
+                    if ref not in ALL_CARD_NAMES[lang]:
                         error = ('Invalid reference [[{}]] in {} column'
                                  .format(ref,
                                          key.replace(BACK_PREFIX, 'Back ')))
                         PRE_SANITY_CHECK['ref'].setdefault(
-                            (row[ROW_COLUMN], row[CARD_SCRATCH]),
+                            (row[ROW_COLUMN], row[CARD_SCRATCH], lang),
                             []).append(error)
 
             value = re.sub(CARD_NAME_REFERENCE_REGEX, '\\1', value)
@@ -2159,7 +2165,7 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                 if key == CARD_TEXT and re.search(card_name_regex, value):
                     prepared_value = value
                     similar_names = get_similar_names(
-                        card_name, ALL_CARD_NAMES,
+                        card_name, ALL_CARD_NAMES['English'],
                         row[CARD_SCRATCH] and ALL_SCRATCH_CARD_NAMES or None)
                     for similar_name in similar_names:
                         similar_name_regex = (
@@ -2178,7 +2184,7 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                       re.search(card_name_regex, value)):
                     prepared_value = value
                     similar_names = get_similar_names(
-                        card_name, ALL_CARD_NAMES,
+                        card_name, ALL_CARD_NAMES['English'],
                         row[CARD_SCRATCH] and ALL_SCRATCH_CARD_NAMES or None)
                     for similar_name in similar_names:
                         similar_name_regex = (
@@ -2199,7 +2205,7 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                         re.search(card_name_regex_back, value)):
                     prepared_value = value
                     similar_names = get_similar_names(
-                        card_name_back, ALL_CARD_NAMES,
+                        card_name_back, ALL_CARD_NAMES['English'],
                         row[CARD_SCRATCH] and ALL_SCRATCH_CARD_NAMES or None)
                     for similar_name in similar_names:
                         similar_name_regex = (
@@ -2218,7 +2224,7 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                           re.search(card_name_regex_back, value)):
                     prepared_value = value
                     similar_names = get_similar_names(
-                        card_name_back, ALL_CARD_NAMES,
+                        card_name_back, ALL_CARD_NAMES['English'],
                         row[CARD_SCRATCH] and ALL_SCRATCH_CARD_NAMES or None)
                     for similar_name in similar_names:
                         similar_name_regex = (
@@ -2582,10 +2588,10 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
             DATA.extend(data)
 
     DATA[:] = [row for row in DATA if not _skip_row(row)]
-    _extract_all_card_names(DATA)
-    PRE_SANITY_CHECK['name'].clear()
-    PRE_SANITY_CHECK['ref'].clear()
-    PRE_SANITY_CHECK['flavour'].clear()
+    PRE_SANITY_CHECK['name'] = {}
+    PRE_SANITY_CHECK['ref'] = {}
+    PRE_SANITY_CHECK['flavour'] = {}
+    _extract_all_card_names(DATA, 'English')
     _clean_data(conf, DATA, 'English')
 
     SELECTED_CARDS.update({row[CARD_ID] for row in DATA if row[CARD_SELECTED]})
@@ -2630,6 +2636,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
             for row in data:
                 row[CARD_SCRATCH] = None
 
+            _extract_all_card_names(data, lang)
             _clean_data(conf, data, lang)
             for row in data:
                 if row[CARD_ID] in TRANSLATIONS[lang]:
@@ -3333,7 +3340,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             if not card_scratch:
                 errors.append(message)
 
-        for error in PRE_SANITY_CHECK['ref'].get((i, card_scratch), []):
+        for error in PRE_SANITY_CHECK['ref'].get(
+                (i, card_scratch, 'English'), []):
             message = ('{} for row #{}{}'.format(error, i, row_info))
             logging.error(message)
             if not card_scratch:
@@ -5666,6 +5674,13 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     'No card ID %s in %s translations', card_id, lang)
                 continue
 
+            for error in PRE_SANITY_CHECK['ref'].get(
+                    (TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                     card_scratch, lang), []):
+                logging.error(
+                    '%s for card ID %s in %s translations, row #%s', error,
+                    card_id, lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
             for error in PRE_SANITY_CHECK['flavour'].get(
                     (TRANSLATIONS[lang][card_id][ROW_COLUMN],
                      card_scratch, lang), []):
@@ -6279,7 +6294,7 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
               'playtesting_set_ids': playtesting_set_ids,
               'set_and_quest_names': list(ALL_SET_AND_QUEST_NAMES),
               'encounter_set_names': list(ALL_ENCOUNTER_SET_NAMES),
-              'card_names': list(ALL_CARD_NAMES),
+              'card_names': list(ALL_CARD_NAMES['English']),
               'traits': list(ALL_TRAITS),
               'artwork_ids': artwork_ids,
               'data': data}
