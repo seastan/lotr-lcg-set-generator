@@ -268,6 +268,7 @@ List of **!edit** commands:
 **!edit flavour <set name or set code>** - display possible flavour text issues (for example: `!edit flavour Children of Eorl` or `!edit flavour CoE`)
 **!edit names <set name or set code>** - display potentially unknown or misspelled names (for example: `!edit names Children of Eorl` or `!edit names CoE`)
 **!edit numbers <set name or set code>** - display potentially incorrect card numbers (for example: `!edit numbers Children of Eorl` or `!edit numbers CoE`)
+**!edit quests <set name or set code>** - display possible quest issues such as incorrect additional encounter sets or adventure values (for example: `!edit quests Children of Eorl` or `!edit quests CoE`)
 **!edit text <set name or set code>** - display text that may be a subject of editing rules for a set (for example: `!edit text Children of Eorl` or `!edit text CoE`)
 **!edit traits <set name or set code>** - display possible trait issues for a set (for example: `!edit traits Children of Eorl` or `!edit traits CoE`)
 **!edit all <set name or set code>** - display results of all commands above (for example: `!edit all Children of Eorl` or `!edit all CoE`)
@@ -5342,6 +5343,96 @@ Targets removed.
         return output
 
 
+    async def _display_quests(self, value):  # pylint: disable=R0912,R0914
+        """ Display possible quest issues for a set.
+        """
+        data = await read_card_data()
+
+        set_name = re.sub(r'^alep---', '', lotr.normalized_name(value))
+        matches = [card for card in data['data'] if re.sub(
+            r'^alep---', '',
+            lotr.normalized_name(card[lotr.CARD_SET_NAME])) == set_name]
+
+        if not matches:
+            new_set_name = 'the-{}'.format(set_name)
+            matches = [card for card in data['data'] if re.sub(
+                r'^alep---', '',
+                lotr.normalized_name(card[lotr.CARD_SET_NAME])) ==
+                new_set_name]
+
+        if not matches:
+            set_code = value.lower()
+            matches = [
+                card for card in data['data']
+                if card.get(lotr.CARD_SET_HOB_CODE, '').lower() == set_code]
+            if not matches:
+                return 'no cards found for the set'
+
+        matches.sort(key=lambda card: card[lotr.ROW_COLUMN])
+        res = {}
+        quest_sets = {}
+        for card in matches:
+            if (card[lotr.CARD_TYPE] != 'Campaign' and
+                    card.get(lotr.CARD_ENCOUNTER_SET) and
+                    card.get(lotr.CARD_ADVENTURE) and
+                    card[lotr.CARD_ENCOUNTER_SET] !=
+                    card[lotr.CARD_ADVENTURE]):
+                precedent = {
+                    'name': card[lotr.CARD_NAME],
+                    'field': lotr.CARD_ADVENTURE,
+                    'text': 'Encounter set is "{}" and adventure is "{}"'
+                        .format(card[lotr.CARD_ENCOUNTER_SET],
+                                card[lotr.CARD_ADVENTURE]),
+                    'row': card[lotr.ROW_COLUMN]}
+                res.setdefault(
+                    'Different encounter set and adventure values', []
+                    ).append(precedent)
+
+            if card[lotr.CARD_TYPE] == 'Quest':
+                if card.get(lotr.CARD_ENCOUNTER_SET) in quest_sets:
+                    if (quest_sets[card.get(lotr.CARD_ENCOUNTER_SET)] !=
+                            card.get(lotr.CARD_ADDITIONAL_ENCOUNTER_SETS,
+                                     '')):
+                        precedent = {
+                            'name': card[lotr.CARD_NAME],
+                            'field': lotr.CARD_ADDITIONAL_ENCOUNTER_SETS,
+                            'text': 'Additional encounter sets are "{}" and '
+                                'the first value was "{}"'.format(
+                                card.get(lotr.CARD_ADDITIONAL_ENCOUNTER_SETS,
+                                         ''),
+                                quest_sets[card.get(lotr.CARD_ENCOUNTER_SET)]
+                                ),
+                            'row': card[lotr.ROW_COLUMN]}
+                        res.setdefault(
+                            'Different additional encounter sets for the '
+                            'quest', []).append(precedent)
+                else:
+                    quest_sets[card.get(lotr.CARD_ENCOUNTER_SET)] = (
+                        card.get(lotr.CARD_ADDITIONAL_ENCOUNTER_SETS, ''))
+
+        output = []
+        for rule, card_list in res.items():
+            rule_output = (
+                '\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\n**{}**:\n'
+                '\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_'.format(rule))
+            for card_data in card_list:
+                row_url = '<{}&range=A{}>'.format(data['url'],
+                                                  card_data['row'])
+                rule_output += '\n` `\n*{}* (**{}**):\n{}\n{}'.format(
+                    card_data['name'], card_data['field'].replace('_', ' '),
+                    card_data['text'], row_url)
+
+            output.append(rule_output)
+
+        output = '\n` `\n'.join(sorted(output))
+        if output:
+            output = '{}\n` `\nDone.'.format(output)
+        else:
+            output = 'no quest issues found'
+
+        return output
+
+
     async def _display_text(self, value):  # pylint: disable=R0912,R0914
         """ Display text that may be a subject of editing rules for a set.
         """
@@ -5626,6 +5717,21 @@ Targets removed.
             await self._send_channel(message.channel, res)
         elif command.lower() == 'numbers':
             await self._send_channel(message.channel, 'please specify the set')
+        elif command.lower().startswith('quests '):
+            try:
+                set_name = re.sub(r'^quests ', '', command,
+                                  flags=re.IGNORECASE)
+                res = await self._display_quests(set_name)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await self._send_channel(
+                    message.channel,
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await self._send_channel(message.channel, res)
+        elif command.lower() == 'quests':
+            await self._send_channel(message.channel, 'please specify the set')
         elif command.lower().startswith('text '):
             try:
                 set_name = re.sub(r'^text ', '', command,
@@ -5664,6 +5770,7 @@ Targets removed.
                 res.append(await self._display_flavour(set_name))
                 res.append(await self._display_names(set_name))
                 res.append(await self._display_numbers(set_name))
+                res.append(await self._display_quests(set_name))
                 res.append(await self._display_text(set_name))
                 res.append(await self._display_traits(set_name))
                 res = '\n` `\n'.join(res)
