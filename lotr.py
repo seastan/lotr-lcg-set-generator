@@ -3238,6 +3238,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
     all_set_ids = set(SETS.keys())
     broken_set_ids = set()
     deck_rules = set()
+    quest_adventures = {}
     card_data = DATA[:]
     card_data = sorted(card_data, key=lambda row: (row[CARD_SCRATCH] or 0,
                                                    row[ROW_COLUMN]))
@@ -5473,6 +5474,23 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     errors.append(message)
                 else:
                     broken_set_ids.add(set_id)
+
+        if card_type == 'Quest' and card_adventure is not None:
+            if (set_id, card_encounter_set) in quest_adventures:
+                if (quest_adventures[(set_id, card_encounter_set)] !=
+                        card_adventure):
+                    message = (
+                        'Different adventure value for the quest in row #{}{}:'
+                        ' "{}" instead of "{}"'.format(
+                            i, row_info, card_adventure,
+                            quest_adventures[(set_id, card_encounter_set)]))
+                    logging.error(message)
+                    if not card_scratch:
+                        errors.append(message)
+                    else:
+                        broken_set_ids.add(set_id)
+            else:
+                quest_adventures[(set_id, card_encounter_set)] = card_adventure
 
         if card_icon is not None and card_type in CARD_TYPES_NO_ICON:
             message = 'Redundant collection icon for row #{}{}'.format(
