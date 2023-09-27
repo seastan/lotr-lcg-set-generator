@@ -1956,11 +1956,8 @@ function markUp(value, key, cardType, lang, setID) {
 	value = value.replace(/ +(?=\n|$)/g, '');
 	value = value.replace(/\n+$/g, '');
 	value = value.replace(/\[nobr\]/g, '\u00a0');
-	value = value.replace(/\[NOBR\]/g, '\u00a0');
 	value = value.replace(/\[inline\]\n\n/g, ' ');
 	value = value.replace(/\[inline\]/g, '');
-	value = value.replace(/\[INLINE\]\n\n/g, ' ');
-	value = value.replace(/\[INLINE\]/g, '');
 
 	if (['Side', 'Subtype'].indexOf(key + '') > -1) {
 		return updateVafthrudnir(value, 3.515, lang);

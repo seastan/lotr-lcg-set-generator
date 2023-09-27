@@ -269,6 +269,7 @@ List of **!edit** commands:
 **!edit names <set name or set code>** - display potentially unknown or misspelled names (for example: `!edit names Children of Eorl` or `!edit names CoE`)
 **!edit numbers <set name or set code>** - display potentially incorrect card numbers (for example: `!edit numbers Children of Eorl` or `!edit numbers CoE`)
 **!edit quests <set name or set code>** - display possible quest issues such as incorrect additional encounter sets or adventure values (for example: `!edit quests Children of Eorl` or `!edit quests CoE`)
+**!edit space <set name or set code>** - display possible spacing issues like single linebreaks (for example: `!edit space Children of Eorl` or `!edit space CoE`)
 **!edit text <set name or set code>** - display text that may be a subject of editing rules for a set (for example: `!edit text Children of Eorl` or `!edit text CoE`)
 **!edit traits <set name or set code>** - display possible trait issues for a set (for example: `!edit traits Children of Eorl` or `!edit traits CoE`)
 **!edit all <set name or set code>** - display results of all commands above (for example: `!edit all Children of Eorl` or `!edit all CoE`)
@@ -5433,6 +5434,84 @@ Targets removed.
         return output
 
 
+    async def _display_space(self, value):  # pylint: disable=R0914
+        """ Display possible spacing issues for a set.
+        """
+        data = await read_card_data()
+
+        set_name = re.sub(r'^alep---', '', lotr.normalized_name(value))
+        matches = [card for card in data['data'] if re.sub(
+            r'^alep---', '',
+            lotr.normalized_name(card[lotr.CARD_SET_NAME])) == set_name]
+
+        if not matches:
+            new_set_name = 'the-{}'.format(set_name)
+            matches = [card for card in data['data'] if re.sub(
+                r'^alep---', '',
+                lotr.normalized_name(card[lotr.CARD_SET_NAME])) ==
+                new_set_name]
+
+        if not matches:
+            set_code = value.lower()
+            matches = [
+                card for card in data['data']
+                if card.get(lotr.CARD_SET_HOB_CODE, '').lower() == set_code]
+            if not matches:
+                return 'no cards found for the set'
+
+        matches.sort(key=lambda card: card[lotr.ROW_COLUMN])
+        res = {}
+        for card in matches:
+            if card[lotr.CARD_TYPE] in ('Presentation', 'Rules'):
+                continue
+
+            for field in (lotr.CARD_TEXT, lotr.CARD_SHADOW,
+                          lotr.BACK_PREFIX + lotr.CARD_TEXT,
+                          lotr.BACK_PREFIX + lotr.CARD_SHADOW):
+                value = card.get(field, '')
+                if re.search(r'\n{3,}', value.replace('[split]', '')
+                             .replace('[vspace]', '')):
+                    precedent = {
+                        'name': card[lotr.CARD_NAME],
+                        'field': field,
+                        'text': 'Multiple linebreaks in:\n```\n{}\n```'
+                            .format(value.replace('\n', '\\n\n')),
+                        'row': card[lotr.ROW_COLUMN]}
+                    res.setdefault('Multiple linebreaks', []).append(precedent)
+
+                elif re.search(r'[^\n]\n[^\n]', value.replace('[split]', '')
+                               .replace('[vspace]', '')):
+                    precedent = {
+                        'name': card[lotr.CARD_NAME],
+                        'field': field,
+                        'text': 'Single linebreak in:\n```\n{}\n```'.format(
+                            value.replace('\n', '\\n\n')),
+                        'row': card[lotr.ROW_COLUMN]}
+                    res.setdefault('Single linebreaks', []).append(precedent)
+
+        output = []
+        for rule, card_list in res.items():
+            rule_output = (
+                '\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\n**{}**:\n'
+                '\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_'.format(rule))
+            for card_data in card_list:
+                row_url = '<{}&range=A{}>'.format(data['url'],
+                                                  card_data['row'])
+                rule_output += '\n` `\n*{}* (**{}**):\n{}\n{}'.format(
+                    card_data['name'], card_data['field'].replace('_', ' '),
+                    card_data['text'], row_url)
+
+            output.append(rule_output)
+
+        output = '\n` `\n'.join(sorted(output))
+        if output:
+            output = '{}\n` `\nDone.'.format(output)
+        else:
+            output = 'no spacing issues found'
+
+        return output
+
+
     async def _display_text(self, value):  # pylint: disable=R0912,R0914
         """ Display text that may be a subject of editing rules for a set.
         """
@@ -5732,6 +5811,21 @@ Targets removed.
             await self._send_channel(message.channel, res)
         elif command.lower() == 'quests':
             await self._send_channel(message.channel, 'please specify the set')
+        elif command.lower().startswith('space '):
+            try:
+                set_name = re.sub(r'^space ', '', command,
+                                  flags=re.IGNORECASE)
+                res = await self._display_space(set_name)
+            except Exception as exc:
+                logging.exception(str(exc))
+                await self._send_channel(
+                    message.channel,
+                    'unexpected error: {}'.format(str(exc)))
+                return
+
+            await self._send_channel(message.channel, res)
+        elif command.lower() == 'space':
+            await self._send_channel(message.channel, 'please specify the set')
         elif command.lower().startswith('text '):
             try:
                 set_name = re.sub(r'^text ', '', command,
@@ -5771,6 +5865,7 @@ Targets removed.
                 res.append(await self._display_names(set_name))
                 res.append(await self._display_numbers(set_name))
                 res.append(await self._display_quests(set_name))
+                res.append(await self._display_space(set_name))
                 res.append(await self._display_text(set_name))
                 res.append(await self._display_traits(set_name))
                 res = '\n` `\n'.join(res)
