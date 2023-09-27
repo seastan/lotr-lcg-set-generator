@@ -791,6 +791,11 @@ def update_text(text):  # pylint: disable=R0915
 
     text = update_emojis(text)
 
+    text = text.replace('[space]', ' ')
+    text = text.replace('[vspace]', ' ')
+    text = text.replace('[tab]', '   ')
+    text = text.replace('[br]', '')
+    text = text.replace('[nobr]', ' ')
     text = text.replace('[split]', '')
     text = text.replace('[', '`[').replace(']', ']`')
     text = text.replace('``', '')

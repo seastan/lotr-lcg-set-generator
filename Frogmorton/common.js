@@ -1956,6 +1956,7 @@ function markUp(value, key, cardType, lang, setID) {
 	value = value.replace(/ +(?=\n|$)/g, '');
 	value = value.replace(/\n+$/g, '');
 	value = value.replace(/\[nobr\]/g, '\u00a0');
+	value = value.replace(/\[br\]/g, '');
 	value = value.replace(/\[inline\]\n\n/g, ' ');
 	value = value.replace(/\[inline\]/g, '');
 
