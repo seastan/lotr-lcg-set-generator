@@ -1,4 +1,4 @@
-# pylint: disable=W0703,C0209,C0301
+# pylint: disable=W0703,C0209,C0301,C0302
 """ Monitor MakePlayingCards shared URLs.
 """
 from datetime import datetime
@@ -6,6 +6,7 @@ from email.header import Header
 import json
 import logging
 import os
+import random
 import re
 import sys
 import time
@@ -19,6 +20,11 @@ import common
 
 SAVED_PROJECTS_URL = \
     'https://www.makeplayingcards.com/design/dn_temporary_designes.aspx'
+PREVIEW_URL = (
+    'https://www.makeplayingcards.com/design/dn_parse_products.aspx?'
+    'product={}&pieces={}&attach={}&give=&orderno=&sellID=&effectNo='
+    '&componentList={}&rm={}')
+
 DECK_REGEX = (
     r'<a href="javascript:oTempSave.show\(\'([^\']+)\'[^"]+">'
     r'<img src="[^?]+\?([^"]+)" alt="[^"]*"><\/a><\/div>'
@@ -34,6 +40,8 @@ SESSIONID_REGEX = \
 NEXT_REGEX = (
     r'<a href="javascript:__doPostBack\(&#39;([^&]+)&#39;,'
     r'&#39;([^&]+)&#39;\)" style="[^"]+">Next<\/a>')
+PREVIEW_REGEX = r'(?<=javascript:oTempSave\.show\()[^\)]+'
+IMAGE_REGEX = r'(?<=<img src=")[^"]+'
 
 DEFAULT_VIEWSTATE = \
     '/wEPDwUJNjAwNDE3MDgyDxYCHhNWYWxpZGF0ZVJlcXVlc3RNb2RlAgFkZKxwlxJ+dQzVGn0L8+0kT3Qk5oie'
@@ -60,6 +68,9 @@ NEXT_LIMIT = 10
 URL_TIMEOUT = 30
 URL_RETRIES = 5
 URL_SLEEP = 60
+
+REFRESH_URL_TIMEOUT = 300
+MIN_IMAGES = 18
 
 
 class ConfigurationError(Exception):
@@ -219,12 +230,13 @@ def send_discord(message):
     return False
 
 
-def send_get(session, url):
+def send_get(session, url, timeout=None):
     """ Send GET request.
     """
+    timeout = timeout or URL_TIMEOUT
     for i in range(URL_RETRIES):
         try:
-            req = session.get(url, timeout=URL_TIMEOUT)
+            req = session.get(url, timeout=timeout)
             res = req.content.decode('unicode-escape', errors='ignore')
             break
         except Exception:
@@ -489,7 +501,7 @@ Attempting to rename it automatically..."""
     send_discord(discord_message)
     discord_users = data['discord_users']
 
-    try:
+    try:  # pylint: disable=R1705
         content = rename_deck(session, deck_id, deck_name, actual_deck_name)
     except Exception as exc:
         message = ('Attempt to rename deck {} automatically failed: {}: {}'
@@ -533,7 +545,7 @@ Attempting to fix it automatically...
     create_mail(ALERT_SUBJECT_TEMPLATE.format(message))
     send_discord(discord_message)
 
-    try:
+    try:  # pylint: disable=R1705
         if actual_deck_name != deck_name:
             new_deck_name = 'Corrupted {} ({}, {})'.format(deck_name,
                                                            actual_deck_name,
@@ -675,32 +687,41 @@ https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_fro
         return content, new_deck_id
 
 
-def add_deck(deck_name):
+def add_deck(deck_name):  # pylint: disable=R0915
     """ Add new deck to monitoring.
     """
+    logging.info('Adding a new deck to monitoring')
     try:
         with open(CONF_PATH, 'r', encoding='utf-8') as fobj:
             data = json.load(fobj)
     except Exception:
-        logging.error('No configuration found')
+        message = 'No configuration found'
+        logging.error(message)
+        print(message)
         return
 
     try:
         with open(COOKIES_PATH, 'r', encoding='utf-8') as fobj:
             cookies = json.load(fobj)
     except Exception:
-        logging.error('No cookies found')
+        message = 'No cookies found'
+        logging.error(message)
+        print(message)
         return
 
     if 'decks' in data and deck_name in data['decks']:
-        logging.info('Deck %s already added to monitoring', deck_name)
+        message = 'Deck {} already added to monitoring'.format(deck_name)
+        logging.info(message)
+        print(message)
         return
 
     logging.info('Adding deck %s to monitoring...', deck_name)
     session = init_session(cookies)
     content = get_decks(session)
     if not content:
-        logging.info('The site is undergoing system upgrade')
+        message = 'The site is undergoing system upgrade'
+        logging.info(message)
+        print(message)
         return
 
     regex = DECK_REGEX.format(re.escape(deck_name))
@@ -708,6 +729,7 @@ def add_deck(deck_name):
     if not match:
         logging.error('Deck %s not found, content length: %s',
                       deck_name, len(content))
+        print('Deck {} not found'.format(deck_name))
         return
 
     deck_id = match.groups()[0]
@@ -726,6 +748,7 @@ def add_deck(deck_name):
         else:
             logging.error('Deck %s not found, content length: %s',
                           backup_name, len(content))
+            print('Deck {} not found'.format(backup_name))
             return
 
     backup_id = match.groups()[0]
@@ -753,6 +776,81 @@ def add_deck(deck_name):
     logging.info(message)
     print(message)
     print('See {} for details'.format(LOG_PATH))
+
+
+def refresh():  # pylint: disable=R0914
+    """ Refresh all decks.
+    """
+    logging.info('Refreshing all decks')
+    try:
+        with open(CONF_PATH, 'r', encoding='utf-8') as fobj:
+            data = json.load(fobj)
+    except Exception as exc:
+        raise ConfigurationError('No configuration found') from exc
+
+    try:
+        with open(COOKIES_PATH, 'r', encoding='utf-8') as fobj:
+            cookies = json.load(fobj)
+    except Exception as exc:
+        raise ConfigurationError('No cookies found') from exc
+
+    session = init_session(cookies)
+    content = get_decks(session)
+    if not content:
+        logging.info('The site is undergoing system upgrade')
+        return
+
+    preview_data = re.findall(PREVIEW_REGEX, content)
+    for i in range(len(preview_data)):  # pylint: disable=C0200
+        preview_data[i] = preview_data[i][1:-1].split("','")
+
+    preview_data = {p[0]:p for p in preview_data}
+
+    decks = []
+    for deck_name in data.get('decks', {}):
+        decks.append({'name': deck_name,
+                      'id': data['decks'][deck_name]['deck_id']})
+        decks.append({'name': '{} Backup'.format(deck_name),
+                      'id': data['decks'][deck_name]['backup_id']})
+
+    for deck in decks:
+        if deck['id'] not in preview_data:
+            logging.error('Deck %s not found, content length: %s',
+                          deck['name'], len(content))
+            continue
+
+        item = preview_data[deck['id']]
+        deck['url'] = PREVIEW_URL.format(
+            item[0], item[1], item[2], item[4],
+            random.randint(100000, 1000000))
+
+    decks.sort(key=lambda d: d['name'])
+    broken_decks = []
+    for deck in decks:
+        logging.info('Refreshing %s, URL: %s', deck['name'], deck['url'])
+        deck_content = send_get(session, deck['url'],
+                                timeout=REFRESH_URL_TIMEOUT)
+        logging.info('Content length: %s', len(deck_content))
+        if not deck_content:
+            broken_decks.append(deck['name'])
+            logging.error('No response for deck %s', deck['name'])
+            continue
+
+        images = re.findall(IMAGE_REGEX, deck_content)
+        images = [i for i in images if i.endswith('.jpg')]
+        logging.info('Images found: %s', len(images))
+        if len(images) < MIN_IMAGES:
+            logging.error('Not enough images for deck %s', deck['name'])
+
+    cookies = session.cookies.get_dict()
+    with open(COOKIES_PATH, 'w', encoding='utf-8') as fobj:
+        json.dump(cookies, fobj, indent=4)
+
+    if broken_decks:
+        message = 'Detected {} broken decks'.format(len(broken_decks))
+        logging.error(message)
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message),
+                    '\n'.join(broken_decks))
 
 
 def monitor():  # pylint: disable=R0912,R0914,R0915
@@ -872,7 +970,19 @@ def main():
             return
 
         if len(sys.argv) > 1:
-            add_deck(sys.argv[1])
+            if sys.argv[1] == 'refresh':
+                refresh()
+            elif sys.argv[1] == 'add':
+                if len(sys.argv) > 2:
+                    add_deck(sys.argv[2])
+                else:
+                    message = 'No deck name specified'
+                    logging.error(message)
+                    print(message)
+            else:
+                message = 'Unknown command: {}'.format(sys.argv[1])
+                logging.error(message)
+                print(message)
         else:
             monitor()
     except Exception as exc:

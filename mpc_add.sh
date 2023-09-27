@@ -5,5 +5,4 @@ if [[ ! "$DECK" ]]; then
   echo 'No deck name specified'
   exit 1
 fi
-flock -x mpc_monitor.lock -c "python3 mpc_monitor.py \"$DECK\""
-echo 'Done'
+flock -x mpc_monitor.lock -c "python3 mpc_monitor.py add \"$DECK\""

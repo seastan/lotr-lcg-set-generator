@@ -339,19 +339,20 @@ Additional steps:
   - `* * * * *     <path>/check_internet_state.sh >> <path>/cron.log 2>&1`
   - `* * * * *     <path>/check_mail.sh >> <path>/cron.log 2>&1`
   - `*/10 * * * *  <path>/check_mpc_monitor.sh >> <path>/cron.log 2>&1`
-  - `19 * * *      <path>/check_playtesting_sets.sh >> <path>/cron.log 2>&1`
-  - `29 4 * *      <path>/monitor_images_upload.sh >> <path>/cron.log 2>&1`
+  - `19 * * * *    <path>/check_playtesting_sets.sh >> <path>/cron.log 2>&1`
   - `9 * * * *     <path>/check_ringsdb_alep_decks.sh >> <path>/cron.log 2>&1`
   - `* * * * *     <path>/check_run_before_se_service.sh >> <path>/cron.log 2>&1`
   - `7 1 * * *     <path>/configuration_backup.sh "<path to a local configuration backup folder>" >> <path>/cron.log 2>&1`
   - `5 11 * * *    <path>/download_ringsdb_stat.sh >> <path>/cron.log 2>&1`
   - `* * * * *     <path>/env_health_check.sh >> <path>/cron.log 2>&1`
   - `*/2 * * * *   <path>/monitor_discord_changes.sh >> <path>/cron.log 2>&1`
+  - `29 4 * * *    <path>/monitor_images_upload.sh >> <path>/cron.log 2>&1`
   - `36 9 * * *    <path>/monitor_remote_pipeline.sh >> <path>/cron.log 2>&1`
   - `36 8 * * *    <path>/monitor_wordpress_site.sh >> <path>/cron.log 2>&1`
   - `36 7 * * *    <path>/monitor_mpc_url_format.sh >> <path>/cron.log 2>&1`
   - `0 1 * * *     <path>/monitor_wordpress_token.sh >> <path>/cron.log 2>&1`
   - `*/5 * * * *   <path>/mpc_monitor.sh >> <path>/cron.log 2>&1`
+  - `15 6 * * 0    <path>/mpc_refresh.sh >> <path>/cron.log 2>&1`
   - `7 0 * * *     <path>/rclone_backup.sh "<local Drive/Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
   - `12,42 * * * * <path>/rclone_data_remotely.sh >> <path>/cron.log 2>&1`
   - `22,52 * * * * <path>/rclone_renderer.sh >> <path>/cron.log 2>&1`
@@ -467,6 +468,7 @@ Please note that all tags are case-sensitive.
 - `[vspace]`: vertical spacing
 - `[tab]`: tab symbol
 - `[nobr]`: non-breakable space
+- `[br]`: doesn't do anything, use this tag before the actual linebreak to emphasize that the linebreak was intentional
 - `[lsb]`: [
 - `[rsb]`: ]
 - `[lfb]`: {
@@ -478,8 +480,8 @@ Please note that all tags are case-sensitive.
 - `[quot]`: "
 - `[apos]`: '
 - `[hyphen]`: -
-- `[inline]`: put it at the end of the `Keywords` field, to place the keywords on the same line as the first line of text
-- `[split]`: split the text between different regions (only for `Cave`)
+- `[inline]`: put it at the end of the `Keywords` field, to place the keywords on the same line as the first line of the text
+- `[split]`: split the text between different regions (only for `Cave` card type)
 - `[name]`: this card's name (never hardcode the name itself)
 - `[[Name]]`: reference to a different card name (allows to apply a check for unknown names)
 - `{Trait}`: an alias for `[bi]Trait[/bi]`
