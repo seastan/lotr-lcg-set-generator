@@ -2746,15 +2746,14 @@ def _verify_period(value):
     res = True
     paragraphs = value.split('\n\n')
     for pos, paragraph in enumerate(paragraphs):
-        paragraph = paragraph.replace('[/size]', '')
+        paragraph = paragraph.replace('[/size]', '').replace('[br]', '')
         if pos != len(paragraphs) - 1:
             paragraph = paragraph.replace(':', '.')
 
         if not (re.search(
                     r'\.\)?”?(?:\[\/b\]|\[\/i\]|\[\/bi\])?$', paragraph) or
                 re.search(
-                    r'\.”\)(?:\[\/b\]|\[\/i\]|\[\/bi\])?$', paragraph) or
-                paragraph.endswith('[vspace]')):
+                    r'\.”\)(?:\[\/b\]|\[\/i\]|\[\/bi\])?$', paragraph)):
             res = False
             break
 
