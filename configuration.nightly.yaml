@@ -83,6 +83,9 @@ stable_data_user: reader
 # Verify whether Google Drive is up to date or not (true or false)
 verify_drive_timestamp: true
 
+# Ignore IgnoreName and IgnoreRules flags (true or false)
+ignore_ignore_flags: false
+
 # List of set IDs to work on
 set_ids:
   - all  # all non-scratch sets
