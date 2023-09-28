@@ -2197,7 +2197,8 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                  card_name not in ALL_SCRATCH_TRAITS) and
                 row[CARD_TYPE] not in CARD_TYPES_NO_NAME_TAG and
                 not (row[CARD_FLAGS] and
-                     'IgnoreName' in extract_flags(row[CARD_FLAGS]))):
+                     'IgnoreName' in extract_flags(
+                         row[CARD_FLAGS], conf['ignore_ignore_flags']))):
             card_name_regex = r'(?<!\[bi\])\b' + re.escape(card_name) + r'\b'
         else:
             card_name_regex = None
@@ -2208,7 +2209,8 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                 row[BACK_PREFIX + CARD_TYPE] not in CARD_TYPES_NO_NAME_TAG and
                 not (row[BACK_PREFIX + CARD_FLAGS] and
                      'IgnoreName' in
-                     extract_flags(row[BACK_PREFIX + CARD_FLAGS]))):
+                     extract_flags(row[BACK_PREFIX + CARD_FLAGS],
+                                   conf['ignore_ignore_flags']))):
             card_name_regex_back = (
                 r'(?<!\[bi\])\b' + re.escape(card_name) + r'\b')
         else:
@@ -2764,11 +2766,15 @@ def get_sets(conf, sheet_changes=True, scratch_changes=True):
     return chosen_sets
 
 
-def extract_flags(value):
+def extract_flags(value, ignore_flags=False):
     """ Extract flags from a string value.
     """
-    return [f.strip() for f in
-            str(value or '').replace(';', '\n').split('\n') if f.strip()]
+    flags = [f.strip() for f in
+             str(value or '').replace(';', '\n').split('\n') if f.strip()]
+    if ignore_flags:
+        flags = [f for f in flags if f not in ('IgnoreName', 'IgnoreRules')]
+
+    return flags
 
 
 def _verify_period(value):
@@ -3516,7 +3522,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_encounter_set is not None and
-              not (card_flags and 'IgnoreName' in extract_flags(card_flags))):
+              not (card_flags and 'IgnoreName' in extract_flags(
+                  card_flags, conf['ignore_ignore_flags']))):
             capitalization_errors = _get_capitalization_errors(
                 card_encounter_set)
             if capitalization_errors:
@@ -3538,7 +3545,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_name is not None and
-              not (card_flags and 'IgnoreName' in extract_flags(card_flags))):
+              not (card_flags and 'IgnoreName' in extract_flags(
+                  card_flags, conf['ignore_ignore_flags']))):
             capitalization_errors = _get_capitalization_errors(card_name)
             if capitalization_errors:
                 message = (
@@ -3568,7 +3576,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_name_back is not None and
               not (card_flags_back and
-                   'IgnoreName' in extract_flags(card_flags_back))):
+                   'IgnoreName' in extract_flags(
+                       card_flags_back, conf['ignore_ignore_flags']))):
             capitalization_errors = _get_capitalization_errors(card_name_back)
             if capitalization_errors:
                 message = (
@@ -3806,7 +3815,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_traits is not None and
-              not (card_flags and 'IgnoreName' in extract_flags(card_flags))):
+              not (card_flags and 'IgnoreName' in extract_flags(
+                  card_flags, conf['ignore_ignore_flags']))):
             capitalization_errors = _get_capitalization_errors(
                 re.sub(r'\[[^\]]+\]', '', card_traits))
             if capitalization_errors:
@@ -3877,7 +3887,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_traits_back is not None and
               not (card_flags_back and
-                   'IgnoreName' in extract_flags(card_flags_back))):
+                   'IgnoreName' in extract_flags(
+                       card_flags_back, conf['ignore_ignore_flags']))):
             capitalization_errors = _get_capitalization_errors(
                 re.sub(r'\[[^\]]+\]', '', card_traits_back))
             if capitalization_errors:
@@ -4733,7 +4744,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_text is not None and
               card_type != 'Presentation' and card_sphere != 'Back' and
-              not (card_flags and 'IgnoreRules' in extract_flags(card_flags))):
+              not (card_flags and 'IgnoreRules' in extract_flags(
+                  card_flags, conf['ignore_ignore_flags']))):
             rules_errors = _get_rules_errors(card_text, CARD_TEXT, row)
             if rules_errors:
                 message = (
@@ -4793,7 +4805,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
               card_type_back != 'Presentation' and
               card_sphere != 'Back' and
               not (card_flags_back and
-                   'IgnoreRules' in extract_flags(card_flags_back))):
+                   'IgnoreRules' in extract_flags(
+                       card_flags_back, conf['ignore_ignore_flags']))):
             rules_errors = _get_rules_errors(card_text_back,
                                              BACK_PREFIX + CARD_TEXT, row)
             if rules_errors:
@@ -4847,7 +4860,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_shadow is not None and
-              not (card_flags and 'IgnoreRules' in extract_flags(card_flags))):
+              not (card_flags and 'IgnoreRules' in extract_flags(
+                  card_flags, conf['ignore_ignore_flags']))):
             rules_errors = _get_rules_errors(card_shadow, CARD_SHADOW, row)
             if rules_errors:
                 message = (
@@ -4886,7 +4900,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_shadow_back is not None and
               not (card_flags_back and
-                   'IgnoreRules' in extract_flags(card_flags_back))):
+                   'IgnoreRules' in extract_flags(
+                       card_flags_back, conf['ignore_ignore_flags']))):
             rules_errors = _get_rules_errors(card_shadow_back,
                                              BACK_PREFIX + CARD_SHADOW, row)
             if rules_errors:
@@ -5461,7 +5476,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     s for s in all_sets if s not in ALL_ENCOUNTER_SET_NAMES]
                 if (unknown_sets and
                         not (card_flags and
-                             'IgnoreName' in extract_flags(card_flags))):
+                             'IgnoreName' in extract_flags(
+                                 card_flags, conf['ignore_ignore_flags']))):
                     message = (
                         'Unknown additional encounter sets for row #{}{}: {} '
                         '(use IgnoreName flag to ignore)'.format(
@@ -5494,7 +5510,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_adventure is not None and
-              not (card_flags and 'IgnoreName' in extract_flags(card_flags))):
+              not (card_flags and 'IgnoreName' in extract_flags(
+                  card_flags, conf['ignore_ignore_flags']))):
             capitalization_errors = _get_capitalization_errors(card_adventure)
             if capitalization_errors:
                 message = (
@@ -5702,11 +5719,13 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 ignore_accents = False
                 if key.startswith(BACK_PREFIX):
                     if (card_flags_back and
-                            'IgnoreName' in extract_flags(card_flags_back)):
+                            'IgnoreName' in extract_flags(
+                                card_flags_back, conf['ignore_ignore_flags'])):
                         ignore_accents = True
                 else:
                     if (card_flags and
-                            'IgnoreName' in extract_flags(card_flags)):
+                            'IgnoreName' in extract_flags(
+                                card_flags, conf['ignore_ignore_flags'])):
                         ignore_accents = True
 
                 if not ignore_accents:
