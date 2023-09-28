@@ -1826,6 +1826,7 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
 
     for paragraph in paragraphs:
         paragraph = paragraph.replace('\n', ' ')
+
         traits = detect_traits(paragraph)
         traits = sorted([t for t in traits if t not in all_traits and
                          t not in lotr.COMMON_TRAITS])
@@ -1838,6 +1839,58 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
                     'text': re.sub(traits_regex, '__**\\1**__', paragraph),
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('Unknown traits', []).append(data)
+
+        sentences = [s.strip() for s in paragraph.split('.') if s.strip()]
+        for sentence in sentences:
+            sentence_original = sentence
+            sentence = sentence.replace('additional', '')
+            sentence = re.sub(
+                r'\bplace(?!.+?\badd.+?token)(?!.+?\bput.+?token).+?token'
+                r'(?!.+?\bpool)', '', sentence, flags=re.IGNORECASE)
+            sentence = re.sub(
+                r'\bplace(?!.+?\badd.+?progress)(?!.+?\bput.+?progress).+?'
+                r'progress', '', sentence, flags=re.IGNORECASE)
+            sentence = re.sub(
+                r'\badd(?!.+?\bplace.+?resource)(?!.+?\bput.+?resource).+?'
+                r'resource.+?\bpool', '', sentence, flags=re.IGNORECASE)
+            if (re.search('token', sentence, flags=re.IGNORECASE) and (
+                    re.search(r'\badd', sentence, flags=re.IGNORECASE) or
+                    re.search(r'\bput', sentence, flags=re.IGNORECASE) or
+                    re.search(r'\bpool', sentence, flags=re.IGNORECASE))):
+                data = {'name': card[lotr.CARD_NAME],
+                        'field': field,
+                        'text': re.sub(
+                            r'((?:token|\badd|\bput|\bpool)[a-z]*)',
+                            '__**\\1**__', sentence_original,
+                            flags=re.IGNORECASE),
+                        'row': card[lotr.ROW_COLUMN]}
+                res.setdefault('Place vs. Put vs. Add', []).append(data)
+
+            if (re.search('progress', sentence, flags=re.IGNORECASE) and (
+                    re.search(r'\badd', sentence, flags=re.IGNORECASE) or
+                    re.search(r'\bput', sentence, flags=re.IGNORECASE))):
+                data = {'name': card[lotr.CARD_NAME],
+                        'field': field,
+                        'text': re.sub(
+                            r'((?:progress|\badd|\bput)[a-z]*)',
+                            '__**\\1**__', sentence_original,
+                            flags=re.IGNORECASE),
+                        'row': card[lotr.ROW_COLUMN]}
+                res.setdefault('Place vs. Put vs. Add', []).append(data)
+
+            if (re.search('resource(?! token)', sentence,
+                          flags=re.IGNORECASE) and (
+                    re.search(r'\badd', sentence, flags=re.IGNORECASE) or
+                    re.search(r'\bput', sentence, flags=re.IGNORECASE) or
+                    re.search(r'\bplace', sentence, flags=re.IGNORECASE))):
+                data = {'name': card[lotr.CARD_NAME],
+                        'field': field,
+                        'text': re.sub(
+                            r'((?:resource|\badd|\bput|\bplace)[a-z]*)',
+                            '__**\\1**__', sentence_original,
+                            flags=re.IGNORECASE),
+                        'row': card[lotr.ROW_COLUMN]}
+                res.setdefault('Place vs. Put vs. Add', []).append(data)
 
         value = paragraph.replace('Encounter Cards', '')
         match = re.search(keywords_regex, value)
