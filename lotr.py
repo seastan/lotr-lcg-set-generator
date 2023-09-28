@@ -1797,19 +1797,20 @@ def _verify_drive_timestamp(folder_path):
     path = os.path.join(folder_path, UTC_TIMESTAMP_PATH)
     try:
         with open(path, 'r', encoding='utf-8') as fobj:
-            timestamp = fobj.read()
+            timestamp = fobj.read().strip()
 
         diff = (datetime.utcnow().timestamp() -
                 datetime.strptime(timestamp, '%a %d %b %H:%M:%S %Z %Y')
                 .timestamp())
-        if diff > DRIVE_TIMESTAMP_MAX_DIFF:
-            raise GoogleDriveError(
-                'No Google Drive updates for {} folder for {} seconds'
-                .format(os.path.split(folder_path)[-1], diff))
     except Exception as exc:
         raise GoogleDriveError(
             "Can't read Google Drive timestamp for {} folder"
             .format(os.path.split(folder_path)[-1])) from exc
+    else:
+        if diff > DRIVE_TIMESTAMP_MAX_DIFF:
+            raise GoogleDriveError(
+                'No Google Drive updates for {} folder for {} seconds'
+                .format(os.path.split(folder_path)[-1], int(diff)))
 
 
 def upload_stable_data():
@@ -1833,7 +1834,9 @@ def read_stable_data(conf):
     logging.info('Reading the latest stable data...')
     timestamp = time.time()
 
-    _verify_drive_timestamp(conf['stable_data_path'])
+    if conf['verify_drive_timestamp']:
+        _verify_drive_timestamp(conf['stable_data_path'])
+
     stable_data_path = os.path.join(conf['stable_data_path'],
                                     '{}.json'.format(CARD_SHEET))
     try:
@@ -9514,7 +9517,9 @@ def verify_images(conf):
     logging.info('')
     timestamp = time.time()
 
-    _verify_drive_timestamp(conf['artwork_path'])
+    if conf['verify_drive_timestamp']:
+        _verify_drive_timestamp(conf['artwork_path'])
+
     if os.path.exists(conf['artwork_path']):
         for root, _, filenames in os.walk(conf['artwork_path']):
             if root == os.path.join(conf['artwork_path'], SCRATCH_FOLDER):
