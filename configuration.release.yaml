@@ -80,6 +80,9 @@ parallelism: default
 # - "writer" (write the stable data when sanity check passed)
 stable_data_user: none
 
+# Verify whether Google Drive is up to date or not (true or false)
+verify_drive_timestamp: true
+
 # List of set IDs to work on
 set_ids:
 #  - all  # all non-scratch sets

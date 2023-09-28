@@ -171,6 +171,7 @@ or `bash` (Mac/Linux).  To navigate to a right folder inside your CLI you can us
   - `run_sanity_check_for_all_sets`: run sanity check for all sets (true or false)
   - `parallelism`: number of parallel processes to use (`default` means `cpu_count() - 1`, but not more than 4)
   - `stable_data_user`: how to use the stable data: "none" (don't use stable data), "reader" (read the latest stable data when sanity check failed), "writer" (write the stable data when sanity check passed)
+  - `verify_drive_timestamp`: verify whether Google Drive is up to date or not (true or false)
   - `set_ids`: list of set IDs to work on (you can use `all` and `all_scratch` aliases to select all non-scratch and all scratch sets sutomatically)
   - `ignore_set_ids`: list of set IDs to ignore
   - `set_ids_octgn_image_destination`: list of set IDs to copy to OCTGN image destination
