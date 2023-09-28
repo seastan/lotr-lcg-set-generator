@@ -1791,7 +1791,7 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
     return (changes, scratch_changes)
 
 
-def verify_drive_timestamp(folder_path):
+def _verify_drive_timestamp(folder_path):
     """ Verify Google Drive timestamp of a particular folder.
     """
     path = os.path.join(folder_path, UTC_TIMESTAMP_PATH)
@@ -1833,7 +1833,7 @@ def read_stable_data(conf):
     logging.info('Reading the latest stable data...')
     timestamp = time.time()
 
-    verify_drive_timestamp(conf['stable_data_path'])
+    _verify_drive_timestamp(conf['stable_data_path'])
     stable_data_path = os.path.join(conf['stable_data_path'],
                                     '{}.json'.format(CARD_SHEET))
     try:
@@ -9514,7 +9514,7 @@ def verify_images(conf):
     logging.info('')
     timestamp = time.time()
 
-    verify_drive_timestamp(conf['artwork_path'])
+    _verify_drive_timestamp(conf['artwork_path'])
     if os.path.exists(conf['artwork_path']):
         for root, _, filenames in os.walk(conf['artwork_path']):
             if root == os.path.join(conf['artwork_path'], SCRATCH_FOLDER):
