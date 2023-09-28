@@ -3082,11 +3082,13 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if re.search(r'is a \[bi\][^\[]+\[\/bi\](?! trait| \[bi\]trait)',
                      paragraph, flags=re.IGNORECASE):
             errors.append('"has the {Trait} trait"')
-        elif re.search(r'(?<!the )(?:printed )?\[bi\][^\[]+\[\/bi\]'
-                     r'(?:(?:, | or | and )\[bi\][^\[]+\[\/bi\])* traits?\b',
-                     re.sub(r'the (?:printed )?\[bi\][^\[]+\[\/bi\]'
-                            r'(?:(?:, | or | and )\[bi\][^\[]+\[\/bi\])* '
-                            r'traits?\b', '', paragraph), flags=re.IGNORECASE):
+        elif re.search(
+            r'(?<!the )(?:printed )?\[bi\][^\[]+\[\/bi\]'
+            r'(?:(?:, | or |, or | and |, and )\[bi\][^\[]+\[\/bi\])* '
+            r'traits?\b',
+            re.sub(r'the (?:printed )?\[bi\][^\[]+\[\/bi\]'
+                   r'(?:(?:, | or |, or | and |, and )\[bi\][^\[]+\[\/bi\])* '
+                   r'traits?\b', '', paragraph), flags=re.IGNORECASE):
             errors.append('"the {Trait} trait"')
 
         if re.search(r'\[\/bi\] Traits?\b', paragraph):
