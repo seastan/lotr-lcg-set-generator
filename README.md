@@ -360,6 +360,7 @@ Additional steps:
   - `5 8 2 * *     <path>/remind_monthly.sh >> <path>/cron.log 2>&1`
   - `0 12 * * *    <path>/remote_player_cards_stat_monitor.sh >> <path>/cron.log 2>&1`
   - `19 8 * * *    <path>/scheduled_backup.sh "<local Drive/LinksBackup path>" >> <path>/cron.log 2>&1`
+  - `0,30 * * * *  <path>/utc_timestamp.sh >> <path>/cron.log 2>&1`
 
     Replace `<path>` with the absolute path to the root folder of this repo.  `cron.log` may be located either in the root folder
     or in some external folder (if you already have other crons).  Set `<path to a local configuration backup folder>`
