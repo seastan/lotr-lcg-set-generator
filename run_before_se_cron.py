@@ -314,4 +314,8 @@ def run(conf=None):  # pylint: disable=R0912,R0915
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     init_logging()
-    run()
+    my_conf = read_conf()
+
+    run(my_conf)
+    # import cProfile
+    # cProfile.run('run(my_conf)', sort='time')
