@@ -2115,13 +2115,14 @@ def parse_flavour(value, lang):  # pylint: disable=R0912,R0915
     if len(parts) == 2:
         source_parts = parts[1][::-1].split(' ,', maxsplit=1)
         source_parts = [p[::-1].strip() for p in source_parts][::-1]
+        source_book = re.sub(r'\[[^\]]+\]$', '', source_parts[-1])
         if not KNOWN_BOOKS.get(lang):
             parts = [original_value]
-        elif (re.sub(r'\[[^\]]+\]$', '', source_parts[-1])
-              not in KNOWN_BOOKS[lang]):
+        elif source_book not in KNOWN_BOOKS[lang]:
             parts = [original_value]
             if not false_split:
-                errors.append('Possibly unknown source book')
+                errors.append('Possibly unknown source book: {}'.format(
+                    source_book))
         else:
             if len(source_parts) == 2:
                 parts = [parts[0], source_parts[0], source_parts[1]]
@@ -2215,7 +2216,7 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                      extract_flags(row[BACK_PREFIX + CARD_FLAGS],
                                    conf['ignore_ignore_flags']))):
             card_name_regex_back = (
-                r'(?<!\[bi\])\b' + re.escape(card_name) + r'\b')
+                r'(?<!\[bi\])\b' + re.escape(card_name_back) + r'\b')
         else:
             card_name_regex_back = None
 
@@ -2232,9 +2233,10 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                 refs = re.findall(CARD_NAME_REFERENCE_REGEX, value)
                 for ref in refs:
                     if ref not in ALL_CARD_NAMES[lang]:
-                        error = ('Invalid reference [[{}]] in {} column'
-                                 .format(ref,
-                                         key.replace(BACK_PREFIX, 'Back ')))
+                        error = (
+                            'Invalid reference [[{}]] in {} column: there is '
+                            'no card with that name'.format(
+                                ref, key.replace(BACK_PREFIX, 'Back ')))
                         PRE_SANITY_CHECK['ref'].setdefault(
                             (row[ROW_COLUMN], row[CARD_SCRATCH], lang),
                             []).append(error)
@@ -2255,8 +2257,9 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                                                 prepared_value)
 
                     if re.search(card_name_regex, prepared_value):
-                        error = ('Hardcoded card name instead of [name] '
-                                 'in text')
+                        error = (
+                            'Hardcoded card name "{}" instead of [name] in '
+                            'text'.format(card_name))
                         PRE_SANITY_CHECK['name'].setdefault(
                             (row[ROW_COLUMN], row[CARD_SCRATCH]),
                             []).append(error)
@@ -2274,8 +2277,9 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                                                 prepared_value)
 
                     if re.search(card_name_regex, prepared_value):
-                        error = ('Hardcoded card name instead of [name] '
-                                 'in shadow')
+                        error = (
+                            'Hardcoded card name "{}" instead of [name] in '
+                            'shadow'.format(card_name))
                         PRE_SANITY_CHECK['name'].setdefault(
                             (row[ROW_COLUMN], row[CARD_SCRATCH]),
                             []).append(error)
@@ -2295,8 +2299,9 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                                                 prepared_value)
 
                     if re.search(card_name_regex_back, prepared_value):
-                        error = ('Hardcoded card name instead of [name] '
-                                 'in text back')
+                        error = (
+                            'Hardcoded card name "{}" instead of [name] in '
+                            'text back'.format(card_name_back))
                         PRE_SANITY_CHECK['name'].setdefault(
                             (row[ROW_COLUMN], row[CARD_SCRATCH]),
                             []).append(error)
@@ -2314,8 +2319,9 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                                                 prepared_value)
 
                     if re.search(card_name_regex_back, prepared_value):
-                        error = ('Hardcoded card name instead of [name] '
-                                 'in shadow back')
+                        error = (
+                            'Hardcoded card name "{} instead of [name] in '
+                            'shadow back'.format(card_name_back))
                         PRE_SANITY_CHECK['name'].setdefault(
                             (row[ROW_COLUMN], row[CARD_SCRATCH]),
                             []).append(error)
@@ -3286,8 +3292,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
     card_data = sorted(card_data, key=lambda row: (row[CARD_SCRATCH] or 0,
                                                    row[ROW_COLUMN]))
 
-    accents_regex = (r'\b(?:' + '|'.join([re.escape(a) for a in ACCENTS]) +
-                     r')\b')
+    accents_regex = (
+        r'\b(?:' + '|'.join([re.escape(a) for a in ACCENTS]) + r')\b')
 
     for row in card_data:  # pylint: disable=R1702
         i = row[ROW_COLUMN]
@@ -3377,8 +3383,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             if not card_scratch:
                 errors.append(message)
         elif set_id == '[filtered set]':
-            message = 'Reusing non-scratch set ID for row #{}{}'.format(
-                i, row_info)
+            message = (
+                'Reusing non-scratch set ID for row #{}{} (which is '
+                'prohibited)'.format(i, row_info))
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
@@ -3484,8 +3491,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_type in CARD_TYPES_ONE_COPY and card_quantity != 1 and
               not (card_flags and
                    'AdditionalCopies' in extract_flags(card_flags))):
-            message = ('Incorrect card quantity for row #{}{}'.format(
-                i, row_info))
+            message = ('Incorrect card quantity according to its card type '
+                       'for row #{}{}'.format(i, row_info))
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
@@ -3495,8 +3502,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
               card_sphere != 'Boon' and card_quantity not in (1, 3) and
               not (card_flags and
                    'AdditionalCopies' in extract_flags(card_flags))):
-            message = ('Incorrect card quantity for row #{}{}'.format(
-                i, row_info))
+            message = ('Incorrect card quantity according to its card type '
+                       'for row #{}{}'.format(i, row_info))
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
@@ -3596,7 +3603,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     broken_set_ids.add(set_id)
 
         if card_unique is not None and card_unique not in ('1', 1):
-            message = 'Incorrect format for unique for row #{}{}'.format(
+            message = 'Incorrect format for unique flag for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
             if not card_scratch:
@@ -3606,8 +3613,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif ((card_unique is None and card_type in CARD_TYPES_UNIQUE) or
               (card_unique in ('1', 1) and
                card_type in CARD_TYPES_NO_UNIQUE)):
-            message = 'Incorrect unique value for row #{}{}'.format(
-                i, row_info)
+            message = (
+                'Incorrect unique flag according to its card type for '
+                'row #{}{}'.format(i, row_info))
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
@@ -3615,7 +3623,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
 
         if card_unique_back is not None and card_type_back is None:
-            message = 'Redundant unique back for row #{}{}'.format(
+            message = 'Redundant unique flag back for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
             if not card_scratch:
@@ -3623,8 +3631,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif card_unique_back is not None and card_unique_back not in ('1', 1):
-            message = 'Incorrect format for unique back for row #{}{}'.format(
-                i, row_info)
+            message = ('Incorrect format for unique flag back for row #{}{}'
+                       .format(i, row_info))
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
@@ -3634,8 +3642,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                card_type_back in CARD_TYPES_UNIQUE) or
               (card_unique_back in ('1', 1) and
                card_type_back in CARD_TYPES_NO_UNIQUE)):
-            message = 'Incorrect unique back value for row #{}{}'.format(
-                i, row_info)
+            message = ('Incorrect unique flag back according to its card type '
+                       'for row #{}{}'.format(i, row_info))
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
