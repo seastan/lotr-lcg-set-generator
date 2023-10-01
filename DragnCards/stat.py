@@ -16,8 +16,6 @@ import psycopg2
 import requests
 
 
-SUBJECT_TEMPLATE = 'DragnCards Stat Cron Result for {}'
-ERROR_SUBJECT_TEMPLATE = 'DragnCards Stat Cron ERROR: {}'
 LOG_PATH = 'stat.log'
 LOG_LEVEL = logging.INFO
 
@@ -80,14 +78,6 @@ def init_logging():
                         format='%(asctime)s %(levelname)s: %(message)s')
 
 
-def send_mail(subject, body=''):
-    """ Send email message.
-    """
-    # T.B.D.
-    print(subject)
-    print(body)
-
-
 def get_last_month():
     """ Get last month in 'YYYY-MM' format.
     """
@@ -116,7 +106,7 @@ def get_ringsdb_data(month):
         except Exception as exc:
             message = 'Reading RingsDB data mock failed: {}'.format(str(exc))
             logging.error(message)
-            send_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+            print(message)
             raise
 
     try:
@@ -125,7 +115,7 @@ def get_ringsdb_data(month):
     except Exception as exc:
         message = 'Reading RingsDB cookies failed: {}'.format(str(exc))
         logging.error(message)
-        send_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+        print(message)
         raise
 
     session = requests.Session()
@@ -138,33 +128,13 @@ def get_ringsdb_data(month):
     except Exception as exc:
         message = 'Reading RingsDB data failed: {}'.format(str(exc))
         logging.error(message)
-        send_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+        print(message)
         raise
 
     cookies = session.cookies.get_dict()
     with open(RINGSDB_COOKIES_PATH, 'w', encoding='utf-8') as fobj:
         json.dump(cookies, fobj)
 
-    return res
-
-
-def run_dragncards_query(cursor, month, next_month, offset):
-    """ Run a DragnCards database query.
-    """
-    query = """
-    SELECT game_json::json->'cardById' AS cards,
-      "user",
-      inserted_at
-    FROM replays
-    WHERE inserted_at BETWEEN '{}-01' AND '{}-01'
-      AND rounds > 0
-      AND (rounds > 1 OR outcome IN ('victory', 'defeat', 'incomplete'))
-    ORDER BY id
-    OFFSET {} limit {}
-    """.format(month, next_month, offset, QUERY_LIMIT)
-    cursor.execute(query)
-    res = cursor.fetchall()
-    logging.info('Obtained %s records from DragnCards database', len(res))
     return res
 
 
@@ -201,7 +171,7 @@ def process_dragncards_data(dragncards_data, ringsdb_data, packs, stat):  # pyli
                                       'Escape from Umbar Nightmare')):
                     message = 'Unknown pack detected: {}'.format(pack_name)
                     logging.error(message)
-                    send_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+                    print(message)
 
                 ignore_replay = True
                 break
@@ -260,12 +230,13 @@ def process_dragncards_data(dragncards_data, ringsdb_data, packs, stat):  # pyli
                 else:
                     message = 'No cycle for the pack: {}'.format(pack_name)
                     logging.error(message)
-                    send_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+                    print(message)
 
 
 def get_dragncards_data(ringsdb_data, month):  # pylint: disable=R0914
     """ Get the data from DragnCards database.
     """
+    next_month = get_next_month(month)
     packs = {p['name']: p['date_release'] for p in ringsdb_data['packs']}
     packs['Custom Set'] = '2000-01-01'
     stat = {'quests': [], 'decks': []}
@@ -276,17 +247,27 @@ def get_dragncards_data(ringsdb_data, month):  # pylint: disable=R0914
                             port=DRAGNCARDS_PORT,
                             database=DRAGNCARDS_DATABASE)
     try:
-        cursor = conn.cursor()
-        next_month = get_next_month(month)
-        offset = 0
+        cursor = conn.cursor('replays')
+        cursor.itersize = QUERY_LIMIT
+        query = """
+        SELECT game_json::json->'cardById' AS cards,
+          "user",
+          inserted_at
+        FROM replays
+        WHERE inserted_at BETWEEN '{}-01' AND '{}-01'
+          AND rounds > 0
+          AND (rounds > 1 OR outcome IN ('victory', 'defeat', 'incomplete'))
+        """.format(month, next_month)
+        cursor.execute(query)
+
         while True:
-            dragncards_data = run_dragncards_query(
-                cursor, month, next_month, offset)
-            process_dragncards_data(dragncards_data, ringsdb_data, packs, stat)
+            dragncards_data = cursor.fetchmany(QUERY_LIMIT)
+            logging.info('Obtained %s records from DragnCards database',
+                         len(dragncards_data))
+            process_dragncards_data(dragncards_data, ringsdb_data, packs,
+                                    stat)
             if len(dragncards_data) < QUERY_LIMIT:
                 break
-
-            offset += QUERY_LIMIT
     finally:
         conn.close()
 
@@ -342,7 +323,7 @@ def main():
         if not re.match(r'^[0-9]{4}-[0-9]{2}$', month):
             message = 'Incorrect month value: {}'.format(month)
             logging.error(message)
-            send_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+            print(message)
             raise ValueError(message)
     else:
         month = get_last_month()
@@ -369,7 +350,7 @@ def main():
         ])
 
     logging.info(output)
-    send_mail(SUBJECT_TEMPLATE.format(month), output)
+    print(output)
     logging.info('Done (%ss)', round(time.time() - timestamp, 3))
 
 
