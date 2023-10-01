@@ -11,6 +11,7 @@ import logging
 import os
 import re
 import subprocess
+import sys
 import time
 import uuid
 
@@ -47,11 +48,31 @@ class RCloneError(Exception):
     """
 
 
+class LoggerWriter:
+    """ Custom writer to redirect stdout/stderr to existing logging.
+    """
+    def __init__(self, level):
+        self.level = level
+
+    def write(self, message):
+        """ Write data.
+        """
+        if message and message != '\n':
+            self.level(message)
+
+    def flush(self):
+        """ Flush data.
+        """
+        self.level(sys.stderr)
+
+
 def init_logging():
     """ Init logging.
     """
     logging.basicConfig(filename=LOG_PATH, level=LOG_LEVEL,
                         format='%(asctime)s %(levelname)s: %(message)s')
+    sys.stdout = LoggerWriter(logging.info)
+    sys.stderr = LoggerWriter(logging.warning)
 
 
 def internet_state():
@@ -313,9 +334,10 @@ def run(conf=None):  # pylint: disable=R0912,R0915
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    init_logging()
-    my_conf = read_conf()
+    # init_logging()
+    # run(my_conf)
 
-    run(my_conf)
-    # import cProfile
-    # cProfile.run('run(my_conf)', sort='time')
+    import cProfile
+    from run_before_se import init_logging as init_logging_stdout
+    init_logging_stdout()
+    cProfile.run('run()', sort='time')

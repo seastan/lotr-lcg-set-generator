@@ -88,11 +88,31 @@ class DiscordResponseError(Exception):
     """
 
 
+class LoggerWriter:
+    """ Custom writer to redirect stdout/stderr to existing logging.
+    """
+    def __init__(self, level):
+        self.level = level
+
+    def write(self, message):
+        """ Write data.
+        """
+        if message and message != '\n':
+            self.level(message)
+
+    def flush(self):
+        """ Flush data.
+        """
+        self.level(sys.stderr)
+
+
 def init_logging():
     """ Init logging.
     """
     logging.basicConfig(filename=LOG_PATH, level=LOG_LEVEL,
                         format='%(asctime)s %(levelname)s: %(message)s')
+    sys.stdout = LoggerWriter(logging.info)
+    sys.stderr = LoggerWriter(logging.warning)
 
 
 def internet_state():

@@ -48,6 +48,8 @@ try:
 except ModuleNotFoundError:
     pass
 
+re._MAXCACHE = 1000  # pylint: disable=W0212
+
 
 SET_SHEET = 'Sets'
 CARD_SHEET = 'Card Data'
@@ -1005,10 +1007,11 @@ def is_positive_or_zero_int(value):
 def is_int(value):
     """ Check whether a value is an int or not.
     """
+    str_value = str(value)
     try:
-        if (str(value).isdigit() or
-                (len(str(value)) > 1 and str(value)[0] == '-' and
-                 str(value)[1:].isdigit()) or
+        if (str_value.isdigit() or
+                (len(str_value) > 1 and str_value[0] == '-' and
+                 str_value[1:].isdigit()) or
                 int(value) == value):
             return True
 
