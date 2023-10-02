@@ -2883,137 +2883,159 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if re.search(r'limit once per',
                      re.sub(r'\(Limit once per .+\.\)”?$', '', paragraph),
                      flags=re.IGNORECASE):
-            errors.append('"(Limit once per _.)"')
+            errors.append('use "(Limit once per _.)" format')
 
         if re.search(r'limit (?:twice|two times|2 times) per',
                      re.sub(r'\(Limit twice per .+\.\)”?$', '', paragraph),
                      flags=re.IGNORECASE):
-            errors.append('"(Limit twice per _.)"')
+            errors.append('use "(Limit twice per _.)" format')
 
         if re.search(r'limit (?:thrice|three times|3 times) per',
                      re.sub(r'\(Limit 3 times per .+\.\)”?$', '', paragraph),
                      flags=re.IGNORECASE):
-            errors.append('"(Limit 3 times per _.)"')
+            errors.append('use "(Limit 3 times per _.)" format')
 
         if ' to travel here' in paragraph:
-            errors.append('redundant: "to travel here"')
+            errors.append('redundant "to travel here" statement')
 
-        if re.search(r' he (?:or she|commit|controls|deals|(?:just )?discard|'
+        if re.search(r' he (?:commit|controls|deals|(?:just )?discard|'
                      'is eliminated|must|owns|puts|raises)', paragraph):
-            errors.append('"they"')
+            errors.append('"they" not "he"')
 
-        if re.search(r' his (?:or her|(?:eligible )?characters|choice|control|'
+        if ' he or she' in paragraph:
+            errors.append('"they" not "he or she"')
+
+        if re.search(r' his (?:(?:eligible )?characters|choice|control|'
                      'deck|discard pile|hand|hero|out-of-play deck|own|'
                      'play area|threat)', paragraph):
-            errors.append('"their"')
+            errors.append('"their" not "his"')
 
-        if (' him or her' in paragraph or
-                'engaged with him' in paragraph or
-                'in front of him' in paragraph):
-            errors.append('"them"')
+        if ' his or her' in paragraph:
+            errors.append('"their" not "his or her"')
+
+        if 'engaged with him' in paragraph or 'in front of him' in paragraph:
+            errors.append('"them" not "him"')
+
+        if ' him or her' in paragraph:
+            errors.append('"them" not "him or her"')
 
         if re.search(r'encounter deck[^.]+from the top of the encounter deck',
                      paragraph):
-            errors.append('redundant: "from the top of the encounter deck"')
+            errors.append('redundant "from the top of the encounter deck" '
+                          'statement')
 
         if re.search(r'encounter deck[^.]+from the encounter deck', paragraph):
-            errors.append('redundant: "from the encounter deck"')
+            errors.append('redundant "from the encounter deck" statement')
 
         if re.search(r'discards? (?:[^ ]+ )?cards? from the top of the '
                      'encounter deck', paragraph, flags=re.IGNORECASE):
-            errors.append('"from the encounter deck"')
+            errors.append('"from the encounter deck" not "from the top of the '
+                          'encounter deck"')
 
         if re.search(r' gets? [^+–]', paragraph):
-            errors.append('"gain(s)" a non-stat modification')
+            errors.append('"gain" not "get" a non-stat modification')
 
         if re.search(r' gains? [+–]', paragraph):
-            errors.append('"get(s)" a stat modification')
+            errors.append('"get" not "gain" a stat modification')
 
         if re.search(r'discards? . cards? at random', paragraph,
                      flags=re.IGNORECASE):
-            errors.append('"discard(s) .. random card(s)"')
+            errors.append('use "discard(s) .. random card(s)" format')
 
         if re.search(r'\(Counts as a (?:\[bi\])?Condition', paragraph):
-            errors.append('"While attached... counts as a {Condition} '
-                          'attachment with the text:"')
+            errors.append('use "While attached .. counts as a {Condition} '
+                          'attachment with the text:" format')
 
         if ' by this effect' in paragraph:
-            errors.append('"this way" instead of "by this effect"')
+            errors.append('"this way" not "by this effect"')
 
-        if re.search(r'may trigger this (?:action|response)',
+        match = re.search(r'may trigger this (action|response)',
+                          paragraph, flags=re.IGNORECASE)
+        if match:
+            errors.append('"may trigger this effect" not "may trigger this {}"'
+                          .format(match.groups()[0]))
+
+        if re.search(r'\(any player may trigger this effect',
                      paragraph, flags=re.IGNORECASE):
-            errors.append('"may trigger this effect"')
-        elif re.search(r'\(any player may trigger this effect',
-                     paragraph, flags=re.IGNORECASE):
-            errors.append('"Any player may trigger this effect"')
+            errors.append('use "Any player may trigger this effect" format '
+                          '(without parenthesis)')
 
         if ('cannot be chosen as the current quest'
                 in paragraph.replace('cannot be chosen as the current quest '
                                      'during the quest phase', '')):
-            errors.append('"cannot be chosen as the current quest during '
-                          'the quest phase"')
+            errors.append('use "cannot be chosen as the current quest during '
+                          'the quest phase" format')
 
-        if 'active quest' in paragraph or 'current quest stage' in paragraph:
-            errors.append('"current quest"')
+        if 'active quest' in paragraph:
+            errors.append('"current quest" not "active quest"')
+
+        if 'current quest stage' in paragraph:
+            errors.append('"current quest" not "current quest stage"')
 
         if re.search(r'adds? [0-9X](?:\[pp\])? resources? to ',
                      re.sub(r'adds? [0-9X](?:\[pp\])? resources? to [^.]+ '
                             r'pool', '', paragraph, flags=re.IGNORECASE),
                      flags=re.IGNORECASE):
-            errors.append('"place(s) .. resource token(s) on"')
+            errors.append('use "place(s) .. resource token(s) on" format')
 
         if re.search(r'adds? [0-9X](?:\[pp\])? resource tokens? to [^.]+ pool',
                      paragraph, flags=re.IGNORECASE):
-            errors.append('"add(s) .. resource(s) to .. resource pool"')
+            errors.append('use "add(s) .. resource(s) to .. resource pool" '
+                          'format')
         elif re.search(r'adds? [0-9X](?:\[pp\])? resource tokens? to ',
                        paragraph, flags=re.IGNORECASE):
-            errors.append('"place(s) .. resource token(s) on"')
+            errors.append('use "place(s) .. resource token(s) on" format')
 
         if re.search(r'places? [0-9X](?:\[pp\])? resources? on [^.]+ pool',
                      paragraph, flags=re.IGNORECASE):
-            errors.append('"add(s) .. resource(s) to .. resource pool"')
+            errors.append('use "add(s) .. resource(s) to .. resource pool" '
+                          'format')
         elif re.search(r'places? [0-9X](?:\[pp\])? resources? on ',
                        paragraph, flags=re.IGNORECASE):
-            errors.append('"place(s) .. resource token(s) on"')
+            errors.append('use "place(s) .. resource token(s) on" format')
 
         if re.search(
                 r'places? [0-9X](?:\[pp\])? resource tokens? on [^.]+ pool',
                 paragraph, flags=re.IGNORECASE):
-            errors.append('"add(s) .. resource(s) to .. resource pool"')
+            errors.append('use "add(s) .. resource(s) to .. resource pool" '
+                          'format')
 
         if 'per player' in re.sub(r'limit [^.]+\.', '', paragraph,
                                   flags=re.IGNORECASE):
-            errors.append('"[pp]" instead of "per player"')
+            errors.append('"[pp]" tag not "per player" text')
 
-        if re.search(r'step is completed?',
-                     paragraph.replace('complete rules', '')):
-            errors.append('redundant: "is complete(d)"')
+        if 'step is completed' in paragraph.replace('complete rules', ''):
+            errors.append('redundant "is completed" statement')
+        elif 'step is complete' in paragraph.replace('complete rules', ''):
+            errors.append('redundant "is complete" statement')
         elif re.search(r'\bcomplete[ds]?\b',
                        paragraph.replace('complete rules', ''),
                        flags=re.IGNORECASE):
-            errors.append('"defeat(ed)"')
+            errors.append('"defeat" not "complete"')
         elif re.search(r'explore (?:this |a quest )?stage', paragraph,
                        flags=re.IGNORECASE):
-            errors.append('"defeat(ed)"')
-        elif re.search(r'(?:stage|quest) (?:is|is not|cannot be) explored',
-                       paragraph):
-            errors.append('"defeat(ed)"')
+            errors.append('"defeat stage" not "explore stage"')
+        elif re.search(r'stage (?:is|is not|cannot be) explored', paragraph):
+            errors.append('"defeat stage" not "explore stage"')
+        elif re.search(r'quest (?:is|is not|cannot be) explored', paragraph):
+            errors.append('"defeat quest" not "explore quest"')
         elif re.search(r'\b(?:clear|cleared)\b', paragraph,
                        flags=re.IGNORECASE):
-            errors.append('"defeat(ed)"')
+            errors.append('"defeat" not "clear"')
 
         if re.search(r'play only after',
                      paragraph, flags=re.IGNORECASE):
-            errors.append('"Response: At the end of _" instead of '
-                          '"play only after"')
+            errors.append('"Response: At the end of" not "play only after"')
 
         if 'cancelled' in paragraph:
-            errors.append('"canceled"')
+            errors.append('"canceled" not "cancelled"')
 
-        if re.search(
-                r' (?:leadership|lore|spirit|tactics|baggins|fellowship)\b',
-                paragraph):
-            errors.append('"[sphere name] as tag"')
+        match = re.search(
+            r' (leadership|lore|spirit|tactics|baggins|fellowship)\b',
+            paragraph)
+        if match:
+            errors.append('"[{}]" tag not "{}" text'.format(match.groups()[0],
+                                                            match.groups()[0]))
 
         if (re.search(
                 r'more than [0-9]+(?!\[pp\])',
@@ -3115,14 +3137,14 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if (field in (CARD_SHADOW, BACK_PREFIX + CARD_SHADOW) and
                 re.search(r'\bdefending player\b', paragraph,
                           flags=re.IGNORECASE)):
-            errors.append('"you" (instead of "defending player")')
+            errors.append('"you" not "defending player"')
         elif re.search(r'\bshadow\b[^.]+ defending player\b', paragraph,
                        flags=re.IGNORECASE):
-            errors.append('"you" (instead of "defending player")')
+            errors.append('"you" not "defending player"')
         elif re.search(
                 r'\b(?:after|when) [^.]+ attacks[^.]+ defending player\b',
                 paragraph, flags=re.IGNORECASE):
-            errors.append('"you" (instead of "defending player")')
+            errors.append('"you" not "defending player"')
 
         if (field in (CARD_SHADOW, BACK_PREFIX + CARD_SHADOW) and
                 re.search(r'\bafter this attack[^.]* attacking enemy engages '
@@ -3146,9 +3168,11 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                      flags=re.IGNORECASE):
             errors.append('"advance to stage _A(B)")')
 
-        if re.search(r'(?<!\bstage )[2-90X] card\b', paragraph,
-                     flags=re.IGNORECASE):
-            errors.append('"cards" not "card"')
+        match = re.search(r'(?<!\bstage )([2-90X]) card\b', paragraph,
+                          flags=re.IGNORECASE)
+        if match:
+            errors.append('"{} cards" not "{} card"'.format(match.groups()[0],
+                                                            match.groups()[0]))
 
         if re.search(r'^\[b\]Rumor\[\/b\]:', paragraph):
             errors.append('Rumor text must be inside [i] tags')
@@ -3257,7 +3281,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
     if (field == CARD_TEXT and card[CARD_TYPE] == 'Quest'
             and str(card[CARD_COST]) == '1'):
         if 'When Revealed' in text:
-            errors.append('"Setup" instead of "When Revealed"')
+            errors.append('"Setup" not "When Revealed"')
 
     if ((field == CARD_TEXT and
          card[CARD_TYPE] not in CARD_TYPES_NO_KEYWORDS) or
