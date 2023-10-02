@@ -2940,10 +2940,10 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
 
         if re.search(r'discards? . cards? at random', paragraph,
                      flags=re.IGNORECASE):
-            errors.append('use "discard(s) .. random card(s)" format')
+            errors.append('use "discard(s) ... random card(s)" format')
 
         if re.search(r'\(Counts as a (?:\[bi\])?Condition', paragraph):
-            errors.append('use "While attached .. counts as a {Condition} '
+            errors.append('use "While attached ... counts as a {Condition} '
                           'attachment with the text:" format')
 
         if ' by this effect' in paragraph:
@@ -2976,28 +2976,28 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                      re.sub(r'adds? [0-9X](?:\[pp\])? resources? to [^.]+ '
                             r'pool', '', paragraph, flags=re.IGNORECASE),
                      flags=re.IGNORECASE):
-            errors.append('use "place(s) .. resource token(s) on" format')
+            errors.append('use "place(s) ... resource token(s) on" format')
 
         if re.search(r'adds? [0-9X](?:\[pp\])? resource tokens? to [^.]+ pool',
                      paragraph, flags=re.IGNORECASE):
-            errors.append('use "add(s) .. resource(s) to .. resource pool" '
+            errors.append('use "add(s) ... resource(s) to ... resource pool" '
                           'format')
         elif re.search(r'adds? [0-9X](?:\[pp\])? resource tokens? to ',
                        paragraph, flags=re.IGNORECASE):
-            errors.append('use "place(s) .. resource token(s) on" format')
+            errors.append('use "place(s) ... resource token(s) on" format')
 
         if re.search(r'places? [0-9X](?:\[pp\])? resources? on [^.]+ pool',
                      paragraph, flags=re.IGNORECASE):
-            errors.append('use "add(s) .. resource(s) to .. resource pool" '
+            errors.append('use "add(s) ... resource(s) to ... resource pool" '
                           'format')
         elif re.search(r'places? [0-9X](?:\[pp\])? resources? on ',
                        paragraph, flags=re.IGNORECASE):
-            errors.append('use "place(s) .. resource token(s) on" format')
+            errors.append('use "place(s) ... resource token(s) on" format')
 
         if re.search(
                 r'places? [0-9X](?:\[pp\])? resource tokens? on [^.]+ pool',
                 paragraph, flags=re.IGNORECASE):
-            errors.append('use "add(s) .. resource(s) to .. resource pool" '
+            errors.append('use "add(s) ... resource(s) to ... resource pool" '
                           'format')
 
         if 'per player' in re.sub(r'limit [^.]+\.', '', paragraph,
@@ -3045,7 +3045,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                               re.sub(r'cannot[^.]+unless', '', paragraph,
                                      flags=re.IGNORECASE),
                               flags=re.IGNORECASE)):
-            errors.append('".. or more (greater)"')
+            errors.append('use "... or more" rather than "more than ..."')
         elif (re.search(
                 r'greater than [0-9]+(?!\[pp\])', paragraph,
                 flags=re.IGNORECASE) and
@@ -3053,7 +3053,8 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                               re.sub(r'cannot[^.]+unless', '', paragraph,
                                      flags=re.IGNORECASE),
                               flags=re.IGNORECASE)):
-            errors.append('".. or more (greater)"')
+            errors.append(
+                'use "... or greater" rather than "greater than ..."')
 
         if (re.search(r'fewer than [0-9]+(?!\[pp\])', paragraph,
                       flags=re.IGNORECASE) and
@@ -3061,58 +3062,67 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                               re.sub(r'cannot[^.]+unless', '', paragraph,
                                      flags=re.IGNORECASE),
                               flags=re.IGNORECASE)):
-            errors.append('".. or fewer (less)"')
+            errors.append('use "... or fewer" rather than "fewer than ..."')
         elif (re.search(r'less than [0-9]+(?!\[pp\])', paragraph,
                         flags=re.IGNORECASE) and
                 not re.search(r'cannot[^.]+less than [0-9]+(?!\[pp\])',
                               re.sub(r'cannot[^.]+unless', '', paragraph,
                                      flags=re.IGNORECASE),
                               flags=re.IGNORECASE)):
-            errors.append('".. or fewer (less)"')
+            errors.append('use "... or less" rather than "less than ..."')
 
-        if (re.search(r'cannot[^.]+ [0-9]+ or (?:more|greater)',
+        if (re.search(r'cannot[^.]+ [0-9]+ or more',
                       re.sub(r'cannot[^.]+unless', '', paragraph,
                              flags=re.IGNORECASE), flags=re.IGNORECASE)):
-            errors.append('"more (greater) than _"')
-
-        if (re.search(r'cannot[^.]+ [0-9]+ or (?:less|fewer)',
+            errors.append('use "more than ..." rather than "... or more"')
+        elif (re.search(r'cannot[^.]+ [0-9]+ or greater',
                       re.sub(r'cannot[^.]+unless', '', paragraph,
                              flags=re.IGNORECASE), flags=re.IGNORECASE)):
-            errors.append('"fewer (less) than _"')
+            errors.append(
+                'use "greater than ..." rather than "... or greater"')
+
+        if (re.search(r'cannot[^.]+ [0-9]+ or less',
+                      re.sub(r'cannot[^.]+unless', '', paragraph,
+                             flags=re.IGNORECASE), flags=re.IGNORECASE)):
+            errors.append('use "less than ..." rather than "... or less"')
+        elif (re.search(r'cannot[^.]+ [0-9]+ or fewer',
+                      re.sub(r'cannot[^.]+unless', '', paragraph,
+                             flags=re.IGNORECASE), flags=re.IGNORECASE)):
+            errors.append('use "fewer than ..." rather than "... or fewer"')
 
         if re.search(r' defense\b', paragraph):
-            errors.append('"[defense] as tag"')
+            errors.append('"[defense]" tag not "defense" text')
 
         if re.search(r' willpower\b', paragraph):
-            errors.append('"[willpower] as tag"')
+            errors.append('"[willpower]" tag not "willpower" text')
 
         if re.search(r' (?:[+–][0-9X]+|printed) attack\b', paragraph):
-            errors.append('"[attack] as tag"')
+            errors.append('"[attack]" tag not "attack" text')
 
         if re.search(
                 r' (?:[+–][0-9X]+|printed) threat\b',
                 paragraph.replace('threat cost', '').replace('threat penalty',
                                                              '')):
-            errors.append('"[threat] as tag"')
+            errors.append('"[threat]" tag not "threat" text')
 
         if re.search(r'[Cc]hoose[^:]*?: Either', paragraph):
-            errors.append('"choose: either"')
+            errors.append('"either" must be in lower case')
 
         if re.search(r'\bheal[^.]+?\bon\b',
                      re.sub(r'\bfrom\b[^.]+?\bon\b', '', paragraph,
                             flags=re.IGNORECASE),
                      flags=re.IGNORECASE):
-            errors.append('"heal .. from"')
+            errors.append('"heal ... from" not "heal ... on"')
 
         if 'quest card' in paragraph:
-            errors.append('redundant: "card(s)" after "quest"')
+            errors.append('"quest" not "quest card"')
 
         if 'set-aside' in paragraph:
-            errors.append('"set aside"')
+            errors.append('"set aside" not "set-aside"')
 
         if re.search(r'is a \[bi\][^\[]+\[\/bi\](?! trait| \[bi\]trait)',
                      paragraph, flags=re.IGNORECASE):
-            errors.append('"has the {Trait} trait"')
+            errors.append('use "has the {Trait} trait" format')
         elif re.search(
             r'(?<!the )(?:printed )?\[bi\][^\[]+\[\/bi\]'
             r'(?:(?:, | or |, or | and |, and )\[bi\][^\[]+\[\/bi\])* '
@@ -3120,19 +3130,29 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
             re.sub(r'the (?:printed )?\[bi\][^\[]+\[\/bi\]'
                    r'(?:(?:, | or |, or | and |, and )\[bi\][^\[]+\[\/bi\])* '
                    r'traits?\b', '', paragraph), flags=re.IGNORECASE):
-            errors.append('"the {Trait} trait"')
+            errors.append('use "the {Trait} trait" format')
 
-        if re.search(r'\[\/bi\] Traits?\b', paragraph):
-            errors.append('lowercase "trait(s)" after "{Trait}"')
-        elif re.search(r'\[\/bi\] \[bi\]traits?\b', paragraph,
+        if re.search(r'\[\/bi\] Traits\b', paragraph):
+            errors.append('"traits" must be in lower case')
+        elif re.search(r'\[\/bi\] Trait\b', paragraph):
+            errors.append('"trait" must be in lower case')
+        elif re.search(r'\[\/bi\] \[bi\]traits\b', paragraph,
                        flags=re.IGNORECASE):
-            errors.append('remove tags around "trait(s)" after "{Trait}"')
+            errors.append('remove tags around "traits"')
+        elif re.search(r'\[\/bi\] \[bi\]trait\b', paragraph,
+                       flags=re.IGNORECASE):
+            errors.append('remove tags around "trait"')
 
-        if re.search(r'(?<!\[\/bi\] )traits?\b', paragraph):
-            errors.append('uppercase "Trait(s)"')
-        elif re.search(r'(?<!\[\/bi\] )(?<!\[bi\])Traits?\b', paragraph,
+        if re.search(r'(?<!\[\/bi\] )traits\b', paragraph):
+            errors.append('"Traits" must be capitalized')
+        if re.search(r'(?<!\[\/bi\] )trait\b', paragraph):
+            errors.append('"Trait" must be capitalized')
+        elif re.search(r'(?<!\[\/bi\] )(?<!\[bi\])Traits\b', paragraph,
                        flags=re.IGNORECASE):
-            errors.append('add {} around "Trait(s)"')
+            errors.append('add {} around "Traits"')
+        elif re.search(r'(?<!\[\/bi\] )(?<!\[bi\])Trait\b', paragraph,
+                       flags=re.IGNORECASE):
+            errors.append('add {} around "Trait"')
 
         if (field in (CARD_SHADOW, BACK_PREFIX + CARD_SHADOW) and
                 re.search(r'\bdefending player\b', paragraph,
@@ -3153,20 +3173,24 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                 not re.search(r'\bafter this attack, attacking enemy engages '
                               r'the next player, then makes an immediate '
                               r'attack\b', paragraph, flags=re.IGNORECASE)):
-            errors.append('"After this attack, attacking enemy engages the '
-                          'next player, then makes an immediate attack"')
+            errors.append(
+                'use "After this attack, attacking enemy engages the next '
+                'player, then makes an immediate attack" format')
         if (re.search(r'\bshadow\b[^.]+ after this attack[^.]* attacking '
                       r'enemy engages the next player[^.]* makes an immediate '
                       r'attack\b', paragraph, flags=re.IGNORECASE) and
                 not re.search(r'\bafter this attack, attacking enemy engages '
                               r'the next player, then makes an immediate '
                               r'attack\b', paragraph, flags=re.IGNORECASE)):
-            errors.append('"After this attack, attacking enemy engages the '
-                          'next player, then makes an immediate attack"')
+            errors.append(
+                'use "After this attack, attacking enemy engages the next '
+                'player, then makes an immediate attack" format')
 
-        if re.search(r'advance to stage [0-9]+\b', paragraph,
-                     flags=re.IGNORECASE):
-            errors.append('"advance to stage _A(B)")')
+        match = re.search(r'advance to stage ([0-9]+)\b', paragraph,
+                          flags=re.IGNORECASE)
+        if match:
+            errors.append('use "advance to stage {}A(B)" format'
+                          .format(match.groups()[0]))
 
         match = re.search(r'(?<!\bstage )([2-90X]) card\b', paragraph,
                           flags=re.IGNORECASE)
@@ -3175,7 +3199,8 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                                                             match.groups()[0]))
 
         if re.search(r'^\[b\]Rumor\[\/b\]:', paragraph):
-            errors.append('Rumor text must be inside [i] tags')
+            errors.append(
+                'Rumor text must be inside [i] tags (including "Rumor:")')
 
         if (re.search(r'(?:\[bi\]forced\[\/bi\]|forced|"forced") effect',
                       paragraph, flags=re.IGNORECASE) or
@@ -3211,9 +3236,9 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
             errors.append('"to a minimum of 0" is redundant')
         elif re.search(r'[^\(]to a minimum of ', paragraph,
                        flags=re.IGNORECASE):
-            errors.append('"to a minimum of _" should be in parenthesis')
+            errors.append('"to a minimum of ..." should be in parenthesis')
         elif 'To a minimum of ' in paragraph:
-            errors.append('"to a minimum of _" should be lowercase')
+            errors.append('"to a minimum of ..." should be lowercase')
 
         updated_paragraph = re.sub(
             r'\b(?:Valour )?(?:Resource |Planning |Quest |Travel |Encounter '
