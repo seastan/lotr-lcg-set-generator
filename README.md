@@ -641,7 +641,7 @@ Setup: Saruman; Grima; Brandywine Gate
 
 Below is a list of all supported rules:
 
-- `Prefix`: A **mandatory** filename prefix.  It must start with:
+- `Prefix`: A **mandatory** scenario prefix.  It must start with:
   `<either "Q" (normal mode) or "N" (nightmare mode)><two capital letters and/or numbers>.<one or two numbers><end of string or dash>`.
   For example, `Prefix: Q0B.19-Standalone` will result in a filename like `Q0B.19-Standalone-The-Scouring-of-the-Shire.o8d`.
 - `Sets`: Additional sets to be included.  For example: `Sets: ALeP - Children of Eorl`.
