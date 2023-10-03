@@ -2957,14 +2957,14 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
 
         if re.search(r'\(any player may trigger this effect',
                      paragraph, flags=re.IGNORECASE):
-            errors.append('use "Any player may trigger this effect" format '
+            errors.append('use "Any player may trigger this effect" '
                           '(without parenthesis)')
 
         if ('cannot be chosen as the current quest'
                 in paragraph.replace('cannot be chosen as the current quest '
                                      'during the quest phase', '')):
             errors.append('use "cannot be chosen as the current quest during '
-                          'the quest phase" format')
+                          'the quest phase"')
 
         if 'active quest' in paragraph:
             errors.append('"current quest" not "active quest"')
@@ -3122,7 +3122,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
 
         if re.search(r'is a \[bi\][^\[]+\[\/bi\](?! trait| \[bi\]trait)',
                      paragraph, flags=re.IGNORECASE):
-            errors.append('use "has the {Trait} trait" format')
+            errors.append('use "has the {Trait} trait"')
         elif re.search(
             r'(?<!the )(?:printed )?\[bi\][^\[]+\[\/bi\]'
             r'(?:(?:, | or |, or | and |, and )\[bi\][^\[]+\[\/bi\])* '
@@ -3130,7 +3130,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
             re.sub(r'the (?:printed )?\[bi\][^\[]+\[\/bi\]'
                    r'(?:(?:, | or |, or | and |, and )\[bi\][^\[]+\[\/bi\])* '
                    r'traits?\b', '', paragraph), flags=re.IGNORECASE):
-            errors.append('use "the {Trait} trait" format')
+            errors.append('use "the {Trait} trait"')
 
         if re.search(r'\[\/bi\] Traits\b', paragraph):
             errors.append('"traits" must be in lower case')
@@ -3175,7 +3175,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                               r'attack\b', paragraph, flags=re.IGNORECASE)):
             errors.append(
                 'use "After this attack, attacking enemy engages the next '
-                'player, then makes an immediate attack" format')
+                'player, then makes an immediate attack"')
         if (re.search(r'\bshadow\b[^.]+ after this attack[^.]* attacking '
                       r'enemy engages the next player[^.]* makes an immediate '
                       r'attack\b', paragraph, flags=re.IGNORECASE) and
@@ -3184,7 +3184,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                               r'attack\b', paragraph, flags=re.IGNORECASE)):
             errors.append(
                 'use "After this attack, attacking enemy engages the next '
-                'player, then makes an immediate attack" format')
+                'player, then makes an immediate attack"')
 
         match = re.search(r'advance to stage ([0-9]+)\b', paragraph,
                           flags=re.IGNORECASE)
@@ -3205,40 +3205,40 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if (re.search(r'(?:\[bi\]forced\[\/bi\]|forced|"forced") effect',
                       paragraph, flags=re.IGNORECASE) or
                 '[b]forced[/b] effect' in paragraph):
-            errors.append('"[b]Forced[/b]"')
+            errors.append('use "[b]Forced[/b]" (without double quotes)')
 
         if (re.search(r'(?:\[bi\]travel\[\/bi\]|travel|"travel") effect',
                       paragraph, flags=re.IGNORECASE) or
                 '[b]travel[/b] effect' in paragraph):
-            errors.append('"[b]Travel[/b]"')
+            errors.append('use "[b]Travel[/b]" (without double quotes)')
 
         if (re.search(r'(?:\[bi\]rumor\[\/bi\]|rumor|"rumor") effect',
                       paragraph, flags=re.IGNORECASE) or
                 '[b]rumor[/b] effect' in paragraph):
-            errors.append('"[b]Rumor[/b]"')
+            errors.append('use "[b]Rumor[/b]" (without double quotes)')
 
         if (re.search(r'(?:\[bi\]shadow\[\/bi\]|\[b\]shadow\[\/b\]|"shadow") '
                       r'effect', paragraph, flags=re.IGNORECASE) or
                 re.search(r'(?<!\.) Shadow effect\b', paragraph)):
-            errors.append('"shadow"')
+            errors.append('use "shadow" (without tags and double quotes)')
 
         if (re.search(r'(?:\[bi\]when revealed\[\/bi\]|'
                       r'\[b\]when revealed\[\/b\]|when revealed) effect',
                       paragraph, flags=re.IGNORECASE) or
                 '"When Revealed" effect' in paragraph or
                 '"When revealed" effect' in paragraph):
-            errors.append('"when revealed" in double-quotes')
+            errors.append('use "when revealed" (in double quotes)')
 
         if 'When revealed:' in paragraph:
-            errors.append('"When Revealed:"')
+            errors.append('use "When Revealed:"')
 
         if 'to a minimum of 0' in paragraph:
-            errors.append('"to a minimum of 0" is redundant')
+            errors.append('redundant "to a minimum of 0" statement')
         elif re.search(r'[^\(]to a minimum of ', paragraph,
                        flags=re.IGNORECASE):
-            errors.append('"to a minimum of ..." should be in parenthesis')
+            errors.append('"(to a minimum of ...)" must be in parenthesis')
         elif 'To a minimum of ' in paragraph:
-            errors.append('"to a minimum of ..." should be lowercase')
+            errors.append('"to a minimum of ..." must be in lower case')
 
         updated_paragraph = re.sub(
             r'\b(?:Valour )?(?:Resource |Planning |Quest |Travel |Encounter '
@@ -3257,40 +3257,40 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if (re.search(r'(?:\[bi\]action\[\/bi\]|\[b\]action\[\/b\]|"action")',
                       updated_paragraph, flags=re.IGNORECASE) or
                 re.search(r'(?<!\.) Action\b', updated_paragraph)):
-            errors.append('"action"')
+            errors.append('use "action" (without tags and double quotes)')
 
         if (re.search(r'(?:\[bi\]response\[\/bi\]|\[b\]response\[\/b\]|'
                       r'"response")', updated_paragraph,
                       flags=re.IGNORECASE) or
                 re.search(r'(?<!\.) Response\b', updated_paragraph)):
-            errors.append('"response"')
+            errors.append('use "response" (without tags and double quotes)')
 
         if field == CARD_TEXT and card[CARD_TYPE] == 'Quest':
             name_regex = (r'(?<!\[bi\])\b' + re.escape(card[CARD_NAME] or '') +
                           r'\b(?!\[\/bi\])')
-            if (re.search(name_regex, paragraph) or
-                    re.search(r'\bthis quest\b', paragraph,
-                              flags=re.IGNORECASE)):
-                errors.append('"this stage"')
+            if re.search(name_regex, paragraph):
+                errors.append('use "this stage" rather than card name')
+            elif re.search(r'\bthis quest\b', paragraph, flags=re.IGNORECASE):
+                errors.append('"this stage" not "this quest"')
 
         if (field == BACK_PREFIX + CARD_TEXT and
                 card[BACK_PREFIX + CARD_TYPE] == 'Quest'):
             name_regex = (r'(?<!\[bi\])\b' +
                           re.escape(card[BACK_PREFIX + CARD_NAME] or '') +
                           r'\b(?!\[\/bi\])')
-            if (re.search(name_regex, paragraph) or
-                    re.search(r'\bthis quest\b', paragraph,
-                              flags=re.IGNORECASE)):
-                errors.append('"this stage"')
+            if re.search(name_regex, paragraph):
+                errors.append('use "this stage" rather than card name')
+            elif re.search(r'\bthis quest\b', paragraph, flags=re.IGNORECASE):
+                errors.append('"this stage" not "this quest"')
 
         if (field == CARD_TEXT and card[CARD_TYPE] in
                 ('Encounter Side Quest', 'Player Side Quest')):
             name_regex = (r'(?<!\[bi\])\b' + re.escape(card[CARD_NAME] or '') +
                           r'\b(?!\[\/bi\]| (?:is )?in the victory display)')
-            if (re.search(name_regex, paragraph) or
-                    re.search(r'\bthis stage\b', paragraph,
-                              flags=re.IGNORECASE)):
-                errors.append('"this quest"')
+            if re.search(name_regex, paragraph):
+                errors.append('use "this quest" rather than card name')
+            elif re.search(r'\bthis stage\b', paragraph, flags=re.IGNORECASE):
+                errors.append('"this quest" not "this stage"')
 
         if (field == BACK_PREFIX + CARD_TEXT and
                 card[BACK_PREFIX + CARD_TYPE] in
@@ -3298,10 +3298,10 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
             name_regex = (r'(?<!\[bi\])\b' +
                           re.escape(card[BACK_PREFIX + CARD_NAME] or '') +
                           r'\b(?!\[\/bi\]| (?:is )?in the victory display)')
-            if (re.search(name_regex, paragraph) or
-                    re.search(r'\bthis stage\b', paragraph,
-                              flags=re.IGNORECASE)):
-                errors.append('"this quest"')
+            if re.search(name_regex, paragraph):
+                errors.append('use "this quest" rather than card name')
+            elif re.search(r'\bthis stage\b', paragraph, flags=re.IGNORECASE):
+                errors.append('"this quest" not "this stage"')
 
     if (field == CARD_TEXT and card[CARD_TYPE] == 'Quest'
             and str(card[CARD_COST]) == '1'):
