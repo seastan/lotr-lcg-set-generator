@@ -1886,7 +1886,7 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
                             '__**\\1**__', sentence_original,
                             flags=re.IGNORECASE),
                         'row': card[lotr.ROW_COLUMN]}
-                res.setdefault('Place vs. Put vs. Add', []).append(data)
+                res.setdefault('Place vs Put vs Add', []).append(data)
 
             if (re.search('progress', sentence, flags=re.IGNORECASE) and (
                     re.search(r'\badd', sentence, flags=re.IGNORECASE) or
@@ -1898,7 +1898,7 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
                             '__**\\1**__', sentence_original,
                             flags=re.IGNORECASE),
                         'row': card[lotr.ROW_COLUMN]}
-                res.setdefault('Place vs. Put vs. Add', []).append(data)
+                res.setdefault('Place vs Put vs Add', []).append(data)
 
             if (re.search('resource(?! token)', sentence,
                           flags=re.IGNORECASE) and (
@@ -1912,7 +1912,7 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
                             '__**\\1**__', sentence_original,
                             flags=re.IGNORECASE),
                         'row': card[lotr.ROW_COLUMN]}
-                res.setdefault('Place vs. Put vs. Add', []).append(data)
+                res.setdefault('Place vs Put vs Add', []).append(data)
 
         value = paragraph.replace('Encounter Cards', '')
         match = re.search(keywords_regex, value)
@@ -1949,7 +1949,7 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
                     'text': re.sub(r'\b(they|them|their)\b', '__**\\1**__',
                                    paragraph, flags=re.IGNORECASE),
                     'row': card[lotr.ROW_COLUMN]}
-            res.setdefault('You/your', []).append(data)
+            res.setdefault('Ambiguous third-person pronouns', []).append(data)
 
         if re.search(r'\beither\b[^.]+\bor\b', paragraph, flags=re.IGNORECASE):
             data = {'name': card[lotr.CARD_NAME],
@@ -5567,7 +5567,7 @@ Targets removed.
                         'text': 'Single linebreak in:\n```\n{}\n```'.format(
                             value.replace('\n', '\\n\n')),
                         'row': card[lotr.ROW_COLUMN]}
-                    res.setdefault('Single linebreaks', []).append(precedent)
+                    res.setdefault('Single linebreak', []).append(precedent)
 
         output = []
         for rule, card_list in res.items():
