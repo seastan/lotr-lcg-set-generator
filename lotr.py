@@ -2029,6 +2029,9 @@ def _clean_value(value):  # pylint: disable=R0915
     value = value.replace('[rfquot]', '»')
     value = value.replace('[quot]', '"')
     value = value.replace('[apos]', "'")
+
+    value = value.replace('[[', '\t')
+    value = value.replace(']]', '\r')
     while True:
         value_old = value
         value = re.sub(r'[“”]([^\[]*)\]', '"\\1]', value)
@@ -2038,6 +2041,9 @@ def _clean_value(value):  # pylint: disable=R0915
         value = re.sub(r'–([^\[]*)\]', "--\\1]", value)
         if value == value_old:
             break
+
+    value = value.replace('\t', '[[')
+    value = value.replace('\r', ']]')
 
     value = re.sub(r' +(?=\n)', '', value)
     value = re.sub(r' +', ' ', value)
