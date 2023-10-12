@@ -63,7 +63,6 @@ class LoggerWriter:
     def flush(self):
         """ Flush data.
         """
-        self.level(sys.stderr)
 
 
 def init_logging():
