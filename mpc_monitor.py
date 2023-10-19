@@ -114,6 +114,13 @@ def init_logging():
     sys.stderr = LoggerWriter(logging.warning)
 
 
+def init_logging_manual():
+    """ Init logging (manual run).
+    """
+    logging.basicConfig(filename=LOG_PATH, level=LOG_LEVEL,
+                        format='%(asctime)s %(levelname)s: %(message)s')
+
+
 def internet_state():
     """ Check external internet sensor.
     """
@@ -797,6 +804,97 @@ def add_deck(deck_name):  # pylint: disable=R0915
     print('See {} for details'.format(LOG_PATH))
 
 
+def backup():  # pylint: disable=R0912,R0914,R0915
+    """ Save all backups as new decks.
+    """
+    logging.info('Saving all backups as new decks')
+    try:
+        with open(CONF_PATH, 'r', encoding='utf-8') as fobj:
+            data = json.load(fobj)
+    except Exception as exc:
+        raise ConfigurationError('No configuration found') from exc
+
+    try:
+        with open(COOKIES_PATH, 'r', encoding='utf-8') as fobj:
+            cookies = json.load(fobj)
+    except Exception as exc:
+        raise ConfigurationError('No cookies found') from exc
+
+    session = init_session(cookies)
+    content = get_decks(session)
+    if not content:
+        logging.info('The site is undergoing system upgrade')
+        return
+
+    deck_names = data.get('decks', {})
+    deck_names = deck_names[-1:] # T.B.D.
+    for deck_name in deck_names:
+        logging.info('Processing %s', deck_name)
+        # continue # T.B.D.
+        content_id = data['decks'][deck_name]['content_id']
+        backup_id = data['decks'][deck_name]['backup_id']
+        backup_name = '{} Backup'.format(deck_name)
+        regex = DECK_ID_REGEX.format(backup_id)
+        match = re.search(regex, content)
+        if not match:
+            message = ('Deck {} not found, content length: {}'
+                       .format(backup_name, len(content)))
+            logging.error(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+            continue
+
+        temp_backup_name = '{} Backup Temp'.format(deck_name)
+        logging.info('Creating a copy of the deck backup...')
+        # continue # T.B.D.
+        content = clone_deck(session, content, backup_id, temp_backup_name)
+        regex = DECK_REGEX.format(re.escape(temp_backup_name))
+        match = re.search(regex, content)
+        if not match:
+            message = 'Deck {} not found, content length: {}'.format(
+                temp_backup_name, len(content))
+            logging.error(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+            continue
+
+        new_backup_id = match.groups()[0]
+        new_content_id = match.groups()[1]
+        if new_content_id != content_id:
+            message = 'Deck {} has incorrect content'.format(temp_backup_name)
+            logging.error(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+            continue
+
+        logging.info('Deleting the original deck backup...')
+        # continue # T.B.D.
+        content = delete_deck(session, content, backup_id, backup_name)
+        regex = DECK_ID_REGEX.format(backup_id)
+        match = re.search(regex, content)
+        if match:
+            message = 'Deck {} was not deleted'.format(backup_name)
+            logging.error(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+            continue
+
+        logging.info('Renaming the new deck backup...')
+        try:
+            rename_deck(session, new_backup_id, backup_name, temp_backup_name)
+        except ResponseError as exc:
+            message = str(ResponseError)
+            logging.error(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+            continue
+
+        logging.info('Successfully saved backup as a new deck')
+        data['decks'][deck_name]['backup_id'] = new_backup_id
+
+#    with open(CONF_PATH, 'w', encoding='utf-8') as fobj:
+#        json.dump(data, fobj, indent=4)
+
+    cookies = session.cookies.get_dict()
+    with open(COOKIES_PATH, 'w', encoding='utf-8') as fobj:
+        json.dump(cookies, fobj, indent=4)
+
+
 def refresh():  # pylint: disable=R0914
     """ Refresh all decks.
     """
@@ -894,7 +992,8 @@ def monitor():  # pylint: disable=R0912,R0914,R0915
         return
 
     not_found_errors = 0
-    for deck_name in data.get('decks', {}):
+    deck_names = data.get('decks', {})
+    for deck_name in deck_names:
         content_id = data['decks'][deck_name]['content_id']
         deck_id = data['decks'][deck_name]['deck_id']
         backup_id = data['decks'][deck_name]['backup_id']
@@ -979,7 +1078,7 @@ def monitor():  # pylint: disable=R0912,R0914,R0915
         json.dump(cookies, fobj, indent=4)
 
 
-def main():
+def main():  # pylint: disable=R0912
     """ Main function.
     """
     logging.info('Started')
@@ -991,6 +1090,8 @@ def main():
         if len(sys.argv) > 1:
             if sys.argv[1] == 'refresh':
                 refresh()
+            elif sys.argv[1] == 'backup':
+                backup()
             elif sys.argv[1] == 'add':
                 if len(sys.argv) > 2:
                     add_deck(sys.argv[2])
@@ -1017,5 +1118,9 @@ def main():
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    init_logging()
+    if len(sys.argv) > 1 and sys.argv[1] not in ('refresh', 'backup'):
+        init_logging_manual()
+    else:
+        init_logging()
+
     main()
