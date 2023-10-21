@@ -1675,6 +1675,12 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						s.set('Name-region', nameUniqueRegion[cardType]);
 					}
 				}
+				else if ((cardType == 'Treachery') && (cardName == 'Dziewi\u0119ciu Kr\u0105\u017cy po \u015awiecie')) { // workaround for the Polish card
+					s.set('Name-region', '56,101,26,178');
+				}
+				else if ((cardType == 'Treachery') && (cardName == 'Zagubiony w mie\u015bcie goblin\u00f3w')) { // workaround for the Polish card
+					s.set('Name-region', '56,100,26,180');
+				}
 				else {
 					if (cardType in nameRegion) {
 						s.set('Name-region', nameRegion[cardType]);
