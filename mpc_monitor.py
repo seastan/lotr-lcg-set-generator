@@ -35,8 +35,9 @@ DECK_ID_REGEX = (
     r'<div class="bmrbox"><div class="bmname">([^<]+)<\/div>')
 VIEWSTATE_REGEX = r'id="__VIEWSTATE" value="([^"]+)"'
 VIEWSTATEGENERATOR_REGEX = r'id="__VIEWSTATEGENERATOR" value="([^"]+)"'
-SESSIONID_REGEX = \
-    r'<form method="post" action="\.\/dn_preview_layout\.aspx\?ssid=([^"]+)"'
+SESSIONID_REGEX = (
+    r'<form method="post" action="\.\/dn_playingcards_front_dynamic\.aspx\?'
+    r'[^"]*?ssid=([^&"]+)')
 NEXT_REGEX = (
     r'<a href="javascript:__doPostBack\(&#39;([^&]+)&#39;,'
     r'&#39;([^&]+)&#39;\)" style="[^"]+">Next<\/a>')
@@ -485,10 +486,13 @@ def clone_deck(session, content, deck_id, new_deck_name):
 
 def rename_deck(session, deck_id, deck_name, actual_deck_name):
     """ Rename a deck.
+
+    ATTENTION: Renaming a deck causes a new content ID.
     """
     res = send_get(
         session,
-        'https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id={}&edit=Y'
+        'https://www.makeplayingcards.com/products/playingcard/design/'
+        'dn_playingcards_front_dynamic.aspx?id={}&edit=Y'
         .format(deck_id))
     match = re.search(SESSIONID_REGEX, res)
     if not match:
@@ -500,7 +504,7 @@ def rename_deck(session, deck_id, deck_name, actual_deck_name):
         session,
         'https://www.makeplayingcards.com/design/dn_project_save.aspx?ssid={}'
         .format(session_id), {'name': deck_name})
-    if not '[CDATA[SUCCESS]]' in res:
+    if '[CDATA[SUCCESS]]' not in res:
         raise ResponseError('Deck {} was not renamed, response: {}'.format(
             actual_deck_name, res))
 
@@ -512,41 +516,6 @@ def rename_deck(session, deck_id, deck_name, actual_deck_name):
                             .format(actual_deck_name, len(content)))
 
     return content
-
-
-def fix_deck_rename(session, data, deck_id, deck_name, actual_deck_name):
-    """ Fix a renamed deck.
-    """
-    message = ('Deck {} has been renamed to {}! Attempting to '
-               'rename it automatically...'.format(deck_name,
-                                                   actual_deck_name))
-    discord_message = f"""Deck **{deck_name}** has been renamed to **{actual_deck_name}**!
-Attempting to rename it automatically..."""
-    logging.info(message)
-    create_mail(ALERT_SUBJECT_TEMPLATE.format(message))
-    send_discord(discord_message)
-    discord_users = data['discord_users']
-
-    try:  # pylint: disable=R1705
-        content = rename_deck(session, deck_id, deck_name, actual_deck_name)
-    except Exception as exc:
-        message = ('Attempt to rename deck {} automatically failed: {}: {}'
-                   .format(actual_deck_name, type(exc).__name__, str(exc)))
-        logging.exception(message)
-        create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
-        discord_message = f"""Attempt to rename deck **{actual_deck_name}** automatically failed!
-{discord_users}"""
-        send_discord(discord_message)
-        return ''
-    else:
-        message = ('Attempt to rename deck {} automatically succeeded!'
-                   .format(actual_deck_name))
-        logging.info(message)
-        create_mail(ALERT_SUBJECT_TEMPLATE.format(message))
-        discord_message = f"""Attempt to rename deck **{actual_deck_name}** automatically succeeded!
-{discord_users}"""
-        send_discord(discord_message)
-        return content
 
 
 def fix_deck(session, data, content, deck_id, backup_id, deck_name,  # pylint: disable=R0912,R0913,R0914,R0915
@@ -716,7 +685,7 @@ https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_fro
 def add_deck(deck_name):  # pylint: disable=R0915
     """ Add new deck to monitoring.
     """
-    logging.info('Adding a new deck to monitoring')
+    logging.info('Adding deck %s to monitoring', deck_name)
     try:
         with open(CONF_PATH, 'r', encoding='utf-8') as fobj:
             data = json.load(fobj)
@@ -741,7 +710,6 @@ def add_deck(deck_name):  # pylint: disable=R0915
         print(message)
         return
 
-    logging.info('Adding deck %s to monitoring...', deck_name)
     session = init_session(cookies)
     content = get_decks(session)
     if not content:
@@ -767,6 +735,7 @@ def add_deck(deck_name):  # pylint: disable=R0915
     if match:
         logging.info('Deck %s already exists', backup_name)
     else:
+        logging.info('Creating a backup of the deck...')
         content = clone_deck(session, content, deck_id, backup_name)
         match = re.search(regex, content)
         if match:
@@ -827,10 +796,8 @@ def backup():  # pylint: disable=R0912,R0914,R0915
         return
 
     deck_names = data.get('decks', {})
-    deck_names = deck_names[-1:] # T.B.D.
     for deck_name in deck_names:
         logging.info('Processing %s', deck_name)
-        # continue # T.B.D.
         content_id = data['decks'][deck_name]['content_id']
         backup_id = data['decks'][deck_name]['backup_id']
         backup_name = '{} Backup'.format(deck_name)
@@ -845,7 +812,6 @@ def backup():  # pylint: disable=R0912,R0914,R0915
 
         temp_backup_name = '{} Backup Temp'.format(deck_name)
         logging.info('Creating a copy of the deck backup...')
-        # continue # T.B.D.
         content = clone_deck(session, content, backup_id, temp_backup_name)
         regex = DECK_REGEX.format(re.escape(temp_backup_name))
         match = re.search(regex, content)
@@ -865,7 +831,6 @@ def backup():  # pylint: disable=R0912,R0914,R0915
             continue
 
         logging.info('Deleting the original deck backup...')
-        # continue # T.B.D.
         content = delete_deck(session, content, backup_id, backup_name)
         regex = DECK_ID_REGEX.format(backup_id)
         match = re.search(regex, content)
@@ -875,20 +840,16 @@ def backup():  # pylint: disable=R0912,R0914,R0915
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
             continue
 
-        logging.info('Renaming the new deck backup...')
-        try:
-            rename_deck(session, new_backup_id, backup_name, temp_backup_name)
-        except ResponseError as exc:
-            message = str(ResponseError)
-            logging.error(message)
-            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
-            continue
-
-        logging.info('Successfully saved backup as a new deck')
         data['decks'][deck_name]['backup_id'] = new_backup_id
 
-#    with open(CONF_PATH, 'w', encoding='utf-8') as fobj:
-#        json.dump(data, fobj, indent=4)
+        logging.info('Renaming the new deck backup...')
+        # T.B.D. Rename the new deck backup using clone and delete
+
+        logging.info('Successfully saved backup as a new deck')
+        break # T.B.D.
+
+    with open(CONF_PATH, 'w', encoding='utf-8') as fobj:
+        json.dump(data, fobj, indent=4)
 
     cookies = session.cookies.get_dict()
     with open(COOKIES_PATH, 'w', encoding='utf-8') as fobj:
@@ -1049,7 +1010,7 @@ def monitor():  # pylint: disable=R0912,R0914,R0915
             logging.error(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
 
-        if actual_content_id != content_id:
+        if actual_content_id != content_id or actual_deck_name != deck_name:
             if (actual_content_id in
                     data['decks'][deck_name]['failed_content_ids']):
                 logging.warning('Skipping known failed content ID %s for '
@@ -1064,11 +1025,6 @@ def monitor():  # pylint: disable=R0912,R0914,R0915
                 else:
                     data['decks'][deck_name]['failed_content_ids'].append(
                         actual_content_id)
-        elif actual_deck_name != deck_name:
-            new_content = fix_deck_rename(session, data, deck_id, deck_name,
-                                          actual_deck_name)
-            if new_content:
-                content = new_content
 
     with open(CONF_PATH, 'w', encoding='utf-8') as fobj:
         json.dump(data, fobj, indent=4)
