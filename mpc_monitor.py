@@ -586,8 +586,9 @@ Attempting to fix it automatically...
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
 
             logging.info('Renaming the deck...')
-            rename_deck(session, deck_id, 'Delete {}'.format(new_deck_name),
-                        actual_deck_name)
+            content = rename_deck(session, deck_id,
+                                  'Delete {}'.format(new_deck_name),
+                                  actual_deck_name)
         else:
             discord_message = 'Deleted the deck...'
             send_discord(discord_message)
@@ -795,8 +796,8 @@ def backup():  # pylint: disable=R0912,R0914,R0915
         logging.info('The site is undergoing system upgrade')
         return
 
-    deck_names = data.get('decks', {})
-    for deck_name in deck_names:
+    decks = data.get('decks', {})
+    for deck_name in decks:
         logging.info('Processing %s', deck_name)
         content_id = data['decks'][deck_name]['content_id']
         backup_id = data['decks'][deck_name]['backup_id']
@@ -808,7 +809,7 @@ def backup():  # pylint: disable=R0912,R0914,R0915
                        .format(backup_name, len(content)))
             logging.error(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
-            continue
+            break
 
         temp_backup_name = '{} Backup Temp'.format(deck_name)
         logging.info('Creating a copy of the deck backup...')
@@ -820,7 +821,7 @@ def backup():  # pylint: disable=R0912,R0914,R0915
                 temp_backup_name, len(content))
             logging.error(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
-            continue
+            break
 
         new_backup_id = match.groups()[0]
         new_content_id = match.groups()[1]
@@ -828,9 +829,9 @@ def backup():  # pylint: disable=R0912,R0914,R0915
             message = 'Deck {} has incorrect content'.format(temp_backup_name)
             logging.error(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
-            continue
+            break
 
-        logging.info('Deleting the original deck backup...')
+        logging.info('Deleting original deck backup...')
         content = delete_deck(session, content, backup_id, backup_name)
         regex = DECK_ID_REGEX.format(backup_id)
         match = re.search(regex, content)
@@ -838,18 +839,131 @@ def backup():  # pylint: disable=R0912,R0914,R0915
             message = 'Deck {} was not deleted'.format(backup_name)
             logging.error(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
-            continue
-
-        data['decks'][deck_name]['backup_id'] = new_backup_id
+            break
 
         logging.info('Renaming the new deck backup...')
-        # T.B.D. Rename the new deck backup using clone and delete
+        content = clone_deck(session, content, new_backup_id, backup_name)
+        regex = DECK_REGEX.format(re.escape(backup_name))
+        match = re.search(regex, content)
+        if not match:
+            message = ('INCONSISTENT STATE: Deck {} not found, content '
+                       'length: {}'.format(backup_name, len(content)))
+            logging.error(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+            break
+
+        backup_id = match.groups()[0]
+        content_id = match.groups()[1]
+        if content_id != new_content_id:
+            message = ('INCONSISTENT STATE: Deck {} has incorrect content'
+                       .format(backup_name))
+            logging.error(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+            break
+
+        data['decks'][deck_name]['backup_id'] = backup_id
+
+        logging.info('Deleting redundant deck backup...')
+        content = delete_deck(session, content, new_backup_id,
+                              temp_backup_name)
+        regex = DECK_ID_REGEX.format(new_backup_id)
+        match = re.search(regex, content)
+        if match:
+            message = 'Deck {} was not deleted'.format(temp_backup_name)
+            logging.error(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+            break
 
         logging.info('Successfully saved backup as a new deck')
-        break # T.B.D.
 
     with open(CONF_PATH, 'w', encoding='utf-8') as fobj:
         json.dump(data, fobj, indent=4)
+
+    cookies = session.cookies.get_dict()
+    with open(COOKIES_PATH, 'w', encoding='utf-8') as fobj:
+        json.dump(cookies, fobj, indent=4)
+
+
+def test():  # pylint: disable=R0911,R0914,R0915
+    """ Test all MakePlayingCards commands.
+    """
+    logging.info('Testing all MakePlayingCards commands')
+    try:
+        with open(CONF_PATH, 'r', encoding='utf-8') as fobj:
+            data = json.load(fobj)
+    except Exception as exc:
+        raise ConfigurationError('No configuration found') from exc
+
+    try:
+        with open(COOKIES_PATH, 'r', encoding='utf-8') as fobj:
+            cookies = json.load(fobj)
+    except Exception as exc:
+        raise ConfigurationError('No cookies found') from exc
+
+    session = init_session(cookies)
+    content = get_decks(session)
+    if not content:
+        logging.info('The site is undergoing system upgrade')
+        return
+
+    decks = data.get('decks', {})
+    if not decks:
+        logging.info('No decks in the configuration file')
+        return
+
+    deck_name = list(decks.keys())[0]
+    deck_id = data['decks'][deck_name]['deck_id']
+    content_id = data['decks'][deck_name]['content_id']
+    regex = DECK_ID_REGEX.format(deck_id)
+    match = re.search(regex, content)
+    if not match:
+        message = ('Deck {} not found, content length: {}'
+                   .format(deck_name, len(content)))
+        logging.error(message)
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+        return
+
+    temp_name = '{} Temp Test'.format(deck_name)
+    logging.info('Creating a copy of the deck...')
+    content = clone_deck(session, content, deck_id, temp_name)
+    regex = DECK_REGEX.format(re.escape(temp_name))
+    match = re.search(regex, content)
+    if not match:
+        message = 'Deck {} not found, content length: {}'.format(
+            temp_name, len(content))
+        logging.error(message)
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+        return
+
+    temp_id = match.groups()[0]
+    temp_content_id = match.groups()[1]
+    if temp_content_id != content_id:
+        message = 'Deck {} has incorrect content'.format(temp_name)
+        logging.error(message)
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+        return
+
+    logging.info('Renaming the deck...')
+    temp_name_new = '{} New'.format(temp_name)
+    try:
+        content = rename_deck(session, temp_id, temp_name_new, temp_name)
+    except ResponseError as exc:
+        message = str(exc)
+        logging.error(message)
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+        return
+
+    logging.info('Deleting the deck...')
+    content = delete_deck(session, content, temp_id, temp_name_new)
+    regex = DECK_ID_REGEX.format(temp_id)
+    match = re.search(regex, content)
+    if match:
+        message = 'Deck {} was not deleted'.format(temp_name_new)
+        logging.error(message)
+        create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
+        return
+
+    logging.info('All tests passed')
 
     cookies = session.cookies.get_dict()
     with open(COOKIES_PATH, 'w', encoding='utf-8') as fobj:
@@ -953,8 +1067,8 @@ def monitor():  # pylint: disable=R0912,R0914,R0915
         return
 
     not_found_errors = 0
-    deck_names = data.get('decks', {})
-    for deck_name in deck_names:
+    decks = data.get('decks', {})
+    for deck_name in decks:
         content_id = data['decks'][deck_name]['content_id']
         deck_id = data['decks'][deck_name]['deck_id']
         backup_id = data['decks'][deck_name]['backup_id']
@@ -1048,6 +1162,8 @@ def main():  # pylint: disable=R0912
                 refresh()
             elif sys.argv[1] == 'backup':
                 backup()
+            elif sys.argv[1] == 'test':
+                test()
             elif sys.argv[1] == 'add':
                 if len(sys.argv) > 2:
                     add_deck(sys.argv[2])
@@ -1074,7 +1190,7 @@ def main():  # pylint: disable=R0912
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    if len(sys.argv) > 1 and sys.argv[1] not in ('refresh', 'backup'):
+    if len(sys.argv) > 1 and sys.argv[1] not in ('refresh', 'backup', 'test'):
         init_logging_manual()
     else:
         init_logging()
