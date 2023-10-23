@@ -140,7 +140,7 @@ def internet_state():
 
 
 def is_non_ascii(value):
-    """ Check whether the string is ASCII only or not.
+    """ Check whether a string is ASCII only or not.
     """
     return not all(ord(c) < 128 for c in value)
 
@@ -684,7 +684,7 @@ https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_fro
 
 
 def add_deck(deck_name):  # pylint: disable=R0915
-    """ Add new deck to monitoring.
+    """ Add a new deck to monitoring.
     """
     logging.info('Adding deck %s to monitoring', deck_name)
     try:
@@ -841,7 +841,7 @@ def backup():  # pylint: disable=R0912,R0914,R0915
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
             break
 
-        logging.info('Renaming the new deck backup...')
+        logging.info('Renaming new deck backup...')
         content = clone_deck(session, content, new_backup_id, backup_name)
         regex = DECK_REGEX.format(re.escape(backup_name))
         match = re.search(regex, content)

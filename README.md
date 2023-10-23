@@ -353,8 +353,9 @@ Additional steps:
   - `36 8 * * *    <path>/monitor_wordpress_site.sh >> <path>/cron.log 2>&1`
   - `36 7 * * *    <path>/monitor_mpc_url_format.sh >> <path>/cron.log 2>&1`
   - `0 1 * * *     <path>/monitor_wordpress_token.sh >> <path>/cron.log 2>&1`
+  - `17 7 1 */2 *  <path>/mpc_backup.sh >> <path>/cron.log 2>&1`
   - `*/5 * * * *   <path>/mpc_monitor.sh >> <path>/cron.log 2>&1`
-  - `15 6 * * 0    <path>/mpc_refresh.sh >> <path>/cron.log 2>&1`
+  - `17 6 * * 0    <path>/mpc_refresh.sh >> <path>/cron.log 2>&1`
   - `7 0 * * *     <path>/rclone_backup.sh "<local Drive/Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
   - `12,42 * * * * <path>/rclone_data_remotely.sh >> <path>/cron.log 2>&1`
   - `22,52 * * * * <path>/rclone_renderer.sh >> <path>/cron.log 2>&1`
