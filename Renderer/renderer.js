@@ -366,8 +366,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var content = '<img src="' + imagesFolder + 'asterisk.png" width="' + data['Asterisk-region'][2] + '" height="' + data['Asterisk-region'][3] + '">';
-            return content;
+            return '<div style="color: ' + data['Asterisk-colour'] + '; line-height: ' + data['Asterisk-region'][3] + 'px">' +
+                data['Asterisk-format'] + '&#10038;' + data['Asterisk-formatEnd'] + '</div>';
         },
         'Attack': function(data) {
             if (data.Attack + '' == '') {
@@ -718,8 +718,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            var content = '<img src="' + imagesFolder + 'asterisk.png" width="' + data['AsteriskBack-region'][2] + '" height="' + data['AsteriskBack-region'][3] + '">';
-            return content;
+            return '<div style="color: ' + data['Asterisk-colour'] + '; line-height: ' + data['AsteriskBack-region'][3] + 'px">' +
+                data['Asterisk-format'] + '&#10038;' + data['Asterisk-formatEnd'] + '</div>';
         },
         'BodyBack': function(data) {
             var content = [];
