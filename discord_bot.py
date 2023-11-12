@@ -71,6 +71,7 @@ IO_SLEEP_TIME = 1
 RCLONE_ART_SLEEP_TIME = 300
 REMOTE_CRON_TIMESTAMP_SLEEP_TIME = 1800
 SANITY_CHECK_WAIT_TIME = 3600
+TEST_CHANNELS_SLEEP_TIME = 14400
 WATCH_CHANGES_SLEEP_TIME = 5
 WATCH_SANITY_CHECK_SLEEP_TIME = 300
 
@@ -375,6 +376,7 @@ def _incremental_id():
 
 
 incremental_id = _incremental_id()
+test_channels_lock = asyncio.Lock()
 watch_changes_lock = asyncio.Lock()
 rclone_art_lock = asyncio.Lock()
 remote_cron_timestamp_lock = asyncio.Lock()
@@ -2121,6 +2123,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
     """ My bot class.
     """
 
+    test_channels_schedule_id = None
     watch_changes_schedule_id = None
     rclone_art_schedule_id = None
     remote_cron_timestamp_schedule_id = None
@@ -2132,6 +2135,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
     updates_channel = None
     rclone_art = False
     last_sanity_check_mtime = None
+    non_card_channels_analyzed = False
     categories = {}
     channels = {}
     general_channels = {}
@@ -2222,8 +2226,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
         clear_rendered_images()
         self.categories, self.channels, self.general_channels = (
             await self._load_channels())
-        await self._test_channels()
 
+        self.loop.create_task(self._test_channels_schedule())
         self.loop.create_task(self._watch_changes_schedule())
         self.loop.create_task(self._rclone_art_schedule())
         self.loop.create_task(self._remote_cron_timestamp_schedule())
@@ -2290,6 +2294,28 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                         'category_name': channel.category.name}
 
         return categories, channels, general_channels
+
+
+    async def _test_channels_schedule(self):
+        logging.info('Starting test channels schedule...')
+        my_id = incremental_id()
+        while True:
+            async with test_channels_lock:
+                if (not self.test_channels_schedule_id or
+                        self.test_channels_schedule_id < my_id):
+                    self.test_channels_schedule_id = my_id
+                    logging.info('Acquiring test channels schedule id: %s',
+                                 my_id)
+                elif self.test_channels_schedule_id > my_id:
+                    logging.info(
+                        'Detected a new test_channels schedule id: %s, '
+                        'exiting with the old id: %s',
+                        self.test_channels_schedule_id, my_id)
+                    break
+
+                await self._test_channels()
+
+            await asyncio.sleep(TEST_CHANNELS_SLEEP_TIME)
 
 
     async def _watch_changes_schedule(self):
@@ -2378,6 +2404,54 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                 await self._watch_sanity_check()
 
             await asyncio.sleep(WATCH_SANITY_CHECK_SLEEP_TIME)
+
+
+    async def _test_channels(self):
+        self.categories, self.channels, self.general_channels = (
+            await self._load_channels())
+        channels = self.channels.copy()
+        data = await read_card_data()
+        for card in data['data']:
+            if not card.get(lotr.CARD_DISCORD_CHANNEL):
+                continue
+
+            name = card[lotr.CARD_DISCORD_CHANNEL]
+            if name in channels:
+                if (card[lotr.CARD_DISCORD_CATEGORY] !=
+                        channels[name]['category_name']):
+                    message = (
+                        'Card {} ({}) has a wrong channel category: {} '
+                        'instead of {}'.format(
+                            card[lotr.CARD_NAME],
+                            card[lotr.CARD_DISCORD_CHANNEL],
+                            channels[name]['category_name'],
+                            card[lotr.CARD_DISCORD_CATEGORY]))
+                    logging.warning(message)
+                    create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
+
+                del channels[name]
+            elif not card.get(lotr.CARD_SET_LOCKED):
+                message = (
+                    "Card {} from {} doesn't have the channel {}".format(
+                        card[lotr.CARD_NAME],
+                        card[lotr.CARD_SET_NAME],
+                        card[lotr.CARD_DISCORD_CHANNEL]))
+                logging.warning(message)
+                create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
+
+        if not self.non_card_channels_analyzed:
+            if channels:
+                logging.info('Non-card channels detected:')
+                non_card_channels = []
+                for channel in channels:
+                    non_card_channels.append(
+                        (channel, channels[channel]['category_name']))
+
+                non_card_channels.sort(key=lambda ch: (ch[1], ch[0]))
+                for channel in non_card_channels:
+                    logging.info('%s in %s', channel[0], channel[1])
+
+            self.non_card_channels_analyzed = True
 
 
     async def _watch_changes(self):
@@ -2988,47 +3062,6 @@ Card "{}" has been updated:
             if self.cron_channel:
                 await self._send_channel(self.cron_channel,
                                          message)
-
-
-    async def _test_channels(self):
-        channels = self.channels.copy()
-        data = await read_card_data()
-        orphan_cards = []
-        for card in data['data']:
-            if not card.get(lotr.CARD_DISCORD_CHANNEL):
-                continue
-
-            name = card[lotr.CARD_DISCORD_CHANNEL]
-            if name in channels:
-                if (card[lotr.CARD_DISCORD_CATEGORY] !=
-                        channels[name]['category_name']):
-                    message = (
-                        'Card {} ({}) has a wrong channel category: {} '
-                        'instead of {}'.format(
-                            card[lotr.CARD_NAME],
-                            card[lotr.CARD_DISCORD_CHANNEL],
-                            channels[name]['category_name'],
-                            card[lotr.CARD_DISCORD_CATEGORY]))
-                    logging.warning(message)
-                    create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
-
-                del channels[name]
-            else:
-                orphan_cards.append(card)
-
-        if orphan_cards:
-            logging.warning('Orphan cards detected:')
-            for card in orphan_cards:
-                logging.warning('%s (%s): %s, %s', card[lotr.CARD_NAME],
-                                card[lotr.CARD_DISCORD_CHANNEL],
-                                card[lotr.CARD_TYPE],
-                                card[lotr.CARD_SET_NAME])
-
-        if channels:
-            logging.info('Non-card channels detected:')
-            for channel in channels:
-                logging.info('%s (%s)', channel,
-                             channels[channel]['category_name'])
 
 
     async def _send_channel(self, channel, content):
