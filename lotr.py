@@ -3219,29 +3219,30 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if (re.search(r'(?:\[bi\]forced\[\/bi\]|forced|"forced") effect',
                       paragraph, flags=re.IGNORECASE) or
                 '[b]forced[/b] effect' in paragraph):
-            errors.append('use "[b]Forced[/b]" (without double quotes)')
+            errors.append('use [b]Forced[/b] in the middle of the text')
 
         if (re.search(r'(?:\[bi\]travel\[\/bi\]|travel|"travel") effect',
                       paragraph, flags=re.IGNORECASE) or
                 '[b]travel[/b] effect' in paragraph):
-            errors.append('use "[b]Travel[/b]" (without double quotes)')
+            errors.append('use [b]Travel[/b] in the middle of the text')
 
         if (re.search(r'(?:\[bi\]rumor\[\/bi\]|rumor|"rumor") effect',
                       paragraph, flags=re.IGNORECASE) or
                 '[b]rumor[/b] effect' in paragraph):
-            errors.append('use "[b]Rumor[/b]" (without double quotes)')
+            errors.append('use [b]Rumor[/b] in the middle of the text')
 
         if (re.search(r'(?:\[bi\]shadow\[\/bi\]|\[b\]shadow\[\/b\]|"shadow") '
                       r'effect', paragraph, flags=re.IGNORECASE) or
                 re.search(r'(?<!\.) Shadow effect\b', paragraph)):
-            errors.append('use "shadow" (without tags and double quotes)')
+            errors.append('use shadow (without tags and double quotes)')
 
         if (re.search(r'(?:\[bi\]when revealed\[\/bi\]|'
                       r'\[b\]when revealed\[\/b\]|when revealed) effect',
                       paragraph, flags=re.IGNORECASE) or
                 '"When Revealed" effect' in paragraph or
                 '"When revealed" effect' in paragraph):
-            errors.append('use "when revealed" (in double quotes)')
+            errors.append(
+                'use "when revealed" (in double quotes and without tags)')
 
         if 'When revealed:' in paragraph:
             errors.append('use "When Revealed:"')
@@ -3271,13 +3272,13 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if (re.search(r'(?:\[bi\]action\[\/bi\]|\[b\]action\[\/b\]|"action")',
                       updated_paragraph, flags=re.IGNORECASE) or
                 re.search(r'(?<!\.) Action\b', updated_paragraph)):
-            errors.append('use "action" (without tags and double quotes)')
+            errors.append('use action (without tags and double quotes)')
 
         if (re.search(r'(?:\[bi\]response\[\/bi\]|\[b\]response\[\/b\]|'
                       r'"response")', updated_paragraph,
                       flags=re.IGNORECASE) or
                 re.search(r'(?<!\.) Response\b', updated_paragraph)):
-            errors.append('use "response" (without tags and double quotes)')
+            errors.append('use response (without tags and double quotes)')
 
         if field == CARD_TEXT and card[CARD_TYPE] == 'Quest':
             name_regex = (r'(?<!\[bi\])\b' + re.escape(card[CARD_NAME] or '') +
