@@ -87,7 +87,6 @@ CARD_DEFENSE = 'Defense'
 CARD_HEALTH = 'Health'
 CARD_QUEST = 'Quest Points'
 CARD_VICTORY = 'Victory Points'
-CARD_SPECIAL_ICON = 'Special Icon'
 CARD_TEXT = 'Text'
 CARD_SHADOW = 'Shadow'
 CARD_FLAVOUR = 'Flavour'
@@ -95,6 +94,8 @@ CARD_PRINTED_NUMBER = 'Printed Card Number'
 CARD_ENCOUNTER_SET_NUMBER = 'Encounter Set Number'
 CARD_ENCOUNTER_SET_ICON = 'Encounter Set Icon'
 CARD_FLAGS = 'Flags'
+CARD_ICONS = 'Icons'
+CARD_INFO = 'Info'
 CARD_ARTIST = 'Artist'
 CARD_PANX = 'PanX'
 CARD_PANY = 'PanY'
@@ -104,10 +105,9 @@ CARD_SIDE_B = 'Side B'
 CARD_EASY_MODE = 'Removed for Easy Mode'
 CARD_ADDITIONAL_ENCOUNTER_SETS = 'Additional Encounter Sets'
 CARD_ADVENTURE = 'Adventure'
-CARD_ICON = 'Collection Icon'
+CARD_COLLECTION_ICON = 'Collection Icon'
 CARD_COPYRIGHT = 'Copyright'
 CARD_BACK = 'Card Back'
-CARD_VERSION = 'Version'
 CARD_DECK_RULES = 'Deck Rules'
 CARD_SELECTED = 'Selected'
 CARD_CHANGED = 'Changed'
@@ -150,12 +150,14 @@ DISCORD_IGNORE_CHANGES_COLUMNS = {
 ONE_LINE_COLUMNS = {
     CARD_ENCOUNTER_SET, CARD_NAME, CARD_TRAITS, CARD_KEYWORDS, CARD_VICTORY,
     CARD_PRINTED_NUMBER, CARD_ENCOUNTER_SET_NUMBER, CARD_ENCOUNTER_SET_ICON,
-    CARD_ARTIST, BACK_PREFIX + CARD_ENCOUNTER_SET, BACK_PREFIX + CARD_NAME,
+    CARD_ICONS, CARD_INFO, CARD_ARTIST, BACK_PREFIX + CARD_NAME,
     BACK_PREFIX + CARD_TRAITS, BACK_PREFIX + CARD_KEYWORDS,
     BACK_PREFIX + CARD_VICTORY, BACK_PREFIX + CARD_PRINTED_NUMBER,
     BACK_PREFIX + CARD_ENCOUNTER_SET_NUMBER,
-    BACK_PREFIX + CARD_ENCOUNTER_SET_ICON, BACK_PREFIX + CARD_ARTIST,
-    CARD_ADDITIONAL_ENCOUNTER_SETS, CARD_ADVENTURE, CARD_ICON, CARD_COPYRIGHT}
+    BACK_PREFIX + CARD_ENCOUNTER_SET_ICON, BACK_PREFIX + CARD_ICONS,
+    BACK_PREFIX + CARD_INFO, BACK_PREFIX + CARD_ARTIST,
+    CARD_ADDITIONAL_ENCOUNTER_SETS, CARD_ADVENTURE, CARD_COLLECTION_ICON,
+    CARD_COPYRIGHT}
 TRANSLATED_COLUMNS = {
     CARD_NAME, CARD_TRAITS, CARD_KEYWORDS, CARD_VICTORY, CARD_TEXT,
     CARD_SHADOW, CARD_FLAVOUR, BACK_PREFIX + CARD_NAME,
@@ -198,9 +200,9 @@ CARD_TYPES_NO_UNIQUE = {'Campaign', 'Contract', 'Event', 'Full Art Landscape',
                         'Quest', 'Rules'}
 CARD_TYPES_PLAYER_SPHERE = {'Ally', 'Attachment', 'Event', 'Hero',
                             'Player Side Quest'}
-CARD_TYPES_TRAITS = {'Ally', 'Enemy', 'Hero', 'Location', 'Objective Ally',
-                     'Objective Hero', 'Objective Location', 'Ship Enemy',
-                     'Ship Objective', 'Treasure'}
+CARD_TYPES_TRAITS = {'Ally', 'Attachment', 'Enemy', 'Hero', 'Location',
+                     'Objective Ally', 'Objective Hero', 'Objective Location',
+                     'Ship Enemy', 'Ship Objective', 'Treasure'}
 CARD_TYPES_NO_TRAITS = {'Campaign', 'Contract', 'Full Art Landscape',
                         'Full Art Portrait', 'Nightmare', 'Presentation',
                         'Quest', 'Rules'}
@@ -221,16 +223,12 @@ CARD_TYPES_QUEST = {'Encounter Side Quest', 'Location', 'Objective Location',
 CARD_TYPES_QUEST_BACK = {'Quest'}
 CARD_SPHERES_NO_QUEST = {'Cave', 'NoProgress', 'Region'}
 CARD_TYPES_VICTORY = {'Ally', 'Attachment', 'Encounter Side Quest', 'Enemy',
-                      'Event', 'Location', 'Objective', 'Objective Ally',
-                      'Objective Location', 'Player Objective',
-                      'Player Side Quest', 'Ship Enemy', 'Ship Objective',
-                      'Treachery', 'Treasure'}
+                      'Event', 'Hero', 'Location', 'Objective',
+                      'Objective Ally', 'Objective Hero', 'Objective Location',
+                      'Player Objective', 'Player Side Quest', 'Ship Enemy',
+                      'Ship Objective', 'Treachery', 'Treasure'}
 CARD_TYPES_VICTORY_BACK = {'Quest'}
 CARD_SPHERES_NO_VICTORY = {'Cave', 'NoStat', 'Region'}
-CARD_TYPES_SPECIAL_ICON = {'Enemy', 'Location', 'Objective', 'Objective Ally',
-                           'Objective Location', 'Ship Enemy',
-                           'Ship Objective', 'Treachery'}
-CARD_SPHERES_NO_SPECIAL_ICON = {'NoStat'}
 CARD_TYPES_NO_PERIOD_CHECK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
 CARD_TYPES_TEXT = {}
 #CARD_TYPES_TEXT = {'Attachment', 'Campaign', 'Contract',
@@ -332,6 +330,15 @@ CARD_TYPES_NO_FLAGS_BACK = {
 CARD_SPHERES_NO_FLAGS = {'BlueRing': {'Cave', 'NoStat', 'Region'},
                          'GreenRing': {'Cave', 'NoStat', 'Region'},
                          'RedRing': {'Cave', 'NoStat', 'Region'}}
+CARD_TYPES_ICONS = {'Enemy', 'Location', 'Objective', 'Objective Ally',
+                    'Objective Hero', 'Objective Location', 'Ship Enemy',
+                    'Ship Objective', 'Treachery'}
+CARD_SPHERES_NO_ICONS = {'NoStat'}
+CARD_TYPES_NO_INFO = {'Full Art Landscape', 'Full Art Portrait',
+                      'Presentation', 'Rules'}
+CARD_TYPES_NO_INFO_BACK = {'Campaign', 'Full Art Landscape',
+                           'Full Art Portrait', 'Nightmare', 'Presentation',
+                           'Rules'}
 CARD_TYPES_NO_ARTIST = {'Presentation', 'Rules'}
 CARD_TYPES_NO_ARTIST_BACK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
 CARD_TYPES_NO_ARTWORK = {'Rules'}
@@ -346,7 +353,8 @@ CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
 CARD_TYPES_SUBTITLE = {'Campaign', 'Objective', 'Objective Ally',
                        'Objective Hero', 'Objective Location',
                        'Quest', 'Ship Objective'}
-CARD_TYPES_NO_ICON = {'Full Art Landscape', 'Full Art Portrait', 'Rules'}
+CARD_TYPES_NO_COLLECTION_ICON = {'Full Art Landscape', 'Full Art Portrait',
+                                 'Rules'}
 CARD_TYPES_NO_COPYRIGHT = {'Presentation', 'Rules'}
 CARD_TYPES_DECK_RULES = {'Nightmare', 'Quest'}
 CARD_TYPES_ONE_COPY = {'Campaign', 'Contract', 'Encounter Side Quest',
@@ -379,8 +387,6 @@ SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow',
 SPHERES_RULES = {'Back'}
 SPHERES_SHIP_OBJECTIVE = {'Upgraded'}
 SPHERES_SIDE_QUEST = {'Cave', 'NoProgress', 'Region', 'SmallTextArea'}
-SPECIAL_ICONS = {'eye of sauron', 'eye of sauronx2', 'eye of sauronx3',
-                 'sailing', 'sailingx2'}
 
 COPY_STABLE_DATA_COMMAND = "rclone copy '{}' 'ALePStableData:/'"
 DRAGNCARDS_PLAYER_CARDS_STAT_COMMAND = \
@@ -2513,12 +2519,13 @@ def _update_selected_rows(data):
             if row[CARD_SCRATCH] and row[CARD_SELECTED] in intersected_sets:
                 continue
 
-            if (row[CARD_TYPE] not in CARD_TYPES_NO_ICON and
-                    row[CARD_ICON] is None):
+            if (row[CARD_TYPE] not in CARD_TYPES_NO_COLLECTION_ICON and
+                    row[CARD_COLLECTION_ICON] is None):
                 if SETS.get(row[CARD_SET], {}).get(SET_COLLECTION_ICON):
-                    row[CARD_ICON] = SETS[row[CARD_SET]][SET_COLLECTION_ICON]
+                    row[CARD_COLLECTION_ICON] = (
+                        SETS[row[CARD_SET]][SET_COLLECTION_ICON])
                 elif SETS.get(row[CARD_SET], {}).get(SET_NAME):
-                    row[CARD_ICON] = SETS[row[CARD_SET]][SET_NAME]
+                    row[CARD_COLLECTION_ICON] = SETS[row[CARD_SET]][SET_NAME]
 
             if (row[CARD_TYPE] not in CARD_TYPES_NO_COPYRIGHT and
                     row[CARD_COPYRIGHT] is None):
@@ -3380,12 +3387,13 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_encounter_set_number = row[CARD_ENCOUNTER_SET_NUMBER]
         card_encounter_set_icon = row[CARD_ENCOUNTER_SET_ICON]
         card_flags = row[CARD_FLAGS]
+        card_icons = row[CARD_ICONS]
+        card_info = row[CARD_INFO]
         card_artist = row[CARD_ARTIST]
         card_panx = row[CARD_PANX]
         card_pany = row[CARD_PANY]
         card_scale = row[CARD_SCALE]
         card_portrait_shadow = row[CARD_PORTRAIT_SHADOW]
-        card_special_icon = row[CARD_SPECIAL_ICON]
 
         card_name_back = row[BACK_PREFIX + CARD_NAME]
         card_unique_back = row[BACK_PREFIX + CARD_UNIQUE]
@@ -3411,17 +3419,18 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_encounter_set_icon_back = row[
             BACK_PREFIX + CARD_ENCOUNTER_SET_ICON]
         card_flags_back = row[BACK_PREFIX + CARD_FLAGS]
+        card_icons_back = row[BACK_PREFIX + CARD_ICONS]
+        card_info_back = row[BACK_PREFIX + CARD_INFO]
         card_artist_back = row[BACK_PREFIX + CARD_ARTIST]
         card_panx_back = row[BACK_PREFIX + CARD_PANX]
         card_pany_back = row[BACK_PREFIX + CARD_PANY]
         card_scale_back = row[BACK_PREFIX + CARD_SCALE]
         card_portrait_shadow_back = row[BACK_PREFIX + CARD_PORTRAIT_SHADOW]
-        card_special_icon_back = row[BACK_PREFIX + CARD_SPECIAL_ICON]
 
         card_easy_mode = row[CARD_EASY_MODE]
         card_additional_encounter_sets = row[CARD_ADDITIONAL_ENCOUNTER_SETS]
         card_adventure = row[CARD_ADVENTURE]
-        card_icon = row[CARD_ICON]
+        card_collection_icon = row[CARD_COLLECTION_ICON]
         card_copyright = row[CARD_COPYRIGHT]
         card_back = row[CARD_BACK]
         card_deck_rules = row[CARD_DECK_RULES]
@@ -4718,70 +4727,6 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_special_icon is not None and
-                card_special_icon.lower() not in SPECIAL_ICONS):
-            message = 'Incorrect format for special icon for row #{}{}'.format(
-                i, row_info)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-        elif (card_special_icon is not None and
-              card_type not in CARD_TYPES_SPECIAL_ICON):
-            message = 'Redundant special icon for row #{}{}'.format(
-                i, row_info)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-        elif (card_special_icon is not None and
-              card_sphere in CARD_SPHERES_NO_SPECIAL_ICON):
-            message = 'Redundant special icon for row #{}{}'.format(
-                i, row_info)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-
-        if card_special_icon_back is not None and card_type_back is None:
-            message = 'Redundant special icon back for row #{}{}'.format(
-                i, row_info)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-        elif (card_special_icon_back is not None and
-              card_special_icon_back.lower() not in SPECIAL_ICONS):
-            message = ('Incorrect format for special icon back for row #{}{}'
-                       .format(i, row_info))
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-        elif (card_special_icon_back is not None and
-              card_type_back not in CARD_TYPES_SPECIAL_ICON):
-            message = 'Redundant special icon back for row #{}{}'.format(
-                i, row_info)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-        elif (card_special_icon_back is not None and
-              card_sphere_back in CARD_SPHERES_NO_SPECIAL_ICON):
-            message = 'Redundant special icon back for row #{}{}'.format(
-                i, row_info)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-
         if card_text is None and card_type in CARD_TYPES_TEXT:
             message = 'Missing text for row #{}{}'.format(i, row_info)
             logging.error(message)
@@ -5212,6 +5157,69 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     else:
                         found_ring_flag = True
 
+        if card_icons is not None and card_type not in CARD_TYPES_ICONS:
+            message = 'Redundant icons for row #{}{}'.format(i, row_info)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif card_icons is not None and card_sphere in CARD_SPHERES_NO_ICONS:
+            message = 'Redundant icons for row #{}{}'.format(i, row_info)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_icons_back is not None and card_type_back is None:
+            message = 'Redundant icons back for row #{}{}'.format(i, row_info)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_icons_back is not None and
+              card_type_back not in CARD_TYPES_ICONS):
+            message = 'Redundant icons back for row #{}{}'.format(i, row_info)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_icons_back is not None and
+              card_sphere_back in CARD_SPHERES_NO_ICONS):
+            message = 'Redundant icons back for row #{}{}'.format(i, row_info)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_info is not None and card_type in CARD_TYPES_NO_INFO:
+            message = 'Redundant info for row #{}{}'.format(i, row_info)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
+        if card_info_back is not None and card_type_back is None:
+            message = 'Redundant info back for row #{}{}'.format(i, row_info)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_info_back is not None and
+              card_type_back in CARD_TYPES_NO_INFO_BACK):
+            message = 'Redundant info back for row #{}{}'.format(i, row_info)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
         if (card_artist is not None and
                 card_type in CARD_TYPES_NO_ARTIST):
             message = 'Redundant artist for row #{}{}'.format(
@@ -5614,7 +5622,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 quest_adventures[(set_id, card_encounter_set)] = card_adventure
 
-        if card_icon is not None and card_type in CARD_TYPES_NO_ICON:
+        if (card_collection_icon is not None and
+                card_type in CARD_TYPES_NO_COLLECTION_ICON):
             message = 'Redundant collection icon for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -8257,8 +8266,8 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
             victory_points = _handle_int_str(translated_row.get(CARD_VICTORY))
 
         tokens = []
-        if row[CARD_SPECIAL_ICON] is not None:
-            tokens.append(row[CARD_SPECIAL_ICON])
+        if row[CARD_ICONS] is not None:
+            tokens.extend(re.split(r'(?<=\])(?=\[)', row[CARD_ICONS]))
 
         if victory_points is not None and not is_int(victory_points):
             tokens.append(victory_points)
@@ -9038,8 +9047,8 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                                  CARD_TRAITS, CARD_KEYWORDS, CARD_COST,
                                  CARD_ENGAGEMENT, CARD_THREAT, CARD_WILLPOWER,
                                  CARD_ATTACK, CARD_DEFENSE, CARD_HEALTH,
-                                 CARD_QUEST, CARD_VICTORY, CARD_SPECIAL_ICON,
-                                 CARD_TEXT, CARD_SHADOW}
+                                 CARD_QUEST, CARD_VICTORY, CARD_TEXT, CARD_SHADOW,
+                                 CARD_ICONS}
 
         card_type = row[CARD_TYPE]
         properties = []
@@ -9047,14 +9056,14 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                      CARD_UNIQUE, CARD_TYPE, CARD_SPHERE, CARD_TRAITS,
                      CARD_KEYWORDS, CARD_COST, CARD_ENGAGEMENT, CARD_THREAT,
                      CARD_WILLPOWER, CARD_ATTACK, CARD_DEFENSE, CARD_HEALTH,
-                     CARD_QUEST, CARD_VICTORY, CARD_SPECIAL_ICON, CARD_TEXT,
-                     CARD_SHADOW, CARD_FLAVOUR, CARD_PRINTED_NUMBER,
+                     CARD_QUEST, CARD_VICTORY, CARD_TEXT, CARD_SHADOW,
+                     CARD_FLAVOUR, CARD_PRINTED_NUMBER,
                      CARD_ENCOUNTER_SET_NUMBER, CARD_ENCOUNTER_SET_ICON,
-                     CARD_FLAGS, CARD_ARTIST, CARD_PANX, CARD_PANY, CARD_SCALE,
-                     CARD_PORTRAIT_SHADOW, CARD_EASY_MODE,
-                     CARD_ADDITIONAL_ENCOUNTER_SETS, CARD_ADVENTURE, CARD_ICON,
-                     CARD_COPYRIGHT, CARD_BACK, CARD_VERSION,
-                     CARD_ENCOUNTER_SET_NUMBER_START,
+                     CARD_FLAGS, CARD_ICONS, CARD_INFO, CARD_ARTIST, CARD_PANX,
+                     CARD_PANY, CARD_SCALE, CARD_PORTRAIT_SHADOW,
+                     CARD_EASY_MODE, CARD_ADDITIONAL_ENCOUNTER_SETS,
+                     CARD_ADVENTURE, CARD_COLLECTION_ICON, CARD_COPYRIGHT,
+                     CARD_BACK, CARD_ENCOUNTER_SET_NUMBER_START,
                      CARD_ENCOUNTER_SET_TOTAL):
             value = _get_xml_property_value(row, name, card_type)
             if value != '':
@@ -9096,10 +9105,10 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                          CARD_KEYWORDS, CARD_COST, CARD_ENGAGEMENT,
                          CARD_THREAT, CARD_WILLPOWER, CARD_ATTACK,
                          CARD_DEFENSE, CARD_HEALTH, CARD_QUEST, CARD_VICTORY,
-                         CARD_SPECIAL_ICON, CARD_TEXT, CARD_SHADOW,
-                         CARD_FLAVOUR, CARD_PRINTED_NUMBER,
-                         CARD_ENCOUNTER_SET_NUMBER, CARD_ENCOUNTER_SET_ICON,
-                         CARD_FLAGS, CARD_ARTIST, CARD_PANX, CARD_PANY,
+                         CARD_TEXT, CARD_SHADOW, CARD_FLAVOUR,
+                         CARD_PRINTED_NUMBER, CARD_ENCOUNTER_SET_NUMBER,
+                         CARD_ENCOUNTER_SET_ICON, CARD_FLAGS, CARD_ICONS,
+                         CARD_INFO, CARD_ARTIST, CARD_PANX, CARD_PANY,
                          CARD_SCALE, CARD_PORTRAIT_SHADOW):
                 value = _get_xml_property_value(row, BACK_PREFIX + name,
                                                 card_type)
@@ -9416,7 +9425,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                     int(os.path.getmtime(custom_images[image]))))
                 prop.tail = '\n      '
 
-        if card_type in CARD_TYPES_NO_ICON:
+        if card_type in CARD_TYPES_NO_COLLECTION_ICON:
             continue
 
         target_icon_images = []

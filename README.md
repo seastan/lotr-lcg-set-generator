@@ -595,14 +595,6 @@ List of available sphere values:
 - `Black`
 - `PortraitTint`` (`Quest` Side A only)
 
-**Special Icons**
-
-- `Eye Of Sauron`
-- `Eye Of Sauronx2`
-- `Eye Of Sauronx3`
-- `Sailing`
-- `Sailingx2`
-
 **Deck Rules**
 
 OCTGN/DragnCards `.o8d` and DragnCards `.json` deck files are generated automatically for each scenario detected

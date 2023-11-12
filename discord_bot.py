@@ -924,12 +924,17 @@ def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
     else:
         card_victory = '\n**{}**'.format(victory)
 
-    special_icon = card.get(prefix + lotr.CARD_SPECIAL_ICON, '')
-    if special_icon == '':
-        card_special_icon = ''
+    icons = card.get(prefix + lotr.CARD_ICONS, '')
+    if icons == '':
+        card_icons = ''
     else:
-        card_special_icon = '\n{}'.format(
-            EMOJIS['[{}]'.format(special_icon.lower().replace(' ', ''))])
+        card_icons = '\n{}'.format(update_emojis(icons))
+
+    info = card.get(prefix + lotr.CARD_INFO, '')
+    if info == '':
+        card_info = ''
+    else:
+        card_info = '\n**{}**'.format(info)
 
     flavour = update_text(card.get(prefix + lotr.CARD_FLAVOUR, ''))
     card_flavour = '' if flavour == '' else '\n\n*{}*'.format(flavour)
@@ -943,7 +948,7 @@ def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
     res = f"""{card_unique}{card_name}
 {card_sphere}{card_type}{card_promo}{card_cost}{card_engagement}{card_stage}{card_skills}
 
-{card_traits}{card_keywords}{card_text}{card_shadow}{card_victory}{card_special_icon}{card_flavour}{card_artist}"""  # pylint: disable=C0301
+{card_traits}{card_keywords}{card_text}{card_shadow}{card_victory}{card_icons}{card_info}{card_flavour}{card_artist}"""  # pylint: disable=C0301
     return res
 
 
@@ -1012,11 +1017,9 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
     else:
         card_number = '**#{}**'.format(card[lotr.CARD_NUMBER])
 
-    icon = card.get(lotr.CARD_ICON, '')
-    card_icon = '' if icon == '' else ' ({})'.format(icon)
-
-    version = card.get(lotr.CARD_VERSION, '')
-    card_version = '' if version == '' else ' **{}**'.format(version)
+    collection_icon = card.get(lotr.CARD_COLLECTION_ICON, '')
+    card_collection_icon = ('' if collection_icon == ''
+                            else ' ({})'.format(collection_icon))
 
     custom_copyright = card.get(lotr.CARD_COPYRIGHT, '')
     card_custom_copyright = ('' if custom_copyright == ''
@@ -1047,7 +1050,7 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
 
     res = f"""{res_a}{res_b}
 
-{card_set}{card_icon}, {card_number}{card_version} {card_quantity}
+{card_set}{card_collection_icon}, {card_number} {card_quantity}
 {card_encounter_set}{card_adventure}{card_custom_back}{card_custom_copyright}{card_id}
 
 {card_deck_rules}{ringsdb_url}{row_url}

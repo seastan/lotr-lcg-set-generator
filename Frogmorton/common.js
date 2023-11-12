@@ -67,7 +67,7 @@ var encounterSet5PortraitRegion = {};
 encounterSet5PortraitRegion['Quest'] = '354,213,20,20';
 
 var asteriskRegion = {};
-asteriskRegion['Ally'] = '371,524,11,11';
+asteriskRegion['Ally'] = '372,524,11,11';
 asteriskRegion['Attachment'] = '373,524,11,11';
 asteriskRegion['Campaign'] = '373,524,11,11';
 asteriskRegion['Cave'] = '529,374,11,11';
@@ -95,34 +95,32 @@ asteriskRegion['Treachery'] = '373,524,11,11';
 asteriskRegion['Treasure'] = '377,524,11,11';
 
 var collectionInfoRegion = {};
-collectionInfoRegion['Ally'] = '358,527,20,15';
-collectionInfoRegion['Attachment'] = '358,527,20,15';
-collectionInfoRegion['Campaign'] = '358,527,20,15';
-collectionInfoRegion['Cave'] = '512,375,20,15';
-collectionInfoRegion['Contract'] = '358,527,20,15';
-collectionInfoRegion['Encounter Side Quest'] = '427,375,20,15';
-collectionInfoRegion['Encounter Side Quest SmallTextArea'] = '427,375,20,15';
-collectionInfoRegion['Enemy'] = '358,527,20,15';
-collectionInfoRegion['Enemy NoStat'] = '358,527,20,15';
-collectionInfoRegion['Event'] = '358,527,20,15';
-collectionInfoRegion['Hero'] = '358,527,20,15';
-collectionInfoRegion['Hero Promo'] = '338,510,20,12';
-collectionInfoRegion['Location'] = '358,527,20,15';
-collectionInfoRegion['Nightmare'] = '358,527,20,15';
-collectionInfoRegion['Objective'] = '358,527,20,15';
-collectionInfoRegion['Objective Ally'] = '358,527,20,15';
-collectionInfoRegion['Objective Hero'] = '358,527,20,15';
-collectionInfoRegion['Objective Location'] = '358,527,20,15';
-collectionInfoRegion['Player Objective'] = '358,527,20,15';
-collectionInfoRegion['Player Side Quest'] = '427,375,20,15';
-collectionInfoRegion['Presentation'] = '358,527,20,15';
-collectionInfoRegion['Quest'] = '427,375,20,15';
-collectionInfoRegion['Region'] = '512,375,20,15';
-collectionInfoRegion['Rules'] = '358,527,20,15';
-collectionInfoRegion['Ship Enemy'] = '358,527,20,15';
-collectionInfoRegion['Ship Objective'] = '358,527,20,15';
-collectionInfoRegion['Treachery'] = '358,527,20,15';
-collectionInfoRegion['Treasure'] = '358,527,20,15';
+collectionInfoRegion['Ally'] = '357,526,26,15';
+collectionInfoRegion['Attachment'] = '358,526,26,15';
+collectionInfoRegion['Campaign'] = '358,526,26,15';
+collectionInfoRegion['Cave'] = '516,374,26,15';
+collectionInfoRegion['Contract'] = '358,526,26,15';
+collectionInfoRegion['Encounter Side Quest'] = '518,374,26,15';
+collectionInfoRegion['Encounter Side Quest SmallTextArea'] = '518,374,26,15';
+collectionInfoRegion['Enemy'] = '358,526,26,15';
+collectionInfoRegion['Enemy NoStat'] = '358,526,26,15';
+collectionInfoRegion['Event'] = '358,526,26,15';
+collectionInfoRegion['Hero'] = '358,526,26,15';
+collectionInfoRegion['Hero Promo'] = '321,510,20,12';
+collectionInfoRegion['Location'] = '358,526,26,15';
+collectionInfoRegion['Nightmare'] = '364,526,26,15';
+collectionInfoRegion['Objective'] = '348,526,26,15';
+collectionInfoRegion['Objective Ally'] = '348,526,26,15';
+collectionInfoRegion['Objective Hero'] = '348,526,26,15';
+collectionInfoRegion['Objective Location'] = '348,526,26,15';
+collectionInfoRegion['Player Objective'] = '348,526,26,15';
+collectionInfoRegion['Player Side Quest'] = '516,374,26,15';
+collectionInfoRegion['Quest'] = '516,374,26,15';
+collectionInfoRegion['Region'] = '516,374,26,15';
+collectionInfoRegion['Ship Enemy'] = '358,526,26,15';
+collectionInfoRegion['Ship Objective'] = '348,526,26,15';
+collectionInfoRegion['Treachery'] = '358,526,26,15';
+collectionInfoRegion['Treasure'] = '362,526,26,15';
 
 var collectionNumberRegion = {};
 collectionNumberRegion['Ally'] = '334,527,24,15';
@@ -571,10 +569,20 @@ encounterNumberRegion['Ship Enemy'] = '329,313,26,10';
 encounterNumberRegion['Ship Objective'] = '323,316,26,10';
 encounterNumberRegion['Treachery'] = '329,317,26,10';
 
+var optionLeftRegion = {};
+optionLeftRegion['Enemy'] = '43,494,48,24';
+optionLeftRegion['Location'] = '43,494,48,24';
+optionLeftRegion['Objective'] = '63,494,48,24';
+optionLeftRegion['Objective Ally'] = '63,494,48,24';
+optionLeftRegion['Objective Hero'] = '63,494,48,24';
+optionLeftRegion['Objective Location'] = '63,494,48,24';
+optionLeftRegion['Ship Enemy'] = '43,494,48,24';
+optionLeftRegion['Ship Objective'] = '43,494,48,24';
+optionLeftRegion['Treachery'] = '43,494,48,24';
+
 var optionRightDecorationRegion = {};
 optionRightDecorationRegion['Ally'] = '298,503,72,18';
 optionRightDecorationRegion['Attachment'] = '300,503,72,18';
-optionRightDecorationRegion['Campaign'] = '301,503,72,18';
 optionRightDecorationRegion['Encounter Side Quest'] = '452,347,72,18';
 optionRightDecorationRegion['Encounter Side Quest SmallTextArea'] = '452,347,72,18';
 optionRightDecorationRegion['Enemy'] = '301,503,72,18';
@@ -582,7 +590,6 @@ optionRightDecorationRegion['Event'] = '298,503,72,18';
 optionRightDecorationRegion['Hero'] = '298,502,72,18';
 optionRightDecorationRegion['Hero Promo'] = '282,495,72,18';
 optionRightDecorationRegion['Location'] = '301,503,72,18';
-optionRightDecorationRegion['Nightmare'] = '299,503,72,18';
 optionRightDecorationRegion['Objective'] = '290,502,72,18';
 optionRightDecorationRegion['Objective Ally'] = '290,502,72,18';
 optionRightDecorationRegion['Objective Hero'] = '290,502,72,18';
@@ -598,7 +605,6 @@ optionRightDecorationRegion['Treasure'] = '253,477,72,18';
 var optionRightRegion = {};
 optionRightRegion['Ally'] = '305,504,59,20';
 optionRightRegion['Attachment'] = '307,504,59,20';
-optionRightRegion['Campaign'] = '308,504,59,20';
 optionRightRegion['Encounter Side Quest'] = '459,348,59,20';
 optionRightRegion['Encounter Side Quest SmallTextArea'] = '459,348,59,20';
 optionRightRegion['Enemy'] = '308,504,59,20';
@@ -606,7 +612,6 @@ optionRightRegion['Event'] = '305,504,59,20';
 optionRightRegion['Hero'] = '305,503,59,20';
 optionRightRegion['Hero Promo'] = '289,496,59,20';
 optionRightRegion['Location'] = '308,504,59,20';
-optionRightRegion['Nightmare'] = '306,507,59,20';
 optionRightRegion['Objective'] = '297,503,59,20';
 optionRightRegion['Objective Ally'] = '297,503,59,20';
 optionRightRegion['Objective Hero'] = '297,503,59,20';
@@ -618,16 +623,6 @@ optionRightRegion['Ship Enemy'] = '308,504,59,20';
 optionRightRegion['Ship Objective'] = '297,503,59,20';
 optionRightRegion['Treachery'] = '308,504,59,20';
 optionRightRegion['Treasure'] = '260,478,59,20';
-
-var optionSpecialRegion = {};
-optionSpecialRegion['Enemy'] = '55,494,24,24';
-optionSpecialRegion['Location'] = '55,494,24,24';
-optionSpecialRegion['Objective'] = '75,494,24,24';
-optionSpecialRegion['Objective Ally'] = '75,494,24,24';
-optionSpecialRegion['Objective Location'] = '75,494,24,24';
-optionSpecialRegion['Ship Enemy'] = '55,494,24,24';
-optionSpecialRegion['Ship Objective'] = '75,494,24,24';
-optionSpecialRegion['Treachery'] = '55,494,24,24';
 
 var questStageRegion = {};
 questStageRegion['1'] = '44,43,62,42';
@@ -1021,17 +1016,17 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						['HitPoints', 'Health'],
 						['Progress', 'Quest Points'],
 						['OptionRight', 'Victory Points'],
-						['OptionSpecial', 'Special Icon'],
 						['Rules', 'Text'],
 						['Shadow', 'Shadow'],
 						['Flavour', 'Flavour'],
 						['Story', 'Flavour'],
+						['OptionLeft', 'Icons'],
+						['CollectionInfo', 'Info'],
 						['Artist', 'Artist'],
 						['Adventure', 'Adventure'],
 						['Cycle', 'Adventure'],
 						['CollectionNumberCustom', 'Card Number'],
 						['CollectionNumberCustomOverwrite', 'Printed Card Number'],
-						['CollectionInfo', 'Version'],
 						['EncounterSetNumberOverwrite', 'Encounter Set Number']
 					];
 					if (doubleSide) {
@@ -1040,10 +1035,11 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						mapping = mapping.concat([
 							['NameBack', 'BName'],
 							['StageLetterBack', 'BEngagement Cost'],
+							['OptionRightBack', 'BVictory Points'],
 							['RulesBack', 'BText'],
 							['FlavourBack', 'BFlavour'],
 							['StoryBack', 'BFlavour'],
-							['OptionRightBack', 'BVictory Points'],
+							['CollectionInfoBack', 'BInfo'],
 							['CollectionNumberCustomOverwriteBack', 'BPrinted Card Number'],
 							['ArtistBack', 'BArtist']
 						]);
@@ -1116,17 +1112,17 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						['HitPoints', 'BHealth'],
 						['Progress', 'BQuest Points'],
 						['OptionRight', 'BVictory Points'],
-						['OptionSpecial', 'BSpecial Icon'],
 						['Rules', 'BText'],
 						['Shadow', 'BShadow'],
 						['Flavour', 'BFlavour'],
 						['Story', 'BFlavour'],
+						['CollectionInfo', 'BInfo'],
+						['OptionLeft', 'BIcons'],
 						['Artist', 'BArtist'],
 						['Adventure', 'Adventure'],
 						['Cycle', 'Adventure'],
 						['CollectionNumberCustom', 'Card Number'],
 						['CollectionNumberCustomOverwrite', 'BPrinted Card Number'],
-						['CollectionInfo', 'Version'],
 						['EncounterSetNumberOverwrite', 'BEncounter Set Number']
 					];
 				}
@@ -1150,9 +1146,6 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 								s.set(nEon, '');
 							}
 						}
-						else if (['Special Icon', 'BSpecial Icon'].indexOf(nXml + '') > -1) {
-							s.set(nEon, 'Empty');
-						}
 						else {
 							s.set(nEon, '');
 						}
@@ -1166,9 +1159,6 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 								vXml += '.';
 							}
 						}
-					}
-					else if (['Special Icon', 'BSpecial Icon'].indexOf(nXml + '') > -1) {
-						vXml = convertIconName(vXml);
 					}
 					else if (['Artist', 'BArtist'].indexOf(nXml + '') > -1) {
 						if (vXml == 'Unknown Artist') {
@@ -1725,9 +1715,9 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					['Difficulty-region', difficultyRegion],
 					['EncounterSet-portrait-clip-region', encounterPortraitRegion],
 					['EncounterSetNumber-region', encounterNumberRegion],
+					['OptionLeft-region', optionLeftRegion],
 					['OptionRightDecoration-region', optionRightDecorationRegion],
 					['OptionRight-region', optionRightRegion],
-					['OptionSpecial-portrait-clip-region', optionSpecialRegion],
 					['Artist-region', artistRegion],
 					['Copyright-region', copyrightRegion],
 					['Collection-portrait-clip-region', collectionPortraitRegion],

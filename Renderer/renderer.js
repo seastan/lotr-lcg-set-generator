@@ -28,6 +28,8 @@ const containerFontSize = {
     'EncounterSetNumber': 11,
     'Name': 12,
     'NameBack': 12,
+    'OptionLeft': 14,
+    'OptionLeftBack': 14,
     'OptionRight': 12,
     'OptionRightBack': 12,
     'PageIn': 11,
@@ -195,7 +197,8 @@ function updateRegion(key, value, card_type) {
 
     var sizeKey = key.replace(/-region$/, '');
     if ((sizeKey in containerFontSize) &&
-        (['Artist', 'CollectionInfo', 'CollectionNumber', 'Copyright'].indexOf(sizeKey) == -1)) {
+        (['Artist', 'ArtistBack', 'CollectionInfo', 'CollectionInfoBack',
+          'CollectionNumber', 'CollectionNumberBack', 'Copyright', 'CopyrightBack'].indexOf(sizeKey) == -1)) {
         regions[0] -= 1;
         regions[2] += 2;
         regions[3] += 1;
@@ -578,21 +581,19 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             var content = '<div style="text-align: center' + rotate + '"><span style="color: ' + data['Name-colour'] + '">' + unique + data.Name + '</span></div>';
             return content;
         },
+        'OptionLeft': function(data) {
+            if (data.OptionLeft + '' == '') {
+                return '';
+            }
+
+            return '<div style="text-align: center">' + data['OptionLeft-format'] + data.OptionLeft + data['OptionLeft-formatEnd'] + '</div>';
+        },
         'OptionRight': function(data) {
             if (data.OptionRight + '' == '') {
                 return '';
             }
 
             return '<div style="text-align: center; padding-top: 4px">' + data['OptionRight-format'] + data.OptionRight + data['OptionRight-formatEnd'] + '</div>';
-        },
-        'OptionSpecial-portrait-clip': function(data) {
-            if ((data.OptionSpecial + '' == '') || (data.OptionSpecial + '' == 'Empty')) {
-                return '';
-            }
-
-            var content = '<img src="' + imagesFolder + data.OptionSpecial.toLowerCase().replace(/ /g, '') + '.png" width="' +
-                data['OptionSpecial-portrait-clip-region'][2] + '" height="' + data['OptionSpecial-portrait-clip-region'][3] + '">';
-            return content;
         },
         'PageIn': function(data) {
             if (parseInt(data.PageNumber) == 0) {
@@ -753,7 +754,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             }
 
             return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionInfoBack-region'][3] +
-                'px">' + data['Bottom-format'] + data.CollectionInfo + data['Bottom-formatEnd'] + '</div>';
+                'px">' + data['Bottom-format'] + data.CollectionInfoBack + data['Bottom-formatEnd'] + '</div>';
         },
         'CollectionNumberBack': function(data) {
             if ((data.CollectionNumberCustom + '' == '') && (data.CollectionNumberCustomOverwriteBack + '' == '')) {
@@ -989,9 +990,9 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
                         data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: hidden; overflow-y: hidden; z-index: -2">' + containerRules[key](data) + '</div>';
                 }
-                else if (['Asterisk', 'Attack', 'Collection-portrait-clip', 'Defense', 'Difficulty', 'EncounterSet-portrait-clip',
-                          'EncounterSet1-portrait-clip', 'EncounterSet2-portrait-clip', 'EncounterSet3-portrait-clip', 'EncounterSet4-portrait-clip',
-                          'EncounterSet5-portrait-clip', 'Engagement', 'HitPoints', 'OptionSpecial-portrait-clip', 'Progress', 'ResourceCost', 'Stage', 'Threat', 'ThreatCost', 'Willpower'].indexOf(key) > -1) {
+                else if (['Attack', 'Collection-portrait-clip', 'Defense', 'Difficulty', 'EncounterSet-portrait-clip', 'EncounterSet1-portrait-clip',
+                          'EncounterSet2-portrait-clip', 'EncounterSet3-portrait-clip', 'EncounterSet4-portrait-clip', 'EncounterSet5-portrait-clip',
+                          'Engagement', 'HitPoints', 'Progress', 'ResourceCost', 'Stage', 'Threat', 'ThreatCost', 'Willpower'].indexOf(key) > -1) {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
                         data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: visible">' + containerRules[key](data) + '</div>';
                 }
@@ -1099,7 +1100,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                         content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
                             data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: hidden; overflow-y: hidden; z-index: -2">' + containerRulesBack[key](data) + '</div>';
                     }
-                    else if (['AsteriskBack', 'CollectionBack-portrait-clip', 'EncounterSetBack-portrait-clip', 'ProgressBack', 'StageBack'].indexOf(key) > -1) {
+                    else if (['CollectionBack-portrait-clip', 'EncounterSetBack-portrait-clip', 'ProgressBack', 'StageBack'].indexOf(key) > -1) {
                         content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
                             data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: visible">' + containerRulesBack[key](data) + '</div>';
                     }
