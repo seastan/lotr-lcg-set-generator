@@ -1488,15 +1488,20 @@ async def get_dragncards_player_cards_stat(set_name, start_date):
     except Exception:
         end_date = ''
 
-    cards = {c[lotr.CARD_ID]:c[lotr.CARD_NAME] for c in matches}
-    card_ids = ';'.join(list(cards.keys()))
+    cards = {c[lotr.CARD_ID]:
+             {'id': c[lotr.CARD_ID],
+              'name': c[lotr.CARD_NAME],
+              'date': c.get(lotr.CARD_LAST_DESIGN_CHANGE_DATE, '')}
+             for c in matches}
+    card_ids = ';'.join(
+        ['{}:{}'.format(c['id'], c['date']) for c in cards.values()])
     res = lotr.get_dragncards_player_cards_stat(
         CONF, card_ids, start_date, end_date)
     lines = res.split('\n')
     for i in range(1, len(lines)):
         parts = lines[i].split('\t', 1)
         if parts[0] in cards:
-            parts[0] = cards[parts[0]]
+            parts[0] = cards[parts[0]]['name']
             if len(parts[0]) < 29:
                 parts[0] = parts[0] + ' ' * (29 - len(parts[0]))
 

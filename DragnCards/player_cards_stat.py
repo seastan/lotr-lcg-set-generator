@@ -57,7 +57,7 @@ def get_stat(card_ids, start_date, end_date):
         FROM player_cards_stat
         WHERE stat_date >= %s
             AND stat_date < %s
-            AND card_id IN %s
+            AND card_id = %s
         GROUP BY card_id
     ) t
     """
@@ -69,8 +69,12 @@ def get_stat(card_ids, start_date, end_date):
                             database=DRAGNCARDS_DATABASE)
     try:
         cursor = conn.cursor(cursor_factory=extras.DictCursor)
-        cursor.execute(query, (start_date, end_date, tuple(card_ids)))
-        res = cursor.fetchall()
+        res = []
+        for card_id, card_start_date in card_ids.items():
+            card_start_date = max(card_start_date, start_date)
+            cursor.execute(query, (card_start_date, end_date, card_id))
+            res.extend(cursor.fetchall())
+
         res = [dict(row) for row in res]
         return res
     finally:
@@ -121,7 +125,8 @@ def main():
         return
 
     card_ids_raw = sys.argv[1]
-    card_ids = card_ids_raw.split(';')
+    card_ids = [c.split(':') for c in card_ids_raw.split(';')]
+    card_ids = {c[0]:(c[1] or DEFAULT_START_DATE) for c in card_ids}
 
     if (len(sys.argv) > 2 and sys.argv[2] and
             sys.argv[2] > DEFAULT_START_DATE):
