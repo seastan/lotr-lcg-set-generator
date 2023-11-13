@@ -212,8 +212,10 @@ List of **!stat** commands:
 **!stat dragncards build** - display information about the latest DragnCards build
 **!stat quest <quest name or set name or set code>** - display the quest statistics
 ` `
-**!stat player cards <set name or set code>** - display DragnCards player cards statistics for the set
-**!stat player cards <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date
+**!stat player cards <set name or set code>** - display DragnCards player cards statistics for the set (no earlier than the Last Design Change Date)
+**!stat player cards <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date (but no earlier than the Last Design Change Date)
+**!stat player cards full <set name or set code>** - display DragnCards player cards statistics for the set (regardless of the Last Design Change Date)
+**!stat player cards full <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date (regardless of the Last Design Change Date)
 **!stat player cards help** - display additional help about DragnCards player cards statistics
 ` `
 **!stat all plays <quest name>** - display all DragnCards plays for the quest
@@ -284,8 +286,10 @@ List of **!secret** commands:
 """.format(USERS_LIST_PATH)
 }
 HELP_STAT_PLAYER_CARDS = """
-**!stat player cards <set name or set code>** - display DragnCards player cards statistics for the set
-**!stat player cards <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date
+**!stat player cards <set name or set code>** - display DragnCards player cards statistics for the set (no earlier than the Last Design Change Date)
+**!stat player cards <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date (but no earlier than the Last Design Change Date)
+**!stat player cards full <set name or set code>** - display DragnCards player cards statistics for the set (regardless of the Last Design Change Date)
+**!stat player cards full <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date (regardless of the Last Design Change Date)
 **!stat player cards help** - display this help message
 ` `
 **Columns:**
@@ -1450,7 +1454,7 @@ async def get_attachment_content(message):
     return content
 
 
-async def get_dragncards_player_cards_stat(set_name, start_date):
+async def get_dragncards_player_cards_stat(set_name, start_date, full_data):  # pylint: disable=R0914
     """ Get DragnCards player cards statistics for the set.
     """
     data = await read_card_data()
@@ -1491,7 +1495,8 @@ async def get_dragncards_player_cards_stat(set_name, start_date):
     cards = {c[lotr.CARD_ID]:
              {'id': c[lotr.CARD_ID],
               'name': c[lotr.CARD_NAME],
-              'date': c.get(lotr.CARD_LAST_DESIGN_CHANGE_DATE, '')}
+              'date': '' if full_data else
+                c.get(lotr.CARD_LAST_DESIGN_CHANGE_DATE, '')}
              for c in matches}
     card_ids = ';'.join(
         ['{}:{}'.format(c['id'], c['date']) for c in cards.values()])
@@ -3829,6 +3834,13 @@ Targets removed.
             try:
                 set_name = re.sub(r'^player cards ', '', command,
                                   flags=re.IGNORECASE)
+                if set_name.lower().startswith('full '):
+                    full_data = True
+                    set_name = re.sub(r'^full ', '', set_name,
+                                      flags=re.IGNORECASE)
+                else:
+                    full_data = False
+
                 start_date = ''
                 parts = set_name.split(' ')
                 if (len(parts) > 1 and
@@ -3842,7 +3854,8 @@ Targets removed.
                         set_name = ' '.join(parts[:-1])
 
                 res = await get_dragncards_player_cards_stat(set_name,
-                                                             start_date)
+                                                             start_date,
+                                                             full_data)
             except Exception as exc:
                 logging.exception(str(exc))
                 await self._send_channel(
