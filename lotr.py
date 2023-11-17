@@ -1816,11 +1816,11 @@ def _verify_drive_timestamp(folder_path):
         raise GoogleDriveError(
             "Can't read Google Drive timestamp for {} folder"
             .format(os.path.split(folder_path)[-1])) from exc
-    else:
-        if diff > DRIVE_TIMESTAMP_MAX_DIFF:
-            raise GoogleDriveError(
-                'No Google Drive updates for {} folder for {} seconds'
-                .format(os.path.split(folder_path)[-1], int(diff)))
+
+    if diff > DRIVE_TIMESTAMP_MAX_DIFF:
+        raise GoogleDriveError(
+            'No Google Drive updates for {} folder for {} seconds'
+            .format(os.path.split(folder_path)[-1], int(diff)))
 
 
 def upload_stable_data():
@@ -3502,7 +3502,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         for error in PRE_SANITY_CHECK['ref'].get(
                 (i, card_scratch, 'English'), []):
-            message = ('{} for row #{}{}'.format(error, i, row_info))
+            message = '{} for row #{}{}'.format(error, i, row_info)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
@@ -7112,7 +7112,7 @@ def _filter_section_cards(section):
     """
     cards = {}
     for card in section:
-        if card[CARD_QUANTITY] <= 0:
+        if card[CARD_QUANTITY] is None or card[CARD_QUANTITY] <= 0:
             continue
 
         if card[CARD_ID] in cards:
