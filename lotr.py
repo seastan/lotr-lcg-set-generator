@@ -3133,7 +3133,20 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if 'quest card' in paragraph:
             errors.append('"quest" not "quest card"')
 
-        if 'set-aside' in paragraph:
+        if re.search(
+                r'\b(?:1|2|a|all|any|another|both|each|more|the|those|your)'
+                r'(?: facedown| previously| random| remaining)? set aside',
+                paragraph):
+            errors.append('"set-aside" not "set aside"')
+
+        if 'set-aside' in re.sub(
+                r'\b(?:1|2|a|all|any|another|both|each|more|the|those|your)'
+                r'(?: facedown| previously| random| remaining)? set-aside', '',
+                paragraph):
+            print(re.sub(
+                r'\b(?:1|2|a|all|any|another|both|each|more|the|those|your)'
+                r'(?: facedown| previously| random| remaining)? set-aside', '',
+                paragraph))
             errors.append('"set aside" not "set-aside"')
 
         if re.search(r'is a \[bi\][^\[]+\[\/bi\](?! trait| \[bi\]trait)',
