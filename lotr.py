@@ -3156,6 +3156,12 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                 'use "After [name] is explored as the active location" format '
                 '(without "While..." phrase)')
 
+        if re.search(r' gains “(?:\[[^\]]+\])?[A-Z]', paragraph):
+            errors.append('add ":" after "gains"')
+
+        if re.search(r' text “(?:\[[^\]]+\])?[A-Z]', paragraph):
+            errors.append('add ":" after "text"')
+
         if re.search(r'is a \[bi\][^\[]+\[\/bi\](?! trait| \[bi\]trait)',
                      paragraph, flags=re.IGNORECASE):
             errors.append('use "has the {Trait} trait"')
