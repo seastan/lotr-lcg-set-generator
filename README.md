@@ -83,7 +83,7 @@ Choose `My Drive` and click `Add Shortcut`.
     _Scratch/untitled.png
     ```
 
-    Make sure that top-level folders `custom`, `generated`, `icons`, `_Keep`, and `_Scratch`  exist, even if they are empty.
+    Make sure that top-level folders `custom`, `generated`, `icons`, `_Keep`, and `_Scratch` exist, even if they are empty.
     If you are starting a new project from scratch, copy all images from `imagesCustom` and `imagesIcons` folders in the root
     of this repo to `custom` and `icons` folders in the root of the Google Drive folder.
 
