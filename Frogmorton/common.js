@@ -1544,6 +1544,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				}
 
 				let defaultAsteriskPointSize = 6.5;
+				let defaultOptionLeftPointSize = 7.5;
 				let defaultPagePointSize = 7;
 				let defaultEncounterSetNumberPointSize = 4;
 
@@ -1583,11 +1584,14 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				s.set('EncounterSetNumber-style', 'WEIGHT: BOLD; FAMILY: {"Times New Roman"}');
 				s.set('Bottom-style', 'WIDTH: SEMICONDENSED; WEIGHT: BOLD; FAMILY: {"Times New Roman"}');
 				s.set('Asterisk-style', 'FAMILY: {"Times New Roman"}');
+				s.set('OptionLeft-style', 'FAMILY: {"Times New Roman"}');
 				s.set('Side-style', 'FAMILY: {"Vafthrudnir"}');
 				s.set('Asterisk-colour', '#FFFFFF');
+				s.set('OptionLeft-colour', '#000000');
 				s.set('Name-pointsize', Math.round(defaultNamePointSize * 1.734 * 100) / 100);
 				s.set('Bottom-pointsize', defaultBottomPointSize);
 				s.set('Asterisk-pointsize', defaultAsteriskPointSize);
+				s.set('OptionLeft-pointsize', defaultOptionLeftPointSize);
 				s.set('EncounterSetNumber-pointsize', defaultEncounterSetNumberPointSize);
 				s.set('Engagement-tint', '32.0,1.0,0.9');
 				s.set('Progress-tint', '32.0,1.0,0.9');
@@ -1815,6 +1819,8 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('Bottom-formatEnd', '</b></size></family></width>');
 					s.set('EncounterSetNumber-format', '<family "Times New Roman"><size ' + defaultEncounterSetNumberPointSize + '><b>');
 					s.set('EncounterSetNumber-formatEnd', '</b></size></family>');
+					s.set('OptionLeft-format', '<family "Times New Roman"><size ' + defaultOptionLeftPointSize + '>');
+					s.set('OptionLeft-formatEnd', '</size></family>');
 					s.set('OptionRight-format', '<width semicondensed>');
 					s.set('OptionRight-formatEnd', '</width>');
 					s.set('TypeRenderer', cardType);

@@ -807,7 +807,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="text-align: center; padding-top: 4px">' + data.OptionRightBack + '</div>';
+            return '<div style="text-align: center; padding-top: 4px">' + data['OptionRight-format'] + data.OptionRightBack + data['OptionRight-formatEnd'] + '</div>';
         },
         'PageInBack': function(data) {
             if (parseInt(data.PageNumberBack) == 0) {
