@@ -3149,6 +3149,13 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                 paragraph))
             errors.append('"set aside" not "set-aside"')
 
+        if re.search(r'[Ww]hile [^\.]+ is the active location, it gains[^\.]+'
+                     r'(?:Forced|Response)[^\.]+ [Aa]fter [^\.]+ is explored',
+                     paragraph):
+            errors.append(
+                'use "After [name] is explored as the active location" format '
+                '(without "While..." phrase)')
+
         if re.search(r'is a \[bi\][^\[]+\[\/bi\](?! trait| \[bi\]trait)',
                      paragraph, flags=re.IGNORECASE):
             errors.append('use "has the {Trait} trait"')
