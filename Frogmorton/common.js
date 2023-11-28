@@ -570,15 +570,15 @@ encounterNumberRegion['Ship Objective'] = '323,316,26,10';
 encounterNumberRegion['Treachery'] = '329,317,26,10';
 
 var optionLeftRegion = {};
-optionLeftRegion['Enemy'] = '43,494,48,24';
-optionLeftRegion['Location'] = '43,494,48,24';
-optionLeftRegion['Objective'] = '63,494,48,24';
-optionLeftRegion['Objective Ally'] = '63,494,48,24';
-optionLeftRegion['Objective Hero'] = '63,494,48,24';
-optionLeftRegion['Objective Location'] = '63,494,48,24';
-optionLeftRegion['Ship Enemy'] = '43,494,48,24';
-optionLeftRegion['Ship Objective'] = '43,494,48,24';
-optionLeftRegion['Treachery'] = '43,494,48,24';
+optionLeftRegion['Enemy'] = '43,490,48,24';
+optionLeftRegion['Location'] = '43,490,48,24';
+optionLeftRegion['Objective'] = '60,490,48,24';
+optionLeftRegion['Objective Ally'] = '60,490,48,24';
+optionLeftRegion['Objective Hero'] = '60,490,48,24';
+optionLeftRegion['Objective Location'] = '60,490,48,24';
+optionLeftRegion['Ship Enemy'] = '43,490,48,24';
+optionLeftRegion['Ship Objective'] = '43,490,48,24';
+optionLeftRegion['Treachery'] = '43,490,48,24';
 
 var optionRightDecorationRegion = {};
 optionRightDecorationRegion['Ally'] = '298,503,72,18';
@@ -1165,6 +1165,9 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 							vXml = translate['Unknown Artist'][lang];
 						}
 					}
+					else if (['Icons', 'BIcons'].indexOf(nXml + '') > -1) {
+						vXml = (vXml + '').replace(/\]\[/g, '][size 4]\u00a0[/size][');
+					}
 					else if (nXml == 'Text') {
 						if (keywords) {
 							vXml = keywords + '\n\n' + vXml;
@@ -1544,7 +1547,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				}
 
 				let defaultAsteriskPointSize = 6.5;
-				let defaultOptionLeftPointSize = 7.5;
+				let defaultOptionLeftPointSize = 12;
 				let defaultPagePointSize = 7;
 				let defaultEncounterSetNumberPointSize = 4;
 
@@ -1593,6 +1596,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				s.set('Asterisk-pointsize', defaultAsteriskPointSize);
 				s.set('OptionLeft-pointsize', defaultOptionLeftPointSize);
 				s.set('EncounterSetNumber-pointsize', defaultEncounterSetNumberPointSize);
+				s.set('OptionLeft-alignment', 'bottom,center');
 				s.set('Engagement-tint', '32.0,1.0,0.9');
 				s.set('Progress-tint', '32.0,1.0,0.9');
 				s.set('HitPoints-tint', '0.0,0.8,1.0');
@@ -2071,6 +2075,9 @@ function markUp(value, key, cardType, lang, setID) {
 		else {
 			defaultPointSize = 6.25;
 		}
+	}
+	else if (['Icons', 'BIcons'].indexOf(key + '') > -1) {
+		defaultPointSize = 12;
 	}
 	else {
 		if (cardType in bodyPointSize) {
