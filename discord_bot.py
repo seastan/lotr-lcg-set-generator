@@ -851,8 +851,9 @@ def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
                   'Fellowship'):
         card_sphere = '*{}* {} '.format(sphere,
                                         EMOJIS['[{}]'.format(sphere.lower())])
-    elif sphere in ('Neutral', 'Boon', 'Burden', 'Nightmare', 'Upgraded',
-                    'Cave', 'Region'):
+    elif sphere in ('Neutral', 'Boon', 'BoonLeadership', 'BoonLore',
+                    'BoonSpirit', 'BoonTactics', 'Burden', 'Nightmare',
+                    'Upgraded', 'Cave', 'Region'):
         card_sphere = '*{}* '.format(sphere)
     else:
         card_sphere = ''
@@ -1082,7 +1083,9 @@ def format_match(card, num):
         card_type = '{} {} {}'.format(sphere,
                                       EMOJIS['[{}]'.format(sphere.lower())],
                                       card_type)
-    elif sphere in ('Neutral', 'Boon', 'Burden', 'Nightmare', 'Upgraded'):
+    elif sphere in ('Neutral', 'Boon', 'BoonLeadership', 'BoonLore',
+                    'BoonSpirit', 'BoonTactics', 'Burden', 'Nightmare',
+                    'Upgraded'):
         card_type = '{} {}'.format(sphere, card_type)
 
     card_name_back = card.get(lotr.BACK_PREFIX + lotr.CARD_NAME)
@@ -1099,7 +1102,9 @@ def format_match(card, num):
                   'Fellowship'):
         card_type_back = '{} {} {}'.format(
             sphere, EMOJIS['[{}]'.format(sphere.lower())], card_type_back)
-    elif sphere in ('Neutral', 'Boon', 'Burden', 'Nightmare', 'Upgraded'):
+    elif sphere in ('Neutral', 'Boon', 'BoonLeadership', 'BoonLore',
+                    'BoonSpirit', 'BoonTactics', 'Burden', 'Nightmare',
+                    'Upgraded'):
         card_type_back = '{} {}'.format(sphere, card_type_back)
 
     if 'Promo' in lotr.extract_flags(card.get(lotr.CARD_FLAGS)):

@@ -553,6 +553,10 @@ List of available sphere values:
 - `Spirit`
 - `Tactics`
 - `Boon`
+- `BoonLeadership`
+- `BoonLore`
+- `BoonSpirit`
+- `BoonTactics`
 - `Burden`
 - `Nightmare`
 - `Setup` (`Campaign` only)

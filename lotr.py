@@ -270,6 +270,7 @@ CARD_TYPES_ENCOUNTER_SET_NUMBER = {'Encounter Side Quest', 'Enemy', 'Location',
                                    'Objective', 'Objective Ally',
                                    'Objective Hero', 'Objective Location',
                                    'Ship Enemy', 'Ship Objective', 'Treachery'}
+CARD_SPHERES_NO_ENCOUNTER_SET_NUMBER = {'Boon', 'Burden'}
 CARD_TYPES_ENCOUNTER_SET_ICON = {'Campaign', 'Encounter Side Quest', 'Enemy',
                                  'Location', 'Nightmare', 'Objective',
                                  'Objective Ally', 'Objective Hero',
@@ -367,6 +368,9 @@ CARD_TYPES_ONE_COPY = {'Campaign', 'Contract', 'Encounter Side Quest',
 CARD_TYPES_THREE_COPIES = {'Ally', 'Attachment', 'Event', 'Player Objective',
                            'Player Side Quest'}
 CARD_TYPES_BOON = {'Ally', 'Attachment', 'Event', 'Objective Ally'}
+CARD_TYPES_BOON_SPHERE = {'Attachment', 'Event'}
+CARD_SPHERES_BOON = {'Boon', 'BoonLeadership', 'BoonLore', 'BoonSpirit',
+                     'BoonTactics'}
 CARD_TYPES_BURDEN = {'Encounter Side Quest', 'Enemy', 'Objective',
                      'Ship Enemy', 'Treachery'}
 CARD_TYPES_NIGHTMARE = {'Encounter Side Quest', 'Enemy', 'Location',
@@ -640,6 +644,10 @@ CARD_TYPE_FRENCH_IDS = {
 }
 CARD_SUBTYPE_FRENCH_IDS = {
     'Boon': 600,
+    'BoonLeadership': 600,
+    'BoonLore': 600,
+    'BoonSpirit': 600,
+    'BoonTactics': 600,
     'Burden': 601
 }
 CARD_SPHERE_FRENCH_IDS = {
@@ -2476,10 +2484,12 @@ def _set_encounter_set_numbers(data):
                 row[CARD_ENCOUNTER_SET] is not None and
                 is_positive_int(row[CARD_QUANTITY]) and
                 ((row[CARD_TYPE] in CARD_TYPES_ENCOUNTER_SET_NUMBER and
-                  row[CARD_SPHERE] not in ('Boon', 'Burden')) or
+                  row[CARD_SPHERE] not in
+                  CARD_SPHERES_NO_ENCOUNTER_SET_NUMBER) or
                  (row[BACK_PREFIX + CARD_TYPE] in
                   CARD_TYPES_ENCOUNTER_SET_NUMBER and
-                  row[BACK_PREFIX + CARD_SPHERE] not in ('Boon', 'Burden')))):
+                  row[BACK_PREFIX + CARD_SPHERE] not in
+                  CARD_SPHERES_NO_ENCOUNTER_SET_NUMBER))):
             row[CARD_ENCOUNTER_SET_NUMBER_START] = (
                 encounter_sets.get((row[CARD_SET],
                                     row[CARD_ENCOUNTER_SET]), 0) + 1)
@@ -2496,10 +2506,12 @@ def _set_encounter_set_numbers(data):
                 row[CARD_ENCOUNTER_SET] is not None and
                 is_positive_int(row[CARD_QUANTITY]) and
                 ((row[CARD_TYPE] in CARD_TYPES_ENCOUNTER_SET_NUMBER and
-                  row[CARD_SPHERE] not in ('Boon', 'Burden')) or
+                  row[CARD_SPHERE] not in
+                  CARD_SPHERES_NO_ENCOUNTER_SET_NUMBER) or
                  (row[BACK_PREFIX + CARD_TYPE] in
                   CARD_TYPES_ENCOUNTER_SET_NUMBER and
-                  row[BACK_PREFIX + CARD_SPHERE] not in ('Boon', 'Burden')))):
+                  row[BACK_PREFIX + CARD_SPHERE] not in
+                  CARD_SPHERES_NO_ENCOUNTER_SET_NUMBER))):
             row[CARD_ENCOUNTER_SET_TOTAL] = encounter_sets.get(
                 (row[CARD_SET], row[CARD_ENCOUNTER_SET]), 0)
 
@@ -3594,7 +3606,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_type in CARD_TYPES_THREE_COPIES and
-              card_sphere != 'Boon' and card_quantity not in (1, 3) and
+              card_sphere not in CARD_SPHERES_BOON and
+              card_quantity not in (1, 3) and
               not (card_flags and
                    'AdditionalCopies' in extract_flags(card_flags))):
             message = ('Incorrect card quantity according to its card type '
@@ -3806,6 +3819,10 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         if card_type in CARD_TYPES_BOON:
             spheres.add('Boon')
 
+        if card_type in CARD_TYPES_BOON_SPHERE:
+            spheres.update(['BoonLeadership', 'BoonLore', 'BoonSpirit',
+                            'BoonTactics'])
+
         if card_type in CARD_TYPES_BURDEN:
             spheres.add('Burden')
 
@@ -3842,6 +3859,10 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
             if card_type_back in CARD_TYPES_BOON:
                 spheres_back.add('Boon')
+
+            if card_type_back in CARD_TYPES_BOON_SPHERE:
+                spheres_back.update(['BoonLeadership', 'BoonLore',
+                                     'BoonSpirit', 'BoonTactics'])
 
             if card_type_back in CARD_TYPES_BURDEN:
                 spheres_back.add('Burden')
@@ -5023,7 +5044,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         if (card_encounter_set_number is not None and
                 (card_type not in CARD_TYPES_ENCOUNTER_SET_NUMBER or
-                 card_sphere in ('Boon', 'Burden'))):
+                 card_sphere in CARD_SPHERES_NO_ENCOUNTER_SET_NUMBER)):
             message = 'Redundant encounter set number for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -5043,7 +5064,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_encounter_set_number_back is not None and
               (card_type_back not in CARD_TYPES_ENCOUNTER_SET_NUMBER or
-               card_sphere_back in ('Boon', 'Burden'))):
+               card_sphere_back in CARD_SPHERES_NO_ENCOUNTER_SET_NUMBER)):
             message = ('Redundant encounter set number back for row #{}{}'
                        .format(i, row_info))
             logging.error(message)
@@ -7612,7 +7633,8 @@ def _needed_for_ringsdb(card):
     """ Check whether a card is needed for RingsDB or not.
     """
     return (card.get(CARD_TYPE) in CARD_TYPES_PLAYER or
-             card.get(CARD_SPHERE) in ('Boon', 'Burden'))
+            card.get(CARD_SPHERE) in CARD_SPHERES_BOON or
+            card.get(CARD_SPHERE) == 'Burden')
 
 
 def _needed_for_frenchdb(card):
@@ -7718,7 +7740,8 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
 
             if (row[CARD_TYPE] in ('Contract', 'Player Objective',
                                    'Treasure') or
-                    row[CARD_SPHERE] in ('Boon', 'Burden')):
+                    row[CARD_SPHERE] in CARD_SPHERES_BOON or
+                    row[CARD_SPHERE] == 'Burden'):
                 sphere = 'Neutral'
             else:
                 sphere = row[CARD_SPHERE]
@@ -7726,7 +7749,8 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
             if row[CARD_TYPE] == 'Player Objective':
                 card_type = 'Attachment'
             elif (row[CARD_TYPE] == 'Treasure' or
-                  row[CARD_SPHERE] in ('Boon', 'Burden')):
+                  row[CARD_SPHERE] in CARD_SPHERES_BOON or
+                  row[CARD_SPHERE] == 'Burden'):
                 card_type = 'Campaign'
             else:
                 card_type = row[CARD_TYPE]
@@ -8230,7 +8254,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
         else:
             sphere = 'None'
 
-        if sphere == 'Boon':
+        if sphere in CARD_SPHERES_BOON:
             sphere = 'Neutral'
             subtype_name = 'Boon'
         elif sphere == 'Burden':
@@ -8472,7 +8496,9 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
 
             if row[CARD_TYPE] in ('Contract', 'Player Objective'):
                 sphere = 'Neutral'
-            elif row[CARD_SPHERE] in ('Boon', 'Upgraded'):
+            elif row[CARD_SPHERE] in CARD_SPHERES_BOON:
+                sphere = None
+            elif row[CARD_SPHERE] == 'Upgraded':
                 sphere = None
             else:
                 sphere = row[CARD_SPHERE]
