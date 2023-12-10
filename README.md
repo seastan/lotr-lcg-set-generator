@@ -565,6 +565,7 @@ List of available sphere values:
 - `Region` (`Encounter Side Quest` only)
 - `SmallTextArea` (`Encounter Side Quest` only)
 - `NoStat` (`Enemy` only)
+- `NoIcon` (`Objective` only)
 - `Back` (`Rules` only)
 - `Upgraded` (`Ship Objective` only)
 - `Blue` (`Presentation` only)
