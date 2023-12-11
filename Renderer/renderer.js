@@ -15,6 +15,8 @@ const containerFontSize = {
     'AdventureBack': 12,
     'Artist': 11,
     'ArtistBack': 11,
+    'Asterisk': 9,
+    'AsteriskBack': 9,
     'Body': 14,
     'BodyBack': 14,
     'BodyRight': 14,
@@ -29,7 +31,6 @@ const containerFontSize = {
     'Name': 12,
     'NameBack': 12,
     'OptionLeft': 14,
-    'OptionLeftBack': 14,
     'OptionRight': 12,
     'OptionRightBack': 12,
     'PageIn': 11,
@@ -586,7 +587,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            return '<div style="text-align: center">' + data['OptionLeft-format'] + data.OptionLeft + data['OptionLeft-formatEnd'] + '</div>';
+            return data['OptionLeft-format'] + data.OptionLeft + data['OptionLeft-formatEnd'];
         },
         'OptionRight': function(data) {
             if (data.OptionRight + '' == '') {
@@ -995,6 +996,11 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                           'Engagement', 'HitPoints', 'Progress', 'ResourceCost', 'Stage', 'Threat', 'ThreatCost', 'Willpower'].indexOf(key) > -1) {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
                         data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: visible">' + containerRules[key](data) + '</div>';
+                }
+                else if (key == 'OptionLeft') {
+                    content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
+                        data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: auto; font-size: ' + containerFontSize[key] + 'px; text-align: center">' +
+                        shapeDiv + containerRules[key](data) + '</div>';
                 }
                 else if (key == 'OptionRight') {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
