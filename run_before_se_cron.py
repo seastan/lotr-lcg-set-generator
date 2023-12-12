@@ -113,6 +113,13 @@ def set_sanity_check_message(message):
         create_mail(WARNING_SUBJECT_TEMPLATE.format(message))
 
 
+def clean_sanity_check_message(message):
+    """ Clean a sanity check message to get a human-readable format.
+    """
+    message = re.sub(r' \[Card GUID: [^\]]+\]', '', message)
+    return message
+
+
 def send_discord(message):
     """ Send a message to a Discord channel.
     """
@@ -304,13 +311,15 @@ def run(conf=None):  # pylint: disable=R0912,R0915
 
     except SanityCheckError as exc:
         message = str(exc)
-        logging.error(message)
+        clean_message = clean_sanity_check_message(message)
+        logging.error(clean_message)
         logging.info('Done (%ss)', round(time.time() - timestamp, 3))
         if message != get_sanity_check_message():
             try:
-                if send_discord(message):
+                if send_discord(clean_message):
                     set_sanity_check_message(message)
-                    create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(message))
+                    create_mail(SANITY_CHECK_SUBJECT_TEMPLATE.format(
+                        clean_message))
             except Exception as exc_new:
                 logging.exception(str(exc_new)[:LOG_LIMIT])
     except Exception as exc:

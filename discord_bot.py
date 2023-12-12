@@ -70,10 +70,11 @@ COMMUNICATION_SLEEP_TIME = 5
 IO_SLEEP_TIME = 1
 RCLONE_ART_SLEEP_TIME = 300
 REMOTE_CRON_TIMESTAMP_SLEEP_TIME = 1800
-SANITY_CHECK_WAIT_TIME = 1800
+SANITY_CHECK_WAIT_TIME = 300
+SANITY_CHECK_ALERT_WAIT_TIME = 1800
 TEST_CHANNELS_SLEEP_TIME = 14400
 WATCH_CHANGES_SLEEP_TIME = 5
-WATCH_SANITY_CHECK_SLEEP_TIME = 300
+WATCH_SANITY_CHECK_SLEEP_TIME = 120
 
 ERROR_SUBJECT_TEMPLATE = 'LotR Discord Bot ERROR: {}'
 WARNING_SUBJECT_TEMPLATE = 'LotR Discord Bot WARNING: {}'
@@ -1006,7 +1007,7 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
     card_id = '*id:* {}'.format(card[lotr.CARD_ID])
 
     if 'Asterisk' in lotr.extract_flags(card.get(lotr.CARD_FLAGS)):
-        card_asterisk = ' *'
+        card_asterisk = ' \*'
     else:
         card_asterisk = ''
 
@@ -2161,6 +2162,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
     updates_channel = None
     rclone_art = False
     last_sanity_check_mtime = None
+    last_sanity_check_alert_mtime = None
     non_card_channels_analyzed = False
     categories = {}
     channels = {}
@@ -2605,11 +2607,32 @@ class MyClient(discord.Client):  # pylint: disable=R0902
             return
 
         mtime = os.path.getmtime(lotr.SANITY_CHECK_PATH)
-        if mtime == self.last_sanity_check_mtime:
-            return
 
-        if time.time() > mtime + SANITY_CHECK_WAIT_TIME:
+        if (mtime != self.last_sanity_check_mtime and
+                time.time() > mtime + SANITY_CHECK_WAIT_TIME):
             self.last_sanity_check_mtime = mtime
+
+            with open(lotr.SANITY_CHECK_PATH, 'r', encoding='utf-8') as obj:
+                message = obj.read()
+
+            card_ids = set(re.findall(r'(?<=\[Card GUID: )[^\]]+', message))
+            if card_ids:
+                data = await read_card_data()
+                matches = [card for card in data['data']
+                           if card[lotr.CARD_ID] in card_ids and
+                           card.get(lotr.CARD_DISCORD_CHANNEL) and
+                           card[lotr.CARD_DISCORD_CHANNEL] in self.channels]
+                for card in matches:
+                    channel = self.get_channel(
+                        self.channels[card[lotr.CARD_DISCORD_CHANNEL]]['id'])
+                    await self._send_channel(
+                        channel,
+                        'Please take a look at the sanity check issues in '
+                        '<#{}>'.format(self.cron_channel.id))
+
+        if (mtime != self.last_sanity_check_alert_mtime and
+                time.time() > mtime + SANITY_CHECK_ALERT_WAIT_TIME):
+            self.last_sanity_check_alert_mtime = mtime
 
             sanity_check_users = CONF.get('sanity_check_users') or ''
             await self._send_channel(

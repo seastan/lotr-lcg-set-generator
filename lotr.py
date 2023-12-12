@@ -3483,9 +3483,10 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         card_scratch = row[CARD_SCRATCH]
         card_selected = row[CARD_SELECTED]
         card_last_design_change_date = row[CARD_LAST_DESIGN_CHANGE_DATE]
-        row_info = '{}{}{}'.format(
+        row_info = '{}{}{}{}'.format(
             ', {}'.format(card_name) if card_name else '',
             ' ({})'.format(row[CARD_SET_NAME]) if row[CARD_SET_NAME] else '',
+            ' [Card GUID: {}]'.format(card_id) if card_id else '',
             ' (Scratch)' if card_scratch else '')
 
         if set_id is None:
