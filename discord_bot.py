@@ -210,24 +210,24 @@ List of **!stat** commands:
 **!stat assistants** - display the list of assistants (all Discord users except for those who have a role)
 **!stat channels** - display the number of Discord channels and free channel slots
 **!stat dragncards build** - display information about the latest DragnCards build
-**!stat quest <quest name or set name or set code>** - display the quest statistics
+**!stat quest <quest name or set name or set code>** - display the quest statistics (for example: `!stat quest Ambush at Erelas` or `!stat quest Children of Eorl` or `!stat quest CoE`)
 ` `
-**!stat player cards <set name or set code>** - display DragnCards player cards statistics for the set (no earlier than the Last Design Change Date)
-**!stat player cards <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date (but no earlier than the Last Design Change Date)
-**!stat player cards full <set name or set code>** - display DragnCards player cards statistics for the set (regardless of the Last Design Change Date)
-**!stat player cards full <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date (regardless of the Last Design Change Date)
+**!stat player cards <set name or set code>** - display DragnCards player cards statistics for the set (no earlier than the Last Design Change Date) (for example: `!stat player cards Children of Eorl` or `!stat player cards CoE`)
+**!stat player cards <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date (but no earlier than the Last Design Change Date) (for example: `!stat player cards Children of Eorl 2022-01-01` or `!stat player cards CoE 2022-01-01`)
+**!stat player cards full <set name or set code>** - display DragnCards player cards statistics for the set (regardless of the Last Design Change Date) (for example: `!stat player cards full Children of Eorl` or `!stat player cards full CoE`)
+**!stat player cards full <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date (regardless of the Last Design Change Date) (for example: `!stat player cards full Children of Eorl 2022-01-01` or `!stat player cards full CoE 2022-01-01`)
 **!stat player cards help** - display additional help about DragnCards player cards statistics
 ` `
-**!stat all plays <quest name>** - display all DragnCards plays for the quest
-**!stat all plays <quest name> <date in YYYY-MM-DD format>** - display all DragnCards plays for the quest starting from the specified date
+**!stat all plays <quest name>** - display all DragnCards plays for the quest (for example: `!stat all plays Ambush at Erelas`)
+**!stat all plays <quest name> <date in YYYY-MM-DD format>** - display all DragnCards plays for the quest starting from the specified date (for example: `!stat all plays Ambush at Erelas 2022-01-01`)
 **!stat all plays help** - display additional help about all DragnCards plays for the quest
 ` `
-**!stat plays <quest name>** - display aggregated DragnCards plays statistics for the quest
-**!stat plays <quest name> <date in YYYY-MM-DD format>** - display aggregated DragnCards plays statistics for the quest starting from the specified date
+**!stat plays <quest name>** - display aggregated DragnCards plays statistics for the quest (for example: `!stat plays Ambush at Erelas`)
+**!stat plays <quest name> <date in YYYY-MM-DD format>** - display aggregated DragnCards plays statistics for the quest starting from the specified date (for example: `!stat plays Ambush at Erelas 2022-01-01`)
 **!stat plays help** - display additional help about aggregated DragnCards plays statistics for the quest
 ` `
 **!stat quests** - display aggregated DragnCards statistics for all released ALeP quests
-**!stat quests <date in YYYY-MM-DD format>** - display aggregated DragnCards statistics for all released ALeP quests starting from the specified date
+**!stat quests <date in YYYY-MM-DD format>** - display aggregated DragnCards statistics for all released ALeP quests starting from the specified date (for example: `!stat quests 2022-01-01`)
 **!stat quests help** - display additional help about aggregated DragnCards statistics for all released ALeP quests
 ` `
 **!stat help** - display this help message
@@ -286,10 +286,10 @@ List of **!secret** commands:
 """.format(USERS_LIST_PATH)
 }
 HELP_STAT_PLAYER_CARDS = """
-**!stat player cards <set name or set code>** - display DragnCards player cards statistics for the set (no earlier than the Last Design Change Date)
-**!stat player cards <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date (but no earlier than the Last Design Change Date)
-**!stat player cards full <set name or set code>** - display DragnCards player cards statistics for the set (regardless of the Last Design Change Date)
-**!stat player cards full <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date (regardless of the Last Design Change Date)
+**!stat player cards <set name or set code>** - display DragnCards player cards statistics for the set (no earlier than the Last Design Change Date) (for example: `!stat player cards Children of Eorl` or `!stat player cards CoE`)
+**!stat player cards <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date (but no earlier than the Last Design Change Date) (for example: `!stat player cards Children of Eorl 2022-01-01` or `!stat player cards CoE 2022-01-01`)
+**!stat player cards full <set name or set code>** - display DragnCards player cards statistics for the set (regardless of the Last Design Change Date) (for example: `!stat player cards full Children of Eorl` or `!stat player cards full CoE`)
+**!stat player cards full <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date (regardless of the Last Design Change Date) (for example: `!stat player cards full Children of Eorl 2022-01-01` or `!stat player cards full CoE 2022-01-01`)
 **!stat player cards help** - display this help message
 ` `
 **Columns:**
@@ -307,8 +307,8 @@ HELP_STAT_PLAYER_CARDS = """
 `other     ` % of cards in all other areas at the end of the play (discard pile, victory display, etc.)
 """
 HELP_STAT_ALL_PLAYS = """
-**!stat all plays <quest name>** - display all DragnCards plays for the quest
-**!stat all plays <quest name> <date in YYYY-MM-DD format>** - display all DragnCards plays for the quest starting from the specified date
+**!stat all plays <quest name>** - display all DragnCards plays for the quest (for example: `!stat all plays Ambush at Erelas`)
+**!stat all plays <quest name> <date in YYYY-MM-DD format>** - display all DragnCards plays for the quest starting from the specified date (for example: `!stat all plays Ambush at Erelas 2022-01-01`)
 **!stat all plays help** - display this help message
 ` `
 **Columns:**
@@ -322,8 +322,8 @@ HELP_STAT_ALL_PLAYS = """
 `heroes    ` starting heroes of each player
 """
 HELP_STAT_PLAYS = """
-**!stat plays <quest name>** - display aggregated DragnCards plays statistics for the quest
-**!stat plays <quest name> <date in YYYY-MM-DD format>** - display aggregated DragnCards plays statistics for the quest starting from the specified date
+**!stat plays <quest name>** - display aggregated DragnCards plays statistics for the quest (for example: `!stat plays Ambush at Erelas`)
+**!stat plays <quest name> <date in YYYY-MM-DD format>** - display aggregated DragnCards plays statistics for the quest starting from the specified date (for example: `!stat plays Ambush at Erelas 2022-01-01`)
 **!stat plays help** - display this help message
 ` `
 **Columns:**
@@ -342,7 +342,7 @@ HELP_STAT_PLAYS = """
 """
 HELP_STAT_QUESTS = """
 **!stat quests** - display aggregated DragnCards statistics for all released ALeP quests
-**!stat quests <date in YYYY-MM-DD format>** - display aggregated DragnCards statistics for all released ALeP quests starting from the specified date
+**!stat quests <date in YYYY-MM-DD format>** - display aggregated DragnCards statistics for all released ALeP quests starting from the specified date (for example: `!stat quests 2022-01-01`)
 **!stat quests help** - display this help message
 ` `
 **Columns:**
