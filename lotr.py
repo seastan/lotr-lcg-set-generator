@@ -2829,9 +2829,9 @@ def _verify_period(value):
             paragraph = paragraph.replace(':', '.')
 
         if not (re.search(
-                    r'\.\)?”?(?:\[\/b\]|\[\/i\]|\[\/bi\])?$', paragraph) or
+                    r'\.\)?”? ?(?:\[\/b\]|\[\/i\]|\[\/bi\])?$', paragraph) or
                 re.search(
-                    r'\.”\)(?:\[\/b\]|\[\/i\]|\[\/bi\])?$', paragraph)):
+                    r'\.”\) ?(?:\[\/b\]|\[\/i\]|\[\/bi\])?$', paragraph)):
             res = False
             break
 
@@ -5766,6 +5766,19 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     broken_set_ids.add(set_id)
 
             if key != CARD_DECK_RULES and isinstance(value, str):
+                match = re.search(r' ((?:\[[^\]]+\])+)(?:\n|$)', value)
+                if match:
+                    message = (
+                        'Redundant space before "{}" in {} column for '
+                        'row #{}{}'.format(
+                            match.groups()[0],
+                            key.replace(BACK_PREFIX, 'Back '), i, row_info))
+                    logging.error(message)
+                    if not card_scratch:
+                        errors.append(message)
+                    else:
+                        broken_set_ids.add(set_id)
+
                 cleaned_value = _clean_tags(value)
                 if key == CARD_SET:
                     cleaned_value = cleaned_value.replace('[filtered set]', '')
@@ -5980,10 +5993,19 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     logging.error(
                         'Redundant line break in %s column for card ID %s in '
                         '%s translations, row #%s',
-                        key.replace(BACK_PREFIX, 'Back '), card_id,
-                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                        key.replace(BACK_PREFIX, 'Back '), card_id, lang,
+                        TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                 if isinstance(value, str):
+                    match = re.search(r' ((?:\[[^\]]+\])+)(?:\n|$)', value)
+                    if match:
+                        logging.error(
+                            'Redundant space before "%s" in %s column for '
+                            'card ID %s in %s translations, row #%s',
+                            match.groups()[0],
+                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
+                            TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
                     cleaned_value = _clean_tags(value)
                     if key in (CARD_FLAVOUR, BACK_PREFIX + CARD_FLAVOUR):
                         cleaned_value = cleaned_value.replace('[...]', '')
