@@ -5604,8 +5604,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 else:
                     broken_set_ids.add(set_id)
             elif len(all_sets) > 6:
-                message = ('Too many additional encounter sets for row #{}{}'
-                           .format(i, row_info))
+                message = ('Too many additional encounter sets for row #{}{}: '
+                           '{} instead of the maximum 6'.format(i, row_info,
+                                                                len(all_sets)))
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)

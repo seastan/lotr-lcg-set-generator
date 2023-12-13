@@ -66,6 +66,9 @@ encounterSet4PortraitRegion['Quest'] = '378,213,20,20';
 var encounterSet5PortraitRegion = {};
 encounterSet5PortraitRegion['Quest'] = '354,213,20,20';
 
+var encounterSet6PortraitRegion = {};
+encounterSet6PortraitRegion['Quest'] = '330,213,20,20';
+
 var starRegion = {};
 starRegion['Ally'] = '372,524,11,11';
 starRegion['Attachment'] = '373,524,11,11';
@@ -1428,7 +1431,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					if (context == 'renderer') {
 						s.set('AdditionalEncounterSetsLength', encounterSets.length);
 					}
-					while (encounterSets.length < 5) {
+					while (encounterSets.length < 6) {
 						encounterSets.push('');
 					}
 					for (let k = 0; k < encounterSets.length; k++) {
@@ -1749,6 +1752,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					['EncounterSet3-portrait-clip-region', encounterSet3PortraitRegion],
 					['EncounterSet4-portrait-clip-region', encounterSet4PortraitRegion],
 					['EncounterSet5-portrait-clip-region', encounterSet5PortraitRegion],
+					['EncounterSet6-portrait-clip-region', encounterSet6PortraitRegion],
 					['Sphere-Body-shape', sphereBodyShape],
 					['Option-Body-shape', optionBodyShape]
 				];

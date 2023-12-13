@@ -529,6 +529,14 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             var content = '<img src="' + data['EncounterSet5-external-path'] + '" width="' + data['EncounterSet5-portrait-clip-region'][2] + '" height="' + data['EncounterSet5-portrait-clip-region'][3] + '">';
             return content;
         },
+        'EncounterSet6-portrait-clip': function(data) {
+            if (data['EncounterSet6-external-path'] + '' == '') {
+                return '';
+            }
+
+            var content = '<img src="' + data['EncounterSet6-external-path'] + '" width="' + data['EncounterSet6-portrait-clip-region'][2] + '" height="' + data['EncounterSet6-portrait-clip-region'][3] + '">';
+            return content;
+        },
         'EncounterSetNumber': function(data) {
             if (data.EncounterSetNumberOverwrite + '' != '') {
                 return '<div style="text-align: center; color: #FFFFFF">' + data['EncounterSetNumber-format'] + data.EncounterSetNumberOverwrite + data['EncounterSetNumber-formatEnd'] + '</div>';
@@ -993,7 +1001,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 }
                 else if (['Attack', 'Collection-portrait-clip', 'Defense', 'Difficulty', 'EncounterSet-portrait-clip', 'EncounterSet1-portrait-clip',
                           'EncounterSet2-portrait-clip', 'EncounterSet3-portrait-clip', 'EncounterSet4-portrait-clip', 'EncounterSet5-portrait-clip',
-                          'Engagement', 'HitPoints', 'Progress', 'ResourceCost', 'Stage', 'Threat', 'ThreatCost', 'Willpower'].indexOf(key) > -1) {
+                          'EncounterSet6-portrait-clip', 'Engagement', 'HitPoints', 'Progress', 'ResourceCost', 'Stage', 'Threat', 'ThreatCost', 'Willpower'].indexOf(key) > -1) {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
                         data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: visible">' + containerRules[key](data) + '</div>';
                 }
