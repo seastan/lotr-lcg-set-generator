@@ -15,8 +15,6 @@ const containerFontSize = {
     'AdventureBack': 12,
     'Artist': 11,
     'ArtistBack': 11,
-    'Asterisk': 9,
-    'AsteriskBack': 9,
     'Body': 14,
     'BodyBack': 14,
     'BodyRight': 14,
@@ -37,6 +35,8 @@ const containerFontSize = {
     'PageInBack': 11,
     'Side': 14,
     'SideBack': 14,
+    'Star': 9,
+    'StarBack': 9,
     'Subtype': 14,
     'TraitOut-Trait': 14,
     'Type': 12,
@@ -365,14 +365,6 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['Artist-region'][3] + 'px">' +
                 data['Bottom-format'] + data['LRL-IllustratorShort'] + ' ' + data.Artist + data['Bottom-formatEnd'] + '</div>';
         },
-        'Asterisk': function(data) {
-            if (parseInt(data.Asterisk) == 0) {
-                return '';
-            }
-
-            return '<div style="color: ' + data['Asterisk-colour'] + '; line-height: ' + data['Asterisk-region'][3] + 'px">' +
-                data['Asterisk-format'] + '&#10038;' + data['Asterisk-formatEnd'] + '</div>';
-        },
         'Attack': function(data) {
             if (data.Attack + '' == '') {
                 return '';
@@ -649,6 +641,14 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             return '<div style="text-align: center; color: #53B2C5; font-family: Vafthrudnir; width: ' + data['Stage-region'][2] + 'px"><span style="vertical-align: middle; display: inline-block; font-size: 48px">' +
                 data.Stage + '</span><span style="vertical-align: middle; display: inline-block; font-size: 24px; padding-bottom: 4px; padding-right: 4px">' + data.StageLetter + '</span></div>';
         },
+        'Star': function(data) {
+            if (parseInt(data.Star) == 0) {
+                return '';
+            }
+
+            return '<div style="color: ' + data['Star-colour'] + '; line-height: ' + data['Star-region'][3] + 'px">' +
+                data['Star-format'] + '&#10038;' + data['Star-formatEnd'] + '</div>';
+        },
         'Subtype': function(data) {
             if (data.Subtype + '' == '') {
                 return '';
@@ -714,14 +714,6 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
             return '<div style="-webkit-text-stroke: 2px #000000; text-stroke: 2px #000000; color: ' + data['Bottom-colour'] + '; line-height: ' + data['ArtistBack-region'][3] + 'px">' +
                 data['Bottom-format'] + data['LRL-IllustratorShort'] + ' ' + (data.ArtistBack + '' || data.Artist) + data['Bottom-formatEnd'] + '</div>';
-        },
-        'AsteriskBack': function(data) {
-            if (parseInt(data.AsteriskBack) == 0) {
-                return '';
-            }
-
-            return '<div style="color: ' + data['Asterisk-colour'] + '; line-height: ' + data['AsteriskBack-region'][3] + 'px">' +
-                data['Asterisk-format'] + '&#10038;' + data['Asterisk-formatEnd'] + '</div>';
         },
         'BodyBack': function(data) {
             var content = [];
@@ -846,6 +838,14 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             return '<div style="text-align: center; color: #53B2C5; font-family: Vafthrudnir; width: ' + data['StageBack-region'][2] + 'px"><span style="vertical-align: middle; display: inline-block; font-size: 48px">' +
                 data.Stage + '</span><span style="vertical-align: middle; display: inline-block; font-size: 24px; padding-bottom: 4px; padding-right: 4px">' + data.StageLetterBack + '</span></div>';
         },
+        'StarBack': function(data) {
+            if (parseInt(data.StarBack) == 0) {
+                return '';
+            }
+
+            return '<div style="color: ' + data['Star-colour'] + '; line-height: ' + data['StarBack-region'][3] + 'px">' +
+                data['Star-format'] + '&#10038;' + data['Star-formatEnd'] + '</div>';
+        },
         'TypeBack': function(data) {
             if (data.Type + '' == '') {
                 return '';
@@ -927,8 +927,8 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         data['CollectionInfoBack-region'] = data['CollectionInfo-region'];
     }
 
-    if (data['Asterisk-region'] && data.DoubleSide && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
-        data['AsteriskBack-region'] = data['Asterisk-region'];
+    if (data['Star-region'] && data.DoubleSide && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
+        data['StarBack-region'] = data['Star-region'];
     }
 
     if (data['PageIn-region'] && (data.TypeRenderer == 'Rules')) {

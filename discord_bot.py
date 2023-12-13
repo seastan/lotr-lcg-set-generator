@@ -1006,16 +1006,16 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
     card_set = re.sub(r'^ALeP - ', '', card[lotr.CARD_SET_NAME])
     card_id = '*id:* {}'.format(card[lotr.CARD_ID])
 
-    if 'Asterisk' in lotr.extract_flags(card.get(lotr.CARD_FLAGS)):
-        card_asterisk = ' \*'
+    if 'Star' in lotr.extract_flags(card.get(lotr.CARD_FLAGS)):
+        card_star = ' \u2736'
     else:
-        card_asterisk = ''
+        card_star = ''
 
-    if 'Asterisk' in lotr.extract_flags(
+    if 'Star' in lotr.extract_flags(
             card.get(lotr.BACK_PREFIX + lotr.CARD_FLAGS)):
-        card_asterisk_back = ' *'
+        card_star_back = ' \u2736'
     else:
-        card_asterisk_back = ''
+        card_star_back = ''
 
     if (card.get(lotr.CARD_PRINTED_NUMBER) or
             card.get(lotr.BACK_PREFIX + lotr.CARD_PRINTED_NUMBER)):
@@ -1026,15 +1026,15 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
                                     lotr.CARD_PRINTED_NUMBER) or
                            card[lotr.CARD_NUMBER])
             card_number = '**#{}{}/{}{}** *({})*'.format(
-                front_number, card_asterisk, back_number, card_asterisk_back,
+                front_number, card_star, back_number, card_star_back,
                 card[lotr.CARD_NUMBER])
         else:
             front_number = (card.get(lotr.CARD_PRINTED_NUMBER) or
                             card[lotr.CARD_NUMBER])
             card_number = '**#{}{}** *({})*'.format(
-                front_number, card_asterisk, card[lotr.CARD_NUMBER])
+                front_number, card_star, card[lotr.CARD_NUMBER])
     else:
-        card_number = '**#{}{}**'.format(card[lotr.CARD_NUMBER], card_asterisk)
+        card_number = '**#{}{}**'.format(card[lotr.CARD_NUMBER], card_star)
 
     collection_icon = card.get(lotr.CARD_COLLECTION_ICON, '')
     card_collection_icon = ('' if collection_icon == ''

@@ -66,33 +66,33 @@ encounterSet4PortraitRegion['Quest'] = '378,213,20,20';
 var encounterSet5PortraitRegion = {};
 encounterSet5PortraitRegion['Quest'] = '354,213,20,20';
 
-var asteriskRegion = {};
-asteriskRegion['Ally'] = '372,524,11,11';
-asteriskRegion['Attachment'] = '373,524,11,11';
-asteriskRegion['Campaign'] = '373,524,11,11';
-asteriskRegion['Cave'] = '529,374,11,11';
-asteriskRegion['Contract'] = '373,524,11,11';
-asteriskRegion['Encounter Side Quest'] = '531,374,11,11';
-asteriskRegion['Encounter Side Quest SmallTextArea'] = '531,374,11,11';
-asteriskRegion['Enemy'] = '373,524,11,11';
-asteriskRegion['Enemy NoStat'] = '373,524,11,11';
-asteriskRegion['Event'] = '373,524,11,11';
-asteriskRegion['Hero'] = '373,524,11,11';
-asteriskRegion['Hero Promo'] = '351,524,11,11';
-asteriskRegion['Location'] = '373,524,11,11';
-asteriskRegion['Nightmare'] = '379,524,11,11';
-asteriskRegion['Objective'] = '363,524,11,11';
-asteriskRegion['Objective Ally'] = '363,524,11,11';
-asteriskRegion['Objective Hero'] = '363,524,11,11';
-asteriskRegion['Objective Location'] = '363,524,11,11';
-asteriskRegion['Player Objective'] = '363,524,11,11';
-asteriskRegion['Player Side Quest'] = '529,374,11,11';
-asteriskRegion['Quest'] = '529,374,11,11';
-asteriskRegion['Region'] = '529,374,11,11';
-asteriskRegion['Ship Enemy'] = '373,524,11,11';
-asteriskRegion['Ship Objective'] = '363,524,11,11';
-asteriskRegion['Treachery'] = '373,524,11,11';
-asteriskRegion['Treasure'] = '377,524,11,11';
+var starRegion = {};
+starRegion['Ally'] = '372,524,11,11';
+starRegion['Attachment'] = '373,524,11,11';
+starRegion['Campaign'] = '373,524,11,11';
+starRegion['Cave'] = '529,374,11,11';
+starRegion['Contract'] = '373,524,11,11';
+starRegion['Encounter Side Quest'] = '531,374,11,11';
+starRegion['Encounter Side Quest SmallTextArea'] = '531,374,11,11';
+starRegion['Enemy'] = '373,524,11,11';
+starRegion['Enemy NoStat'] = '373,524,11,11';
+starRegion['Event'] = '373,524,11,11';
+starRegion['Hero'] = '373,524,11,11';
+starRegion['Hero Promo'] = '351,524,11,11';
+starRegion['Location'] = '373,524,11,11';
+starRegion['Nightmare'] = '379,524,11,11';
+starRegion['Objective'] = '363,524,11,11';
+starRegion['Objective Ally'] = '363,524,11,11';
+starRegion['Objective Hero'] = '363,524,11,11';
+starRegion['Objective Location'] = '363,524,11,11';
+starRegion['Player Objective'] = '363,524,11,11';
+starRegion['Player Side Quest'] = '529,374,11,11';
+starRegion['Quest'] = '529,374,11,11';
+starRegion['Region'] = '529,374,11,11';
+starRegion['Ship Enemy'] = '373,524,11,11';
+starRegion['Ship Objective'] = '363,524,11,11';
+starRegion['Treachery'] = '373,524,11,11';
+starRegion['Treasure'] = '377,524,11,11';
 
 var collectionInfoRegion = {};
 collectionInfoRegion['Ally'] = '357,526,26,15';
@@ -1209,11 +1209,11 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				else {
 					s.set('NoArtist', 0);
 				}
-				if (flags.indexOf('Asterisk') > -1) {
-					s.set('Asterisk', 1);
+				if (flags.indexOf('Star') > -1) {
+					s.set('Star', 1);
 				}
 				else {
-					s.set('Asterisk', 0);
+					s.set('Star', 0);
 				}
 
 				if (flags.indexOf('NoArtistBack') > -1) {
@@ -1234,11 +1234,11 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				else {
 					s.set('NoCopyrightBack', 0);
 				}
-				if (flags.indexOf('AsteriskBack') > -1) {
-					s.set('AsteriskBack', 1);
+				if (flags.indexOf('StarBack') > -1) {
+					s.set('StarBack', 1);
 				}
 				else {
-					s.set('AsteriskBack', 0);
+					s.set('StarBack', 0);
 				}
 
 				if (context == 'renderer') {
@@ -1554,7 +1554,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					defaultBottomPointSize = bottomPointSize[cardType];
 				}
 
-				let defaultAsteriskPointSize = 6.5;
+				let defaultStarPointSize = 6.5;
 				let defaultOptionLeftPointSize = 12;
 				let defaultPagePointSize = 7;
 				let defaultEncounterSetNumberPointSize = 4;
@@ -1594,14 +1594,14 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				s.set('Option-style', 'WIDTH: SEMICONDENSED; FAMILY: {"Vafthrudnir"}');
 				s.set('EncounterSetNumber-style', 'WEIGHT: BOLD; FAMILY: {"Times New Roman"}');
 				s.set('Bottom-style', 'WIDTH: SEMICONDENSED; WEIGHT: BOLD; FAMILY: {"Times New Roman"}');
-				s.set('Asterisk-style', 'FAMILY: {"Times New Roman"}');
+				s.set('Star-style', 'FAMILY: {"Times New Roman"}');
 				s.set('OptionLeft-style', 'FAMILY: {"Times New Roman"}');
 				s.set('Side-style', 'FAMILY: {"Vafthrudnir"}');
-				s.set('Asterisk-colour', '#FFFFFF');
+				s.set('Star-colour', '#FFFFFF');
 				s.set('OptionLeft-colour', '#000000');
 				s.set('Name-pointsize', Math.round(defaultNamePointSize * 1.734 * 100) / 100);
 				s.set('Bottom-pointsize', defaultBottomPointSize);
-				s.set('Asterisk-pointsize', defaultAsteriskPointSize);
+				s.set('Star-pointsize', defaultStarPointSize);
 				s.set('OptionLeft-pointsize', defaultOptionLeftPointSize);
 				s.set('EncounterSetNumber-pointsize', defaultEncounterSetNumberPointSize);
 				s.set('OptionLeft-alignment', 'bottom,center');
@@ -1741,7 +1741,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					['CollectionInfo-region', collectionInfoRegion],
 					['PageIn-region', pageInRegion],
 					['Side-region', sideRegion],
-					['Asterisk-region', asteriskRegion],
+					['Star-region', starRegion],
 					['GameName-portrait-clip-region', gameNamePortraitRegion],
 					['Name-portrait-clip-region', namePortraitRegion],
 					['EncounterSet1-portrait-clip-region', encounterSet1PortraitRegion],
@@ -1825,8 +1825,8 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 
 				s.set('Id', card['octgn']);
 				if (context == 'renderer') {
-					s.set('Asterisk-format', '<family "Times New Roman"><size ' + defaultAsteriskPointSize + '>');
-					s.set('Asterisk-formatEnd', '</size></family>');
+					s.set('Star-format', '<family "Times New Roman"><size ' + defaultStarPointSize + '>');
+					s.set('Star-formatEnd', '</size></family>');
 					s.set('Bottom-format', '<width semicondensed><family "Times New Roman"><size ' + defaultBottomPointSize + '><b>');
 					s.set('Bottom-formatEnd', '</b></size></family></width>');
 					s.set('EncounterSetNumber-format', '<family "Times New Roman"><size ' + defaultEncounterSetNumberPointSize + '><b>');

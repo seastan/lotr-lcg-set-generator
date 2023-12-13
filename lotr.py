@@ -315,8 +315,8 @@ CARD_TYPES_FLAGS_BACK = {'NoTraits':
                           'Objective', 'Objective Ally', 'Objective Hero',
                           'Objective Location', 'Ship Enemy', 'Ship Objective',
                           'Treachery'}}
-CARD_TYPES_NO_FLAGS = {'Asterisk': {'Full Art Landscape', 'Full Art Portrait',
-                                    'Presentation', 'Rules'},
+CARD_TYPES_NO_FLAGS = {'Star': {'Full Art Landscape', 'Full Art Portrait',
+                                'Presentation', 'Rules'},
                        'IgnoreName': {'Full Art Landscape',
                                       'Full Art Portrait', 'Presentation',
                                       'Rules'},
@@ -325,8 +325,8 @@ CARD_TYPES_NO_FLAGS = {'Asterisk': {'Full Art Landscape', 'Full Art Portrait',
                        'NoArtist': {'Presentation', 'Rules'},
                        'NoCopyright': {'Presentation', 'Rules'}}
 CARD_TYPES_NO_FLAGS_BACK = {
-    'Asterisk': {'Campaign', 'Full Art Landscape', 'Full Art Portrait',
-                 'Nightmare', 'Presentation', 'Rules'},
+    'Star': {'Campaign', 'Full Art Landscape', 'Full Art Portrait',
+             'Nightmare', 'Presentation', 'Rules'},
     'IgnoreName': {'Full Art Landscape', 'Full Art Portrait', 'Presentation',
                    'Rules'},
     'IgnoreRules': {'Full Art Landscape', 'Full Art Portrait', 'Presentation'},
@@ -383,7 +383,7 @@ CARD_TYPES_NO_DISCORD_CHANNEL = {'Full Art Landscape', 'Full Art Portrait',
                                  'Rules', 'Presentation'}
 CARD_TYPES_NO_NAME_TAG = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
 
-FLAGS = {'AdditionalCopies', 'Asterisk', 'IgnoreName', 'IgnoreRules',
+FLAGS = {'AdditionalCopies', 'Star', 'IgnoreName', 'IgnoreRules',
          'NoArtist', 'NoCopyright', 'NoTraits', 'Promo', 'BlueRing',
          'GreenRing', 'RedRing'}
 RING_FLAGS = {'BlueRing', 'GreenRing', 'RedRing'}

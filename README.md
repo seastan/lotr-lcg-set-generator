@@ -584,7 +584,6 @@ List of available sphere values:
 **Flags**
 
 - `AdditionalCopies`
-- `Asterisk`
 - `IgnoreName`
 - `IgnoreRules`
 - `NoArtist`
@@ -594,6 +593,7 @@ List of available sphere values:
 - `BlueRing`
 - `GreenRing`
 - `RedRing`
+- `Star`
 
 **Portrait Shadows**
 
