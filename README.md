@@ -598,7 +598,7 @@ List of available sphere values:
 **Portrait Shadows**
 
 - `Black`
-- `PortraitTint`` (`Quest` Side A only)
+- `PortraitTint` (`Quest` Side A only)
 
 **Deck Rules**
 
@@ -723,7 +723,7 @@ Staging Setup: The Carrock
 - `copy_output.py`: Script to copy all set outputs to a destination folder.  For example:
   `python copy_output.py "c:\\ALeP\\Output\\" "ALeP - Children of Eorl" "French"`
 - `make_unique_png.py`: Script to make unique PNG files for MakePlayingCards.  For example:
-  `python make_unique_png.py "c:\\ALeP\\CustomPNG\\"
+  `python make_unique_png.py "c:\\ALeP\\CustomPNG\\"`
 - `replace_cmyk_card_backs.py`: Script to replace card backs in existing image archives.  Expects `replace_cmyk_card_backs.txt`
   with a list of direct Mediafire URLs or local file paths to `MBPrint` 7z archives.
 - `card_stat.py`: Collect various data from Hall of Beorn and RingsDB and put outputs into `Output/Scripts` folder.
