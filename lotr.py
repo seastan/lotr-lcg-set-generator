@@ -5603,7 +5603,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     errors.append(message)
                 else:
                     broken_set_ids.add(set_id)
-            elif len(all_sets) > 5:
+            elif len(all_sets) > 6:
                 message = ('Too many additional encounter sets for row #{}{}'
                            .format(i, row_info))
                 logging.error(message)
