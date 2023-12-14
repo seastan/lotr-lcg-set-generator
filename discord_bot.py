@@ -227,9 +227,9 @@ List of **!stat** commands:
 **!stat plays <quest name> <date in YYYY-MM-DD format>** - display aggregated DragnCards plays statistics for the quest starting from the specified date (for example: `!stat plays Ambush at Erelas 2022-01-01`)
 **!stat plays help** - display additional help about aggregated DragnCards plays statistics for the quest
 ` `
-**!stat quests** - display aggregated DragnCards statistics for all released ALeP quests
-**!stat quests <date in YYYY-MM-DD format>** - display aggregated DragnCards statistics for all released ALeP quests starting from the specified date (for example: `!stat quests 2022-01-01`)
-**!stat quests help** - display additional help about aggregated DragnCards statistics for all released ALeP quests
+**!stat quests** - display aggregated DragnCards statistics for all released quests
+**!stat quests <date in YYYY-MM-DD format>** - display aggregated DragnCards statistics for all released quests starting from the specified date (for example: `!stat quests 2022-01-01`)
+**!stat quests help** - display additional help about aggregated DragnCards statistics for all released quests
 ` `
 **!stat help** - display this help message
 """,
@@ -342,8 +342,8 @@ HELP_STAT_PLAYS = """
 `user      ` user name
 """
 HELP_STAT_QUESTS = """
-**!stat quests** - display aggregated DragnCards statistics for all released ALeP quests
-**!stat quests <date in YYYY-MM-DD format>** - display aggregated DragnCards statistics for all released ALeP quests starting from the specified date (for example: `!stat quests 2022-01-01`)
+**!stat quests** - display aggregated DragnCards statistics for all released quests
+**!stat quests <date in YYYY-MM-DD format>** - display aggregated DragnCards statistics for all released quests starting from the specified date (for example: `!stat quests 2022-01-01`)
 **!stat quests help** - display this help message
 ` `
 **Columns:**
@@ -1645,7 +1645,7 @@ async def get_dragncards_plays_stat(quest, start_date):
 
 
 async def get_dragncards_quests_stat(start_date):
-    """ Get aggregated DragnCards statistics for all released ALeP quests.
+    """ Get aggregated DragnCards statistics for all released quests.
     """
     with open(RINGSDB_STAT_PATH, 'r', encoding='utf-8') as obj:
         ringsdb_data = json.load(obj)

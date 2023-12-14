@@ -1,6 +1,6 @@
 # pylint: disable=C0209
 # -*- coding: utf8 -*-
-""" Get aggregated statistics for all released ALeP quests.
+""" Get aggregated statistics for all released quests.
 """
 import json
 import logging

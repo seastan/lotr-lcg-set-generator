@@ -1,7 +1,12 @@
+**Introduction**
+
+This is a private tool not intended for use by anyone else.  Don't expect sufficient documentation or
+any kind of support.
+
 **Setup**
 
-Please note that to generate final image outputs, you must run this workflow on a Windows platform,
-because each platform renders the fonts differently.
+To generate final image outputs, you must run this workflow on a Windows platform, because each platform
+renders the fonts differently.
 
 1. Clone this repo to a new local folder.  The easiest way is to click `Code` and then `Download ZIP`.
 At the same time, the preferable way is to use Git.
@@ -33,8 +38,8 @@ At the same time, the preferable way is to use Git.
 
     If it doesn't exist yet (that means you are starting a new project from scratch),
     upload `Spreadsheet/spreadsheet.xlsx` from this repo, click `Save as Google Sheets`,
-    click `Share` and `Change to anyone with the link`.  Click `Extensions -> Apps Script` and upload the scripts
-    from `Spreadsheet/Code.gs`.  After that, re-run `=SHEETS()` function from `A1` cell of the first `-` tab.
+    click `Share` and `Change to anyone with the link`.  Click `Extensions -> Apps Script` and upload the content
+    of `Spreadsheet/Code.gs`.  After that, re-run `=SHEETS()` function from `A1` cell of the first `-` tab.
     Add all the sets and cards data.
 
 3. Add the folder with the artwork to your Google Drive to be able to sync it locally.
@@ -85,7 +90,7 @@ Choose `My Drive` and click `Add Shortcut`.
 
     Make sure that top-level folders `custom`, `generated`, `icons`, `_Keep`, and `_Scratch` exist, even if they are empty.
     If you are starting a new project from scratch, copy all images from `imagesCustom` and `imagesIcons` folders in the root
-    of this repo to `custom` and `icons` folders in the root of the Google Drive folder.
+    of this repo to `custom` and `icons` folders in the root of this folder.
 
 4. If you are using the artwork from Google Drive, make sure that the Google Drive application is installed (install it if needed).
 If the artwork folder is a shortcut, click on the shortcut and copy the actual path to the virtual folder (it might look like
@@ -97,7 +102,7 @@ existing Google Drive folders and use their local paths in the configuration (re
 
 6. Install the design tool and the custom plugin.  Follow these steps:
 
-  - Clone https://github.com/seastan/lotr-lcg-se-plugin to a new local folder.  Go to this folder.
+  - Clone the plugin repo to a new local folder.  Go to that folder.
   - Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir, extract the archive and
     put `VAFTHRUD.TTF` into `TheLordOfTheRingsLCG-B/resources/TheLordOfTheRingsLCG/font/` folder.
   - Run `setup.bat` (Windows) or `setup.sh` (Mac/Linux) to generate the `.seext` files.
@@ -111,7 +116,7 @@ existing Google Drive folders and use their local paths in the configuration (re
   - Click `Edit` -> `Preferences` -> `Language`.  Make sure that "English-United States" is chosen for both `Game Language` and `User Interface Language`.
     Click `Drawing`.  Make sure that `Text Fitting Methods` is set to `Reduce Line Spacing and Shrink Text`.  Don't change any other preferences.
   - Go to the plugins folder (run the design tool, then click `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`), close the program and
-    delete or move all files, which names start with `TheLordOfTheRingsLCG`.  Instead of them, copy all generated `.seext` files.
+    delete or move all files, which names start with `TheLordOfTheRingsLCG`.  Instead of them, copy all `.seext` files that you generated.
 
 7. Install the latest GIMP version from https://www.gimp.org/downloads/.
 
@@ -212,7 +217,7 @@ To run the workflow, go to the root folder of this repo and follow these steps:
 - `python run_after_se.py`.
 - Pay attention to possible errors in the script output.
 
-For debugging purposes you can also run the steps above using the Jupyter notebook (it doesn't use parallelism):
+For debugging purposes you can also run the steps above using the Jupyter notebook (it doesn't use any parallelism):
 
 - [skip this step, if you don't use VirtualEnv] `env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
 - `jupyter notebook`
@@ -248,8 +253,8 @@ and is not 100% reliable (it may be stuck on the manual step).  To minimize the 
 - Make sure the screen is not locked (and doesn't lock automatically).
 - If the script started, don't touch the keyboard or mouse.
 
-If you need to perform some additional actions before and/or after the script starts (like unlocking your PC
-or restarting Google Drive), you may create two additional batch scripts with your custom code:
+If you need to perform any additional actions before and/or after the script starts (like
+restarting Google Drive), you may create two additional batch scripts with your custom code:
 
 - `run_setup.bat`
 - `run_cleanup.bat`
@@ -342,7 +347,7 @@ Additional steps:
   - `* * * * *     <path>/check_mail.sh >> <path>/cron.log 2>&1`
   - `*/10 * * * *  <path>/check_mpc_monitor.sh >> <path>/cron.log 2>&1`
   - `19 * * * *    <path>/check_playtesting_sets.sh >> <path>/cron.log 2>&1`
-  - `9 * * * *     <path>/check_ringsdb_alep_decks.sh >> <path>/cron.log 2>&1`
+  - `9 * * * *     <path>/check_ringsdb_decks.sh >> <path>/cron.log 2>&1`
   - `* * * * *     <path>/check_run_before_se_service.sh >> <path>/cron.log 2>&1`
   - `7 1 * * *     <path>/configuration_backup.sh "<path to a local configuration backup folder>" >> <path>/cron.log 2>&1`
   - `5 11 * * *    <path>/download_ringsdb_stat.sh >> <path>/cron.log 2>&1`
@@ -369,9 +374,8 @@ Additional steps:
     or in some external folder (if you already have other crons).  Set `<path to a local configuration backup folder>`
     to some backup folder outside of the root folder.
 
-7. Copy `LOTRHeader.ttf`, `LRLsymbols.ttf` and `Vafthaurdir.ttf` from
-https://github.com/seastan/lotr-lcg-se-plugin/tree/master/TheLordOfTheRingsLCG-B/resources/TheLordOfTheRingsLCG/font
-to `Renderer/Fonts` folder .  Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir, extract the archive and
+7. Copy `LOTRHeader.ttf`, `LRLsymbols.ttf` and `Vafthaurdir.ttf` from `TheLordOfTheRingsLCG-B/resources/TheLordOfTheRingsLCG/font`
+folder of the plugin repo to `Renderer/Fonts` folder.  Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir, extract the archive and
 put `VAFTHRUD.TTF` into `Renderer/Fonts` folder too.  Find a `ttf` file for the `Times New Roman` font (you may find it in
 `c:\Windows\Fonts` folder on a Windows machine or download from Internet) and put it into `Renderer/Fonts` folder as `times.ttf`.
 
@@ -642,7 +646,7 @@ Below is a list of all supported rules:
 - `Prefix`: A **mandatory** scenario prefix.  It must start with:
   `<either "Q" (normal mode) or "N" (nightmare mode)><two capital letters and/or numbers>.<one or two numbers><end of string or dash>`.
   For example, `Prefix: Q0B.19-Standalone` will result in a filename like `Q0B.19-Standalone-The-Scouring-of-the-Shire.o8d`.
-- `Sets`: Additional sets to be included.  For example: `Sets: ALeP - Children of Eorl`.
+- `Sets`: Additional sets to be included.  For example: `Sets: The Road Darkens`.
 - `Encounter Sets`: Additional encounter sets to be included.  For example:
   `Encounter Sets: Journey in the Dark`.
 - `External XML`: Links to external `set.xml` files (if those cards are not in the spreadsheet).
@@ -721,9 +725,9 @@ Staging Setup: The Carrock
 **Standalone Scripts**
 
 - `copy_output.py`: Script to copy all set outputs to a destination folder.  For example:
-  `python copy_output.py "c:\\ALeP\\Output\\" "ALeP - Children of Eorl" "French"`
+  `python copy_output.py "c:\\Output\\" "Custom Set" "French"`
 - `make_unique_png.py`: Script to make unique PNG files for MakePlayingCards.  For example:
-  `python make_unique_png.py "c:\\ALeP\\CustomPNG\\"`
+  `python make_unique_png.py "c:\\CustomPNG\\"`
 - `replace_cmyk_card_backs.py`: Script to replace card backs in existing image archives.  Expects `replace_cmyk_card_backs.txt`
   with a list of direct Mediafire URLs or local file paths to `MBPrint` 7z archives.
 - `card_stat.py`: Collect various data from Hall of Beorn and RingsDB and put outputs into `Output/Scripts` folder.

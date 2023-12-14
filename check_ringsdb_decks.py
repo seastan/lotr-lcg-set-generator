@@ -1,6 +1,6 @@
 # pylint: disable=W0703,C0209
 # -*- coding: utf8 -*-
-""" Check recent RingsDB ALeP decks.
+""" Check recent RingsDB decks.
 """
 from datetime import datetime, timedelta
 from email.header import Header
@@ -17,12 +17,12 @@ import yaml
 import common
 
 
-DATA_PATH = os.path.join('Data', 'check_ringsdb_alep_decks.json')
+DATA_PATH = os.path.join('Data', 'check_ringsdb_decks.json')
 DISCORD_CARD_DATA_PATH = os.path.join('Discord', 'Data', 'card_data.json')
 DISCORD_CONF_PATH = 'discord.yaml'
-ERROR_SUBJECT_TEMPLATE = 'RingsDB ALeP Decks Cron ERROR: {}'
+ERROR_SUBJECT_TEMPLATE = 'RingsDB Decks Cron ERROR: {}'
 INTERNET_SENSOR_PATH = 'internet_state'
-LOG_PATH = 'check_ringsdb_alep_decks.log'
+LOG_PATH = 'check_ringsdb_decks.log'
 MAILS_PATH = 'mails'
 RINGSDB_URL = 'http://ringsdb.com/api/public/decklists/by_date/{}'
 
@@ -118,13 +118,13 @@ def send_discord(message):
         with open(DISCORD_CONF_PATH, 'r', encoding='utf-8') as f_conf:
             conf = yaml.safe_load(f_conf)
 
-        if conf.get('ringsdb_alep_decks_webhook_url'):
+        if conf.get('ringsdb_decks_webhook_url'):
             for i, chunk in enumerate(common.split_result(message)):
                 if i > 0:
                     time.sleep(1)
 
                 data = {'content': chunk}
-                res = requests.post(conf['ringsdb_alep_decks_webhook_url'],
+                res = requests.post(conf['ringsdb_decks_webhook_url'],
                                     json=data)
                 res = res.content.decode('utf-8')
                 if res != '':
@@ -260,7 +260,7 @@ def process_ringsdb_data():  # pylint: disable=R0912,R0914,R0915
                 description = 'no description'
 
             url = 'https://ringsdb.com/decklist/view/{}'.format(deck['id'])
-            message = """New AleP deck has been published to RingsDB:
+            message = """New deck has been published to RingsDB:
 
 **{}** by {} *({} threat, {} up to {})*
 {}
@@ -280,9 +280,9 @@ def process_ringsdb_data():  # pylint: disable=R0912,R0914,R0915
             send_discord(message)
 
     if deck_count > 1:
-        logging.info('Found %s new ALeP deck(s)', deck_count)
+        logging.info('Found %s new deck(s)', deck_count)
     else:
-        logging.info('No new ALeP decks found')
+        logging.info('No new decks found')
 
     new_data = {'previous_decks': new_decks}
     with open(DATA_PATH, 'w', encoding='utf-8') as fobj:

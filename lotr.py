@@ -13209,7 +13209,7 @@ def get_dragncards_plays_stat(conf, quest, start_date, end_date):
 
 
 def get_dragncards_quests_stat(conf, quests):
-    """ Get aggregated DragnCards statistics for all released ALeP quests.
+    """ Get aggregated DragnCards statistics for all released quests.
     """
     command = DRAGNCARDS_QUESTS_STAT_COMMAND.format(quests)
     logging.info('Running remote command: %s', command)
