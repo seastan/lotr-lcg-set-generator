@@ -76,6 +76,9 @@ TEST_CHANNELS_SLEEP_TIME = 14400
 WATCH_CHANGES_SLEEP_TIME = 5
 WATCH_SANITY_CHECK_SLEEP_TIME = 120
 
+ARTWORK_JPG_MIN_SIZE = 250000
+ARTWORK_PNG_MIN_SIZE = 1000000
+
 ERROR_SUBJECT_TEMPLATE = 'LotR Discord Bot ERROR: {}'
 WARNING_SUBJECT_TEMPLATE = 'LotR Discord Bot WARNING: {}'
 
@@ -4493,7 +4496,7 @@ Targets removed.
         return ''
 
 
-    async def _get_artwork_files(self, set_id):
+    async def _get_artwork_files(self, set_id, size=False):
         """ Get the ordered list of artwork files for the set.
         """
         async with rclone_art_lock:
@@ -4501,9 +4504,13 @@ Targets removed.
 
         stdout, stderr = await run_shell(RCLONE_ART_FOLDER_CMD.format(set_id))
         try:
-            filenames = [(f['Name'], f['ModTime']) for f in json.loads(stdout)]
+            filenames = [(f['Name'], f['ModTime'], f['Size'])
+                         for f in json.loads(stdout)]
             filenames.sort(key=lambda f: (f[1], f[0]), reverse=True)
-            filenames = [f[0] for f in filenames]
+            if size:
+                filenames = [(f[0], f[2]) for f in filenames]
+            else:
+                filenames = [f[0] for f in filenames]
         except Exception as exc:
             if 'directory not found' in stderr:
                 return []
@@ -4619,11 +4626,13 @@ Targets removed.
                 return 'no cards found for the set'
 
         matches.sort(key=lambda card: card[lotr.ROW_COLUMN])
-        filenames = await self._get_artwork_files(matches[0][lotr.CARD_SET])
+        filenames = await self._get_artwork_files(matches[0][lotr.CARD_SET],
+                                                  size=True)
 
         file_data = {}
         duplicate_artwork = []
-        for filename in filenames:
+        small_filesize = []
+        for filename, filesize in filenames:
             if (not filename.endswith('.png') and
                     not filename.endswith('.jpg')):
                 continue
@@ -4644,6 +4653,12 @@ Targets removed.
                 duplicate_artwork.append(filename)
             else:
                 file_data[((file_id, file_side))] = file_artist
+
+            if ((filename.endswith('.png') and
+                 filesize < ARTWORK_PNG_MIN_SIZE) or
+                    (filename.endswith('.jpg') and
+                     filesize < ARTWORK_JPG_MIN_SIZE)):
+                small_filesize.append((filename, filesize))
 
         missing_artwork = []
         different_artist = []
@@ -4688,6 +4703,13 @@ Targets removed.
         if duplicate_artwork:
             res += '\n**Duplicate artwork found**:```\n{}```'.format(
                 '\n'.join(duplicate_artwork))
+
+        if small_filesize:
+            res += (
+                '\n**Small file size (potentially insufficient image '
+                'resolution) found**:```\n{}```'.format(
+                    '\n'.join(['{} ({} bytes)'.format(fn, fs)
+                               for fn, fs in small_filesize])))
 
         if different_artist:
             res += ('\n**Different spreadsheet artists found**:```\n{}```'
