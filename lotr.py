@@ -7501,7 +7501,7 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                     card[CARD_SET_NAME],
                     is_positive_or_zero_int(card[CARD_NUMBER])
                     and int(card[CARD_NUMBER]) or 0,
-                    card[CARD_NUMBER],
+                    card[CARD_NUMBER] or '',
                     card[CARD_NAME]))
 
             for card in chosen_player_cards:
