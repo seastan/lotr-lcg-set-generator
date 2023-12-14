@@ -5,7 +5,7 @@ any kind of support.
 
 **Setup**
 
-To generate final image outputs, you must run this workflow on a Windows platform, because each platform
+To generate final image outputs, you must run this workflow on a Windows platform because each platform
 renders the fonts differently.
 
 1. Clone this repo to a new local folder.  The easiest way is to click `Code` and then `Download ZIP`.
@@ -13,7 +13,7 @@ At the same time, the preferable way is to use Git.
 
     You can install the Git client from https://git-scm.com/downloads
     (default settings should be fine).  On GitHub UI click `Code`, then click `HTTPS` and copy the URL.
-    Run `Git CMD`, navigate to the folder, and run the following command (don't forget the period in the end):
+    Run `Git CMD`, navigate to the folder, and run the following command (don't forget the period at the end):
 
     ```
     git clone <copied URL> .
@@ -25,13 +25,13 @@ At the same time, the preferable way is to use Git.
     git clone https://github.com/seastan/lotr-lcg-set-generator.git .
     ```
 
-    Later, when you want to update the code, run `Git CMD`, navigate to the folder and run the following command:
+    Later, when you want to update the code, run `Git CMD`, navigate to the folder, and run the following command:
 
     ```
     git pull
     ```
 
-    If you prefer UI interface, instead of `Git CMD` you may also use `GitHub Desktop` (https://desktop.github.com).
+    If you prefer a UI interface, instead of `Git CMD` you may also use `GitHub Desktop` (https://desktop.github.com).
     In that case, on GitHub UI click `Code`, then click `Open with Github Desktop`.
 
 2. Make sure there is a spreadsheet on Google Sheets (most likely, it already exists).
@@ -40,7 +40,7 @@ At the same time, the preferable way is to use Git.
     upload `Spreadsheet/spreadsheet.xlsx` from this repo, click `Save as Google Sheets`,
     click `Share` and `Change to anyone with the link`.  Click `Extensions -> Apps Script` and upload the content
     of `Spreadsheet/Code.gs`.  After that, re-run `=SHEETS()` function from `A1` cell of the first `-` tab.
-    Add all the sets and cards data.
+    Add all the sets and the card data.
 
 3. Add the folder with the artwork to your Google Drive to be able to sync it locally.
 Open the folder in the browser, right-click on the folder name, then click `Add shortcut to Drive`.
@@ -103,10 +103,10 @@ existing Google Drive folders and use their local paths in the configuration (re
 6. Install the design tool and the custom plugin.  Follow these steps:
 
   - Clone the plugin repo to a new local folder.  Go to that folder.
-  - Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir, extract the archive and
+  - Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir, extract the archive, and
     put `VAFTHRUD.TTF` into `TheLordOfTheRingsLCG-B/resources/TheLordOfTheRingsLCG/font/` folder.
   - Run `setup.bat` (Windows) or `setup.sh` (Mac/Linux) to generate the `.seext` files.
-  - Make sure that `Times New Roman` font is installed.  If you have Mac or Linux, it may be not installed by default.
+  - Make sure that `Times New Roman` font is installed.  If you have a Mac or Linux, it may be not installed by default.
   - Install the design tool, `Build 3970`.  Please note that the latest version from the site may not work as expected.  Use the following links:
     - Windows (64-bit): https://drive.google.com/file/d/19vuP5QFKrjuilJbuFh10NPIn6i_FZZI9/view?usp=sharing
     - Windows (32-bit): https://drive.google.com/file/d/1lZ6h7OQBvZdh2hOlAiZMYivzeooTqWhW/view?usp=sharing
@@ -115,13 +115,13 @@ existing Google Drive folders and use their local paths in the configuration (re
   - Run the design tool and install `The Lord of the Rings LCG` plugin.
   - Click `Edit` -> `Preferences` -> `Language`.  Make sure that "English-United States" is chosen for both `Game Language` and `User Interface Language`.
     Click `Drawing`.  Make sure that `Text Fitting Methods` is set to `Reduce Line Spacing and Shrink Text`.  Don't change any other preferences.
-  - Go to the plugins folder (run the design tool, then click `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`), close the program and
-    delete or move all files, which names start with `TheLordOfTheRingsLCG`.  Instead of them, copy all `.seext` files that you generated.
+  - Go to the plugins folder (run the design tool, then click `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`), close the program, and
+    delete or move all files, whose names start with `TheLordOfTheRingsLCG`.  Instead of them, copy all `.seext` files that you generated.
 
 7. Install the latest GIMP version from https://www.gimp.org/downloads/.
 
 8. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `GIMP` folder
-from this repo, click `OK` and then close GIMP.
+from this repo, click `OK`, and then close GIMP.
 
 9. Install ImageMagick 7.0.10-28 (download Windows version from https://drive.google.com/file/d/1tBFGjE9OakbQNjY-Nqpxky14XVFdGL_G/view?usp=sharing,
 for other platforms look at https://download.imagemagick.org/ImageMagick/download/releases/).
@@ -136,8 +136,8 @@ into the root folder of this repo.
 Optionally, install VirtualEnv (see https://help.dreamhost.com/hc/en-us/articles/115000695551-Installing-and-using-virtualenv-with-Python-3
 for details).
 
-13. Go to the root folder of this repo and follow the steps below.  All commands should by run in CLI, for example, `cmd` (Windows)
-or `bash` (Mac/Linux).  To navigate to a right folder inside your CLI you can use `cd <folder>` command
+13. Go to the root folder of this repo and follow the steps below.  All commands should be run in CLI, for example, `cmd` (Windows)
+or `bash` (Mac/Linux).  To navigate to the right folder inside your CLI you can use `cd <folder>` command
 (for example, `cd Documents\lotr-lcg-set-generator`).
 
   - [skip this step, if you don't use VirtualEnv] `virtualenv env --python=python3.9` (replace `3.9` with your actual Python version)
@@ -151,7 +151,7 @@ or `bash` (Mac/Linux).  To navigate to a right folder inside your CLI you can us
 14. Create `configuration.yaml`: copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
   - `sheet_gdid`: Google Sheets ID of the cards spreadsheet
-  - `artwork_path`: local path to the artwork folder (don't use for that any existing folder in this repo)
+  - `artwork_path`: local path to the artwork folder (don't use for that purpose any existing folder in this repo)
   - `stable_data_path`: local path to the stable data folder
   - `gimp_console_path`: path to GIMP console executable
   - `magick_path`: path to ImageMagick executable
@@ -178,7 +178,7 @@ or `bash` (Mac/Linux).  To navigate to a right folder inside your CLI you can us
   - `stable_data_user`: how to use the stable data: "none" (don't use stable data), "reader" (read the latest stable data when sanity check failed), "writer" (write the stable data when sanity check passed)
   - `verify_drive_timestamp`: verify whether Google Drive is up to date or not (true or false)
   - `ignore_ignore_flags`: ignore IgnoreName and IgnoreRules flags (true or false)
-  - `set_ids`: list of set IDs to work on (you can use `all` and `all_scratch` aliases to select all non-scratch and all scratch sets sutomatically)
+  - `set_ids`: list of set IDs to work on (you can use `all` and `all_scratch` aliases to select all non-scratch and all scratch sets automatically)
   - `ignore_set_ids`: list of set IDs to ignore
   - `set_ids_octgn_image_destination`: list of set IDs to copy to OCTGN image destination
   - `octgn_set_xml`: creating `set.xml` files for OCTGN (true or false)
@@ -213,11 +213,11 @@ To run the workflow, go to the root folder of this repo and follow these steps:
 - `python run_before_se.py`.
 - Pay attention to possible errors in the script output.
 - Open `setGenerator.seproject` and run `makeCards` script by double-clicking it.
-  Once completed, close the program and wait until it finished packing the project.
+  Once completed, close the program and wait until it finishes packing the project.
 - `python run_after_se.py`.
 - Pay attention to possible errors in the script output.
 
-For debugging purposes you can also run the steps above using the Jupyter notebook (it doesn't use any parallelism):
+For debugging purposes, you can also run the steps above using the Jupyter notebook (it doesn't use any parallelism):
 
 - [skip this step, if you don't use VirtualEnv] `env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
 - `jupyter notebook`
@@ -235,9 +235,9 @@ To generate only a subset of cards (produce one artifact regardless of the sets)
 - In the spreadsheet, on the `Sets` tab add a new set like `Selected Cards`.
 - Add that new set to `configuration.yaml` and comment out any other sets.
 - In the spreadsheet, set `Selected` column to the ID of that new set for all the needed cards.
-- In the artwork folder, temporarily create a new folder named as the new set ID and copy all images and subfolders
+- In the artwork folder, temporarily create a new folder named the new set ID and copy all images and subfolders
   from the folders with the set IDs that you refer to in your selected cards (there should be no naming conflicts between files
-  from the different folders).  After you finished generating the cards, you can safely delete this folder.
+  from the different folders).  After you finish generating the cards, you can safely delete this folder.
   Also, when running the scripts you can ignore any `Unused image detected` errors.
 
 **Automatic Pipeline**
@@ -251,7 +251,7 @@ and is not 100% reliable (it may be stuck on the manual step).  To minimize the 
 
 - Make sure the design tool window was maximized when you closed it.
 - Make sure the screen is not locked (and doesn't lock automatically).
-- If the script started, don't touch the keyboard or mouse.
+- If the script starts, don't touch the keyboard or mouse.
 
 If you need to perform any additional actions before and/or after the script starts (like
 restarting Google Drive), you may create two additional batch scripts with your custom code:
@@ -271,7 +271,7 @@ If you want to set up a Windows cron job, do the following:
 - Click `Triggers` -> `New`.
 - Set up a schedule and click `OK`.
 - Click `Actions` -> `New`.
-- Click `Browse...`, choose `run_all.bat` and click `OK`.
+- Click `Browse...`, choose `run_all.bat`, and click `OK`.
 - Click `OK`.
 
 **Cron Job Pipeline**
@@ -374,10 +374,10 @@ Additional steps:
     or in some external folder (if you already have other crons).  Set `<path to a local configuration backup folder>`
     to some backup folder outside of the root folder.
 
-7. Copy `LOTRHeader.ttf`, `LRLsymbols.ttf` and `Vafthaurdir.ttf` from `TheLordOfTheRingsLCG-B/resources/TheLordOfTheRingsLCG/font`
-folder of the plugin repo to `Renderer/Fonts` folder.  Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir, extract the archive and
+7. Copy `LOTRHeader.ttf`, `LRLsymbols.ttf`, and `Vafthaurdir.ttf` from `TheLordOfTheRingsLCG-B/resources/TheLordOfTheRingsLCG/font`
+folder of the plugin repo to `Renderer/Fonts` folder.  Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir, extract the archive, and
 put `VAFTHRUD.TTF` into `Renderer/Fonts` folder too.  Find a `ttf` file for the `Times New Roman` font (you may find it in
-`c:\Windows\Fonts` folder on a Windows machine or download from Internet) and put it into `Renderer/Fonts` folder as `times.ttf`.
+`c:\Windows\Fonts` folder on a Windows machine or download it from the Internet) and put it into `Renderer/Fonts` folder as `times.ttf`.
 
 If you want to manually restart the scripts, run:
 
@@ -387,7 +387,7 @@ If you want to manually restart the scripts, run:
 
 If you want to migrate the pipeline to a different host, do the following steps:
 
-1. Setup the pipeline on the new host, but comment out all crons.  You might want to adjust the hours column in the crontab
+1. Set up the pipeline on the new host, but comment out all crons.  You might want to adjust the hours column in the crontab
 according to the new timezone.  Also, you may copy `id_rsa` and configuration files from the old host and only apply
 changes where needed (for example, different local paths).  Instead of configuring `rclone` from scratch,
 you may copy its configuration file from the old host (run `rclone config file` to find its location on each host).
@@ -398,7 +398,7 @@ you may copy its configuration file from the old host (run `rclone config file` 
 3. Run `tail -f run_before_se.log` on the old host.  After another iteration has been finished,
 kill `python3 run_before_se_service.py` process (use `ps aux | grep run_before_se` and `kill <process id>` commands).
 
-4. Wait until no files remain in `Discord/Changes`, `Discord/Images` and `Discord/Temp` folders on the old host and kill
+4. Wait until no files remain in `Discord/Changes`, `Discord/Images`, and `Discord/Temp` folders on the old host and kill
 `python3 discord_bot.py` process (use `ps aux | grep discord` and `kill <process id>` commands).
 
 5. Run `./rclone_data_remotely.sh` on the old host.
@@ -448,10 +448,10 @@ The scripts will generate the following outputs:
 - `Output/TTS/<set name>.<language>/`: 300 dpi JPG image sheets for TTS.
 
 Please note that `Output/DB`, `Output/HallOfBeornImages`, `Output/PreviewImages`, `Output/RingsDBImages` (for English language only),
-`Output/FrenchDBImages` (for French language only) and `Output/SpanishDBImages` (for Spanish language only)
+`Output/FrenchDBImages` (for French language only), and `Output/SpanishDBImages` (for Spanish language only)
 are generated when `db` output is enabled in the configuration.
 
-When `tts` output is enabled in the configuration, `octgn_o8d` and `db` outputs become enabled automatically.
+When `tts` output is enabled in the configuration, `octgn_o8d`, and `db` outputs become enabled automatically.
 
 **Supported Tags**
 
@@ -607,12 +607,12 @@ List of available sphere values:
 **Deck Rules**
 
 OCTGN/DragnCards `.o8d` and DragnCards `.json` deck files are generated automatically for each scenario detected
-on `Quest` and `Nightmare` cards.  By default, the deck includes all cards, which share both the set
+on `Quest` and `Nightmare` cards.  By default, the deck includes all cards, that share both the set
 and encounter set from the "parent" `Quest` or `Nightmare` card (including encounter sets from
 `Additional Encounter Sets` column).  All `Quest`, `Nightmare`, and `Campaign` cards are put into
-`Quest` section, all `Rules` cards are put into `Setup` section and all encounter cards are put into
+`Quest` section, all `Rules` cards are put into `Setup` section, and all encounter cards are put into
 `Encounter` section.  The filename of the deck is the same as `Adventure` value (`Quest` cards) or
-`Name` value (`Nightmare` cards) with all spaces replaced with `-`.  Easy mode version is generated
+`Name` value (`Nightmare` cards) with all spaces replaced with `-`.  The easy mode version is generated
 automatically if any card included in the deck has a different quantity for the normal and easy modes.
 
 To adjust the deck, you need to describe the rules in `Deck Rules` column (for a corresponding `Quest`
@@ -728,7 +728,7 @@ Staging Setup: The Carrock
   `python copy_output.py "c:\\Output\\" "Custom Set" "French"`
 - `make_unique_png.py`: Script to make unique PNG files for MakePlayingCards.  For example:
   `python make_unique_png.py "c:\\CustomPNG\\"`
-- `replace_cmyk_card_backs.py`: Script to replace card backs in existing image archives.  Expects `replace_cmyk_card_backs.txt`
+- `replace_cmyk_card_backs.py`: Script to replace card backs in existing image archives.  It expects `replace_cmyk_card_backs.txt`
   with a list of direct Mediafire URLs or local file paths to `MBPrint` 7z archives.
 - `card_stat.py`: Collect various data from Hall of Beorn and RingsDB and put outputs into `Output/Scripts` folder.
 
@@ -740,7 +740,7 @@ Setup:
 
 1. Install GIMP (https://www.gimp.org/downloads/).
 2. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `GIMP` folder
-from this repo, click `OK` and then restart GIMP.
+from this repo, click `OK`, and then restart GIMP.
 
 Usage:
 
