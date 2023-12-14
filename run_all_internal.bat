@@ -12,7 +12,7 @@ set /a retry=%retry%+1
 echo %date_correct% %time% retry %retry%
 
 echo %date_correct% %time% looking for the running application
-wmic process where "commandline like '%%strangeeons.exe%%' and not commandline like '%%wmic%%'" delete
+wmic process where "commandline like '%%strang%%eons.exe%%' and not commandline like '%%wmic%%'" delete
 
 echo %date_correct% %time% looking for running autohotkey scripts
 wmic process where "commandline like '%%eons.ahk%%' and not commandline like '%%wmic%%'" delete
@@ -45,7 +45,8 @@ echo %date_correct% %time% waiting until the application is closed
 
 :loop
 timeout /t 10
-tasklist /fi "ImageName eq strangeeons.exe" /fo csv 2>NUL | find /I "strangeeons.exe">NUL
+set name="strang"
+tasklist /fi "ImageName eq %name%eeons.exe" /fo csv 2>NUL | find /I "eons.exe">NUL
 set /a iteration=%iteration%+1
 
 if %iteration%==180 (
