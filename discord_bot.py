@@ -1406,8 +1406,10 @@ async def get_rendered_images(set_name):  # pylint: disable=R0914
     except Exception:
         message = ('RClone failed (rendered images), stdout: {}, stderr: {}'
                    .format(stdout, stderr))
-        logging.error(message)
-        if 'directory not found' not in stderr:
+        if 'directory not found' in stderr:
+            logging.warning(message)
+        else:
+            logging.error(message)
             create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
 
         return {}, None
@@ -2190,7 +2192,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
             await asyncio.sleep(COMMUNICATION_SLEEP_TIME)
             channels = [c for c in self.get_all_channels()]  # pylint: disable=R1721
             if not channels:
-                message = 'No channels obtained from Discord'
+                message = 'Discord error: no channels obtained from Discord'
                 logging.error(message)
                 create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
                 raise CommunicationError(message)
@@ -2902,8 +2904,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                         all_channels = await self.get_all_channels_safe()
                         if CHANNEL_LIMIT - len(all_channels) <= 0:
                             message = (
-                                'No free slots to create a new channel '
-                                '"general" in category "{}"'
+                                'Discord error: No free slots to create a new '
+                                'channel "general" in category "{}"'
                                 .format(card[lotr.CARD_DISCORD_CATEGORY]))
                             logging.error(message)
                             create_mail(ERROR_SUBJECT_TEMPLATE.format(message),
@@ -3026,8 +3028,8 @@ The card has been updated:
                         all_channels = await self.get_all_channels_safe()
                         if CHANNEL_LIMIT - len(all_channels) <= 0:
                             message = (
-                                'No free slots to create a new channel '
-                                '"general" in category "{}"'.format(
+                                'Discord error: No free slots to create a new '
+                                'channel "general" in category "{}"'.format(
                                     card[lotr.CARD_DISCORD_CATEGORY]))
                             logging.error(message)
                             create_mail(ERROR_SUBJECT_TEMPLATE.format(message))
