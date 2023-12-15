@@ -5125,6 +5125,10 @@ Targets removed.
         set_name = card[lotr.CARD_SET_NAME]
         images, download_time = await get_rendered_images(set_name)
         if not images or card[lotr.CARD_ID] not in images:
+            if channel.name == 'general':
+                return ('no rendered images found for the card {}'
+                        .format(card[lotr.CARD_ID]))
+
             return 'no rendered images found for the card'
 
         await load_timestamps_data()
