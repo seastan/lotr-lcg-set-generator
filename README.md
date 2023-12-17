@@ -353,6 +353,7 @@ Additional steps:
   - `5 11 * * *    <path>/download_ringsdb_stat.sh >> <path>/cron.log 2>&1`
   - `* * * * *     <path>/env_health_check.sh >> <path>/cron.log 2>&1`
   - `*/2 * * * *   <path>/monitor_discord_changes.sh >> <path>/cron.log 2>&1`
+  - `15 0 * * *    <path>/monitor_discord_log.sh >> <path>/cron.log 2>&1`
   - `29 4 * * *    <path>/monitor_images_upload.sh >> <path>/cron.log 2>&1`
   - `36 9 * * *    <path>/monitor_remote_pipeline.sh >> <path>/cron.log 2>&1`
   - `36 8 * * *    <path>/monitor_wordpress_site.sh >> <path>/cron.log 2>&1`
