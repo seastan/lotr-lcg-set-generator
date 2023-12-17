@@ -4699,26 +4699,26 @@ Targets removed.
 
         res = ''
         if missing_artwork:
-            res += '\n**Missing artwork found**:```\n{}```'.format(
+            res += '\n**Missing artwork**:```\n{}```'.format(
                 '\n'.join(missing_artwork))
 
         if duplicate_artwork:
-            res += '\n**Duplicate artwork found**:```\n{}```'.format(
+            res += '\n**Duplicate artwork**:```\n{}```'.format(
                 '\n'.join(duplicate_artwork))
 
         if small_filesize:
             res += (
                 '\n**Small file size (potentially insufficient image '
-                'resolution) found**:```\n{}```'.format(
+                'resolution)**:```\n{}```'.format(
                     '\n'.join(['{} ({} bytes)'.format(fn, fs)
                                for fn, fs in small_filesize])))
 
         if different_artist:
-            res += ('\n**Different spreadsheet artists found**:```\n{}```'
+            res += ('\n**Different spreadsheet artists**:```\n{}```'
                     .format('\n'.join(different_artist)))
 
         if no_spreadsheet_artist:
-            res += ('\n**Missing spreadsheet artists found**:```\n{}```'
+            res += ('\n**Missing spreadsheet artists**:```\n{}```'
                     .format('\n'.join(no_spreadsheet_artist)))
 
         res = res.strip()
