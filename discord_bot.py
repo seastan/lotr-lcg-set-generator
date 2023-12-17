@@ -36,6 +36,8 @@ PLAYTEST_PATH = os.path.join(lotr.DISCORD_PATH, 'Data', 'playtest.json')
 RINGSDB_STAT_PATH = os.path.join(lotr.DATA_PATH, 'ringsdb_stat.json')
 TEMP_PATH = os.path.join(lotr.DISCORD_PATH, 'Temp')
 USERS_LIST_PATH = os.path.join(lotr.DISCORD_PATH, 'Data', 'users.csv')
+USERS_SNAPSHOT_PATH = os.path.join(lotr.DISCORD_PATH, 'Data',
+                                   'users_snapshot.json')
 
 CRON_ERRORS_CMD = './cron_errors.sh'
 CRON_LOG_CMD = './cron_log.sh'
@@ -75,6 +77,7 @@ SANITY_CHECK_ALERT_WAIT_TIME = 1800
 TEST_CHANNELS_SLEEP_TIME = 14400
 WATCH_CHANGES_SLEEP_TIME = 5
 WATCH_SANITY_CHECK_SLEEP_TIME = 120
+CHECK_USER_CHANGES_SLEEP_TIME = 86400
 
 ARTWORK_JPG_MIN_SIZE = 250000
 ARTWORK_PNG_MIN_SIZE = 1000000
@@ -389,6 +392,7 @@ watch_changes_lock = asyncio.Lock()
 rclone_art_lock = asyncio.Lock()
 remote_cron_timestamp_lock = asyncio.Lock()
 watch_sanity_check_lock = asyncio.Lock()
+check_users_changes_lock = asyncio.Lock()
 playtest_lock = asyncio.Lock()
 art_lock = asyncio.Lock()
 generate_lock = asyncio.Lock()
@@ -2160,6 +2164,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
     rclone_art_schedule_id = None
     remote_cron_timestamp_schedule_id = None
     watch_sanity_check_schedule_id = None
+    check_users_changes_schedule_id = None
     archive_category = None
     cron_channel = None
     notifications_channel = None
@@ -2265,6 +2270,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
         self.loop.create_task(self._rclone_art_schedule())
         self.loop.create_task(self._remote_cron_timestamp_schedule())
         self.loop.create_task(self._watch_sanity_check_schedule())
+        self.loop.create_task(self._check_users_changes_schedule())
         read_external_data()
         await read_card_data()
         await load_timestamps_data()
@@ -2341,7 +2347,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                                  my_id)
                 elif self.test_channels_schedule_id > my_id:
                     logging.info(
-                        'Detected a new test_channels schedule id: %s, '
+                        'Detected a new test channels schedule id: %s, '
                         'exiting with the old id: %s',
                         self.test_channels_schedule_id, my_id)
                     break
@@ -2437,6 +2443,28 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                 await self._watch_sanity_check()
 
             await asyncio.sleep(WATCH_SANITY_CHECK_SLEEP_TIME)
+
+
+    async def _check_users_changes_schedule(self):
+        logging.info('Starting check users changes schedule...')
+        my_id = incremental_id()
+        while True:
+            async with check_users_changes_lock:
+                if (not self.check_users_changes_schedule_id or
+                        self.check_users_changes_schedule_id < my_id):
+                    self.check_users_changes_schedule_id = my_id
+                    logging.info('Acquiring check users changes schedule id: '
+                                 '%s', my_id)
+                elif self.check_users_changes_schedule_id > my_id:
+                    logging.info(
+                        'Detected a new check users changes schedule id: %s, '
+                        'exiting with the old id: %s',
+                        self.check_users_changes_schedule_id, my_id)
+                    break
+
+                self.check_users_changes()
+
+            await asyncio.sleep(CHECK_USER_CHANGES_SLEEP_TIME)
 
 
     async def _test_channels(self):
@@ -4022,6 +4050,46 @@ Targets removed.
                 return
 
             await self._send_channel(message.channel, 'done')
+
+
+    def check_users_changes(self):
+        """ Check Discord users changes.
+        """
+        try:
+            with open(USERS_SNAPSHOT_PATH, 'r', encoding='utf-8') as obj:
+                old_dict = json.load(obj)
+        except Exception:
+            old_dict = {}
+
+        members = self.guilds[0].members
+        new_dict = {}
+        for member in members:
+            if member.display_name == member.name:
+                name = member.display_name
+            else:
+                name = '{} [{}]'.format(member.display_name, member.name)
+
+            new_dict[str(member.id)] = name
+
+        changes = []
+        for user_id, name in old_dict.items():
+            if user_id not in new_dict:
+                changes.append('User removed: {} (id: {})'
+                               .format(name, user_id))
+            elif new_dict[user_id] != name:
+                changes.append('User renamed: from {} to {} (id: {})'
+                               .format(name, new_dict[user_id], user_id))
+
+        for user_id, name in new_dict.items():
+            if user_id not in old_dict:
+                changes.append('User added: {} (id: {})'
+                               .format(name, user_id))
+
+        if changes:
+            create_mail('Discord users changes', '\n'.join(changes))
+
+        with open(USERS_SNAPSHOT_PATH, 'w', encoding='utf-8') as obj:
+            json.dump(new_dict, obj)
 
 
     async def _prepare_users_list(self):  # pylint: disable=R0914
