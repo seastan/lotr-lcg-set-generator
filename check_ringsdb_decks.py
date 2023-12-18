@@ -236,26 +236,30 @@ def process_ringsdb_data():  # pylint: disable=R0912,R0914,R0915
                 if code in codes:
                     alep_codes.append(code)
 
+            if len(alep_codes) < 1:
+                continue
+
             if len(alep_codes) > 1:
                 alep_cards_count = '{} ALeP cards'.format(len(alep_codes))
                 alep_cards = 'ALeP cards:\n{}'.format('\n'.join(
                     ['- {}'.format(codes[c]) for c in sorted(alep_codes)]))
-            elif len(alep_codes) == 1:
+            else:
                 alep_cards_count = '1 ALeP card'
                 alep_cards = 'ALeP card:\n- {}'.format(codes[alep_codes[0]])
-            else:
-                continue
 
             if deck['description_md']:
                 description = deck['description_md']
                 for tag, emoji in TAG_EMOJIS.items():
                     description = description.replace(tag, emoji)
-                    description = description.replace('<b>', '**').replace(
-                        '</b>', '**')
-                    description = description.replace('<i>', '*').replace(
-                        '</i>', '*')
-                    description = description.replace('<u>', '__').replace(
-                        '</u>', '__')
+
+                description = re.sub(r'\[([^\]]+)\]\(\/card\/[0-9]+\)', '\\1',
+                                     description)
+                description = description.replace('<b>', '**').replace(
+                    '</b>', '**')
+                description = description.replace('<i>', '*').replace(
+                    '</i>', '*')
+                description = description.replace('<u>', '__').replace(
+                    '</u>', '__')
             else:
                 description = 'no description'
 
