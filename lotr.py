@@ -895,7 +895,7 @@ ALL_CARD_NAMES = {'English': set()}
 ALL_SCRATCH_CARD_NAMES = set()
 ALL_TRAITS = set()
 ALL_SCRATCH_TRAITS = set()
-PRE_SANITY_CHECK = {'name': {}, 'ref': {}, 'flavour': {}}
+PRE_SANITY_CHECK = {'name': {}, 'ref': {}, 'flavour': {}, 'shadow': {}}
 TRANSLATIONS = {}
 SELECTED_CARDS = set()
 FOUND_SETS = set()
@@ -2174,7 +2174,7 @@ def parse_flavour(value, lang):  # pylint: disable=R0912,R0915
                 if len(source_parts) == 2:
                     if (not parts[0].startswith('“') and
                             not parts[0].endswith('”')):
-                        errors.append('Missing double quotes')
+                        errors.append('Possibly missing double quotes')
                 elif (parts[0].startswith('“') or
                       parts[0].endswith('”')):
                     errors.append('Possibly redundant double quotes')
@@ -2385,11 +2385,62 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                 else:
                     value = parts[0]
 
-            if (lang == 'English' and
-                    key in (CARD_SHADOW, BACK_PREFIX + CARD_SHADOW) and
-                    not re.search(r'^(?:\[[^\]]+\])?Shadow(?:\[[^\]]+\])?:',
-                                  value)):
-                value = 'Shadow: {}'.format(value)
+            if key in (CARD_SHADOW, BACK_PREFIX + CARD_SHADOW):
+                field = 'shadow' if key == CARD_SHADOW else 'shadow back'
+                if (lang == 'English' and
+                        not re.search(r'^(?:\[[^\]]+\])?Shadow(?:\[[^\]]+\])?:',
+                                      value)):
+                    value = 'Shadow: {}'.format(value)
+                    error = ('Appending missing "Shadow:" text to the {} '
+                             'effect'.format(field))
+                    PRE_SANITY_CHECK['shadow'].setdefault(
+                        (row[ROW_COLUMN], row[CARD_SCRATCH], lang),
+                        []).append(error)
+                elif (lang == 'French' and
+                        not re.search(r'^(?:\[[^\]]+\])?Ombre(?:\[[^\]]+\])? ?:',
+                                      value)):
+                    value = 'Ombre: {}'.format(value)
+                    error = ('Appending missing "Ombre:" text to the {} '
+                             'effect'.format(field))
+                    PRE_SANITY_CHECK['shadow'].setdefault(
+                        (row[ROW_COLUMN], row[CARD_SCRATCH], lang),
+                        []).append(error)
+                elif (lang == 'German' and
+                        not re.search(r'^(?:\[[^\]]+\])?Schatten(?:\[[^\]]+\])? ?:',
+                                      value)):
+                    value = 'Schatten: {}'.format(value)
+                    error = ('Appending missing "Schatten:" text to the {} '
+                             'effect'.format(field))
+                    PRE_SANITY_CHECK['shadow'].setdefault(
+                        (row[ROW_COLUMN], row[CARD_SCRATCH], lang),
+                        []).append(error)
+                elif (lang == 'Italian' and
+                        not re.search(r'^(?:\[[^\]]+\])?Ombra(?:\[[^\]]+\])? ?:',
+                                      value)):
+                    value = 'Ombra: {}'.format(value)
+                    error = ('Appending missing "Ombra:" text to the {} '
+                             'effect'.format(field))
+                    PRE_SANITY_CHECK['shadow'].setdefault(
+                        (row[ROW_COLUMN], row[CARD_SCRATCH], lang),
+                        []).append(error)
+                elif (lang == 'Polish' and
+                        not re.search(r'^(?:\[[^\]]+\])?Cień(?:\[[^\]]+\])? ?:',
+                                      value)):
+                    value = 'Cień: {}'.format(value)
+                    error = ('Appending missing "Cień:" text to the {} '
+                             'effect'.format(field))
+                    PRE_SANITY_CHECK['shadow'].setdefault(
+                        (row[ROW_COLUMN], row[CARD_SCRATCH], lang),
+                        []).append(error)
+                elif (lang == 'Spanish' and
+                        not re.search(r'^(?:\[[^\]]+\])?Sombra(?:\[[^\]]+\])? ?:',
+                                      value)):
+                    value = 'Sombra: {}'.format(value)
+                    error = ('Appending missing "Sombra:" text to the {} '
+                             'effect'.format(field))
+                    PRE_SANITY_CHECK['shadow'].setdefault(
+                        (row[ROW_COLUMN], row[CARD_SCRATCH], lang),
+                        []).append(error)
 
             row[key] = value
 
@@ -2709,6 +2760,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
     PRE_SANITY_CHECK['name'] = {}
     PRE_SANITY_CHECK['ref'] = {}
     PRE_SANITY_CHECK['flavour'] = {}
+    PRE_SANITY_CHECK['shadow'] = {}
     _extract_all_card_names(DATA, 'English')
     _clean_data(conf, DATA, 'English')
 
@@ -2821,10 +2873,18 @@ def extract_flags(value, ignore_flags=False):
 def _verify_period(value):
     """ Verify period at the end of the paragraph.
     """
+    if not value:
+        return True
+
     res = True
     paragraphs = value.split('\n\n')
     for pos, paragraph in enumerate(paragraphs):
-        paragraph = paragraph.replace('[/size]', '').replace('[br]', '')
+        paragraph = (paragraph.replace('[vspace]', '').replace('[br]', '')
+                     .strip())
+        if not paragraph:
+            continue
+
+        paragraph = paragraph.replace('[/size]', '')
         if pos != len(paragraphs) - 1:
             paragraph = paragraph.replace(':', '.')
 
@@ -2903,7 +2963,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
     """
     errors = []
     text = re.sub(r'(^|\n)(?:\[[^\]]+\])*\[i\](?!\[b\]Rumor\[\/b\]|Example:)'
-                  r'.+?\[\/i\](?:\[[^\]]+\])*(?:\n|$)', '\\1',
+                  r'.+?\[\/i\](?:\[[^\]]+\])*(?:\n\n|$)', '\\1',
                   text, flags=re.DOTALL)
 
     paragraphs = [p.strip() for p in re.split(r'\n{2,}', text) if p.strip()]
@@ -3553,6 +3613,11 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
 
         for error in PRE_SANITY_CHECK['flavour'].get(
+                (i, card_scratch, 'English'), []):
+            message = '{} for row #{}{}'.format(error, i, row_info)
+            logging.warning(message)
+
+        for error in PRE_SANITY_CHECK['shadow'].get(
                 (i, card_scratch, 'English'), []):
             message = '{} for row #{}{}'.format(error, i, row_info)
             logging.warning(message)
@@ -4927,6 +4992,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
+        elif (card_shadow is not None and
+              not _verify_shadow_case(card_shadow, 'English')):
+            message = ('Shadow effect should start with a capital letter for '
+                       'row #{}{}'.format(i, row_info))
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
         elif (card_shadow is not None and card_shadow != 'TBD' and
               not _verify_period(card_shadow)):
             message = ('Missing period at the end of shadow for row #{}{}'
@@ -4961,6 +5035,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif card_shadow_back is not None:
             message = 'Redundant shadow back for row #{}{}'.format(
                 i, row_info)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+        elif (card_shadow_back is not None and
+              not _verify_shadow_case(card_shadow_back, 'English')):
+            message = ('Shadow back effect should start with a capital letter '
+                       'for row #{}{}'.format(i, row_info))
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
@@ -5768,7 +5851,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     broken_set_ids.add(set_id)
 
             if key != CARD_DECK_RULES and isinstance(value, str):
-                match = re.search(r' ((?:\[[^\]]+\])+)(?:\n|$)', value)
+                match = re.search(r' ((?:\[[^\]]+\])+)(?:\n\n|$)', value)
                 if match:
                     message = (
                         'Redundant space before "{}" in {} column for '
@@ -5973,6 +6056,13 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     '%s for card ID %s in %s translations, row #%s', error,
                     card_id, lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
+            for error in PRE_SANITY_CHECK['shadow'].get(
+                    (TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                     card_scratch, lang), []):
+                logging.warning(
+                    '%s for card ID %s in %s translations, row #%s', error,
+                    card_id, lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
             for key, value in TRANSLATIONS[lang][card_id].items():
                 if key not in TRANSLATED_COLUMNS:
                     continue
@@ -5999,7 +6089,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                 if isinstance(value, str):
-                    match = re.search(r' ((?:\[[^\]]+\])+)(?:\n|$)', value)
+                    match = re.search(r' ((?:\[[^\]]+\])+)(?:\n\n|$)', value)
                     if match:
                         logging.error(
                             'Redundant space before "%s" in %s column for '
@@ -6180,7 +6270,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
             if card_text is not None:
-                card_text_tr = TRANSLATIONS[lang][card_id].get(CARD_TEXT, '')
+                card_text_tr = TRANSLATIONS[lang][card_id].get(CARD_TEXT) or ''
                 if (card_type not in CARD_TYPES_NO_PERIOD_CHECK and
                       not _verify_period(card_text_tr)):
                     logging.error(
@@ -6201,7 +6291,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
             if card_text_back is not None:
                 card_text_back_tr = TRANSLATIONS[lang][card_id].get(
-                    BACK_PREFIX + CARD_TEXT, '')
+                    BACK_PREFIX + CARD_TEXT) or ''
                 if (card_type_back not in CARD_TYPES_NO_PERIOD_CHECK and
                       not _verify_period(card_text_back_tr)):
                     logging.error(
@@ -6224,8 +6314,21 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
             if card_shadow is not None:
                 card_shadow_tr = TRANSLATIONS[lang][card_id].get(
-                    CARD_SHADOW, '')
-                if not _verify_period(card_shadow_tr):
+                    CARD_SHADOW) or ''
+                if not _verify_shadow_case(card_shadow_tr, lang):
+                    if lang == 'French':
+                        logging.warning(
+                            'Shadow effect should probably start with a '
+                            'lowercase letter for card ID %s in %s '
+                            'translations, row #%s', card_id, lang,
+                            TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                    else:
+                        logging.error(
+                            'Shadow effect should start with a capital letter '
+                            'for card ID %s in %s translations, row #%s',
+                            card_id, lang,
+                            TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                elif not _verify_period(card_shadow_tr):
                     logging.error(
                         'Missing period at the end of shadow for card ID %s '
                         'in %s translations, row #%s', card_id, lang,
@@ -6233,8 +6336,21 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
             if card_shadow_back is not None:
                 card_shadow_back_tr = TRANSLATIONS[lang][card_id].get(
-                    BACK_PREFIX + CARD_SHADOW, '')
-                if not _verify_period(card_shadow_back_tr):
+                    BACK_PREFIX + CARD_SHADOW) or ''
+                if not _verify_shadow_case(card_shadow_back_tr, lang):
+                    if lang == 'French':
+                        logging.warning(
+                            'Shadow back effect should probably start with a '
+                            'lowercase letter for card ID %s in %s '
+                            'translations, row #%s', card_id, lang,
+                            TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                    else:
+                        logging.error(
+                            'Shadow back effect should start with a capital '
+                            'letter for card ID %s in %s translations, row '
+                            '#%s', card_id, lang,
+                            TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                elif not _verify_period(card_shadow_back_tr):
                     logging.error(
                         'Missing period at the end of shadow back for card ID '
                         '%s in %s translations, row #%s', card_id, lang,
@@ -6249,6 +6365,48 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
     logging.info('...Performing a sanity check of the spreadsheet (%ss)',
                  round(time.time() - timestamp, 3))
     return sets
+
+
+def _verify_shadow_case(shadow_text, lang):  # pylint: disable=R0911
+    """ Check whether a shadow effect has a correct case or not.
+    """
+    if (lang == 'English' and
+            re.search(r'^(?:\[[^\]]+\])?Shadow(?:\[[^\]]+\])?: '
+                      r'[a-zàáâãäąæçćĉèéêëęìíîïłñńòóôõöœśßùúûüźż]',
+                      shadow_text)):
+        return False
+
+    if (lang == 'French' and
+            re.search(r'^(?:\[[^\]]+\])?Ombre(?:\[[^\]]+\])?: '
+                      r'[A-ZÀÁÂÃÄĄÆÇĆĈÈÉÊËĘÌÍÎÏŁÑŃÒÓÔÕÖŒŚßÙÚÛÜŹŻ]',
+                      shadow_text)):
+        return False
+
+    if (lang == 'German' and
+            re.search(r'^(?:\[[^\]]+\])?Schatten(?:\[[^\]]+\])?: '
+                      r'[a-zàáâãäąæçćĉèéêëęìíîïłñńòóôõöœśßùúûüźż]',
+                      shadow_text)):
+        return False
+
+    if (lang == 'Italian' and
+            re.search(r'^(?:\[[^\]]+\])?Ombra(?:\[[^\]]+\])?: '
+                      r'[a-zàáâãäąæçćĉèéêëęìíîïłñńòóôõöœśßùúûüźż]',
+                      shadow_text)):
+        return False
+
+    if (lang == 'Polish' and
+            re.search(r'^(?:\[[^\]]+\])?Cień(?:\[[^\]]+\])?: '
+                      r'[a-zàáâãäąæçćĉèéêëęìíîïłñńòóôõöœśßùúûüźż]',
+                      shadow_text)):
+        return False
+
+    if (lang == 'Spanish' and
+            re.search(r'^(?:\[[^\]]+\])?Sombra(?:\[[^\]]+\])?: '
+                      r'[a-zàáâãäąæçćĉèéêëęìíîïłñńòóôõöœśßùúûüźż]',
+                      shadow_text)):
+        return False
+
+    return True
 
 
 def _has_discord_channel(card):

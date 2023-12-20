@@ -1852,7 +1852,7 @@ def get_unknown_names(text, field, card, res, all_card_names,  # pylint: disable
     """ Detect unknown names in the text.
     """
     text = re.sub(r'(^|\n)(?:\[[^\]]+\])*\[i\](?!\[b\]Rumor\[\/b\]|Example:)'
-                  r'.+?\[\/i\](?:\[[^\]]+\])*(?:\n|$)', '\\1',
+                  r'.+?\[\/i\](?:\[[^\]]+\])*(?:\n\n|$)', '\\1',
                   text, flags=re.DOTALL)
 
     if 'developed by A Long-extended Party' in text:
@@ -1880,7 +1880,7 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
     """ Detect text rules precedents.
     """
     text = re.sub(r'(^|\n)(?:\[[^\]]+\])*\[i\](?!\[b\]Rumor\[\/b\]|Example:)'
-                  r'.+?\[\/i\](?:\[[^\]]+\])*(?:\n|$)', '\\1\\*\\*\\*',
+                  r'.+?\[\/i\](?:\[[^\]]+\])*(?:\n\n|$)', '\\1\\*\\*\\*',
                   text, flags=re.DOTALL)
     paragraphs = [p.strip() for p in re.split(r'\n{2,}', text) if p.strip()]
     if not paragraphs:
