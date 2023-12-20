@@ -977,6 +977,9 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
             (card_type not in ('Rules', 'Campaign', 'Contract', 'Nightmare') or
              (card_type == 'Contract' and
               card.get(lotr.BACK_PREFIX + lotr.CARD_TYPE) != 'Contract') or
+             (card_type == 'Player Objective' and
+              card.get(lotr.BACK_PREFIX + lotr.CARD_TYPE) !=
+              'Player Objective') or
              card.get(lotr.BACK_PREFIX + lotr.CARD_TEXT))):
         res_b = '\n\n`SIDE B`\n\n{}'.format(format_side(card, lotr.BACK_PREFIX))
     else:
@@ -4449,7 +4452,10 @@ Targets removed.
             if (side == 'A' and card.get(lotr.BACK_PREFIX + lotr.CARD_NAME) and
                     (card[lotr.CARD_TYPE] == 'Quest' or
                      card[lotr.CARD_TYPE] == card.get(
-                         lotr.BACK_PREFIX + lotr.CARD_TYPE) == 'Contract')):
+                         lotr.BACK_PREFIX + lotr.CARD_TYPE) == 'Contract' or
+                     card[lotr.CARD_TYPE] == card.get(
+                         lotr.BACK_PREFIX + lotr.CARD_TYPE) ==
+                     'Player Objective')):
                 await self._generate_artwork(card, filetype, 'B', content)
 
         return ''

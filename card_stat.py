@@ -173,7 +173,7 @@ def collect_spheres(data):
 def collect_numbers(data):  # pylint: disable=R0912,R0914,R0915
     """ Collect numbers statistics from Hall of Beorn.
     """
-    non_sphere_types = ['Player Objective']
+    non_sphere_types = []
     sphere_types = ['Hero', 'Ally', 'Attachment', 'Event', 'Player Side Quest']
     unique_types = ['Ally', 'Attachment']
     spheres = ['Leadership', 'Lore', 'Spirit', 'Tactics', 'Neutral']
@@ -549,7 +549,7 @@ def create_ringsdb_csv(pack_name, pack_code):
                     row[key] = value.replace('\r\n', '\n')
 
             if row['type_name'] == 'Player Objective':
-                type_name = 'Attachment'
+                type_name = 'Contract'
             elif (row['type_name'] == 'Treasure' or
                   row.get('subtype_code') in ('Boon', 'Burden')):
                 type_name = 'Campaign'

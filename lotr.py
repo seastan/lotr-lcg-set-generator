@@ -178,12 +178,11 @@ CARD_TYPES = {'Ally', 'Attachment', 'Campaign', 'Contract',
               'Treachery', 'Treasure'}
 CARD_TYPES_LANDSCAPE = {'Encounter Side Quest', 'Full Art Landscape',
                         'Player Side Quest', 'Quest'}
-CARD_TYPES_DOUBLESIDE_MANDATORY = {'Campaign', 'Nightmare', 'Presentation',
-                                   'Quest', 'Rules'}
+CARD_TYPES_DOUBLESIDE_DEFAULT = {'Campaign', 'Nightmare', 'Presentation',
+                                 'Quest', 'Rules'}
 CARD_TYPES_PLAYER = {'Ally', 'Attachment', 'Contract', 'Event', 'Hero',
                      'Player Objective', 'Player Side Quest', 'Treasure'}
-CARD_TYPES_PLAYER_DECK = {'Ally', 'Attachment', 'Event', 'Player Objective',
-                          'Player Side Quest'}
+CARD_TYPES_PLAYER_DECK = {'Ally', 'Attachment', 'Event', 'Player Side Quest'}
 CARD_TYPES_ENCOUNTER_SIZE = {'Enemy', 'Location', 'Objective',
                              'Objective Ally', 'Objective Hero',
                              'Objective Location', 'Ship Enemy',
@@ -197,7 +196,7 @@ CARD_TYPES_NO_ENCOUNTER_SET = {'Ally', 'Attachment', 'Contract', 'Event',
                                'Full Art Landscape', 'Full Art Portrait',
                                'Hero', 'Player Objective', 'Player Side Quest',
                                'Presentation'}
-CARD_TYPES_UNIQUE = {'Hero', 'Objective Hero', 'Treasure'}
+CARD_TYPES_UNIQUE = {'Hero', 'Objective Hero', 'Player Objective', 'Treasure'}
 CARD_TYPES_NO_UNIQUE = {'Campaign', 'Contract', 'Event', 'Full Art Landscape',
                         'Full Art Portrait', 'Nightmare', 'Presentation',
                         'Quest', 'Rules'}
@@ -213,8 +212,8 @@ CARD_SPHERES_TRAITS = {'Region'}
 CARD_TYPES_NO_KEYWORDS = {'Campaign', 'Contract', 'Full Art Landscape',
                           'Full Art Portrait', 'Nightmare', 'Presentation',
                           'Rules'}
-CARD_TYPES_COST = {'Hero', 'Ally', 'Attachment', 'Event', 'Player Objective',
-                   'Player Side Quest', 'Treasure', 'Quest'}
+CARD_TYPES_COST = {'Hero', 'Ally', 'Attachment', 'Event', 'Player Side Quest',
+                   'Treasure', 'Quest'}
 CARD_TYPES_ENGAGEMENT = {'Enemy', 'Ship Enemy', 'Quest'}
 CARD_TYPES_THREAT = {'Enemy', 'Location', 'Ship Enemy'}
 CARD_TYPES_WILLPOWER = {'Ally', 'Hero', 'Objective Ally', 'Objective Hero',
@@ -233,29 +232,14 @@ CARD_TYPES_VICTORY = {'Ally', 'Attachment', 'Encounter Side Quest', 'Enemy',
 CARD_TYPES_VICTORY_BACK = {'Quest'}
 CARD_SPHERES_NO_VICTORY = {'Cave', 'NoStat', 'Region'}
 CARD_TYPES_NO_PERIOD_CHECK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
-CARD_TYPES_TEXT = {}
-#CARD_TYPES_TEXT = {'Attachment', 'Campaign', 'Contract',
-#                   'Encounter Side Quest', 'Event', 'Hero', 'Location',
-#                   'Nightmare', 'Objective', 'Objective Ally',
-#                   'Objective Hero', 'Objective Location', 'Player Objective',
-#                   'Player Side Quest', 'Presentation', 'Rules', 'Ship Enemy',
-#                   'Ship Objective', 'Treasure'}
 CARD_TYPES_NO_TEXT = {'Full Art Landscape', 'Full Art Portrait'}
-CARD_TYPES_TEXT_BACK = {}
-#CARD_TYPES_TEXT_BACK = {'Attachment', 'Campaign', 'Encounter Side Quest',
-#                        'Event', 'Hero', 'Location', 'Nightmare', 'Objective',
-#                        'Objective Ally', 'Objective Hero',
-#                        'Objective Location', 'Player Objective',
-#                        'Player Side Quest', 'Quest', 'Ship Enemy',
-#                        'Ship Objective', 'Treasure'}
 CARD_TYPES_NO_TEXT_BACK = {'Full Art Landscape', 'Full Art Portrait',
                            'Presentation'}
 CARD_SPHERES_NO_TEXT = {'Region'}
 CARD_TYPES_SHADOW = {'Enemy', 'Location', 'Objective', 'Objective Ally',
                      'Objective Hero', 'Objective Location', 'Ship Enemy',
                      'Ship Objective', 'Treachery'}
-CARD_TYPES_SHADOW_ENCOUNTER = {'Ally', 'Attachment', 'Event',
-                               'Player Objective'}
+CARD_TYPES_SHADOW_ENCOUNTER = {'Ally', 'Attachment', 'Event'}
 CARD_TYPES_NO_FLAVOUR = {'Full Art Landscape', 'Full Art Portrait',
                          'Presentation', 'Rules'}
 CARD_SPHERES_NO_FLAVOUR = {'Region'}
@@ -366,10 +350,9 @@ CARD_TYPES_NO_COPYRIGHT = {'Presentation', 'Rules'}
 CARD_TYPES_DECK_RULES = {'Nightmare', 'Quest'}
 CARD_TYPES_ONE_COPY = {'Campaign', 'Contract', 'Encounter Side Quest',
                        'Full Art Landscape', 'Full Art Portrait', 'Hero',
-                       'Nightmare', 'Objective Hero', 'Presentation', 'Quest',
-                       'Rules', 'Treasure'}
-CARD_TYPES_THREE_COPIES = {'Ally', 'Attachment', 'Event', 'Player Objective',
-                           'Player Side Quest'}
+                       'Nightmare', 'Objective Hero', 'Player Objective',
+                       'Presentation', 'Quest', 'Rules', 'Treasure'}
+CARD_TYPES_THREE_COPIES = {'Ally', 'Attachment', 'Event', 'Player Side Quest'}
 CARD_TYPES_BOON = {'Ally', 'Attachment', 'Event', 'Objective Ally'}
 CARD_TYPES_BOON_SPHERE = {'Attachment', 'Event'}
 CARD_SPHERES_BOON = {'Boon', 'BoonLeadership', 'BoonLore', 'BoonSpirit',
@@ -615,6 +598,7 @@ CARD_TYPE_SUFFIX_HALLOFBEORN = {
     'Campaign': 'Setup',
     'Contract': 'Side',
     'Nightmare': 'Setup',
+    'Player Objective': 'Side',
     'Presentation': 'Setup',
     'Rules': 'Setup'
 }
@@ -2474,10 +2458,13 @@ def _clean_sets(data):
 def is_doubleside(card_type, card_type_back):
     """ Check whether the card is double-sided or not.
     """
-    if card_type in CARD_TYPES_DOUBLESIDE_MANDATORY:
+    if card_type in CARD_TYPES_DOUBLESIDE_DEFAULT:
         return True
 
     if card_type == card_type_back == 'Contract':
+        return True
+
+    if card_type == card_type_back == 'Player Objective':
         return True
 
     return False
@@ -2507,11 +2494,11 @@ def _update_data(data):
         if row[BACK_PREFIX + CARD_TYPE] == 'Side Quest':
             row[BACK_PREFIX + CARD_TYPE] = 'Encounter Side Quest'
 
-        if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_MANDATORY and
+        if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_DEFAULT and
                 row[BACK_PREFIX + CARD_TYPE] is None):
             row[BACK_PREFIX + CARD_TYPE] = row[CARD_TYPE]
 
-        if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_MANDATORY and
+        if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_DEFAULT and
                 row[CARD_SIDE_B] is None):
             row[CARD_SIDE_B] = row[CARD_NAME]
 
@@ -2815,7 +2802,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
                         'ignoring', row[CARD_ID], row[ROW_COLUMN], lang)
                 else:
                     if (card_types.get(row[CARD_ID]) in
-                            CARD_TYPES_DOUBLESIDE_MANDATORY and
+                            CARD_TYPES_DOUBLESIDE_DEFAULT and
                             row[CARD_SIDE_B] is None):
                         row[CARD_SIDE_B] = row[CARD_NAME]
 
@@ -3852,7 +3839,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_type in CARD_TYPES_DOUBLESIDE_MANDATORY
+        elif (card_type in CARD_TYPES_DOUBLESIDE_DEFAULT
               and card_type_back is not None and card_type_back != card_type):
             message = ('Incorrect card type back according to its card type '
                        'front for row #{}{}'.format(i, row_info))
@@ -3861,8 +3848,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_type not in CARD_TYPES_DOUBLESIDE_MANDATORY
-              and card_type_back in CARD_TYPES_DOUBLESIDE_MANDATORY):
+        elif (card_type not in CARD_TYPES_DOUBLESIDE_DEFAULT
+              and card_type_back in CARD_TYPES_DOUBLESIDE_DEFAULT):
             message = ('Incorrect card type back according to its card type '
                        'front for row #{}{}'.format(i, row_info))
             logging.error(message)
@@ -4851,14 +4838,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if card_text is None and card_type in CARD_TYPES_TEXT:
-            message = 'Missing text for row #{}{}'.format(i, row_info)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-        elif card_text is not None and card_type in CARD_TYPES_NO_TEXT:
+        if card_text is not None and card_type in CARD_TYPES_NO_TEXT:
             message = 'Redundant text for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -4902,14 +4882,6 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         if card_text_back is not None and card_type_back is None:
             message = 'Redundant text back for row #{}{}'.format(i, row_info)
-            logging.error(message)
-            if not card_scratch:
-                errors.append(message)
-            else:
-                broken_set_ids.add(set_id)
-        elif (card_text_back is None and
-              card_type_back in CARD_TYPES_TEXT_BACK):
-            message = 'Missing text back for row #{}{}'.format(i, row_info)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
@@ -5789,7 +5761,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
 
         if (card_back is not None and
-                (card_type in CARD_TYPES_DOUBLESIDE_MANDATORY or
+                (card_type in CARD_TYPES_DOUBLESIDE_DEFAULT or
                  card_type_back is not None)):
             message = 'Redundant custom card back for row #{}{}'.format(
                 i, row_info)
@@ -6840,7 +6812,7 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
         return value
 
     if name in (CARD_TYPE, BACK_PREFIX + CARD_TYPE):
-        if card_type in CARD_TYPES_DOUBLESIDE_MANDATORY:
+        if card_type in CARD_TYPES_DOUBLESIDE_DEFAULT:
             value = card_type
         elif value == 'Encounter Side Quest':
             value = 'Side Quest'
@@ -6852,7 +6824,7 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
         return value
 
     if name in (CARD_SPHERE, BACK_PREFIX + CARD_SPHERE):
-        if card_type in ('Player Objective', 'Treasure'):
+        if card_type == 'Treasure':
             value = 'Neutral'
         elif card_type in ('Presentation', 'Rules'):
             value = ''
@@ -7000,12 +6972,13 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
             if value != '':
                 properties.append((name, value))
 
-        side_b = (card_type in CARD_TYPES_DOUBLESIDE_MANDATORY
+        side_b = (card_type in CARD_TYPES_DOUBLESIDE_DEFAULT
                   or row[BACK_PREFIX + CARD_NAME])
         if card_type in ('Campaign', 'Nightmare'):
             properties.append((CARD_ENGAGEMENT, 'A'))
-        elif (card_type == 'Contract' and
-              row[BACK_PREFIX + CARD_TYPE] == 'Contract'):
+        elif card_type == row[BACK_PREFIX + CARD_TYPE] == 'Contract':
+            properties.append((CARD_ENGAGEMENT, 'A'))
+        elif card_type == row[BACK_PREFIX + CARD_TYPE] == 'Player Objective':
             properties.append((CARD_ENGAGEMENT, 'A'))
 
         fix_linebreaks = card_type not in ('Presentation', 'Rules')
@@ -7017,7 +6990,7 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
             _add_set_xml_properties(card, properties, fix_linebreaks, '    ')
 
         if side_b:
-            if (card_type in CARD_TYPES_DOUBLESIDE_MANDATORY
+            if (card_type in CARD_TYPES_DOUBLESIDE_DEFAULT
                     and not row[BACK_PREFIX + CARD_NAME]):
                 alternate_name = row[CARD_NAME]
             else:
@@ -7050,8 +7023,10 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
 
             if card_type in ('Campaign', 'Nightmare'):
                 properties.append((CARD_ENGAGEMENT, 'B'))
-            elif (card_type == 'Contract' and
-                  row[BACK_PREFIX + CARD_TYPE] == 'Contract'):
+            elif card_type == row[BACK_PREFIX + CARD_TYPE] == 'Contract':
+                properties.append((CARD_ENGAGEMENT, 'B'))
+            elif (card_type == row[BACK_PREFIX + CARD_TYPE] ==
+                  'Player Objective'):
                 properties.append((CARD_ENGAGEMENT, 'B'))
 
             if properties:
@@ -7667,7 +7642,7 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                     hero_cards.append(card)
                 elif card[CARD_TYPE] == 'ally':
                     ally_cards.append(card)
-                elif card[CARD_TYPE] in ('attachment', 'player objective'):
+                elif card[CARD_TYPE] == 'attachment':
                     attachment_cards.append(card)
                 elif card[CARD_TYPE] == 'event':
                     event_cards.append(card)
@@ -7939,7 +7914,7 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                 sphere = row[CARD_SPHERE]
 
             if row[CARD_TYPE] == 'Player Objective':
-                card_type = 'Attachment'
+                card_type = 'Contract'
             elif (row[CARD_TYPE] == 'Treasure' or
                   row[CARD_SPHERE] in CARD_SPHERES_BOON or
                   row[CARD_SPHERE] == 'Burden'):
@@ -8187,7 +8162,7 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
         else:
             card_type = row[CARD_TYPE]
 
-        if row[CARD_TYPE] in ('Player Objective', 'Treasure'):
+        if row[CARD_TYPE] == 'Treasure':
             sphere = 'Neutral'
         elif row[CARD_SPHERE] in ('Cave', 'NoIcon', 'NoProgress', 'NoStat',
                                   'Region', 'Setup', 'SmallTextArea',
@@ -8229,8 +8204,7 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
             else:
                 card_type = row[BACK_PREFIX + CARD_TYPE]
 
-            if row[BACK_PREFIX + CARD_TYPE] in ('Player Objective',
-                                                'Treasure'):
+            if row[BACK_PREFIX + CARD_TYPE] == 'Treasure':
                 sphere = 'Neutral'
             elif row[BACK_PREFIX + CARD_SPHERE] in (
                     'Cave', 'NoIcon', 'NoProgress', 'NoStat', 'Region',
@@ -9206,7 +9180,7 @@ def _get_xml_property_value(row, name, card_type):
         value = ''
 
     if name in (CARD_TYPE, BACK_PREFIX + CARD_TYPE):
-        if card_type in CARD_TYPES_DOUBLESIDE_MANDATORY:
+        if card_type in CARD_TYPES_DOUBLESIDE_DEFAULT:
             value = card_type
 
         return value
@@ -9340,7 +9314,7 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
         properties.append(('Set Copyright', SETS[set_id][SET_COPYRIGHT] or ''))
 
         side_b = (card_type != 'Presentation' and (
-            card_type in CARD_TYPES_DOUBLESIDE_MANDATORY or
+            card_type in CARD_TYPES_DOUBLESIDE_DEFAULT or
             row[BACK_PREFIX + CARD_NAME]))
         if properties:
             if side_b:
@@ -9349,7 +9323,7 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
             _add_xml_properties(card, properties, '    ')
 
         if side_b:
-            if (card_type in CARD_TYPES_DOUBLESIDE_MANDATORY
+            if (card_type in CARD_TYPES_DOUBLESIDE_DEFAULT
                     and not row[BACK_PREFIX + CARD_NAME]):
                 alternate_name = row[CARD_NAME]
             else:
@@ -11493,7 +11467,8 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
                 images['{}.B'.format(card_id)] = data_back
             elif (data and
                   (data['card_type'] == 'Quest' or
-                   data['card_type'] == card_type_back == 'Contract')):
+                   data['card_type'] == card_type_back == 'Contract' or
+                   data['card_type'] == card_type_back == 'Player Objective')):
                 images['{}.B'.format(card_id)] = data.copy()
 
             artist_back = _extract_artist_name(alternate)
@@ -11501,7 +11476,8 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
                 artists['{}.B'.format(card_id)] = artist_back
             elif (artist and data and
                   (data['card_type'] == 'Quest' or
-                   data['card_type'] == card_type_back == 'Contract')):
+                   data['card_type'] == card_type_back == 'Contract' or
+                   data['card_type'] == card_type_back == 'Player Objective')):
                 artists['{}.B'.format(card_id)] = artist
 
     old_xml_path = os.path.join(SET_EONS_PATH,
@@ -11526,7 +11502,9 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
                 data_back = _extract_image_properties(alternate)
                 if (not data_back and data and
                         (data['card_type'] == 'Quest' or
-                         data['card_type'] == card_type_back == 'Contract')):
+                         data['card_type'] == card_type_back == 'Contract' or
+                         data['card_type'] == card_type_back ==
+                         'Player Objective')):
                     data_back = data
 
                 if (data_back and data_back['snapshot'] ==

@@ -1,6 +1,6 @@
 var doubleSideTypes = ['Campaign', 'Nightmare', 'Presentation', 'Quest', 'Rules'];
 var playerTypes = ['Ally', 'Attachment', 'Contract', 'Event', 'Full Art Landscape', 'Full Art Portrait', 'Hero', 'Hero Promo', 'Player Objective', 'Player Side Quest', 'Treasure'];
-var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Objective', 'Player Side Quest'];
+var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Side Quest'];
 var landscapeTypes = ['Cave', 'Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Full Art Landscape', 'Player Side Quest', 'Region', 'Quest'];
 
 var optionalTraitTypes = ['Cave', 'Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Player Side Quest'];
@@ -50,6 +50,7 @@ pageInRegion['Rules'] = '48,488,317,15';
 
 var sideRegion = {};
 sideRegion['Contract'] = '0,279,413,17';
+sideRegion['Player Region'] = '0,279,413,17';
 
 var encounterSet1PortraitRegion = {};
 encounterSet1PortraitRegion['Quest'] = '450,213,20,20';
@@ -395,7 +396,7 @@ nameRegion['Objective'] = '74,46,265,33';
 nameRegion['Objective Ally'] = '74,46,265,33';
 nameRegion['Objective Hero'] = '74,46,265,33';
 nameRegion['Objective Location'] = '74,46,265,33';
-nameRegion['Player Objective'] = '126,46,213,33';
+nameRegion['Player Objective'] = '74,46,265,33';
 nameRegion['Player Side Quest'] = '143,42,370,33';
 nameRegion['Quest'] = '143,42,370,33';
 nameRegion['Region'] = '79,347,162,30';
@@ -423,7 +424,7 @@ nameUniqueRegion['Objective'] = '74,44,265,34';
 nameUniqueRegion['Objective Ally'] = '74,44,265,34';
 nameUniqueRegion['Objective Hero'] = '74,44,265,34';
 nameUniqueRegion['Objective Location'] = '74,44,265,34';
-nameUniqueRegion['Player Objective'] = '126,44,213,34';
+nameUniqueRegion['Player Objective'] = '74,44,265,34';
 nameUniqueRegion['Player Side Quest'] = '143,40,370,34';
 nameUniqueRegion['Region'] = '79,345,162,31';
 nameUniqueRegion['Ship Enemy'] = '93,323,227,31';
@@ -518,7 +519,6 @@ var resourceCostRegion = {};
 resourceCostRegion['Ally'] = '67,41,56,37';
 resourceCostRegion['Attachment'] = '37,44,56,37';
 resourceCostRegion['Event'] = '37,38,56,37';
-resourceCostRegion['Player Objective'] = '37,44,56,37';
 resourceCostRegion['Player Side Quest'] = '43,44,56,37';
 resourceCostRegion['Treasure'] = '45,61,44,30';
 
@@ -815,8 +815,8 @@ translate['Objective Hero'] = {'English': 'Objective-Hero', 'French': 'Objectif-
 	'Polish': 'Cel-Bohater', 'Italian': 'Eroe-Obiettivo', 'Portuguese': 'Objetivo-Her\u00f3i'};
 translate['Objective Location'] = {'English': 'Objective-Location', 'French': 'Objectif-Lieu', 'German': 'Ziel-Ort', 'Spanish': 'Lugar-Objetivo', 'Polish': 'Cel-Obszar',
 	'Italian': 'Luogo-Obiettivo', 'Portuguese': 'Objetivo-Localiza\u00e7\u00e3o'};
-translate['Player Objective'] = {'English': 'Objective', 'French': 'Objectif', 'German': 'Ziel', 'Spanish': 'Objetivo', 'Polish': 'Cel', 'Italian': 'Obiettivo',
-	'Portuguese': 'Objetivo'};
+translate['Player Objective'] = {'English': 'Player Objective', 'French': 'Objectif', 'German': 'Spieler-Ziel', 'Spanish': 'Objetivo', 'Polish': 'Cel',
+	'Italian': 'Obiettivo dei Giocatori', 'Portuguese': 'T.B.D.'};
 translate['Player Side Quest'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria',
 	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria', 'Portuguese': 'Miss\u00e3o Secund\u00e1ria'};
 translate['Quest'] = {'English': 'Quest', 'French': 'Qu\u00eate', 'German': 'Abenteuer', 'Spanish': 'Misi\u00f3n', 'Polish': 'Wyprawa', 'Italian': 'Ricerca',
@@ -900,7 +900,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 
 		let doubleSide = isDoubleSide(card['Type'], card['BType']);
 
-		if (card['Type'] == 'Quest' && card['BQuest Points']) {
+		if ((card['Type'] + '' == 'Quest') && card['BQuest Points']) {
 			card['Quest Points'] = card['BQuest Points'];
 		}
 
@@ -914,6 +914,10 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 
 		if (!card['Artist']) {
 			card['Artist'] = 'Unknown Artist';
+		}
+
+		if ((card['Type'] + '' == 'Player Objective') && (card['BType'] + '' == 'Player Objective') && !card['BArtist']) {
+			card['BArtist'] = card['Artist'];
 		}
 
 		if (!doubleSide && card['BName'] && !card['BArtist']) {
@@ -1316,6 +1320,16 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						s.set('Template', 'Neutral');
 					}
 				}
+				else if (cardType == 'Player Objective') {
+					let playerObjectiveSide;
+					if (side == 'front') {
+						playerObjectiveSide = 'A';
+					}
+					else {
+						playerObjectiveSide = 'B';
+					}
+					s.set('Side', markUp(translate['Side'][lang].toUpperCase() + ' ' + playerObjectiveSide, 'Side', cardType, lang, setID));
+				}
 
 				if (['Boon', 'Burden'].indexOf(cardSphere) > -1) {
 					s.set('Subtype', markUp(translate[cardSphere][lang].toUpperCase(), 'Subtype', cardType, lang, setID));
@@ -1387,6 +1401,14 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 							s.set('Portrait-external-panx', card['BPanX']);
 							s.set('Portrait-external-pany', card['BPanY']);
 							s.set('Portrait-external-scale', card['BScale'] / 100);
+						}
+					}
+					else if ((cardType == 'Player Objective') && (card['BType'] + '' == 'Player Objective') && card['Artwork']) {
+						s.set('Portrait-external-path', 'project:imagesRaw/' + card['Artwork']);
+						if (card['PanX'] && card['PanY'] && card['Scale']) {
+							s.set('Portrait-external-panx', card['PanX']);
+							s.set('Portrait-external-pany', card['PanY']);
+							s.set('Portrait-external-scale', card['Scale'] / 100);
 						}
 					}
 					else {
