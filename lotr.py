@@ -6157,9 +6157,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         key.replace(BACK_PREFIX, 'Back '), card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
-            if card_traits is not None:
-                card_traits_tr = TRANSLATIONS[lang][card_id].get(
-                    CARD_TRAITS, '')
+            if (card_traits is not None and
+                    TRANSLATIONS[lang][card_id].get(CARD_TRAITS)):
+                card_traits_tr = TRANSLATIONS[lang][card_id][CARD_TRAITS]
                 if (len(extract_traits(card_traits_tr)) !=
                         len(extract_traits(card_traits))):
                     logging.error(
@@ -6173,9 +6173,11 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         'ID %s in %s translations, row #%s', card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
-            if card_traits_back is not None:
-                card_traits_back_tr = TRANSLATIONS[lang][card_id].get(
-                    BACK_PREFIX + CARD_TRAITS, '')
+            if (card_traits_back is not None and
+                    TRANSLATIONS[lang][card_id].get(
+                        BACK_PREFIX + CARD_TRAITS)):
+                card_traits_back_tr = (
+                    TRANSLATIONS[lang][card_id][BACK_PREFIX + CARD_TRAITS])
                 if (len(extract_traits(card_traits_back_tr)) !=
                         len(extract_traits(card_traits_back))):
                     logging.error(
@@ -6189,9 +6191,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         'ID %s in %s translations, row #%s', card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
-            if card_keywords is not None:
-                card_keywords_tr = TRANSLATIONS[lang][card_id].get(
-                    CARD_KEYWORDS, '')
+            if (card_keywords is not None and
+                    TRANSLATIONS[lang][card_id].get(CARD_KEYWORDS)):
+                card_keywords_tr = TRANSLATIONS[lang][card_id][CARD_KEYWORDS]
                 if (len(extract_keywords(card_keywords_tr)) !=
                         len(extract_keywords(card_keywords))):
                     logging.error(
@@ -6205,9 +6207,11 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         'ID %s in %s translations, row #%s', card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
-            if card_keywords_back is not None:
-                card_keywords_back_tr = TRANSLATIONS[lang][card_id].get(
-                    BACK_PREFIX + CARD_KEYWORDS, '')
+            if (card_keywords_back is not None and
+                    TRANSLATIONS[lang][card_id].get(
+                        BACK_PREFIX + CARD_KEYWORDS)):
+                card_keywords_back_tr = (
+                    TRANSLATIONS[lang][card_id][BACK_PREFIX + CARD_KEYWORDS])
                 if (len(extract_keywords(card_keywords_back_tr)) !=
                         len(extract_keywords(card_keywords_back))):
                     logging.error(
@@ -6222,27 +6226,31 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
             if (card_victory is not None and
+                    TRANSLATIONS[lang][card_id].get(CARD_VICTORY) and
                     (is_positive_or_zero_int(card_victory) or
                      card_type in ('Presentation', 'Rules')) and
                     card_victory !=
-                    TRANSLATIONS[lang][card_id].get(CARD_VICTORY, '')):
+                    TRANSLATIONS[lang][card_id][CARD_VICTORY]):
                 logging.error(
                     'Incorrect victory points for card '
                     'ID %s in %s translations, row #%s', card_id,
                     lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
             if (card_victory_back is not None and
+                    TRANSLATIONS[lang][card_id].get(
+                        BACK_PREFIX + CARD_VICTORY) and
                     (is_positive_or_zero_int(card_victory_back) or
                      card_type == 'Rules') and
-                    card_victory_back != TRANSLATIONS[lang][card_id].get(
-                        BACK_PREFIX + CARD_VICTORY, '')):
+                    card_victory_back !=
+                    TRANSLATIONS[lang][card_id][BACK_PREFIX + CARD_VICTORY]):
                 logging.error(
                     'Incorrect victory points back for card '
                     'ID %s in %s translations, row #%s', card_id,
                     lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
-            if card_text is not None:
-                card_text_tr = TRANSLATIONS[lang][card_id].get(CARD_TEXT) or ''
+            if (card_text is not None and
+                    TRANSLATIONS[lang][card_id].get(CARD_TEXT)):
+                card_text_tr = TRANSLATIONS[lang][card_id][CARD_TEXT]
                 if (card_type not in CARD_TYPES_NO_PERIOD_CHECK and
                       not _verify_period(card_text_tr)):
                     logging.error(
@@ -6261,9 +6269,10 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         'translations, row #%s', card_id, lang,
                         TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
-            if card_text_back is not None:
-                card_text_back_tr = TRANSLATIONS[lang][card_id].get(
-                    BACK_PREFIX + CARD_TEXT) or ''
+            if (card_text_back is not None and
+                    TRANSLATIONS[lang][card_id].get(BACK_PREFIX + CARD_TEXT)):
+                card_text_back_tr = (
+                    TRANSLATIONS[lang][card_id][BACK_PREFIX + CARD_TEXT])
                 if (card_type_back not in CARD_TYPES_NO_PERIOD_CHECK and
                       not _verify_period(card_text_back_tr)):
                     logging.error(
@@ -6284,9 +6293,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         '%s translations, row #%s', card_id, lang,
                         TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
-            if card_shadow is not None:
-                card_shadow_tr = TRANSLATIONS[lang][card_id].get(
-                    CARD_SHADOW) or ''
+            if (card_shadow is not None and
+                    TRANSLATIONS[lang][card_id].get(CARD_SHADOW)):
+                card_shadow_tr = TRANSLATIONS[lang][card_id][CARD_SHADOW]
                 if not _verify_shadow_case(card_shadow_tr, lang):
                     if lang == 'French':
                         logging.warning(
@@ -6306,9 +6315,11 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         'in %s translations, row #%s', card_id, lang,
                         TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
-            if card_shadow_back is not None:
-                card_shadow_back_tr = TRANSLATIONS[lang][card_id].get(
-                    BACK_PREFIX + CARD_SHADOW) or ''
+            if (card_shadow_back is not None and
+                    TRANSLATIONS[lang][card_id].get(
+                        BACK_PREFIX + CARD_SHADOW)):
+                card_shadow_back_tr = (
+                    TRANSLATIONS[lang][card_id][BACK_PREFIX + CARD_SHADOW])
                 if not _verify_shadow_case(card_shadow_back_tr, lang):
                     if lang == 'French':
                         logging.warning(
