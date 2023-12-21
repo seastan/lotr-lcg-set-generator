@@ -635,11 +635,11 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 data['ResourceCost-region'][2] + 'px">' + '<span style="vertical-align: middle; display: inline-block; padding-right: 2px">' + data.ResourceCost + '</span></div>';
         },
         'Side': function(data) {
-            if ((data.SideA + '' == '') || (data.Template == 'Neutral')) {
+            if ((data.Side + '' == '') && ((data.SideA + '' == '') || (data.Template == 'Neutral'))) {
                 return '';
             }
 
-            return '<div style="text-align: center; padding-top: 2px">' + data.SideA + '</div>';
+            return '<div style="text-align: center; padding-top: 2px">' + (data.Side || data.SideA) + '</div>';
         },
         'Stage': function(data) {
             if ((data.Stage + '' == '') || (data.StageLetter + '' == '')) {
@@ -832,11 +832,11 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             return '<div style="text-align: center; color: #C46900; font-family: Vafthrudnir; font-size: 27px; width: ' + data['ProgressBack-region'][2] + 'px">' + data.ProgressBack + '</div>';
         },
         'SideBack': function(data) {
-            if (data.SideB + '' == '') {
+            if ((data.Side + '' == '') && (data.SideB + '' == '')) {
                 return '';
             }
 
-            return '<div style="text-align: center; padding-top: 2px">' + data.SideB + '</div>';
+            return '<div style="text-align: center; padding-top: 2px">' + (data.Side || data.SideB) + '</div>';
         },
         'StageBack': function(data) {
             if ((data.Stage + '' == '') || (data.StageLetterBack + '' == '')) {
