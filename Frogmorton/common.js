@@ -1310,6 +1310,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				}
 
 				if (cardType == 'Contract') {
+					s.set('Side', '');
 					s.set('SideA', markUp(translate['Side'][lang].toUpperCase() + ' A', 'Side', cardType, lang, setID));
 					s.set('SideB', markUp(translate['Side'][lang].toUpperCase() + ' B', 'Side', cardType, lang, setID));
 
