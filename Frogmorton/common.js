@@ -815,8 +815,8 @@ translate['Objective Hero'] = {'English': 'Objective-Hero', 'French': 'Objectif-
 	'Polish': 'Cel-Bohater', 'Italian': 'Eroe-Obiettivo', 'Portuguese': 'Objetivo-Her\u00f3i'};
 translate['Objective Location'] = {'English': 'Objective-Location', 'French': 'Objectif-Lieu', 'German': 'Ziel-Ort', 'Spanish': 'Lugar-Objetivo', 'Polish': 'Cel-Obszar',
 	'Italian': 'Luogo-Obiettivo', 'Portuguese': 'Objetivo-Localiza\u00e7\u00e3o'};
-translate['Player Objective'] = {'English': 'Player Objective', 'French': 'Objectif Joueur', 'German': 'Spieler-Ziel', 'Spanish': 'Objetivo', 'Polish': 'Cel',
-	'Italian': 'Obiettivo dei Giocatori', 'Portuguese': 'T.B.D.'};
+translate['Player Objective'] = {'English': 'Player Objective', 'French': 'Objectif Joueur', 'German': 'Spieler-Ziel', 'Spanish': 'Objetivo de Jugador',
+	'Polish': 'Cel Gracza', 'Italian': 'Obiettivo dei Giocatori', 'Portuguese': 'T.B.D.'};
 translate['Player Side Quest'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria',
 	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria', 'Portuguese': 'Miss\u00e3o Secund\u00e1ria'};
 translate['Quest'] = {'English': 'Quest', 'French': 'Qu\u00eate', 'German': 'Abenteuer', 'Spanish': 'Misi\u00f3n', 'Polish': 'Wyprawa', 'Italian': 'Ricerca',
