@@ -662,7 +662,7 @@ SPANISH = {
     'Objective Ally': 'Objetivo-Aliado',
     'Objective Hero': 'H\u00e9roe-Objetivo',
     'Objective Location': 'Lugar-Objetivo',
-    'Player Objective': 'Objetivo',
+    'Player Objective': 'Objetivo de Jugador',
     'Player Side Quest': 'Misi\u00f3n Secundaria',
     'Quest': 'Misi\u00f3n',
     'Setup': 'Preparaci\u00f3n',
@@ -8021,7 +8021,9 @@ def _generate_tsv_from_json(json_data, output_path, release):  # pylint: disable
                       'numberInPack', 'encounterSet', 'unique', 'sphere',
                       'traits', 'keywords', 'cost', 'engagementCost', 'threat',
                       'willpower', 'attack', 'defense', 'hitPoints',
-                      'questPoints', 'victoryPoints', 'text', 'shadow', 'side']
+                      'questPoints', 'victoryPoints', 'cornerText', 'text',
+                      'shadow', 'side']
+
         if not release:
             fieldnames.append('modifiedTimeUtc')
 
@@ -8040,6 +8042,14 @@ def _generate_tsv_from_json(json_data, output_path, release):  # pylint: disable
             else:
                 engagement_cost = row['sides']['A']['engagementcost']
                 side = ''
+
+            if (row['sides']['A']['victorypoints'] and
+                    not is_int(row['sides']['A']['victorypoints'])):
+                victory_points = ''
+                corner_text = row['sides']['A']['victorypoints']
+            else:
+                victory_points = row['sides']['A']['victorypoints']
+                corner_text = ''
 
             tsv_row = {
                 'databaseId': row['cardid'],
@@ -8064,7 +8074,8 @@ def _generate_tsv_from_json(json_data, output_path, release):  # pylint: disable
                 'defense': row['sides']['A']['defense'],
                 'hitPoints': row['sides']['A']['hitpoints'],
                 'questPoints': row['sides']['A']['questpoints'],
-                'victoryPoints': row['sides']['A']['victorypoints'],
+                'victoryPoints': victory_points,
+                'cornerText': corner_text,
                 'text': row['sides']['A']['text'].replace('\n', ' '),
                 'shadow': row['sides']['A']['shadow'].replace('\n', ' '),
                 'side': side
@@ -8083,6 +8094,14 @@ def _generate_tsv_from_json(json_data, output_path, release):  # pylint: disable
                 else:
                     engagement_cost = row['sides']['B']['engagementcost']
                     side = ''
+
+                if (row['sides']['B']['victorypoints'] and
+                        not is_int(row['sides']['B']['victorypoints'])):
+                    victory_points = ''
+                    corner_text = row['sides']['B']['victorypoints']
+                else:
+                    victory_points = row['sides']['B']['victorypoints']
+                    corner_text = ''
 
                 tsv_row = {
                     'databaseId': row['cardid'],
@@ -8107,7 +8126,8 @@ def _generate_tsv_from_json(json_data, output_path, release):  # pylint: disable
                     'defense': row['sides']['B']['defense'],
                     'hitPoints': row['sides']['B']['hitpoints'],
                     'questPoints': row['sides']['B']['questpoints'],
-                    'victoryPoints': row['sides']['B']['victorypoints'],
+                    'victoryPoints': victory_points,
+                    'cornerText': corner_text,
                     'text': row['sides']['B']['text'].replace('\n', ' '),
                     'shadow': row['sides']['B']['shadow'].replace('\n', ' '),
                     'side': side
