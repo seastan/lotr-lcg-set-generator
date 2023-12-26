@@ -5945,6 +5945,28 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     else:
                         broken_set_ids.add(set_id)
 
+                if '“ ' in value:
+                    message = (
+                        'Redundant space after “ in {} column for row #{}{}'
+                        .format(key.replace(BACK_PREFIX, 'Back '), i,
+                                row_info))
+                    logging.error(message)
+                    if not card_scratch:
+                        errors.append(message)
+                    else:
+                        broken_set_ids.add(set_id)
+
+                if ' ”' in value:
+                    message = (
+                        'Redundant space before ” in {} column for row #{}{}'
+                        .format(key.replace(BACK_PREFIX, 'Back '), i,
+                                row_info))
+                    logging.error(message)
+                    if not card_scratch:
+                        errors.append(message)
+                    else:
+                        broken_set_ids.add(set_id)
+
                 ignore_accents = False
                 if key.startswith(BACK_PREFIX):
                     if (card_flags_back and
@@ -6141,6 +6163,20 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         logging.error(
                             '"[/bi]:" not ":[/bi]" in %s column for card ID '
                             '%s in %s translations, row #%s',
+                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
+                            TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+                    if lang != 'French' and '“ ' in value:
+                        logging.error(
+                            'Redundant space after “ in %s column for card'
+                            ' ID %s in %s translations, row #%s',
+                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
+                            TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+                    if lang != 'French' and ' ”' in value:
+                        logging.error(
+                            'Redundant space before ” in %s column for card'
+                            ' ID %s in %s translations, row #%s',
                             key.replace(BACK_PREFIX, 'Back '), card_id, lang,
                             TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
