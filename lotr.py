@@ -11497,18 +11497,16 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
             if data_back:
                 images['{}.B'.format(card_id)] = data_back
             elif (data and
-                  (data['card_type'] == 'Quest' or
-                   data['card_type'] == card_type_back == 'Contract' or
-                   data['card_type'] == card_type_back == 'Player Objective')):
+                  data['card_type'] in ('Contract', 'Player Objective',
+                                        'Quest')):
                 images['{}.B'.format(card_id)] = data.copy()
 
             artist_back = _extract_artist_name(alternate)
             if artist_back:
                 artists['{}.B'.format(card_id)] = artist_back
             elif (artist and data and
-                  (data['card_type'] == 'Quest' or
-                   data['card_type'] == card_type_back == 'Contract' or
-                   data['card_type'] == card_type_back == 'Player Objective')):
+                  data['card_type'] in ('Contract', 'Player Objective',
+                                        'Quest')):
                 artists['{}.B'.format(card_id)] = artist
 
     old_xml_path = os.path.join(SET_EONS_PATH,
@@ -11532,10 +11530,8 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
                                   else '')
                 data_back = _extract_image_properties(alternate)
                 if (not data_back and data and
-                        (data['card_type'] == 'Quest' or
-                         data['card_type'] == card_type_back == 'Contract' or
-                         data['card_type'] == card_type_back ==
-                         'Player Objective')):
+                        data['card_type'] in ('Contract', 'Player Objective',
+                                              'Quest')):
                     data_back = data
 
                 if (data_back and data_back['snapshot'] ==

@@ -4449,14 +4449,14 @@ Targets removed.
         async with generate_lock:
             await self._generate_artwork(card, filetype, side, content)
 
-            if (side == 'A' and card.get(lotr.BACK_PREFIX + lotr.CARD_NAME) and
-                    (card[lotr.CARD_TYPE] == 'Quest' or
-                     card[lotr.CARD_TYPE] == card.get(
-                         lotr.BACK_PREFIX + lotr.CARD_TYPE) == 'Contract' or
-                     card[lotr.CARD_TYPE] == card.get(
-                         lotr.BACK_PREFIX + lotr.CARD_TYPE) ==
-                     'Player Objective')):
-                await self._generate_artwork(card, filetype, 'B', content)
+            if (side == 'A' and
+                    card[lotr.CARD_TYPE] in ('Contract', 'Player Objective',
+                                             'Quest')):
+                filenames = await self._get_artwork_files(card[lotr.CARD_SET])
+                filenames = [f for f in filenames if f.startswith(
+                             '{}_B'.format(card[lotr.CARD_ID]))]
+                if not filenames:
+                    await self._generate_artwork(card, filetype, 'B', content)
 
         return ''
 
@@ -4468,6 +4468,13 @@ Targets removed.
             card_type = card[lotr.CARD_TYPE]
         else:
             card_type = card.get(lotr.BACK_PREFIX + lotr.CARD_TYPE, '')
+            if (not card_type and
+                    card[lotr.CARD_TYPE] in ('Contract', 'Player Objective',
+                                             'Quest')):
+                card_type = card[lotr.CARD_TYPE]
+
+        if not card_type:
+            return
 
         portrait = PORTRAIT.get(card_type)
         if not portrait:
