@@ -7,12 +7,12 @@ function onEdit(e) {
   var columnHeader = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getRange(1, column).getValue().toString();
   // Check if sheet is a translation sheet
   if (
-    sheetName == 'Italian' ||
     sheetName == 'French' ||
     sheetName == 'German' ||
-    sheetName == 'Spanish' ||
+    sheetName == 'Italian' ||
     sheetName == 'Polish' ||
-    sheetName == 'Portuguese'
+    sheetName == 'Portuguese' ||
+    sheetName == 'Spanish'
   ) {
     if (columnHeader == 'Updated') {
       // Check if the checkbox was changed to TRUE

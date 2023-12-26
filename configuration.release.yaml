@@ -161,6 +161,20 @@ outputs:
     - genericpng_pdf_letter_7z
     - rules_pdf
     - tts
+  French:
+#    - db
+#    - dragncards_hq
+#    - octgn
+#    - pdf_a4
+#    - pdf_letter
+#    - mbprint_7z
+#    - mbprint_pdf_7z
+#    - makeplayingcards_7z
+#    - genericpng_7z
+#    - genericpng_pdf_a4_7z
+#    - genericpng_pdf_letter_7z
+#    - rules_pdf
+#    - tts
   German:
 #    - db
 #    - dragncards_hq
@@ -175,21 +189,7 @@ outputs:
 #    - genericpng_pdf_letter_7z
 #    - rules_pdf
 #    - tts
-  Spanish:
-#    - db
-#    - dragncards_hq
-#    - octgn
-#    - pdf_a4
-#    - pdf_letter
-#    - mbprint_7z
-#    - mbprint_pdf_7z
-#    - makeplayingcards_7z
-#    - genericpng_7z
-#    - genericpng_pdf_a4_7z
-#    - genericpng_pdf_letter_7z
-#    - rules_pdf
-#    - tts
-  French:
+  Italian:
 #    - db
 #    - dragncards_hq
 #    - octgn
@@ -217,7 +217,7 @@ outputs:
 #    - genericpng_pdf_letter_7z
 #    - rules_pdf
 #    - tts
-  Italian:
+  Spanish:
 #    - db
 #    - dragncards_hq
 #    - octgn
