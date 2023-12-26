@@ -916,7 +916,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 			card['Artist'] = 'Unknown Artist';
 		}
 
-		if ((card['Type'] + '' == 'Player Objective') && (card['BType'] + '' == 'Player Objective') && !card['BArtist']) {
+		if (((card['Type'] + '' == 'Contract') || (card['Type'] + '' == 'Player Objective')) && !card['BArtist']) {
 			card['BArtist'] = card['Artist'];
 		}
 
@@ -1404,7 +1404,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 							s.set('Portrait-external-scale', card['BScale'] / 100);
 						}
 					}
-					else if ((cardType == 'Player Objective') && (card['BType'] + '' == 'Player Objective') && card['Artwork']) {
+					else if (((card['Type'] + '' == 'Contract') || (card['Type'] + '' == 'Player Objective')) && card['Artwork']) {
 						s.set('Portrait-external-path', 'project:imagesRaw/' + card['Artwork']);
 						if (card['PanX'] && card['PanY'] && card['Scale']) {
 							s.set('Portrait-external-panx', card['PanX']);
