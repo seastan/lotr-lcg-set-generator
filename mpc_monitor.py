@@ -70,6 +70,9 @@ URL_TIMEOUT = 30
 URL_RETRIES = 5
 URL_SLEEP = 60
 
+DEBUG = False
+DEBUG_PATH = os.path.join('Data', 'mpc_monitor_debug.html')
+
 REFRESH_URL_TIMEOUT = 300
 MIN_IMAGES = 18
 
@@ -288,6 +291,10 @@ def send_post(session, url, form_data):
                 time.sleep(URL_SLEEP)
             else:
                 raise
+
+    if DEBUG:
+        with open(DEBUG_PATH, 'w', encoding='utf-8') as fobj:
+            fobj.write(res)
 
     return res
 

@@ -1,6 +1,7 @@
 .ipynb_checkpoints/
 __pycache__/
 Data/*.cnt
+Data/*.html
 Data/*.json
 Data/*.json.backup
 Data/*.txt
