@@ -430,6 +430,15 @@ PLAYTEST_SUFFIX = '-Playtest'
 SCRATCH_FOLDER = '_Scratch'
 TEXT_CHUNK_FLAG = b'tEXt'
 
+TAGS_WITH_NUMBERS_REGEX = r'\[[^\]]*[0-9][^\]]*\]'
+ANCHORS_REGEX = (
+    r'(?:[1-9][AB]|(?:\+|–)?\b(?:[1-9][0-9][0-9]|[1-9][0-9]|[2-9]|0|X)\b'
+    r'(?:\[pp\]| \[threat\]| \[attack\]| \[defense\]| \[willpower\]'
+    r'| \[leadership\]| \[lore\]| \[spirit\]| \[tactics\])?'
+    r'|\[unique\]|\[threat\]|\[attack\]|\[defense\]|\[willpower\]'
+    r'|\[leadership\]|\[lore\]|\[spirit\]|\[tactics\]|\[baggins\]'
+    r'|\[fellowship\]|\[sunny\]|\[cloudy\]|\[rainy\]|\[stormy\]|\[sailing\]'
+    r'|\[eos\]|1\[pp\]|\[pp\])')
 CARD_NAME_REFERENCE_REGEX = r'\[\[([^\]]+)\]\]'
 DECK_PREFIX_REGEX = r'^[QN][A-Z0-9][A-Z0-9]\.[0-9][0-9]?(?:-|$)'
 KEYWORDS_REGEX = (r'^(?: ?[A-Z][A-Za-z\'\-]+(?: [0-9X]+(?:\[pp\])?)?\.|'
@@ -3616,6 +3625,15 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
     return errors
 
 
+def _remove_common_elements(list1, list2):
+    """ Remove common elements from two lists.
+    """
+    for i in list1.copy():
+        if i in list2:
+            list1.remove(i)
+            list2.remove(i)
+
+
 def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
     """ Perform a sanity check of the spreadsheet and return "healthy" sets.
     """
@@ -6438,6 +6456,29 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                         key.replace(BACK_PREFIX, 'Back '),
                                         card_id, lang,
                                         TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+                        value_english = row[key]
+                        value_english = re.sub(TAGS_WITH_NUMBERS_REGEX, '',
+                                               value_english)
+                        anchors_english = re.findall(ANCHORS_REGEX,
+                                                     value_english)
+                        value_translated = value
+                        value_translated = re.sub(TAGS_WITH_NUMBERS_REGEX, '',
+                                                  value_translated)
+                        anchors_translated = re.findall(ANCHORS_REGEX,
+                                                        value_translated)
+                        if (sorted(anchors_english) !=
+                                sorted(anchors_translated)):
+                            _remove_common_elements(anchors_english,
+                                                    anchors_translated)
+                            logging.warning(
+                                'Possibly different elements in %s column for '
+                                'card ID %s in %s translations, row #%s: "%s" '
+                                'compared to "%s" in the English source',
+                                key.replace(BACK_PREFIX, 'Back '), card_id,
+                                lang, TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                                ', '.join(anchors_translated),
+                                ', '.join(anchors_english))
 
                 if not value and row.get(key):
                     logging.error(
