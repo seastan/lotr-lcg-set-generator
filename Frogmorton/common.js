@@ -2044,49 +2044,42 @@ function markUp(value, key, cardType, lang, setID) {
 
 	if (['Text', 'BText', 'Shadow', 'BShadow'].indexOf(key + '') > -1) {
 		if (lang == 'English') {
-			value = value.replace(/\b(Quest Resolution)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			value = value.replace(/\b(Valour )?(Resource |Planning |Quest |Travel |Encounter |Combat |Refresh )?(Action):/g, '[b]$1$2$3[/b]:');
 			value = value.replace(/\b(When Revealed|Forced|Valour Response|Response|Travel|Shadow|Resolution):/g, '[b]$1[/b]:');
 			value = value.replace(/\b(Setup)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			value = value.replace(/\b(Condition)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'French') {
-			value = value.replace(/\b(R\u00e9solution de la qu\u00eate)( \([^\)]+\))? ?:/g, '[b]$1[/b]$2 :');
 			value = value.replace(/(\[Vaillance\] )?(\[Ressource\] |\[Organisation\] |\[Qu\u00eate\] |\[Voyage\] |\[Rencontre\] |\[Combat\] |\[Restauration\] )?\b(Action) ?:/g, '[b]$1$2$3[/b] :');
 			value = value.replace(/\b(Une fois r\u00e9v\u00e9l\u00e9e|Forc\u00e9|\[Vaillance\] R\u00e9ponse|R\u00e9ponse|Trajet|Ombre|R\u00e9solution) ?:/g, '[b]$1[/b] :');
 			value = value.replace(/\b(Mise en place)( \([^\)]+\))? ?:/g, '[b]$1[/b]$2 :');
 			value = value.replace(/\b(Condition)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'German') {
-			value = value.replace(/\b(Abenteuer bestehen)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			value = value.replace(/\b(Ehrenvolle )?(Ressourcenaktion|Planungsaktion|Abenteueraktion|Reiseaktion|Begegnungsaktion|Kampfaktion|Auffrischungsaktion|Aktion):/g, '[b]$1$2[/b]:');
 			value = value.replace(/\b(Wenn aufgedeckt|Erzwungen|Ehrenvolle Reaktion|Reaktion|Reise|Schatten|Aufl\u00f6sung):/g, '[b]$1[/b]:');
 			value = value.replace(/\b(Vorbereitung)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			value = value.replace(/\b(Zustand)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'Italian') {
-			value = value.replace(/\b(Risoluzione della Ricerca)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			value = value.replace(/\b(Azione)( Valorosa)?( di Risorse| di Pianificazione| di Ricerca| di Viaggio| di Incontri| di Combattimento| di Riordino)?:/g, '[b]$1$2$3[/b]:');
 			value = value.replace(/\b(Quando Rivelata|Obbligato|Risposta Valorosa|Risposta|Viaggio|Ombra|Risoluzione):/g, '[b]$1[/b]:');
 			value = value.replace(/\b(Preparazione)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			value = value.replace(/\b(Condizione)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'Polish') {
-			value = value.replace(/\b(Rozpatrzenie wyprawy)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			value = value.replace(/\b(Akcja)( Zasob\u00f3w| Planowania| Wyprawy| Podr\u00f3\u017cy| Spotka\u0144| Walki| Odpoczynku)?( M\u0119stwa)?:/g, '[b]$1$2$3[/b]:');
 			value = value.replace(/\b(Po odkryciu|Wymuszony|Odpowied\u017a M\u0119stwa|Odpowied\u017a|Podr\u00f3\u017c|Cie\u0144|Nast\u0119pstwa):/g, '[b]$1[/b]:');
 			value = value.replace(/\b(Przygotowanie)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			value = value.replace(/\b(Stan)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'Portuguese') {
-			value = value.replace(/\b(Resolu\u00e7\u00e3o da Miss\u00e3o)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			value = value.replace(/\b(A\u00e7\u00e3o)( Valorosa)?( de Recursos| de Planejamento| de Miss\u00e3o| de Viagem| de Encontro| de Combate| de Renova\u00e7\u00e3o)?:/g, '[b]$1$2$3[/b]:');
 			value = value.replace(/\b(Efeito Revelado|Efeito For\u00e7ado|Resposta Valorosa|Resposta|Viagem|Efeito Sombrio|Resolu\u00e7\u00e3o):/g, '[b]$1[/b]:');
 			value = value.replace(/\b(Prepara\u00e7\u00e3o)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			value = value.replace(/\b(Condi\u00e7\u00e3o)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'Spanish') {
-			value = value.replace(/\b(Resoluci\u00f3n de la misi\u00f3n)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			value = value.replace(/\b(Acci\u00f3n)( de Recursos| de Planificaci\u00f3n| de Misi\u00f3n| de Viaje| de Encuentro| de Combate| de Recuperaci\u00f3n)?( de Valor)?:/g, '[b]$1$2$3[/b]:');
 			value = value.replace(/\b(Al ser revelada|Obligado|Respuesta de Valor|Respuesta|Viaje|Sombra|Resoluci\u00f3n):/g, '[b]$1[/b]:');
 			value = value.replace(/\b(Preparaci\u00f3n)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');

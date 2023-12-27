@@ -868,14 +868,8 @@ LOWERCASE_WORDS = {
     'that', 'to', 'up', 'with', 'am', 'are', 'is', 'was', 'were', 'sonof_'}
 
 TRANSLATION_MATCH = [
-    [r'Quest Resolution', {
-        'French': r'\bR\u00e9solution de la qu\u00eate\b',
-        'German': r'\bAbenteuer bestehen\b',
-        'Italian': r'\bRisoluzione della Ricerca\b',
-        'Polish': r'\bRozpatrzenie wyprawy\b',
-        'Portuguese': r'\bResolu\u00e7\u00e3o da Miss\u00e3o\b',
-        'Spanish': r'\bResoluci\u00f3n de la misi\u00f3n\b'}],
     [r'Valour Resource Action', {
+        'English': r'\bValour Resource Action',
         'French': r'\[Vaillance\] \[Ressource\] Action\b',
         'German': r'\bEhrenvolle Ressourcenaktion\b',
         'Italian': r'\bAzione Valorosa di Risorse\b',
@@ -883,6 +877,7 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bA\u00e7\u00e3o Valorosa de Recursos\b',
         'Spanish': r'\bAcci\u00f3n de Recursos de Valor\b'}],
     [r'Valour Planning Action', {
+        'English': r'\bValour Planning Action',
         'French': r'\[Vaillance\] \[Organisation\] Action\b',
         'German': r'\bEhrenvolle Planungsaktion\b',
         'Italian': r'\bAzione Valorosa di Pianificazione\b',
@@ -890,13 +885,15 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bA\u00e7\u00e3o Valorosa de Planejamento\b',
         'Spanish': r'\bAcci\u00f3n de Planificaci\u00f3n de Valor\b'}],
     [r'Valour Quest Action', {
-        'French': r'\[Qu\u00eate\] Action\b',
+        'English': r'\bValour Quest Action',
+        'French': r'\[Vaillance\] \[Qu\u00eate\] Action\b',
         'German': r'\bEhrenvolle Abenteueraktion\b',
         'Italian': r'\bAzione Valorosa di Ricerca\b',
         'Polish': r'\bAkcja Wyprawy M\u0119stwa\b',
         'Portuguese': r'\bA\u00e7\u00e3o Valorosa de Miss\u00e3o\b',
         'Spanish': r'\bAcci\u00f3n de Misi\u00f3n de Valor\b'}],
     [r'Valour Travel Action', {
+        'English': r'\bValour Travel Action',
         'French': r'\[Vaillance\] \[Voyage\] Action\b',
         'German': r'\bEhrenvolle Reiseaktion\b',
         'Italian': r'\bAzione Valorosa di Viaggio\b',
@@ -904,6 +901,7 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bA\u00e7\u00e3o Valorosa de Viagem\b',
         'Spanish': r'\bAcci\u00f3n de Viaje de Valor\b'}],
     [r'Valour Encounter Action', {
+        'English': r'\bValour Encounter Action',
         'French': r'\[Vaillance\] \[Rencontre\] Action\b',
         'German': r'\bEhrenvolle Begegnungsaktion\b',
         'Italian': r'\bAzione Valorosa di Incontri\b',
@@ -911,6 +909,7 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bA\u00e7\u00e3o Valorosa de Encontro\b',
         'Spanish': r'\bAcci\u00f3n de Encuentro de Valor\b'}],
     [r'Valour Combat Action', {
+        'English': r'\bValour Combat Action',
         'French': r'\[Vaillance\] \[Combat\] Action\b',
         'German': r'\bEhrenvolle Kampfaktion\b',
         'Italian': r'\bAzione Valorosa di Combattimento\b',
@@ -918,6 +917,7 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bA\u00e7\u00e3o Valorosa de Combate\b',
         'Spanish': r'\bAcci\u00f3n de Combate de Valor\b'}],
     [r'Valour Refresh Action', {
+        'English': r'\bValour Refresh Action',
         'French': r'\[Vaillance\] \[Restauration\] Action\b',
         'German': r'\bEhrenvolle Auffrischungsaktion\b',
         'Italian': r'\bAzione Valorosa di Riordino\b',
@@ -925,6 +925,7 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bA\u00e7\u00e3o Valorosa de Renova\u00e7\u00e3o\b',
         'Spanish': r'\bAcci\u00f3n de Recuperaci\u00f3n de Valor\b'}],
     [r'Valour Action', {
+        'English': r'\bValour Action',
         'French': r'\[Vaillance\] Action\b',
         'German': r'\bEhrenvolle Aktion\b',
         'Italian': r'\bAzione Valorosa\b',
@@ -932,6 +933,7 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bA\u00e7\u00e3o Valorosa\b',
         'Spanish': r'\bAcci\u00f3n de Valor\b'}],
     [r'Resource Action', {
+        'English': r'\bResource Action',
         'French': r'\[Ressource\] Action\b',
         'German': r'\bRessourcenaktion\b',
         'Italian': r'\bAzione di Risorse\b',
@@ -939,6 +941,7 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bA\u00e7\u00e3o de Recursos\b',
         'Spanish': r'\bAcci\u00f3n de Recursos\b'}],
     [r'Planning Action', {
+        'English': r'\bPlanning Action',
         'French': r'\[Organisation\] Action\b',
         'German': r'\bPlanungsaktion\b',
         'Italian': r'\bAzione di Pianificazione\b',
@@ -946,6 +949,7 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bA\u00e7\u00e3o de Planejamento\b',
         'Spanish': r'\bAcci\u00f3n de Planificaci\u00f3n\b'}],
     [r'Quest Action', {
+        'English': r'\bQuest Action',
         'French': r'\[Qu\u00eate\] Action\b',
         'German': r'\bAbenteueraktion\b',
         'Italian': r'\bAzione di Ricerca\b',
@@ -953,6 +957,7 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bA\u00e7\u00e3o de Miss\u00e3o\b',
         'Spanish': r'\bAcci\u00f3n de Misi\u00f3n\b'}],
     [r'Travel Action', {
+        'English': r'\bTravel Action',
         'French': r'\[Voyage\] Action\b',
         'German': r'\bReiseaktion\b',
         'Italian': r'\bAzione di Viaggio\b',
@@ -960,6 +965,7 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bA\u00e7\u00e3o de Viagem\b',
         'Spanish': r'\bAcci\u00f3n de Viaje\b'}],
     [r'Encounter Action', {
+        'English': r'\bEncounter Action',
         'French': r'\[Rencontre\] Action\b',
         'German': r'\bBegegnungsaktion\b',
         'Italian': r'\bAzione di Incontri\b',
@@ -967,6 +973,7 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bA\u00e7\u00e3o de Encontro\b',
         'Spanish': r'\bAcci\u00f3n de Encuentro\b'}],
     [r'Combat Action', {
+        'English': r'\bCombat Action',
         'French': r'\[Combat\] Action\b',
         'German': r'\bKampfaktion\b',
         'Italian': r'\bAzione di Combattimento\b',
@@ -974,6 +981,7 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bA\u00e7\u00e3o de Combate\b',
         'Spanish': r'\bAcci\u00f3n de Combate\b'}],
     [r'Refresh Action', {
+        'English': r'\bRefresh Action',
         'French': r'\[Restauration\] Action\b',
         'German': r'\bAuffrischungsaktion\b',
         'Italian': r'\bAzione di Riordino\b',
@@ -981,6 +989,7 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bA\u00e7\u00e3o de Renova\u00e7\u00e3o\b',
         'Spanish': r'\bAcci\u00f3n de Recuperaci\u00f3n\b'}],
     [r'Action', {
+        'English': r'\bAction',
         'French': r'\bAction\b',
         'German': r'\bAktion\b',
         'Italian': r'\bAzione\b',
@@ -988,6 +997,7 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bA\u00e7\u00e3o\b',
         'Spanish': r'\bAcci\u00f3n\b'}],
     [r'When Revealed', {
+        'English': r'\bRevealed',
         'French': r'\bUne fois r\u00e9v\u00e9l\u00e9e\b',
         'German': r'\bWenn aufgedeckt\b',
         'Italian': r'\bQuando Rivelata\b',
@@ -995,6 +1005,7 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bEfeito Revelado\b',
         'Spanish': r'\bAl ser revelada\b'}],
     [r'Forced', {
+        'English': r'\bForced',
         'French': r'\bForc\u00e9\b',
         'German': r'\bErzwungen\b',
         'Italian': r'\bObbligato\b',
@@ -1002,6 +1013,7 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bEfeito For\u00e7ado\b',
         'Spanish': r'\bObligado\b'}],
     [r'Valour Response', {
+        'English': r'\bValour Response',
         'French': r'\[Vaillance\] R\u00e9ponse\b',
         'German': r'\bEhrenvolle Reaktion\b',
         'Italian': r'\bRisposta Valorosa\b',
@@ -1009,6 +1021,7 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bResposta Valorosa\b',
         'Spanish': r'\bRespuesta de Valor\b'}],
     [r'Response', {
+        'English': r'\bResponse',
         'French': r'\bR\u00e9ponse\b',
         'German': r'\bReaktion\b',
         'Italian': r'\bRisposta\b',
@@ -1016,13 +1029,15 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bResposta\b',
         'Spanish': r'\bRespuesta\b'}],
     [r'Travel', {
-        'French': r'(\bTrajet\b|\bVoyage\b)',
+        'English': r'\b(Travel|Journey)',
+        'French': r'\b(Trajet|Voyage)\b',
         'German': r'\bReise',
         'Italian': r'\bViaggio\b',
-        'Polish': r'\b[Pp]odr\u00f3\u017c',
+        'Polish': r'\b[Pp]odr\u00f3\u017cy?\b',
         'Portuguese': r'\bViagem\b',
         'Spanish': r'\bViaje\b'}],
     [r'Resolution', {
+        'English': r'\b(Resolution|Conclusion)',
         'French': r'\bR\u00e9solution\b',
         'German': r'\bAufl\u00f6sung\b',
         'Italian': r'\bRisoluzione\b',
@@ -1030,13 +1045,15 @@ TRANSLATION_MATCH = [
         'Portuguese': r'\bResolu\u00e7\u00e3o\b',
         'Spanish': r'\bResoluci\u00f3n\b'}],
     [r'Setup', {
+        'English': r'\b(Setup|Set Up|Setting Up|Staging)',
         'French': r'\bMise en place\b',
         'German': r'\bVorbereitung\b',
         'Italian': r'\bPreparazione\b',
-        'Polish': r'\bPrzygotowanie\b',
+        'Polish': r'\bPrzygotowanie\b(?! polskiej)',
         'Portuguese': r'\bPrepara\u00e7\u00e3o\b',
         'Spanish': r'\bPreparaci\u00f3n\b'}],
     [r'Condition', {
+        'English': r'\bCondition',
         'French': r'\bCondition\b',
         'German': r'\bZustand\b',
         'Italian': r'\bCondizione\b',
@@ -1349,8 +1366,6 @@ def _update_card_text(text, lang='English', skip_rules=False,  # pylint: disable
     """
     text = str(text)
     if lang == 'Spanish' and not skip_rules:
-        text = re.sub(r'\b(Resoluci\u00f3n de la misi\u00f3n)( \([^\)]+\))?:',
-                      '[b]\\1[/b]\\2:', text)
         text = re.sub(r'\b(Acci\u00f3n)( de Recursos| de Planificaci\u00f3n'
                       r'| de Misi\u00f3n| de Viaje| de Encuentro| de Combate'
                       r'| de Recuperaci\u00f3n)?( de Valor)?:',
@@ -1362,8 +1377,6 @@ def _update_card_text(text, lang='English', skip_rules=False,  # pylint: disable
                       text)
         text = re.sub(r'\b(Estado)\b', '[bi]\\1[/bi]', text)
     if lang == 'French' and not skip_rules:
-        text = re.sub(r'\b(R\u00e9solution de la qu\u00eate)( \([^\)]+\))? ?:',
-                      '[b]\\1[/b]\\2 :', text)
         text = re.sub(r'(\[Vaillance\] )?(\[Ressource\] |\[Organisation\] '
                       r'|\[Qu\u00eate\] |\[Voyage\] |\[Rencontre\] '
                       r'|\[Combat\] |\[Restauration\] )?\b(Action) ?:',
@@ -1375,8 +1388,6 @@ def _update_card_text(text, lang='English', skip_rules=False,  # pylint: disable
                       text)
         text = re.sub(r'\b(Condition)\b', '[bi]\\1[/bi]', text)
     elif lang == 'English' and not skip_rules:
-        text = re.sub(r'\b(Quest Resolution)( \([^\)]+\))?:', '[b]\\1[/b]\\2:',
-                      text)
         text = re.sub(r'\b(Valour )?(Resource |Planning |Quest |Travel '
                       r'|Encounter |Combat |Refresh )?(Action):',
                       '[b]\\1\\2\\3[/b]:', text)
@@ -6358,8 +6369,17 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             key.replace(BACK_PREFIX, 'Back '), card_id, lang,
                             TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
-                    value_english = row.get(key)
-                    if isinstance(value_english, str):
+                    if (key in (CARD_TEXT, BACK_PREFIX + CARD_TEXT,
+                                CARD_SHADOW, BACK_PREFIX + CARD_SHADOW) and
+                            isinstance(row.get(key), str)):
+                        value_english = row[key]
+                        if key in (CARD_TEXT, CARD_SHADOW):
+                            value_english = value_english.replace(
+                                row.get(CARD_NAME) or '', '')
+                        else:
+                            value_english = value_english.replace(
+                                row.get(BACK_PREFIX + CARD_NAME) or '', '')
+
                         value_translated = value
                         for term_english, lang_dict in TRANSLATION_MATCH:
                             regex_english = r'\b' + term_english + r'\b'
@@ -6377,6 +6397,41 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                 else:
                                     logging.error(
                                         'Missing translation for "%s" in %s '
+                                        'column for card ID %s in %s '
+                                        'translations, row #%s',
+                                        term_english,
+                                        key.replace(BACK_PREFIX, 'Back '),
+                                        card_id, lang,
+                                        TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+                        value_english = row[key]
+                        value_translated = value
+                        if key in (CARD_TEXT, CARD_SHADOW):
+                            value_translated = value_translated.replace(
+                                TRANSLATIONS[lang][card_id].get(
+                                    CARD_NAME) or '', '')
+                        else:
+                            value_translated = value_translated.replace(
+                                TRANSLATIONS[lang][card_id].get(
+                                    BACK_PREFIX + CARD_NAME) or '', '')
+
+                        for term_english, lang_dict in TRANSLATION_MATCH:
+                            regex_english = lang_dict.get('English')
+                            regex_translated = lang_dict.get(lang)
+                            if not regex_english or not regex_translated:
+                                continue
+
+                            if re.search(regex_translated, value_translated):
+                                value_translated = re.sub(
+                                    regex_translated, '', value_translated)
+                                if re.search(regex_english, value_english,
+                                             flags=re.IGNORECASE):
+                                    value_english = re.sub(
+                                        regex_english, '', value_english,
+                                        flags=re.IGNORECASE)
+                                else:
+                                    logging.error(
+                                        'Redundant translation for "%s" in %s '
                                         'column for card ID %s in %s '
                                         'translations, row #%s',
                                         term_english,

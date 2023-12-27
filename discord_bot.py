@@ -794,8 +794,6 @@ def update_emojis(text):
 def update_text(text):  # pylint: disable=R0915
     """ Update card text.
     """
-    text = re.sub(r'\b(Quest Resolution)( \([^\)]+\))?:', '[b]\\1[/b]\\2:',
-                  text)
     text = re.sub(r'\b(Valour )?(Resource |Planning |Quest |Travel |Encounter '
                   r'|Combat |Refresh )?(Action):', '[b]\\1\\2\\3[/b]:', text)
     text = re.sub(r'\b(When Revealed|Forced|Valour Response|Response|Travel'
@@ -1747,7 +1745,7 @@ def detect_names(text, card_type):  # pylint: disable=R0912
                         name = name[:-1]
 
                     if not re.match(
-                            r'Condition|Forced|Quest Resolution|Resolution|'
+                            r'Condition|Forced|Resolution|'
                             r'Response|Restricted|Setup|Shadow|Travel|'
                             r'Valour Response|When Revealed|(?:(?:Valour )?'
                             r'(?:Combat |Encounter |Planning |Quest |Refresh |'
@@ -2136,8 +2134,6 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
             res.setdefault('Printed cost', []).append(data)
 
         if re.search(r': [A-Z]', paragraph):
-            paragraph = re.sub(r'\bQuest Resolution(?: \([^\)]+\))?:',
-                               '\\*\\*\\*', paragraph)
             paragraph = re.sub(r'\b(?:Valour )?(?:Resource |Planning |Quest '
                                r'|Travel |Encounter |Combat |Refresh )?'
                                r'(?:Action):', '\\*\\*\\*', paragraph)
