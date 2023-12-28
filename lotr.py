@@ -3634,6 +3634,114 @@ def _remove_common_elements(list1, list2):
             list2.remove(i)
 
 
+def _split_combined_elements(input_list):
+    """ Split combined elements in the list.
+    """
+    output_list = []
+    for element in input_list:
+        if re.match(r'^[0-9]+\[pp\]$', element):
+            output_list.append(element[:-4])
+            output_list.append(element[-4:])
+        elif re.match(r'^[0-9]+ \[[^\]]+\]$', element):
+            output_list.extend(element.split(' '))
+        else:
+            output_list.append(element)
+
+    return output_list
+
+
+def _add_automatic_tags(value, lang='English'):
+    """ Add automatic tags.
+    """
+    if lang == 'English':
+        value = re.sub(
+            r'\b(Valour )?(Resource |Planning |Quest |Travel |Encounter '
+            r'|Combat |Refresh )?(Action):', '[b]\\1\\2\\3[/b]:', value)
+        value = re.sub(
+            r'\b(When Revealed|Forced|Valour Response|Response|Travel|Shadow'
+            r'|Resolution):', '[b]\\1[/b]:', value)
+        value = re.sub(
+            r'\b(Setup)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', value)
+        value = re.sub(r'\b(Condition)\b', '[bi]\\1[/bi]', value)
+    elif lang == 'French':
+        value = re.sub(
+            r'(\[Vaillance\] )?(\[Ressource\] |\[Organisation\] '
+            r'|\[Qu\u00eate\] |\[Voyage\] |\[Rencontre\] |\[Combat\] '
+            r'|\[Restauration\] )?\b(Action) ?:', '[b]\\1\\2\\3[/b] :', value)
+        value = re.sub(
+            r'\b(Une fois r\u00e9v\u00e9l\u00e9e|Forc\u00e9'
+            r'|\[Vaillance\] R\u00e9ponse|R\u00e9ponse|Trajet|Ombre'
+            r'|R\u00e9solution) ?:', '[b]\\1[/b] :', value)
+        value = re.sub(
+            r'\b(Mise en place)( \([^\)]+\))? ?:', '[b]\\1[/b]\\2 :', value)
+        value = re.sub(r'\b(Condition)\b', '[bi]\\1[/bi]', value)
+    elif lang == 'German':
+        value = re.sub(
+            r'\b(Ehrenvolle )?(Ressourcenaktion|Planungsaktion'
+            r'|Abenteueraktion|Reiseaktion|Begegnungsaktion|Kampfaktion'
+            r'|Auffrischungsaktion|Aktion):', '[b]\\1\\2[/b]:', value)
+        value = re.sub(
+            r'\b(Wenn aufgedeckt|Erzwungen|Ehrenvolle Reaktion|Reaktion|Reise'
+            r'|Schatten|Aufl\u00f6sung):', '[b]\\1[/b]:', value)
+        value = re.sub(
+            r'\b(Vorbereitung)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', value)
+        value = re.sub(r'\b(Zustand)\b', '[bi]\\1[/bi]', value)
+    elif lang == 'Italian':
+        value = re.sub(
+            r'\b(Azione)( Valorosa)?( di Risorse| di Pianificazione'
+            r'| di Ricerca| di Viaggio| di Incontri| di Combattimento'
+            r'| di Riordino)?:', '[b]\\1\\2\\3[/b]:', value)
+        value = re.sub(
+            r'\b(Quando Rivelata|Obbligato|Risposta Valorosa|Risposta'
+            r'|Viaggio|Ombra|Risoluzione):', '[b]\\1[/b]:', value)
+        value = re.sub(
+            r'\b(Preparazione)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', value)
+        value = re.sub(r'\b(Condizione)\b', '[bi]\\1[/bi]', value)
+    elif lang == 'Polish':
+        value = re.sub(
+            r'\b(Akcja)( Zasob\u00f3w| Planowania| Wyprawy| Podr\u00f3\u017cy'
+            r'| Spotka\u0144| Walki| Odpoczynku)?( M\u0119stwa)?:',
+            '[b]\\1\\2\\3[/b]:', value)
+        value = re.sub(
+            r'\b(Po odkryciu|Wymuszony|Odpowied\u017a M\u0119stwa'
+            r'|Odpowied\u017a|Podr\u00f3\u017c|Cie\u0144|Nast\u0119pstwa):',
+            '[b]\\1[/b]:', value)
+        value = re.sub(
+            r'\b(Przygotowanie)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', value)
+        value = re.sub(r'\b(Stan)\b', '[bi]\\1[/bi]', value)
+    elif lang == 'Portuguese':
+        value = re.sub(
+            r'\b(A\u00e7\u00e3o)( Valorosa)?( de Recursos| de Planejamento'
+            r'| de Miss\u00e3o| de Viagem| de Encontro| de Combate'
+            r'| de Renova\u00e7\u00e3o)?:', '[b]\\1\\2\\3[/b]:', value)
+        value = re.sub(
+            r'\b(Efeito Revelado|Efeito For\u00e7ado|Resposta Valorosa'
+            r'|Resposta|Viagem|Efeito Sombrio|Resolu\u00e7\u00e3o):',
+            '[b]\\1[/b]:', value)
+        value = re.sub(
+            r'\b(Prepara\u00e7\u00e3o)( \([^\)]+\))?:', '[b]\\1[/b]\\2:',
+            value)
+        value = re.sub(r'\b(Condi\u00e7\u00e3o)\b', '[bi]\\1[/bi]', value)
+    elif lang == 'Spanish':
+        value = re.sub(
+            r'\b(Acci\u00f3n)( de Recursos| de Planificaci\u00f3n'
+            r'| de Misi\u00f3n| de Viaje| de Encuentro| de Combate'
+            r'| de Recuperaci\u00f3n)?( de Valor)?:', '[b]\\1\\2\\3[/b]:',
+            value)
+        value = re.sub(
+            r'\b(Al ser revelada|Obligado|Respuesta de Valor|Respuesta|Viaje'
+            r'|Sombra|Resoluci\u00f3n):', '[b]\\1[/b]:', value)
+        value = re.sub(
+            r'\b(Preparaci\u00f3n)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', value)
+        value = re.sub(r'\b(Estado)\b', '[bi]\\1[/bi]', value)
+
+    value = value.replace('[bi][bi]', '[bi]')
+    value = value.replace('[/bi][/bi]', '[/bi]')
+    value = value.replace('[b][b]', '[b]')
+    value = value.replace('[/b][/b]', '[/b]')
+    return value
+
+
 def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
     """ Perform a sanity check of the spreadsheet and return "healthy" sets.
     """
@@ -6326,7 +6434,11 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             key.replace(BACK_PREFIX, 'Back '), card_id,
                             lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
+
                     unmatched_tags = _detect_unmatched_tags(value)
+                    if TRANSLATIONS[lang][card_id][ROW_COLUMN] == 19 and key == CARD_TEXT: #
+                        logging.info(value) #
+                        logging.info(unmatched_tags) #
                     if unmatched_tags:
                         logging.error(
                             'Unmatched tag(s) in %s column for card ID %s in '
@@ -6457,6 +6569,65 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                         card_id, lang,
                                         TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
+                        paragraphs_english = len(re.split(r'\n{2,}', row[key]))
+                        paragraphs_translated = len(re.split(r'\n{2,}', value))
+                        if paragraphs_english != paragraphs_translated:
+                            if row.get(CARD_TYPE) == 'Rules':
+                                logging.warning(
+                                    'Different number of paragraphs in %s '
+                                    'column for card ID %s in %s '
+                                    'translations, row #%s: %s compared to %s '
+                                    'in the English source',
+                                    key.replace(BACK_PREFIX, 'Back '), card_id,
+                                    lang,
+                                    TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                                    paragraphs_translated, paragraphs_english)
+                            else:
+                                logging.error(
+                                    'Different number of paragraphs in %s '
+                                    'column for card ID %s in %s '
+                                    'translations, row #%s: %s compared to %s '
+                                    'in the English source',
+                                    key.replace(BACK_PREFIX, 'Back '), card_id,
+                                    lang,
+                                    TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                                    paragraphs_translated, paragraphs_english)
+
+                        value_english = _add_automatic_tags(row[key])
+                        value_translated = _add_automatic_tags(value)
+                        tags_english = value_english.count('[bi]')
+                        tags_translated = value_translated.count('[bi]')
+                        if tags_english != tags_translated:
+                            logging.error(
+                                'Different number of [bi] tags in %s column '
+                                'for card ID %s in %s translations, row #%s: '
+                                '%s compared to %s in the English source',
+                                key.replace(BACK_PREFIX, 'Back '), card_id,
+                                lang, TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                                tags_translated, tags_english)
+
+                        tags_english = value_english.count('[b]')
+                        tags_translated = value_translated.count('[b]')
+                        if tags_english != tags_translated:
+                            logging.error(
+                                'Different number of [b] tags in %s column '
+                                'for card ID %s in %s translations, row #%s: '
+                                '%s compared to %s in the English source',
+                                key.replace(BACK_PREFIX, 'Back '), card_id,
+                                lang, TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                                tags_translated, tags_english)
+
+                        tags_english = value_english.count('[i]')
+                        tags_translated = value_translated.count('[i]')
+                        if tags_english != tags_translated:
+                            logging.error(
+                                'Different number of [i] tags in %s column '
+                                'for card ID %s in %s translations, row #%s: '
+                                '%s compared to %s in the English source',
+                                key.replace(BACK_PREFIX, 'Back '), card_id,
+                                lang, TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                                tags_translated, tags_english)
+
                         value_english = row[key]
                         value_english = re.sub(TAGS_WITH_NUMBERS_REGEX, '',
                                                value_english)
@@ -6471,14 +6642,19 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                 sorted(anchors_translated)):
                             _remove_common_elements(anchors_english,
                                                     anchors_translated)
-                            logging.warning(
-                                'Possibly different elements in %s column for '
-                                'card ID %s in %s translations, row #%s: "%s" '
-                                'compared to "%s" in the English source',
-                                key.replace(BACK_PREFIX, 'Back '), card_id,
-                                lang, TRANSLATIONS[lang][card_id][ROW_COLUMN],
-                                ', '.join(anchors_translated),
-                                ', '.join(anchors_english))
+                            if (_split_combined_elements(anchors_english) !=
+                                    _split_combined_elements(
+                                        anchors_translated)):
+                                logging.warning(
+                                    'Possibly different content in %s column '
+                                    'for card ID %s in %s translations, row '
+                                    '#%s: "%s" compared to "%s" in the '
+                                    'English source',
+                                    key.replace(BACK_PREFIX, 'Back '), card_id,
+                                    lang,
+                                    TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                                    ', '.join(anchors_translated),
+                                    ', '.join(anchors_english))
 
                 if not value and row.get(key):
                     logging.error(
