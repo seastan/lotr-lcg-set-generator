@@ -6517,6 +6517,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
                     if (key in (CARD_TEXT, BACK_PREFIX + CARD_TEXT,
                                 CARD_SHADOW, BACK_PREFIX + CARD_SHADOW) and
+                            row.get(CARD_TYPE) != 'Presentation' and
                             isinstance(row.get(key), str)):
                         value_english = row[key]
                         if key in (CARD_TEXT, CARD_SHADOW):
@@ -6585,8 +6586,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                         card_id, lang,
                                         TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
-                        paragraphs_english = len(re.split(r'\n{2,}', row[key]))
-                        paragraphs_translated = len(re.split(r'\n{2,}', value))
+                        paragraphs_english = len(
+                            re.split(r'\n{2,}', re.sub(
+                                r'\n +\n', '\n\n',
+                                _clean_tags(row[key])).strip()))
+                        paragraphs_translated = len(
+                            re.split(r'\n{2,}', re.sub(
+                                r'\n +\n', '\n\n',
+                                _clean_tags(value)).strip()))
                         if paragraphs_english != paragraphs_translated:
                             if row.get(CARD_TYPE) == 'Rules':
                                 logging.warning(
@@ -6609,40 +6616,34 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                     TRANSLATIONS[lang][card_id][ROW_COLUMN],
                                     paragraphs_translated, paragraphs_english)
 
-                        value_english = _add_automatic_tags(row[key])
-                        value_translated = _add_automatic_tags(value)
-                        tags_english = value_english.count('[bi]')
-                        tags_translated = value_translated.count('[bi]')
-                        if tags_english != tags_translated:
-                            logging.error(
-                                'Different number of [bi] tags in %s column '
-                                'for card ID %s in %s translations, row #%s: '
-                                '%s compared to %s in the English source',
-                                key.replace(BACK_PREFIX, 'Back '), card_id,
-                                lang, TRANSLATIONS[lang][card_id][ROW_COLUMN],
-                                tags_translated, tags_english)
-
-                        tags_english = value_english.count('[b]')
-                        tags_translated = value_translated.count('[b]')
-                        if tags_english != tags_translated:
-                            logging.error(
-                                'Different number of [b] tags in %s column '
-                                'for card ID %s in %s translations, row #%s: '
-                                '%s compared to %s in the English source',
-                                key.replace(BACK_PREFIX, 'Back '), card_id,
-                                lang, TRANSLATIONS[lang][card_id][ROW_COLUMN],
-                                tags_translated, tags_english)
-
-                        tags_english = value_english.count('[i]')
-                        tags_translated = value_translated.count('[i]')
-                        if tags_english != tags_translated:
-                            logging.error(
-                                'Different number of [i] tags in %s column '
-                                'for card ID %s in %s translations, row #%s: '
-                                '%s compared to %s in the English source',
-                                key.replace(BACK_PREFIX, 'Back '), card_id,
-                                lang, TRANSLATIONS[lang][card_id][ROW_COLUMN],
-                                tags_translated, tags_english)
+                        value_english = _add_automatic_tags(row[key],
+                                                            lang='English')
+                        value_translated = _add_automatic_tags(value,
+                                                               lang=lang)
+                        for tag in ('[b]', '[i]', '[bi]'):
+                            tags_english = value_english.count(tag)
+                            tags_translated = value_translated.count(tag)
+                            if tags_english != tags_translated:
+                                if row.get(CARD_TYPE) == 'Rules':
+                                    logging.warning(
+                                        'Different number of %s tags in %s '
+                                        'column for card ID %s in %s '
+                                        'translations, row #%s: %s compared '
+                                        'to %s in the English source', tag,
+                                        key.replace(BACK_PREFIX, 'Back '),
+                                        card_id, lang,
+                                        TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                                        tags_translated, tags_english)
+                                else:
+                                    logging.error(
+                                        'Different number of %s tags in %s '
+                                        'column for card ID %s in %s '
+                                        'translations, row #%s: %s compared '
+                                        'to %s in the English source', tag,
+                                        key.replace(BACK_PREFIX, 'Back '),
+                                        card_id, lang,
+                                        TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                                        tags_translated, tags_english)
 
                         value_english = row[key]
                         value_english = re.sub(TAGS_WITH_NUMBERS_REGEX, '',
