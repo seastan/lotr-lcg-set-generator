@@ -2068,7 +2068,7 @@ function markUp(value, key, cardType, lang, setID) {
 			value = value.replace(/\b(Condizione)\b/g, '[bi]$1[/bi]');
 		}
 		else if (lang == 'Polish') {
-			value = value.replace(/\b(Akcja)( Zasob\u00f3w| Planowania| Wyprawy| Podr\u00f3\u017cy| Spotka\u0144| Walki| Odpoczynku)?( M\u0119stwa)?:/g, '[b]$1$2$3[/b]:');
+			value = value.replace(/\b(Akcja)( Zasob\u00f3w| Planowania| Wyprawy| Podr\u00f3\u017cy| Spotkania| Walki| Odpoczynku)?( M\u0119stwa)?:/g, '[b]$1$2$3[/b]:');
 			value = value.replace(/\b(Po odkryciu|Wymuszony|Odpowied\u017a M\u0119stwa|Odpowied\u017a|Podr\u00f3\u017c|Cie\u0144|Nast\u0119pstwa):/g, '[b]$1[/b]:');
 			value = value.replace(/\b(Przygotowanie)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			value = value.replace(/\b(Stan)\b/g, '[bi]$1[/bi]');

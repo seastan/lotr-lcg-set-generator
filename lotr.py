@@ -680,6 +680,26 @@ SPANISH = {
     'Treachery': 'Traici\u00f3n',
     'Treasure': 'Tesoro'
 }
+NUMBER_TRANSLATIONS = {  # NOT USED AT THE MOMENT
+    '2' : {
+        'English': ['two'],
+        'French': ['deux'],
+        'German': ['zwei'],
+        'Italian': ['due'],
+        'Polish': ['dwa'],
+        'Portuguese': ['duas', 'dois'],
+        'Spanish': ['dos']
+    },
+    '3' : {
+        'English': ['three'],
+        'French': ['trois'],
+        'German': ['drei'],
+        'Italian': ['tre'],
+        'Polish': ['trzy'],
+        'Portuguese': ['três'],
+        'Spanish': ['tres']
+    }
+}
 RESTRICTED_TRANSLATION = {
     'English': 'Restricted',
     'French': 'Restreint',
@@ -914,7 +934,7 @@ TRANSLATION_MATCH = [
         'French': r'\[Vaillance\] \[Rencontre\] Action\b',
         'German': r'\bEhrenvolle Begegnungsaktion\b',
         'Italian': r'\bAzione Valorosa di Incontri\b',
-        'Polish': r'\bAkcja Spotka\u0144 M\u0119stwa\b',
+        'Polish': r'\bAkcja Spotkania M\u0119stwa\b',
         'Portuguese': r'\bA\u00e7\u00e3o Valorosa de Encontro\b',
         'Spanish': r'\bAcci\u00f3n de Encuentro de Valor\b'}],
     [r'Valour Combat Action', {
@@ -978,7 +998,7 @@ TRANSLATION_MATCH = [
         'French': r'\[Rencontre\] Action\b',
         'German': r'\bBegegnungsaktion\b',
         'Italian': r'\bAzione di Incontri\b',
-        'Polish': r'\bAkcja Spotka\u0144\b',
+        'Polish': r'\bAkcja Spotkania\b',
         'Portuguese': r'\bA\u00e7\u00e3o de Encontro\b',
         'Spanish': r'\bAcci\u00f3n de Encuentro\b'}],
     [r'Combat Action', {
@@ -1084,6 +1104,7 @@ ALL_SCRATCH_CARD_NAMES = set()
 ALL_TRAITS = set()
 ALL_SCRATCH_TRAITS = set()
 PRE_SANITY_CHECK = {'name': {}, 'ref': {}, 'flavour': {}, 'shadow': {}}
+FLAVOUR_WARNINGS = {'missing_quotes': set(), 'redundant_quotes': set()}
 TRANSLATIONS = {}
 SELECTED_CARDS = set()
 FOUND_SETS = set()
@@ -2292,7 +2313,7 @@ def get_similar_names(value, card_names, scratch_card_names=None):
     return res
 
 
-def parse_flavour(value, lang):  # pylint: disable=R0912,R0915
+def parse_flavour(value, lang, value_id=None):  # pylint: disable=R0912,R0915
     """ Parse the flavour text and detect possible issues.
     """
     errors = []
@@ -2340,7 +2361,7 @@ def parse_flavour(value, lang):  # pylint: disable=R0912,R0915
         if not false_split:
             errors.append('Too many commas in the source')
 
-    if len(parts) == 2:
+    if len(parts) == 2:  # pylint: disable=R1702
         source_parts = parts[1][::-1].split(' ,', maxsplit=1)
         source_parts = [p[::-1].strip() for p in source_parts][::-1]
         source_book = re.sub(r'\[[^\]]+\]$', '', source_parts[-1])
@@ -2375,10 +2396,25 @@ def parse_flavour(value, lang):  # pylint: disable=R0912,R0915
                 if len(source_parts) == 2:
                     if (not parts[0].startswith('“') and
                             not parts[0].endswith('”')):
-                        errors.append('Possibly missing double quotes')
+                        if lang == 'English':
+                            errors.append('Possibly missing double quotes')
+                            if value_id:
+                                FLAVOUR_WARNINGS['missing_quotes'].add(
+                                    value_id)
+                        elif (not value_id or
+                              value_id not in
+                              FLAVOUR_WARNINGS['missing_quotes']):
+                            errors.append('Possibly missing double quotes')
                 elif (parts[0].startswith('“') or
                       parts[0].endswith('”')):
-                    errors.append('Possibly redundant double quotes')
+                    if lang == 'English':
+                        errors.append('Possibly redundant double quotes')
+                        if value_id:
+                            FLAVOUR_WARNINGS['redundant_quotes'].add(value_id)
+                    elif (not value_id or
+                          value_id not in
+                          FLAVOUR_WARNINGS['redundant_quotes']):
+                        errors.append('Possibly redundant double quotes')
 
             if lang == 'English':
                 parts[0] = parts[0].replace('—', '–')
@@ -2560,7 +2596,8 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                 value = value.replace('[name]', card_name)
 
             if key in (CARD_FLAVOUR, BACK_PREFIX + CARD_FLAVOUR):
-                errors, parts, separator, dash = parse_flavour(value, lang)
+                errors, parts, separator, dash = parse_flavour(
+                    value, lang, (row[ROW_COLUMN], row[CARD_SCRATCH], key))
                 if errors and lang in conf['output_languages']:
                     for error in errors:
                         error = '{} in {}'.format(
@@ -2965,6 +3002,8 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
     PRE_SANITY_CHECK['ref'] = {}
     PRE_SANITY_CHECK['flavour'] = {}
     PRE_SANITY_CHECK['shadow'] = {}
+    FLAVOUR_WARNINGS['missing_quotes'] = set()
+    FLAVOUR_WARNINGS['redundant_quotes'] = set()
     _extract_all_card_names(DATA, 'English')
     _clean_data(conf, DATA, 'English')
 
@@ -3669,6 +3708,20 @@ def _split_combined_elements(input_list):
     return output_list
 
 
+def _replace_numbers(value, lang='English'):
+    """ Replace numbers as text.
+
+    NOT USED AT THE MOMENT
+    """
+    for key, translations in NUMBER_TRANSLATIONS.items():
+        translation = translations.get(lang, [])
+        for word in translation:
+            value = re.sub(r'\b' + re.escape(word) + r'\b', key, value,
+                           flags=re.IGNORECASE)
+
+    return value
+
+
 def _add_automatic_tags(value, lang='English'):
     """ Add automatic tags.
     """
@@ -3719,7 +3772,7 @@ def _add_automatic_tags(value, lang='English'):
     elif lang == 'Polish':
         value = re.sub(
             r'\b(Akcja)( Zasob\u00f3w| Planowania| Wyprawy| Podr\u00f3\u017cy'
-            r'| Spotka\u0144| Walki| Odpoczynku)?( M\u0119stwa)?:',
+            r'| Spotkania| Walki| Odpoczynku)?( M\u0119stwa)?:',
             '[b]\\1\\2\\3[/b]:', value)
         value = re.sub(
             r'\b(Po odkryciu|Wymuszony|Odpowied\u017a M\u0119stwa'
@@ -3936,12 +3989,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         for error in PRE_SANITY_CHECK['flavour'].get(
                 (i, card_scratch, 'English'), []):
             message = '{} for row #{}{}'.format(error, i, row_info)
-            logging.warning(message)
+            if not [l for l in conf['languages'] if l != 'English']:
+                logging.warning(message)
 
         for error in PRE_SANITY_CHECK['shadow'].get(
                 (i, card_scratch, 'English'), []):
             message = '{} for row #{}{}'.format(error, i, row_info)
-            logging.warning(message)
+            if not [l for l in conf['languages'] if l != 'English']:
+                logging.warning(message)
 
         if card_number is None:
             message = 'Missing card number for row #{}{}'.format(i, row_info)
@@ -6529,7 +6584,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
                         value_translated = value
                         for term_english, lang_dict in TRANSLATION_MATCH:
-                            regex_english = r'\b' + term_english + r'\b'
+                            regex_english = (r'\b' + re.escape(term_english)
+                                             + r'\b')
                             regex_translated = lang_dict.get(lang)
                             if not regex_translated:
                                 continue
@@ -6596,17 +6652,19 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                 _clean_tags(value)).strip()))
                         if paragraphs_english != paragraphs_translated:
                             if row.get(CARD_TYPE) == 'Rules':
-                                logging.warning(
-                                    'Different number of paragraphs in %s '
-                                    'column for card ID %s in %s '
-                                    'translations, row #%s: %s compared to %s '
-                                    'in the English source',
-                                    key.replace(BACK_PREFIX, 'Back '), card_id,
-                                    lang,
-                                    TRANSLATIONS[lang][card_id][ROW_COLUMN],
-                                    paragraphs_translated, paragraphs_english)
+                                # too much noise
+                                # logging.warning(
+                                #     'Different number of paragraphs in %s '
+                                #     'column for card ID %s in %s '
+                                #     'translations, row #%s: %s compared to %s '
+                                #     'in the English source',
+                                #     key.replace(BACK_PREFIX, 'Back '), card_id,
+                                #     lang,
+                                #     TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                                #     paragraphs_translated, paragraphs_english)
+                                pass
                             else:
-                                logging.error(
+                                logging.warning(
                                     'Different number of paragraphs in %s '
                                     'column for card ID %s in %s '
                                     'translations, row #%s: %s compared to %s '
@@ -6625,6 +6683,18 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             tags_translated = value_translated.count(tag)
                             if tags_english != tags_translated:
                                 if row.get(CARD_TYPE) == 'Rules':
+                                    # too much noise
+                                    # logging.warning(
+                                    #     'Different number of %s tags in %s '
+                                    #     'column for card ID %s in %s '
+                                    #     'translations, row #%s: %s compared '
+                                    #     'to %s in the English source', tag,
+                                    #     key.replace(BACK_PREFIX, 'Back '),
+                                    #     card_id, lang,
+                                    #     TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                                    #     tags_translated, tags_english)
+                                    pass
+                                else:
                                     logging.warning(
                                         'Different number of %s tags in %s '
                                         'column for card ID %s in %s '
@@ -6634,25 +6704,38 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                         card_id, lang,
                                         TRANSLATIONS[lang][card_id][ROW_COLUMN],
                                         tags_translated, tags_english)
-                                else:
-                                    logging.error(
-                                        'Different number of %s tags in %s '
-                                        'column for card ID %s in %s '
-                                        'translations, row #%s: %s compared '
-                                        'to %s in the English source', tag,
-                                        key.replace(BACK_PREFIX, 'Back '),
-                                        card_id, lang,
-                                        TRANSLATIONS[lang][card_id][ROW_COLUMN],
-                                        tags_translated, tags_english)
 
-                        value_english = row[key]
                         value_english = re.sub(TAGS_WITH_NUMBERS_REGEX, '',
-                                               value_english)
+                                               row[key])
+
+                        # increases the number of false-positives
+                        # if key in (CARD_TEXT, CARD_SHADOW):
+                        #     value_english = value_english.replace(
+                        #         row.get(CARD_NAME) or '', '')
+                        # else:
+                        #     value_english = value_english.replace(
+                        #         row.get(BACK_PREFIX + CARD_NAME) or '', '')
+                        # value_english = _replace_numbers(value_english,
+                        #                                  lang='English')
+
                         anchors_english = re.findall(ANCHORS_REGEX,
                                                      value_english)
-                        value_translated = value
+
                         value_translated = re.sub(TAGS_WITH_NUMBERS_REGEX, '',
-                                                  value_translated)
+                                                  value)
+
+                        # increases the number of false-positives
+                        # if key in (CARD_TEXT, CARD_SHADOW):
+                        #     value_translated = value_translated.replace(
+                        #         TRANSLATIONS[lang][card_id].get(
+                        #             CARD_NAME) or '', '')
+                        # else:
+                        #     value_translated = value_translated.replace(
+                        #         TRANSLATIONS[lang][card_id].get(
+                        #             BACK_PREFIX + CARD_NAME) or '', '')
+                        # value_translated = _replace_numbers(value_translated,
+                        #                                    lang=lang)
+
                         anchors_translated = re.findall(ANCHORS_REGEX,
                                                         value_translated)
                         if (sorted(anchors_english) !=
@@ -6662,16 +6745,30 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             if (_split_combined_elements(anchors_english) !=
                                     _split_combined_elements(
                                         anchors_translated)):
-                                logging.warning(
-                                    'Possibly different content in %s column '
-                                    'for card ID %s in %s translations, row '
-                                    '#%s: "%s" compared to "%s" in the '
-                                    'English source',
-                                    key.replace(BACK_PREFIX, 'Back '), card_id,
-                                    lang,
-                                    TRANSLATIONS[lang][card_id][ROW_COLUMN],
-                                    ', '.join(anchors_translated),
-                                    ', '.join(anchors_english))
+                                if row.get(CARD_TYPE) == 'Rules':
+                                    # too much noise
+                                    # logging.warning(
+                                    #     'Possibly different content in %s '
+                                    #     'column for card ID %s in %s '
+                                    #     'translations, row #%s: "%s" compared '
+                                    #     'to "%s" in the English source',
+                                    #     key.replace(BACK_PREFIX, 'Back '),
+                                    #     card_id, lang,
+                                    #     TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                                    #     ', '.join(anchors_translated),
+                                    #     ', '.join(anchors_english))
+                                    pass
+                                else:
+                                    logging.warning(
+                                        'Possibly different content in %s '
+                                        'column for card ID %s in %s '
+                                        'translations, row #%s: "%s" compared '
+                                        'to "%s" in the English source',
+                                        key.replace(BACK_PREFIX, 'Back '),
+                                        card_id, lang,
+                                        TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                                        ', '.join(anchors_translated),
+                                        ', '.join(anchors_english))
 
                 if not value and row.get(key):
                     logging.error(
