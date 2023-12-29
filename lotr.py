@@ -1280,25 +1280,44 @@ def _detect_unmatched_tags(text):
     text_copy = text
     # 'right' is removed from the list to make the life of translators easier
     for tag in ('center', 'b', 'i', 'bi', 'u', 'strike', 'red'):
+        open_tag = '[{}]'.format(tag)
+        close_tag = '[/{}]'.format(tag)
+        diff = text_copy.count(open_tag) - text_copy.count(close_tag)
+        if diff > 0:
+            errors.append(open_tag)
+            continue
+
+        if diff < 0:
+            errors.append(close_tag)
+            continue
+
         text = text_copy
         text = re.sub(r'\[{}\].+?\[\/{}\]'.format(tag, tag), '', text,  # pylint: disable=W1308
                       flags=re.DOTALL)
-        open_tag = '[{}]'.format(tag)
         if open_tag in text:
             errors.append(open_tag)
 
-        close_tag = '[/{}]'.format(tag)
         if close_tag in text:
             errors.append(close_tag)
 
     for tag in ('lotr', 'lotrheader', 'size'):
+        open_tag = '[{}]'.format(tag)
+        close_tag = '[/{}]'.format(tag)
+        diff = text_copy.count('[{} '.format(tag)) - text_copy.count(close_tag)
+        if diff > 0:
+            errors.append(open_tag)
+            continue
+
+        if diff < 0:
+            errors.append(close_tag)
+            continue
+
         text = text_copy
         text = re.sub(r'\[{} .+?\[\/{}\]'.format(tag, tag), '', text,  # pylint: disable=W1308
                       flags=re.DOTALL)
         if '[{} '.format(tag) in text:
-            errors.append('[{}]'.format(tag))
+            errors.append(open_tag)
 
-        close_tag = '[/{}]'.format(tag)
         if close_tag in text:
             errors.append(close_tag)
 
@@ -6436,9 +6455,6 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
 
                     unmatched_tags = _detect_unmatched_tags(value)
-                    if TRANSLATIONS[lang][card_id][ROW_COLUMN] == 19 and key == CARD_TEXT: #
-                        logging.info(value) #
-                        logging.info(unmatched_tags) #
                     if unmatched_tags:
                         logging.error(
                             'Unmatched tag(s) in %s column for card ID %s in '
