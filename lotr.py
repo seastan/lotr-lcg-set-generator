@@ -6682,7 +6682,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             tags_english = value_english.count(tag)
                             tags_translated = value_translated.count(tag)
                             if tags_english != tags_translated:
-                                if row.get(CARD_TYPE) == 'Rules':
+                                if (row.get(CARD_TYPE) == 'Rules' and
+                                        tag != '[bi]'):
                                     # too much noise
                                     # logging.warning(
                                     #     'Different number of %s tags in %s '
@@ -6736,39 +6737,49 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         # value_translated = _replace_numbers(value_translated,
                         #                                    lang=lang)
 
+                        anchors_issue = False
                         anchors_translated = re.findall(ANCHORS_REGEX,
                                                         value_translated)
                         if (sorted(anchors_english) !=
                                 sorted(anchors_translated)):
+                            anchors_issue = True
+
+                        if anchors_issue:
                             _remove_common_elements(anchors_english,
                                                     anchors_translated)
-                            if (_split_combined_elements(anchors_english) !=
-                                    _split_combined_elements(
-                                        anchors_translated)):
-                                if row.get(CARD_TYPE) == 'Rules':
-                                    # too much noise
-                                    # logging.warning(
-                                    #     'Possibly different content in %s '
-                                    #     'column for card ID %s in %s '
-                                    #     'translations, row #%s: "%s" compared '
-                                    #     'to "%s" in the English source',
-                                    #     key.replace(BACK_PREFIX, 'Back '),
-                                    #     card_id, lang,
-                                    #     TRANSLATIONS[lang][card_id][ROW_COLUMN],
-                                    #     ', '.join(anchors_translated),
-                                    #     ', '.join(anchors_english))
-                                    pass
-                                else:
-                                    logging.warning(
-                                        'Possibly different content in %s '
-                                        'column for card ID %s in %s '
-                                        'translations, row #%s: "%s" compared '
-                                        'to "%s" in the English source',
-                                        key.replace(BACK_PREFIX, 'Back '),
-                                        card_id, lang,
-                                        TRANSLATIONS[lang][card_id][ROW_COLUMN],
-                                        ', '.join(anchors_translated),
-                                        ', '.join(anchors_english))
+
+                        if (anchors_issue and
+                                _split_combined_elements(anchors_english) ==
+                                _split_combined_elements(anchors_translated)):
+                            anchors_issue = False
+
+                        if anchors_issue:
+                            if (row.get(CARD_TYPE) == 'Rules' and
+                                    '[' not in ', '.join(anchors_english) and
+                                    '[' not in ', '.join(anchors_translated)):
+                                # too much noise
+                                # logging.warning(
+                                #     'Possibly different content in %s column '
+                                #     'for card ID %s in %s translations, row '
+                                #     '#%s: "%s" compared to "%s" in the '
+                                #     'English source',
+                                #     key.replace(BACK_PREFIX, 'Back '), card_id,
+                                #     lang,
+                                #     TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                                #     ', '.join(anchors_translated),
+                                #     ', '.join(anchors_english))
+                                pass
+                            else:
+                                logging.warning(
+                                    'Possibly different content in %s column '
+                                    'for card ID %s in %s translations, row '
+                                    '#%s: "%s" compared to "%s" in the '
+                                    'English source',
+                                    key.replace(BACK_PREFIX, 'Back '), card_id,
+                                    lang,
+                                    TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                                    ', '.join(anchors_translated),
+                                    ', '.join(anchors_english))
 
                 if not value and row.get(key):
                     logging.error(
