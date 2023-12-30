@@ -197,7 +197,7 @@ CARD_TYPES_NO_ENCOUNTER_SET = {'Ally', 'Attachment', 'Contract', 'Event',
                                'Hero', 'Player Objective', 'Player Side Quest',
                                'Presentation'}
 CARD_TYPES_UNIQUE = {'Hero', 'Objective Hero', 'Player Objective', 'Treasure'}
-CARD_TYPES_NO_UNIQUE = {'Campaign', 'Contract', 'Event', 'Full Art Landscape',
+CARD_TYPES_NO_UNIQUE = {'Campaign', 'Event', 'Full Art Landscape',
                         'Full Art Portrait', 'Nightmare', 'Presentation',
                         'Quest', 'Rules'}
 CARD_TYPES_PLAYER_SPHERE = {'Ally', 'Attachment', 'Event', 'Hero',

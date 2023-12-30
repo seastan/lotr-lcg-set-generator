@@ -413,6 +413,7 @@ var nameUniqueRegion = {};
 nameUniqueRegion['Ally'] = '99,324,215,31';
 nameUniqueRegion['Attachment'] = '131,34,185,31';
 nameUniqueRegion['Cave'] = '79,39,162,31';
+nameUniqueRegion['Contract'] = '83,241,247,34';
 nameUniqueRegion['Encounter Side Quest'] = '99,38,365,34';
 nameUniqueRegion['Encounter Side Quest SmallTextArea'] = '99,38,365,34';
 nameUniqueRegion['Enemy'] = '93,323,227,31';
@@ -431,6 +432,9 @@ nameUniqueRegion['Ship Enemy'] = '93,323,227,31';
 nameUniqueRegion['Ship Objective'] = '74,44,265,34';
 nameUniqueRegion['Treachery'] = '52,108,29,164';
 nameUniqueRegion['Treasure'] = '131,40,185,31';
+
+var nameUniqueBackRegion = {};
+nameUniqueBackRegion['Contract'] = '83,241,247,34';
 
 var subtypeRegion = {};
 subtypeRegion['Ally'] = '146,301,124,20';
@@ -1049,6 +1053,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						cardNameBack = card['BName'];
 						mapping = mapping.concat([
 							['NameBack', 'BName'],
+							['UniqueBack', 'BUnique'],
 							['StageLetterBack', 'BEngagement Cost'],
 							['OptionRightBack', 'BVictory Points'],
 							['RulesBack', 'BText'],
@@ -1723,6 +1728,17 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 				}
 
+				if (s.get('UniqueBack') + '' == '1') {
+					if (cardType in nameUniqueBackRegion) {
+						s.set('NameBack-region', nameUniqueBackRegion[cardType]);
+					}
+				}
+				else {
+					if (cardType in nameBackRegion) {
+						s.set('NameBack-region', nameBackRegion[cardType]);
+					}
+				}
+
 				if ((cardType == 'Hero Promo') && (translate[cardType][lang].length > 4)) {
 					s.set('Type-region', '279,448,39,15');
 				}
@@ -1752,7 +1768,6 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					['Progress-region', progressRegion],
 					['Adventure-region', adventureRegion],
 					['Cycle-region', cycleRegion],
-					['NameBack-region', nameBackRegion],
 					['ResourceCost-region', resourceCostRegion],
 					['Difficulty-region', difficultyRegion],
 					['EncounterSet-portrait-clip-region', encounterPortraitRegion],

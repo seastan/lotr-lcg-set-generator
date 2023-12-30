@@ -796,7 +796,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             }
 
             var unique = '';
-            if (data.Unique + '') {
+            if (data.UniqueBack + '') {
                 unique = '<span style="font-size: ' + updateFontSize(data['Name-pointsize']) + 'em"><span style="font-family: Symbols">u</span> </span>';
             }
 
