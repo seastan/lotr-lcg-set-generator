@@ -6703,6 +6703,12 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                         TRANSLATIONS[lang][card_id][ROW_COLUMN],
                                         tags_translated, tags_english)
 
+                    if (key in (CARD_TEXT, BACK_PREFIX + CARD_TEXT,
+                                CARD_SHADOW, BACK_PREFIX + CARD_SHADOW,
+                                CARD_KEYWORDS, BACK_PREFIX + CARD_KEYWORDS,
+                                CARD_VICTORY, BACK_PREFIX + CARD_VICTORY) and
+                            row.get(CARD_TYPE) != 'Presentation' and
+                            isinstance(row.get(key), str)):
                         value_english = re.sub(TAGS_WITH_NUMBERS_REGEX, '',
                                                row[key])
                         if key in (CARD_TEXT, CARD_SHADOW):
