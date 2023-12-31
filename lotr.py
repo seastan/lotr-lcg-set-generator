@@ -2597,7 +2597,7 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
 
             if key in (CARD_FLAVOUR, BACK_PREFIX + CARD_FLAVOUR):
                 errors, parts, separator, dash = parse_flavour(
-                    value, lang, (row[ROW_COLUMN], row[CARD_SCRATCH], key))
+                    value, lang, (row[CARD_ID], key))
                 if errors and lang in conf['output_languages']:
                     for error in errors:
                         error = '{} in {}'.format(
@@ -3828,6 +3828,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
     broken_set_ids = set()
     deck_rules = set()
     quest_adventures = {}
+    hash_by_key = {}
+    keys_by_hash = {}
     card_data = DATA[:]
     card_data = sorted(card_data, key=lambda row: (row[CARD_SCRATCH] or 0,
                                                    row[ROW_COLUMN]))
@@ -6210,6 +6212,12 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     broken_set_ids.add(set_id)
 
             if key != CARD_DECK_RULES and isinstance(value, str):
+                value_key = (row[CARD_ID], key)
+                value_hash = hashlib.md5(value.encode()).hexdigest()
+                hash_by_key[('English', value_key)] = value_hash
+                keys_by_hash[('English', value_hash)] = keys_by_hash.get(
+                    ('English', value_hash), []) + [value_key]
+
                 match = re.search(r' ((?:\[[^\]]+\])+)(?:\n\n|$)', value)
                 if match:
                     message = (
@@ -6470,6 +6478,12 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                 if isinstance(value, str):
+                    value_key = (row[CARD_ID], key)
+                    value_hash = hashlib.md5(value.encode()).hexdigest()
+                    hash_by_key[(lang, value_key)] = value_hash
+                    keys_by_hash[(lang, value_hash)] = keys_by_hash.get(
+                        (lang, value_hash), []) + [value_key]
+
                     match = re.search(r' ((?:\[[^\]]+\])+)(?:\n\n|$)', value)
                     if match:
                         logging.error(
