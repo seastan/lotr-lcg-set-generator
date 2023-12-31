@@ -432,13 +432,13 @@ TEXT_CHUNK_FLAG = b'tEXt'
 
 TAGS_WITH_NUMBERS_REGEX = r'\[[^\]]*[0-9][^\]]*\]'
 ANCHORS_REGEX = (
-    r'(?:[1-9][AB]|(?:\+|–)?\b(?:[1-9][0-9][0-9]|[1-9][0-9]|[2-9]|0|X)\b'
+    r'(?:[1-9][AB]|\b(?:[1-9][0-9][0-9]|[1-9][0-9]|[2-9]|0|X)\b'
     r'(?:\[pp\]| \[threat\]| \[attack\]| \[defense\]| \[willpower\]'
     r'| \[leadership\]| \[lore\]| \[spirit\]| \[tactics\])?'
     r'|\[unique\]|\[threat\]|\[attack\]|\[defense\]|\[willpower\]'
     r'|\[leadership\]|\[lore\]|\[spirit\]|\[tactics\]|\[baggins\]'
     r'|\[fellowship\]|\[sunny\]|\[cloudy\]|\[rainy\]|\[stormy\]|\[sailing\]'
-    r'|\[eos\]|1\[pp\]|\[pp\])')
+    r'|\[eos\]|\[pp\])')
 CARD_NAME_REFERENCE_REGEX = r'\[\[([^\]]+)\]\]'
 DECK_PREFIX_REGEX = r'^[QN][A-Z0-9][A-Z0-9]\.[0-9][0-9]?(?:-|$)'
 KEYWORDS_REGEX = (r'^(?: ?[A-Z][A-Za-z\'\-]+(?: [0-9X]+(?:\[pp\])?)?\.|'
@@ -680,7 +680,7 @@ SPANISH = {
     'Treachery': 'Traici\u00f3n',
     'Treasure': 'Tesoro'
 }
-NUMBER_TRANSLATIONS = {  # NOT USED AT THE MOMENT
+NUMBER_TRANSLATIONS = {
     '2' : {
         'English': ['two'],
         'French': ['deux'],
@@ -3710,8 +3710,6 @@ def _split_combined_elements(input_list):
 
 def _replace_numbers(value, lang='English'):
     """ Replace numbers as text.
-
-    NOT USED AT THE MOMENT
     """
     for key, translations in NUMBER_TRANSLATIONS.items():
         translation = translations.get(lang, [])
@@ -6642,17 +6640,17 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                         card_id, lang,
                                         TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
+                        value_english = re.sub(
+                            r'\n +\n', '\n\n', _clean_tags(row[key])).strip()
+                        value_translated = re.sub(
+                            r'\n +\n', '\n\n', _clean_tags(value)).strip()
+
                         paragraphs_english = len(
-                            re.split(r'\n{2,}', re.sub(
-                                r'\n +\n', '\n\n',
-                                _clean_tags(row[key])).strip()))
+                            re.split(r'\n{2,}', value_english))
                         paragraphs_translated = len(
-                            re.split(r'\n{2,}', re.sub(
-                                r'\n +\n', '\n\n',
-                                _clean_tags(value)).strip()))
+                            re.split(r'\n{2,}', value_translated))
                         if paragraphs_english != paragraphs_translated:
                             if row.get(CARD_TYPE) == 'Rules':
-                                # too much noise
                                 # logging.warning(
                                 #     'Different number of paragraphs in %s '
                                 #     'column for card ID %s in %s '
@@ -6684,7 +6682,6 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             if tags_english != tags_translated:
                                 if (row.get(CARD_TYPE) == 'Rules' and
                                         tag != '[bi]'):
-                                    # too much noise
                                     # logging.warning(
                                     #     'Different number of %s tags in %s '
                                     #     'column for card ID %s in %s '
@@ -6708,56 +6705,75 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
                         value_english = re.sub(TAGS_WITH_NUMBERS_REGEX, '',
                                                row[key])
-
-                        # increases the number of false-positives
-                        # if key in (CARD_TEXT, CARD_SHADOW):
-                        #     value_english = value_english.replace(
-                        #         row.get(CARD_NAME) or '', '')
-                        # else:
-                        #     value_english = value_english.replace(
-                        #         row.get(BACK_PREFIX + CARD_NAME) or '', '')
-                        # value_english = _replace_numbers(value_english,
-                        #                                  lang='English')
-
-                        anchors_english = re.findall(ANCHORS_REGEX,
-                                                     value_english)
+                        if key in (CARD_TEXT, CARD_SHADOW):
+                            value_english = value_english.replace(
+                                row.get(CARD_NAME) or '', '')
+                        else:
+                            value_english = value_english.replace(
+                                row.get(BACK_PREFIX + CARD_NAME) or '', '')
 
                         value_translated = re.sub(TAGS_WITH_NUMBERS_REGEX, '',
                                                   value)
-
-                        # increases the number of false-positives
-                        # if key in (CARD_TEXT, CARD_SHADOW):
-                        #     value_translated = value_translated.replace(
-                        #         TRANSLATIONS[lang][card_id].get(
-                        #             CARD_NAME) or '', '')
-                        # else:
-                        #     value_translated = value_translated.replace(
-                        #         TRANSLATIONS[lang][card_id].get(
-                        #             BACK_PREFIX + CARD_NAME) or '', '')
-                        # value_translated = _replace_numbers(value_translated,
-                        #                                    lang=lang)
+                        if key in (CARD_TEXT, CARD_SHADOW):
+                            value_translated = value_translated.replace(
+                                TRANSLATIONS[lang][card_id].get(
+                                    CARD_NAME) or '', '')
+                        else:
+                            value_translated = value_translated.replace(
+                                TRANSLATIONS[lang][card_id].get(
+                                    BACK_PREFIX + CARD_NAME) or '', '')
 
                         anchors_issue = False
+                        anchors_english = re.findall(ANCHORS_REGEX,
+                                                     value_english)
                         anchors_translated = re.findall(ANCHORS_REGEX,
                                                         value_translated)
                         if (sorted(anchors_english) !=
                                 sorted(anchors_translated)):
-                            anchors_issue = True
-
-                        if anchors_issue:
                             _remove_common_elements(anchors_english,
                                                     anchors_translated)
+                            anchors_issue = True
 
                         if (anchors_issue and
                                 _split_combined_elements(anchors_english) ==
                                 _split_combined_elements(anchors_translated)):
                             anchors_issue = False
 
+                        if ((anchors_issue and not anchors_english and  # pylint: disable=R0916
+                             not [a for a in anchors_translated
+                                  if a not in ('2', '3')]) or
+                                (anchors_issue and not anchors_translated and
+                                 not [a for a in anchors_english
+                                      if a not in ('2', '3')])):
+                            if not anchors_english:
+                                value_english = _replace_numbers(
+                                    value_english, lang='English')
+                            else:
+                                value_translated = _replace_numbers(
+                                    value_translated, lang=lang)
+
+                            anchors_english = re.findall(ANCHORS_REGEX,
+                                                         value_english)
+                            anchors_translated = re.findall(ANCHORS_REGEX,
+                                                            value_translated)
+                            if (sorted(anchors_english) ==
+                                    sorted(anchors_translated)):
+                                anchors_issue = False
+                            else:
+                                _remove_common_elements(anchors_english,
+                                                        anchors_translated)
+
+                            if (anchors_issue and
+                                    _split_combined_elements(
+                                        anchors_english) ==
+                                    _split_combined_elements(
+                                        anchors_translated)):
+                                anchors_issue = False
+
                         if anchors_issue:
                             if (row.get(CARD_TYPE) == 'Rules' and
                                     '[' not in ', '.join(anchors_english) and
                                     '[' not in ', '.join(anchors_translated)):
-                                # too much noise
                                 # logging.warning(
                                 #     'Possibly different content in %s column '
                                 #     'for card ID %s in %s translations, row '
