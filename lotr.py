@@ -711,25 +711,25 @@ RESTRICTED_TRANSLATION = {
 }
 
 KNOWN_BOOKS = {
-    'English': {
+    'English': [
         'The Hobbit', 'The Fellowship of the Ring', 'The Two Towers',
-        'The Return of the King', 'The Silmarillion', 'The Fall of Gondolin'},
-    'French': {
+        'The Return of the King', 'The Silmarillion', 'The Fall of Gondolin'],
+    'French': [
         'Le Hobbit', 'La Communauté de l’Anneau', 'Les Deux Tours',
-        'Le Retour du Roi', 'Le Silmarillion', 'La Chute de Gondolin'},
-    'German': {
+        'Le Retour du Roi', 'Le Silmarillion', 'La Chute de Gondolin'],
+    'German': [
         'Der kleine Hobbit', 'Die Gefährten', 'Die zwei Türme',
         'Die Rückkehr des Königs', 'Das Silmarillion',
-        'Der Fall von Gondolin'},
-    'Italian': {
+        'Der Fall von Gondolin'],
+    'Italian': [
         'Lo Hobbit', 'La Compagnia dell’Anello', 'Le Due Torri',
-        'Il Ritorno del Re', 'Il Silmarillion', 'La Caduta di Gondolin'},
-    'Polish': {
+        'Il Ritorno del Re', 'Il Silmarillion', 'La Caduta di Gondolin'],
+    'Polish': [
         'Hobbit', 'Drużyna Pierścienia', 'Dwie Wieże',
-        'Powrót Króla', 'Silmarillion', 'Upadek Gondolinu'},
-    'Spanish': {
+        'Powrót Króla', 'Silmarillion', 'Upadek Gondolinu'],
+    'Spanish': [
         'El Hobbit', 'La Comunidad del Anillo', 'Las Dos Torres',
-        'El Retorno del Rey', 'El Silmarillion', 'La Caída de Gondolin'},
+        'El Retorno del Rey', 'El Silmarillion', 'La Caída de Gondolin'],
     }
 AUXILIARY_TRAITS = {
     'Abroad', 'Basic', 'Broken', 'Corrupt', 'Cursed', 'Elite', 'Epic',
@@ -1104,6 +1104,7 @@ ALL_SCRATCH_CARD_NAMES = set()
 ALL_TRAITS = set()
 ALL_SCRATCH_TRAITS = set()
 PRE_SANITY_CHECK = {'name': {}, 'ref': {}, 'flavour': {}, 'shadow': {}}
+FLAVOUR_BOOKS = {}
 FLAVOUR_WARNINGS = {'missing_quotes': set(), 'redundant_quotes': set()}
 TRANSLATIONS = {}
 SELECTED_CARDS = set()
@@ -2361,6 +2362,7 @@ def parse_flavour(value, lang, value_id=None):  # pylint: disable=R0912,R0915
         if not false_split:
             errors.append('Too many commas in the source')
 
+    source_book = None
     if len(parts) == 2:  # pylint: disable=R1702
         source_parts = parts[1][::-1].split(' ,', maxsplit=1)
         source_parts = [p[::-1].strip() for p in source_parts][::-1]
@@ -2373,6 +2375,9 @@ def parse_flavour(value, lang, value_id=None):  # pylint: disable=R0912,R0915
                 errors.append('Possibly unknown source book: {}'.format(
                     source_book))
         else:
+            if lang == 'English' and value_id:
+                FLAVOUR_BOOKS[value_id] = KNOWN_BOOKS[lang].index(source_book)
+
             if len(source_parts) == 2:
                 parts = [parts[0], source_parts[0], source_parts[1]]
 
@@ -2420,6 +2425,15 @@ def parse_flavour(value, lang, value_id=None):  # pylint: disable=R0912,R0915
                 parts[0] = parts[0].replace('—', '–')
             elif lang == 'Italian':
                 parts[0] = parts[0].replace('—', '-')
+
+    if lang != 'English' and KNOWN_BOOKS.get(lang) and value_id:
+        if source_book and source_book in KNOWN_BOOKS[lang]:
+            book_index = KNOWN_BOOKS[lang].index(source_book)
+        else:
+            book_index = -1
+
+        if book_index != FLAVOUR_BOOKS.get(value_id, -1):
+            errors.append('Different source book from the English version')
 
     if lang == 'German':
         dash = '–'
@@ -3002,6 +3016,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
     PRE_SANITY_CHECK['ref'] = {}
     PRE_SANITY_CHECK['flavour'] = {}
     PRE_SANITY_CHECK['shadow'] = {}
+    FLAVOUR_BOOKS.clear()
     FLAVOUR_WARNINGS['missing_quotes'] = set()
     FLAVOUR_WARNINGS['redundant_quotes'] = set()
     _extract_all_card_names(DATA, 'English')
