@@ -3708,6 +3708,14 @@ def _split_combined_elements(input_list):
     return output_list
 
 
+def _clean_value_for_hash(value):
+    """ Clean the value before generating its hash.
+    """
+    value = value.replace('[br]', '').replace('[nobr]', ' ')
+    value = re.sub(r'\n{1}', ' ', value)
+    return value
+
+
 def _replace_numbers(value, lang='English'):
     """ Replace numbers as text.
     """
@@ -6212,11 +6220,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     broken_set_ids.add(set_id)
 
             if key != CARD_DECK_RULES and isinstance(value, str):
-                value_key = (row[CARD_ID], key)
-                value_hash = hashlib.md5(value.encode()).hexdigest()
-                hash_by_key[('English', value_key)] = value_hash
-                keys_by_hash[('English', value_hash)] = keys_by_hash.get(
-                    ('English', value_hash), []) + [value_key]
+                if key in TRANSLATED_COLUMNS:
+                    value_key = (row[CARD_ID], key)
+                    value_hash = hashlib.md5(_clean_value_for_hash(value)
+                                             .encode()).hexdigest()
+                    hash_by_key[('English', value_key)] = value_hash
+                    keys_by_hash[('English', row[CARD_SET], value_hash)] = (
+                        keys_by_hash.get(('English', row[CARD_SET],
+                                          value_hash), []) + [value_key])
 
                 match = re.search(r' ((?:\[[^\]]+\])+)(?:\n\n|$)', value)
                 if match:
@@ -6479,10 +6490,12 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
                 if isinstance(value, str):
                     value_key = (row[CARD_ID], key)
-                    value_hash = hashlib.md5(value.encode()).hexdigest()
+                    value_hash = hashlib.md5(_clean_value_for_hash(value)
+                                             .encode()).hexdigest()
                     hash_by_key[(lang, value_key)] = value_hash
-                    keys_by_hash[(lang, value_hash)] = keys_by_hash.get(
-                        (lang, value_hash), []) + [value_key]
+                    keys_by_hash[(lang, row[CARD_SET], value_hash)] = (
+                        keys_by_hash.get((lang, row[CARD_SET],
+                                          value_hash), []) + [value_key])
 
                     match = re.search(r' ((?:\[[^\]]+\])+)(?:\n\n|$)', value)
                     if match:
@@ -6829,6 +6842,44 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         'ID %s in %s translations, row #%s',
                         key.replace(BACK_PREFIX, 'Back '), card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+            for key, value in TRANSLATIONS[lang][card_id].items():
+                if key not in TRANSLATED_COLUMNS:
+                    continue
+
+                if isinstance(value, str):
+                    value_key = (row[CARD_ID], key)
+                    translated_keys = [k for k in keys_by_hash[
+                        (lang, row[CARD_SET], hash_by_key[(lang, value_key)])]
+                                       if k != value_key]
+                    english_keys = [k for k in keys_by_hash[
+                        ('English', row[CARD_SET], hash_by_key[('English',
+                                                                value_key)])]
+                                    if k != value_key]
+                    if sorted(translated_keys) != sorted(english_keys):
+                        if translated_keys:
+                            translated_keys = ', '.join([
+                                '{} for card ID {}'.format(
+                                    k[1].replace(BACK_PREFIX, 'Back '), k[0])
+                                for k in translated_keys])
+                        else:
+                            translated_keys = '[nothing]'
+
+                        if english_keys:
+                            english_keys = ', '.join([
+                                '{} for card ID {}'.format(
+                                    k[1].replace(BACK_PREFIX, 'Back '), k[0])
+                                for k in english_keys])
+                        else:
+                            english_keys = '[nothing]'
+
+                        logging.error(
+                            'Suspicious value in %s column for card ID %s in '
+                            '%s translations, row #%s: it\'s the same as %s, '
+                            'but the English source is the same as %s',
+                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
+                            TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                            translated_keys, english_keys)
 
             if (card_traits is not None and
                     TRANSLATIONS[lang][card_id].get(CARD_TRAITS)):
