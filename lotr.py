@@ -1483,6 +1483,13 @@ def _update_card_text(text, lang='English', skip_rules=False,  # pylint: disable
     text = text.replace('[/lotrheader]', '')
     text = text.replace('[/size]', '')
 
+    text = text.replace('<b><b>', '<b>')
+    text = text.replace('</b></b>', '</b>')
+    text = text.replace('<i><i>', '<i>')
+    text = text.replace('</i></i>', '</i>')
+    text = text.replace('<b><i><b><i>', '<b><i>')
+    text = text.replace('</i></b></i></b>', '</i></b>')
+
     text = text.strip()
     text = re.sub(r' +(?=\n)', '', text)
     text = re.sub(r' +', ' ', text)
