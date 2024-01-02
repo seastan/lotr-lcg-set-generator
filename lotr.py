@@ -2360,7 +2360,7 @@ def parse_flavour(value, lang, value_id=None):  # pylint: disable=R0912,R0915
     if len(parts) == 2 and parts[1].count(', ') > 1:
         parts = [original_value]
         if not false_split:
-            errors.append('Too many commas in the source')
+            errors.append('Possibly too many commas in the source')
 
     source_book = None
     if len(parts) == 2:  # pylint: disable=R1702
@@ -4013,7 +4013,10 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 (i, card_scratch, 'English'), []):
             message = '{} for row #{}{}'.format(error, i, row_info)
             if not [l for l in conf['languages'] if l != 'English']:
-                logging.warning(message)
+                if message.startswith('Possibly '):
+                    logging.warning(message)
+                else:
+                    logging.error(message)
 
         for error in PRE_SANITY_CHECK['shadow'].get(
                 (i, card_scratch, 'English'), []):
@@ -6467,9 +6470,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             for error in PRE_SANITY_CHECK['flavour'].get(
                     (TRANSLATIONS[lang][card_id][ROW_COLUMN],
                      card_scratch, lang), []):
-                logging.warning(
-                    '%s for card ID %s in %s translations, row #%s', error,
-                    card_id, lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                message = (
+                    '{} for card ID {} in {} translations, row #{}'
+                    .format(error, card_id, lang,
+                            TRANSLATIONS[lang][card_id][ROW_COLUMN]))
+                if message.startswith('Possibly '):
+                    logging.warning(message)
+                else:
+                    logging.error(message)
 
             for error in PRE_SANITY_CHECK['shadow'].get(
                     (TRANSLATIONS[lang][card_id][ROW_COLUMN],
