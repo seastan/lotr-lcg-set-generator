@@ -106,6 +106,8 @@ MAX_PINS = 50
 PREVIEW_URL = 'https://drive.google.com/file/d/{}/preview'
 RENDERED_IMAGES_TTL = 600
 
+MIDJOURNEY_ARTIST = 'Midjourney'
+
 EMOJIS = {
     '[leadership]': '<:leadership:822573464601886740>',
     '[lore]': '<:lore:822573464678301736>',
@@ -131,28 +133,29 @@ EMOJIS = {
 }
 
 PORTRAIT = {
-    'Ally': '87,0,326,330',
-    'Attachment': '40,50,333,280',
-    'Campaign': '0,0,413,245',
-    'Contract': '0,0,413,315',
-    'Encounter Side Quest': '0,0,563,413',
-    'Enemy': '87,0,326,330',
-    'Enemy NoStat': '0,0,413,563',
-    'Event': '60,0,353,330',
-    'Hero': '87,0,326,330',
-    'Location': '0,60,413,268',
-    'Nightmare': '0,77,413,245',
-    'Objective': '0,69,413,300',
-    'Objective Ally': '78,81,335,268',
-    'Objective Hero': '78,81,335,268',
-    'Objective Location': '0,69,413,300',
-    'Player Objective': '0,69,413,300',
-    'Player Side Quest': '0,0,563,413',
-    'Quest': '0,0,563,413',
-    'Ship Enemy': '87,0,326,330',
-    'Ship Objective': '78,81,335,268',
-    'Treachery': '60,0,353,330',
-    'Treasure': '0,61,413,265'
+    lotr.T_ALLY: '87,0,326,330',
+    lotr.T_ATTACHMENT: '40,50,333,280',
+    lotr.T_CAMPAIGN: '0,0,413,245',
+    lotr.T_CONTRACT: '0,0,413,315',
+    lotr.T_ENCOUNTER_SIDE_QUEST: '0,0,563,413',
+    lotr.T_ENEMY: '87,0,326,330',
+    lotr.T_ENEMY + lotr.S_NOSTAT: '0,0,413,563',
+    lotr.T_EVENT: '60,0,353,330',
+    lotr.T_HERO: '87,0,326,330',
+    lotr.T_HERO + lotr.F_PROMO: '0,0,413,563',
+    lotr.T_LOCATION: '0,60,413,268',
+    lotr.T_NIGHTMARE: '0,77,413,245',
+    lotr.T_OBJECTIVE: '0,69,413,300',
+    lotr.T_OBJECTIVE_ALLY: '78,81,335,268',
+    lotr.T_OBJECTIVE_HERO: '78,81,335,268',
+    lotr.T_OBJECTIVE_LOCATION: '0,69,413,300',
+    lotr.T_PLAYER_OBJECTIVE: '0,69,413,300',
+    lotr.T_PLAYER_SIDE_QUEST: '0,0,563,413',
+    lotr.T_QUEST: '0,0,563,413',
+    lotr.T_SHIP_ENEMY: '87,0,326,330',
+    lotr.T_SHIP_OBJECTIVE: '78,81,335,268',
+    lotr.T_TREACHERY: '60,0,353,330',
+    lotr.T_TREASURE: '0,61,413,265'
 }
 
 HELP = {
@@ -690,7 +693,7 @@ def read_external_data():
 def card_match(card_name, card_back_name, search_name):
     """ Compare a search name with a card name.
     """
-    if search_name in (card_name, card_back_name):
+    if search_name in {card_name, card_back_name}:
         return 1
 
     if (card_name.startswith(search_name + '-') or
@@ -759,7 +762,7 @@ def find_card_matches(data, command, this=False):
 
     matches.sort(key=lambda m: (
         m[1],
-        m[0][lotr.CARD_TYPE] in ('Rules', 'Presentation'),
+        m[0][lotr.CARD_TYPE] in {lotr.T_PRESENTATION, lotr.T_RULES},
         m[0][lotr.CARD_SET_RINGSDB_CODE],
         lotr.is_positive_or_zero_int(m[0][lotr.CARD_NUMBER])
         and int(m[0][lotr.CARD_NUMBER]) or 0,
@@ -853,37 +856,38 @@ def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
                    else '')
 
     sphere = card.get(prefix + lotr.CARD_SPHERE, '')
-    if sphere in ('Leadership', 'Lore', 'Spirit', 'Tactics', 'Baggins',
-                  'Fellowship'):
+    if sphere in {lotr.S_BAGGINS, lotr.S_FELLOWSHIP, lotr.S_LEADERSHIP,
+                  lotr.S_LORE, lotr.S_SPIRIT, lotr.S_TACTICS}:
         card_sphere = '*{}* {} '.format(sphere,
                                         EMOJIS['[{}]'.format(sphere.lower())])
-    elif sphere in ('Neutral', 'Boon', 'BoonLeadership', 'BoonLore',
-                    'BoonSpirit', 'BoonTactics', 'Burden', 'Nightmare',
-                    'Upgraded', 'Cave', 'Region'):
+    elif sphere in {lotr.S_BOON, lotr.S_BOONLEADERSHIP, lotr.S_BOONLORE,
+                    lotr.S_BOONSPIRIT, lotr.S_BOONTACTICS, lotr.S_BURDEN,
+                    lotr.S_CAVE, lotr.S_NEUTRAL, lotr.S_NIGHTMARE,
+                    lotr.S_REGION, lotr.S_UPGRADED}:
         card_sphere = '*{}* '.format(sphere)
     else:
         card_sphere = ''
 
-    if 'Promo' in lotr.extract_flags(card.get(prefix + lotr.CARD_FLAGS)):
+    if lotr.F_PROMO in lotr.extract_flags(card.get(prefix + lotr.CARD_FLAGS)):
         card_promo = ' (**Promo**)'
     else:
         card_promo = ''
 
     cost = card.get(prefix + lotr.CARD_COST, '')
-    if cost == '' or card_type == 'Quest':
+    if cost == '' or card_type == lotr.T_QUEST:
         card_cost = ''
-    elif card_type == 'Hero':
+    elif card_type == lotr.T_HERO:
         card_cost = ', *Threat Cost*: **{}**'.format(cost)
     else:
         card_cost = ', *Cost*: **{}**'.format(cost)
 
     engagement = card.get(prefix + lotr.CARD_ENGAGEMENT, '')
-    if engagement == '' or card_type == 'Quest':
+    if engagement == '' or card_type == lotr.T_QUEST:
         card_engagement = ''
     else:
         card_engagement = ', *Engagement Cost*: **{}**'.format(engagement)
 
-    if card_type == 'Quest':
+    if card_type == lotr.T_QUEST:
         card_stage = ', **{}{}**'.format(
             card.get(prefix + lotr.CARD_COST, ''),
             card.get(prefix + lotr.CARD_ENGAGEMENT, ''))
@@ -930,7 +934,7 @@ def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
     victory = card.get(prefix + lotr.CARD_VICTORY, '')
     if victory == '':
         card_victory = ''
-    elif card_type in ('Presentation', 'Rules'):
+    elif card_type in lotr.CARD_TYPES_PAGES:
         card_victory = '\n**Page {}**'.format(victory)
     elif lotr.is_positive_or_zero_int(victory):
         card_victory = '\n**VICTORY {}**'.format(victory)
@@ -954,7 +958,7 @@ def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
 
     artist = card.get(prefix + lotr.CARD_ARTIST, '')
     card_artist = '' if artist == '' else '\n\n*Artist*: {}'.format(artist)
-    if (card_artist and 'NoArtist' in
+    if (card_artist and lotr.F_NOARTIST in
             lotr.extract_flags(card.get(prefix + lotr.CARD_FLAGS))):
         card_artist = '{} *(not displayed on the card)*'.format(card_artist)
 
@@ -971,13 +975,15 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
     card_type = card[lotr.CARD_TYPE]
     res_a = format_side(card, '')
     if (card.get(lotr.BACK_PREFIX + lotr.CARD_NAME) and  # pylint: disable=R0916
-            card_type != 'Presentation' and
-            (card_type not in ('Rules', 'Campaign', 'Contract', 'Nightmare') or
-             (card_type == 'Contract' and
-              card.get(lotr.BACK_PREFIX + lotr.CARD_TYPE) != 'Contract') or
-             (card_type == 'Player Objective' and
+            card_type != lotr.T_PRESENTATION and
+            (card_type not in {lotr.T_RULES, lotr.T_CAMPAIGN, lotr.T_CONTRACT,
+                               lotr.T_NIGHTMARE} or
+             (card_type == lotr.T_CONTRACT and
               card.get(lotr.BACK_PREFIX + lotr.CARD_TYPE) !=
-              'Player Objective') or
+              lotr.T_CONTRACT) or
+             (card_type == lotr.T_PLAYER_OBJECTIVE and
+              card.get(lotr.BACK_PREFIX + lotr.CARD_TYPE) !=
+              lotr.T_PLAYER_OBJECTIVE) or
              card.get(lotr.BACK_PREFIX + lotr.CARD_TEXT))):
         res_b = '\n\n`SIDE B`\n\n{}'.format(format_side(card, lotr.BACK_PREFIX))
     else:
@@ -986,7 +992,7 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
     adventure = card.get(lotr.CARD_ADVENTURE, '')
     if adventure == '':
         card_adventure = ''
-    elif card_type == 'Campaign':
+    elif card_type == lotr.T_CAMPAIGN:
         card_adventure = '*Campaign*: {}\n'.format(adventure)
     else:
         card_adventure = '*Adventure*: {}\n'.format(adventure)
@@ -1000,7 +1006,7 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
     if custom_back:
         card_custom_back = '**{} Card Back**\n'.format(custom_back)
     elif (card_type in lotr.CARD_TYPES_PLAYER and
-          'Encounter' in
+          lotr.B_ENCOUNTER in
           lotr.extract_keywords(card.get(lotr.CARD_KEYWORDS))):
         card_custom_back = '**Encounter Card Back**\n'
     else:
@@ -1014,12 +1020,12 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
     card_set = re.sub(r'^ALeP - ', '', card[lotr.CARD_SET_NAME])
     card_id = '*id:* {}'.format(card[lotr.CARD_ID])
 
-    if 'Star' in lotr.extract_flags(card.get(lotr.CARD_FLAGS)):
+    if lotr.F_STAR in lotr.extract_flags(card.get(lotr.CARD_FLAGS)):
         card_star = ' \u2736'
     else:
         card_star = ''
 
-    if 'Star' in lotr.extract_flags(
+    if lotr.F_STAR in lotr.extract_flags(
             card.get(lotr.BACK_PREFIX + lotr.CARD_FLAGS)):
         card_star_back = ' \u2736'
     else:
@@ -1096,16 +1102,16 @@ def format_match(card, num):
                    else '')
     card_name = card[lotr.CARD_NAME]
     card_type = card[lotr.CARD_TYPE]
-
     sphere = card.get(lotr.CARD_SPHERE, '')
-    if sphere in ('Leadership', 'Lore', 'Spirit', 'Tactics', 'Baggins',
-                  'Fellowship'):
+    if sphere in {lotr.S_BAGGINS, lotr.S_FELLOWSHIP, lotr.S_LEADERSHIP,
+                  lotr.S_LORE, lotr.S_SPIRIT, lotr.S_TACTICS}:
         card_type = '{} {} {}'.format(sphere,
                                       EMOJIS['[{}]'.format(sphere.lower())],
                                       card_type)
-    elif sphere in ('Neutral', 'Boon', 'BoonLeadership', 'BoonLore',
-                    'BoonSpirit', 'BoonTactics', 'Burden', 'Nightmare',
-                    'Upgraded'):
+    elif sphere in {lotr.S_BOON, lotr.S_BOONLEADERSHIP, lotr.S_BOONLORE,
+                    lotr.S_BOONSPIRIT, lotr.S_BOONTACTICS, lotr.S_BURDEN,
+                    lotr.S_CAVE, lotr.S_NEUTRAL, lotr.S_NIGHTMARE,
+                    lotr.S_REGION, lotr.S_UPGRADED}:
         card_type = '{} {}'.format(sphere, card_type)
 
     card_name_back = card.get(lotr.BACK_PREFIX + lotr.CARD_NAME)
@@ -1118,20 +1124,21 @@ def format_match(card, num):
 
     card_type_back = card.get(lotr.BACK_PREFIX + lotr.CARD_TYPE, '')
     sphere = card.get(lotr.BACK_PREFIX + lotr.CARD_SPHERE, '')
-    if sphere in ('Leadership', 'Lore', 'Spirit', 'Tactics', 'Baggins',
-                  'Fellowship'):
+    if sphere in {lotr.S_BAGGINS, lotr.S_FELLOWSHIP, lotr.S_LEADERSHIP,
+                  lotr.S_LORE, lotr.S_SPIRIT, lotr.S_TACTICS}:
         card_type_back = '{} {} {}'.format(
             sphere, EMOJIS['[{}]'.format(sphere.lower())], card_type_back)
-    elif sphere in ('Neutral', 'Boon', 'BoonLeadership', 'BoonLore',
-                    'BoonSpirit', 'BoonTactics', 'Burden', 'Nightmare',
-                    'Upgraded'):
+    elif sphere in {lotr.S_BOON, lotr.S_BOONLEADERSHIP, lotr.S_BOONLORE,
+                    lotr.S_BOONSPIRIT, lotr.S_BOONTACTICS, lotr.S_BURDEN,
+                    lotr.S_CAVE, lotr.S_NEUTRAL, lotr.S_NIGHTMARE,
+                    lotr.S_REGION, lotr.S_UPGRADED}:
         card_type_back = '{} {}'.format(sphere, card_type_back)
 
-    if 'Promo' in lotr.extract_flags(card.get(lotr.CARD_FLAGS)):
+    if lotr.F_PROMO in lotr.extract_flags(card.get(lotr.CARD_FLAGS)):
         card_type = '{} (**Promo**)'.format(card_type)
 
     if (card_type_back and
-            'Promo' in lotr.extract_flags(
+            lotr.F_PROMO in lotr.extract_flags(
                 card.get(lotr.BACK_PREFIX + lotr.CARD_FLAGS))):
         card_type_back = '{} (**Promo**)'.format(card_type_back)
 
@@ -1232,7 +1239,7 @@ def get_quest_stat(cards):  # pylint: disable=R0912,R0915
                  str(card[lotr.CARD_ADDITIONAL_ENCOUNTER_SETS]).split(';')])
 
         card_type = card[lotr.CARD_TYPE]
-        if card.get(lotr.CARD_SPHERE) in ('Boon', 'Burden'):
+        if card.get(lotr.CARD_SPHERE) in {lotr.S_BOON, lotr.S_BURDEN}:
             card_type = '{} ({})'.format(card_type, card[lotr.CARD_SPHERE])
 
         card_types[card_type] = (
@@ -1266,7 +1273,7 @@ def get_quest_stat(cards):  # pylint: disable=R0912,R0915
     deck = [card for card in cards if card[CARD_DECK_SECTION] == 'Encounter']
     for card in deck:
         card_type = card[lotr.CARD_TYPE]
-        if card.get(lotr.CARD_SPHERE) in ('Boon', 'Burden'):
+        if card.get(lotr.CARD_SPHERE) in {lotr.S_BOON, lotr.S_BURDEN}:
             card_type = '{} ({})'.format(card_type, card[lotr.CARD_SPHERE])
 
         card_types[card_type] = (
@@ -1423,7 +1430,7 @@ async def get_rendered_images(set_name):  # pylint: disable=R0914
     empty_rules_backs = {
         row[lotr.CARD_ID] for row in card_data['data']
         if row[lotr.CARD_SET_NAME] == set_name and
-        row[lotr.CARD_TYPE] == 'Rules' and
+        row[lotr.CARD_TYPE] == lotr.T_RULES and
         not row.get(lotr.BACK_PREFIX + lotr.CARD_TEXT) and
         not row.get(lotr.BACK_PREFIX + lotr.CARD_VICTORY)}
 
@@ -1490,7 +1497,7 @@ async def get_dragncards_player_cards_stat(set_name, start_date, full_data):  # 
         r'^alep---', '',
         lotr.normalized_name(card[lotr.CARD_SET_NAME])) == set_name and
         card[lotr.CARD_TYPE] in lotr.CARD_TYPES_PLAYER and
-        'Promo' not in lotr.extract_flags(card.get(lotr.CARD_FLAGS))]
+        lotr.F_PROMO not in lotr.extract_flags(card.get(lotr.CARD_FLAGS))]
 
     if not matches:
         new_set_name = 'the-{}'.format(set_name)
@@ -1498,7 +1505,7 @@ async def get_dragncards_player_cards_stat(set_name, start_date, full_data):  # 
             r'^alep---', '',
             lotr.normalized_name(card[lotr.CARD_SET_NAME])) == new_set_name and
             card[lotr.CARD_TYPE] in lotr.CARD_TYPES_PLAYER and
-            'Promo' not in lotr.extract_flags(card.get(lotr.CARD_FLAGS))]
+            lotr.F_PROMO not in lotr.extract_flags(card.get(lotr.CARD_FLAGS))]
 
     if not matches:
         set_code = set_name.lower()
@@ -1506,7 +1513,7 @@ async def get_dragncards_player_cards_stat(set_name, start_date, full_data):  # 
             card for card in data['data']
             if card.get(lotr.CARD_SET_HOB_CODE, '').lower() == set_code and
             card[lotr.CARD_TYPE] in lotr.CARD_TYPES_PLAYER and
-            'Promo' not in lotr.extract_flags(card.get(lotr.CARD_FLAGS))]
+            lotr.F_PROMO not in lotr.extract_flags(card.get(lotr.CARD_FLAGS))]
         if not matches:
             return 'no cards found for the set'
 
@@ -1703,7 +1710,7 @@ def detect_names(text, card_type):  # pylint: disable=R0912
     text = re.sub(r'(?:^|[ “])[0-9]+(?:[”, ]|$)', ' text ', text)
     text = text.replace(' son of ', ' sonof_ ')
 
-    if card_type == 'Rules':
+    if card_type == lotr.T_RULES:
         text = re.sub(r'Adventure Pack in the “[^”]+”', ' text ', text)
 
     parts = [p.strip() for p in text.split('[]') if p.strip()]
@@ -1763,16 +1770,16 @@ def verify_known_name(pos, name, card_type, all_card_names,  # pylint: disable=R
     """ Check whether the name is known or not.
     """
     all_names = set(all_card_names)
-    if card_type == 'Rules':
+    if card_type == lotr.T_RULES:
         all_names.update(all_set_and_quest_names)
         all_names.update(
             ['“{}”'.format(n) for n in all_set_and_quest_names])
         all_names.update(all_encounter_set_names)
         all_names.update(lotr.ALLOWED_RULES_NAMES)
-    elif card_type == 'Campaign':
+    elif card_type == lotr.T_CAMPAIGN:
         all_names.update(all_encounter_set_names)
         all_names.update(lotr.ALLOWED_CAMPAIGN_NAMES)
-    elif card_type == 'Quest':
+    elif card_type == lotr.T_QUEST:
         all_names.update(all_encounter_set_names)
 
     if name in all_names:
@@ -1806,7 +1813,7 @@ def verify_known_name(pos, name, card_type, all_card_names,  # pylint: disable=R
             if not parts:
                 return True
 
-            if parts[0] in ('and', 'or', 'to'):
+            if parts[0] in {'and', 'or', 'to'}:
                 parts = parts[1:]
 
             name = ' '.join(parts)
@@ -1839,7 +1846,7 @@ def verify_known_name(pos, name, card_type, all_card_names,  # pylint: disable=R
 def get_flavour_errors(text, field, card, res):
     """ Detect possible flavour text issues.
     """
-    errors, _, _, _ = lotr.parse_flavour(text, 'English')
+    errors, _, _, _ = lotr.parse_flavour(text, lotr.L_ENGLISH)
     for error in errors:
         data = {'name': card[lotr.CARD_NAME],
                 'field': field,
@@ -2024,9 +2031,10 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('Self-referential pronouns', []).append(data)
         elif (re.search(r'\b(?:it|its)\b', paragraph, flags=re.IGNORECASE) and
-              card[lotr.CARD_TYPE] in (
-                'Ally', 'Hero', 'Enemy', 'Objective Ally', 'Objective Hero',
-                'Ship Enemy', 'Ship Objective') and
+              card[lotr.CARD_TYPE] in {
+                lotr.T_ALLY, lotr.T_ENEMY, lotr.T_HERO, lotr.T_OBJECTIVE_ALLY,
+                lotr.T_OBJECTIVE_HERO, lotr.T_SHIP_ENEMY,
+                lotr.T_SHIP_OBJECTIVE} and
               card.get(lotr.CARD_UNIQUE)):
             data = {'name': card[lotr.CARD_NAME],
                     'field': field,
@@ -2102,7 +2110,7 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
             res.setdefault('Cannot leave the staging area (except ...)',
                            []).append(data)
 
-        if (field in (lotr.CARD_SHADOW, lotr.BACK_PREFIX + lotr.CARD_SHADOW)
+        if (field in {lotr.CARD_SHADOW, lotr.BACK_PREFIX + lotr.CARD_SHADOW}
                 and re.search(r'\badditional attacks?(?! against you)',
                               paragraph)):
             data = {'name': card[lotr.CARD_NAME],
@@ -2754,7 +2762,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
             if len(change) != 3:
                 raise FormatError('Incorrect change format: {}'.format(change))
 
-            if change[0] not in ('add', 'move', 'remove', 'rename'):
+            if change[0] not in {'add', 'move', 'remove', 'rename'}:
                 raise FormatError('Unknown channel change type: {}'.format(
                     change[0]))
 
@@ -2986,17 +2994,17 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                     if diff[0] == lotr.BACK_PREFIX + lotr.CARD_NAME:
                         diff[0] = lotr.CARD_SIDE_B
 
-                    if card[lotr.CARD_TYPE] == 'Quest':
-                        if diff[0] in (lotr.CARD_COST,
-                                       lotr.BACK_PREFIX + lotr.CARD_COST):
+                    if card[lotr.CARD_TYPE] == lotr.T_QUEST:
+                        if diff[0] in {lotr.CARD_COST,
+                                       lotr.BACK_PREFIX + lotr.CARD_COST}:
                             diff[0] = '{} (Quest Stage)'.format(diff[0])
-                        elif diff[0] in (
+                        elif diff[0] in {
                                 lotr.CARD_ENGAGEMENT,
-                                lotr.BACK_PREFIX + lotr.CARD_ENGAGEMENT):
+                                lotr.BACK_PREFIX + lotr.CARD_ENGAGEMENT}:
                             diff[0] = '{} (Stage Letter)'.format(diff[0])
-                    elif card[lotr.CARD_TYPE] in ('Presentation', 'Rules'):
-                        if diff[0] in (lotr.CARD_VICTORY,
-                                       lotr.BACK_PREFIX + lotr.CARD_VICTORY):
+                    elif card[lotr.CARD_TYPE] in lotr.CARD_TYPES_PAGES:
+                        if diff[0] in {lotr.CARD_VICTORY,
+                                       lotr.BACK_PREFIX + lotr.CARD_VICTORY}:
                             diff[0] = '{} (Page)'.format(diff[0])
 
                     diff[0] = diff[0].replace(lotr.BACK_PREFIX, '[Back] ')
@@ -4446,8 +4454,9 @@ Targets removed.
             await self._generate_artwork(card, filetype, side, content)
 
             if (side == 'A' and
-                    card[lotr.CARD_TYPE] in ('Contract', 'Player Objective',
-                                             'Quest')):
+                    card[lotr.CARD_TYPE] in {lotr.T_CONTRACT,
+                                             lotr.T_PLAYER_OBJECTIVE,
+                                             lotr.T_QUEST}):
                 filenames = await self._get_artwork_files(card[lotr.CARD_SET])
                 filenames = [f for f in filenames if f.startswith(
                              '{}_B'.format(card[lotr.CARD_ID]))]
@@ -4457,16 +4466,34 @@ Targets removed.
         return ''
 
 
-    async def _generate_artwork(self, card, filetype, side, content):  # pylint: disable=R0914
+    async def _generate_artwork(self, card, filetype, side, content):  # pylint: disable=R0912,R0914,R0915
         """ Generate light-weight artwork for the card.
         """
         if side == 'A':
             card_type = card[lotr.CARD_TYPE]
+            if (card_type == lotr.T_ENEMY and
+                    card.get(lotr.CARD_SPHERE) == lotr.S_NOSTAT):
+                card_type = lotr.T_ENEMY + lotr.S_NOSTAT
+            elif (card_type == lotr.T_HERO and
+                  lotr.F_PROMO in
+                  lotr.extract_flags(card.get(lotr.CARD_FLAGS))):
+                card_type = lotr.T_HERO + lotr.F_PROMO
         else:
             card_type = card.get(lotr.BACK_PREFIX + lotr.CARD_TYPE, '')
+            if (card_type == lotr.T_ENEMY and
+                    card.get(lotr.BACK_PREFIX + lotr.CARD_SPHERE) ==
+                    lotr.S_NOSTAT):
+                card_type = lotr.T_ENEMY + lotr.S_NOSTAT
+            elif (card_type == lotr.T_HERO and
+                  lotr.F_PROMO in
+                  lotr.extract_flags(card.get(
+                      lotr.BACK_PREFIX + lotr.CARD_FLAGS))):
+                card_type = lotr.T_HERO + lotr.F_PROMO
+
             if (not card_type and
-                    card[lotr.CARD_TYPE] in ('Contract', 'Player Objective',
-                                             'Quest')):
+                    card[lotr.CARD_TYPE] in {
+                        lotr.T_CONTRACT, lotr.T_PLAYER_OBJECTIVE,
+                        lotr.T_QUEST}):
                 card_type = card[lotr.CARD_TYPE]
 
         if not card_type:
@@ -4686,21 +4713,24 @@ Targets removed.
         matches = [card for card in data['data'] if re.sub(
             r'^alep---', '',
             lotr.normalized_name(card[lotr.CARD_SET_NAME])) == set_name and
-            card[lotr.CARD_TYPE] not in ('Presentation', 'Rules')]
+            card[lotr.CARD_TYPE] not in {lotr.T_PRESENTATION, lotr.T_RULES}]
 
         if not matches:
             new_set_name = 'the-{}'.format(set_name)
             matches = [card for card in data['data'] if re.sub(
                 r'^alep---', '',
-                lotr.normalized_name(card[lotr.CARD_SET_NAME])) == new_set_name
-                and card[lotr.CARD_TYPE] not in ('Presentation', 'Rules')]
+                lotr.normalized_name(
+                    card[lotr.CARD_SET_NAME])) == new_set_name and
+                card[lotr.CARD_TYPE] not in {
+                    lotr.T_PRESENTATION, lotr.T_RULES}]
 
         if not matches:
             set_code = value.lower()
             matches = [
                 card for card in data['data']
                 if card.get(lotr.CARD_SET_HOB_CODE, '').lower() == set_code and
-                card[lotr.CARD_TYPE] not in ('Presentation', 'Rules')]
+                card[lotr.CARD_TYPE] not in {
+                    lotr.T_PRESENTATION, lotr.T_RULES}]
             if not matches:
                 return 'no cards found for the set'
 
@@ -4814,20 +4844,22 @@ Targets removed.
         matches = [card for card in data['data'] if re.sub(
             r'^alep---', '',
             lotr.normalized_name(card[lotr.CARD_SET_NAME])) == set_name and
-            card[lotr.CARD_TYPE] not in ('Presentation', 'Rules')]
+            card[lotr.CARD_TYPE] not in {lotr.T_PRESENTATION, lotr.T_RULES}]
         if not matches:
             new_set_name = 'the-{}'.format(set_name)
             matches = [card for card in data['data'] if re.sub(
                 r'^alep---', '',
                 lotr.normalized_name(card[lotr.CARD_SET_NAME])) == new_set_name
-                and card[lotr.CARD_TYPE] not in ('Presentation', 'Rules')]
+                and card[lotr.CARD_TYPE] not in {
+                    lotr.T_PRESENTATION, lotr.T_RULES}]
 
         if not matches:
             set_code = value.lower()
             matches = [
                 card for card in data['data']
                 if card.get(lotr.CARD_SET_HOB_CODE, '').lower() == set_code and
-                card[lotr.CARD_TYPE] not in ('Presentation', 'Rules')]
+                card[lotr.CARD_TYPE] not in {
+                    lotr.T_PRESENTATION, lotr.T_RULES}]
             if not matches:
                 return 'no cards found for the set'
 
@@ -4917,7 +4949,7 @@ Targets removed.
                 if command.lower() == 'keep':
                     await self._send_channel(message.channel,
                                              'assuming Midjourney artist')
-                    artist = 'Midjourney'
+                    artist = MIDJOURNEY_ARTIST
                 else:
                     artist = re.sub(r'^keep ', '', command, flags=re.IGNORECASE)
 
@@ -4926,7 +4958,7 @@ Targets removed.
                         await self._send_channel(message.channel,
                                                  'assuming Midjourney artist')
                         card_id = artist
-                        artist = 'Midjourney'
+                        artist = MIDJOURNEY_ARTIST
                         error = await self._keep_artwork(message, artist,
                                                          card_id, None)
                     else:
@@ -4938,7 +4970,7 @@ Targets removed.
                         await self._send_channel(message.channel,
                                                  'assuming Midjourney artist')
                         channel_id = int(artist[2:-1])
-                        artist = 'Midjourney'
+                        artist = MIDJOURNEY_ARTIST
                         error = await self._keep_artwork(message, artist, None,
                                                          channel_id)
                     else:
@@ -4998,7 +5030,7 @@ Targets removed.
                 if command.lower() == 'save' or command.lower() == 'saveb':
                     await self._send_channel(message.channel,
                                              'assuming Midjourney artist')
-                    artist = 'Midjourney'
+                    artist = MIDJOURNEY_ARTIST
                 else:
                     artist = re.sub(r'^saveb? ', '', command,
                                     flags=re.IGNORECASE)
@@ -5041,7 +5073,7 @@ Targets removed.
                 if command.lower() == 'savescr':
                     await self._send_channel(message.channel,
                                              'assuming Midjourney artist')
-                    artist = 'Midjourney'
+                    artist = MIDJOURNEY_ARTIST
                 else:
                     artist = re.sub(r'^savescr ', '', command,
                                     flags=re.IGNORECASE)
@@ -5399,24 +5431,24 @@ Targets removed.
         matches = [card for card in data['data'] if re.sub(
             r'^alep---', '',
             lotr.normalized_name(card[lotr.CARD_SET_NAME])) == set_name and
-            card[lotr.CARD_TYPE] != 'Presentation' and
-            card.get(lotr.CARD_SPHERE) != 'Back']
+            card[lotr.CARD_TYPE] != lotr.T_PRESENTATION and
+            card.get(lotr.CARD_SPHERE) != lotr.S_BACK]
 
         if not matches:
             new_set_name = 'the-{}'.format(set_name)
             matches = [card for card in data['data'] if re.sub(
                 r'^alep---', '',
                 lotr.normalized_name(card[lotr.CARD_SET_NAME])) == new_set_name
-                and card[lotr.CARD_TYPE] != 'Presentation'
-                and card.get(lotr.CARD_SPHERE) != 'Back']
+                and card[lotr.CARD_TYPE] != lotr.T_PRESENTATION
+                and card.get(lotr.CARD_SPHERE) != lotr.S_BACK]
 
         if not matches:
             set_code = value.lower()
             matches = [
                 card for card in data['data']
                 if card.get(lotr.CARD_SET_HOB_CODE, '').lower() == set_code and
-                card[lotr.CARD_TYPE] != 'Presentation' and
-                card.get(lotr.CARD_SPHERE) != 'Back']
+                card[lotr.CARD_TYPE] != lotr.T_PRESENTATION and
+                card.get(lotr.CARD_SPHERE) != lotr.S_BACK]
             if not matches:
                 return 'no cards found for the set'
 
@@ -5502,20 +5534,22 @@ Targets removed.
         state = 'intro'  # intro|cards|outro
         next_intro_number = '0.1'
         next_cards_number = None
-        intro_type_order = [None, 'Presentation', 'Rules', 'Hero']
+        intro_type_order = [None, lotr.T_PRESENTATION, lotr.T_RULES,
+                            lotr.T_HERO]
         last_intro_type = None
         for card in matches:
-            if (card[lotr.CARD_TYPE] == 'Presentation' or
-                    (card[lotr.CARD_TYPE] == 'Rules' and
-                     card.get(lotr.CARD_SPHERE) != 'Back') or
-                    'Promo' in lotr.extract_flags(card.get(lotr.CARD_FLAGS))):
+            if (card[lotr.CARD_TYPE] == lotr.T_PRESENTATION or
+                    (card[lotr.CARD_TYPE] == lotr.T_RULES and
+                     card.get(lotr.CARD_SPHERE) != lotr.S_BACK) or
+                    lotr.F_PROMO in
+                    lotr.extract_flags(card.get(lotr.CARD_FLAGS))):
                 if state != 'intro':
                     precedent = {
                         'name': card[lotr.CARD_NAME],
                         'field': 'card order',
                         'text': '{} cards should be put before other cards'
                             .format('Promo Hero'
-                                    if card[lotr.CARD_TYPE] == 'Hero'
+                                    if card[lotr.CARD_TYPE] == lotr.T_HERO
                                     else card[lotr.CARD_TYPE]),
                         'row': card[lotr.ROW_COLUMN]}
                     res.setdefault(
@@ -5548,7 +5582,7 @@ Targets removed.
                         card[lotr.CARD_NUMBER])
                     if card[lotr.CARD_TYPE] in intro_type_order:
                         last_intro_type = card[lotr.CARD_TYPE]
-            elif card.get(lotr.CARD_SPHERE) == 'Back':
+            elif card.get(lotr.CARD_SPHERE) == lotr.S_BACK:
                 if str(card[lotr.CARD_NUMBER]) != '999':
                     precedent = {
                         'name': card[lotr.CARD_NAME],
@@ -5561,7 +5595,7 @@ Targets removed.
 
                 state = 'outro'
             else:
-                if state not in ('intro', 'cards'):
+                if state not in {'intro', 'cards'}:
                     precedent = {
                         'name': card[lotr.CARD_NAME],
                         'field': 'card order',
@@ -5650,7 +5684,7 @@ Targets removed.
         res = {}
         quest_sets = {}
         for card in matches:
-            if (card[lotr.CARD_TYPE] != 'Campaign' and
+            if (card[lotr.CARD_TYPE] != lotr.T_CAMPAIGN and
                     card.get(lotr.CARD_ENCOUNTER_SET) and
                     card.get(lotr.CARD_ADVENTURE) and
                     card[lotr.CARD_ENCOUNTER_SET] !=
@@ -5666,7 +5700,7 @@ Targets removed.
                     'Different encounter set and adventure values', []
                     ).append(precedent)
 
-            if card[lotr.CARD_TYPE] == 'Quest':
+            if card[lotr.CARD_TYPE] == lotr.T_QUEST:
                 if card.get(lotr.CARD_ENCOUNTER_SET) in quest_sets:
                     if (quest_sets[card.get(lotr.CARD_ENCOUNTER_SET)] !=
                             card.get(lotr.CARD_ADDITIONAL_ENCOUNTER_SETS,
@@ -5739,7 +5773,7 @@ Targets removed.
         matches.sort(key=lambda card: card[lotr.ROW_COLUMN])
         res = {}
         for card in matches:
-            if card[lotr.CARD_TYPE] in ('Presentation', 'Rules'):
+            if card[lotr.CARD_TYPE] in {lotr.T_PRESENTATION, lotr.T_RULES}:
                 continue
 
             for field in (lotr.CARD_TEXT, lotr.CARD_SHADOW,
@@ -5798,24 +5832,24 @@ Targets removed.
         matches = [card for card in data['data'] if re.sub(
             r'^alep---', '',
             lotr.normalized_name(card[lotr.CARD_SET_NAME])) == set_name and
-            card[lotr.CARD_TYPE] != 'Presentation' and
-            card.get(lotr.CARD_SPHERE) != 'Back']
+            card[lotr.CARD_TYPE] != lotr.T_PRESENTATION and
+            card.get(lotr.CARD_SPHERE) != lotr.S_BACK]
 
         if not matches:
             new_set_name = 'the-{}'.format(set_name)
             matches = [card for card in data['data'] if re.sub(
                 r'^alep---', '',
                 lotr.normalized_name(card[lotr.CARD_SET_NAME])) == new_set_name
-                and card[lotr.CARD_TYPE] != 'Presentation'
-                and card.get(lotr.CARD_SPHERE) != 'Back']
+                and card[lotr.CARD_TYPE] != lotr.T_PRESENTATION
+                and card.get(lotr.CARD_SPHERE) != lotr.S_BACK]
 
         if not matches:
             set_code = value.lower()
             matches = [
                 card for card in data['data']
                 if card.get(lotr.CARD_SET_HOB_CODE, '').lower() == set_code and
-                card[lotr.CARD_TYPE] != 'Presentation' and
-                card.get(lotr.CARD_SPHERE) != 'Back']
+                card[lotr.CARD_TYPE] != lotr.T_PRESENTATION and
+                card.get(lotr.CARD_SPHERE) != lotr.S_BACK]
             if not matches:
                 return 'no cards found for the set'
 
@@ -6167,7 +6201,7 @@ Targets removed.
         logging.info('Received help command')
 
         help_keys = sorted([key for key in HELP
-                            if key not in ('playtest', 'secret')])
+                            if key not in {'playtest', 'secret'}])
         help_keys.append('playtest')
         res = ''.join(HELP[key] for key in help_keys)
         await asyncio.sleep(CMD_SLEEP_TIME)

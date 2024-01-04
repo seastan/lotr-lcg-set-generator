@@ -167,8 +167,8 @@ def process_dragncards_data(dragncards_data, ringsdb_data, packs, stat):  # pyli
             pack_name = PACK_ALIAS.get(pack_name, pack_name)
             if pack_name not in packs or pack_name in unreleased_packs:
                 if not (pack_name.startswith('ALeP ') or
-                        pack_name in ('The Withered Heath Nightmare',
-                                      'Escape from Umbar Nightmare')):
+                        pack_name in {'The Withered Heath Nightmare',
+                                      'Escape from Umbar Nightmare'}):
                     message = 'Unknown pack detected: {}'.format(pack_name)
                     logging.error(message)
                     print(message)

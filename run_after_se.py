@@ -224,7 +224,7 @@ def main():  # pylint: disable=R0912,R0914,R0915
     for set_id, set_name in sets:
         scratch = set_id in lotr.FOUND_SCRATCH_SETS
         for lang in conf['output_languages']:
-            if scratch and lang != 'English':
+            if scratch and lang != lotr.L_ENGLISH:
                 continue
 
             skip_set, skip_ids = lotr.get_skip_info(set_id, lang)
@@ -307,28 +307,28 @@ def main():  # pylint: disable=R0912,R0914,R0915
 
     lotr.check_messages()
 
-    if 'English' in conf['output_languages']:
+    if lotr.L_ENGLISH in conf['output_languages']:
         updated_sets = [s for s in sets
-                        if (s[0], 'English') in actual_sets
-                        and not lotr.get_skip_info(s[0], 'English')[0]]
+                        if (s[0], lotr.L_ENGLISH) in actual_sets
+                        and not lotr.get_skip_info(s[0], lotr.L_ENGLISH)[0]]
     else:
         updated_sets = []
 
     if (conf['db_destination_path'] and
-            'English' in conf['output_languages'] and
-            'db' in conf['outputs']['English'] and
+            lotr.L_ENGLISH in conf['output_languages'] and
+            'db' in conf['outputs'][lotr.L_ENGLISH] and
             updated_sets):
         lotr.copy_db_outputs(conf, updated_sets)
 
     if (conf['octgn_image_destination_path'] and
-            'English' in conf['output_languages'] and
-            'octgn' in conf['outputs']['English'] and
+            lotr.L_ENGLISH in conf['output_languages'] and
+            'octgn' in conf['outputs'][lotr.L_ENGLISH] and
             updated_sets):
         lotr.copy_octgn_image_outputs(conf, updated_sets)
 
     if (conf['tts_destination_path'] and
-            'English' in conf['output_languages'] and
-            'tts' in conf['outputs']['English'] and
+            lotr.L_ENGLISH in conf['output_languages'] and
+            'tts' in conf['outputs'][lotr.L_ENGLISH] and
             updated_sets):
         lotr.copy_tts_outputs(conf, updated_sets)
 

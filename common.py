@@ -72,7 +72,7 @@ def split_result(value):  # pylint: disable=R0912
             pos += 1
             if char == '*' and previous_char != '\\':
                 if (pos < len(chunk) and chunk[pos] == '*' and
-                        state not in ('bi', 'i')):
+                        state not in {'bi', 'i'}):
                     char = 'b'
                     pos += 1
                 else:

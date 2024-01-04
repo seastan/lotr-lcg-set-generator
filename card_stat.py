@@ -383,7 +383,7 @@ def collect_traits(data):
               c['sphere_name']
               ) for t in c['traits'].split('.') if t.strip()]
             for c in data if c['traits']
-            and c['type_name'] in ('Hero', 'Ally', 'Attachment', 'Event')]
+            and c['type_name'] in {'Hero', 'Ally', 'Attachment', 'Event'}]
         for item in sublist]
     traits = list(zip(Counter(traits).keys(), Counter(traits).values()))
 
@@ -448,7 +448,7 @@ def collect_keywords(data):
               c['sphere_name']
               ) for t in c['keywords'].split('.') if t.strip()]
             for c in data if c.get('keywords')
-            and c['type_name'] in ('Hero', 'Ally', 'Attachment', 'Event')]
+            and c['type_name'] in {'Hero', 'Ally', 'Attachment', 'Event'}]
         for item in sublist]
     keywords = list(zip(Counter(keywords).keys(), Counter(keywords).values()))
 
@@ -551,14 +551,14 @@ def create_ringsdb_csv(pack_name, pack_code):
             if row['type_name'] == 'Player Objective':
                 type_name = 'Contract'
             elif (row['type_name'] == 'Treasure' or
-                  row.get('subtype_code') in ('Boon', 'Burden')):
+                  row.get('subtype_code') in {'Boon', 'Burden'}):
                 type_name = 'Campaign'
             else:
                 type_name = row['type_name']
 
-            if (row['type_name'] in ('Contract', 'Player Objective',
-                                     'Treasure') or
-                    row.get('subtype_code') in ('Boon', 'Burden')):
+            if (row['type_name'] in {'Contract', 'Player Objective',
+                                     'Treasure'} or
+                    row.get('subtype_code') in {'Boon', 'Burden'}):
                 sphere_name = 'Neutral'
             else:
                 sphere_name = row.get('sphere_name') or 'Neutral'
@@ -608,8 +608,8 @@ def create_dragncards_json(pack_name, pack_id):  # pylint: disable=R0912,R0914
     source_data = get_ringsdb_data()
     cards = {}
     for row in source_data:
-        if row['pack_code'] in ('Starter', 'DoD', 'EoL', 'DoG', 'RoR', 'MotKA',
-                                'ALePMotKA'):
+        if row['pack_code'] in {'Starter', 'DoD', 'EoL', 'DoG', 'RoR', 'MotKA',
+                                'ALePMotKA'}:
             continue
 
         if 'cost' in row:

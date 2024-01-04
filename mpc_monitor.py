@@ -1197,7 +1197,7 @@ def main():  # pylint: disable=R0912
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    if len(sys.argv) > 1 and sys.argv[1] not in ('refresh', 'backup', 'test'):
+    if len(sys.argv) > 1 and sys.argv[1] not in {'refresh', 'backup', 'test'}:
         init_logging_manual()
     else:
         init_logging()

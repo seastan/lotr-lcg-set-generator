@@ -67,6 +67,8 @@ SET_IGNORE = 'Ignore'
 SET_CHANGED = 'Changed'
 
 BACK_PREFIX = 'Back_'
+BACK_PREFIX_LOG = 'Back '
+
 CARD_SET = 'Set'
 CARD_ID = 'Card GUID'
 CARD_UPDATED = 'Updated'
@@ -169,218 +171,293 @@ TRANSLATED_COLUMNS = {
     BACK_PREFIX + CARD_SHADOW, BACK_PREFIX + CARD_FLAVOUR, CARD_ADVENTURE
 }
 
-CARD_TYPES = {'Ally', 'Attachment', 'Campaign', 'Contract',
-              'Encounter Side Quest', 'Enemy', 'Event', 'Full Art Landscape',
-              'Full Art Portrait', 'Hero', 'Location', 'Nightmare',
-              'Objective', 'Objective Ally', 'Objective Hero',
-              'Objective Location', 'Player Objective', 'Player Side Quest',
-              'Presentation', 'Quest', 'Rules', 'Ship Enemy', 'Ship Objective',
-              'Treachery', 'Treasure'}
-CARD_TYPES_LANDSCAPE = {'Encounter Side Quest', 'Full Art Landscape',
-                        'Player Side Quest', 'Quest'}
-CARD_TYPES_DOUBLESIDE_DEFAULT = {'Campaign', 'Nightmare', 'Presentation',
-                                 'Quest', 'Rules'}
-CARD_TYPES_PLAYER = {'Ally', 'Attachment', 'Contract', 'Event', 'Hero',
-                     'Player Objective', 'Player Side Quest', 'Treasure'}
-CARD_TYPES_PLAYER_DECK = {'Ally', 'Attachment', 'Event', 'Player Side Quest'}
-CARD_TYPES_ENCOUNTER_SIZE = {'Enemy', 'Location', 'Objective',
-                             'Objective Ally', 'Objective Hero',
-                             'Objective Location', 'Ship Enemy',
-                             'Ship Objective', 'Treachery', 'Treasure'}
-CARD_TYPES_ENCOUNTER_SET = {'Campaign', 'Encounter Side Quest', 'Enemy',
-                            'Location', 'Nightmare', 'Objective',
-                            'Objective Ally', 'Objective Hero',
-                            'Objective Location', 'Quest', 'Ship Enemy',
-                            'Ship Objective', 'Treachery', 'Treasure'}
-CARD_TYPES_NO_ENCOUNTER_SET = {'Ally', 'Attachment', 'Contract', 'Event',
-                               'Full Art Landscape', 'Full Art Portrait',
-                               'Hero', 'Player Objective', 'Player Side Quest',
-                               'Presentation'}
-CARD_TYPES_UNIQUE = {'Hero', 'Objective Hero', 'Player Objective', 'Treasure'}
-CARD_TYPES_NO_UNIQUE = {'Campaign', 'Event', 'Full Art Landscape',
-                        'Full Art Portrait', 'Nightmare', 'Presentation',
-                        'Quest', 'Rules'}
-CARD_TYPES_PLAYER_SPHERE = {'Ally', 'Attachment', 'Event', 'Hero',
-                            'Player Side Quest'}
-CARD_TYPES_TRAITS = {'Ally', 'Attachment', 'Enemy', 'Hero', 'Location',
-                     'Objective Ally', 'Objective Hero', 'Objective Location',
-                     'Ship Enemy', 'Ship Objective', 'Treasure'}
-CARD_TYPES_NO_TRAITS = {'Campaign', 'Contract', 'Full Art Landscape',
-                        'Full Art Portrait', 'Nightmare', 'Presentation',
-                        'Quest', 'Rules'}
-CARD_SPHERES_TRAITS = {'Region'}
-CARD_TYPES_NO_KEYWORDS = {'Campaign', 'Contract', 'Full Art Landscape',
-                          'Full Art Portrait', 'Nightmare', 'Presentation',
-                          'Rules'}
-CARD_TYPES_COST = {'Hero', 'Ally', 'Attachment', 'Event', 'Player Side Quest',
-                   'Treasure', 'Quest'}
-CARD_TYPES_ENGAGEMENT = {'Enemy', 'Ship Enemy', 'Quest'}
-CARD_TYPES_THREAT = {'Enemy', 'Location', 'Ship Enemy'}
-CARD_TYPES_WILLPOWER = {'Ally', 'Hero', 'Objective Ally', 'Objective Hero',
-                        'Ship Objective'}
-CARD_TYPES_COMBAT = {'Ally', 'Enemy', 'Hero', 'Objective Ally',
-                     'Objective Hero', 'Ship Enemy', 'Ship Objective'}
-CARD_TYPES_QUEST = {'Encounter Side Quest', 'Location', 'Objective Location',
-                    'Player Side Quest'}
-CARD_TYPES_QUEST_BACK = {'Quest'}
-CARD_SPHERES_NO_QUEST = {'Cave', 'NoProgress', 'Region'}
-CARD_TYPES_VICTORY = {'Ally', 'Attachment', 'Encounter Side Quest', 'Enemy',
-                      'Event', 'Hero', 'Location', 'Objective',
-                      'Objective Ally', 'Objective Hero', 'Objective Location',
-                      'Player Objective', 'Player Side Quest', 'Ship Enemy',
-                      'Ship Objective', 'Treachery', 'Treasure'}
-CARD_TYPES_VICTORY_BACK = {'Quest'}
-CARD_SPHERES_NO_VICTORY = {'Cave', 'NoStat', 'Region'}
-CARD_TYPES_NO_PERIOD_CHECK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
-CARD_TYPES_NO_TEXT = {'Full Art Landscape', 'Full Art Portrait'}
-CARD_TYPES_NO_TEXT_BACK = {'Full Art Landscape', 'Full Art Portrait',
-                           'Presentation'}
-CARD_SPHERES_NO_TEXT = {'Region'}
-CARD_TYPES_SHADOW = {'Enemy', 'Location', 'Objective', 'Objective Ally',
-                     'Objective Hero', 'Objective Location', 'Ship Enemy',
-                     'Ship Objective', 'Treachery'}
-CARD_TYPES_SHADOW_ENCOUNTER = {'Ally', 'Attachment', 'Event'}
-CARD_TYPES_NO_FLAVOUR = {'Full Art Landscape', 'Full Art Portrait',
-                         'Presentation', 'Rules'}
-CARD_SPHERES_NO_FLAVOUR = {'Region'}
-CARD_TYPES_NO_FLAVOUR_BACK = {'Full Art Landscape', 'Full Art Portrait',
-                              'Nightmare', 'Presentation', 'Rules'}
-CARD_TYPES_NO_PRINTED_NUMBER = {'Full Art Landscape', 'Full Art Portrait',
-                                'Presentation', 'Rules'}
-CARD_TYPES_NO_PRINTED_NUMBER_BACK = {'Campaign', 'Full Art Landscape',
-                                     'Full Art Portrait', 'Nightmare',
-                                     'Presentation', 'Rules'}
-CARD_TYPES_ENCOUNTER_SET_NUMBER = {'Encounter Side Quest', 'Enemy', 'Location',
-                                   'Objective', 'Objective Ally',
-                                   'Objective Hero', 'Objective Location',
-                                   'Ship Enemy', 'Ship Objective', 'Treachery'}
-CARD_SPHERES_NO_ENCOUNTER_SET_NUMBER = {'Boon', 'Burden', 'NoIcon'}
-CARD_TYPES_ENCOUNTER_SET_ICON = {'Campaign', 'Encounter Side Quest', 'Enemy',
-                                 'Location', 'Nightmare', 'Objective',
-                                 'Objective Ally', 'Objective Hero',
-                                 'Objective Location', 'Quest', 'Ship Enemy',
-                                 'Ship Objective', 'Treachery', 'Treasure'}
-CARD_SPHERES_NO_ENCOUNTER_SET_ICON = {'Boon', 'NoIcon'}
-CARD_TYPES_FLAGS = {'NoTraits':
-                    {'Ally', 'Enemy', 'Hero', 'Location', 'Objective Ally',
-                     'Objective Hero', 'Objective Location', 'Ship Enemy',
-                     'Ship Objective', 'Treasure'},
-                    'Promo': {'Hero'},
-                    'BlueRing':
-                    {'Encounter Side Quest', 'Enemy', 'Location', 'Objective',
-                     'Objective Ally', 'Objective Hero', 'Objective Location',
-                     'Ship Enemy', 'Ship Objective', 'Treachery'},
-                    'GreenRing':
-                    {'Encounter Side Quest', 'Enemy', 'Location', 'Objective',
-                     'Objective Ally', 'Objective Hero', 'Objective Location',
-                     'Ship Enemy', 'Ship Objective', 'Treachery'},
-                    'RedRing':
-                    {'Encounter Side Quest', 'Enemy', 'Location', 'Objective',
-                     'Objective Ally', 'Objective Hero', 'Objective Location',
-                     'Ship Enemy', 'Ship Objective', 'Treachery'}}
-CARD_TYPES_FLAGS_BACK = {'NoTraits':
-                         {'Ally', 'Enemy', 'Hero', 'Location',
-                          'Objective Ally', 'Objective Hero',
-                          'Objective Location', 'Ship Enemy', 'Ship Objective',
-                          'Treasure'},
-                         'Promo': {'Hero'},
-                         'BlueRing':
-                         {'Encounter Side Quest', 'Enemy', 'Location',
-                          'Objective', 'Objective Ally', 'Objective Hero',
-                          'Objective Location', 'Ship Enemy', 'Ship Objective',
-                          'Treachery'},
-                         'GreenRing':
-                         {'Encounter Side Quest', 'Enemy', 'Location',
-                          'Objective', 'Objective Ally', 'Objective Hero',
-                          'Objective Location', 'Ship Enemy', 'Ship Objective',
-                          'Treachery'},
-                         'RedRing':
-                         {'Encounter Side Quest', 'Enemy', 'Location',
-                          'Objective', 'Objective Ally', 'Objective Hero',
-                          'Objective Location', 'Ship Enemy', 'Ship Objective',
-                          'Treachery'}}
-CARD_TYPES_NO_FLAGS = {'Star': {'Full Art Landscape', 'Full Art Portrait',
-                                'Presentation', 'Rules'},
-                       'IgnoreName': {'Full Art Landscape',
-                                      'Full Art Portrait', 'Presentation',
-                                      'Rules'},
-                       'IgnoreRules': {'Full Art Landscape',
-                                       'Full Art Portrait', 'Presentation'},
-                       'NoArtist': {'Presentation', 'Rules'},
-                       'NoCopyright': {'Presentation', 'Rules'}}
-CARD_TYPES_NO_FLAGS_BACK = {
-    'Star': {'Campaign', 'Full Art Landscape', 'Full Art Portrait',
-             'Nightmare', 'Presentation', 'Rules'},
-    'IgnoreName': {'Full Art Landscape', 'Full Art Portrait', 'Presentation',
-                   'Rules'},
-    'IgnoreRules': {'Full Art Landscape', 'Full Art Portrait', 'Presentation'},
-    'NoArtist': {'Campaign', 'Nightmare', 'Presentation', 'Rules'},
-    'NoCopyright': {'Campaign', 'Nightmare', 'Presentation', 'Rules'}}
-CARD_SPHERES_NO_FLAGS = {'BlueRing': {'Cave', 'NoStat', 'Region'},
-                         'GreenRing': {'Cave', 'NoStat', 'Region'},
-                         'RedRing': {'Cave', 'NoStat', 'Region'}}
-CARD_TYPES_ICONS = {'Enemy', 'Location', 'Objective', 'Objective Ally',
-                    'Objective Hero', 'Objective Location', 'Ship Enemy',
-                    'Ship Objective', 'Treachery'}
-CARD_SPHERES_NO_ICONS = {'NoStat'}
-CARD_TYPES_NO_INFO = {'Full Art Landscape', 'Full Art Portrait',
-                      'Presentation', 'Rules'}
-CARD_TYPES_NO_INFO_BACK = {'Campaign', 'Full Art Landscape',
-                           'Full Art Portrait', 'Nightmare', 'Presentation',
-                           'Rules'}
-CARD_TYPES_NO_ARTIST = {'Presentation', 'Rules'}
-CARD_TYPES_NO_ARTIST_BACK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
-CARD_TYPES_NO_ARTWORK = {'Rules'}
-CARD_TYPES_NO_ARTWORK_BACK = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
-CARD_TYPES_EASY_MODE = {'Encounter Side Quest', 'Enemy', 'Location',
-                        'Ship Enemy', 'Treachery'}
-CARD_SPHERES_NO_EASY_MODE = {'Boon', 'Burden', 'Cave', 'NoIcon', 'NoStat',
-                             'Region'}
-CARD_TYPES_ADDITIONAL_ENCOUNTER_SETS = {'Quest'}
-CARD_TYPES_ADVENTURE = {'Campaign', 'Objective', 'Objective Ally',
-                        'Objective Hero', 'Objective Location',
-                        'Quest', 'Ship Objective'}
-CARD_SPHERES_NO_ADVENTURE = {'NoIcon'}
-CARD_TYPES_SUBTITLE = {'Campaign', 'Objective', 'Objective Ally',
-                       'Objective Hero', 'Objective Location',
-                       'Quest', 'Ship Objective'}
-CARD_TYPES_NO_COLLECTION_ICON = {'Full Art Landscape', 'Full Art Portrait',
-                                 'Rules'}
-CARD_TYPES_NO_COPYRIGHT = {'Presentation', 'Rules'}
-CARD_TYPES_DECK_RULES = {'Nightmare', 'Quest'}
-CARD_TYPES_ONE_COPY = {'Campaign', 'Contract', 'Encounter Side Quest',
-                       'Full Art Landscape', 'Full Art Portrait', 'Hero',
-                       'Nightmare', 'Objective Hero', 'Player Objective',
-                       'Presentation', 'Quest', 'Rules', 'Treasure'}
-CARD_TYPES_THREE_COPIES = {'Ally', 'Attachment', 'Event', 'Player Side Quest'}
-CARD_TYPES_BOON = {'Ally', 'Attachment', 'Event', 'Objective Ally'}
-CARD_TYPES_BOON_SPHERE = {'Attachment', 'Event'}
-CARD_SPHERES_BOON = {'Boon', 'BoonLeadership', 'BoonLore', 'BoonSpirit',
-                     'BoonTactics'}
-CARD_TYPES_BURDEN = {'Encounter Side Quest', 'Enemy', 'Objective',
-                     'Ship Enemy', 'Treachery'}
-CARD_TYPES_NIGHTMARE = {'Encounter Side Quest', 'Enemy', 'Location',
-                        'Objective', 'Quest', 'Ship Enemy', 'Treachery'}
-CARD_TYPES_NOSTAT = {'Enemy'}
-CARD_TYPES_NO_DISCORD_CHANNEL = {'Full Art Landscape', 'Full Art Portrait',
-                                 'Rules', 'Presentation'}
-CARD_TYPES_NO_NAME_TAG = {'Campaign', 'Nightmare', 'Presentation', 'Rules'}
+T_ALLY = 'Ally'
+T_ATTACHMENT = 'Attachment'
+T_CAMPAIGN = 'Campaign'
+T_CONTRACT = 'Contract'
+T_ENCOUNTER_SIDE_QUEST = 'Encounter Side Quest'
+T_ENEMY = 'Enemy'
+T_EVENT = 'Event'
+T_FULL_ART_LANDSCAPE = 'Full Art Landscape'
+T_FULL_ART_PORTRAIT = 'Full Art Portrait'
+T_HERO = 'Hero'
+T_LOCATION = 'Location'
+T_NIGHTMARE = 'Nightmare'
+T_OBJECTIVE = 'Objective'
+T_OBJECTIVE_ALLY = 'Objective Ally'
+T_OBJECTIVE_HERO = 'Objective Hero'
+T_OBJECTIVE_LOCATION = 'Objective Location'
+T_PLAYER_OBJECTIVE = 'Player Objective'
+T_PLAYER_SIDE_QUEST = 'Player Side Quest'
+T_PRESENTATION = 'Presentation'
+T_QUEST = 'Quest'
+T_RULES = 'Rules'
+T_SHIP_ENEMY = 'Ship Enemy'
+T_SHIP_OBJECTIVE = 'Ship Objective'
+T_TREACHERY = 'Treachery'
+T_TREASURE = 'Treasure'
+T_ALIAS_SIDE_QUEST = 'Side Quest'
 
-FLAGS = {'AdditionalCopies', 'Star', 'IgnoreName', 'IgnoreRules',
-         'NoArtist', 'NoCopyright', 'NoTraits', 'Promo', 'BlueRing',
-         'GreenRing', 'RedRing'}
-RING_FLAGS = {'BlueRing', 'GreenRing', 'RedRing'}
+S_BACK = 'Back'
+S_BAGGINS = 'Baggins'
+S_BOON = 'Boon'
+S_BOONLEADERSHIP = 'BoonLeadership'
+S_BOONLORE = 'BoonLore'
+S_BOONSPIRIT = 'BoonSpirit'
+S_BOONTACTICS = 'BoonTactics'
+S_BURDEN = 'Burden'
+S_CAVE = 'Cave'
+S_FELLOWSHIP = 'Fellowship'
+S_LEADERSHIP = 'Leadership'
+S_LORE = 'Lore'
+S_NEUTRAL = 'Neutral'
+S_NIGHTMARE = 'Nightmare'
+S_NOICON = 'NoIcon'
+S_NOPROGRESS = 'NoProgress'
+S_NOSTAT = 'NoStat'
+S_REGION = 'Region'
+S_SETUP = 'Setup'
+S_SMALLTEXTAREA = 'SmallTextArea'
+S_SPIRIT = 'Spirit'
+S_TACTICS = 'Tactics'
+S_UPGRADED = 'Upgraded'
+
+F_ADDITIONALCOPIES = 'AdditionalCopies'
+F_IGNORENAME = 'IgnoreName'
+F_IGNORERULES = 'IgnoreRules'
+F_NOARTIST = 'NoArtist'
+F_NOCOPYRIGHT = 'NoCopyright'
+F_NOTRAITS = 'NoTraits'
+F_PROMO = 'Promo'
+F_STAR = 'Star'
+F_BLUERING = 'BlueRing'
+F_GREENRING = 'GreenRing'
+F_REDRING = 'RedRing'
+
+B_ENCOUNTER = 'Encounter'
+B_PLAYER = 'Player'
+
+L_ENGLISH = 'English'
+L_FRENCH = 'French'
+L_GERMAN = 'German'
+L_ITALIAN = 'Italian'
+L_POLISH = 'Polish'
+L_PORTUGUESE = 'Portuguese'
+L_SPANISH = 'Spanish'
+
+CARD_TYPES = {T_ALLY, T_ATTACHMENT, T_CAMPAIGN, T_CONTRACT,
+              T_ENCOUNTER_SIDE_QUEST, T_ENEMY, T_EVENT, T_FULL_ART_LANDSCAPE,
+              T_FULL_ART_PORTRAIT, T_HERO, T_LOCATION, T_NIGHTMARE,
+              T_OBJECTIVE, T_OBJECTIVE_ALLY, T_OBJECTIVE_HERO,
+              T_OBJECTIVE_LOCATION, T_PLAYER_OBJECTIVE, T_PLAYER_SIDE_QUEST,
+              T_PRESENTATION, T_QUEST, T_RULES, T_SHIP_ENEMY, T_SHIP_OBJECTIVE,
+              T_TREACHERY, T_TREASURE}
+CARD_TYPES_LANDSCAPE = {T_ENCOUNTER_SIDE_QUEST, T_FULL_ART_LANDSCAPE,
+                        T_PLAYER_SIDE_QUEST, T_QUEST}
+CARD_TYPES_DOUBLESIDE_DEFAULT = {T_CAMPAIGN, T_NIGHTMARE, T_PRESENTATION,
+                                 T_QUEST, T_RULES}
+CARD_TYPES_PLAYER = {T_ALLY, T_ATTACHMENT, T_CONTRACT, T_EVENT, T_HERO,
+                     T_PLAYER_OBJECTIVE, T_PLAYER_SIDE_QUEST, T_TREASURE}
+CARD_TYPES_PLAYER_DECK = {T_ALLY, T_ATTACHMENT, T_EVENT, T_PLAYER_SIDE_QUEST}
+CARD_TYPES_ENCOUNTER_SIZE = {T_ENEMY, T_LOCATION, T_OBJECTIVE,
+                             T_OBJECTIVE_ALLY, T_OBJECTIVE_HERO,
+                             T_OBJECTIVE_LOCATION, T_SHIP_ENEMY,
+                             T_SHIP_OBJECTIVE, T_TREACHERY, T_TREASURE}
+CARD_TYPES_ENCOUNTER_SET = {T_CAMPAIGN, T_ENCOUNTER_SIDE_QUEST, T_ENEMY,
+                            T_LOCATION, T_NIGHTMARE, T_OBJECTIVE,
+                            T_OBJECTIVE_ALLY, T_OBJECTIVE_HERO,
+                            T_OBJECTIVE_LOCATION, T_QUEST, T_SHIP_ENEMY,
+                            T_SHIP_OBJECTIVE, T_TREACHERY, T_TREASURE}
+CARD_TYPES_NO_ENCOUNTER_SET = {T_ALLY, T_ATTACHMENT, T_CONTRACT, T_EVENT,
+                               T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT,
+                               T_HERO, T_PLAYER_OBJECTIVE, T_PLAYER_SIDE_QUEST,
+                               T_PRESENTATION}
+CARD_TYPES_UNIQUE = {T_HERO, T_OBJECTIVE_HERO, T_PLAYER_OBJECTIVE, T_TREASURE}
+CARD_TYPES_NO_UNIQUE = {T_CAMPAIGN, T_EVENT, T_FULL_ART_LANDSCAPE,
+                        T_FULL_ART_PORTRAIT, T_NIGHTMARE, T_PRESENTATION,
+                        T_QUEST, T_RULES}
+CARD_TYPES_PLAYER_SPHERE = {T_ALLY, T_ATTACHMENT, T_EVENT, T_HERO,
+                            T_PLAYER_SIDE_QUEST}
+CARD_TYPES_TRAITS = {T_ALLY, T_ATTACHMENT, T_ENEMY, T_HERO, T_LOCATION,
+                     T_OBJECTIVE_ALLY, T_OBJECTIVE_HERO, T_OBJECTIVE_LOCATION,
+                     T_SHIP_ENEMY, T_SHIP_OBJECTIVE, T_TREASURE}
+CARD_TYPES_NO_TRAITS = {T_CAMPAIGN, T_CONTRACT, T_FULL_ART_LANDSCAPE,
+                        T_FULL_ART_PORTRAIT, T_NIGHTMARE, T_PRESENTATION,
+                        T_QUEST, T_RULES}
+CARD_SPHERES_TRAITS = {S_REGION}
+CARD_TYPES_NO_KEYWORDS = {T_CAMPAIGN, T_CONTRACT, T_FULL_ART_LANDSCAPE,
+                          T_FULL_ART_PORTRAIT, T_NIGHTMARE, T_PRESENTATION,
+                          T_RULES}
+CARD_TYPES_COST = {T_ALLY, T_ATTACHMENT, T_EVENT, T_HERO, T_PLAYER_SIDE_QUEST,
+                   T_QUEST, T_TREASURE}
+CARD_TYPES_ENGAGEMENT = {T_ENEMY, T_QUEST, T_SHIP_ENEMY}
+CARD_TYPES_THREAT = {T_ENEMY, T_LOCATION, T_SHIP_ENEMY}
+CARD_TYPES_WILLPOWER = {T_ALLY, T_HERO, T_OBJECTIVE_ALLY, T_OBJECTIVE_HERO,
+                        T_SHIP_OBJECTIVE}
+CARD_TYPES_COMBAT = {T_ALLY, T_ENEMY, T_HERO, T_OBJECTIVE_ALLY,
+                     T_OBJECTIVE_HERO, T_SHIP_ENEMY, T_SHIP_OBJECTIVE}
+CARD_TYPES_QUEST = {T_ENCOUNTER_SIDE_QUEST, T_LOCATION, T_OBJECTIVE_LOCATION,
+                    T_PLAYER_SIDE_QUEST}
+CARD_TYPES_QUEST_BACK = {T_QUEST}
+CARD_SPHERES_NO_QUEST = {S_CAVE, S_NOPROGRESS, S_REGION}
+CARD_TYPES_VICTORY = {T_ALLY, T_ATTACHMENT, T_ENCOUNTER_SIDE_QUEST, T_ENEMY,
+                      T_EVENT, T_HERO, T_LOCATION, T_OBJECTIVE,
+                      T_OBJECTIVE_ALLY, T_OBJECTIVE_HERO, T_OBJECTIVE_LOCATION,
+                      T_PLAYER_OBJECTIVE, T_PLAYER_SIDE_QUEST, T_SHIP_ENEMY,
+                      T_SHIP_OBJECTIVE, T_TREACHERY, T_TREASURE}
+CARD_TYPES_VICTORY_BACK = {T_QUEST}
+CARD_SPHERES_NO_VICTORY = {S_CAVE, S_NOSTAT, S_REGION}
+CARD_TYPES_NO_PERIOD_CHECK = {T_CAMPAIGN, T_NIGHTMARE, T_PRESENTATION, T_RULES}
+CARD_TYPES_NO_TEXT = {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT}
+CARD_TYPES_NO_TEXT_BACK = {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT,
+                           T_PRESENTATION}
+CARD_SPHERES_NO_TEXT = {S_REGION}
+CARD_TYPES_SHADOW = {T_ENEMY, T_LOCATION, T_OBJECTIVE, T_OBJECTIVE_ALLY,
+                     T_OBJECTIVE_HERO, T_OBJECTIVE_LOCATION, T_SHIP_ENEMY,
+                     T_SHIP_OBJECTIVE, T_TREACHERY}
+CARD_TYPES_SHADOW_ENCOUNTER = {T_ALLY, T_ATTACHMENT, T_EVENT}
+CARD_TYPES_NO_FLAVOUR = {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT,
+                         T_PRESENTATION, T_RULES}
+CARD_SPHERES_NO_FLAVOUR = {S_REGION}
+CARD_TYPES_NO_FLAVOUR_BACK = {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT,
+                              T_NIGHTMARE, T_PRESENTATION, T_RULES}
+CARD_TYPES_NO_PRINTED_NUMBER = {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT,
+                                T_PRESENTATION, T_RULES}
+CARD_TYPES_NO_PRINTED_NUMBER_BACK = {T_CAMPAIGN, T_FULL_ART_LANDSCAPE,
+                                     T_FULL_ART_PORTRAIT, T_NIGHTMARE,
+                                     T_PRESENTATION, T_RULES}
+CARD_TYPES_ENCOUNTER_SET_NUMBER = {T_ENCOUNTER_SIDE_QUEST, T_ENEMY, T_LOCATION,
+                                   T_OBJECTIVE, T_OBJECTIVE_ALLY,
+                                   T_OBJECTIVE_HERO, T_OBJECTIVE_LOCATION,
+                                   T_SHIP_ENEMY, T_SHIP_OBJECTIVE, T_TREACHERY}
+CARD_SPHERES_NO_ENCOUNTER_SET_NUMBER = {S_BOON, S_BURDEN, S_NOICON}
+CARD_TYPES_ENCOUNTER_SET_ICON = {T_CAMPAIGN, T_ENCOUNTER_SIDE_QUEST, T_ENEMY,
+                                 T_LOCATION, T_NIGHTMARE, T_OBJECTIVE,
+                                 T_OBJECTIVE_ALLY, T_OBJECTIVE_HERO,
+                                 T_OBJECTIVE_LOCATION, T_QUEST, T_SHIP_ENEMY,
+                                 T_SHIP_OBJECTIVE, T_TREACHERY, T_TREASURE}
+CARD_SPHERES_NO_ENCOUNTER_SET_ICON = {S_BOON, S_NOICON}
+CARD_TYPES_FLAGS = {F_NOTRAITS:
+                    {T_ALLY, T_ENEMY, T_HERO, T_LOCATION, T_OBJECTIVE_ALLY,
+                     T_OBJECTIVE_HERO, T_OBJECTIVE_LOCATION, T_SHIP_ENEMY,
+                     T_SHIP_OBJECTIVE, T_TREASURE},
+                    F_PROMO: {T_HERO},
+                    F_BLUERING:
+                    {T_ENCOUNTER_SIDE_QUEST, T_ENEMY, T_LOCATION, T_OBJECTIVE,
+                     T_OBJECTIVE_ALLY, T_OBJECTIVE_HERO, T_OBJECTIVE_LOCATION,
+                     T_SHIP_ENEMY, T_SHIP_OBJECTIVE, T_TREACHERY},
+                    F_GREENRING:
+                    {T_ENCOUNTER_SIDE_QUEST, T_ENEMY, T_LOCATION, T_OBJECTIVE,
+                     T_OBJECTIVE_ALLY, T_OBJECTIVE_HERO, T_OBJECTIVE_LOCATION,
+                     T_SHIP_ENEMY, T_SHIP_OBJECTIVE, T_TREACHERY},
+                    F_REDRING:
+                    {T_ENCOUNTER_SIDE_QUEST, T_ENEMY, T_LOCATION, T_OBJECTIVE,
+                     T_OBJECTIVE_ALLY, T_OBJECTIVE_HERO, T_OBJECTIVE_LOCATION,
+                     T_SHIP_ENEMY, T_SHIP_OBJECTIVE, T_TREACHERY}}
+CARD_TYPES_FLAGS_BACK = {F_NOTRAITS:
+                         {T_ALLY, T_ENEMY, T_HERO, T_LOCATION,
+                          T_OBJECTIVE_ALLY, T_OBJECTIVE_HERO,
+                          T_OBJECTIVE_LOCATION, T_SHIP_ENEMY, T_SHIP_OBJECTIVE,
+                          T_TREASURE},
+                         F_PROMO: {T_HERO},
+                         F_BLUERING:
+                         {T_ENCOUNTER_SIDE_QUEST, T_ENEMY, T_LOCATION,
+                          T_OBJECTIVE, T_OBJECTIVE_ALLY, T_OBJECTIVE_HERO,
+                          T_OBJECTIVE_LOCATION, T_SHIP_ENEMY, T_SHIP_OBJECTIVE,
+                          T_TREACHERY},
+                         F_GREENRING:
+                         {T_ENCOUNTER_SIDE_QUEST, T_ENEMY, T_LOCATION,
+                          T_OBJECTIVE, T_OBJECTIVE_ALLY, T_OBJECTIVE_HERO,
+                          T_OBJECTIVE_LOCATION, T_SHIP_ENEMY, T_SHIP_OBJECTIVE,
+                          T_TREACHERY},
+                         F_REDRING:
+                         {T_ENCOUNTER_SIDE_QUEST, T_ENEMY, T_LOCATION,
+                          T_OBJECTIVE, T_OBJECTIVE_ALLY, T_OBJECTIVE_HERO,
+                          T_OBJECTIVE_LOCATION, T_SHIP_ENEMY, T_SHIP_OBJECTIVE,
+                          T_TREACHERY}}
+CARD_TYPES_NO_FLAGS = {F_STAR: {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT,
+                                T_PRESENTATION, T_RULES},
+                       F_IGNORENAME: {T_FULL_ART_LANDSCAPE,
+                                      T_FULL_ART_PORTRAIT, T_PRESENTATION,
+                                      T_RULES},
+                       F_IGNORERULES: {T_FULL_ART_LANDSCAPE,
+                                       T_FULL_ART_PORTRAIT, T_PRESENTATION},
+                       F_NOARTIST: {T_PRESENTATION, T_RULES},
+                       F_NOCOPYRIGHT: {T_PRESENTATION, T_RULES}}
+CARD_TYPES_NO_FLAGS_BACK = {
+    F_STAR: {T_CAMPAIGN, T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT,
+             T_NIGHTMARE, T_PRESENTATION, T_RULES},
+    F_IGNORENAME: {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT, T_PRESENTATION,
+                   T_RULES},
+    F_IGNORERULES: {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT, T_PRESENTATION},
+    F_NOARTIST: {T_CAMPAIGN, T_NIGHTMARE, T_PRESENTATION, T_RULES},
+    F_NOCOPYRIGHT: {T_CAMPAIGN, T_NIGHTMARE, T_PRESENTATION, T_RULES}}
+CARD_SPHERES_NO_FLAGS = {F_BLUERING: {S_CAVE, S_NOSTAT, S_REGION},
+                         F_GREENRING: {S_CAVE, S_NOSTAT, S_REGION},
+                         F_REDRING: {S_CAVE, S_NOSTAT, S_REGION}}
+CARD_TYPES_ICONS = {T_ENEMY, T_LOCATION, T_OBJECTIVE, T_OBJECTIVE_ALLY,
+                    T_OBJECTIVE_HERO, T_OBJECTIVE_LOCATION, T_SHIP_ENEMY,
+                    T_SHIP_OBJECTIVE, T_TREACHERY}
+CARD_SPHERES_NO_ICONS = {S_NOSTAT}
+CARD_TYPES_NO_INFO = {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT,
+                      T_PRESENTATION, T_RULES}
+CARD_TYPES_NO_INFO_BACK = {T_CAMPAIGN, T_FULL_ART_LANDSCAPE,
+                           T_FULL_ART_PORTRAIT, T_NIGHTMARE, T_PRESENTATION,
+                           T_RULES}
+CARD_TYPES_NO_ARTIST = {T_PRESENTATION, T_RULES}
+CARD_TYPES_NO_ARTIST_BACK = {T_CAMPAIGN, T_NIGHTMARE, T_PRESENTATION, T_RULES}
+CARD_TYPES_NO_ARTWORK = {T_RULES}
+CARD_TYPES_NO_ARTWORK_BACK = {T_CAMPAIGN, T_NIGHTMARE, T_PRESENTATION, T_RULES}
+CARD_TYPES_EASY_MODE = {T_ENCOUNTER_SIDE_QUEST, T_ENEMY, T_LOCATION,
+                        T_SHIP_ENEMY, T_TREACHERY}
+CARD_SPHERES_NO_EASY_MODE = {S_BOON, S_BURDEN, S_CAVE, S_NOICON, S_NOSTAT,
+                             S_REGION}
+CARD_TYPES_ADDITIONAL_ENCOUNTER_SETS = {T_QUEST}
+CARD_TYPES_ADVENTURE = {T_CAMPAIGN, T_OBJECTIVE, T_OBJECTIVE_ALLY,
+                        T_OBJECTIVE_HERO, T_OBJECTIVE_LOCATION,
+                        T_QUEST, T_SHIP_OBJECTIVE}
+CARD_SPHERES_NO_ADVENTURE = {S_NOICON}
+CARD_TYPES_SUBTITLE = {T_CAMPAIGN, T_OBJECTIVE, T_OBJECTIVE_ALLY,
+                       T_OBJECTIVE_HERO, T_OBJECTIVE_LOCATION,
+                       T_QUEST, T_SHIP_OBJECTIVE}
+CARD_TYPES_NO_COLLECTION_ICON = {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT,
+                                 T_RULES}
+CARD_TYPES_NO_COPYRIGHT = {T_PRESENTATION, T_RULES}
+CARD_TYPES_DECK_RULES = {T_NIGHTMARE, T_QUEST}
+CARD_TYPES_ONE_COPY = {T_CAMPAIGN, T_CONTRACT, T_ENCOUNTER_SIDE_QUEST,
+                       T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT, T_HERO,
+                       T_NIGHTMARE, T_OBJECTIVE_HERO, T_PLAYER_OBJECTIVE,
+                       T_PRESENTATION, T_QUEST, T_RULES, T_TREASURE}
+CARD_TYPES_THREE_COPIES = {T_ALLY, T_ATTACHMENT, T_EVENT, T_PLAYER_SIDE_QUEST}
+CARD_TYPES_BOON = {T_ALLY, T_ATTACHMENT, T_EVENT, T_OBJECTIVE_ALLY}
+CARD_TYPES_BOON_SPHERE = {T_ATTACHMENT, T_EVENT}
+CARD_SPHERES_BOON = {S_BOON, S_BOONLEADERSHIP, S_BOONLORE, S_BOONSPIRIT,
+                     S_BOONTACTICS}
+CARD_TYPES_BURDEN = {T_ENCOUNTER_SIDE_QUEST, T_ENEMY, T_OBJECTIVE,
+                     T_SHIP_ENEMY, T_TREACHERY}
+CARD_TYPES_NIGHTMARE = {T_ENCOUNTER_SIDE_QUEST, T_ENEMY, T_LOCATION,
+                        T_OBJECTIVE, T_QUEST, T_SHIP_ENEMY, T_TREACHERY}
+CARD_TYPES_NOSTAT = {T_ENEMY}
+CARD_TYPES_NO_DISCORD_CHANNEL = {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT,
+                                 T_PRESENTATION, T_RULES}
+CARD_TYPES_NO_NAME_TAG = {T_CAMPAIGN, T_NIGHTMARE, T_PRESENTATION, T_RULES}
+CARD_TYPES_PAGES = {T_PRESENTATION, T_RULES}
+
+FLAGS = {F_ADDITIONALCOPIES, F_IGNORENAME, F_IGNORERULES, F_NOARTIST,
+         F_NOCOPYRIGHT, F_NOTRAITS, F_PROMO, F_STAR, F_BLUERING, F_GREENRING,
+         F_REDRING}
+RING_FLAGS = {F_BLUERING, F_GREENRING, F_REDRING}
 SPHERES = set()
-SPHERES_CAMPAIGN = {'Setup'}
-SPHERES_OBJECTIVE = {'NoIcon'}
-SPHERES_PLAYER = {'Baggins', 'Fellowship', 'Leadership', 'Lore', 'Neutral',
-                  'Spirit', 'Tactics'}
+SPHERES_CAMPAIGN = {S_SETUP}
+SPHERES_OBJECTIVE = {S_NOICON}
+SPHERES_PLAYER = {S_BAGGINS, S_FELLOWSHIP, S_LEADERSHIP, S_LORE, S_NEUTRAL,
+                  S_SPIRIT, S_TACTICS}
 SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow',
                         'BlueNightmare', 'GreenNightmare', 'PurpleNightmare',
                         'RedNightmare', 'BrownNightmare', 'YellowNightmare'}
-SPHERES_RULES = {'Back'}
-SPHERES_SHIP_OBJECTIVE = {'Upgraded'}
-SPHERES_SIDE_QUEST = {'Cave', 'NoProgress', 'Region', 'SmallTextArea'}
+SPHERES_RULES = {S_BACK}
+SPHERES_SHIP_OBJECTIVE = {S_UPGRADED}
+SPHERES_SIDE_QUEST = {S_CAVE, S_NOPROGRESS, S_REGION, S_SMALLTEXTAREA}
 
 COPY_STABLE_DATA_COMMAND = "rclone copy '{}' 'ALePStableData:/'"
 DRAGNCARDS_PLAYER_CARDS_STAT_COMMAND = \
@@ -604,130 +681,129 @@ XML_TEMPLATE = """<set>
 """
 
 CARD_TYPE_SUFFIX_HALLOFBEORN = {
-    'Campaign': 'Setup',
-    'Contract': 'Side',
-    'Nightmare': 'Setup',
-    'Player Objective': 'Side',
-    'Presentation': 'Setup',
-    'Rules': 'Setup'
+    T_CAMPAIGN: 'Setup',
+    T_CONTRACT: 'Side',
+    T_NIGHTMARE: 'Setup',
+    T_PLAYER_OBJECTIVE: 'Side',
+    T_PRESENTATION: 'Setup',
+    T_RULES: 'Setup'
 }
 
-CARD_TYPES_PLAYER_FRENCH = {'Ally', 'Attachment', 'Contract', 'Event', 'Hero',
-                            'Player Objective', 'Player Side Quest',
-                            'Treasure', 'Campaign', 'Objective Ally',
-                            'Objective Hero', 'Ship Objective'}
+CARD_TYPES_PLAYER_FRENCH = {
+    T_ALLY, T_ATTACHMENT, T_CAMPAIGN, T_CONTRACT, T_EVENT, T_HERO,
+    T_OBJECTIVE_ALLY, T_OBJECTIVE_HERO, T_PLAYER_OBJECTIVE,
+    T_PLAYER_SIDE_QUEST, T_SHIP_OBJECTIVE, T_TREASURE}
 CARD_TYPE_FRENCH_IDS = {
-    'Ally': 401,
-    'Attachment': 403,
-    'Campaign': 411,
-    'Contract': 418,
-    'Enemy': 404,
-    'Encounter Side Quest': 413,
-    'Event': 402,
-    'Hero': 400,
-    'Location': 405,
-    'Nightmare': 415,
-    'Objective': 407,
-    'Objective Ally': 409,
-    'Objective Hero': 416,
-    'Objective Location': 417,
-    'Player Objective': 419,
-    'Player Side Quest': 412,
-    'Quest': 408,
-    'Ship Enemy': 404,
-    'Ship Objective': 414,
-    'Treachery': 406,
-    'Treasure': 410
+    T_ALLY: 401,
+    T_ATTACHMENT: 403,
+    T_CAMPAIGN: 411,
+    T_CONTRACT: 418,
+    T_ENCOUNTER_SIDE_QUEST: 413,
+    T_ENEMY: 404,
+    T_EVENT: 402,
+    T_HERO: 400,
+    T_LOCATION: 405,
+    T_NIGHTMARE: 415,
+    T_OBJECTIVE: 407,
+    T_OBJECTIVE_ALLY: 409,
+    T_OBJECTIVE_HERO: 416,
+    T_OBJECTIVE_LOCATION: 417,
+    T_PLAYER_OBJECTIVE: 419,
+    T_PLAYER_SIDE_QUEST: 412,
+    T_QUEST: 408,
+    T_SHIP_ENEMY: 404,
+    T_SHIP_OBJECTIVE: 414,
+    T_TREACHERY: 406,
+    T_TREASURE: 410
 }
 CARD_SUBTYPE_FRENCH_IDS = {
-    'Boon': 600,
-    'BoonLeadership': 600,
-    'BoonLore': 600,
-    'BoonSpirit': 600,
-    'BoonTactics': 600,
-    'Burden': 601
+    S_BOON: 600,
+    S_BOONLEADERSHIP: 600,
+    S_BOONLORE: 600,
+    S_BOONSPIRIT: 600,
+    S_BOONTACTICS: 600,
+    S_BURDEN: 601
 }
 CARD_SPHERE_FRENCH_IDS = {
-    'Baggins': 306,
-    'Fellowship': 305,
-    'Leadership': 300,
-    'Lore': 301,
-    'Neutral': 304,
-    'Spirit': 302,
-    'Tactics': 303
+    S_BAGGINS: 306,
+    S_FELLOWSHIP: 305,
+    S_LEADERSHIP: 300,
+    S_LORE: 301,
+    S_NEUTRAL: 304,
+    S_SPIRIT: 302,
+    S_TACTICS: 303
 }
 SPANISH = {
-    'Ally': 'Aliado',
-    'Attachment': 'Vinculada',
-    'Campaign': 'Campa\u00f1a',
-    'Contract': 'Contrato',
-    'Encounter Side Quest': 'Misi\u00f3n Secundaria',
-    'Enemy': 'Enemigo',
-    'Event': 'Evento',
-    'Hero': 'H\u00e9roe',
-    'Location': 'Lugar',
-    'Nightmare': 'Preparaci\u00f3n',
-    'Objective': 'Objetivo',
-    'Objective Ally': 'Objetivo-Aliado',
-    'Objective Hero': 'H\u00e9roe-Objetivo',
-    'Objective Location': 'Lugar-Objetivo',
-    'Player Objective': 'Objetivo de Jugador',
-    'Player Side Quest': 'Misi\u00f3n Secundaria',
-    'Quest': 'Misi\u00f3n',
-    'Setup': 'Preparaci\u00f3n',
-    'Ship Enemy': 'Barco-Enemigo',
-    'Ship Objective': 'Barco-Objetivo',
-    'Treachery': 'Traici\u00f3n',
-    'Treasure': 'Tesoro'
+    T_ALLY: 'Aliado',
+    T_ATTACHMENT: 'Vinculada',
+    T_CAMPAIGN: 'Campa\u00f1a',
+    T_CONTRACT: 'Contrato',
+    T_ENCOUNTER_SIDE_QUEST: 'Misi\u00f3n Secundaria',
+    T_ENEMY: 'Enemigo',
+    T_EVENT: 'Evento',
+    T_HERO: 'H\u00e9roe',
+    T_LOCATION: 'Lugar',
+    T_NIGHTMARE: 'Preparaci\u00f3n',
+    T_OBJECTIVE: 'Objetivo',
+    T_OBJECTIVE_ALLY: 'Objetivo-Aliado',
+    T_OBJECTIVE_HERO: 'H\u00e9roe-Objetivo',
+    T_OBJECTIVE_LOCATION: 'Lugar-Objetivo',
+    T_PLAYER_OBJECTIVE: 'Objetivo de Jugador',
+    T_PLAYER_SIDE_QUEST: 'Misi\u00f3n Secundaria',
+    T_QUEST: 'Misi\u00f3n',
+    T_SHIP_ENEMY: 'Barco-Enemigo',
+    T_SHIP_OBJECTIVE: 'Barco-Objetivo',
+    T_TREACHERY: 'Traici\u00f3n',
+    T_TREASURE: 'Tesoro'
 }
 NUMBER_TRANSLATIONS = {
     '2' : {
-        'English': ['two'],
-        'French': ['deux'],
-        'German': ['zwei'],
-        'Italian': ['due'],
-        'Polish': ['dwa'],
-        'Portuguese': ['duas', 'dois'],
-        'Spanish': ['dos']
+        L_ENGLISH: ['two'],
+        L_FRENCH: ['deux'],
+        L_GERMAN: ['zwei'],
+        L_ITALIAN: ['due'],
+        L_POLISH: ['dwa'],
+        L_PORTUGUESE: ['duas', 'dois'],
+        L_SPANISH: ['dos']
     },
     '3' : {
-        'English': ['three'],
-        'French': ['trois'],
-        'German': ['drei'],
-        'Italian': ['tre'],
-        'Polish': ['trzy'],
-        'Portuguese': ['três'],
-        'Spanish': ['tres']
+        L_ENGLISH: ['three'],
+        L_FRENCH: ['trois'],
+        L_GERMAN: ['drei'],
+        L_ITALIAN: ['tre'],
+        L_POLISH: ['trzy'],
+        L_PORTUGUESE: ['três'],
+        L_SPANISH: ['tres']
     }
 }
 RESTRICTED_TRANSLATION = {
-    'English': 'Restricted',
-    'French': 'Restreint',
-    'German': 'Eingeschränkt',
-    'Italian': 'Limitato',
-    'Polish': 'Ograniczenie',
-    'Portuguese': 'Restrito',
-    'Spanish': 'Restringido'
+    L_ENGLISH: 'Restricted',
+    L_FRENCH: 'Restreint',
+    L_GERMAN: 'Eingeschränkt',
+    L_ITALIAN: 'Limitato',
+    L_POLISH: 'Ograniczenie',
+    L_PORTUGUESE: 'Restrito',
+    L_SPANISH: 'Restringido'
 }
 
 KNOWN_BOOKS = {
-    'English': [
+    L_ENGLISH: [
         'The Hobbit', 'The Fellowship of the Ring', 'The Two Towers',
         'The Return of the King', 'The Silmarillion', 'The Fall of Gondolin'],
-    'French': [
+    L_FRENCH: [
         'Le Hobbit', 'La Communauté de l’Anneau', 'Les Deux Tours',
         'Le Retour du Roi', 'Le Silmarillion', 'La Chute de Gondolin'],
-    'German': [
+    L_GERMAN: [
         'Der kleine Hobbit', 'Die Gefährten', 'Die zwei Türme',
         'Die Rückkehr des Königs', 'Das Silmarillion',
         'Der Fall von Gondolin'],
-    'Italian': [
+    L_ITALIAN: [
         'Lo Hobbit', 'La Compagnia dell’Anello', 'Le Due Torri',
         'Il Ritorno del Re', 'Il Silmarillion', 'La Caduta di Gondolin'],
-    'Polish': [
+    L_POLISH: [
         'Hobbit', 'Drużyna Pierścienia', 'Dwie Wieże',
         'Powrót Króla', 'Silmarillion', 'Upadek Gondolinu'],
-    'Spanish': [
+    L_SPANISH: [
         'El Hobbit', 'La Comunidad del Anillo', 'Las Dos Torres',
         'El Retorno del Rey', 'El Silmarillion', 'La Caída de Gondolin'],
     }
@@ -898,197 +974,197 @@ LOWERCASE_WORDS = {
 
 TRANSLATION_MATCH = [
     [r'Valour Resource Action', {
-        'English': r'\bValour Resource Action',
-        'French': r'\[Vaillance\] \[Ressource\] Action\b',
-        'German': r'\bEhrenvolle Ressourcenaktion\b',
-        'Italian': r'\bAzione Valorosa di Risorse\b',
-        'Polish': r'\bAkcja Zasob\u00f3w M\u0119stwa\b',
-        'Portuguese': r'\bA\u00e7\u00e3o Valorosa de Recursos\b',
-        'Spanish': r'\bAcci\u00f3n de Recursos de Valor\b'}],
+        L_ENGLISH: r'\bValour Resource Action',
+        L_FRENCH: r'\[Vaillance\] \[Ressource\] Action\b',
+        L_GERMAN: r'\bEhrenvolle Ressourcenaktion\b',
+        L_ITALIAN: r'\bAzione Valorosa di Risorse\b',
+        L_POLISH: r'\bAkcja Zasob\u00f3w M\u0119stwa\b',
+        L_PORTUGUESE: r'\bA\u00e7\u00e3o Valorosa de Recursos\b',
+        L_SPANISH: r'\bAcci\u00f3n de Recursos de Valor\b'}],
     [r'Valour Planning Action', {
-        'English': r'\bValour Planning Action',
-        'French': r'\[Vaillance\] \[Organisation\] Action\b',
-        'German': r'\bEhrenvolle Planungsaktion\b',
-        'Italian': r'\bAzione Valorosa di Pianificazione\b',
-        'Polish': r'\bAkcja Planowania M\u0119stwa\b',
-        'Portuguese': r'\bA\u00e7\u00e3o Valorosa de Planejamento\b',
-        'Spanish': r'\bAcci\u00f3n de Planificaci\u00f3n de Valor\b'}],
+        L_ENGLISH: r'\bValour Planning Action',
+        L_FRENCH: r'\[Vaillance\] \[Organisation\] Action\b',
+        L_GERMAN: r'\bEhrenvolle Planungsaktion\b',
+        L_ITALIAN: r'\bAzione Valorosa di Pianificazione\b',
+        L_POLISH: r'\bAkcja Planowania M\u0119stwa\b',
+        L_PORTUGUESE: r'\bA\u00e7\u00e3o Valorosa de Planejamento\b',
+        L_SPANISH: r'\bAcci\u00f3n de Planificaci\u00f3n de Valor\b'}],
     [r'Valour Quest Action', {
-        'English': r'\bValour Quest Action',
-        'French': r'\[Vaillance\] \[Qu\u00eate\] Action\b',
-        'German': r'\bEhrenvolle Abenteueraktion\b',
-        'Italian': r'\bAzione Valorosa di Ricerca\b',
-        'Polish': r'\bAkcja Wyprawy M\u0119stwa\b',
-        'Portuguese': r'\bA\u00e7\u00e3o Valorosa de Miss\u00e3o\b',
-        'Spanish': r'\bAcci\u00f3n de Misi\u00f3n de Valor\b'}],
+        L_ENGLISH: r'\bValour Quest Action',
+        L_FRENCH: r'\[Vaillance\] \[Qu\u00eate\] Action\b',
+        L_GERMAN: r'\bEhrenvolle Abenteueraktion\b',
+        L_ITALIAN: r'\bAzione Valorosa di Ricerca\b',
+        L_POLISH: r'\bAkcja Wyprawy M\u0119stwa\b',
+        L_PORTUGUESE: r'\bA\u00e7\u00e3o Valorosa de Miss\u00e3o\b',
+        L_SPANISH: r'\bAcci\u00f3n de Misi\u00f3n de Valor\b'}],
     [r'Valour Travel Action', {
-        'English': r'\bValour Travel Action',
-        'French': r'\[Vaillance\] \[Voyage\] Action\b',
-        'German': r'\bEhrenvolle Reiseaktion\b',
-        'Italian': r'\bAzione Valorosa di Viaggio\b',
-        'Polish': r'\bAkcja Podr\u00f3\u017cy M\u0119stwa\b',
-        'Portuguese': r'\bA\u00e7\u00e3o Valorosa de Viagem\b',
-        'Spanish': r'\bAcci\u00f3n de Viaje de Valor\b'}],
+        L_ENGLISH: r'\bValour Travel Action',
+        L_FRENCH: r'\[Vaillance\] \[Voyage\] Action\b',
+        L_GERMAN: r'\bEhrenvolle Reiseaktion\b',
+        L_ITALIAN: r'\bAzione Valorosa di Viaggio\b',
+        L_POLISH: r'\bAkcja Podr\u00f3\u017cy M\u0119stwa\b',
+        L_PORTUGUESE: r'\bA\u00e7\u00e3o Valorosa de Viagem\b',
+        L_SPANISH: r'\bAcci\u00f3n de Viaje de Valor\b'}],
     [r'Valour Encounter Action', {
-        'English': r'\bValour Encounter Action',
-        'French': r'\[Vaillance\] \[Rencontre\] Action\b',
-        'German': r'\bEhrenvolle Begegnungsaktion\b',
-        'Italian': r'\bAzione Valorosa di Incontri\b',
-        'Polish': r'\bAkcja Spotkania M\u0119stwa\b',
-        'Portuguese': r'\bA\u00e7\u00e3o Valorosa de Encontro\b',
-        'Spanish': r'\bAcci\u00f3n de Encuentro de Valor\b'}],
+        L_ENGLISH: r'\bValour Encounter Action',
+        L_FRENCH: r'\[Vaillance\] \[Rencontre\] Action\b',
+        L_GERMAN: r'\bEhrenvolle Begegnungsaktion\b',
+        L_ITALIAN: r'\bAzione Valorosa di Incontri\b',
+        L_POLISH: r'\bAkcja Spotkania M\u0119stwa\b',
+        L_PORTUGUESE: r'\bA\u00e7\u00e3o Valorosa de Encontro\b',
+        L_SPANISH: r'\bAcci\u00f3n de Encuentro de Valor\b'}],
     [r'Valour Combat Action', {
-        'English': r'\bValour Combat Action',
-        'French': r'\[Vaillance\] \[Combat\] Action\b',
-        'German': r'\bEhrenvolle Kampfaktion\b',
-        'Italian': r'\bAzione Valorosa di Combattimento\b',
-        'Polish': r'\bAkcja Walki M\u0119stwa\b',
-        'Portuguese': r'\bA\u00e7\u00e3o Valorosa de Combate\b',
-        'Spanish': r'\bAcci\u00f3n de Combate de Valor\b'}],
+        L_ENGLISH: r'\bValour Combat Action',
+        L_FRENCH: r'\[Vaillance\] \[Combat\] Action\b',
+        L_GERMAN: r'\bEhrenvolle Kampfaktion\b',
+        L_ITALIAN: r'\bAzione Valorosa di Combattimento\b',
+        L_POLISH: r'\bAkcja Walki M\u0119stwa\b',
+        L_PORTUGUESE: r'\bA\u00e7\u00e3o Valorosa de Combate\b',
+        L_SPANISH: r'\bAcci\u00f3n de Combate de Valor\b'}],
     [r'Valour Refresh Action', {
-        'English': r'\bValour Refresh Action',
-        'French': r'\[Vaillance\] \[Restauration\] Action\b',
-        'German': r'\bEhrenvolle Auffrischungsaktion\b',
-        'Italian': r'\bAzione Valorosa di Riordino\b',
-        'Polish': r'\bAkcja Odpoczynku M\u0119stwa\b',
-        'Portuguese': r'\bA\u00e7\u00e3o Valorosa de Renova\u00e7\u00e3o\b',
-        'Spanish': r'\bAcci\u00f3n de Recuperaci\u00f3n de Valor\b'}],
+        L_ENGLISH: r'\bValour Refresh Action',
+        L_FRENCH: r'\[Vaillance\] \[Restauration\] Action\b',
+        L_GERMAN: r'\bEhrenvolle Auffrischungsaktion\b',
+        L_ITALIAN: r'\bAzione Valorosa di Riordino\b',
+        L_POLISH: r'\bAkcja Odpoczynku M\u0119stwa\b',
+        L_PORTUGUESE: r'\bA\u00e7\u00e3o Valorosa de Renova\u00e7\u00e3o\b',
+        L_SPANISH: r'\bAcci\u00f3n de Recuperaci\u00f3n de Valor\b'}],
     [r'Valour Action', {
-        'English': r'\bValour Action',
-        'French': r'\[Vaillance\] Action\b',
-        'German': r'\bEhrenvolle Aktion\b',
-        'Italian': r'\bAzione Valorosa\b',
-        'Polish': r'\bAkcja M\u0119stwa\b',
-        'Portuguese': r'\bA\u00e7\u00e3o Valorosa\b',
-        'Spanish': r'\bAcci\u00f3n de Valor\b'}],
+        L_ENGLISH: r'\bValour Action',
+        L_FRENCH: r'\[Vaillance\] Action\b',
+        L_GERMAN: r'\bEhrenvolle Aktion\b',
+        L_ITALIAN: r'\bAzione Valorosa\b',
+        L_POLISH: r'\bAkcja M\u0119stwa\b',
+        L_PORTUGUESE: r'\bA\u00e7\u00e3o Valorosa\b',
+        L_SPANISH: r'\bAcci\u00f3n de Valor\b'}],
     [r'Resource Action', {
-        'English': r'\bResource Action',
-        'French': r'\[Ressource\] Action\b',
-        'German': r'\bRessourcenaktion\b',
-        'Italian': r'\bAzione di Risorse\b',
-        'Polish': r'\bAkcja Zasob\u00f3w\b',
-        'Portuguese': r'\bA\u00e7\u00e3o de Recursos\b',
-        'Spanish': r'\bAcci\u00f3n de Recursos\b'}],
+        L_ENGLISH: r'\bResource Action',
+        L_FRENCH: r'\[Ressource\] Action\b',
+        L_GERMAN: r'\bRessourcenaktion\b',
+        L_ITALIAN: r'\bAzione di Risorse\b',
+        L_POLISH: r'\bAkcja Zasob\u00f3w\b',
+        L_PORTUGUESE: r'\bA\u00e7\u00e3o de Recursos\b',
+        L_SPANISH: r'\bAcci\u00f3n de Recursos\b'}],
     [r'Planning Action', {
-        'English': r'\bPlanning Action',
-        'French': r'\[Organisation\] Action\b',
-        'German': r'\bPlanungsaktion\b',
-        'Italian': r'\bAzione di Pianificazione\b',
-        'Polish': r'\bAkcja Planowania\b',
-        'Portuguese': r'\bA\u00e7\u00e3o de Planejamento\b',
-        'Spanish': r'\bAcci\u00f3n de Planificaci\u00f3n\b'}],
+        L_ENGLISH: r'\bPlanning Action',
+        L_FRENCH: r'\[Organisation\] Action\b',
+        L_GERMAN: r'\bPlanungsaktion\b',
+        L_ITALIAN: r'\bAzione di Pianificazione\b',
+        L_POLISH: r'\bAkcja Planowania\b',
+        L_PORTUGUESE: r'\bA\u00e7\u00e3o de Planejamento\b',
+        L_SPANISH: r'\bAcci\u00f3n de Planificaci\u00f3n\b'}],
     [r'Quest Action', {
-        'English': r'\bQuest Action',
-        'French': r'\[Qu\u00eate\] Action\b',
-        'German': r'\bAbenteueraktion\b',
-        'Italian': r'\bAzione di Ricerca\b',
-        'Polish': r'\bAkcja Wyprawy\b',
-        'Portuguese': r'\bA\u00e7\u00e3o de Miss\u00e3o\b',
-        'Spanish': r'\bAcci\u00f3n de Misi\u00f3n\b'}],
+        L_ENGLISH: r'\bQuest Action',
+        L_FRENCH: r'\[Qu\u00eate\] Action\b',
+        L_GERMAN: r'\bAbenteueraktion\b',
+        L_ITALIAN: r'\bAzione di Ricerca\b',
+        L_POLISH: r'\bAkcja Wyprawy\b',
+        L_PORTUGUESE: r'\bA\u00e7\u00e3o de Miss\u00e3o\b',
+        L_SPANISH: r'\bAcci\u00f3n de Misi\u00f3n\b'}],
     [r'Travel Action', {
-        'English': r'\bTravel Action',
-        'French': r'\[Voyage\] Action\b',
-        'German': r'\bReiseaktion\b',
-        'Italian': r'\bAzione di Viaggio\b',
-        'Polish': r'\bAkcja Podr\u00f3\u017cy\b',
-        'Portuguese': r'\bA\u00e7\u00e3o de Viagem\b',
-        'Spanish': r'\bAcci\u00f3n de Viaje\b'}],
+        L_ENGLISH: r'\bTravel Action',
+        L_FRENCH: r'\[Voyage\] Action\b',
+        L_GERMAN: r'\bReiseaktion\b',
+        L_ITALIAN: r'\bAzione di Viaggio\b',
+        L_POLISH: r'\bAkcja Podr\u00f3\u017cy\b',
+        L_PORTUGUESE: r'\bA\u00e7\u00e3o de Viagem\b',
+        L_SPANISH: r'\bAcci\u00f3n de Viaje\b'}],
     [r'Encounter Action', {
-        'English': r'\bEncounter Action',
-        'French': r'\[Rencontre\] Action\b',
-        'German': r'\bBegegnungsaktion\b',
-        'Italian': r'\bAzione di Incontri\b',
-        'Polish': r'\bAkcja Spotkania\b',
-        'Portuguese': r'\bA\u00e7\u00e3o de Encontro\b',
-        'Spanish': r'\bAcci\u00f3n de Encuentro\b'}],
+        L_ENGLISH: r'\bEncounter Action',
+        L_FRENCH: r'\[Rencontre\] Action\b',
+        L_GERMAN: r'\bBegegnungsaktion\b',
+        L_ITALIAN: r'\bAzione di Incontri\b',
+        L_POLISH: r'\bAkcja Spotkania\b',
+        L_PORTUGUESE: r'\bA\u00e7\u00e3o de Encontro\b',
+        L_SPANISH: r'\bAcci\u00f3n de Encuentro\b'}],
     [r'Combat Action', {
-        'English': r'\bCombat Action',
-        'French': r'\[Combat\] Action\b',
-        'German': r'\bKampfaktion\b',
-        'Italian': r'\bAzione di Combattimento\b',
-        'Polish': r'\bAkcja Walki\b',
-        'Portuguese': r'\bA\u00e7\u00e3o de Combate\b',
-        'Spanish': r'\bAcci\u00f3n de Combate\b'}],
+        L_ENGLISH: r'\bCombat Action',
+        L_FRENCH: r'\[Combat\] Action\b',
+        L_GERMAN: r'\bKampfaktion\b',
+        L_ITALIAN: r'\bAzione di Combattimento\b',
+        L_POLISH: r'\bAkcja Walki\b',
+        L_PORTUGUESE: r'\bA\u00e7\u00e3o de Combate\b',
+        L_SPANISH: r'\bAcci\u00f3n de Combate\b'}],
     [r'Refresh Action', {
-        'English': r'\bRefresh Action',
-        'French': r'\[Restauration\] Action\b',
-        'German': r'\bAuffrischungsaktion\b',
-        'Italian': r'\bAzione di Riordino\b',
-        'Polish': r'\bAkcja Odpoczynku\b',
-        'Portuguese': r'\bA\u00e7\u00e3o de Renova\u00e7\u00e3o\b',
-        'Spanish': r'\bAcci\u00f3n de Recuperaci\u00f3n\b'}],
+        L_ENGLISH: r'\bRefresh Action',
+        L_FRENCH: r'\[Restauration\] Action\b',
+        L_GERMAN: r'\bAuffrischungsaktion\b',
+        L_ITALIAN: r'\bAzione di Riordino\b',
+        L_POLISH: r'\bAkcja Odpoczynku\b',
+        L_PORTUGUESE: r'\bA\u00e7\u00e3o de Renova\u00e7\u00e3o\b',
+        L_SPANISH: r'\bAcci\u00f3n de Recuperaci\u00f3n\b'}],
     [r'Action', {
-        'English': r'\bAction',
-        'French': r'\bAction\b',
-        'German': r'\bAktion\b',
-        'Italian': r'\bAzione\b',
-        'Polish': r'\bAkcja\b',
-        'Portuguese': r'\bA\u00e7\u00e3o\b',
-        'Spanish': r'\bAcci\u00f3n\b'}],
+        L_ENGLISH: r'\bAction',
+        L_FRENCH: r'\bAction\b',
+        L_GERMAN: r'\bAktion\b',
+        L_ITALIAN: r'\bAzione\b',
+        L_POLISH: r'\bAkcja\b',
+        L_PORTUGUESE: r'\bA\u00e7\u00e3o\b',
+        L_SPANISH: r'\bAcci\u00f3n\b'}],
     [r'When Revealed', {
-        'English': r'\bRevealed',
-        'French': r'\bUne fois r\u00e9v\u00e9l\u00e9e\b',
-        'German': r'\bWenn aufgedeckt\b',
-        'Italian': r'\bQuando Rivelata\b',
-        'Polish': r'\bPo odkryciu\b',
-        'Portuguese': r'\bEfeito Revelado\b',
-        'Spanish': r'\bAl ser revelada\b'}],
+        L_ENGLISH: r'\bRevealed',
+        L_FRENCH: r'\bUne fois r\u00e9v\u00e9l\u00e9e\b',
+        L_GERMAN: r'\bWenn aufgedeckt\b',
+        L_ITALIAN: r'\bQuando Rivelata\b',
+        L_POLISH: r'\bPo odkryciu\b',
+        L_PORTUGUESE: r'\bEfeito Revelado\b',
+        L_SPANISH: r'\bAl ser revelada\b'}],
     [r'Forced', {
-        'English': r'\bForced',
-        'French': r'\bForc\u00e9\b',
-        'German': r'\bErzwungen\b',
-        'Italian': r'\bObbligato\b',
-        'Polish': r'\bWymuszony\b',
-        'Portuguese': r'\bEfeito For\u00e7ado\b',
-        'Spanish': r'\bObligado\b'}],
+        L_ENGLISH: r'\bForced',
+        L_FRENCH: r'\bForc\u00e9\b',
+        L_GERMAN: r'\bErzwungen\b',
+        L_ITALIAN: r'\bObbligato\b',
+        L_POLISH: r'\bWymuszony\b',
+        L_PORTUGUESE: r'\bEfeito For\u00e7ado\b',
+        L_SPANISH: r'\bObligado\b'}],
     [r'Valour Response', {
-        'English': r'\bValour Response',
-        'French': r'\[Vaillance\] R\u00e9ponse\b',
-        'German': r'\bEhrenvolle Reaktion\b',
-        'Italian': r'\bRisposta Valorosa\b',
-        'Polish': r'\bOdpowied\u017a M\u0119stwa\b',
-        'Portuguese': r'\bResposta Valorosa\b',
-        'Spanish': r'\bRespuesta de Valor\b'}],
+        L_ENGLISH: r'\bValour Response',
+        L_FRENCH: r'\[Vaillance\] R\u00e9ponse\b',
+        L_GERMAN: r'\bEhrenvolle Reaktion\b',
+        L_ITALIAN: r'\bRisposta Valorosa\b',
+        L_POLISH: r'\bOdpowied\u017a M\u0119stwa\b',
+        L_PORTUGUESE: r'\bResposta Valorosa\b',
+        L_SPANISH: r'\bRespuesta de Valor\b'}],
     [r'Response', {
-        'English': r'\bResponse',
-        'French': r'\bR\u00e9ponse\b',
-        'German': r'\bReaktion\b',
-        'Italian': r'\bRisposta\b',
-        'Polish': r'\bOdpowied\u017a\b',
-        'Portuguese': r'\bResposta\b',
-        'Spanish': r'\bRespuesta\b'}],
+        L_ENGLISH: r'\bResponse',
+        L_FRENCH: r'\bR\u00e9ponse\b',
+        L_GERMAN: r'\bReaktion\b',
+        L_ITALIAN: r'\bRisposta\b',
+        L_POLISH: r'\bOdpowied\u017a\b',
+        L_PORTUGUESE: r'\bResposta\b',
+        L_SPANISH: r'\bRespuesta\b'}],
     [r'Travel', {
-        'English': r'\b(Travel|Journey)',
-        'French': r'\b(Trajet|Voyage)\b',
-        'German': r'\bReise',
-        'Italian': r'\bViaggio\b',
-        'Polish': r'\b[Pp]odr\u00f3\u017cy?\b',
-        'Portuguese': r'\bViagem\b',
-        'Spanish': r'\bViaje\b'}],
+        L_ENGLISH: r'\b(Travel|Journey)',
+        L_FRENCH: r'\b(Trajet|Voyage)\b',
+        L_GERMAN: r'\bReise',
+        L_ITALIAN: r'\bViaggio\b',
+        L_POLISH: r'\b[Pp]odr\u00f3\u017cy?\b',
+        L_PORTUGUESE: r'\bViagem\b',
+        L_SPANISH: r'\bViaje\b'}],
     [r'Resolution', {
-        'English': r'\b(Resolution|Conclusion)',
-        'French': r'\bR\u00e9solution\b',
-        'German': r'\bAufl\u00f6sung\b',
-        'Italian': r'\bRisoluzione\b',
-        'Polish': r'\bNast\u0119pstwa\b',
-        'Portuguese': r'\bResolu\u00e7\u00e3o\b',
-        'Spanish': r'\bResoluci\u00f3n\b'}],
+        L_ENGLISH: r'\b(Resolution|Conclusion)',
+        L_FRENCH: r'\bR\u00e9solution\b',
+        L_GERMAN: r'\bAufl\u00f6sung\b',
+        L_ITALIAN: r'\bRisoluzione\b',
+        L_POLISH: r'\bNast\u0119pstwa\b',
+        L_PORTUGUESE: r'\bResolu\u00e7\u00e3o\b',
+        L_SPANISH: r'\bResoluci\u00f3n\b'}],
     [r'Setup', {
-        'English': r'\b(Setup|Set Up|Setting Up|Staging)',
-        'French': r'\bMise en place\b',
-        'German': r'\bVorbereitung\b',
-        'Italian': r'\bPreparazione\b',
-        'Polish': r'\bPrzygotowanie\b(?! polskiej)',
-        'Portuguese': r'\bPrepara\u00e7\u00e3o\b',
-        'Spanish': r'\bPreparaci\u00f3n\b'}],
+        L_ENGLISH: r'\b(Setup|Set Up|Setting Up|Staging)',
+        L_FRENCH: r'\bMise en place\b',
+        L_GERMAN: r'\bVorbereitung\b',
+        L_ITALIAN: r'\bPreparazione\b',
+        L_POLISH: r'\bPrzygotowanie\b(?! polskiej)',
+        L_PORTUGUESE: r'\bPrepara\u00e7\u00e3o\b',
+        L_SPANISH: r'\bPreparaci\u00f3n\b'}],
     [r'Condition', {
-        'English': r'\bCondition',
-        'French': r'\bCondition\b',
-        'German': r'\bZustand\b',
-        'Italian': r'\bCondizione\b',
-        'Polish': r'\bStan\b',
-        'Portuguese': r'\bCondi\u00e7\u00e3o\b',
-        'Spanish': r'\bEstado\b'}]
+        L_ENGLISH: r'\bCondition',
+        L_FRENCH: r'\bCondition\b',
+        L_GERMAN: r'\bZustand\b',
+        L_ITALIAN: r'\bCondizione\b',
+        L_POLISH: r'\bStan\b',
+        L_PORTUGUESE: r'\bCondi\u00e7\u00e3o\b',
+        L_SPANISH: r'\bEstado\b'}]
 ]
 
 CARD_COLUMNS = {}
@@ -1099,7 +1175,7 @@ ACCENTS = set()
 ALL_NAMES = set()
 ALL_SET_AND_QUEST_NAMES = set()
 ALL_ENCOUNTER_SET_NAMES = set()
-ALL_CARD_NAMES = {'English': set()}
+ALL_CARD_NAMES = {L_ENGLISH: set()}
 ALL_SCRATCH_CARD_NAMES = set()
 ALL_TRAITS = set()
 ALL_SCRATCH_TRAITS = set()
@@ -1410,12 +1486,12 @@ def _clean_tags(text):  # pylint: disable=R0915
     return text
 
 
-def _update_card_text(text, lang='English', skip_rules=False,  # pylint: disable=R0915
+def _update_card_text(text, lang=L_ENGLISH, skip_rules=False,  # pylint: disable=R0915
                       fix_linebreaks=True):
     """ Update card text for RingsDB, Hall of Beorn, French and Spanish DBs.
     """
     text = str(text)
-    if lang == 'Spanish' and not skip_rules:
+    if lang == L_SPANISH and not skip_rules:
         text = re.sub(r'\b(Acci\u00f3n)( de Recursos| de Planificaci\u00f3n'
                       r'| de Misi\u00f3n| de Viaje| de Encuentro| de Combate'
                       r'| de Recuperaci\u00f3n)?( de Valor)?:',
@@ -1426,7 +1502,7 @@ def _update_card_text(text, lang='English', skip_rules=False,  # pylint: disable
         text = re.sub(r'\b(Preparaci\u00f3n)( \([^\)]+\))?:', '[b]\\1[/b]\\2:',
                       text)
         text = re.sub(r'\b(Estado)\b', '[bi]\\1[/bi]', text)
-    if lang == 'French' and not skip_rules:
+    if lang == L_FRENCH and not skip_rules:
         text = re.sub(r'(\[Vaillance\] )?(\[Ressource\] |\[Organisation\] '
                       r'|\[Qu\u00eate\] |\[Voyage\] |\[Rencontre\] '
                       r'|\[Combat\] |\[Restauration\] )?\b(Action) ?:',
@@ -1437,7 +1513,7 @@ def _update_card_text(text, lang='English', skip_rules=False,  # pylint: disable
         text = re.sub(r'\b(Mise en place)( \([^\)]+\))? ?:', '[b]\\1[/b]\\2 :',
                       text)
         text = re.sub(r'\b(Condition)\b', '[bi]\\1[/bi]', text)
-    elif lang == 'English' and not skip_rules:
+    elif lang == L_ENGLISH and not skip_rules:
         text = re.sub(r'\b(Valour )?(Resource |Planning |Quest |Travel '
                       r'|Encounter |Combat |Refresh )?(Action):',
                       '[b]\\1\\2\\3[/b]:', text)
@@ -1546,7 +1622,7 @@ def _get_french_icon(name):
 def _update_french_card_text(text):
     """ Update card text for French DB.
     """
-    text = _update_card_text(text, lang='French')
+    text = _update_card_text(text, lang=L_FRENCH)
     text = text.replace('\n', '<br>')
 
     text = text.replace('[willpower]', _get_french_icon('volonte'))
@@ -1672,7 +1748,7 @@ def clear_folder(folder):
 
     for _, _, filenames in os.walk(folder):
         for filename in filenames:
-            if filename not in ('seproject', '.gitignore', 'desktop.ini'):
+            if filename not in {'seproject', '.gitignore', 'desktop.ini'}:
                 os.remove(os.path.join(folder, filename))
 
         break
@@ -1736,11 +1812,11 @@ def read_conf(path=CONFIGURATION_PATH):  # pylint: disable=R0912
     conf['all_languages'] = list(conf['outputs'].keys())
     conf['languages'] = [lang for lang in conf['outputs']
                          if conf['outputs'][lang]]
-    if conf['frenchdb_csv'] and 'French' not in conf['languages']:
-        conf['languages'].append('French')
+    if conf['frenchdb_csv'] and L_FRENCH not in conf['languages']:
+        conf['languages'].append(L_FRENCH)
 
-    if conf['spanishdb_csv'] and 'Spanish' not in conf['languages']:
-        conf['languages'].append('Spanish')
+    if conf['spanishdb_csv'] and L_SPANISH not in conf['languages']:
+        conf['languages'].append(L_SPANISH)
 
     conf['output_languages'] = [lang for lang in conf['outputs']
                                 if conf['outputs'][lang]]
@@ -1931,7 +2007,7 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
     changes = False
     scratch_changes = False
     sheets = [SET_SHEET, CARD_SHEET, SCRATCH_SHEET]
-    for lang in set(conf['languages']).difference(set(['English'])):
+    for lang in set(conf['languages']).difference(set([L_ENGLISH])):
         sheets.append(lang)
 
     if conf['offline_mode']:
@@ -2023,7 +2099,7 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
             # into card_data.json
             # if sheet != SCRATCH_SHEET:
             #     changes = True
-            # if sheet in (SET_SHEET, SCRATCH_SHEET):
+            # if sheet in {SET_SHEET, SCRATCH_SHEET}:
             #    scratch_changes = True
 
             changes = True
@@ -2150,7 +2226,7 @@ def _extract_all_card_names(data, lang):
             if clean_value:
                 ALL_CARD_NAMES[lang].add(clean_value)
 
-    if lang == 'English':
+    if lang == L_ENGLISH:
         ALL_SCRATCH_CARD_NAMES.clear()
         for row in data:
             if row[CARD_TYPE] in CARD_TYPES_NO_NAME_TAG:
@@ -2177,8 +2253,8 @@ def _extract_all_set_and_quest_names(data):
                                                    row[CARD_SET_NAME]))
 
             if (row[CARD_ADVENTURE] and
-                    row[CARD_ADVENTURE] not in ('[space]', '[nobr]') and
-                    row[CARD_TYPE] != 'Campaign'):
+                    row[CARD_ADVENTURE] not in {'[space]', '[nobr]'} and
+                    row[CARD_TYPE] != T_CAMPAIGN):
                 ALL_SET_AND_QUEST_NAMES.add(row[CARD_ADVENTURE])
 
 
@@ -2218,7 +2294,7 @@ def _extract_all_names():
     """ Collect all names from the spreadsheet.
     """
     ALL_NAMES.clear()
-    ALL_NAMES.update(ALL_CARD_NAMES['English'])
+    ALL_NAMES.update(ALL_CARD_NAMES[L_ENGLISH])
     ALL_NAMES.update(ALL_SET_AND_QUEST_NAMES)
     ALL_NAMES.update(ALL_ENCOUNTER_SET_NAMES)
     ALL_NAMES.update(ALL_TRAITS)
@@ -2328,18 +2404,18 @@ def parse_flavour(value, lang, value_id=None):  # pylint: disable=R0912,R0915
     value = value.strip()
     value = re.sub(r'\n +', '\n', value)
     original_value = value
-    if lang in ('German', 'Polish', 'Spanish'):
+    if lang in {L_GERMAN, L_POLISH, L_SPANISH}:
         value = re.sub(r'\[right\](\s*[—–].+?)(?:\[\/right\])?$', '\\1', value,
                        flags=re.DOTALL)
 
-    if lang in ('French', 'Polish'):
+    if lang in {L_FRENCH, L_POLISH}:
         value = re.sub(r'([—–])\[nobr\]([^—–]+)$', '\\1 \\2', value)
 
-    if (lang not in ('German', 'Italian') and
+    if (lang not in {L_GERMAN, L_ITALIAN} and
             (re.search(r'\s-', value) or re.search(r'-\s', value))):
         errors.append('Incorrectly used short dashes')
 
-    if lang in ('Italian', 'Spanish'):
+    if lang in {L_ITALIAN, L_SPANISH}:
         default_separator = '\n'
     else:
         default_separator = ' '
@@ -2358,7 +2434,7 @@ def parse_flavour(value, lang, value_id=None):  # pylint: disable=R0912,R0915
     else:
         separator = default_separator
 
-    if lang in ('English', 'Italian', 'Spanish'):
+    if lang in {L_ENGLISH, L_ITALIAN, L_SPANISH}:
         false_split = '—' not in value and re.search(r'\s–\s[^–]+$', value)
     else:
         false_split = False
@@ -2382,7 +2458,7 @@ def parse_flavour(value, lang, value_id=None):  # pylint: disable=R0912,R0915
                 errors.append('Possibly unknown source book: {}'.format(
                     source_book))
         else:
-            if lang == 'English' and value_id:
+            if lang == L_ENGLISH and value_id:
                 FLAVOUR_BOOKS[value_id] = KNOWN_BOOKS[lang].index(source_book)
 
             if len(source_parts) == 2:
@@ -2398,7 +2474,7 @@ def parse_flavour(value, lang, value_id=None):  # pylint: disable=R0912,R0915
                                   re.sub(r'^\[nobr\]', '', parts[2])).strip()
                 parts[2] = re.sub(r'\s+', '[nobr]', parts[2])
 
-            if lang == 'Polish':
+            if lang == L_POLISH:
                 if not parts[0].startswith('“'):
                     parts[0] = '“{}'.format(parts[0])
 
@@ -2408,7 +2484,7 @@ def parse_flavour(value, lang, value_id=None):  # pylint: disable=R0912,R0915
                 if len(source_parts) == 2:
                     if (not parts[0].startswith('“') and
                             not parts[0].endswith('”')):
-                        if lang == 'English':
+                        if lang == L_ENGLISH:
                             errors.append('Possibly missing double quotes')
                             if value_id:
                                 FLAVOUR_WARNINGS['missing_quotes'].add(
@@ -2419,7 +2495,7 @@ def parse_flavour(value, lang, value_id=None):  # pylint: disable=R0912,R0915
                             errors.append('Possibly missing double quotes')
                 elif (parts[0].startswith('“') or
                       parts[0].endswith('”')):
-                    if lang == 'English':
+                    if lang == L_ENGLISH:
                         errors.append('Possibly redundant double quotes')
                         if value_id:
                             FLAVOUR_WARNINGS['redundant_quotes'].add(value_id)
@@ -2428,12 +2504,12 @@ def parse_flavour(value, lang, value_id=None):  # pylint: disable=R0912,R0915
                           FLAVOUR_WARNINGS['redundant_quotes']):
                         errors.append('Possibly redundant double quotes')
 
-            if lang == 'English':
+            if lang == L_ENGLISH:
                 parts[0] = parts[0].replace('—', '–')
-            elif lang == 'Italian':
+            elif lang == L_ITALIAN:
                 parts[0] = parts[0].replace('—', '-')
 
-    if lang != 'English' and KNOWN_BOOKS.get(lang) and value_id:
+    if lang != L_ENGLISH and KNOWN_BOOKS.get(lang) and value_id:
         if source_book and source_book in KNOWN_BOOKS[lang]:
             book_index = KNOWN_BOOKS[lang].index(source_book)
         else:
@@ -2442,24 +2518,24 @@ def parse_flavour(value, lang, value_id=None):  # pylint: disable=R0912,R0915
         if book_index != FLAVOUR_BOOKS.get(value_id, -1):
             errors.append('Different source book from the English version')
 
-    if lang == 'German':
+    if lang == L_GERMAN:
         dash = '–'
     else:
         dash = '—'
 
-    if lang in ('French', 'Polish'):
+    if lang in {L_FRENCH, L_POLISH}:
         dash = '{}[nobr]'.format(dash)
 
-    if (lang in ('German', 'Polish', 'Spanish') and
-            separator in ('\n\n', '\n') and len(parts) >= 2):
+    if (lang in {L_GERMAN, L_POLISH, L_SPANISH} and
+            separator in {'\n\n', '\n'} and len(parts) >= 2):
         dash = '[right]{}'.format(dash)
         parts[-1] = '{}[/right]'.format(parts[-1])
 
-    if lang in ('English', 'German'):
+    if lang in {L_ENGLISH, L_GERMAN}:
         parts[0] = parts[0].replace('—', '–')
-    elif lang in ('French', 'Spanish'):
+    elif lang in {L_FRENCH, L_SPANISH}:
         parts[0] = parts[0].replace('–', '—')
-    elif lang == 'Italian':
+    elif lang == L_ITALIAN:
         parts[0] = parts[0].replace('–', '-')
 
     return (errors, parts, separator, dash)
@@ -2481,23 +2557,23 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
         if not card_name_back:
             card_name_back = card_name
 
-        if (lang == 'English' and card_name and  # pylint: disable=R0916
+        if (lang == L_ENGLISH and card_name and  # pylint: disable=R0916
                 (not row[CARD_SCRATCH] or
                  card_name not in ALL_SCRATCH_TRAITS) and
                 row[CARD_TYPE] not in CARD_TYPES_NO_NAME_TAG and
                 not (row[CARD_FLAGS] and
-                     'IgnoreName' in extract_flags(
+                     F_IGNORENAME in extract_flags(
                          row[CARD_FLAGS], conf['ignore_ignore_flags']))):
             card_name_regex = r'(?<!\[bi\])\b' + re.escape(card_name) + r'\b'
         else:
             card_name_regex = None
 
-        if (lang == 'English' and card_name_back and  # pylint: disable=R0916
+        if (lang == L_ENGLISH and card_name_back and  # pylint: disable=R0916
                 (not row[CARD_SCRATCH] or
                  card_name_back not in ALL_SCRATCH_TRAITS) and
                 row[BACK_PREFIX + CARD_TYPE] not in CARD_TYPES_NO_NAME_TAG and
                 not (row[BACK_PREFIX + CARD_FLAGS] and
-                     'IgnoreName' in
+                     F_IGNORENAME in
                      extract_flags(row[BACK_PREFIX + CARD_FLAGS],
                                    conf['ignore_ignore_flags']))):
             card_name_regex_back = (
@@ -2521,7 +2597,8 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                         error = (
                             'Invalid reference [[{}]] in {} column: there is '
                             'no card with that name'.format(
-                                ref, key.replace(BACK_PREFIX, 'Back ')))
+                                ref, key.replace(BACK_PREFIX,
+                                                 BACK_PREFIX_LOG)))
                         PRE_SANITY_CHECK['ref'].setdefault(
                             (row[ROW_COLUMN], row[CARD_SCRATCH], lang),
                             []).append(error)
@@ -2532,7 +2609,7 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                 if key == CARD_TEXT and re.search(card_name_regex, value):
                     prepared_value = value
                     similar_names = get_similar_names(
-                        card_name, ALL_CARD_NAMES['English'],
+                        card_name, ALL_CARD_NAMES[L_ENGLISH],
                         row[CARD_SCRATCH] and ALL_SCRATCH_CARD_NAMES or None)
                     for similar_name in similar_names:
                         similar_name_regex = (
@@ -2552,7 +2629,7 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                       re.search(card_name_regex, value)):
                     prepared_value = value
                     similar_names = get_similar_names(
-                        card_name, ALL_CARD_NAMES['English'],
+                        card_name, ALL_CARD_NAMES[L_ENGLISH],
                         row[CARD_SCRATCH] and ALL_SCRATCH_CARD_NAMES or None)
                     for similar_name in similar_names:
                         similar_name_regex = (
@@ -2574,7 +2651,7 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                         re.search(card_name_regex_back, value)):
                     prepared_value = value
                     similar_names = get_similar_names(
-                        card_name_back, ALL_CARD_NAMES['English'],
+                        card_name_back, ALL_CARD_NAMES[L_ENGLISH],
                         row[CARD_SCRATCH] and ALL_SCRATCH_CARD_NAMES or None)
                     for similar_name in similar_names:
                         similar_name_regex = (
@@ -2594,7 +2671,7 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                           re.search(card_name_regex_back, value)):
                     prepared_value = value
                     similar_names = get_similar_names(
-                        card_name_back, ALL_CARD_NAMES['English'],
+                        card_name_back, ALL_CARD_NAMES[L_ENGLISH],
                         row[CARD_SCRATCH] and ALL_SCRATCH_CARD_NAMES or None)
                     for similar_name in similar_names:
                         similar_name_regex = (
@@ -2616,7 +2693,7 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
             else:
                 value = value.replace('[name]', card_name)
 
-            if key in (CARD_FLAVOUR, BACK_PREFIX + CARD_FLAVOUR):
+            if key in {CARD_FLAVOUR, BACK_PREFIX + CARD_FLAVOUR}:
                 errors, parts, separator, dash = parse_flavour(
                     value, lang, (row[CARD_ID], key))
                 if errors and lang in conf['output_languages']:
@@ -2644,9 +2721,9 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                 else:
                     value = parts[0]
 
-            if key in (CARD_SHADOW, BACK_PREFIX + CARD_SHADOW):
+            if key in {CARD_SHADOW, BACK_PREFIX + CARD_SHADOW}:
                 field = 'shadow' if key == CARD_SHADOW else 'shadow back'
-                if (lang == 'English' and
+                if (lang == L_ENGLISH and
                         not re.search(r'^(?:\[[^\]]+\])?Shadow(?:\[[^\]]+\])?:',
                                       value)):
                     value = 'Shadow: {}'.format(value)
@@ -2655,7 +2732,7 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                     PRE_SANITY_CHECK['shadow'].setdefault(
                         (row[ROW_COLUMN], row[CARD_SCRATCH], lang),
                         []).append(error)
-                elif (lang == 'French' and
+                elif (lang == L_FRENCH and
                         not re.search(r'^(?:\[[^\]]+\])?Ombre(?:\[[^\]]+\])? ?:',
                                       value)):
                     value = 'Ombre: {}'.format(value)
@@ -2664,7 +2741,7 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                     PRE_SANITY_CHECK['shadow'].setdefault(
                         (row[ROW_COLUMN], row[CARD_SCRATCH], lang),
                         []).append(error)
-                elif (lang == 'German' and
+                elif (lang == L_GERMAN and
                         not re.search(r'^(?:\[[^\]]+\])?Schatten(?:\[[^\]]+\])? ?:',
                                       value)):
                     value = 'Schatten: {}'.format(value)
@@ -2673,7 +2750,7 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                     PRE_SANITY_CHECK['shadow'].setdefault(
                         (row[ROW_COLUMN], row[CARD_SCRATCH], lang),
                         []).append(error)
-                elif (lang == 'Italian' and
+                elif (lang == L_ITALIAN and
                         not re.search(r'^(?:\[[^\]]+\])?Ombra(?:\[[^\]]+\])? ?:',
                                       value)):
                     value = 'Ombra: {}'.format(value)
@@ -2682,7 +2759,7 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                     PRE_SANITY_CHECK['shadow'].setdefault(
                         (row[ROW_COLUMN], row[CARD_SCRATCH], lang),
                         []).append(error)
-                elif (lang == 'Polish' and
+                elif (lang == L_POLISH and
                         not re.search(r'^(?:\[[^\]]+\])?Cień(?:\[[^\]]+\])? ?:',
                                       value)):
                     value = 'Cień: {}'.format(value)
@@ -2691,7 +2768,7 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                     PRE_SANITY_CHECK['shadow'].setdefault(
                         (row[ROW_COLUMN], row[CARD_SCRATCH], lang),
                         []).append(error)
-                elif (lang == 'Spanish' and
+                elif (lang == L_SPANISH and
                         not re.search(r'^(?:\[[^\]]+\])?Sombra(?:\[[^\]]+\])? ?:',
                                       value)):
                     value = 'Sombra: {}'.format(value)
@@ -2703,7 +2780,7 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
 
             row[key] = value
 
-        if row.get(CARD_TYPE) == 'Rules' and row.get(CARD_VICTORY) == 'auto':
+        if row.get(CARD_TYPE) == T_RULES and row.get(CARD_VICTORY) == 'auto':
             auto_page_rows.append(i)
         elif auto_page_rows:
             _fill_auto_pages(data, auto_page_rows)
@@ -2736,10 +2813,10 @@ def is_doubleside(card_type, card_type_back):
     if card_type in CARD_TYPES_DOUBLESIDE_DEFAULT:
         return True
 
-    if card_type == card_type_back == 'Contract':
+    if card_type == card_type_back == T_CONTRACT:
         return True
 
-    if card_type == card_type_back == 'Player Objective':
+    if card_type == card_type_back == T_PLAYER_OBJECTIVE:
         return True
 
     return False
@@ -2759,15 +2836,15 @@ def _update_data(data):
             if is_positive_or_zero_int(set_ringsdb_code)
             else 0)
 
-        if ((row[CARD_QUANTITY] is None or row[CARD_QUANTITY] in ('0', 0)) and
-                row[CARD_TYPE] == 'Rules'):
+        if ((row[CARD_QUANTITY] is None or row[CARD_QUANTITY] in {'0', 0}) and
+                row[CARD_TYPE] == T_RULES):
             row[CARD_QUANTITY] = 1
 
-        if row[CARD_TYPE] == 'Side Quest':
-            row[CARD_TYPE] = 'Encounter Side Quest'
+        if row[CARD_TYPE] == T_ALIAS_SIDE_QUEST:
+            row[CARD_TYPE] = T_ENCOUNTER_SIDE_QUEST
 
-        if row[BACK_PREFIX + CARD_TYPE] == 'Side Quest':
-            row[BACK_PREFIX + CARD_TYPE] = 'Encounter Side Quest'
+        if row[BACK_PREFIX + CARD_TYPE] == T_ALIAS_SIDE_QUEST:
+            row[BACK_PREFIX + CARD_TYPE] = T_ENCOUNTER_SIDE_QUEST
 
         if (row[CARD_TYPE] in CARD_TYPES_DOUBLESIDE_DEFAULT and
                 row[BACK_PREFIX + CARD_TYPE] is None):
@@ -2884,7 +2961,7 @@ def _update_selected_rows(data):
 def _skip_row(row):
     """ Check whether a row should be skipped or not.
     """
-    return row[CARD_SET] in ('0', 0) or row[CARD_ID] in ('0', 0)
+    return row[CARD_SET] in {'0', 0} or row[CARD_ID] in {'0', 0}
 
 
 def _extract_column_names(columns):
@@ -3026,8 +3103,8 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
     FLAVOUR_BOOKS.clear()
     FLAVOUR_WARNINGS['missing_quotes'] = set()
     FLAVOUR_WARNINGS['redundant_quotes'] = set()
-    _extract_all_card_names(DATA, 'English')
-    _clean_data(conf, DATA, 'English')
+    _extract_all_card_names(DATA, L_ENGLISH)
+    _clean_data(conf, DATA, L_ENGLISH)
 
     SELECTED_CARDS.update({row[CARD_ID] for row in DATA if row[CARD_SELECTED]})
     FOUND_SETS.update({row[CARD_SET] for row in DATA
@@ -3061,7 +3138,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
     card_types = {row[CARD_ID]: row[CARD_TYPE] for row in DATA}
 
     for lang in conf['languages']:
-        if lang == 'English':
+        if lang == L_ENGLISH:
             continue
 
         TRANSLATIONS[lang] = {}
@@ -3130,7 +3207,7 @@ def extract_flags(value, ignore_flags=False):
     flags = [f.strip() for f in
              str(value or '').replace(';', '\n').split('\n') if f.strip()]
     if ignore_flags:
-        flags = [f for f in flags if f not in ('IgnoreName', 'IgnoreRules')]
+        flags = [f for f in flags if f not in {F_IGNORENAME, F_IGNORERULES}]
 
     return flags
 
@@ -3175,7 +3252,7 @@ def _get_capitalization_errors(text):  # pylint: disable=R0912
     """ Detect capitalization errors.
     """
     errors = []
-    if text in ('[space]', '[nobr]'):
+    if text in {'[space]', '[nobr]'}:
         return errors
 
     text = re.sub(r'\[[^\]]+\]', '', text)
@@ -3183,7 +3260,7 @@ def _get_capitalization_errors(text):  # pylint: disable=R0912
     parts = text.split(' ')
     parts = [re.sub(r'^[…“’]', '',
                     re.sub(r'[,.?!”’…]$', '', p)) for p in parts
-             if p not in ('-', '+')]
+             if p not in {'-', '+'}]
     if '' in parts:
         errors.append('"an empty word"')
 
@@ -3537,7 +3614,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                        flags=re.IGNORECASE):
             errors.append('add {} around "Trait"')
 
-        if (field in (CARD_SHADOW, BACK_PREFIX + CARD_SHADOW) and
+        if (field in {CARD_SHADOW, BACK_PREFIX + CARD_SHADOW} and
                 re.search(r'\bdefending player\b', paragraph,
                           flags=re.IGNORECASE)):
             errors.append('"you" not "defending player"')
@@ -3549,7 +3626,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                 paragraph, flags=re.IGNORECASE):
             errors.append('"you" not "defending player"')
 
-        if (field in (CARD_SHADOW, BACK_PREFIX + CARD_SHADOW) and
+        if (field in {CARD_SHADOW, BACK_PREFIX + CARD_SHADOW} and
                 re.search(r'\bafter this attack[^.]* attacking enemy engages '
                           r'the next player[^.]* makes an immediate attack\b',
                           paragraph, flags=re.IGNORECASE) and
@@ -3649,7 +3726,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                 re.search(r'(?<!\.) Response\b', updated_paragraph)):
             errors.append('use response (without tags and double quotes)')
 
-        if field == CARD_TEXT and card[CARD_TYPE] == 'Quest':
+        if field == CARD_TEXT and card[CARD_TYPE] == T_QUEST:
             name_regex = (r'(?<!\[bi\])\b' + re.escape(card[CARD_NAME] or '') +
                           r'\b(?!\[\/bi\])')
             if re.search(name_regex, paragraph):
@@ -3658,7 +3735,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                 errors.append('"this stage" not "this quest"')
 
         if (field == BACK_PREFIX + CARD_TEXT and
-                card[BACK_PREFIX + CARD_TYPE] == 'Quest'):
+                card[BACK_PREFIX + CARD_TYPE] == T_QUEST):
             name_regex = (r'(?<!\[bi\])\b' +
                           re.escape(card[BACK_PREFIX + CARD_NAME] or '') +
                           r'\b(?!\[\/bi\])')
@@ -3668,7 +3745,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                 errors.append('"this stage" not "this quest"')
 
         if (field == CARD_TEXT and card[CARD_TYPE] in
-                ('Encounter Side Quest', 'Player Side Quest')):
+                {T_ENCOUNTER_SIDE_QUEST, T_PLAYER_SIDE_QUEST}):
             name_regex = (r'(?<!\[bi\])\b' + re.escape(card[CARD_NAME] or '') +
                           r'\b(?!\[\/bi\]| (?:is )?in the victory display)')
             if re.search(name_regex, paragraph):
@@ -3678,7 +3755,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
 
         if (field == BACK_PREFIX + CARD_TEXT and
                 card[BACK_PREFIX + CARD_TYPE] in
-                ('Encounter Side Quest', 'Player Side Quest')):
+                {T_ENCOUNTER_SIDE_QUEST, T_PLAYER_SIDE_QUEST}):
             name_regex = (r'(?<!\[bi\])\b' +
                           re.escape(card[BACK_PREFIX + CARD_NAME] or '') +
                           r'\b(?!\[\/bi\]| (?:is )?in the victory display)')
@@ -3687,7 +3764,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
             elif re.search(r'\bthis stage\b', paragraph, flags=re.IGNORECASE):
                 errors.append('"this quest" not "this stage"')
 
-    if (field == CARD_TEXT and card[CARD_TYPE] == 'Quest'
+    if (field == CARD_TEXT and card[CARD_TYPE] == T_QUEST
             and str(card[CARD_COST]) == '1'):
         if 'When Revealed' in text:
             errors.append('"Setup" not "When Revealed"')
@@ -3738,7 +3815,7 @@ def _clean_value_for_hash(value):
     return value
 
 
-def _replace_numbers(value, lang='English'):
+def _replace_numbers(value, lang=L_ENGLISH):
     """ Replace numbers as text.
     """
     for key, translations in NUMBER_TRANSLATIONS.items():
@@ -3750,10 +3827,10 @@ def _replace_numbers(value, lang='English'):
     return value
 
 
-def _add_automatic_tags(value, lang='English'):
+def _add_automatic_tags(value, lang=L_ENGLISH):
     """ Add automatic tags.
     """
-    if lang == 'English':
+    if lang == L_ENGLISH:
         value = re.sub(
             r'\b(Valour )?(Resource |Planning |Quest |Travel |Encounter '
             r'|Combat |Refresh )?(Action):', '[b]\\1\\2\\3[/b]:', value)
@@ -3763,7 +3840,7 @@ def _add_automatic_tags(value, lang='English'):
         value = re.sub(
             r'\b(Setup)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', value)
         value = re.sub(r'\b(Condition)\b', '[bi]\\1[/bi]', value)
-    elif lang == 'French':
+    elif lang == L_FRENCH:
         value = re.sub(
             r'(\[Vaillance\] )?(\[Ressource\] |\[Organisation\] '
             r'|\[Qu\u00eate\] |\[Voyage\] |\[Rencontre\] |\[Combat\] '
@@ -3775,7 +3852,7 @@ def _add_automatic_tags(value, lang='English'):
         value = re.sub(
             r'\b(Mise en place)( \([^\)]+\))? ?:', '[b]\\1[/b]\\2 :', value)
         value = re.sub(r'\b(Condition)\b', '[bi]\\1[/bi]', value)
-    elif lang == 'German':
+    elif lang == L_GERMAN:
         value = re.sub(
             r'\b(Ehrenvolle )?(Ressourcenaktion|Planungsaktion'
             r'|Abenteueraktion|Reiseaktion|Begegnungsaktion|Kampfaktion'
@@ -3786,7 +3863,7 @@ def _add_automatic_tags(value, lang='English'):
         value = re.sub(
             r'\b(Vorbereitung)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', value)
         value = re.sub(r'\b(Zustand)\b', '[bi]\\1[/bi]', value)
-    elif lang == 'Italian':
+    elif lang == L_ITALIAN:
         value = re.sub(
             r'\b(Azione)( Valorosa)?( di Risorse| di Pianificazione'
             r'| di Ricerca| di Viaggio| di Incontri| di Combattimento'
@@ -3797,7 +3874,7 @@ def _add_automatic_tags(value, lang='English'):
         value = re.sub(
             r'\b(Preparazione)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', value)
         value = re.sub(r'\b(Condizione)\b', '[bi]\\1[/bi]', value)
-    elif lang == 'Polish':
+    elif lang == L_POLISH:
         value = re.sub(
             r'\b(Akcja)( Zasob\u00f3w| Planowania| Wyprawy| Podr\u00f3\u017cy'
             r'| Spotkania| Walki| Odpoczynku)?( M\u0119stwa)?:',
@@ -3809,7 +3886,7 @@ def _add_automatic_tags(value, lang='English'):
         value = re.sub(
             r'\b(Przygotowanie)( \([^\)]+\))?:', '[b]\\1[/b]\\2:', value)
         value = re.sub(r'\b(Stan)\b', '[bi]\\1[/bi]', value)
-    elif lang == 'Portuguese':
+    elif lang == L_PORTUGUESE:
         value = re.sub(
             r'\b(A\u00e7\u00e3o)( Valorosa)?( de Recursos| de Planejamento'
             r'| de Miss\u00e3o| de Viagem| de Encontro| de Combate'
@@ -3822,7 +3899,7 @@ def _add_automatic_tags(value, lang='English'):
             r'\b(Prepara\u00e7\u00e3o)( \([^\)]+\))?:', '[b]\\1[/b]\\2:',
             value)
         value = re.sub(r'\b(Condi\u00e7\u00e3o)\b', '[bi]\\1[/bi]', value)
-    elif lang == 'Spanish':
+    elif lang == L_SPANISH:
         value = re.sub(
             r'\b(Acci\u00f3n)( de Recursos| de Planificaci\u00f3n'
             r'| de Misi\u00f3n| de Viaje| de Encuentro| de Combate'
@@ -4010,25 +4087,25 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
 
         for error in PRE_SANITY_CHECK['ref'].get(
-                (i, card_scratch, 'English'), []):
+                (i, card_scratch, L_ENGLISH), []):
             message = '{} for row #{}{}'.format(error, i, row_info)
             logging.error(message)
             if not card_scratch:
                 errors.append(message)
 
         for error in PRE_SANITY_CHECK['flavour'].get(
-                (i, card_scratch, 'English'), []):
+                (i, card_scratch, L_ENGLISH), []):
             message = '{} for row #{}{}'.format(error, i, row_info)
-            if not [l for l in conf['languages'] if l != 'English']:
+            if not [l for l in conf['languages'] if l != L_ENGLISH]:
                 if message.startswith('Possibly '):
                     logging.warning(message)
                 else:
                     logging.error(message)
 
         for error in PRE_SANITY_CHECK['shadow'].get(
-                (i, card_scratch, 'English'), []):
+                (i, card_scratch, L_ENGLISH), []):
             message = '{} for row #{}{}'.format(error, i, row_info)
-            if not [l for l in conf['languages'] if l != 'English']:
+            if not [l for l in conf['languages'] if l != L_ENGLISH]:
                 logging.warning(message)
 
         if card_number is None:
@@ -4076,7 +4153,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_type in CARD_TYPES_ONE_COPY and card_quantity != 1 and
               not (card_flags and
-                   'AdditionalCopies' in extract_flags(card_flags))):
+                   F_ADDITIONALCOPIES in extract_flags(card_flags))):
             message = ('Incorrect card quantity according to its card type '
                        'for row #{}{}'.format(i, row_info))
             logging.error(message)
@@ -4086,9 +4163,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_type in CARD_TYPES_THREE_COPIES and
               card_sphere not in CARD_SPHERES_BOON and
-              card_quantity not in (1, 3) and
+              card_quantity not in {1, 3} and
               not (card_flags and
-                   'AdditionalCopies' in extract_flags(card_flags))):
+                   F_ADDITIONALCOPIES in extract_flags(card_flags))):
             message = ('Incorrect card quantity according to its card type '
                        'for row #{}{}'.format(i, row_info))
             logging.error(message)
@@ -4099,9 +4176,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         if (card_encounter_set is None and
                 ((card_type in CARD_TYPES_ENCOUNTER_SET and
-                  card_sphere != 'Boon') or
+                  card_sphere != S_BOON) or
                  (card_type_back in CARD_TYPES_ENCOUNTER_SET and
-                  card_sphere_back != 'Boon'))):
+                  card_sphere_back != S_BOON))):
             message = 'Missing encounter set for row #{}{}'.format(i, row_info)
             logging.error(message)
             if not card_scratch:
@@ -4110,9 +4187,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_encounter_set is not None and  # pylint: disable=R0916
               (card_type in CARD_TYPES_NO_ENCOUNTER_SET
-               or card_sphere == 'Boon') and
+               or card_sphere == S_BOON) and
               (card_type_back in CARD_TYPES_NO_ENCOUNTER_SET or
-               card_type_back is None or card_sphere_back == 'Boon')):
+               card_type_back is None or card_sphere_back == S_BOON)):
             message = 'Redundant encounter set for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -4121,7 +4198,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_encounter_set is not None and
-              not (card_flags and 'IgnoreName' in extract_flags(
+              not (card_flags and F_IGNORENAME in extract_flags(
                   card_flags, conf['ignore_ignore_flags']))):
             capitalization_errors = _get_capitalization_errors(
                 card_encounter_set)
@@ -4144,7 +4221,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_name is not None and
-              not (card_flags and 'IgnoreName' in extract_flags(
+              not (card_flags and F_IGNORENAME in extract_flags(
                   card_flags, conf['ignore_ignore_flags']))):
             capitalization_errors = _get_capitalization_errors(card_name)
             if capitalization_errors:
@@ -4176,7 +4253,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_name_back is not None and
               not (card_flags_back and
-                   'IgnoreName' in extract_flags(
+                   F_IGNORENAME in extract_flags(
                        card_flags_back, conf['ignore_ignore_flags']))):
             capitalization_errors = _get_capitalization_errors(card_name_back)
             if capitalization_errors:
@@ -4190,7 +4267,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 else:
                     broken_set_ids.add(set_id)
 
-        if card_unique is not None and card_unique not in ('1', 1):
+        if card_unique is not None and card_unique not in {'1', 1}:
             message = 'Incorrect format for unique flag for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -4199,7 +4276,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif ((card_unique is None and card_type in CARD_TYPES_UNIQUE) or
-              (card_unique in ('1', 1) and
+              (card_unique in {'1', 1} and
                card_type in CARD_TYPES_NO_UNIQUE)):
             message = (
                 'Incorrect unique flag according to its card type for '
@@ -4218,7 +4295,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif card_unique_back is not None and card_unique_back not in ('1', 1):
+        elif card_unique_back is not None and card_unique_back not in {'1', 1}:
             message = ('Incorrect format for unique flag back for row #{}{}'
                        .format(i, row_info))
             logging.error(message)
@@ -4228,7 +4305,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif ((card_unique_back is None and
                card_type_back in CARD_TYPES_UNIQUE) or
-              (card_unique_back in ('1', 1) and
+              (card_unique_back in {'1', 1} and
                card_type_back in CARD_TYPES_NO_UNIQUE)):
             message = ('Incorrect unique flag back according to its card type '
                        'for row #{}{}'.format(i, row_info))
@@ -4280,17 +4357,17 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if card_type == 'Campaign':
+        if card_type == T_CAMPAIGN:
             spheres = SPHERES_CAMPAIGN.copy()
-        elif card_type == 'Objective':
+        elif card_type == T_OBJECTIVE:
             spheres = SPHERES_OBJECTIVE.copy()
-        elif card_type == 'Encounter Side Quest':
+        elif card_type == T_ENCOUNTER_SIDE_QUEST:
             spheres = SPHERES_SIDE_QUEST.copy()
-        elif card_type == 'Rules':
+        elif card_type == T_RULES:
             spheres = SPHERES_RULES.copy()
-        elif card_type == 'Presentation':
+        elif card_type == T_PRESENTATION:
             spheres = SPHERES_PRESENTATION.copy()
-        elif card_type == 'Ship Objective':
+        elif card_type == T_SHIP_OBJECTIVE:
             spheres = SPHERES_SHIP_OBJECTIVE.copy()
         elif card_type in CARD_TYPES_PLAYER_SPHERE:
             spheres = SPHERES_PLAYER.copy()
@@ -4298,24 +4375,24 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             spheres = SPHERES.copy()
 
         if card_type in CARD_TYPES_BOON:
-            spheres.add('Boon')
+            spheres.add(S_BOON)
 
         if card_type in CARD_TYPES_BOON_SPHERE:
-            spheres.update(['BoonLeadership', 'BoonLore', 'BoonSpirit',
-                            'BoonTactics'])
+            spheres.update([S_BOONLEADERSHIP, S_BOONLORE, S_BOONSPIRIT,
+                            S_BOONTACTICS])
 
         if card_type in CARD_TYPES_BURDEN:
-            spheres.add('Burden')
+            spheres.add(S_BURDEN)
 
         if card_type in CARD_TYPES_NIGHTMARE:
-            spheres.add('Nightmare')
+            spheres.add(S_NIGHTMARE)
 
         if card_type in CARD_TYPES_NOSTAT:
-            spheres.add('NoStat')
+            spheres.add(S_NOSTAT)
 
         if (card_sphere is None and
                 (card_type in CARD_TYPES_PLAYER_SPHERE or
-                 card_type == 'Presentation')):
+                 card_type == T_PRESENTATION)):
             message = 'Missing sphere for row #{}{}'.format(i, row_info)
             logging.error(message)
             if not card_scratch:
@@ -4331,7 +4408,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
 
         if not is_doubleside(card_type, card_type_back):
-            if card_type_back == 'Ship Objective':
+            if card_type_back == T_SHIP_OBJECTIVE:
                 spheres_back = SPHERES_SHIP_OBJECTIVE.copy()
             elif card_type_back in CARD_TYPES_PLAYER_SPHERE:
                 spheres_back = SPHERES_PLAYER.copy()
@@ -4339,20 +4416,20 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 spheres_back = SPHERES.copy()
 
             if card_type_back in CARD_TYPES_BOON:
-                spheres_back.add('Boon')
+                spheres_back.add(S_BOON)
 
             if card_type_back in CARD_TYPES_BOON_SPHERE:
-                spheres_back.update(['BoonLeadership', 'BoonLore',
-                                     'BoonSpirit', 'BoonTactics'])
+                spheres_back.update([S_BOONLEADERSHIP, S_BOONLORE,
+                                     S_BOONSPIRIT, S_BOONTACTICS])
 
             if card_type_back in CARD_TYPES_BURDEN:
-                spheres_back.add('Burden')
+                spheres_back.add(S_BURDEN)
 
             if card_type_back in CARD_TYPES_NIGHTMARE:
-                spheres_back.add('Nightmare')
+                spheres_back.add(S_NIGHTMARE)
 
             if card_type_back in CARD_TYPES_NOSTAT:
-                spheres_back.add('NoStat')
+                spheres_back.add(S_NOSTAT)
 
             if card_sphere_back is not None and card_type_back is None:
                 message = 'Redundant sphere back for row #{}{}'.format(
@@ -4383,7 +4460,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         if (card_traits is None and
                 card_type in CARD_TYPES_TRAITS and
-                not (card_flags and 'NoTraits' in extract_flags(card_flags))):
+                not (card_flags and F_NOTRAITS in extract_flags(card_flags))):
             message = 'Missing traits for row #{}{}'.format(i, row_info)
             logging.error(message)
             if not card_scratch:
@@ -4399,7 +4476,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_traits is None and
               card_sphere in CARD_SPHERES_TRAITS and
-              not (card_flags and 'NoTraits' in extract_flags(card_flags))):
+              not (card_flags and F_NOTRAITS in extract_flags(card_flags))):
             message = 'Missing traits for row #{}{}'.format(i, row_info)
             logging.error(message)
             if not card_scratch:
@@ -4427,7 +4504,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_traits is not None and
-              not (card_flags and 'IgnoreName' in extract_flags(
+              not (card_flags and F_IGNORENAME in extract_flags(
                   card_flags, conf['ignore_ignore_flags']))):
             capitalization_errors = _get_capitalization_errors(
                 re.sub(r'\[[^\]]+\]', '', card_traits))
@@ -4452,7 +4529,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_traits_back is None and
               card_type_back in CARD_TYPES_TRAITS and
               not (card_flags_back and
-                   'NoTraits' in extract_flags(card_flags_back))):
+                   F_NOTRAITS in extract_flags(card_flags_back))):
             message = 'Missing traits back for row #{}{}'.format(i, row_info)
             logging.error(message)
             if not card_scratch:
@@ -4470,7 +4547,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_traits_back is None and
               card_sphere_back in CARD_SPHERES_TRAITS and
               not (card_flags_back and
-                   'NoTraits' in extract_flags(card_flags_back))):
+                   F_NOTRAITS in extract_flags(card_flags_back))):
             message = 'Missing traits back for row #{}{}'.format(i, row_info)
             logging.error(message)
             if not card_scratch:
@@ -4499,7 +4576,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_traits_back is not None and
               not (card_flags_back and
-                   'IgnoreName' in extract_flags(
+                   F_IGNORENAME in extract_flags(
                        card_flags_back, conf['ignore_ignore_flags']))):
             capitalization_errors = _get_capitalization_errors(
                 re.sub(r'\[[^\]]+\]', '', card_traits_back))
@@ -4614,7 +4691,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_type == 'Hero' and
+        elif (card_type == T_HERO and
               not re.match('^[1-9]?[0-9]$', str(card_cost))):
             message = 'Incorrect cost value for row #{}{}'.format(
                 i, row_info)
@@ -4623,7 +4700,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif card_type == 'Quest' and not re.match('^[1-9]$', str(card_cost)):
+        elif card_type == T_QUEST and not re.match('^[1-9]$', str(card_cost)):
             message = 'Incorrect cost value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -4631,7 +4708,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_type not in ('Hero', 'Quest') and card_cost is not None and
+        elif (card_type not in {T_HERO, T_QUEST} and card_cost is not None and
               not re.match('^[1-9]?[0-9]$', str(card_cost)) and
               card_cost != '-' and card_cost != 'X'):
             message = 'Incorrect cost value for row #{}{}'.format(
@@ -4641,9 +4718,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_type not in ('Hero', 'Quest') and card_cost is not None and
-              ('Encounter' in extract_keywords(card_keywords) or
-               card_back == 'Encounter') and
+        elif (card_type not in {T_HERO, T_QUEST} and card_cost is not None and
+              (B_ENCOUNTER in extract_keywords(card_keywords) or
+               card_back == B_ENCOUNTER) and
               card_cost != '-'):
             message = 'Incorrect cost value for row #{}{}'.format(
                 i, row_info)
@@ -4675,7 +4752,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_type_back == 'Hero' and
+        elif (card_type_back == T_HERO and
               not re.match('^[1-9]?[0-9]$', str(card_cost_back))):
             message = 'Incorrect cost back value for row #{}{}'.format(
                 i, row_info)
@@ -4684,7 +4761,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_type_back == 'Quest' and
+        elif (card_type_back == T_QUEST and
               not re.match('^[1-9]$', str(card_cost_back))):
             message = 'Incorrect cost back value for row #{}{}'.format(
                 i, row_info)
@@ -4693,7 +4770,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_type_back not in ('Hero', 'Quest') and
+        elif (card_type_back not in {T_HERO, T_QUEST} and
               card_cost_back is not None and
               not re.match('^[1-9]?[0-9]$', str(card_cost_back)) and
               card_cost_back != '-' and card_cost_back != 'X'):
@@ -4704,9 +4781,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_type_back not in ('Hero', 'Quest') and
+        elif (card_type_back not in {T_HERO, T_QUEST} and
               card_cost_back is not None and
-              'Encounter' in extract_keywords(card_keywords_back) and
+              B_ENCOUNTER in extract_keywords(card_keywords_back) and
               card_cost_back != '-'):
             message = 'Incorrect cost back value for row #{}{}'.format(
                 i, row_info)
@@ -4733,7 +4810,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_type == 'Quest' and
+        elif (card_type == T_QUEST and
               not re.match('^[ACEG]$', str(card_engagement))):
             message = 'Incorrect engagement cost value for row #{}{}'.format(
                 i, row_info)
@@ -4742,7 +4819,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_type != 'Quest' and card_engagement is not None and
+        elif (card_type != T_QUEST and card_engagement is not None and
               not re.match('^[1-9]?[0-9]$', str(card_engagement)) and
               card_engagement != '-' and card_engagement != 'X'):
             message = 'Incorrect engagement cost value for row #{}{}'.format(
@@ -4779,7 +4856,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_type_back == 'Quest' and
+        elif (card_type_back == T_QUEST and
               not re.match('^[BDFH]$', str(card_engagement_back))):
             message = ('Incorrect engagement cost back value for row #{}{}'
                        .format(i, row_info))
@@ -4788,7 +4865,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif (card_type_back != 'Quest' and
+        elif (card_type_back != T_QUEST and
               card_engagement_back is not None and
               not re.match('^[1-9]?[0-9]$', str(card_engagement_back)) and
               card_engagement_back != '-' and card_engagement_back != 'X'):
@@ -5176,7 +5253,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if card_victory is not None and card_type in ('Presentation', 'Rules'):
+        if card_victory is not None and card_type in CARD_TYPES_PAGES:
             if len(str(card_victory).split('/')) != 2:
                 message = ('Incorrect format for victory points for row '
                            '#{}{}'.format(i, row_info))
@@ -5221,7 +5298,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif card_victory_back is not None and card_type_back == 'Rules':
+        elif card_victory_back is not None and card_type_back == T_RULES:
             if len(str(card_victory_back).split('/')) != 2:
                 message = ('Incorrect format for victory points back for row '
                            '#{}{}'.format(i, row_info))
@@ -5287,8 +5364,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_text is not None and
-              card_type != 'Presentation' and card_sphere != 'Back' and
-              not (card_flags and 'IgnoreRules' in extract_flags(
+              card_type != T_PRESENTATION and card_sphere != S_BACK and
+              not (card_flags and F_IGNORERULES in extract_flags(
                   card_flags, conf['ignore_ignore_flags']))):
             rules_errors = _get_rules_errors(card_text, CARD_TEXT, row)
             if rules_errors:
@@ -5338,10 +5415,10 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_text_back is not None and
-              card_type_back != 'Presentation' and
-              card_sphere != 'Back' and
+              card_type_back != T_PRESENTATION and
+              card_sphere != S_BACK and
               not (card_flags_back and
-                   'IgnoreRules' in extract_flags(
+                   F_IGNORERULES in extract_flags(
                        card_flags_back, conf['ignore_ignore_flags']))):
             rules_errors = _get_rules_errors(card_text_back,
                                              BACK_PREFIX + CARD_TEXT, row)
@@ -5357,7 +5434,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     broken_set_ids.add(set_id)
 
         if (card_text is not None and '[split]' in card_text and
-                card_sphere != 'Cave'):
+                card_sphere != S_CAVE):
             message = 'Invalid [split] tag in text for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -5367,7 +5444,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
 
         if (card_text_back is not None and '[split]' in card_text_back and
-                card_sphere_back != 'Cave'):
+                card_sphere_back != S_CAVE):
             message = 'Invalid [split] tag in text back for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -5378,8 +5455,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         if (card_shadow is not None and card_type not in CARD_TYPES_SHADOW and
                 not (card_type in CARD_TYPES_SHADOW_ENCOUNTER and
-                     ('Encounter' in extract_keywords(card_keywords) or
-                      card_back == 'Encounter'))):
+                     (B_ENCOUNTER in extract_keywords(card_keywords) or
+                      card_back == B_ENCOUNTER))):
             message = 'Redundant shadow for row #{}{}'.format(i, row_info)
             logging.error(message)
             if not card_scratch:
@@ -5387,7 +5464,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_shadow is not None and
-              not _verify_shadow_case(card_shadow, 'English')):
+              not _verify_shadow_case(card_shadow, L_ENGLISH)):
             message = ('Shadow effect should start with a capital letter for '
                        'row #{}{}'.format(i, row_info))
             logging.error(message)
@@ -5405,7 +5482,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_shadow is not None and
-              not (card_flags and 'IgnoreRules' in extract_flags(
+              not (card_flags and F_IGNORERULES in extract_flags(
                   card_flags, conf['ignore_ignore_flags']))):
             rules_errors = _get_rules_errors(card_shadow, CARD_SHADOW, row)
             if rules_errors:
@@ -5435,7 +5512,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_shadow_back is not None and
-              not _verify_shadow_case(card_shadow_back, 'English')):
+              not _verify_shadow_case(card_shadow_back, L_ENGLISH)):
             message = ('Shadow back effect should start with a capital letter '
                        'for row #{}{}'.format(i, row_info))
             logging.error(message)
@@ -5454,7 +5531,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_shadow_back is not None and
               not (card_flags_back and
-                   'IgnoreRules' in extract_flags(
+                   F_IGNORERULES in extract_flags(
                        card_flags_back, conf['ignore_ignore_flags']))):
             rules_errors = _get_rules_errors(card_shadow_back,
                                              BACK_PREFIX + CARD_SHADOW, row)
@@ -5992,7 +6069,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif card_portrait_shadow not in (None, 'Black', 'PortraitTint'):
+        elif card_portrait_shadow not in {None, 'Black', 'PortraitTint'}:
             message = ('Incorrect value for portrait shadow for row #{}{}'
                        .format(i, row_info))
             logging.error(message)
@@ -6000,7 +6077,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif card_type != 'Quest' and card_portrait_shadow == 'PortraitTint':
+        elif card_type != T_QUEST and card_portrait_shadow == 'PortraitTint':
             message = ('Incorrect value for portrait shadow for row #{}{}'
                        .format(i, row_info))
             logging.error(message)
@@ -6026,7 +6103,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif card_portrait_shadow_back not in (None, 'Black'):
+        elif card_portrait_shadow_back not in {None, 'Black'}:
             message = ('Incorrect value for portrait shadow back for row '
                        '#{}{}'.format(i, row_info))
             logging.error(message)
@@ -6094,7 +6171,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     s for s in all_sets if s not in ALL_ENCOUNTER_SET_NAMES]
                 if (unknown_sets and
                         not (card_flags and
-                             'IgnoreName' in extract_flags(
+                             F_IGNORENAME in extract_flags(
                                  card_flags, conf['ignore_ignore_flags']))):
                     message = (
                         'Unknown additional encounter sets for row #{}{}: {} '
@@ -6132,7 +6209,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_adventure is not None and
-              not (card_flags and 'IgnoreName' in extract_flags(
+              not (card_flags and F_IGNORENAME in extract_flags(
                   card_flags, conf['ignore_ignore_flags']))):
             capitalization_errors = _get_capitalization_errors(card_adventure)
             if capitalization_errors:
@@ -6146,7 +6223,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 else:
                     broken_set_ids.add(set_id)
 
-        if card_type == 'Quest' and card_adventure is not None:
+        if card_type == T_QUEST and card_adventure is not None:
             if (set_id, card_encounter_set) in quest_adventures:
                 if (quest_adventures[(set_id, card_encounter_set)] !=
                         card_adventure):
@@ -6192,7 +6269,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif card_back not in (None, 'Encounter', 'Player'):
+        elif card_back not in {None, B_ENCOUNTER, B_PLAYER}:
             message = 'Incorrect custom card back for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -6215,7 +6292,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         for key, value in row.items():
             if value == '#REF!':
                 message = ('Reference error in {} column for row '
-                           '#{}{}'.format(key.replace(BACK_PREFIX, 'Back '), i,
+                           '#{}{}'.format(key.replace(BACK_PREFIX,
+                                                      BACK_PREFIX_LOG), i,
                                           row_info))
                 logging.error(message)
                 if not card_scratch:
@@ -6226,7 +6304,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 message = (
                     'Unmatched quote character in {} column for row #{}{} '
                     '(use "[quot]" tag if needed)'.format(
-                        key.replace(BACK_PREFIX, 'Back '), i, row_info))
+                        key.replace(BACK_PREFIX, BACK_PREFIX_LOG), i,
+                        row_info))
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)
@@ -6236,8 +6315,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             if (key in ONE_LINE_COLUMNS and isinstance(value, str) and
                     '\n' in value):
                 message = ('Redundant line break in {} column for row #{}{}'
-                           .format(key.replace(BACK_PREFIX, 'Back '), i,
-                                   row_info))
+                           .format(key.replace(BACK_PREFIX, BACK_PREFIX_LOG),
+                                   i, row_info))
                 logging.error(message)
                 if not card_scratch:
                     errors.append(message)
@@ -6249,9 +6328,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     value_key = (row[CARD_ID], key)
                     value_hash = hashlib.md5(_clean_value_for_hash(value)
                                              .encode()).hexdigest()
-                    hash_by_key[('English', value_key)] = value_hash
-                    keys_by_hash[('English', row[CARD_SET], value_hash)] = (
-                        keys_by_hash.get(('English', row[CARD_SET],
+                    hash_by_key[(L_ENGLISH, value_key)] = value_hash
+                    keys_by_hash[(L_ENGLISH, row[CARD_SET], value_hash)] = (
+                        keys_by_hash.get((L_ENGLISH, row[CARD_SET],
                                           value_hash), []) + [value_key])
 
                 match = re.search(r' ((?:\[[^\]]+\])+)(?:\n\n|$)', value)
@@ -6260,7 +6339,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         'Redundant space before "{}" in {} column for '
                         'row #{}{}'.format(
                             match.groups()[0],
-                            key.replace(BACK_PREFIX, 'Back '), i, row_info))
+                            key.replace(BACK_PREFIX, BACK_PREFIX_LOG), i,
+                            row_info))
                     logging.error(message)
                     if not card_scratch:
                         errors.append(message)
@@ -6270,13 +6350,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 cleaned_value = _clean_tags(value)
                 if key == CARD_SET:
                     cleaned_value = cleaned_value.replace('[filtered set]', '')
-                elif key in (CARD_FLAVOUR, BACK_PREFIX + CARD_FLAVOUR):
+                elif key in {CARD_FLAVOUR, BACK_PREFIX + CARD_FLAVOUR}:
                     cleaned_value = cleaned_value.replace('[...]', '')
 
                 unknown_tags = re.findall(r'\[[^\]\n]+\]', cleaned_value)
                 if unknown_tags:
                     message = ('Unknown tag(s) in {} column for row #{}{}: {}'
-                               .format(key.replace(BACK_PREFIX, 'Back '), i,
+                               .format(key.replace(BACK_PREFIX,
+                                                   BACK_PREFIX_LOG), i,
                                        row_info, ', '.join(unknown_tags)))
                     logging.error(message)
                     if not card_scratch:
@@ -6287,8 +6368,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     message = ('Unmatched square bracket(s) in {} '
                                'column for row #{}{} (use "[lsb]" and "[rsb]" '
                                'tags if needed)'.format(
-                                   key.replace(BACK_PREFIX, 'Back '), i,
-                                   row_info))
+                                   key.replace(BACK_PREFIX, BACK_PREFIX_LOG),
+                                   i, row_info))
                     logging.error(message)
                     if not card_scratch:
                         errors.append(message)
@@ -6298,7 +6379,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 unmatched_tags = _detect_unmatched_tags(value)
                 if unmatched_tags:
                     message = ('Unmatched tag(s) in {} column for row #{}{}: '
-                               '{}'.format(key.replace(BACK_PREFIX, 'Back '),
+                               '{}'.format(key.replace(BACK_PREFIX,
+                                                       BACK_PREFIX_LOG),
                                            i, row_info,
                                            ', '.join(unmatched_tags)))
                     logging.error(message)
@@ -6313,7 +6395,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     message = (
                         'Missing space before [{}] in {} column for row #{}{}'
                         .format(match.groups()[0],
-                                key.replace(BACK_PREFIX, 'Back '), i,
+                                key.replace(BACK_PREFIX, BACK_PREFIX_LOG), i,
                                 row_info))
                     logging.error(message)
                     if not card_scratch:
@@ -6324,7 +6406,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 if re.search(r'[0-9X ]pp[ .]', value):
                     message = (
                         '"[pp]" not "pp" in {} column for row #{}{}'
-                        .format(key.replace(BACK_PREFIX, 'Back '), i,
+                        .format(key.replace(BACK_PREFIX, BACK_PREFIX_LOG), i,
                                 row_info))
                     logging.error(message)
                     if not card_scratch:
@@ -6336,7 +6418,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     message = (
                         'Redundant space before [pp] in {} column for row '
                         '#{}{}'.format(
-                            key.replace(BACK_PREFIX, 'Back '), i, row_info))
+                            key.replace(BACK_PREFIX, BACK_PREFIX_LOG), i,
+                            row_info))
                     logging.error(message)
                     if not card_scratch:
                         errors.append(message)
@@ -6347,7 +6430,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     message = (
                         '"Middle-earth" not "Middle-Earth" in {} column for '
                         'row #{}{}'.format(
-                            key.replace(BACK_PREFIX, 'Back '), i, row_info))
+                            key.replace(BACK_PREFIX, BACK_PREFIX_LOG), i,
+                            row_info))
                     logging.error(message)
                     if not card_scratch:
                         errors.append(message)
@@ -6357,7 +6441,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 if ':[/b] ' in value:
                     message = (
                         '"[/b]:" not ":[/b]" in {} column for row #{}{}'
-                        .format(key.replace(BACK_PREFIX, 'Back '), i,
+                        .format(key.replace(BACK_PREFIX, BACK_PREFIX_LOG), i,
                                 row_info))
                     logging.error(message)
                     if not card_scratch:
@@ -6368,7 +6452,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 if ':[/bi] ' in value:
                     message = (
                         '"[/bi]:" not ":[/bi]" in {} column for row #{}{}'
-                        .format(key.replace(BACK_PREFIX, 'Back '), i,
+                        .format(key.replace(BACK_PREFIX, BACK_PREFIX_LOG), i,
                                 row_info))
                     logging.error(message)
                     if not card_scratch:
@@ -6379,7 +6463,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 if '“ ' in value:
                     message = (
                         'Redundant space after “ in {} column for row #{}{}'
-                        .format(key.replace(BACK_PREFIX, 'Back '), i,
+                        .format(key.replace(BACK_PREFIX, BACK_PREFIX_LOG), i,
                                 row_info))
                     logging.error(message)
                     if not card_scratch:
@@ -6390,7 +6474,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 if ' ”' in value:
                     message = (
                         'Redundant space before ” in {} column for row #{}{}'
-                        .format(key.replace(BACK_PREFIX, 'Back '), i,
+                        .format(key.replace(BACK_PREFIX, BACK_PREFIX_LOG), i,
                                 row_info))
                     logging.error(message)
                     if not card_scratch:
@@ -6401,12 +6485,12 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 ignore_accents = False
                 if key.startswith(BACK_PREFIX):
                     if (card_flags_back and
-                            'IgnoreName' in extract_flags(
+                            F_IGNORENAME in extract_flags(
                                 card_flags_back, conf['ignore_ignore_flags'])):
                         ignore_accents = True
                 else:
                     if (card_flags and
-                            'IgnoreName' in extract_flags(
+                            F_IGNORENAME in extract_flags(
                                 card_flags, conf['ignore_ignore_flags'])):
                         ignore_accents = True
 
@@ -6416,8 +6500,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         message = (
                             'Missing accents in {} column for row #{}{}: {} '
                             '(use IgnoreName flag to ignore)'
-                            .format(key.replace(BACK_PREFIX, 'Back '), i,
-                                    row_info, ', '.join(accents)))
+                            .format(key.replace(BACK_PREFIX, BACK_PREFIX_LOG),
+                                    i, row_info, ', '.join(accents)))
                         logging.error(message)
                         if not card_scratch:
                             errors.append(message)
@@ -6459,7 +6543,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         broken_set_ids.add(set_id)
 
         for lang in conf['languages']:
-            if lang == 'English' or card_scratch:
+            if lang == L_ENGLISH or card_scratch:
                 continue
 
             if not TRANSLATIONS[lang].get(card_id):
@@ -6501,13 +6585,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     logging.error(
                         'Reference error in %s column for card ID %s in %s '
                         'translations, row #%s', key.replace(BACK_PREFIX,
-                                                             'Back '),
+                                                             BACK_PREFIX_LOG),
                         card_id, lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
                 elif isinstance(value, str) and '[unmatched quot]' in value:
                     logging.error(
                         'Unmatched quote character in %s column for card '
                         'ID %s in %s translations, row #%s (use "[quot]" tag '
-                        'if needed)', key.replace(BACK_PREFIX, 'Back '),
+                        'if needed)', key.replace(BACK_PREFIX,
+                                                  BACK_PREFIX_LOG),
                         card_id, lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                 if (key in ONE_LINE_COLUMNS and isinstance(value, str) and
@@ -6515,8 +6600,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     logging.error(
                         'Redundant line break in %s column for card ID %s in '
                         '%s translations, row #%s',
-                        key.replace(BACK_PREFIX, 'Back '), card_id, lang,
-                        TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                        key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
+                        lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                 if isinstance(value, str):
                     value_key = (row[CARD_ID], key)
@@ -6533,14 +6618,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             'Redundant space before "%s" in %s column for '
                             'card ID %s in %s translations, row #%s',
                             match.groups()[0],
-                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
-                            TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                            key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
+                            lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                     cleaned_value = _clean_tags(value)
-                    if key in (CARD_FLAVOUR, BACK_PREFIX + CARD_FLAVOUR):
+                    if key in {CARD_FLAVOUR, BACK_PREFIX + CARD_FLAVOUR}:
                         cleaned_value = cleaned_value.replace('[...]', '')
 
-                    if lang == 'French':
+                    if lang == L_FRENCH:
                         cleaned_value = re.sub(
                             r'(?:\[Vaillance\]|\[Ressource\]|\[Organisation\]|'
                             r'\[Qu\u00eate\]|\[Voyage\]|\[Rencontre\]|'
@@ -6552,15 +6637,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         logging.error(
                             'Unknown tag(s) in %s column for card ID %s in %s '
                             'translations, row #%s: %s',
-                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
-                            TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                            key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
+                            lang, TRANSLATIONS[lang][card_id][ROW_COLUMN],
                             ', '.join(unknown_tags))
                     elif '[' in cleaned_value or ']' in cleaned_value:
                         logging.error(
                             'Unmatched square bracket(s) in %s '
                             'column for card ID %s in %s translations, '
                             'row #%s (use "[lsb]" and "[rsb]" tags if needed)',
-                            key.replace(BACK_PREFIX, 'Back '), card_id,
+                            key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
                             lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
 
@@ -6569,8 +6654,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         logging.error(
                             'Unmatched tag(s) in %s column for card ID %s in '
                             '%s translations, row #%s: %s',
-                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
-                            TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                            key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
+                            lang, TRANSLATIONS[lang][card_id][ROW_COLUMN],
                             ', '.join(unmatched_tags))
 
                     match = re.search(
@@ -6580,57 +6665,57 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             'Missing space before [%s] in %s column for card '
                             'ID %s in %s translations, row #%s',
                             match.groups()[0],
-                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
-                            TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                            key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
+                            lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                     if re.search(r'[0-9X ]pp[ .]', value):
                         logging.error(
                             '"[pp]" not "pp" in %s column for card'
                             ' ID %s in %s translations, row #%s',
-                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
-                            TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                            key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
+                            lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                     if re.search(r'[0-9X] \[pp\]', value):
                         logging.error(
                             'Redundant space before [pp] in %s column for card'
                             ' ID %s in %s translations, row #%s',
-                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
-                            TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                            key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
+                            lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                     if ':[/b] ' in value:
                         logging.error(
                             '"[/b]:" not ":[/b]" in %s column for card ID %s '
                             'in %s translations, row #%s',
-                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
-                            TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                            key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
+                            lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                     if ':[/bi] ' in value:
                         logging.error(
                             '"[/bi]:" not ":[/bi]" in %s column for card ID '
                             '%s in %s translations, row #%s',
-                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
-                            TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                            key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
+                            lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
-                    if lang != 'French' and '“ ' in value:
+                    if lang != L_FRENCH and '“ ' in value:
                         logging.error(
                             'Redundant space after “ in %s column for card'
                             ' ID %s in %s translations, row #%s',
-                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
-                            TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                            key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
+                            lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
-                    if lang != 'French' and ' ”' in value:
+                    if lang != L_FRENCH and ' ”' in value:
                         logging.error(
                             'Redundant space before ” in %s column for card'
                             ' ID %s in %s translations, row #%s',
-                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
-                            TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                            key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
+                            lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
-                    if (key in (CARD_TEXT, BACK_PREFIX + CARD_TEXT,
-                                CARD_SHADOW, BACK_PREFIX + CARD_SHADOW) and
-                            row.get(CARD_TYPE) != 'Presentation' and
+                    if (key in {CARD_TEXT, BACK_PREFIX + CARD_TEXT,
+                                CARD_SHADOW, BACK_PREFIX + CARD_SHADOW} and
+                            row.get(CARD_TYPE) != T_PRESENTATION and
                             isinstance(row.get(key), str)):
                         value_english = row[key]
-                        if key in (CARD_TEXT, CARD_SHADOW):
+                        if key in {CARD_TEXT, CARD_SHADOW}:
                             value_english = value_english.replace(
                                 row.get(CARD_NAME) or '', '')
                         else:
@@ -6658,13 +6743,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                         'column for card ID %s in %s '
                                         'translations, row #%s',
                                         term_english,
-                                        key.replace(BACK_PREFIX, 'Back '),
+                                        key.replace(BACK_PREFIX,
+                                                    BACK_PREFIX_LOG),
                                         card_id, lang,
                                         TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                         value_english = row[key]
                         value_translated = value
-                        if key in (CARD_TEXT, CARD_SHADOW):
+                        if key in {CARD_TEXT, CARD_SHADOW}:
                             value_translated = value_translated.replace(
                                 TRANSLATIONS[lang][card_id].get(
                                     CARD_NAME) or '', '')
@@ -6674,7 +6760,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                     BACK_PREFIX + CARD_NAME) or '', '')
 
                         for term_english, lang_dict in TRANSLATION_MATCH:
-                            regex_english = lang_dict.get('English')
+                            regex_english = lang_dict.get(L_ENGLISH)
                             regex_translated = lang_dict.get(lang)
                             if not regex_english or not regex_translated:
                                 continue
@@ -6693,7 +6779,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                         'column for card ID %s in %s '
                                         'translations, row #%s',
                                         term_english,
-                                        key.replace(BACK_PREFIX, 'Back '),
+                                        key.replace(BACK_PREFIX,
+                                                    BACK_PREFIX_LOG),
                                         card_id, lang,
                                         TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
@@ -6707,14 +6794,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         paragraphs_translated = len(
                             re.split(r'\n{2,}', value_translated))
                         if paragraphs_english != paragraphs_translated:
-                            if row.get(CARD_TYPE) == 'Rules':
+                            if row.get(CARD_TYPE) == T_RULES:
                                 # logging.warning(
                                 #     'Different number of paragraphs in %s '
                                 #     'column for card ID %s in %s '
                                 #     'translations, row #%s: %s compared to %s '
                                 #     'in the English source',
-                                #     key.replace(BACK_PREFIX, 'Back '), card_id,
-                                #     lang,
+                                #     key.replace(BACK_PREFIX, BACK_PREFIX_LOG),
+                                #     card_id, lang,
                                 #     TRANSLATIONS[lang][card_id][ROW_COLUMN],
                                 #     paragraphs_translated, paragraphs_english)
                                 pass
@@ -6724,27 +6811,28 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                     'column for card ID %s in %s '
                                     'translations, row #%s: %s compared to %s '
                                     'in the English source',
-                                    key.replace(BACK_PREFIX, 'Back '), card_id,
-                                    lang,
+                                    key.replace(BACK_PREFIX, BACK_PREFIX_LOG),
+                                    card_id, lang,
                                     TRANSLATIONS[lang][card_id][ROW_COLUMN],
                                     paragraphs_translated, paragraphs_english)
 
                         value_english = _add_automatic_tags(row[key],
-                                                            lang='English')
+                                                            lang=L_ENGLISH)
                         value_translated = _add_automatic_tags(value,
                                                                lang=lang)
                         for tag in ('[b]', '[i]', '[bi]'):
                             tags_english = value_english.count(tag)
                             tags_translated = value_translated.count(tag)
                             if tags_english != tags_translated:
-                                if (row.get(CARD_TYPE) == 'Rules' and
+                                if (row.get(CARD_TYPE) == T_RULES and
                                         tag != '[bi]'):
                                     # logging.warning(
                                     #     'Different number of %s tags in %s '
                                     #     'column for card ID %s in %s '
                                     #     'translations, row #%s: %s compared '
                                     #     'to %s in the English source', tag,
-                                    #     key.replace(BACK_PREFIX, 'Back '),
+                                    #     key.replace(BACK_PREFIX,
+                                    #                 BACK_PREFIX_LOG),
                                     #     card_id, lang,
                                     #     TRANSLATIONS[lang][card_id][ROW_COLUMN],
                                     #     tags_translated, tags_english)
@@ -6755,20 +6843,21 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                         'column for card ID %s in %s '
                                         'translations, row #%s: %s compared '
                                         'to %s in the English source', tag,
-                                        key.replace(BACK_PREFIX, 'Back '),
+                                        key.replace(BACK_PREFIX,
+                                                    BACK_PREFIX_LOG),
                                         card_id, lang,
                                         TRANSLATIONS[lang][card_id][ROW_COLUMN],
                                         tags_translated, tags_english)
 
-                    if (key in (CARD_TEXT, BACK_PREFIX + CARD_TEXT,
+                    if (key in {CARD_TEXT, BACK_PREFIX + CARD_TEXT,
                                 CARD_SHADOW, BACK_PREFIX + CARD_SHADOW,
                                 CARD_KEYWORDS, BACK_PREFIX + CARD_KEYWORDS,
-                                CARD_VICTORY, BACK_PREFIX + CARD_VICTORY) and
-                            row.get(CARD_TYPE) != 'Presentation' and
+                                CARD_VICTORY, BACK_PREFIX + CARD_VICTORY} and
+                            row.get(CARD_TYPE) != T_PRESENTATION and
                             isinstance(row.get(key), str)):
                         value_english = re.sub(TAGS_WITH_NUMBERS_REGEX, '',
                                                row[key])
-                        if key in (CARD_TEXT, CARD_SHADOW):
+                        if key in {CARD_TEXT, CARD_SHADOW}:
                             value_english = value_english.replace(
                                 row.get(CARD_NAME) or '', '')
                         else:
@@ -6777,7 +6866,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
                         value_translated = re.sub(TAGS_WITH_NUMBERS_REGEX, '',
                                                   value)
-                        if key in (CARD_TEXT, CARD_SHADOW):
+                        if key in {CARD_TEXT, CARD_SHADOW}:
                             value_translated = value_translated.replace(
                                 TRANSLATIONS[lang][card_id].get(
                                     CARD_NAME) or '', '')
@@ -6804,13 +6893,13 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
                         if ((anchors_issue and not anchors_english and  # pylint: disable=R0916
                              not [a for a in anchors_translated
-                                  if a not in ('2', '3')]) or
+                                  if a not in {'2', '3'}]) or
                                 (anchors_issue and not anchors_translated and
                                  not [a for a in anchors_english
-                                      if a not in ('2', '3')])):
+                                      if a not in {'2', '3'}])):
                             if not anchors_english:
                                 value_english = _replace_numbers(
-                                    value_english, lang='English')
+                                    value_english, lang=L_ENGLISH)
                             else:
                                 value_translated = _replace_numbers(
                                     value_translated, lang=lang)
@@ -6834,7 +6923,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                 anchors_issue = False
 
                         if anchors_issue:
-                            if (row.get(CARD_TYPE) == 'Rules' and
+                            if (row.get(CARD_TYPE) == T_RULES and
                                     '[' not in ', '.join(anchors_english) and
                                     '[' not in ', '.join(anchors_translated)):
                                 # logging.warning(
@@ -6842,8 +6931,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                 #     'for card ID %s in %s translations, row '
                                 #     '#%s: "%s" compared to "%s" in the '
                                 #     'English source',
-                                #     key.replace(BACK_PREFIX, 'Back '), card_id,
-                                #     lang,
+                                #     key.replace(BACK_PREFIX, BACK_PREFIX_LOG),
+                                #     card_id, lang,
                                 #     TRANSLATIONS[lang][card_id][ROW_COLUMN],
                                 #     ', '.join(anchors_translated),
                                 #     ', '.join(anchors_english))
@@ -6854,8 +6943,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                     'for card ID %s in %s translations, row '
                                     '#%s: "%s" compared to "%s" in the '
                                     'English source',
-                                    key.replace(BACK_PREFIX, 'Back '), card_id,
-                                    lang,
+                                    key.replace(BACK_PREFIX, BACK_PREFIX_LOG),
+                                    card_id, lang,
                                     TRANSLATIONS[lang][card_id][ROW_COLUMN],
                                     ', '.join(anchors_translated),
                                     ', '.join(anchors_english))
@@ -6864,13 +6953,13 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     logging.error(
                         'Missing value for %s column for card ID %s in %s '
                         'translations, row #%s',
-                        key.replace(BACK_PREFIX, 'Back '), card_id,
+                        key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
                 elif value and not row.get(key):
                     logging.error(
                         'Redundant value for %s column for card '
                         'ID %s in %s translations, row #%s',
-                        key.replace(BACK_PREFIX, 'Back '), card_id,
+                        key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
                         lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
             for key, value in TRANSLATIONS[lang][card_id].items():
@@ -6883,14 +6972,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         (lang, row[CARD_SET], hash_by_key[(lang, value_key)])]
                                        if k != value_key]
                     english_keys = [k for k in keys_by_hash[
-                        ('English', row[CARD_SET], hash_by_key[('English',
+                        (L_ENGLISH, row[CARD_SET], hash_by_key[(L_ENGLISH,
                                                                 value_key)])]
                                     if k != value_key]
                     if sorted(translated_keys) != sorted(english_keys):
                         if translated_keys:
                             translated_keys = ', '.join([
                                 '{} for card ID {}'.format(
-                                    k[1].replace(BACK_PREFIX, 'Back '), k[0])
+                                    k[1].replace(BACK_PREFIX, BACK_PREFIX_LOG),
+                                    k[0])
                                 for k in translated_keys])
                         else:
                             translated_keys = '[nothing]'
@@ -6898,7 +6988,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         if english_keys:
                             english_keys = ', '.join([
                                 '{} for card ID {}'.format(
-                                    k[1].replace(BACK_PREFIX, 'Back '), k[0])
+                                    k[1].replace(BACK_PREFIX, BACK_PREFIX_LOG),
+                                    k[0])
                                 for k in english_keys])
                         else:
                             english_keys = '[nothing]'
@@ -6907,8 +6998,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             'Suspicious value in %s column for card ID %s in '
                             '%s translations, row #%s: it\'s the same as %s, '
                             'but the English source is the same as %s',
-                            key.replace(BACK_PREFIX, 'Back '), card_id, lang,
-                            TRANSLATIONS[lang][card_id][ROW_COLUMN],
+                            key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
+                            lang, TRANSLATIONS[lang][card_id][ROW_COLUMN],
                             translated_keys, english_keys)
 
             if (card_traits is not None and
@@ -6982,7 +7073,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             if (card_victory is not None and
                     TRANSLATIONS[lang][card_id].get(CARD_VICTORY) and
                     (is_positive_or_zero_int(card_victory) or
-                     card_type in ('Presentation', 'Rules')) and
+                     card_type in CARD_TYPES_PAGES) and
                     card_victory !=
                     TRANSLATIONS[lang][card_id][CARD_VICTORY]):
                 logging.error(
@@ -6994,7 +7085,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     TRANSLATIONS[lang][card_id].get(
                         BACK_PREFIX + CARD_VICTORY) and
                     (is_positive_or_zero_int(card_victory_back) or
-                     card_type == 'Rules') and
+                     card_type == T_RULES) and
                     card_victory_back !=
                     TRANSLATIONS[lang][card_id][BACK_PREFIX + CARD_VICTORY]):
                 logging.error(
@@ -7051,7 +7142,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     TRANSLATIONS[lang][card_id].get(CARD_SHADOW)):
                 card_shadow_tr = TRANSLATIONS[lang][card_id][CARD_SHADOW]
                 if not _verify_shadow_case(card_shadow_tr, lang):
-                    if lang == 'French':
+                    if lang == L_FRENCH:
                         logging.warning(
                             'Shadow effect should probably start with a '
                             'lowercase letter for card ID %s in %s '
@@ -7075,7 +7166,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 card_shadow_back_tr = (
                     TRANSLATIONS[lang][card_id][BACK_PREFIX + CARD_SHADOW])
                 if not _verify_shadow_case(card_shadow_back_tr, lang):
-                    if lang == 'French':
+                    if lang == L_FRENCH:
                         logging.warning(
                             'Shadow back effect should probably start with a '
                             'lowercase letter for card ID %s in %s '
@@ -7107,37 +7198,37 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 def _verify_shadow_case(shadow_text, lang):  # pylint: disable=R0911
     """ Check whether a shadow effect has a correct case or not.
     """
-    if (lang == 'English' and
+    if (lang == L_ENGLISH and
             re.search(r'^(?:\[[^\]]+\])?Shadow(?:\[[^\]]+\])?: '
                       r'[a-zàáâãäąæçćĉèéêëęìíîïłñńòóôõöœśßùúûüźż]',
                       shadow_text)):
         return False
 
-    if (lang == 'French' and
+    if (lang == L_FRENCH and
             re.search(r'^(?:\[[^\]]+\])?Ombre(?:\[[^\]]+\])?: '
                       r'[A-ZÀÁÂÃÄĄÆÇĆĈÈÉÊËĘÌÍÎÏŁÑŃÒÓÔÕÖŒŚßÙÚÛÜŹŻ]',
                       shadow_text)):
         return False
 
-    if (lang == 'German' and
+    if (lang == L_GERMAN and
             re.search(r'^(?:\[[^\]]+\])?Schatten(?:\[[^\]]+\])?: '
                       r'[a-zàáâãäąæçćĉèéêëęìíîïłñńòóôõöœśßùúûüźż]',
                       shadow_text)):
         return False
 
-    if (lang == 'Italian' and
+    if (lang == L_ITALIAN and
             re.search(r'^(?:\[[^\]]+\])?Ombra(?:\[[^\]]+\])?: '
                       r'[a-zàáâãäąæçćĉèéêëęìíîïłñńòóôõöœśßùúûüźż]',
                       shadow_text)):
         return False
 
-    if (lang == 'Polish' and
+    if (lang == L_POLISH and
             re.search(r'^(?:\[[^\]]+\])?Cień(?:\[[^\]]+\])?: '
                       r'[a-zàáâãäąæçćĉèéêëęìíîïłñńòóôõöœśßùúûüźż]',
                       shadow_text)):
         return False
 
-    if (lang == 'Spanish' and
+    if (lang == L_SPANISH and
             re.search(r'^(?:\[[^\]]+\])?Sombra(?:\[[^\]]+\])?: '
                       r'[a-zàáâãäąæçćĉèéêëęìíîïłñńòóôõöœśßùúûüźż]',
                       shadow_text)):
@@ -7482,7 +7573,7 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
               'playtesting_set_ids': playtesting_set_ids,
               'set_and_quest_names': list(ALL_SET_AND_QUEST_NAMES),
               'encounter_set_names': list(ALL_ENCOUNTER_SET_NAMES),
-              'card_names': list(ALL_CARD_NAMES['English']),
+              'card_names': list(ALL_CARD_NAMES[L_ENGLISH]),
               'traits': list(ALL_TRAITS),
               'artwork_ids': artwork_ids,
               'data': data}
@@ -7576,39 +7667,39 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
 
         return value
 
-    if name in (CARD_TYPE, BACK_PREFIX + CARD_TYPE):
+    if name in {CARD_TYPE, BACK_PREFIX + CARD_TYPE}:
         if card_type in CARD_TYPES_DOUBLESIDE_DEFAULT:
             value = card_type
-        elif value == 'Encounter Side Quest':
-            value = 'Side Quest'
-        elif value == 'Objective Hero':
-            value = 'Objective Ally'
-        elif value == 'Objective Location':
-            value = 'Location'
+        elif value == T_ENCOUNTER_SIDE_QUEST:
+            value = T_ALIAS_SIDE_QUEST
+        elif value == T_OBJECTIVE_HERO:
+            value = T_OBJECTIVE_ALLY
+        elif value == T_OBJECTIVE_LOCATION:
+            value = T_LOCATION
 
         return value
 
-    if name in (CARD_SPHERE, BACK_PREFIX + CARD_SPHERE):
-        if card_type == 'Treasure':
-            value = 'Neutral'
-        elif card_type in ('Presentation', 'Rules'):
+    if name in {CARD_SPHERE, BACK_PREFIX + CARD_SPHERE}:
+        if card_type == T_TREASURE:
+            value = S_NEUTRAL
+        elif card_type in {T_PRESENTATION, T_RULES}:
             value = ''
-        elif value in ('Cave', 'NoIcon', 'NoProgress', 'NoStat', 'Region',
-                       'SmallTextArea', 'Upgraded'):
+        elif value in {S_CAVE, S_NOICON, S_NOPROGRESS, S_NOSTAT, S_REGION,
+                       S_SMALLTEXTAREA, S_UPGRADED}:
             value = ''
-        elif card_type == 'Campaign':
+        elif card_type == T_CAMPAIGN:
             value = str(value).upper() if value else 'CAMPAIGN'
 
         return value
 
-    if name in (CARD_UNIQUE, BACK_PREFIX + CARD_UNIQUE):
+    if name in {CARD_UNIQUE, BACK_PREFIX + CARD_UNIQUE}:
         if value:
             value = '‰'
 
         return value
 
-    if name in (CARD_VICTORY, BACK_PREFIX + CARD_VICTORY):
-        if card_type in ('Presentation', 'Rules'):
+    if name in {CARD_VICTORY, BACK_PREFIX + CARD_VICTORY}:
+        if card_type in CARD_TYPES_PAGES:
             if value:
                 value = 'Page {}'.format(value)
         elif is_positive_or_zero_int(value):
@@ -7622,9 +7713,9 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
 
         return value
 
-    if name == CARD_TEXT and card_type == 'Presentation':
+    if name == CARD_TEXT and card_type == T_PRESENTATION:
         value = ''
-    elif name == BACK_PREFIX + CARD_TEXT and card_type == 'Presentation':
+    elif name == BACK_PREFIX + CARD_TEXT and card_type == T_PRESENTATION:
         value = row[CARD_TEXT] or ''
     elif name == CARD_TEXT and row[CARD_KEYWORDS]:
         if row[CARD_SHADOW]:
@@ -7662,18 +7753,18 @@ def _add_set_xml_properties(parent, properties, fix_linebreaks, tab):
 def _needed_for_octgn(card):
     """ Check whether a card is needed for OCTGN or not.
     """
-    return ('Promo' not in extract_flags(card[CARD_FLAGS]) and
-            card[CARD_TYPE] not in ('Full Art Landscape',
-                                    'Full Art Portrait', 'Presentation') and
-            not (card[CARD_TYPE] == 'Rules' and card[CARD_SPHERE] == 'Back'))
+    return (F_PROMO not in extract_flags(card[CARD_FLAGS]) and
+            card[CARD_TYPE] not in {T_FULL_ART_LANDSCAPE,
+                                    T_FULL_ART_PORTRAIT, T_PRESENTATION} and
+            not (card[CARD_TYPE] == T_RULES and card[CARD_SPHERE] == S_BACK))
 
 
 def _needed_for_dragncards(card):
     """ Check whether a card is needed for DragnCards or not.
     """
-    return (card[CARD_TYPE] not in ('Full Art Landscape',
-                                    'Full Art Portrait', 'Presentation') and
-            not (card[CARD_TYPE] == 'Rules' and card[CARD_SPHERE] == 'Back'))
+    return (card[CARD_TYPE] not in {T_FULL_ART_LANDSCAPE,
+                                    T_FULL_ART_PORTRAIT, T_PRESENTATION} and
+            not (card[CARD_TYPE] == T_RULES and card[CARD_SPHERE] == S_BACK))
 
 
 def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R0914,R0915
@@ -7712,14 +7803,14 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
         card.set('name', _update_octgn_card_text(row[CARD_NAME] or ''))
 
         card_type = row[CARD_TYPE]
-        if card_type == 'Player Side Quest':
+        if card_type == T_PLAYER_SIDE_QUEST:
             card_size = 'PlayerQuestCard'
-        elif card_type in ('Encounter Side Quest', 'Quest'):
+        elif card_type in {T_ENCOUNTER_SIDE_QUEST, T_QUEST}:
             card_size = 'QuestCard'
         elif ((card_type in CARD_TYPES_ENCOUNTER_SIZE or
-               'Encounter' in extract_keywords(row[CARD_KEYWORDS]) or
-               row[CARD_BACK] == 'Encounter') and
-              row[CARD_BACK] != 'Player'):
+               B_ENCOUNTER in extract_keywords(row[CARD_KEYWORDS]) or
+               row[CARD_BACK] == B_ENCOUNTER) and
+              row[CARD_BACK] != B_PLAYER):
             card_size = 'EncounterCard'
         else:
             card_size = None
@@ -7739,14 +7830,14 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
 
         side_b = (card_type in CARD_TYPES_DOUBLESIDE_DEFAULT
                   or row[BACK_PREFIX + CARD_NAME])
-        if card_type in ('Campaign', 'Nightmare'):
+        if card_type in {T_CAMPAIGN, T_NIGHTMARE}:
             properties.append((CARD_ENGAGEMENT, 'A'))
-        elif card_type == row[BACK_PREFIX + CARD_TYPE] == 'Contract':
+        elif card_type == row[BACK_PREFIX + CARD_TYPE] == T_CONTRACT:
             properties.append((CARD_ENGAGEMENT, 'A'))
-        elif card_type == row[BACK_PREFIX + CARD_TYPE] == 'Player Objective':
+        elif card_type == row[BACK_PREFIX + CARD_TYPE] == T_PLAYER_OBJECTIVE:
             properties.append((CARD_ENGAGEMENT, 'A'))
 
-        fix_linebreaks = card_type not in ('Presentation', 'Rules')
+        fix_linebreaks = card_type not in {T_PRESENTATION, T_RULES}
 
         if properties:
             if side_b:
@@ -7786,12 +7877,12 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 if value != '':
                     properties.append((name, value))
 
-            if card_type in ('Campaign', 'Nightmare'):
+            if card_type in {T_CAMPAIGN, T_NIGHTMARE}:
                 properties.append((CARD_ENGAGEMENT, 'B'))
-            elif card_type == row[BACK_PREFIX + CARD_TYPE] == 'Contract':
+            elif card_type == row[BACK_PREFIX + CARD_TYPE] == T_CONTRACT:
                 properties.append((CARD_ENGAGEMENT, 'B'))
             elif (card_type == row[BACK_PREFIX + CARD_TYPE] ==
-                  'Player Objective'):
+                  T_PLAYER_OBJECTIVE):
                 properties.append((CARD_ENGAGEMENT, 'B'))
 
             if properties:
@@ -7876,28 +7967,28 @@ def load_external_xml(url, sets=None, encounter_sets=None):  # pylint: disable=R
         traits = traits[0].attrib['value'] if traits else None
 
         card_type = card_type[0].attrib['value']
-        if card_type == 'Side Quest':
+        if card_type == T_ALIAS_SIDE_QUEST:
             if encounter_set:
-                card_type = 'Encounter Side Quest'
+                card_type = T_ENCOUNTER_SIDE_QUEST
             else:
-                card_type = 'Player Side Quest'
-        elif card_type == 'Enemy':
+                card_type = T_PLAYER_SIDE_QUEST
+        elif card_type == T_ENEMY:
             if 'Ship' in [t.strip() for t in str(traits).split('.')]:
-                card_type = 'Ship Enemy'
-        elif card_type == 'Objective':
+                card_type = T_SHIP_ENEMY
+        elif card_type == T_OBJECTIVE:
             if 'Ship' in [t.strip() for t in str(traits).split('.')]:
-                card_type = 'Ship Objective'
+                card_type = T_SHIP_OBJECTIVE
 
         sphere = _find_properties(card, 'Sphere')
         sphere = sphere[0].attrib['value'] if sphere else None
 
         if (not sphere and encounter_set
                 and encounter_set.lower().endswith(' - nightmare')
-                and card_type in ('Encounter Side Quest', 'Enemy', 'Location',
-                                  'Objective', 'Quest', 'Ship Enemy',
-                                  'Treachery')):
-            sphere = 'Nightmare'
-        elif sphere == 'Neutral' and card_type == 'Treasure':
+                and card_type in {T_ENCOUNTER_SIDE_QUEST, T_ENEMY, T_LOCATION,
+                                  T_OBJECTIVE, T_QUEST, T_SHIP_ENEMY,
+                                  T_TREACHERY}):
+            sphere = S_NIGHTMARE
+        elif sphere == S_NEUTRAL and card_type == T_TREASURE:
             sphere = None
 
         keywords = _find_properties(card, 'Keywords')
@@ -7925,9 +8016,9 @@ def load_external_xml(url, sets=None, encounter_sets=None):  # pylint: disable=R
         cost = handle_int(cost[0].attrib['value']) if cost else None
 
         if not card.attrib.get('size'):
-            row[CARD_BACK] = 'Player'
+            row[CARD_BACK] = B_PLAYER
         elif card.attrib.get('size') == 'EncounterCard':
-            row[CARD_BACK] = 'Encounter'
+            row[CARD_BACK] = B_ENCOUNTER
         else:
             row[CARD_BACK] = None
 
@@ -8186,12 +8277,12 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
         rules = OrderedDict()
         key_count = {}
         for key, value in rules_list:
-            if key.lower() not in (
+            if key.lower() not in {
                     'sets', 'encounter sets', 'prefix', 'external xml',
                     'remove', 'second quest deck', 'special',
                     'second special', 'setup', 'active setup',
                     'staging setup', 'player', 'main quest', 'extra1',
-                    'extra2', 'extra3', 'extra4'):
+                    'extra2', 'extra3', 'extra4'}:
                 errors.append('Unknown key "{}"'.format(key))
                 continue
 
@@ -8200,8 +8291,8 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
             else:
                 key_count[key.lower()] += 1
 
-            if (key.lower() in ('sets', 'encounter sets', 'prefix',
-                                'external xml') and
+            if (key.lower() in {'sets', 'encounter sets', 'prefix',
+                                'external xml'} and
                     key_count.get(key.lower(), 0) > 0):
                 errors.append('Duplicate key "{}"'.format(key))
 
@@ -8241,10 +8332,10 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                  and (not r[CARD_ENCOUNTER_SET] or
                       str(r[CARD_ENCOUNTER_SET]).lower()
                       in quest['encounter sets'])
-                 and (r[CARD_TYPE] != 'Rules' or
-                      (r.get(CARD_TEXT) or '') not in ('', 'T.B.D.') or
+                 and (r[CARD_TYPE] != T_RULES or
+                      (r.get(CARD_TEXT) or '') not in {'', 'T.B.D.'} or
                       (r.get(BACK_PREFIX + CARD_TEXT) or '')
-                      not in ('', 'T.B.D.'))]
+                      not in {'', 'T.B.D.'})]
 
         for url in rules.get(('external xml', 0), []):
             res = load_external_xml(url, quest['sets'],
@@ -8299,9 +8390,9 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
             for card in cards:
                 if not card[CARD_ENCOUNTER_SET]:
                     other_cards.append(_update_card_for_rules(card.copy()))
-                elif card[CARD_TYPE] in ('Campaign', 'Nightmare', 'Quest'):
+                elif card[CARD_TYPE] in {T_CAMPAIGN, T_NIGHTMARE, T_QUEST}:
                     quest_cards.append(_update_card_for_rules(card.copy()))
-                elif card[CARD_TYPE] == 'Rules':
+                elif card[CARD_TYPE] == T_RULES:
                     default_setup_cards.append(
                         _update_card_for_rules(card.copy()))
                 elif mode == EASY_PREFIX and card[CARD_EASY_MODE]:
@@ -8393,7 +8484,7 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                 _filter_section_cards(section)
                 section.sort(key=lambda card: (
                     card[CARD_TYPE] != 'rules',
-                    card[CARD_TYPE] not in ('campaign', 'nightmare'),
+                    card[CARD_TYPE] not in {'campaign', 'nightmare'},
                     card[CARD_TYPE],
                     card[CARD_TYPE] == 'quest' and (card[CARD_COST] or 0) or 0,
                     card[CARD_SET_NAME],
@@ -8566,36 +8657,36 @@ def _needed_for_ringsdb(card):
     """
     return (card.get(CARD_TYPE) in CARD_TYPES_PLAYER or
             card.get(CARD_SPHERE) in CARD_SPHERES_BOON or
-            card.get(CARD_SPHERE) == 'Burden')
+            card.get(CARD_SPHERE) == S_BURDEN)
 
 
 def _needed_for_frenchdb(card):
     """ Check whether a card is needed for the French database or not.
     """
     return (card[CARD_TYPE] not in
-            ('Full Art Landscape', 'Full Art Portrait', 'Presentation',
-             'Rules') and
-            'Promo' not in extract_flags(card[CARD_FLAGS]))
+            {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT, T_PRESENTATION,
+             T_RULES} and
+            F_PROMO not in extract_flags(card[CARD_FLAGS]))
 
 
 def _needed_for_frenchdb_images(card):
     """ Check whether a card is needed for the French database images or not.
     """
     return (card[CARD_TYPE] not in
-            ('Full Art Landscape', 'Full Art Portrait', 'Presentation') and
-            not (card[CARD_TYPE] == 'Rules' and
-                 card[CARD_SPHERE] == 'Back') and
-            'Promo' not in extract_flags(card[CARD_FLAGS]))
+            {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT, T_PRESENTATION} and
+            not (card[CARD_TYPE] == T_RULES and
+                 card[CARD_SPHERE] == S_BACK) and
+            F_PROMO not in extract_flags(card[CARD_FLAGS]))
 
 
 def _needed_for_spanishdb(card):
     """ Check whether a card is needed for the Spanish database or not.
     """
     return (card[CARD_TYPE] not in
-            ('Full Art Landscape', 'Full Art Portrait', 'Presentation') and
-            not (card[CARD_TYPE] == 'Rules' and
-                 card[CARD_SPHERE] == 'Back') and
-            'Promo' not in extract_flags(card[CARD_FLAGS]))
+            {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT, T_PRESENTATION} and
+            not (card[CARD_TYPE] == T_RULES and
+                 card[CARD_SPHERE] == S_BACK) and
+            F_PROMO not in extract_flags(card[CARD_FLAGS]))
 
 
 def _ringsdb_code(row):
@@ -8658,32 +8749,32 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
             else:
                 limit = None
 
-            if row[CARD_TYPE] == 'Hero':
+            if row[CARD_TYPE] == T_HERO:
                 cost = None
                 threat = handle_int(row[CARD_COST])
             else:
                 cost = handle_int(row[CARD_COST])
                 threat = None
 
-            if row[CARD_SPHERE] == 'Burden':
+            if row[CARD_SPHERE] == S_BURDEN:
                 willpower = handle_int(row[CARD_THREAT])
             else:
                 willpower = handle_int(row[CARD_WILLPOWER])
 
-            if (row[CARD_TYPE] in ('Contract', 'Player Objective',
-                                   'Treasure') or
+            if (row[CARD_TYPE] in {T_CONTRACT, T_PLAYER_OBJECTIVE,
+                                   T_TREASURE} or
                     row[CARD_SPHERE] in CARD_SPHERES_BOON or
-                    row[CARD_SPHERE] == 'Burden'):
-                sphere = 'Neutral'
+                    row[CARD_SPHERE] == S_BURDEN):
+                sphere = S_NEUTRAL
             else:
                 sphere = row[CARD_SPHERE]
 
-            if row[CARD_TYPE] == 'Player Objective':
-                card_type = 'Contract'
-            elif (row[CARD_TYPE] == 'Treasure' or
+            if row[CARD_TYPE] == T_PLAYER_OBJECTIVE:
+                card_type = T_CONTRACT
+            elif (row[CARD_TYPE] == T_TREASURE or
                   row[CARD_SPHERE] in CARD_SPHERES_BOON or
-                  row[CARD_SPHERE] == 'Burden'):
-                card_type = 'Campaign'
+                  row[CARD_SPHERE] == S_BURDEN):
+                card_type = T_CAMPAIGN
             else:
                 card_type = row[CARD_TYPE]
 
@@ -8741,11 +8832,11 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                 }
             writer.writerow(csv_row)
 
-            if (csv_row['type'] == 'Ally' and csv_row['isUnique'] == 1 and
-                    csv_row['sphere'] != 'Neutral'):
+            if (csv_row['type'] == T_ALLY and csv_row['isUnique'] == 1 and
+                    csv_row['sphere'] != S_NEUTRAL):
                 new_row = csv_row.copy()
                 new_row['pack'] = 'ALeP - Messenger of the King Allies'
-                new_row['type'] = 'Hero'
+                new_row['type'] = T_HERO
                 new_row['code'] = '99{}'.format(new_row['code'])
                 new_row['name'] = '(MotK) {}'.format(new_row['name'])
                 new_row['cost'] = None
@@ -8785,12 +8876,12 @@ def _generate_tsv_from_json(json_data, output_path, release):  # pylint: disable
         writer.writeheader()
         for row in sorted(json_data.values(),
                           key=lambda r: str(r['cardnumber']).zfill(3)):
-            if row['sides']['B']['name'] in ('player', 'encounter'):
+            if row['sides']['B']['name'] in {'player', 'encounter'}:
                 card_back = row['sides']['B']['name']
             else:
                 card_back = 'multi_sided'
 
-            if row['sides']['A']['type'] == 'Quest':
+            if row['sides']['A']['type'] == T_QUEST:
                 engagement_cost = ''
                 side = row['sides']['A']['engagementcost']
             else:
@@ -8842,7 +8933,7 @@ def _generate_tsv_from_json(json_data, output_path, release):  # pylint: disable
 
             writer.writerow(tsv_row)
             if card_back == 'multi_sided':
-                if row['sides']['B']['type'] == 'Quest':
+                if row['sides']['B']['type'] == T_QUEST:
                     engagement_cost = ''
                     side = row['sides']['B']['engagementcost']
                 else:
@@ -8942,21 +9033,21 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
                     and row[CARD_ID] not in SELECTED_CARDS)):
             continue
 
-        if row[CARD_TYPE] in ('Encounter Side Quest', 'Player Side Quest'):
-            card_type = 'Side Quest'
+        if row[CARD_TYPE] in {T_ENCOUNTER_SIDE_QUEST, T_PLAYER_SIDE_QUEST}:
+            card_type = T_ALIAS_SIDE_QUEST
         else:
             card_type = row[CARD_TYPE]
 
-        if row[CARD_TYPE] == 'Treasure':
-            sphere = 'Neutral'
-        elif row[CARD_SPHERE] in ('Cave', 'NoIcon', 'NoProgress', 'NoStat',
-                                  'Region', 'Setup', 'SmallTextArea',
-                                  'Upgraded'):
+        if row[CARD_TYPE] == T_TREASURE:
+            sphere = S_NEUTRAL
+        elif row[CARD_SPHERE] in {S_CAVE, S_NOICON, S_NOPROGRESS, S_NOSTAT,
+                                  S_REGION, S_SETUP, S_SMALLTEXTAREA,
+                                  S_UPGRADED}:
             sphere = ''
         else:
             sphere = row[CARD_SPHERE]
 
-        if row[CARD_TYPE] == 'Rules' and row[CARD_VICTORY]:
+        if row[CARD_TYPE] == T_RULES and row[CARD_VICTORY]:
             victory = 'Page {}'.format(row[CARD_VICTORY])
         else:
             victory = row[CARD_VICTORY]
@@ -8984,21 +9075,21 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
         }
 
         if row[BACK_PREFIX + CARD_NAME]:
-            if row[BACK_PREFIX + CARD_TYPE] == 'Encounter Side Quest':
-                card_type = 'Side Quest'
+            if row[BACK_PREFIX + CARD_TYPE] == T_ENCOUNTER_SIDE_QUEST:
+                card_type = T_ALIAS_SIDE_QUEST
             else:
                 card_type = row[BACK_PREFIX + CARD_TYPE]
 
-            if row[BACK_PREFIX + CARD_TYPE] == 'Treasure':
-                sphere = 'Neutral'
-            elif row[BACK_PREFIX + CARD_SPHERE] in (
-                    'Cave', 'NoIcon', 'NoProgress', 'NoStat', 'Region',
-                    'Setup', 'SmallTextArea', 'Upgraded'):
+            if row[BACK_PREFIX + CARD_TYPE] == T_TREASURE:
+                sphere = S_NEUTRAL
+            elif row[BACK_PREFIX + CARD_SPHERE] in {
+                    S_CAVE, S_NOICON, S_NOPROGRESS, S_NOSTAT, S_REGION,
+                    S_SETUP, S_SMALLTEXTAREA, S_UPGRADED}:
                 sphere = ''
             else:
                 sphere = row[BACK_PREFIX + CARD_SPHERE]
 
-            if (row[BACK_PREFIX + CARD_TYPE] == 'Rules' and
+            if (row[BACK_PREFIX + CARD_TYPE] == T_RULES and
                     row[BACK_PREFIX + CARD_VICTORY]):
                 victory = 'Page {}'.format(row[BACK_PREFIX + CARD_VICTORY])
             else:
@@ -9036,9 +9127,9 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
             }
         else:
             if ((row[CARD_TYPE] in CARD_TYPES_PLAYER and
-                 'Encounter' not in extract_keywords(row[CARD_KEYWORDS]) and
-                 row[CARD_BACK] != 'Encounter') or
-                    row[CARD_BACK] == 'Player'):
+                 B_ENCOUNTER not in extract_keywords(row[CARD_KEYWORDS]) and
+                 row[CARD_BACK] != B_ENCOUNTER) or
+                    row[CARD_BACK] == B_PLAYER):
                 default_name = 'player'
             else:
                 default_name = 'encounter'
@@ -9147,7 +9238,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
         if conf['selected_only'] and row[CARD_ID] not in SELECTED_CARDS:
             continue
 
-        if lang == 'English':
+        if lang == L_ENGLISH:
             translated_row = row
         else:
             translated_row = TRANSLATIONS[lang].get(row[CARD_ID], {}).copy()
@@ -9169,7 +9260,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
         else:
             limit = None
 
-        if card_type == 'Hero':
+        if card_type == T_HERO:
             cost = None
             threat = _handle_int_str(row[CARD_COST])
             quest_stage = None
@@ -9177,7 +9268,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
             quest_points = None
             stage_letter = None
             opposite_stage_letter = None
-        elif card_type == 'Quest':
+        elif card_type == T_QUEST:
             cost = None
             threat = None
             quest_stage = handle_int(row[CARD_COST])
@@ -9194,13 +9285,13 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
             stage_letter = None
             opposite_stage_letter = None
 
-        if card_type in ('Contract', 'Player Objective', 'Treasure'):
-            sphere = 'Neutral'
-        elif card_type in ('Campaign', 'Presentation', 'Rules'):
+        if card_type in {T_CONTRACT, T_PLAYER_OBJECTIVE, T_TREASURE}:
+            sphere = S_NEUTRAL
+        elif card_type in {T_CAMPAIGN, T_PRESENTATION, T_RULES}:
             sphere = 'None'
-        elif row[CARD_SPHERE] in ('Cave', 'Nightmare', 'NoIcon', 'NoProgress',
-                                  'NoStat', 'Region', 'SmallTextArea',
-                                  'Upgraded'):
+        elif row[CARD_SPHERE] in {S_CAVE, S_NIGHTMARE, S_NOICON, S_NOPROGRESS,
+                                  S_NOSTAT, S_REGION, S_SMALLTEXTAREA,
+                                  S_UPGRADED}:
             sphere = 'None'
         elif row[CARD_SPHERE] is not None:
             sphere = row[CARD_SPHERE]
@@ -9208,11 +9299,11 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
             sphere = 'None'
 
         if sphere in CARD_SPHERES_BOON:
-            sphere = 'Neutral'
-            subtype_name = 'Boon'
-        elif sphere == 'Burden':
+            sphere = S_NEUTRAL
+            subtype_name = S_BOON
+        elif sphere == S_BURDEN:
             sphere = 'None'
-            subtype_name = 'Burden'
+            subtype_name = S_BURDEN
         else:
             subtype_name = None
 
@@ -9259,22 +9350,22 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
                     if card_type in CARD_TYPES_SUBTITLE
                     else translated_row.get(CARD_ADVENTURE))
 
-        if card_type in ('Presentation', 'Rules'):
-            type_name = 'Setup'
-        elif card_type == 'Nightmare':
+        if card_type in {T_PRESENTATION, T_RULES}:
+            type_name = S_SETUP
+        elif card_type == T_NIGHTMARE:
             type_name = 'Nightmare Setup'
-        elif card_type in ('Full Landscape', 'Full Art Portrait'):
+        elif card_type in {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT}:
             type_name = 'None'
-        elif (card_type == 'Encounter Side Quest' and
-              row[CARD_SPHERE] == 'Cave'):
-            type_name = 'Cave'
-        elif (card_type == 'Encounter Side Quest' and
-              row[CARD_SPHERE] == 'Region'):
-            type_name = 'Region'
+        elif (card_type == T_ENCOUNTER_SIDE_QUEST and
+              row[CARD_SPHERE] == S_CAVE):
+            type_name = S_CAVE
+        elif (card_type == T_ENCOUNTER_SIDE_QUEST and
+              row[CARD_SPHERE] == S_REGION):
+            type_name = S_REGION
         else:
             type_name = card_type or ''
 
-        if card_type in ('Presentation', 'Rules'):
+        if card_type in CARD_TYPES_PAGES:
             victory_points = None
         elif is_doubleside(card_type, row[BACK_PREFIX + CARD_TYPE]):
             victory_points = (
@@ -9300,20 +9391,20 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
                                    ).split(';')
             if s.strip()] or None
 
-        fix_linebreaks = card_type not in ('Presentation', 'Rules')
+        fix_linebreaks = card_type not in {T_PRESENTATION, T_RULES}
 
         text = _update_card_text('{}\n\n{}'.format(
             translated_row.get(CARD_KEYWORDS) or '',
             translated_row.get(CARD_TEXT) or ''
             ), fix_linebreaks=fix_linebreaks).replace('\n', '\r\n').strip()
-        if (card_type in ('Presentation', 'Rules') and
+        if (card_type in CARD_TYPES_PAGES and
                 translated_row.get(CARD_VICTORY) is not None):
             text = '{}\r\n\r\nPage {}'.format(text,
                                               translated_row[CARD_VICTORY])
 
         if (translated_row.get(BACK_PREFIX + CARD_NAME) is not None and
                 (translated_row.get(BACK_PREFIX + CARD_TEXT) is not None or
-                 (card_type in ('Presentation', 'Rules')
+                 (card_type in CARD_TYPES_PAGES
                   and translated_row.get(BACK_PREFIX + CARD_VICTORY)
                   is not None)) and
                 is_doubleside(card_type, row[BACK_PREFIX + CARD_TYPE])):
@@ -9321,7 +9412,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
                 translated_row.get(BACK_PREFIX + CARD_TEXT) or '',
                 fix_linebreaks=fix_linebreaks
                 ).replace('\n', '\r\n').strip()
-            if (card_type in ('Presentation', 'Rules') and
+            if (card_type in CARD_TYPES_PAGES and
                     translated_row.get(BACK_PREFIX + CARD_VICTORY)
                     is not None):
                 text_back = '{}\r\n\r\nPage {}'.format(
@@ -9445,18 +9536,18 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
             if row[CARD_TYPE] not in CARD_TYPES_PLAYER_FRENCH:
                 continue
 
-            french_row = TRANSLATIONS['French'].get(row[CARD_ID], {}).copy()
+            french_row = TRANSLATIONS[L_FRENCH].get(row[CARD_ID], {}).copy()
 
-            if row[CARD_TYPE] in ('Contract', 'Player Objective'):
-                sphere = 'Neutral'
+            if row[CARD_TYPE] in {T_CONTRACT, T_PLAYER_OBJECTIVE}:
+                sphere = S_NEUTRAL
             elif row[CARD_SPHERE] in CARD_SPHERES_BOON:
                 sphere = None
-            elif row[CARD_SPHERE] == 'Upgraded':
+            elif row[CARD_SPHERE] == S_UPGRADED:
                 sphere = None
             else:
                 sphere = row[CARD_SPHERE]
 
-            if row[CARD_TYPE] == 'Hero':
+            if row[CARD_TYPE] == T_HERO:
                 cost = None
                 threat = _update_french_non_int(handle_int(row[CARD_COST]))
             else:
@@ -9534,13 +9625,13 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
         writer.writeheader()
         for row in data:
             if (row[CARD_TYPE] in CARD_TYPES_PLAYER_FRENCH or
-                    row[CARD_TYPE] == 'Quest'):
+                    row[CARD_TYPE] == T_QUEST):
                 continue
 
-            french_row = TRANSLATIONS['French'].get(row[CARD_ID], {}).copy()
+            french_row = TRANSLATIONS[L_FRENCH].get(row[CARD_ID], {}).copy()
 
-            if row[CARD_SPHERE] == 'Setup':
-                card_type = 'Nightmare'
+            if row[CARD_SPHERE] == S_SETUP:
+                card_type = T_NIGHTMARE
             else:
                 card_type = row[CARD_TYPE]
 
@@ -9617,10 +9708,10 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
         writer = csv.DictWriter(obj, delimiter=';', fieldnames=fieldnames)
         writer.writeheader()
         for row in data:
-            if row[CARD_TYPE] != 'Quest':
+            if row[CARD_TYPE] != T_QUEST:
                 continue
 
-            french_row = TRANSLATIONS['French'].get(row[CARD_ID], {})
+            french_row = TRANSLATIONS[L_FRENCH].get(row[CARD_ID], {})
 
             name = french_row.get(CARD_NAME) or ''
             if (french_row.get(BACK_PREFIX + CARD_NAME) and
@@ -9676,9 +9767,9 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
     cycle = set_name
     presentations = [row for row in DATA
                      if row[CARD_SET] == set_id and
-                     row[CARD_TYPE] == 'Presentation']
+                     row[CARD_TYPE] == T_PRESENTATION]
     if presentations:
-        spanish_name = TRANSLATIONS['Spanish'].get(
+        spanish_name = TRANSLATIONS[L_SPANISH].get(
             presentations[0][CARD_ID], {}).get(CARD_NAME)
         if spanish_name:
             cycle = spanish_name
@@ -9719,10 +9810,10 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
         writer.writeheader()
         for row in data:
             if (row[CARD_TYPE] in CARD_TYPES_PLAYER or
-                    row[CARD_TYPE] == 'Rules'):
+                    row[CARD_TYPE] == T_RULES):
                 continue
 
-            spanish_row = TRANSLATIONS['Spanish'].get(row[CARD_ID], {}).copy()
+            spanish_row = TRANSLATIONS[L_SPANISH].get(row[CARD_ID], {}).copy()
             if row.get(CARD_DOUBLESIDE):
                 spanish_row[CARD_NAME] = spanish_row.get(
                     BACK_PREFIX + CARD_NAME, '')
@@ -9744,7 +9835,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
             easy_mode = (int(row[CARD_EASY_MODE])
                          if is_int(row[CARD_EASY_MODE])
                          else 0)
-            if row[CARD_TYPE] == 'Quest':
+            if row[CARD_TYPE] == T_QUEST:
                 quest_points = handle_int(row[BACK_PREFIX + CARD_QUEST])
                 engagement = handle_int(row[CARD_COST])
                 threat = '{}-{}'.format(
@@ -9766,20 +9857,20 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
 
             text = _update_card_text('{}\n\n{}'.format(
                 spanish_row.get(CARD_KEYWORDS) or '',
-                spanish_row.get(CARD_TEXT) or ''), lang='Spanish').strip()
+                spanish_row.get(CARD_TEXT) or ''), lang=L_SPANISH).strip()
             if text:
                 text = '<p>{}</p>'.format(text.replace('\n', '</p><p>'))
 
             if spanish_row.get(CARD_SHADOW) is not None:
                 shadow = _update_card_text(spanish_row.get(CARD_SHADOW),
-                                           lang='Spanish').strip()
+                                           lang=L_SPANISH).strip()
             elif (is_doubleside(row[CARD_TYPE],
                                 row[BACK_PREFIX + CARD_TYPE]) and
                   spanish_row.get(BACK_PREFIX + CARD_TEXT) is not None):
                 shadow = _update_card_text('{}\n\n{}'.format(
                     spanish_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
                     spanish_row.get(BACK_PREFIX + CARD_TEXT)),
-                                           lang='Spanish').strip()
+                                           lang=L_SPANISH).strip()
             else:
                 shadow = ''
 
@@ -9830,10 +9921,10 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
         current_date = time.strftime('%d/%m/%Y').lstrip('0').replace('/0', '/')
         for row in data:
             if (row[CARD_TYPE] not in CARD_TYPES_PLAYER
-                    and row[CARD_TYPE] != 'Rules'):
+                    and row[CARD_TYPE] != T_RULES):
                 continue
 
-            spanish_row = TRANSLATIONS['Spanish'].get(row[CARD_ID], {}).copy()
+            spanish_row = TRANSLATIONS[L_SPANISH].get(row[CARD_ID], {}).copy()
             if row.get(CARD_DOUBLESIDE):
                 spanish_row[CARD_NAME] = spanish_row.get(
                     BACK_PREFIX + CARD_NAME, '')
@@ -9842,12 +9933,12 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                         spanish_row[key.replace(BACK_PREFIX, '')] = (
                             spanish_row[key])
 
-            if row[CARD_TYPE] in ('Contract', 'Player Objective', 'Treasure'):
-                sphere = 'Neutral'
+            if row[CARD_TYPE] in {T_CONTRACT, T_PLAYER_OBJECTIVE, T_TREASURE}:
+                sphere = S_NEUTRAL
             else:
                 sphere = row[CARD_SPHERE]
 
-            if row[CARD_TYPE] == 'Hero':
+            if row[CARD_TYPE] == T_HERO:
                 cost = None
                 threat = handle_int(row[CARD_COST])
             else:
@@ -9856,8 +9947,8 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
 
             text = _update_card_text('{}\n\n{}'.format(
                 spanish_row.get(CARD_KEYWORDS) or '',
-                spanish_row.get(CARD_TEXT) or ''), lang='Spanish').strip()
-            if (row[CARD_TYPE] == 'Rules' and
+                spanish_row.get(CARD_TEXT) or ''), lang=L_SPANISH).strip()
+            if (row[CARD_TYPE] == T_RULES and
                     spanish_row.get(CARD_VICTORY) is not None):
                 text = '{}\n\nPage {}'.format(text, spanish_row[CARD_VICTORY])
 
@@ -9869,8 +9960,8 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 text_back = _update_card_text('{}\n\n{}'.format(
                     spanish_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
                     spanish_row[BACK_PREFIX + CARD_TEXT]),
-                                              lang='Spanish').strip()
-                if (row[CARD_TYPE] == 'Rules' and
+                                              lang=L_SPANISH).strip()
+                if (row[CARD_TYPE] == T_RULES and
                         spanish_row.get(BACK_PREFIX + CARD_VICTORY)
                         is not None):
                     text_back = '{}\n\nPage {}'.format(
@@ -9884,7 +9975,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                         .format(text, text_back))
 
             flavor = _update_card_text(spanish_row.get(CARD_FLAVOUR) or '',
-                                       lang='Spanish',
+                                       lang=L_SPANISH,
                                        skip_rules=True,
                                        fix_linebreaks=False).strip()
             if flavor:
@@ -9893,7 +9984,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
             if (is_doubleside(row[CARD_TYPE], row[BACK_PREFIX + CARD_TYPE]) and
                     spanish_row.get(BACK_PREFIX + CARD_FLAVOUR)):
                 flavor_back = _update_card_text(
-                    spanish_row[BACK_PREFIX + CARD_FLAVOUR], lang='Spanish',
+                    spanish_row[BACK_PREFIX + CARD_FLAVOUR], lang=L_SPANISH,
                     skip_rules=True, fix_linebreaks=False).strip()
                 if flavor_back:
                     flavor_back = '<p>{}</p>'.format(
@@ -9903,7 +9994,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                     '<p><b>Lado A.</b></p>\n{}\n<p><b>Lado B.</b></p>\n{}'
                     .format(flavor, flavor_back))
 
-            if row[CARD_TYPE] == 'Rules':
+            if row[CARD_TYPE] == T_RULES:
                 victory_points = None
             else:
                 victory_points = handle_int(spanish_row.get(CARD_VICTORY))
@@ -9964,14 +10055,14 @@ def _get_xml_property_value(row, name, card_type):
     if value is None:
         value = ''
 
-    if name in (CARD_TYPE, BACK_PREFIX + CARD_TYPE):
+    if name in {CARD_TYPE, BACK_PREFIX + CARD_TYPE}:
         if card_type in CARD_TYPES_DOUBLESIDE_DEFAULT:
             value = card_type
 
         return value
 
-    if name in (CARD_SPHERE, BACK_PREFIX + CARD_SPHERE):
-        if card_type == 'Rules':
+    if name in {CARD_SPHERE, BACK_PREFIX + CARD_SPHERE}:
+        if card_type == T_RULES:
             value = ''
 
         return value
@@ -10009,7 +10100,7 @@ def translated_data(set_id, lang):
             continue
 
         row_copy = row.copy()
-        if lang != 'English' and TRANSLATIONS[lang].get(row[CARD_ID]):
+        if lang != L_ENGLISH and TRANSLATIONS[lang].get(row[CARD_ID]):
             row_copy[CARD_NAME] = TRANSLATIONS[lang][row[CARD_ID]][CARD_NAME]
             row_copy[BACK_PREFIX + CARD_NAME] = (
                 TRANSLATIONS[lang][row[CARD_ID]][BACK_PREFIX + CARD_NAME])
@@ -10044,7 +10135,7 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
             continue
 
         row_copy = row.copy()
-        if lang != 'English' and TRANSLATIONS[lang].get(row[CARD_ID]):
+        if lang != L_ENGLISH and TRANSLATIONS[lang].get(row[CARD_ID]):
             for key in TRANSLATED_COLUMNS:
                 row_copy[key] = TRANSLATIONS[lang][row[CARD_ID]][key]
 
@@ -10098,7 +10189,7 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                            SETS[set_id][SET_COLLECTION_ICON] or ''))
         properties.append(('Set Copyright', SETS[set_id][SET_COPYRIGHT] or ''))
 
-        side_b = (card_type != 'Presentation' and (
+        side_b = (card_type != T_PRESENTATION and (
             card_type in CARD_TYPES_DOUBLESIDE_DEFAULT or
             row[BACK_PREFIX + CARD_NAME]))
         if properties:
@@ -10175,7 +10266,7 @@ def _collect_artwork_images(conf, image_path):
                         len(filename.split('_')) < 3):
                     continue
 
-                if filename.split('.')[-1] in ('jpg', 'png'):
+                if filename.split('.')[-1] in {'jpg', 'png'}:
                     sorted_filenames.append((
                         filename,
                         int(os.path.getmtime(
@@ -10215,7 +10306,7 @@ def _collect_custom_images(image_path):
                 if len(filename.split('.')) < 2:
                     continue
 
-                if filename.split('.')[-1] in ('jpg', 'png'):
+                if filename.split('.')[-1] in {'jpg', 'png'}:
                     images[filename] = os.path.join(image_path, filename)
 
             break
@@ -10321,7 +10412,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                         os.path.split(filename)[-1].split('_Artist_')[1:]
                         ).split('.')[:-1]).replace('_', ' '))
                 prop.tail = '\n      '
-        elif card_type != 'Rules' and conf['validate_missing_images']:
+        elif card_type != T_RULES and conf['validate_missing_images']:
             logging.error('No image detected for card %s (%s)',
                           card.attrib['id'], card.attrib['name'])
 
@@ -10331,7 +10422,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
             prop.set('value', external_data[card.attrib['id']])
             prop.tail = '\n      '
 
-        if card_type == 'Presentation':
+        if card_type == T_PRESENTATION:
             image_id = '{}_{}_{}'.format(card.attrib['id'], 'Top', lang)
             if image_id not in images:
                 image_id = '{}_{}'.format(card.attrib['id'], 'Top')
@@ -10421,7 +10512,8 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
             text = ''
 
         try:
-            alternate_text = _find_properties(alternate, 'Text')[0].attrib['value']
+            alternate_text = _find_properties(alternate,
+                                              'Text')[0].attrib['value']
         except IndexError:
             alternate_text = ''
 
@@ -10464,7 +10556,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
                 target_icon_images.append(set_name)
                 target_icon_images.append('{}_stroke'.format(set_name))
 
-        if encounter_set and card_sphere != 'Boon':
+        if encounter_set and card_sphere != S_BOON:
             target_icon_images.append(encounter_set)
 
         additional_sets = _find_properties(card, 'Additional Encounter Sets')
@@ -11291,7 +11383,7 @@ def generate_png800_rules_pdf(set_id, set_name, lang, skip_ids, card_data):  # p
     known_keys = set()
     rules_cards = {c[CARD_ID]:c for c in card_data
                    if c[CARD_SET] == set_id and
-                   c[CARD_TYPE] == 'Rules' and c[CARD_SPHERE] != 'Back'}
+                   c[CARD_TYPE] == T_RULES and c[CARD_SPHERE] != S_BACK}
     for _, _, filenames in os.walk(input_path):
         filenames = sorted(filenames, key=lambda f: f.rsplit('.', 1)[0])
         for filename in filenames:
@@ -12027,10 +12119,10 @@ def _generate_tts_sheets(deck_path, output_path, image_path, card_dict,  # pylin
                     cards[orientation]['back_custom'].append(
                         {'id': card_id, 'path': back_path})
             elif ((card_dict[card_id][CARD_TYPE] in CARD_TYPES_PLAYER and
-                   'Encounter' not in extract_keywords(
+                   B_ENCOUNTER not in extract_keywords(
                     card_dict[card_id][CARD_KEYWORDS]) and
-                   card_dict[card_id][CARD_BACK] != 'Encounter') or
-                  card_dict[card_id][CARD_BACK] == 'Player'):
+                   card_dict[card_id][CARD_BACK] != B_ENCOUNTER) or
+                  card_dict[card_id][CARD_BACK] == B_PLAYER):
                 for _ in range(int(quantity)):
                     cards[orientation]['front_player'].append(
                         {'id': card_id, 'path': card_path})
@@ -12158,9 +12250,9 @@ def _extract_image_properties(root):
     card_sphere = _find_properties(root, 'Sphere')
     card_sphere = card_sphere[0].attrib['value'] if card_sphere else ''
     flags = _find_properties(root, 'Flags')
-    if (flags and 'Promo' in [
+    if (flags and F_PROMO in [
             f.strip() for f in flags[0].attrib['value'].split(';')]):
-        flags = 'Promo'
+        flags = F_PROMO
     else:
         flags = ''
 
@@ -12251,16 +12343,16 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
             if data_back:
                 images['{}.B'.format(card_id)] = data_back
             elif (data and
-                  data['card_type'] in ('Contract', 'Player Objective',
-                                        'Quest')):
+                  data['card_type'] in {T_CONTRACT, T_PLAYER_OBJECTIVE,
+                                        T_QUEST}):
                 images['{}.B'.format(card_id)] = data.copy()
 
             artist_back = _extract_artist_name(alternate)
             if artist_back:
                 artists['{}.B'.format(card_id)] = artist_back
             elif (artist and data and
-                  data['card_type'] in ('Contract', 'Player Objective',
-                                        'Quest')):
+                  data['card_type'] in {T_CONTRACT, T_PLAYER_OBJECTIVE,
+                                        T_QUEST}):
                 artists['{}.B'.format(card_id)] = artist
 
     old_xml_path = os.path.join(SET_EONS_PATH,
@@ -12284,8 +12376,8 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
                                   else '')
                 data_back = _extract_image_properties(alternate)
                 if (not data_back and data and
-                        data['card_type'] in ('Contract', 'Player Objective',
-                                              'Quest')):
+                        data['card_type'] in {T_CONTRACT, T_PLAYER_OBJECTIVE,
+                                              T_QUEST}):
                     data_back = data
 
                 if (data_back and data_back['snapshot'] ==
@@ -12450,7 +12542,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
     empty_rules_backs = {
         row[CARD_ID] for row in card_data
         if row[CARD_SET] == set_id and
-        row[CARD_TYPE] == 'Rules' and
+        row[CARD_TYPE] == T_RULES and
         row[BACK_PREFIX + CARD_TEXT] is None and
         row[BACK_PREFIX + CARD_VICTORY] is None}
 
@@ -12525,7 +12617,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                         card_name = card_dict[card_id][CARD_NAME]
                         side = (
                             card_dict[card_id][BACK_PREFIX + CARD_ENGAGEMENT]
-                            or '' if card_type == 'Quest' else 'B')
+                            or '' if card_type == T_QUEST else 'B')
                     else:
                         card_name = card_dict[card_id][BACK_PREFIX + CARD_NAME]
                         side = ''
@@ -12538,7 +12630,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                             card_dict[card_id][CARD_TYPE],
                             card_dict[card_id][BACK_PREFIX + CARD_TYPE]):
                         side = (card_dict[card_id][CARD_ENGAGEMENT] or ''
-                                if card_type == 'Quest' else 'A')
+                                if card_type == T_QUEST else 'A')
                     else:
                         side = ''
                 else:
@@ -12549,7 +12641,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                 if side == 'B' and card_id in empty_rules_backs:
                     continue
 
-                if card_type == 'Quest':
+                if card_type == T_QUEST:
                     if filename.endswith('-2.png'):
                         card_suffix = (
                             card_dict[card_id][BACK_PREFIX + CARD_COST] or '')
@@ -12584,15 +12676,15 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
 
             break
 
-    if lang == 'English':  # pylint: disable=R1702
+    if lang == L_ENGLISH:  # pylint: disable=R1702
         cards = {}
         for row in card_data:
             if row[CARD_SET] == set_id and _needed_for_ringsdb(row):
                 card_number = _to_str(handle_int(row[CARD_NUMBER])).zfill(3)
                 code = _ringsdb_code(row)
                 cards[card_number] = [code]
-                if (row[CARD_TYPE] == 'Ally' and row[CARD_UNIQUE] and
-                        row[CARD_SPHERE] != 'Neutral'):
+                if (row[CARD_TYPE] == T_ALLY and row[CARD_UNIQUE] and
+                        row[CARD_SPHERE] != S_NEUTRAL):
                     cards[card_number].append('99{}'.format(code))
 
         pairs = []
@@ -12649,7 +12741,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
 
                 break
 
-    elif lang == 'French':  # pylint: disable=R1702
+    elif lang == L_FRENCH:  # pylint: disable=R1702
         cards = {}
         for row in card_data:
             if row[CARD_SET] == set_id and _needed_for_frenchdb_images(row):
@@ -12695,12 +12787,12 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                 shutil.copyfile(os.path.join(output_path, source_filename),
                                 os.path.join(frenchdb_output_path,
                                              target_filename))
-    elif lang == 'Spanish':
+    elif lang == L_SPANISH:
         cards = {}
         for row in card_data:
             if (row[CARD_SET] == set_id and
                     (_needed_for_spanishdb(row) or
-                     row[CARD_TYPE] == 'Presentation')):
+                     row[CARD_TYPE] == T_PRESENTATION)):
                 card_number = _to_str(handle_int(row[CARD_NUMBER])).zfill(3)
                 cards[card_number] = _spanishdb_code(row)
 
@@ -12937,7 +13029,7 @@ def _collect_pdf_images(input_path, set_id, card_data):
         empty_rules_backs = {
             row[CARD_ID] for row in card_data
             if row[CARD_SET] == set_id and
-            row[CARD_TYPE] == 'Rules' and
+            row[CARD_TYPE] == T_RULES and
             row[BACK_PREFIX + CARD_TEXT] is None and
             row[BACK_PREFIX + CARD_VICTORY] is None}
         images = {'player': [],
@@ -13363,7 +13455,7 @@ def _combine_doublesided_rules_cards(set_id, input_path, card_data, service):  #
 
     selected = []
     for i, row in enumerate(card_data):
-        if (row[CARD_TYPE] == 'Rules' and
+        if (row[CARD_TYPE] == T_RULES and
                 row[BACK_PREFIX + CARD_TEXT] is None and
                 row[BACK_PREFIX + CARD_VICTORY] is None):
             card_number = (str(int(row[CARD_NUMBER])).zfill(3)
@@ -14252,8 +14344,8 @@ def upload_dragncards_images(conf, sets):
                 '{}.English'.format(escape_filename(set_name)),
                 '{}.English.o8c'.format(
                     escape_octgn_filename(escape_filename(set_name))))
-            if ('English' in conf['output_languages'] and
-                    'octgn' in conf['outputs']['English'] and
+            if (L_ENGLISH in conf['output_languages'] and
+                    'octgn' in conf['outputs'][L_ENGLISH] and
                     os.path.exists(output_path)):
                 temp_path = os.path.join(
                     TEMP_ROOT_PATH,
@@ -14624,7 +14716,7 @@ def get_last_image_timestamp():
     max_ts = 0
     for root, _, filenames in os.walk(OUTPUT_PATH):
         for filename in filenames:
-            if filename.split('.')[-1] in ('png', 'jpg', 'pdf', 'o8c', '7z'):
+            if filename.split('.')[-1] in {'png', 'jpg', 'pdf', 'o8c', '7z'}:
                 file_ts = int(os.path.getmtime(os.path.join(root, filename)))
                 if file_ts > max_ts:
                     max_ts = file_ts

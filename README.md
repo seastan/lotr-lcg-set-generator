@@ -564,14 +564,14 @@ List of available sphere values:
 - `BoonTactics`
 - `Burden`
 - `Nightmare`
-- `Setup` (`Campaign` only)
-- `Cave` (`Encounter Side Quest` only)
-- `NoProgress` (`Encounter Side Quest` only)
-- `Region` (`Encounter Side Quest` only)
-- `SmallTextArea` (`Encounter Side Quest` only)
-- `NoStat` (`Enemy` only)
-- `NoIcon` (`Objective` only)
 - `Back` (`Rules` only)
+- `Cave` (`Encounter Side Quest` only)
+- `NoIcon` (`Objective` only)
+- `NoProgress` (`Encounter Side Quest` only)
+- `NoStat` (`Enemy` only)
+- `Region` (`Encounter Side Quest` only)
+- `Setup` (`Campaign` only)
+- `SmallTextArea` (`Encounter Side Quest` only)
 - `Upgraded` (`Ship Objective` only)
 - `Blue` (`Presentation` only)
 - `Green` (`Presentation` only)
@@ -595,10 +595,10 @@ List of available sphere values:
 - `NoCopyright`
 - `NoTraits`
 - `Promo` (`Hero` only)
+- `Star`
 - `BlueRing`
 - `GreenRing`
 - `RedRing`
-- `Star`
 
 **Portrait Shadows**
 
