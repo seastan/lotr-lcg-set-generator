@@ -47,6 +47,7 @@ Open the folder in the browser, right-click on the folder name, then click `Add 
 Choose `My Drive` and click `Add Shortcut`.
 
     If it doesn't exist yet (that means you are starting a new project from scratch), create this folder locally.
+    Make sure that you don't reuse an existing folder from the downloaded repo.
     It should have the following structure:
 
     ```
