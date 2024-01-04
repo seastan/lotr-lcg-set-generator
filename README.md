@@ -108,10 +108,10 @@ existing Google Drive folders and use their local paths in the configuration (re
   - Run `setup.bat` (Windows) or `setup.sh` (Mac/Linux) to generate the `.seext` files.
   - Make sure that `Times New Roman` font is installed.  If you have a Mac or Linux, it may be not installed by default.
   - Install the design tool, `Build 3970`.  Please note that the latest version from the site may not work as expected.  Use the following links:
-    - Windows (64-bit): https://drive.google.com/file/d/19vuP5QFKrjuilJbuFh10NPIn6i_FZZI9/view?usp=sharing
-    - Windows (32-bit): https://drive.google.com/file/d/1lZ6h7OQBvZdh2hOlAiZMYivzeooTqWhW/view?usp=sharing
-    - Mac: https://drive.google.com/file/d/1TkWEjB71fdxxq_gHzhI-WfRXaRrJcGZg/view?usp=sharing
-    - Linux: https://drive.google.com/file/d/1ZC-uSOVKqU7XGZUip3I6OvUT7mPOLLoN/view?usp=sharing
+    - Windows (64-bit): https://drive.google.com/file/d/1tqzVeZB27MC_EaOwKXipBODbRL3wBdSr/view?usp=sharing
+    - Windows (32-bit): https://drive.google.com/file/d/1QbruPIOyioZ4MWpLF1YUMaAgnGq8Ch_Y/view?usp=sharing
+    - Mac: https://drive.google.com/file/d/1QcDhm0Bv9de81DNnp0E4obMGtVBtcCnV/view?usp=sharing
+    - Linux: https://drive.google.com/file/d/1QeTjzV4OWdvaEP8oGGX9kIeflGdtlrzH/view?usp=sharing
   - Run the design tool and install `The Lord of the Rings LCG` plugin.
   - Click `Edit` -> `Preferences` -> `Language`.  Make sure that "English-United States" is chosen for both `Game Language` and `User Interface Language`.
     Click `Drawing`.  Make sure that `Text Fitting Methods` is set to `Reduce Line Spacing and Shrink Text`.  Don't change any other preferences.
@@ -123,7 +123,7 @@ existing Google Drive folders and use their local paths in the configuration (re
 8. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `GIMP` folder
 from this repo, click `OK`, and then close GIMP.
 
-9. Install ImageMagick 7.0.10-28 (download Windows version from https://drive.google.com/file/d/1tBFGjE9OakbQNjY-Nqpxky14XVFdGL_G/view?usp=sharing,
+9. Install ImageMagick 7.0.10-28 (download Windows version from https://drive.google.com/file/d/1toCZd4xaYU2ToV-_jc3xXmQW1rJcxmRK/view?usp=sharing,
 for other platforms look at https://download.imagemagick.org/ImageMagick/download/releases/).
 
 10. Download `USWebCoatedSWOP.icc` from
