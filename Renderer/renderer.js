@@ -43,12 +43,13 @@ const containerFontSize = {
     'TypeBack': 12
 };
 
-var difficultyTypes = {};
-difficultyTypes[ENEMY_NOSTAT] = ENEMY;
-difficultyTypes[OBJECTIVE_HERO] = OBJECTIVE_ALLY;
-difficultyTypes[OBJECTIVE_LOCATION] = OBJECTIVE;
-difficultyTypes[SHIP_ENEMY] = ENEMY;
-difficultyTypes[SHIP_OBJECTIVE] = OBJECTIVE_ALLY;
+const difficultyTypes = {
+    'Enemy NoStat': 'Enemy',
+    'Objective Hero': 'Objective Ally',
+    'Objective Location': 'Objective',
+    'Ship Enemy': 'Enemy',
+    'Ship Objective': 'Objective Ally'
+};
 
 function RendererSettings() {
     this.settings = {};
@@ -204,7 +205,7 @@ function updateRegion(key, value, card_type) {
         regions[3] += 1;
     }
 
-    if ((sizeKey == 'Type') && (card_type == HERO_PROMO)) {
+    if ((sizeKey == 'Type') && (card_type == 'Hero Promo')) {
         regions[2] += 10;
     }
 
@@ -356,7 +357,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            if (data.TypeRenderer == HERO_PROMO) {
+            if (data.TypeRenderer == 'Hero Promo') {
                 return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['Artist-region'][3] + 'px">' +
                     data['Bottom-format'] + data['LRL-IllustratorShort'] + ' ' + data.Artist + data['Bottom-formatEnd'] + '</div>';
             }
@@ -415,7 +416,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            if (data.TypeRenderer == HERO_PROMO) {
+            if (data.TypeRenderer == 'Hero Promo') {
                 return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionInfo-region'][3] + 'px">' +
                     data['Bottom-format'] + data.CollectionInfo + data['Bottom-formatEnd'] + '</div>';
             }
@@ -428,7 +429,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            if (data.TypeRenderer == HERO_PROMO) {
+            if (data.TypeRenderer == 'Hero Promo') {
                 return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['CollectionNumber-region'][3] + 'px; padding-left: 2px">' +
                     data['Bottom-format'] + (data.CollectionNumberCustomOverwrite + '' || data.CollectionNumberCustom) + data['Bottom-formatEnd'] + '</div>';
             }
@@ -445,7 +446,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 return '';
             }
 
-            if (data.TypeRenderer == HERO_PROMO) {
+            if (data.TypeRenderer == 'Hero Promo') {
                 return '<div style="color: ' + data['Bottom-colour'] + '; line-height: ' + data['Copyright-region'][3] + 'px">' +
                     data['Bottom-format'] + data.Copyright + data['Bottom-formatEnd'] + '</div>';
             }
@@ -626,7 +627,7 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             }
 
             var size = 42;
-            if (data.TypeRenderer == TREASURE) {
+            if (data.TypeRenderer == 'Treasure') {
                 size = 34;
             }
 
@@ -890,82 +891,82 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         data['Sphere-Body-shape'] = data['Option-Body-shape'];
     }
 
-    if (data['Adventure-region'] && (data.TypeRenderer == QUEST)) {
+    if (data['Adventure-region'] && (data.TypeRenderer == 'Quest')) {
         data['AdventureBack-region'] = data['Adventure-region'];
     }
 
-    if (data['Stage-region'] && (data.TypeRenderer == QUEST)) {
+    if (data['Stage-region'] && (data.TypeRenderer == 'Quest')) {
         data['StageBack-region'] = data['Stage-region'];
     }
 
-    if (data['Progress-region'] && (data.TypeRenderer == QUEST)) {
+    if (data['Progress-region'] && (data.TypeRenderer == 'Quest')) {
         data['ProgressBack-region'] = data['Progress-region'];
     }
 
-    if (data['OptionRight-region'] && (data.TypeRenderer == QUEST)) {
+    if (data['OptionRight-region'] && (data.TypeRenderer == 'Quest')) {
         data['OptionRightBack-region'] = data['OptionRight-region'];
     }
 
-    if (data['OptionRightDecoration-region'] && (data.TypeRenderer == QUEST)) {
+    if (data['OptionRightDecoration-region'] && (data.TypeRenderer == 'Quest')) {
         data['OptionRightBackDecoration-region'] = data['OptionRightDecoration-region'];
     }
 
-    if (data['EncounterSet-portrait-clip-region'] && (data.TypeRenderer == QUEST)) {
+    if (data['EncounterSet-portrait-clip-region'] && (data.TypeRenderer == 'Quest')) {
         data['EncounterSetBack-portrait-clip-region'] = data['EncounterSet-portrait-clip-region'];
     }
 
-    if (data['Artist-region'] && data.DoubleSide && ([CONTRACT, QUEST].indexOf(data.TypeRenderer) > -1)) {
+    if (data['Artist-region'] && data.DoubleSide && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
         data['ArtistBack-region'] = data['Artist-region'];
     }
 
-    if (data['Copyright-region'] && data.DoubleSide && ([CONTRACT, QUEST].indexOf(data.TypeRenderer) > -1)) {
+    if (data['Copyright-region'] && data.DoubleSide && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
         data['CopyrightBack-region'] = data['Copyright-region'];
     }
 
-    if (data['Collection-portrait-clip-region'] && data.DoubleSide && ([CONTRACT, QUEST].indexOf(data.TypeRenderer) > -1)) {
+    if (data['Collection-portrait-clip-region'] && data.DoubleSide && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
         data['CollectionBack-portrait-clip-region'] = data['Collection-portrait-clip-region'];
     }
 
-    if (data['CollectionNumber-region'] && data.DoubleSide && ([CONTRACT, QUEST].indexOf(data.TypeRenderer) > -1)) {
+    if (data['CollectionNumber-region'] && data.DoubleSide && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
         data['CollectionNumberBack-region'] = data['CollectionNumber-region'];
     }
 
-    if (data['CollectionInfo-region'] && data.DoubleSide && ([CONTRACT, QUEST].indexOf(data.TypeRenderer) > -1)) {
+    if (data['CollectionInfo-region'] && data.DoubleSide && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
         data['CollectionInfoBack-region'] = data['CollectionInfo-region'];
     }
 
-    if (data['Star-region'] && data.DoubleSide && ([CONTRACT, QUEST].indexOf(data.TypeRenderer) > -1)) {
+    if (data['Star-region'] && data.DoubleSide && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
         data['StarBack-region'] = data['Star-region'];
     }
 
-    if (data['PageIn-region'] && (data.TypeRenderer == RULES)) {
+    if (data['PageIn-region'] && (data.TypeRenderer == 'Rules')) {
         data['PageInBack-region'] = data['PageIn-region'];
     }
 
-    if (data['Side-region'] && data.DoubleSide && (data.TypeRenderer == CONTRACT)) {
+    if (data['Side-region'] && data.DoubleSide && (data.TypeRenderer == 'Contract')) {
         data['SideBack-region'] = data['Side-region'];
     }
 
-    if (data['Type-region'] && data.DoubleSide && (data.TypeRenderer == CONTRACT)) {
+    if (data['Type-region'] && data.DoubleSide && (data.TypeRenderer == 'Contract')) {
         data['TypeBack-region'] = data['Type-region'];
     }
-    else if (data['Type-region'] && (data.TypeRenderer == NIGHTMARE)) {
+    else if (data['Type-region'] && (data.TypeRenderer == 'Nightmare')) {
         data['TypeBack-region'] = data['Type-region'];
         data['Type-region'] = null;
     }
 
-    if ((data.Progress + '' != '') && (data.TypeRenderer == QUEST)) {
+    if ((data.Progress + '' != '') && (data.TypeRenderer == 'Quest')) {
         data.ProgressBack = data.Progress;
         data.Progress = '';
     }
 
     var template = data.Template;
-    if ((data.TypeRenderer == CAMPAIGN) && (template == 'Standard')) {
+    if ((data.TypeRenderer == 'Campaign') && (template == 'Standard')) {
         template = '';
     }
 
     var additionalEncounterSets = '';
-    if ((data.TypeRenderer == QUEST) && (parseInt(data.AdditionalEncounterSetsLength) > 0)) {
+    if ((data.TypeRenderer == 'Quest') && (parseInt(data.AdditionalEncounterSetsLength) > 0)) {
         additionalEncounterSets = data.AdditionalEncounterSetsLength;
     }
 
