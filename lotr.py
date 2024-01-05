@@ -10855,6 +10855,10 @@ def run_cmd(cmd):
     try:
         res = subprocess.run(cmd, stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT, shell=True, check=True)
+        if res and 'Error' in res.stdout.decode('utf-8'):
+            raise RuntimeError('Command "{}" contains error message(s): {}'
+                               .format(cmd, res.stdout.decode('utf-8')))
+
         return res
     except subprocess.CalledProcessError as exc:
         raise RuntimeError('Command "{}" returned error with code {}: {}'
