@@ -1,635 +1,808 @@
-var doubleSideTypes = ['Campaign', 'Nightmare', 'Presentation', 'Quest', 'Rules'];
-var playerTypes = ['Ally', 'Attachment', 'Contract', 'Event', 'Full Art Landscape', 'Full Art Portrait', 'Hero', 'Hero Promo', 'Player Objective', 'Player Side Quest', 'Treasure'];
-var playerCopyTypes = ['Ally', 'Attachment', 'Event', 'Player Side Quest'];
-var landscapeTypes = ['Cave', 'Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Full Art Landscape', 'Player Side Quest', 'Region', 'Quest'];
+const ALLY = 'Ally';
+const ATTACHMENT = 'Attachment';
+const BOON = 'Boon';
+const BURDEN = 'Burden';
+const CAMPAIGN = 'Campaign';
+const CAVE = 'Cave';
+const CONTRACT = 'Contract';
+const ENCOUNTER_SIDE_QUEST = 'Encounter Side Quest';
+const ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA = 'Encounter Side Quest SmallTextArea';
+const ENEMY = 'Enemy';
+const ENEMY_NOSTAT = 'Enemy NoStat';
+const EVENT = 'Event';
+const FULL_ART_LANDSCAPE = 'Full Art Landscape';
+const FULL_ART_PORTRAIT = 'Full Art Portrait';
+const HERO = 'Hero';
+const HERO_PROMO = 'Hero Promo';
+const LOCATION = 'Location';
+const NIGHTMARE = 'Nightmare';
+const OBJECTIVE = 'Objective';
+const OBJECTIVE_ALLY = 'Objective Ally';
+const OBJECTIVE_HERO = 'Objective Hero';
+const OBJECTIVE_LOCATION = 'Objective Location';
+const PLAYER_OBJECTIVE = 'Player Objective';
+const PLAYER_SIDE_QUEST = 'Player Side Quest';
+const PRESENTATION = 'Presentation';
+const PROMO = 'Promo';
+const QUEST = 'Quest';
+const REGION = 'Region';
+const RULES = 'Rules';
+const SETUP = 'Setup';
+const SHIP_ENEMY = 'Ship Enemy';
+const SHIP_OBJECTIVE = 'Ship Objective';
+const TREACHERY = 'Treachery';
+const TREASURE = 'Treasure';
 
-var optionalTraitTypes = ['Cave', 'Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Player Side Quest'];
+const ENGLISH = 'English';
+const FRENCH = 'French';
+const GERMAN = 'German';
+const ITALIAN = 'Italian';
+const POLISH = 'Polish';
+const PORTUGUESE = 'Portuguese';
+const SPANISH = 'Spanish';
+
+var doubleSideTypes = [CAMPAIGN, NIGHTMARE, PRESENTATION, QUEST, RULES];
+var playerTypes = [ALLY, ATTACHMENT, CONTRACT, EVENT, FULL_ART_LANDSCAPE, FULL_ART_PORTRAIT, HERO, HERO_PROMO, PLAYER_OBJECTIVE, PLAYER_SIDE_QUEST, TREASURE];
+var playerCopyTypes = [ALLY, ATTACHMENT, EVENT, PLAYER_SIDE_QUEST];
+var landscapeTypes = [CAVE, ENCOUNTER_SIDE_QUEST, ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA, FULL_ART_LANDSCAPE, PLAYER_SIDE_QUEST, REGION, QUEST];
+
+var optionalTraitTypes = [CAVE, ENCOUNTER_SIDE_QUEST, ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA, PLAYER_SIDE_QUEST];
 
 /*
 var Region = {};
-Region['Ally'] = '';
-Region['Attachment'] = '';
-Region['Campaign'] = '';
-Region['Cave'] = '';
-Region['Contract'] = '';
-Region['Encounter Side Quest'] = '';
-Region['Encounter Side Quest SmallTextArea'] = '';
-Region['Enemy'] = '';
-Region['Enemy NoStat'] = '';
-Region['Event'] = '';
-Region['Full Art Landscape'] = '';
-Region['Full Art Portrait'] = '';
-Region['Hero'] = '';
-Region['Hero Promo'] = '';
-Region['Location'] = '';
-Region['Nightmare'] = '';
-Region['Objective'] = '';
-Region['Objective Ally'] = '';
-Region['Objective Hero'] = '';
-Region['Objective Location'] = '';
-Region['Player Objective'] = '';
-Region['Player Side Quest'] = '';
-Region['Presentation'] = '';
-Region['Quest'] = '';
-Region['Rules'] = '';
-Region['Ship Enemy'] = '';
-Region['Ship Objective'] = '';
-Region['Treachery'] = '';
-Region['Treasure'] = '';
+Region[ALLY] = '';
+Region[ATTACHMENT] = '';
+Region[CAMPAIGN] = '';
+Region[CAVE] = '';
+Region[CONTRACT] = '';
+Region[ENCOUNTER_SIDE_QUEST] = '';
+Region[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '';
+Region[ENEMY] = '';
+Region[ENEMY_NOSTAT] = '';
+Region[EVENT] = '';
+Region[FULL_ART_LANDSCAPE] = '';
+Region[FULL_ART_PORTRAIT] = '';
+Region[HERO] = '';
+Region[HERO_PROMO] = '';
+Region[LOCATION] = '';
+Region[NIGHTMARE] = '';
+Region[OBJECTIVE] = '';
+Region[OBJECTIVE_ALLY] = '';
+Region[OBJECTIVE_HERO] = '';
+Region[OBJECTIVE_LOCATION] = '';
+Region[PLAYER_OBJECTIVE] = '';
+Region[PLAYER_SIDE_QUEST] = '';
+Region[PRESENTATION] = '';
+Region[QUEST] = '';
+Region[REGION] = '';
+Region[RULES] = '';
+Region[SHIP_ENEMY] = '';
+Region[SHIP_OBJECTIVE] = '';
+Region[TREACHERY] = '';
+Region[TREASURE] = '';
 */
 
 var gameNamePortraitRegion = {};
-gameNamePortraitRegion['Presentation'] = '50,33,313,140';
+gameNamePortraitRegion[PRESENTATION] = '50,33,313,140';
 
 var namePortraitRegion = {};
-namePortraitRegion['Presentation'] = '50,420,313,113';
+namePortraitRegion[PRESENTATION] = '50,420,313,113';
 
 var pageInRegion = {};
-pageInRegion['Presentation'] = '48,488,317,15';
-pageInRegion['Rules'] = '48,488,317,15';
+pageInRegion[PRESENTATION] = '48,488,317,15';
+pageInRegion[RULES] = '48,488,317,15';
 
 var sideRegion = {};
-sideRegion['Contract'] = '0,279,413,17';
-sideRegion['Player Objective'] = '0,310,413,17';
+sideRegion[CONTRACT] = '0,279,413,17';
+sideRegion[PLAYER_OBJECTIVE] = '0,310,413,17';
 
 var encounterSet1PortraitRegion = {};
-encounterSet1PortraitRegion['Quest'] = '450,213,20,20';
+encounterSet1PortraitRegion[QUEST] = '450,213,20,20';
 
 var encounterSet2PortraitRegion = {};
-encounterSet2PortraitRegion['Quest'] = '426,213,20,20';
+encounterSet2PortraitRegion[QUEST] = '426,213,20,20';
 
 var encounterSet3PortraitRegion = {};
-encounterSet3PortraitRegion['Quest'] = '402,213,20,20';
+encounterSet3PortraitRegion[QUEST] = '402,213,20,20';
 
 var encounterSet4PortraitRegion = {};
-encounterSet4PortraitRegion['Quest'] = '378,213,20,20';
+encounterSet4PortraitRegion[QUEST] = '378,213,20,20';
 
 var encounterSet5PortraitRegion = {};
-encounterSet5PortraitRegion['Quest'] = '354,213,20,20';
+encounterSet5PortraitRegion[QUEST] = '354,213,20,20';
 
 var encounterSet6PortraitRegion = {};
-encounterSet6PortraitRegion['Quest'] = '330,213,20,20';
+encounterSet6PortraitRegion[QUEST] = '330,213,20,20';
 
 var starRegion = {};
-starRegion['Ally'] = '372,524,11,11';
-starRegion['Attachment'] = '373,524,11,11';
-starRegion['Campaign'] = '373,524,11,11';
-starRegion['Cave'] = '529,374,11,11';
-starRegion['Contract'] = '373,524,11,11';
-starRegion['Encounter Side Quest'] = '531,374,11,11';
-starRegion['Encounter Side Quest SmallTextArea'] = '531,374,11,11';
-starRegion['Enemy'] = '373,524,11,11';
-starRegion['Enemy NoStat'] = '373,524,11,11';
-starRegion['Event'] = '373,524,11,11';
-starRegion['Hero'] = '373,524,11,11';
-starRegion['Hero Promo'] = '351,524,11,11';
-starRegion['Location'] = '373,524,11,11';
-starRegion['Nightmare'] = '379,524,11,11';
-starRegion['Objective'] = '363,524,11,11';
-starRegion['Objective Ally'] = '363,524,11,11';
-starRegion['Objective Hero'] = '363,524,11,11';
-starRegion['Objective Location'] = '363,524,11,11';
-starRegion['Player Objective'] = '363,524,11,11';
-starRegion['Player Side Quest'] = '529,374,11,11';
-starRegion['Quest'] = '529,374,11,11';
-starRegion['Region'] = '529,374,11,11';
-starRegion['Ship Enemy'] = '373,524,11,11';
-starRegion['Ship Objective'] = '363,524,11,11';
-starRegion['Treachery'] = '373,524,11,11';
-starRegion['Treasure'] = '377,524,11,11';
+starRegion[ALLY] = '372,524,11,11';
+starRegion[ATTACHMENT] = '373,524,11,11';
+starRegion[CAMPAIGN] = '373,524,11,11';
+starRegion[CAVE] = '529,374,11,11';
+starRegion[CONTRACT] = '373,524,11,11';
+starRegion[ENCOUNTER_SIDE_QUEST] = '531,374,11,11';
+starRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '531,374,11,11';
+starRegion[ENEMY] = '373,524,11,11';
+starRegion[ENEMY_NOSTAT] = '373,524,11,11';
+starRegion[EVENT] = '373,524,11,11';
+starRegion[HERO] = '373,524,11,11';
+starRegion[HERO_PROMO] = '351,524,11,11';
+starRegion[LOCATION] = '373,524,11,11';
+starRegion[NIGHTMARE] = '379,524,11,11';
+starRegion[OBJECTIVE] = '363,524,11,11';
+starRegion[OBJECTIVE_ALLY] = '363,524,11,11';
+starRegion[OBJECTIVE_HERO] = '363,524,11,11';
+starRegion[OBJECTIVE_LOCATION] = '363,524,11,11';
+starRegion[PLAYER_OBJECTIVE] = '363,524,11,11';
+starRegion[PLAYER_SIDE_QUEST] = '529,374,11,11';
+starRegion[QUEST] = '529,374,11,11';
+starRegion[REGION] = '529,374,11,11';
+starRegion[SHIP_ENEMY] = '373,524,11,11';
+starRegion[SHIP_OBJECTIVE] = '363,524,11,11';
+starRegion[TREACHERY] = '373,524,11,11';
+starRegion[TREASURE] = '377,524,11,11';
 
 var collectionInfoRegion = {};
-collectionInfoRegion['Ally'] = '357,526,26,15';
-collectionInfoRegion['Attachment'] = '358,526,26,15';
-collectionInfoRegion['Campaign'] = '358,526,26,15';
-collectionInfoRegion['Cave'] = '516,374,26,15';
-collectionInfoRegion['Contract'] = '358,526,26,15';
-collectionInfoRegion['Encounter Side Quest'] = '518,374,26,15';
-collectionInfoRegion['Encounter Side Quest SmallTextArea'] = '518,374,26,15';
-collectionInfoRegion['Enemy'] = '358,526,26,15';
-collectionInfoRegion['Enemy NoStat'] = '358,526,26,15';
-collectionInfoRegion['Event'] = '358,526,26,15';
-collectionInfoRegion['Hero'] = '358,526,26,15';
-collectionInfoRegion['Hero Promo'] = '321,510,20,12';
-collectionInfoRegion['Location'] = '358,526,26,15';
-collectionInfoRegion['Nightmare'] = '364,526,26,15';
-collectionInfoRegion['Objective'] = '348,526,26,15';
-collectionInfoRegion['Objective Ally'] = '348,526,26,15';
-collectionInfoRegion['Objective Hero'] = '348,526,26,15';
-collectionInfoRegion['Objective Location'] = '348,526,26,15';
-collectionInfoRegion['Player Objective'] = '348,526,26,15';
-collectionInfoRegion['Player Side Quest'] = '516,374,26,15';
-collectionInfoRegion['Quest'] = '516,374,26,15';
-collectionInfoRegion['Region'] = '516,374,26,15';
-collectionInfoRegion['Ship Enemy'] = '358,526,26,15';
-collectionInfoRegion['Ship Objective'] = '348,526,26,15';
-collectionInfoRegion['Treachery'] = '358,526,26,15';
-collectionInfoRegion['Treasure'] = '362,526,26,15';
+collectionInfoRegion[ALLY] = '357,526,26,15';
+collectionInfoRegion[ATTACHMENT] = '358,526,26,15';
+collectionInfoRegion[CAMPAIGN] = '358,526,26,15';
+collectionInfoRegion[CAVE] = '516,374,26,15';
+collectionInfoRegion[CONTRACT] = '358,526,26,15';
+collectionInfoRegion[ENCOUNTER_SIDE_QUEST] = '518,374,26,15';
+collectionInfoRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '518,374,26,15';
+collectionInfoRegion[ENEMY] = '358,526,26,15';
+collectionInfoRegion[ENEMY_NOSTAT] = '358,526,26,15';
+collectionInfoRegion[EVENT] = '358,526,26,15';
+collectionInfoRegion[HERO] = '358,526,26,15';
+collectionInfoRegion[HERO_PROMO] = '321,510,20,12';
+collectionInfoRegion[LOCATION] = '358,526,26,15';
+collectionInfoRegion[NIGHTMARE] = '364,526,26,15';
+collectionInfoRegion[OBJECTIVE] = '348,526,26,15';
+collectionInfoRegion[OBJECTIVE_ALLY] = '348,526,26,15';
+collectionInfoRegion[OBJECTIVE_HERO] = '348,526,26,15';
+collectionInfoRegion[OBJECTIVE_LOCATION] = '348,526,26,15';
+collectionInfoRegion[PLAYER_OBJECTIVE] = '348,526,26,15';
+collectionInfoRegion[PLAYER_SIDE_QUEST] = '516,374,26,15';
+collectionInfoRegion[QUEST] = '516,374,26,15';
+collectionInfoRegion[REGION] = '516,374,26,15';
+collectionInfoRegion[SHIP_ENEMY] = '358,526,26,15';
+collectionInfoRegion[SHIP_OBJECTIVE] = '348,526,26,15';
+collectionInfoRegion[TREACHERY] = '358,526,26,15';
+collectionInfoRegion[TREASURE] = '362,526,26,15';
 
 var collectionNumberRegion = {};
-collectionNumberRegion['Ally'] = '334,527,24,15';
-collectionNumberRegion['Attachment'] = '334,527,24,15';
-collectionNumberRegion['Campaign'] = '334,527,24,15';
-collectionNumberRegion['Cave'] = '488,375,24,15';
-collectionNumberRegion['Contract'] = '334,527,24,15';
-collectionNumberRegion['Encounter Side Quest'] = '403,375,24,15';
-collectionNumberRegion['Encounter Side Quest SmallTextArea'] = '403,375,24,15';
-collectionNumberRegion['Enemy'] = '334,527,24,15';
-collectionNumberRegion['Enemy NoStat'] = '334,527,24,15';
-collectionNumberRegion['Event'] = '334,527,24,15';
-collectionNumberRegion['Full Art Landscape'] = '334,527,24,15';
-collectionNumberRegion['Full Art Portrait'] = '334,527,24,15';
-collectionNumberRegion['Hero'] = '334,527,24,15';
-collectionNumberRegion['Hero Promo'] = '313,510,24,12';
-collectionNumberRegion['Location'] = '334,527,24,15';
-collectionNumberRegion['Nightmare'] = '334,527,24,15';
-collectionNumberRegion['Objective'] = '334,527,24,15';
-collectionNumberRegion['Objective Ally'] = '334,527,24,15';
-collectionNumberRegion['Objective Hero'] = '334,527,24,15';
-collectionNumberRegion['Objective Location'] = '334,527,24,15';
-collectionNumberRegion['Player Objective'] = '334,527,24,15';
-collectionNumberRegion['Player Side Quest'] = '403,375,24,15';
-collectionNumberRegion['Quest'] = '403,375,24,15';
-collectionNumberRegion['Region'] = '488,375,24,15';
-collectionNumberRegion['Ship Enemy'] = '334,527,24,15';
-collectionNumberRegion['Ship Objective'] = '334,527,24,15';
-collectionNumberRegion['Treachery'] = '334,527,24,15';
-collectionNumberRegion['Treasure'] = '334,527,24,15';
+collectionNumberRegion[ALLY] = '334,527,24,15';
+collectionNumberRegion[ATTACHMENT] = '334,527,24,15';
+collectionNumberRegion[CAMPAIGN] = '334,527,24,15';
+collectionNumberRegion[CAVE] = '488,375,24,15';
+collectionNumberRegion[CONTRACT] = '334,527,24,15';
+collectionNumberRegion[ENCOUNTER_SIDE_QUEST] = '403,375,24,15';
+collectionNumberRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '403,375,24,15';
+collectionNumberRegion[ENEMY] = '334,527,24,15';
+collectionNumberRegion[ENEMY_NOSTAT] = '334,527,24,15';
+collectionNumberRegion[EVENT] = '334,527,24,15';
+collectionNumberRegion[FULL_ART_LANDSCAPE] = '334,527,24,15';
+collectionNumberRegion[FULL_ART_PORTRAIT] = '334,527,24,15';
+collectionNumberRegion[HERO] = '334,527,24,15';
+collectionNumberRegion[HERO_PROMO] = '313,510,24,12';
+collectionNumberRegion[LOCATION] = '334,527,24,15';
+collectionNumberRegion[NIGHTMARE] = '334,527,24,15';
+collectionNumberRegion[OBJECTIVE] = '334,527,24,15';
+collectionNumberRegion[OBJECTIVE_ALLY] = '334,527,24,15';
+collectionNumberRegion[OBJECTIVE_HERO] = '334,527,24,15';
+collectionNumberRegion[OBJECTIVE_LOCATION] = '334,527,24,15';
+collectionNumberRegion[PLAYER_OBJECTIVE] = '334,527,24,15';
+collectionNumberRegion[PLAYER_SIDE_QUEST] = '403,375,24,15';
+collectionNumberRegion[QUEST] = '403,375,24,15';
+collectionNumberRegion[REGION] = '488,375,24,15';
+collectionNumberRegion[SHIP_ENEMY] = '334,527,24,15';
+collectionNumberRegion[SHIP_OBJECTIVE] = '334,527,24,15';
+collectionNumberRegion[TREACHERY] = '334,527,24,15';
+collectionNumberRegion[TREASURE] = '334,527,24,15';
 
 var collectionPortraitRegion = {};
-collectionPortraitRegion['Ally'] = '322,528,12,12';
-collectionPortraitRegion['Attachment'] = '322,528,12,12';
-collectionPortraitRegion['Campaign'] = '322,528,12,12';
-collectionPortraitRegion['Cave'] = '476,376,12,12';
-collectionPortraitRegion['Contract'] = '322,528,12,12';
-collectionPortraitRegion['Encounter Side Quest'] = '391,376,12,12';
-collectionPortraitRegion['Encounter Side Quest SmallTextArea'] = '391,376,12,12';
-collectionPortraitRegion['Enemy'] = '322,528,12,12';
-collectionPortraitRegion['Enemy NoStat'] = '322,528,12,12';
-collectionPortraitRegion['Event'] = '322,528,12,12';
-collectionPortraitRegion['Hero'] = '322,528,12,12';
-collectionPortraitRegion['Hero Promo'] = '305,511,9,9';
-collectionPortraitRegion['Location'] = '322,528,12,12';
-collectionPortraitRegion['Nightmare'] = '322,528,12,12';
-collectionPortraitRegion['Objective'] = '322,528,12,12';
-collectionPortraitRegion['Objective Ally'] = '322,528,12,12';
-collectionPortraitRegion['Objective Hero'] = '322,528,12,12';
-collectionPortraitRegion['Objective Location'] = '322,528,12,12';
-collectionPortraitRegion['Player Objective'] = '322,528,12,12';
-collectionPortraitRegion['Player Side Quest'] = '391,376,12,12';
-collectionPortraitRegion['Presentation'] = '185,383,43,43';
-collectionPortraitRegion['Quest'] = '391,376,12,12';
-collectionPortraitRegion['Region'] = '476,376,12,12';
-collectionPortraitRegion['Ship Enemy'] = '322,528,12,12';
-collectionPortraitRegion['Ship Objective'] = '322,528,12,12';
-collectionPortraitRegion['Treachery'] = '322,528,12,12';
-collectionPortraitRegion['Treasure'] = '322,528,12,12';
+collectionPortraitRegion[ALLY] = '322,528,12,12';
+collectionPortraitRegion[ATTACHMENT] = '322,528,12,12';
+collectionPortraitRegion[CAMPAIGN] = '322,528,12,12';
+collectionPortraitRegion[CAVE] = '476,376,12,12';
+collectionPortraitRegion[CONTRACT] = '322,528,12,12';
+collectionPortraitRegion[ENCOUNTER_SIDE_QUEST] = '391,376,12,12';
+collectionPortraitRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '391,376,12,12';
+collectionPortraitRegion[ENEMY] = '322,528,12,12';
+collectionPortraitRegion[ENEMY_NOSTAT] = '322,528,12,12';
+collectionPortraitRegion[EVENT] = '322,528,12,12';
+collectionPortraitRegion[HERO] = '322,528,12,12';
+collectionPortraitRegion[HERO_PROMO] = '305,511,9,9';
+collectionPortraitRegion[LOCATION] = '322,528,12,12';
+collectionPortraitRegion[NIGHTMARE] = '322,528,12,12';
+collectionPortraitRegion[OBJECTIVE] = '322,528,12,12';
+collectionPortraitRegion[OBJECTIVE_ALLY] = '322,528,12,12';
+collectionPortraitRegion[OBJECTIVE_HERO] = '322,528,12,12';
+collectionPortraitRegion[OBJECTIVE_LOCATION] = '322,528,12,12';
+collectionPortraitRegion[PLAYER_OBJECTIVE] = '322,528,12,12';
+collectionPortraitRegion[PLAYER_SIDE_QUEST] = '391,376,12,12';
+collectionPortraitRegion[PRESENTATION] = '185,383,43,43';
+collectionPortraitRegion[QUEST] = '391,376,12,12';
+collectionPortraitRegion[REGION] = '476,376,12,12';
+collectionPortraitRegion[SHIP_ENEMY] = '322,528,12,12';
+collectionPortraitRegion[SHIP_OBJECTIVE] = '322,528,12,12';
+collectionPortraitRegion[TREACHERY] = '322,528,12,12';
+collectionPortraitRegion[TREASURE] = '322,528,12,12';
 
 var typeRegion = {};
-typeRegion['Ally'] = '136,504,141,20';
-typeRegion['Attachment'] = '136,504,141,20';
-typeRegion['Campaign'] = '136,504,141,20';
-typeRegion['Contract'] = '136,504,141,20';
-typeRegion['Enemy'] = '136,504,141,20';
-typeRegion['Event'] = '136,504,141,20';
-typeRegion['Hero'] = '136,504,141,20';
-typeRegion['Hero Promo'] = '285,448,32,15';
-typeRegion['Location'] = '136,504,141,20';
-typeRegion['Nightmare'] = '136,504,141,20';
-typeRegion['Objective'] = '136,504,141,20';
-typeRegion['Objective Ally'] = '136,504,141,20';
-typeRegion['Objective Hero'] = '136,504,141,20';
-typeRegion['Objective Location'] = '136,504,141,20';
-typeRegion['Player Objective'] = '136,504,141,20';
-typeRegion['Ship Enemy'] = '136,504,141,20';
-typeRegion['Ship Objective'] = '136,504,141,20';
-typeRegion['Treachery'] = '136,504,141,20';
-typeRegion['Treasure'] = '136,504,141,20';
+typeRegion[ALLY] = '136,504,141,20';
+typeRegion[ATTACHMENT] = '136,504,141,20';
+typeRegion[CAMPAIGN] = '136,504,141,20';
+typeRegion[CONTRACT] = '136,504,141,20';
+typeRegion[ENEMY] = '136,504,141,20';
+typeRegion[EVENT] = '136,504,141,20';
+typeRegion[HERO] = '136,504,141,20';
+typeRegion[HERO_PROMO] = '285,448,32,15';
+typeRegion[LOCATION] = '136,504,141,20';
+typeRegion[NIGHTMARE] = '136,504,141,20';
+typeRegion[OBJECTIVE] = '136,504,141,20';
+typeRegion[OBJECTIVE_ALLY] = '136,504,141,20';
+typeRegion[OBJECTIVE_HERO] = '136,504,141,20';
+typeRegion[OBJECTIVE_LOCATION] = '136,504,141,20';
+typeRegion[PLAYER_OBJECTIVE] = '136,504,141,20';
+typeRegion[SHIP_ENEMY] = '136,504,141,20';
+typeRegion[SHIP_OBJECTIVE] = '136,504,141,20';
+typeRegion[TREACHERY] = '136,504,141,20';
+typeRegion[TREASURE] = '136,504,141,20';
 
 var copyrightRegion = {};
-copyrightRegion['Ally'] = '158,527,124,15';
-copyrightRegion['Attachment'] = '158,527,124,15';
-copyrightRegion['Campaign'] = '158,527,124,15';
-copyrightRegion['Cave'] = '345,375,124,15';
-copyrightRegion['Contract'] = '158,527,124,15';
-copyrightRegion['Encounter Side Quest'] = '225,375,124,15';
-copyrightRegion['Encounter Side Quest SmallTextArea'] = '225,375,124,15';
-copyrightRegion['Enemy'] = '158,527,124,15';
-copyrightRegion['Enemy NoStat'] = '158,527,124,15';
-copyrightRegion['Event'] = '158,527,124,15';
-copyrightRegion['Full Art Landscape'] = '34,364,124,15';
-copyrightRegion['Full Art Portrait'] = '34,514,124,15';
-copyrightRegion['Hero'] = '158,527,124,15';
-copyrightRegion['Hero Promo'] = '161,510,124,12';
-copyrightRegion['Location'] = '158,527,124,15';
-copyrightRegion['Nightmare'] = '158,527,124,15';
-copyrightRegion['Objective'] = '158,527,124,15';
-copyrightRegion['Objective Ally'] = '158,527,124,15';
-copyrightRegion['Objective Hero'] = '158,527,124,15';
-copyrightRegion['Objective Location'] = '158,527,124,15';
-copyrightRegion['Player Objective'] = '158,527,124,15';
-copyrightRegion['Player Side Quest'] = '225,375,124,15';
-copyrightRegion['Quest'] = '225,375,124,15';
-copyrightRegion['Region'] = '276,375,124,15';
-copyrightRegion['Ship Enemy'] = '158,527,124,15';
-copyrightRegion['Ship Objective'] = '158,527,124,15';
-copyrightRegion['Treachery'] = '158,527,124,15';
-copyrightRegion['Treasure'] = '158,527,124,15';
+copyrightRegion[ALLY] = '158,527,124,15';
+copyrightRegion[ATTACHMENT] = '158,527,124,15';
+copyrightRegion[CAMPAIGN] = '158,527,124,15';
+copyrightRegion[CAVE] = '345,375,124,15';
+copyrightRegion[CONTRACT] = '158,527,124,15';
+copyrightRegion[ENCOUNTER_SIDE_QUEST] = '225,375,124,15';
+copyrightRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '225,375,124,15';
+copyrightRegion[ENEMY] = '158,527,124,15';
+copyrightRegion[ENEMY_NOSTAT] = '158,527,124,15';
+copyrightRegion[EVENT] = '158,527,124,15';
+copyrightRegion[FULL_ART_LANDSCAPE] = '34,364,124,15';
+copyrightRegion[FULL_ART_PORTRAIT] = '34,514,124,15';
+copyrightRegion[HERO] = '158,527,124,15';
+copyrightRegion[HERO_PROMO] = '161,510,124,12';
+copyrightRegion[LOCATION] = '158,527,124,15';
+copyrightRegion[NIGHTMARE] = '158,527,124,15';
+copyrightRegion[OBJECTIVE] = '158,527,124,15';
+copyrightRegion[OBJECTIVE_ALLY] = '158,527,124,15';
+copyrightRegion[OBJECTIVE_HERO] = '158,527,124,15';
+copyrightRegion[OBJECTIVE_LOCATION] = '158,527,124,15';
+copyrightRegion[PLAYER_OBJECTIVE] = '158,527,124,15';
+copyrightRegion[PLAYER_SIDE_QUEST] = '225,375,124,15';
+copyrightRegion[QUEST] = '225,375,124,15';
+copyrightRegion[REGION] = '276,375,124,15';
+copyrightRegion[SHIP_ENEMY] = '158,527,124,15';
+copyrightRegion[SHIP_OBJECTIVE] = '158,527,124,15';
+copyrightRegion[TREACHERY] = '158,527,124,15';
+copyrightRegion[TREASURE] = '158,527,124,15';
 
 var artistRegion = {};
-artistRegion['Ally'] = '63,527,100,15';
-artistRegion['Attachment'] = '63,527,100,15';
-artistRegion['Campaign'] = '63,527,100,15';
-artistRegion['Cave'] = '48,375,100,15';
-artistRegion['Contract'] = '63,527,100,15';
-artistRegion['Encounter Side Quest'] = '130,375,100,15';
-artistRegion['Encounter Side Quest SmallTextArea'] = '130,375,100,15';
-artistRegion['Enemy'] = '63,527,100,15';
-artistRegion['Enemy NoStat'] = '63,527,100,15';
-artistRegion['Event'] = '63,527,100,15';
-artistRegion['Full Art Landscape'] = '390,364,140,15';
-artistRegion['Full Art Portrait'] = '240,514,140,15';
-artistRegion['Hero'] = '63,527,100,15';
-artistRegion['Hero Promo'] = '79,510,88,12';
-artistRegion['Location'] = '63,527,100,15';
-artistRegion['Nightmare'] = '63,527,100,15';
-artistRegion['Objective'] = '63,527,100,15';
-artistRegion['Objective Ally'] = '63,527,100,15';
-artistRegion['Objective Hero'] = '63,527,100,15';
-artistRegion['Objective Location'] = '63,527,100,15';
-artistRegion['Player Objective'] = '63,527,100,15';
-artistRegion['Player Side Quest'] = '130,375,100,15';
-artistRegion['Quest'] = '130,375,100,15';
-artistRegion['Region'] = '68,375,100,15';
-artistRegion['Ship Enemy'] = '63,527,100,15';
-artistRegion['Ship Objective'] = '63,527,100,15';
-artistRegion['Treachery'] = '63,527,100,15';
-artistRegion['Treasure'] = '63,527,100,15';
+artistRegion[ALLY] = '63,527,100,15';
+artistRegion[ATTACHMENT] = '63,527,100,15';
+artistRegion[CAMPAIGN] = '63,527,100,15';
+artistRegion[CAVE] = '48,375,100,15';
+artistRegion[CONTRACT] = '63,527,100,15';
+artistRegion[ENCOUNTER_SIDE_QUEST] = '130,375,100,15';
+artistRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '130,375,100,15';
+artistRegion[ENEMY] = '63,527,100,15';
+artistRegion[ENEMY_NOSTAT] = '63,527,100,15';
+artistRegion[EVENT] = '63,527,100,15';
+artistRegion[FULL_ART_LANDSCAPE] = '390,364,140,15';
+artistRegion[FULL_ART_PORTRAIT] = '240,514,140,15';
+artistRegion[HERO] = '63,527,100,15';
+artistRegion[HERO_PROMO] = '79,510,88,12';
+artistRegion[LOCATION] = '63,527,100,15';
+artistRegion[NIGHTMARE] = '63,527,100,15';
+artistRegion[OBJECTIVE] = '63,527,100,15';
+artistRegion[OBJECTIVE_ALLY] = '63,527,100,15';
+artistRegion[OBJECTIVE_HERO] = '63,527,100,15';
+artistRegion[OBJECTIVE_LOCATION] = '63,527,100,15';
+artistRegion[PLAYER_OBJECTIVE] = '63,527,100,15';
+artistRegion[PLAYER_SIDE_QUEST] = '130,375,100,15';
+artistRegion[QUEST] = '130,375,100,15';
+artistRegion[REGION] = '68,375,100,15';
+artistRegion[SHIP_ENEMY] = '63,527,100,15';
+artistRegion[SHIP_OBJECTIVE] = '63,527,100,15';
+artistRegion[TREACHERY] = '63,527,100,15';
+artistRegion[TREASURE] = '63,527,100,15';
 
 // UPDATE discord_bot.py and scripts.py
 var portraitRegion = {};
-portraitRegion['Ally'] = '87,0,326,330';
-portraitRegion['Attachment'] = '40,50,333,280';
-portraitRegion['Campaign'] = '0,0,413,245';
-portraitRegion['Cave'] = '0,0,563,413';
-portraitRegion['Contract'] = '0,0,413,315';
-portraitRegion['Encounter Side Quest'] = '0,0,563,413';
-portraitRegion['Encounter Side Quest SmallTextArea'] = '0,0,563,413';
-portraitRegion['Enemy'] = '87,0,326,330';
-portraitRegion['Enemy NoStat'] = '0,0,413,563';
-portraitRegion['Event'] = '60,0,353,330';
-portraitRegion['Full Art Landscape'] = '0,0,563,413';
-portraitRegion['Full Art Portrait'] = '0,0,413,563';
-portraitRegion['Hero'] = '87,0,326,330';
-portraitRegion['Hero Promo'] = '0,0,413,563';
-portraitRegion['Location'] = '0,60,413,268';
-portraitRegion['Nightmare'] = '0,77,413,245';
-portraitRegion['Objective'] = '0,69,413,300';
-portraitRegion['Objective Ally'] = '78,81,335,268';
-portraitRegion['Objective Hero'] = '78,81,335,268';
-portraitRegion['Objective Location'] = '0,69,413,300';
-portraitRegion['Player Objective'] = '0,69,413,300';
-portraitRegion['Player Side Quest'] = '0,0,563,413';
-portraitRegion['Presentation'] = '0,140,413,285';
-portraitRegion['Quest'] = '0,0,563,413';
-portraitRegion['Region'] = '0,0,563,413';
-portraitRegion['Ship Enemy'] = '87,0,326,330';
-portraitRegion['Ship Objective'] = '78,81,335,268';
-portraitRegion['Treachery'] = '60,0,353,330';
-portraitRegion['Treasure'] = '0,61,413,265';
+portraitRegion[ALLY] = '87,0,326,330';
+portraitRegion[ATTACHMENT] = '40,50,333,280';
+portraitRegion[CAMPAIGN] = '0,0,413,245';
+portraitRegion[CAVE] = '0,0,563,413';
+portraitRegion[CONTRACT] = '0,0,413,315';
+portraitRegion[ENCOUNTER_SIDE_QUEST] = '0,0,563,413';
+portraitRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '0,0,563,413';
+portraitRegion[ENEMY] = '87,0,326,330';
+portraitRegion[ENEMY_NOSTAT] = '0,0,413,563';
+portraitRegion[EVENT] = '60,0,353,330';
+portraitRegion[FULL_ART_LANDSCAPE] = '0,0,563,413';
+portraitRegion[FULL_ART_PORTRAIT] = '0,0,413,563';
+portraitRegion[HERO] = '87,0,326,330';
+portraitRegion[HERO_PROMO] = '0,0,413,563';
+portraitRegion[LOCATION] = '0,60,413,268';
+portraitRegion[NIGHTMARE] = '0,77,413,245';
+portraitRegion[OBJECTIVE] = '0,69,413,300';
+portraitRegion[OBJECTIVE_ALLY] = '78,81,335,268';
+portraitRegion[OBJECTIVE_HERO] = '78,81,335,268';
+portraitRegion[OBJECTIVE_LOCATION] = '0,69,413,300';
+portraitRegion[PLAYER_OBJECTIVE] = '0,69,413,300';
+portraitRegion[PLAYER_SIDE_QUEST] = '0,0,563,413';
+portraitRegion[PRESENTATION] = '0,140,413,285';
+portraitRegion[QUEST] = '0,0,563,413';
+portraitRegion[REGION] = '0,0,563,413';
+portraitRegion[SHIP_ENEMY] = '87,0,326,330';
+portraitRegion[SHIP_OBJECTIVE] = '78,81,335,268';
+portraitRegion[TREACHERY] = '60,0,353,330';
+portraitRegion[TREASURE] = '0,61,413,265';
 
 var portraitBackRegion = {};
-portraitBackRegion['Contract'] = '0,0,413,315';
-portraitBackRegion['Quest'] = '0,0,563,413';
+portraitBackRegion[CONTRACT] = '0,0,413,315';
+portraitBackRegion[QUEST] = '0,0,563,413';
 
 var bodyRegionHeroPromo = {};
-bodyRegionHeroPromo['German'] = '73,467,269,45';
+bodyRegionHeroPromo[GERMAN] = '73,467,269,45';
 
 var bodyRegion = {};
-bodyRegion['Ally'] = '57,378,299,114';
-bodyRegion['Attachment'] = '57,347,299,144';
-bodyRegion['Enemy'] = '57,377,299,114';
-bodyRegion['Enemy NoStat'] = '57,484,299,32';
-bodyRegion['Event'] = '65,351,283,140';
-bodyRegion['Hero'] = '57,377,299,114';
-bodyRegion['Hero Promo'] = '78,467,259,45';
-bodyRegion['Location'] = '56,346,301,142';
-bodyRegion['Objective'] = '65,355,283,137';
-bodyRegion['Objective Ally'] = '65,355,283,137';
-bodyRegion['Objective Hero'] = '65,355,283,137';
-bodyRegion['Objective Location'] = '65,355,283,137';
-bodyRegion['Player Objective'] = '65,355,283,137';
-bodyRegion['Ship Enemy'] = '57,377,299,114';
-bodyRegion['Ship Objective'] = '65,355,283,137';
-bodyRegion['Treachery'] = '65,356,283,135';
-bodyRegion['Treasure'] = '57,347,299,144';
+bodyRegion[ALLY] = '57,378,299,114';
+bodyRegion[ATTACHMENT] = '57,347,299,144';
+bodyRegion[ENEMY] = '57,377,299,114';
+bodyRegion[ENEMY_NOSTAT] = '57,484,299,32';
+bodyRegion[EVENT] = '65,351,283,140';
+bodyRegion[HERO] = '57,377,299,114';
+bodyRegion[HERO_PROMO] = '78,467,259,45';
+bodyRegion[LOCATION] = '56,346,301,142';
+bodyRegion[OBJECTIVE] = '65,355,283,137';
+bodyRegion[OBJECTIVE_ALLY] = '65,355,283,137';
+bodyRegion[OBJECTIVE_HERO] = '65,355,283,137';
+bodyRegion[OBJECTIVE_LOCATION] = '65,355,283,137';
+bodyRegion[PLAYER_OBJECTIVE] = '65,355,283,137';
+bodyRegion[SHIP_ENEMY] = '57,377,299,114';
+bodyRegion[SHIP_OBJECTIVE] = '65,355,283,137';
+bodyRegion[TREACHERY] = '65,356,283,135';
+bodyRegion[TREASURE] = '57,347,299,144';
 
-bodyRegion['Cave'] = '50,303,171,60';
-bodyRegion['Encounter Side Quest'] = '51,269,461,94';
-bodyRegion['Encounter Side Quest SmallTextArea'] = '51,324,461,38';
-bodyRegion['Player Side Quest'] = '51,271,461,94';
+bodyRegion[CAVE] = '50,303,171,60';
+bodyRegion[ENCOUNTER_SIDE_QUEST] = '51,269,461,94';
+bodyRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '51,324,461,38';
+bodyRegion[PLAYER_SIDE_QUEST] = '51,271,461,94';
 
 var traitRegion = {};
-traitRegion['Ally'] = '57,358,299,20';
-traitRegion['Attachment'] = '85,327,243,20';
-traitRegion['Enemy'] = '57,357,299,20';
-traitRegion['Enemy NoStat'] = '57,470,299,14';
-traitRegion['Event'] = '78,331,257,20';
-traitRegion['Hero'] = '57,357,299,20';
-traitRegion['Hero Promo'] = '93,449,160,14';
-traitRegion['Location'] = '56,326,301,20';
-traitRegion['Objective'] = '65,335,283,20';
-traitRegion['Objective Ally'] = '65,335,283,20';
-traitRegion['Objective Hero'] = '65,335,283,20';
-traitRegion['Objective Location'] = '65,335,283,20';
-traitRegion['Player Objective'] = '65,335,283,20';
-traitRegion['Ship Enemy'] = '57,357,299,20';
-traitRegion['Ship Objective'] = '65,335,283,20';
-traitRegion['Treachery'] = '65,336,283,20';
-traitRegion['Treasure'] = '85,327,243,20';
+traitRegion[ALLY] = '57,358,299,20';
+traitRegion[ATTACHMENT] = '85,327,243,20';
+traitRegion[ENEMY] = '57,357,299,20';
+traitRegion[ENEMY_NOSTAT] = '57,470,299,14';
+traitRegion[EVENT] = '78,331,257,20';
+traitRegion[HERO] = '57,357,299,20';
+traitRegion[HERO_PROMO] = '93,449,160,14';
+traitRegion[LOCATION] = '56,326,301,20';
+traitRegion[OBJECTIVE] = '65,335,283,20';
+traitRegion[OBJECTIVE_ALLY] = '65,335,283,20';
+traitRegion[OBJECTIVE_HERO] = '65,335,283,20';
+traitRegion[OBJECTIVE_LOCATION] = '65,335,283,20';
+traitRegion[PLAYER_OBJECTIVE] = '65,335,283,20';
+traitRegion[SHIP_ENEMY] = '57,357,299,20';
+traitRegion[SHIP_OBJECTIVE] = '65,335,283,20';
+traitRegion[TREACHERY] = '65,336,283,20';
+traitRegion[TREASURE] = '85,327,243,20';
 
-traitRegion['Cave'] = '50,283,171,20';
-traitRegion['Encounter Side Quest'] = '51,249,461,20';
-traitRegion['Encounter Side Quest SmallTextArea'] = '51,304,461,20';
-traitRegion['Player Side Quest'] = '51,251,461,20';
-traitRegion['Region'] = '279,350,237,25';
+traitRegion[CAVE] = '50,283,171,20';
+traitRegion[ENCOUNTER_SIDE_QUEST] = '51,249,461,20';
+traitRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '51,304,461,20';
+traitRegion[PLAYER_SIDE_QUEST] = '51,251,461,20';
+traitRegion[REGION] = '279,350,237,25';
 
 var bodyNoTraitRegion = {};
-bodyNoTraitRegion['Campaign'] = '56,277,301,211';
-bodyNoTraitRegion['Contract'] = '65,313,283,176';
-bodyNoTraitRegion['Nightmare'] = '54,325,305,192';
-bodyNoTraitRegion['Presentation'] = '48,73,317,418';
-bodyNoTraitRegion['Rules'] = '48,73,317,418';
-bodyNoTraitRegion['Quest'] = '51,249,461,114';
+bodyNoTraitRegion[CAMPAIGN] = '56,277,301,211';
+bodyNoTraitRegion[CONTRACT] = '65,313,283,176';
+bodyNoTraitRegion[NIGHTMARE] = '54,325,305,192';
+bodyNoTraitRegion[PRESENTATION] = '48,73,317,418';
+bodyNoTraitRegion[RULES] = '48,73,317,418';
+bodyNoTraitRegion[QUEST] = '51,249,461,114';
 
-bodyNoTraitRegion['Cave'] = '50,283,171,80';
-bodyNoTraitRegion['Encounter Side Quest'] = '51,249,461,114';
-bodyNoTraitRegion['Encounter Side Quest SmallTextArea'] = '51,304,461,58';
-bodyNoTraitRegion['Player Side Quest'] = '51,251,461,114';
+bodyNoTraitRegion[CAVE] = '50,283,171,80';
+bodyNoTraitRegion[ENCOUNTER_SIDE_QUEST] = '51,249,461,114';
+bodyNoTraitRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '51,304,461,58';
+bodyNoTraitRegion[PLAYER_SIDE_QUEST] = '51,251,461,114';
 
 var bodyRightNoTraitRegion = {};
-bodyRightNoTraitRegion['Cave'] = '347,283,171,80';
+bodyRightNoTraitRegion[CAVE] = '347,283,171,80';
 
 var bodyBackRegion = {};
-bodyBackRegion['Campaign'] = '64,60,285,443';
-bodyBackRegion['Contract'] = '65,313,283,176';
-bodyBackRegion['Nightmare'] = '54,55,305,439';
-bodyBackRegion['Quest'] = '51,249,461,114';
-bodyBackRegion['Rules'] = '48,73,317,418';
+bodyBackRegion[CAMPAIGN] = '64,60,285,443';
+bodyBackRegion[CONTRACT] = '65,313,283,176';
+bodyBackRegion[NIGHTMARE] = '54,55,305,439';
+bodyBackRegion[QUEST] = '51,249,461,114';
+bodyBackRegion[RULES] = '48,73,317,418';
 
 var nameRegion = {};
-nameRegion['Ally'] = '99,326,215,30';
-nameRegion['Attachment'] = '131,36,185,30';
-nameRegion['Campaign'] = '107,41,199,30';
-nameRegion['Cave'] = '79,41,162,30';
-nameRegion['Contract'] = '83,243,247,33';
-nameRegion['Encounter Side Quest'] = '99,40,365,33';
-nameRegion['Encounter Side Quest SmallTextArea'] = '99,40,365,33';
-nameRegion['Enemy'] = '93,325,227,30';
-nameRegion['Enemy NoStat'] = '93,438,227,30';
-nameRegion['Event'] = '57,86,26,178';
-nameRegion['Hero'] = '99,325,215,30';
-nameRegion['Hero Promo'] = '102,414,208,30';
-nameRegion['Location'] = '107,40,199,30';
-nameRegion['Nightmare'] = '94,45,227,33';
-nameRegion['Objective'] = '74,46,265,33';
-nameRegion['Objective Ally'] = '74,46,265,33';
-nameRegion['Objective Hero'] = '74,46,265,33';
-nameRegion['Objective Location'] = '74,46,265,33';
-nameRegion['Player Objective'] = '74,46,265,33';
-nameRegion['Player Side Quest'] = '143,42,370,33';
-nameRegion['Quest'] = '143,42,370,33';
-nameRegion['Region'] = '79,347,162,30';
-nameRegion['Ship Enemy'] = '93,325,227,30';
-nameRegion['Ship Objective'] = '74,46,265,33';
-nameRegion['Treachery'] = '55,108,26,164';
-nameRegion['Treasure'] = '131,42,185,30';
+nameRegion[ALLY] = '99,326,215,30';
+nameRegion[ATTACHMENT] = '131,36,185,30';
+nameRegion[CAMPAIGN] = '107,41,199,30';
+nameRegion[CAVE] = '79,41,162,30';
+nameRegion[CONTRACT] = '83,243,247,33';
+nameRegion[ENCOUNTER_SIDE_QUEST] = '99,40,365,33';
+nameRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '99,40,365,33';
+nameRegion[ENEMY] = '93,325,227,30';
+nameRegion[ENEMY_NOSTAT] = '93,438,227,30';
+nameRegion[EVENT] = '57,86,26,178';
+nameRegion[HERO] = '99,325,215,30';
+nameRegion[HERO_PROMO] = '102,414,208,30';
+nameRegion[LOCATION] = '107,40,199,30';
+nameRegion[NIGHTMARE] = '94,45,227,33';
+nameRegion[OBJECTIVE] = '74,46,265,33';
+nameRegion[OBJECTIVE_ALLY] = '74,46,265,33';
+nameRegion[OBJECTIVE_HERO] = '74,46,265,33';
+nameRegion[OBJECTIVE_LOCATION] = '74,46,265,33';
+nameRegion[PLAYER_OBJECTIVE] = '74,46,265,33';
+nameRegion[PLAYER_SIDE_QUEST] = '143,42,370,33';
+nameRegion[QUEST] = '143,42,370,33';
+nameRegion[REGION] = '79,347,162,30';
+nameRegion[SHIP_ENEMY] = '93,325,227,30';
+nameRegion[SHIP_OBJECTIVE] = '74,46,265,33';
+nameRegion[TREACHERY] = '55,108,26,164';
+nameRegion[TREASURE] = '131,42,185,30';
 
 var nameBackRegion = {};
-nameBackRegion['Contract'] = '83,243,247,33';
-nameBackRegion['Quest'] = '143,42,370,33';
+nameBackRegion[CONTRACT] = '83,243,247,33';
+nameBackRegion[QUEST] = '143,42,370,33';
 
 var nameUniqueRegion = {};
-nameUniqueRegion['Ally'] = '99,324,215,31';
-nameUniqueRegion['Attachment'] = '131,34,185,31';
-nameUniqueRegion['Cave'] = '79,39,162,31';
-nameUniqueRegion['Contract'] = '83,241,247,34';
-nameUniqueRegion['Encounter Side Quest'] = '99,38,365,34';
-nameUniqueRegion['Encounter Side Quest SmallTextArea'] = '99,38,365,34';
-nameUniqueRegion['Enemy'] = '93,323,227,31';
-nameUniqueRegion['Enemy NoStat'] = '93,436,227,31';
-nameUniqueRegion['Hero'] = '99,323,215,31';
-nameUniqueRegion['Hero Promo'] = '102,414,208,31';
-nameUniqueRegion['Location'] = '107,38,199,31';
-nameUniqueRegion['Objective'] = '74,44,265,34';
-nameUniqueRegion['Objective Ally'] = '74,44,265,34';
-nameUniqueRegion['Objective Hero'] = '74,44,265,34';
-nameUniqueRegion['Objective Location'] = '74,44,265,34';
-nameUniqueRegion['Player Objective'] = '74,44,265,34';
-nameUniqueRegion['Player Side Quest'] = '143,40,370,34';
-nameUniqueRegion['Region'] = '79,345,162,31';
-nameUniqueRegion['Ship Enemy'] = '93,323,227,31';
-nameUniqueRegion['Ship Objective'] = '74,44,265,34';
-nameUniqueRegion['Treachery'] = '52,108,29,164';
-nameUniqueRegion['Treasure'] = '131,40,185,31';
+nameUniqueRegion[ALLY] = '99,324,215,31';
+nameUniqueRegion[ATTACHMENT] = '131,34,185,31';
+nameUniqueRegion[CAVE] = '79,39,162,31';
+nameUniqueRegion[CONTRACT] = '83,241,247,34';
+nameUniqueRegion[ENCOUNTER_SIDE_QUEST] = '99,38,365,34';
+nameUniqueRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '99,38,365,34';
+nameUniqueRegion[ENEMY] = '93,323,227,31';
+nameUniqueRegion[ENEMY_NOSTAT] = '93,436,227,31';
+nameUniqueRegion[HERO] = '99,323,215,31';
+nameUniqueRegion[HERO_PROMO] = '102,414,208,31';
+nameUniqueRegion[LOCATION] = '107,38,199,31';
+nameUniqueRegion[OBJECTIVE] = '74,44,265,34';
+nameUniqueRegion[OBJECTIVE_ALLY] = '74,44,265,34';
+nameUniqueRegion[OBJECTIVE_HERO] = '74,44,265,34';
+nameUniqueRegion[OBJECTIVE_LOCATION] = '74,44,265,34';
+nameUniqueRegion[PLAYER_OBJECTIVE] = '74,44,265,34';
+nameUniqueRegion[PLAYER_SIDE_QUEST] = '143,40,370,34';
+nameUniqueRegion[REGION] = '79,345,162,31';
+nameUniqueRegion[SHIP_ENEMY] = '93,323,227,31';
+nameUniqueRegion[SHIP_OBJECTIVE] = '74,44,265,34';
+nameUniqueRegion[TREACHERY] = '52,108,29,164';
+nameUniqueRegion[TREASURE] = '131,40,185,31';
 
 var nameUniqueBackRegion = {};
-nameUniqueBackRegion['Contract'] = '83,241,247,34';
+nameUniqueBackRegion[CONTRACT] = '83,241,247,34';
 
 var subtypeRegion = {};
-subtypeRegion['Ally'] = '146,301,124,20';
-subtypeRegion['Attachment'] = '146,301,124,20';
-subtypeRegion['Enemy'] = '146,302,124,20';
-subtypeRegion['Event'] = '146,303,124,20';
-subtypeRegion['Objective'] = '146,309,124,20';
-subtypeRegion['Objective Ally'] = '146,309,124,20';
-subtypeRegion['Objective Hero'] = '146,309,124,20';
-subtypeRegion['Objective Location'] = '146,309,124,20';
-subtypeRegion['Ship Enemy'] = '146,302,124,20';
-subtypeRegion['Ship Objective'] = '146,309,124,20';
-subtypeRegion['Treachery'] = '146,305,124,20';
+subtypeRegion[ALLY] = '146,301,124,20';
+subtypeRegion[ATTACHMENT] = '146,301,124,20';
+subtypeRegion[ENEMY] = '146,302,124,20';
+subtypeRegion[EVENT] = '146,303,124,20';
+subtypeRegion[OBJECTIVE] = '146,309,124,20';
+subtypeRegion[OBJECTIVE_ALLY] = '146,309,124,20';
+subtypeRegion[OBJECTIVE_HERO] = '146,309,124,20';
+subtypeRegion[OBJECTIVE_LOCATION] = '146,309,124,20';
+subtypeRegion[SHIP_ENEMY] = '146,302,124,20';
+subtypeRegion[SHIP_OBJECTIVE] = '146,309,124,20';
+subtypeRegion[TREACHERY] = '146,305,124,20';
 
 var hitPointsRegion = {};
-hitPointsRegion['Ally'] = '66,269,58,40';
-hitPointsRegion['Enemy'] = '64,269,58,40';
-hitPointsRegion['Hero'] = '64,269,58,40';
-hitPointsRegion['Hero Promo'] = '46,408,58,40';
-hitPointsRegion['Objective Ally'] = '61,272,58,40';
-hitPointsRegion['Objective Hero'] = '61,272,58,40';
-hitPointsRegion['Ship Enemy'] = '64,269,58,40';
-hitPointsRegion['Ship Objective'] = '61,272,58,40';
+hitPointsRegion[ALLY] = '66,269,58,40';
+hitPointsRegion[ENEMY] = '64,269,58,40';
+hitPointsRegion[HERO] = '64,269,58,40';
+hitPointsRegion[HERO_PROMO] = '46,408,58,40';
+hitPointsRegion[OBJECTIVE_ALLY] = '61,272,58,40';
+hitPointsRegion[OBJECTIVE_HERO] = '61,272,58,40';
+hitPointsRegion[SHIP_ENEMY] = '64,269,58,40';
+hitPointsRegion[SHIP_OBJECTIVE] = '61,272,58,40';
 
 var engagementRegion = {};
-engagementRegion['Enemy'] = '76,48,36,25';
-engagementRegion['Ship Enemy'] = '76,48,36,25';
+engagementRegion[ENEMY] = '76,48,36,25';
+engagementRegion[SHIP_ENEMY] = '76,48,36,25';
 
 var attackRegion = {};
-attackRegion['Ally'] = '70,157,26,16';
-attackRegion['Enemy'] = '68,156,26,16';
-attackRegion['Hero'] = '68,157,26,16';
-attackRegion['Hero Promo'] = '42,128,26,16';
-attackRegion['Objective Ally'] = '65,159,26,16';
-attackRegion['Objective Hero'] = '65,159,26,16';
-attackRegion['Ship Enemy'] = '68,156,26,16';
-attackRegion['Ship Objective'] = '65,159,26,16';
+attackRegion[ALLY] = '70,157,26,16';
+attackRegion[ENEMY] = '68,156,26,16';
+attackRegion[HERO] = '68,157,26,16';
+attackRegion[HERO_PROMO] = '42,128,26,16';
+attackRegion[OBJECTIVE_ALLY] = '65,159,26,16';
+attackRegion[OBJECTIVE_HERO] = '65,159,26,16';
+attackRegion[SHIP_ENEMY] = '68,156,26,16';
+attackRegion[SHIP_OBJECTIVE] = '65,159,26,16';
 
 var defenseRegion = {};
-defenseRegion['Ally'] = '70,200,26,16';
-defenseRegion['Enemy'] = '68,199,26,16';
-defenseRegion['Hero'] = '68,200,26,16';
-defenseRegion['Hero Promo'] = '42,166,26,16';
-defenseRegion['Objective Ally'] = '65,203,26,16';
-defenseRegion['Objective Hero'] = '65,203,26,16';
-defenseRegion['Ship Enemy'] = '68,199,26,16';
-defenseRegion['Ship Objective'] = '65,203,26,16';
+defenseRegion[ALLY] = '70,200,26,16';
+defenseRegion[ENEMY] = '68,199,26,16';
+defenseRegion[HERO] = '68,200,26,16';
+defenseRegion[HERO_PROMO] = '42,166,26,16';
+defenseRegion[OBJECTIVE_ALLY] = '65,203,26,16';
+defenseRegion[OBJECTIVE_HERO] = '65,203,26,16';
+defenseRegion[SHIP_ENEMY] = '68,199,26,16';
+defenseRegion[SHIP_OBJECTIVE] = '65,203,26,16';
 
 var willpowerRegion = {};
-willpowerRegion['Ally'] = '70,117,26,16';
-willpowerRegion['Hero'] = '68,117,26,16';
-willpowerRegion['Hero Promo'] = '42,94,26,16';
-willpowerRegion['Objective Ally'] = '65,113,26,16';
-willpowerRegion['Objective Hero'] = '65,113,26,16';
-willpowerRegion['Ship Objective'] = '65,113,26,16';
+willpowerRegion[ALLY] = '70,117,26,16';
+willpowerRegion[HERO] = '68,117,26,16';
+willpowerRegion[HERO_PROMO] = '42,94,26,16';
+willpowerRegion[OBJECTIVE_ALLY] = '65,113,26,16';
+willpowerRegion[OBJECTIVE_HERO] = '65,113,26,16';
+willpowerRegion[SHIP_OBJECTIVE] = '65,113,26,16';
 
 var threatRegion = {};
-threatRegion['Enemy'] = '68,115,26,16';
-threatRegion['Location'] = '54,92,26,16';
-threatRegion['Ship Enemy'] = '68,115,26,16';
+threatRegion[ENEMY] = '68,115,26,16';
+threatRegion[LOCATION] = '54,92,26,16';
+threatRegion[SHIP_ENEMY] = '68,115,26,16';
 
 var threatCostRegion = {};
-threatCostRegion['Hero'] = '75,50,36,25';
-threatCostRegion['Hero Promo'] = '50,48,33,23';
+threatCostRegion[HERO] = '75,50,36,25';
+threatCostRegion[HERO_PROMO] = '50,48,33,23';
 
 var progressRegion = {};
-progressRegion['Encounter Side Quest'] = '52,202,35,24';
-progressRegion['Encounter Side Quest SmallTextArea'] = '52,257,35,24';
-progressRegion['Location'] = '56,283,35,24';
-progressRegion['Objective Location'] = '56,291,35,24';
-progressRegion['Quest'] = '55,202,35,24';
-progressRegion['Player Side Quest'] = '55,202,35,24';
+progressRegion[ENCOUNTER_SIDE_QUEST] = '52,202,35,24';
+progressRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '52,257,35,24';
+progressRegion[LOCATION] = '56,283,35,24';
+progressRegion[OBJECTIVE_LOCATION] = '56,291,35,24';
+progressRegion[QUEST] = '55,202,35,24';
+progressRegion[PLAYER_SIDE_QUEST] = '55,202,35,24';
 
 var adventureRegion = {};
-adventureRegion['Objective'] = '67,83,276,15';
-adventureRegion['Objective Ally'] = '67,83,276,15';
-adventureRegion['Objective Hero'] = '67,83,276,15';
-adventureRegion['Objective Location'] = '67,83,276,15';
-adventureRegion['Quest'] = '190,78,275,15';
-adventureRegion['Ship Objective'] = '67,83,276,15';
+adventureRegion[OBJECTIVE] = '67,83,276,15';
+adventureRegion[OBJECTIVE_ALLY] = '67,83,276,15';
+adventureRegion[OBJECTIVE_HERO] = '67,83,276,15';
+adventureRegion[OBJECTIVE_LOCATION] = '67,83,276,15';
+adventureRegion[QUEST] = '190,78,275,15';
+adventureRegion[SHIP_OBJECTIVE] = '67,83,276,15';
 
 var cycleRegion = {};
-cycleRegion['Campaign'] = '68,243,274,32';
+cycleRegion[CAMPAIGN] = '68,243,274,32';
 
 var resourceCostRegion = {};
-resourceCostRegion['Ally'] = '67,41,56,37';
-resourceCostRegion['Attachment'] = '37,44,56,37';
-resourceCostRegion['Event'] = '37,38,56,37';
-resourceCostRegion['Player Side Quest'] = '43,44,56,37';
-resourceCostRegion['Treasure'] = '45,61,44,30';
+resourceCostRegion[ALLY] = '67,41,56,37';
+resourceCostRegion[ATTACHMENT] = '37,44,56,37';
+resourceCostRegion[EVENT] = '37,38,56,37';
+resourceCostRegion[PLAYER_SIDE_QUEST] = '43,44,56,37';
+resourceCostRegion[TREASURE] = '45,61,44,30';
 
 var difficultyRegion = {};
-difficultyRegion['Encounter Side Quest'] = '0,0,563,413';
-difficultyRegion['Encounter Side Quest SmallTextArea'] = '0,55,563,413';
-difficultyRegion['Enemy'] = '0,0,413,563';
-difficultyRegion['Enemy NoStat'] = '0,0,413,563';
-difficultyRegion['Location'] = '0,0,413,563';
-difficultyRegion['Objective'] = '0,0,413,563';
-difficultyRegion['Objective Ally'] = '0,0,413,563';
-difficultyRegion['Objective Hero'] = '0,0,413,563';
-difficultyRegion['Objective Location'] = '0,0,413,563';
-difficultyRegion['Ship Enemy'] = '0,0,413,563';
-difficultyRegion['Ship Objective'] = '0,0,413,563';
-difficultyRegion['Treachery'] = '0,0,413,563';
+difficultyRegion[ENCOUNTER_SIDE_QUEST] = '0,0,563,413';
+difficultyRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '0,55,563,413';
+difficultyRegion[ENEMY] = '0,0,413,563';
+difficultyRegion[ENEMY_NOSTAT] = '0,0,413,563';
+difficultyRegion[LOCATION] = '0,0,413,563';
+difficultyRegion[OBJECTIVE] = '0,0,413,563';
+difficultyRegion[OBJECTIVE_ALLY] = '0,0,413,563';
+difficultyRegion[OBJECTIVE_HERO] = '0,0,413,563';
+difficultyRegion[OBJECTIVE_LOCATION] = '0,0,413,563';
+difficultyRegion[SHIP_ENEMY] = '0,0,413,563';
+difficultyRegion[SHIP_OBJECTIVE] = '0,0,413,563';
+difficultyRegion[TREACHERY] = '0,0,413,563';
 
 var encounterPortraitRegion = {};
-encounterPortraitRegion['Campaign'] = '319,189,43,43';
-encounterPortraitRegion['Cave'] = '37,34,35,35';
-encounterPortraitRegion['Encounter Side Quest'] = '478,186,43,43';
-encounterPortraitRegion['Encounter Side Quest SmallTextArea'] = '478,241,43,43';
-encounterPortraitRegion['Enemy'] = '321,265,43,43';
-encounterPortraitRegion['Enemy NoStat'] = '321,379,43,43';
-encounterPortraitRegion['Location'] = '319,265,43,43';
-encounterPortraitRegion['Nightmare'] = '322,263,43,43';
-encounterPortraitRegion['Objective'] = '315,268,43,43';
-encounterPortraitRegion['Objective Ally'] = '315,268,43,43';
-encounterPortraitRegion['Objective Hero'] = '315,268,43,43';
-encounterPortraitRegion['Objective Location'] = '315,268,43,43';
-encounterPortraitRegion['Quest'] = '474,185,43,43';
-encounterPortraitRegion['Region'] = '37,341,35,35';
-encounterPortraitRegion['Ship Enemy'] = '321,265,43,43';
-encounterPortraitRegion['Ship Objective'] = '315,268,43,43';
-encounterPortraitRegion['Treachery'] = '320,268,43,43';
-encounterPortraitRegion['Treasure'] = '327,478,43,43';
+encounterPortraitRegion[CAMPAIGN] = '319,189,43,43';
+encounterPortraitRegion[CAVE] = '37,34,35,35';
+encounterPortraitRegion[ENCOUNTER_SIDE_QUEST] = '478,186,43,43';
+encounterPortraitRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '478,241,43,43';
+encounterPortraitRegion[ENEMY] = '321,265,43,43';
+encounterPortraitRegion[ENEMY_NOSTAT] = '321,379,43,43';
+encounterPortraitRegion[LOCATION] = '319,265,43,43';
+encounterPortraitRegion[NIGHTMARE] = '322,263,43,43';
+encounterPortraitRegion[OBJECTIVE] = '315,268,43,43';
+encounterPortraitRegion[OBJECTIVE_ALLY] = '315,268,43,43';
+encounterPortraitRegion[OBJECTIVE_HERO] = '315,268,43,43';
+encounterPortraitRegion[OBJECTIVE_LOCATION] = '315,268,43,43';
+encounterPortraitRegion[QUEST] = '474,185,43,43';
+encounterPortraitRegion[REGION] = '37,341,35,35';
+encounterPortraitRegion[SHIP_ENEMY] = '321,265,43,43';
+encounterPortraitRegion[SHIP_OBJECTIVE] = '315,268,43,43';
+encounterPortraitRegion[TREACHERY] = '320,268,43,43';
+encounterPortraitRegion[TREASURE] = '327,478,43,43';
 
 var encounterNumberRegion = {};
-encounterNumberRegion['Cave'] = '41,70,26,10';
-encounterNumberRegion['Encounter Side Quest'] = '486,229,26,10';
-encounterNumberRegion['Encounter Side Quest SmallTextArea'] = '486,284,26,10';
-encounterNumberRegion['Enemy'] = '329,313,26,10';
-encounterNumberRegion['Enemy NoStat'] = '330,427,26,10';
-encounterNumberRegion['Location'] = '328,314,26,10';
-encounterNumberRegion['Objective'] = '323,316,26,10';
-encounterNumberRegion['Objective Ally'] = '323,316,26,10';
-encounterNumberRegion['Objective Hero'] = '323,316,26,10';
-encounterNumberRegion['Objective Location'] = '323,316,26,10';
-encounterNumberRegion['Region'] = '41,332,26,10';
-encounterNumberRegion['Ship Enemy'] = '329,313,26,10';
-encounterNumberRegion['Ship Objective'] = '323,316,26,10';
-encounterNumberRegion['Treachery'] = '329,317,26,10';
+encounterNumberRegion[CAVE] = '41,70,26,10';
+encounterNumberRegion[ENCOUNTER_SIDE_QUEST] = '486,229,26,10';
+encounterNumberRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '486,284,26,10';
+encounterNumberRegion[ENEMY] = '329,313,26,10';
+encounterNumberRegion[ENEMY_NOSTAT] = '330,427,26,10';
+encounterNumberRegion[LOCATION] = '328,314,26,10';
+encounterNumberRegion[OBJECTIVE] = '323,316,26,10';
+encounterNumberRegion[OBJECTIVE_ALLY] = '323,316,26,10';
+encounterNumberRegion[OBJECTIVE_HERO] = '323,316,26,10';
+encounterNumberRegion[OBJECTIVE_LOCATION] = '323,316,26,10';
+encounterNumberRegion[REGION] = '41,332,26,10';
+encounterNumberRegion[SHIP_ENEMY] = '329,313,26,10';
+encounterNumberRegion[SHIP_OBJECTIVE] = '323,316,26,10';
+encounterNumberRegion[TREACHERY] = '329,317,26,10';
 
 var optionLeftRegion = {};
-optionLeftRegion['Enemy'] = '43,490,48,24';
-optionLeftRegion['Location'] = '43,490,48,24';
-optionLeftRegion['Objective'] = '60,490,48,24';
-optionLeftRegion['Objective Ally'] = '60,490,48,24';
-optionLeftRegion['Objective Hero'] = '60,490,48,24';
-optionLeftRegion['Objective Location'] = '60,490,48,24';
-optionLeftRegion['Ship Enemy'] = '43,490,48,24';
-optionLeftRegion['Ship Objective'] = '43,490,48,24';
-optionLeftRegion['Treachery'] = '43,490,48,24';
+optionLeftRegion[ENEMY] = '43,490,48,24';
+optionLeftRegion[LOCATION] = '43,490,48,24';
+optionLeftRegion[OBJECTIVE] = '60,490,48,24';
+optionLeftRegion[OBJECTIVE_ALLY] = '60,490,48,24';
+optionLeftRegion[OBJECTIVE_HERO] = '60,490,48,24';
+optionLeftRegion[OBJECTIVE_LOCATION] = '60,490,48,24';
+optionLeftRegion[SHIP_ENEMY] = '43,490,48,24';
+optionLeftRegion[SHIP_OBJECTIVE] = '43,490,48,24';
+optionLeftRegion[TREACHERY] = '43,490,48,24';
 
 var optionRightDecorationRegion = {};
-optionRightDecorationRegion['Ally'] = '298,503,72,18';
-optionRightDecorationRegion['Attachment'] = '300,503,72,18';
-optionRightDecorationRegion['Encounter Side Quest'] = '452,347,72,18';
-optionRightDecorationRegion['Encounter Side Quest SmallTextArea'] = '452,347,72,18';
-optionRightDecorationRegion['Enemy'] = '301,503,72,18';
-optionRightDecorationRegion['Event'] = '298,503,72,18';
-optionRightDecorationRegion['Hero'] = '298,502,72,18';
-optionRightDecorationRegion['Hero Promo'] = '282,495,72,18';
-optionRightDecorationRegion['Location'] = '301,503,72,18';
-optionRightDecorationRegion['Objective'] = '290,502,72,18';
-optionRightDecorationRegion['Objective Ally'] = '290,502,72,18';
-optionRightDecorationRegion['Objective Hero'] = '290,502,72,18';
-optionRightDecorationRegion['Objective Location'] = '290,502,72,18';
-optionRightDecorationRegion['Player Objective'] = '290,502,72,18';
-optionRightDecorationRegion['Player Side Quest'] = '451,349,72,18';
-optionRightDecorationRegion['Quest'] = '450,350,72,18';
-optionRightDecorationRegion['Ship Enemy'] = '301,503,72,18';
-optionRightDecorationRegion['Ship Objective'] = '290,502,72,18';
-optionRightDecorationRegion['Treachery'] = '301,503,72,18';
-optionRightDecorationRegion['Treasure'] = '253,477,72,18';
+optionRightDecorationRegion[ALLY] = '298,503,72,18';
+optionRightDecorationRegion[ATTACHMENT] = '300,503,72,18';
+optionRightDecorationRegion[ENCOUNTER_SIDE_QUEST] = '452,347,72,18';
+optionRightDecorationRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '452,347,72,18';
+optionRightDecorationRegion[ENEMY] = '301,503,72,18';
+optionRightDecorationRegion[EVENT] = '298,503,72,18';
+optionRightDecorationRegion[HERO] = '298,502,72,18';
+optionRightDecorationRegion[HERO_PROMO] = '282,495,72,18';
+optionRightDecorationRegion[LOCATION] = '301,503,72,18';
+optionRightDecorationRegion[OBJECTIVE] = '290,502,72,18';
+optionRightDecorationRegion[OBJECTIVE_ALLY] = '290,502,72,18';
+optionRightDecorationRegion[OBJECTIVE_HERO] = '290,502,72,18';
+optionRightDecorationRegion[OBJECTIVE_LOCATION] = '290,502,72,18';
+optionRightDecorationRegion[PLAYER_OBJECTIVE] = '290,502,72,18';
+optionRightDecorationRegion[PLAYER_SIDE_QUEST] = '451,349,72,18';
+optionRightDecorationRegion[QUEST] = '450,350,72,18';
+optionRightDecorationRegion[SHIP_ENEMY] = '301,503,72,18';
+optionRightDecorationRegion[SHIP_OBJECTIVE] = '290,502,72,18';
+optionRightDecorationRegion[TREACHERY] = '301,503,72,18';
+optionRightDecorationRegion[TREASURE] = '253,477,72,18';
 
 var optionRightRegion = {};
-optionRightRegion['Ally'] = '305,504,59,20';
-optionRightRegion['Attachment'] = '307,504,59,20';
-optionRightRegion['Encounter Side Quest'] = '459,348,59,20';
-optionRightRegion['Encounter Side Quest SmallTextArea'] = '459,348,59,20';
-optionRightRegion['Enemy'] = '308,504,59,20';
-optionRightRegion['Event'] = '305,504,59,20';
-optionRightRegion['Hero'] = '305,503,59,20';
-optionRightRegion['Hero Promo'] = '289,496,59,20';
-optionRightRegion['Location'] = '308,504,59,20';
-optionRightRegion['Objective'] = '297,503,59,20';
-optionRightRegion['Objective Ally'] = '297,503,59,20';
-optionRightRegion['Objective Hero'] = '297,503,59,20';
-optionRightRegion['Objective Location'] = '297,503,59,20';
-optionRightRegion['Player Objective'] = '297,503,59,20';
-optionRightRegion['Player Side Quest'] = '458,350,59,20';
-optionRightRegion['Quest'] = '457,351,59,20';
-optionRightRegion['Ship Enemy'] = '308,504,59,20';
-optionRightRegion['Ship Objective'] = '297,503,59,20';
-optionRightRegion['Treachery'] = '308,504,59,20';
-optionRightRegion['Treasure'] = '260,478,59,20';
+optionRightRegion[ALLY] = '305,504,59,20';
+optionRightRegion[ATTACHMENT] = '307,504,59,20';
+optionRightRegion[ENCOUNTER_SIDE_QUEST] = '459,348,59,20';
+optionRightRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '459,348,59,20';
+optionRightRegion[ENEMY] = '308,504,59,20';
+optionRightRegion[EVENT] = '305,504,59,20';
+optionRightRegion[HERO] = '305,503,59,20';
+optionRightRegion[HERO_PROMO] = '289,496,59,20';
+optionRightRegion[LOCATION] = '308,504,59,20';
+optionRightRegion[OBJECTIVE] = '297,503,59,20';
+optionRightRegion[OBJECTIVE_ALLY] = '297,503,59,20';
+optionRightRegion[OBJECTIVE_HERO] = '297,503,59,20';
+optionRightRegion[OBJECTIVE_LOCATION] = '297,503,59,20';
+optionRightRegion[PLAYER_OBJECTIVE] = '297,503,59,20';
+optionRightRegion[PLAYER_SIDE_QUEST] = '458,350,59,20';
+optionRightRegion[QUEST] = '457,351,59,20';
+optionRightRegion[SHIP_ENEMY] = '308,504,59,20';
+optionRightRegion[SHIP_OBJECTIVE] = '297,503,59,20';
+optionRightRegion[TREACHERY] = '308,504,59,20';
+optionRightRegion[TREASURE] = '260,478,59,20';
+
+var bodyPointSize = {};
+bodyPointSize[ALLY] = 7.5;
+bodyPointSize[ATTACHMENT] = 7.5;
+bodyPointSize[CAMPAIGN] = 7.5;
+bodyPointSize[CAVE] = 7;
+bodyPointSize[CONTRACT] = 7.5;
+bodyPointSize[ENCOUNTER_SIDE_QUEST] = 7;
+bodyPointSize[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = 7;
+bodyPointSize[ENEMY] = 7.5;
+bodyPointSize[ENEMY_NOSTAT] = 5.9;
+bodyPointSize[EVENT] = 7.5;
+bodyPointSize[HERO] = 7.5;
+bodyPointSize[HERO_PROMO] = 5.9;
+bodyPointSize[LOCATION] = 7.5;
+bodyPointSize[NIGHTMARE] = 7.5;
+bodyPointSize[OBJECTIVE] = 7.5;
+bodyPointSize[OBJECTIVE_ALLY] = 7.5;
+bodyPointSize[OBJECTIVE_HERO] = 7.5;
+bodyPointSize[OBJECTIVE_LOCATION] = 7.5;
+bodyPointSize[PLAYER_OBJECTIVE] = 7.5;
+bodyPointSize[PLAYER_SIDE_QUEST] = 7;
+bodyPointSize[PRESENTATION] = 7.5;
+bodyPointSize[QUEST] = 7;
+bodyPointSize[RULES] = 7.5;
+bodyPointSize[SHIP_ENEMY] = 7.5;
+bodyPointSize[SHIP_OBJECTIVE] = 7.5;
+bodyPointSize[TREACHERY] = 7.5;
+bodyPointSize[TREASURE] = 7.5;
+
+var flavourPointSize = {};
+flavourPointSize[ALLY] = 6.25;
+flavourPointSize[ATTACHMENT] = 6.25;
+flavourPointSize[CAMPAIGN] = 6.25;
+flavourPointSize[CAVE] = 7;
+flavourPointSize[CONTRACT] = 6.25;
+flavourPointSize[ENCOUNTER_SIDE_QUEST] = 7;
+flavourPointSize[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = 7;
+flavourPointSize[ENEMY] = 6.25;
+flavourPointSize[ENEMY_NOSTAT] = 4.9;
+flavourPointSize[EVENT] = 6.25;
+flavourPointSize[HERO] = 6.25;
+flavourPointSize[HERO_PROMO] = 4.9;
+flavourPointSize[LOCATION] = 6.25;
+flavourPointSize[NIGHTMARE] = 6.25;
+flavourPointSize[OBJECTIVE] = 6.25;
+flavourPointSize[OBJECTIVE_ALLY] = 6.25;
+flavourPointSize[OBJECTIVE_HERO] = 6.25;
+flavourPointSize[OBJECTIVE_LOCATION] = 6.25;
+flavourPointSize[PLAYER_OBJECTIVE] = 6.25;
+flavourPointSize[PLAYER_SIDE_QUEST] = 7;
+flavourPointSize[QUEST] = 7;
+flavourPointSize[SHIP_ENEMY] = 6.25;
+flavourPointSize[SHIP_OBJECTIVE] = 6.25;
+flavourPointSize[TREACHERY] = 6.25;
+flavourPointSize[TREASURE] = 6.25;
+
+var traitPointSize = {};
+traitPointSize[ALLY] = 8.25;
+traitPointSize[ATTACHMENT] = 8.25;
+traitPointSize[CAVE] = 7.75;
+traitPointSize[ENCOUNTER_SIDE_QUEST] = 7.75;
+traitPointSize[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = 7.75;
+traitPointSize[ENEMY] = 8.25;
+traitPointSize[ENEMY_NOSTAT] = 6.5;
+traitPointSize[EVENT] = 8.25;
+traitPointSize[HERO] = 8.25;
+traitPointSize[HERO_PROMO] = 6.5;
+traitPointSize[LOCATION] = 8.25;
+traitPointSize[OBJECTIVE] = 8.25;
+traitPointSize[OBJECTIVE_ALLY] = 8.25;
+traitPointSize[OBJECTIVE_HERO] = 8.25;
+traitPointSize[OBJECTIVE_LOCATION] = 8.25;
+traitPointSize[PLAYER_OBJECTIVE] = 8.25;
+traitPointSize[PLAYER_SIDE_QUEST] = 7.75;
+traitPointSize[REGION] = 7.75;
+traitPointSize[SHIP_ENEMY] = 8.25;
+traitPointSize[SHIP_OBJECTIVE] = 8.25;
+traitPointSize[TREACHERY] = 8.25;
+traitPointSize[TREASURE] = 8.25;
+
+var namePointSize = {};
+namePointSize[ALLY] = 6.5;
+namePointSize[ATTACHMENT] = 6.5;
+namePointSize[CAMPAIGN] = 6.5;
+namePointSize[CAVE] = 6.5;
+namePointSize[CONTRACT] = 7.5;
+namePointSize[ENCOUNTER_SIDE_QUEST] = 7.5;
+namePointSize[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = 7.5;
+namePointSize[ENEMY] = 6.5;
+namePointSize[ENEMY_NOSTAT] = 6.5;
+namePointSize[EVENT] = 6.5;
+namePointSize[HERO] = 6.5;
+namePointSize[HERO_PROMO] = 6.5;
+namePointSize[LOCATION] = 6.5;
+namePointSize[NIGHTMARE] = 7.5;
+namePointSize[OBJECTIVE] = 7.5;
+namePointSize[OBJECTIVE_ALLY] = 7.5;
+namePointSize[OBJECTIVE_HERO] = 7.5;
+namePointSize[OBJECTIVE_LOCATION] = 7.5;
+namePointSize[PLAYER_OBJECTIVE] = 7.5;
+namePointSize[PLAYER_SIDE_QUEST] = 7.5;
+namePointSize[QUEST] = 7.5;
+namePointSize[REGION] = 6.5;
+namePointSize[SHIP_ENEMY] = 6.5;
+namePointSize[SHIP_OBJECTIVE] = 7.5;
+namePointSize[TREACHERY] = 6.5;
+namePointSize[TREASURE] = 6.5;
+
+var bottomPointSize = {};
+bottomPointSize[HERO_PROMO] = 3.5;
+
+var threatCostTint = {};
+threatCostTint[HERO] = '200.0,0.7,0.7';
+threatCostTint[HERO_PROMO] = '0.0,0.0,0.95';
+
+var sphereBodyShape = {};
+sphereBodyShape[HERO] = '0,0,472,40,0';
+sphereBodyShape[HERO_PROMO] = '0,0,0,0,0';
+sphereBodyShape[TREASURE] = '0,0,472,0,34';
+
+var sphereOptionBodyShape = {};
+sphereOptionBodyShape[TREASURE] = '0,0,472,0,104';
+
+var optionBodyShape = {};
+optionBodyShape[ENCOUNTER_SIDE_QUEST] = '0,0,348,0,62';
+optionBodyShape[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '0,0,348,0,62';
+optionBodyShape[PLAYER_SIDE_QUEST] = '0,0,350,0,62';
+optionBodyShape[QUEST] = '0,0,351,0,62';
 
 var questStageRegion = {};
 questStageRegion['1'] = '44,43,62,42';
@@ -642,142 +815,72 @@ questStageRegion['7'] = '45,43,62,42';
 questStageRegion['8'] = '45,43,62,42';
 questStageRegion['9'] = '45,43,62,42';
 
-var bodyPointSize = {};
-bodyPointSize['Ally'] = 7.5;
-bodyPointSize['Attachment'] = 7.5;
-bodyPointSize['Campaign'] = 7.5;
-bodyPointSize['Cave'] = 7;
-bodyPointSize['Contract'] = 7.5;
-bodyPointSize['Encounter Side Quest'] = 7;
-bodyPointSize['Encounter Side Quest SmallTextArea'] = 7;
-bodyPointSize['Enemy'] = 7.5;
-bodyPointSize['Enemy NoStat'] = 5.9;
-bodyPointSize['Event'] = 7.5;
-bodyPointSize['Hero'] = 7.5;
-bodyPointSize['Hero Promo'] = 5.9;
-bodyPointSize['Location'] = 7.5;
-bodyPointSize['Nightmare'] = 7.5;
-bodyPointSize['Objective'] = 7.5;
-bodyPointSize['Objective Ally'] = 7.5;
-bodyPointSize['Objective Hero'] = 7.5;
-bodyPointSize['Objective Location'] = 7.5;
-bodyPointSize['Player Objective'] = 7.5;
-bodyPointSize['Player Side Quest'] = 7;
-bodyPointSize['Presentation'] = 7.5;
-bodyPointSize['Quest'] = 7;
-bodyPointSize['Rules'] = 7.5;
-bodyPointSize['Ship Enemy'] = 7.5;
-bodyPointSize['Ship Objective'] = 7.5;
-bodyPointSize['Treachery'] = 7.5;
-bodyPointSize['Treasure'] = 7.5;
-
-var flavourPointSize = {};
-flavourPointSize['Ally'] = 6.25;
-flavourPointSize['Attachment'] = 6.25;
-flavourPointSize['Campaign'] = 6.25;
-flavourPointSize['Cave'] = 7;
-flavourPointSize['Contract'] = 6.25;
-flavourPointSize['Encounter Side Quest'] = 7;
-flavourPointSize['Encounter Side Quest SmallTextArea'] = 7;
-flavourPointSize['Enemy'] = 6.25;
-flavourPointSize['Enemy NoStat'] = 4.9;
-flavourPointSize['Event'] = 6.25;
-flavourPointSize['Hero'] = 6.25;
-flavourPointSize['Hero Promo'] = 4.9;
-flavourPointSize['Location'] = 6.25;
-flavourPointSize['Nightmare'] = 6.25;
-flavourPointSize['Objective'] = 6.25;
-flavourPointSize['Objective Ally'] = 6.25;
-flavourPointSize['Objective Hero'] = 6.25;
-flavourPointSize['Objective Location'] = 6.25;
-flavourPointSize['Player Objective'] = 6.25;
-flavourPointSize['Player Side Quest'] = 7;
-flavourPointSize['Quest'] = 7;
-flavourPointSize['Ship Enemy'] = 6.25;
-flavourPointSize['Ship Objective'] = 6.25;
-flavourPointSize['Treachery'] = 6.25;
-flavourPointSize['Treasure'] = 6.25;
-
-var traitPointSize = {};
-traitPointSize['Ally'] = 8.25;
-traitPointSize['Attachment'] = 8.25;
-traitPointSize['Cave'] = 7.75;
-traitPointSize['Encounter Side Quest'] = 7.75;
-traitPointSize['Encounter Side Quest SmallTextArea'] = 7.75;
-traitPointSize['Enemy'] = 8.25;
-traitPointSize['Enemy NoStat'] = 6.5;
-traitPointSize['Event'] = 8.25;
-traitPointSize['Hero'] = 8.25;
-traitPointSize['Hero Promo'] = 6.5;
-traitPointSize['Location'] = 8.25;
-traitPointSize['Objective'] = 8.25;
-traitPointSize['Objective Ally'] = 8.25;
-traitPointSize['Objective Hero'] = 8.25;
-traitPointSize['Objective Location'] = 8.25;
-traitPointSize['Player Objective'] = 8.25;
-traitPointSize['Player Side Quest'] = 7.75;
-traitPointSize['Region'] = 7.75;
-traitPointSize['Ship Enemy'] = 8.25;
-traitPointSize['Ship Objective'] = 8.25;
-traitPointSize['Treachery'] = 8.25;
-traitPointSize['Treasure'] = 8.25;
-
-var namePointSize = {};
-namePointSize['Ally'] = 6.5;
-namePointSize['Attachment'] = 6.5;
-namePointSize['Campaign'] = 6.5;
-namePointSize['Cave'] = 6.5;
-namePointSize['Contract'] = 7.5;
-namePointSize['Encounter Side Quest'] = 7.5;
-namePointSize['Encounter Side Quest SmallTextArea'] = 7.5;
-namePointSize['Enemy'] = 6.5;
-namePointSize['Enemy NoStat'] = 6.5;
-namePointSize['Event'] = 6.5;
-namePointSize['Hero'] = 6.5;
-namePointSize['Hero Promo'] = 6.5;
-namePointSize['Location'] = 6.5;
-namePointSize['Nightmare'] = 7.5;
-namePointSize['Objective'] = 7.5;
-namePointSize['Objective Ally'] = 7.5;
-namePointSize['Objective Hero'] = 7.5;
-namePointSize['Objective Location'] = 7.5;
-namePointSize['Player Objective'] = 7.5;
-namePointSize['Player Side Quest'] = 7.5;
-namePointSize['Quest'] = 7.5;
-namePointSize['Region'] = 6.5;
-namePointSize['Ship Enemy'] = 6.5;
-namePointSize['Ship Objective'] = 7.5;
-namePointSize['Treachery'] = 6.5;
-namePointSize['Treasure'] = 6.5;
-
-var bottomPointSize = {};
-bottomPointSize['Hero Promo'] = 3.5;
-
-var threatCostTint = {};
-threatCostTint['Hero'] = '200.0,0.7,0.7';
-threatCostTint['Hero Promo'] = '0.0,0.0,0.95';
-
-var sphereBodyShape = {};
-sphereBodyShape['Hero'] = '0,0,472,40,0';
-sphereBodyShape['Hero Promo'] = '0,0,0,0,0';
-sphereBodyShape['Treasure'] = '0,0,472,0,34';
-
-var sphereOptionBodyShape = {};
-sphereOptionBodyShape['Treasure'] = '0,0,472,0,104';
-
-var optionBodyShape = {};
-optionBodyShape['Encounter Side Quest'] = '0,0,348,0,62';
-optionBodyShape['Encounter Side Quest SmallTextArea'] = '0,0,348,0,62';
-optionBodyShape['Player Side Quest'] = '0,0,350,0,62';
-optionBodyShape['Quest'] = '0,0,351,0,62';
-
 var translate = {};
-translate['Ally'] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado', 'Polish': 'Sprzymierzeniec', 'Italian': 'Alleato',
+translate[ALLY] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u00fcndeter', 'Spanish': 'Aliado', 'Polish': 'Sprzymierzeniec', 'Italian': 'Alleato',
 	'Portuguese': 'Aliado'};
-translate['Attachment'] = {'English': 'Attachment', 'French': 'Attachement', 'German': 'Verst\u00e4rkung', 'Spanish': 'Vinculada', 'Polish': 'Dodatek',
+translate[ATTACHMENT] = {'English': 'Attachment', 'French': 'Attachement', 'German': 'Verst\u00e4rkung', 'Spanish': 'Vinculada', 'Polish': 'Dodatek',
 	'Italian': 'Aggregato', 'Portuguese': 'Acess\u00f3rio'};
-translate['Boon'] = {'English': 'Boon', 'French': 'Avantage', 'German': 'Gunst', 'Spanish': 'Ayuda', 'Polish': '\u0141aska', 'Italian': 'Vantaggio',
+translate[BOON] = {'English': 'Boon', 'French': 'Avantage', 'German': 'Gunst', 'Spanish': 'Ayuda', 'Polish': '\u0141aska', 'Italian': 'Vantaggio',
 	'Portuguese': 'D\u00e1diva'};
+translate[BURDEN] = {'English': 'Burden', 'French': 'Fardeau', 'German': 'B\u00fcrde', 'Spanish': 'Carga', 'Polish': 'Brzemi\u0119', 'Italian': 'Svantaggio',
+	'Portuguese': 'Fardo'};
+translate[CAMPAIGN] = {'English': 'Campaign', 'French': 'Campagne', 'German': 'Kampagne', 'Spanish': 'Campa\u00f1a', 'Polish': 'Kampania', 'Italian': 'Campagna',
+	'Portuguese': 'Campanha'};
+translate[CAVE] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria',
+	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria', 'Portuguese': 'Miss\u00e3o Secund\u00e1ria'};
+translate[CONTRACT] = {'English': 'Contract', 'French': 'Contrat', 'German': 'Abkommen', 'Spanish': 'Contrato', 'Polish': 'Kontrakt', 'Italian': 'Contratto',
+	'Portuguese': 'Contrato'};
+translate[ENCOUNTER_SIDE_QUEST] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria',
+	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria', 'Portuguese': 'Miss\u00e3o Secund\u00e1ria'};
+translate[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria',
+	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria', 'Portuguese': 'Miss\u00e3o Secund\u00e1ria'};
+translate[ENEMY] = {'English': 'Enemy', 'French': 'Ennemi', 'German': 'Gegner', 'Spanish': 'Enemigo', 'Polish': 'Wr\u00f3g', 'Italian': 'Nemico', 'Portuguese': 'Inimigo'};
+translate[ENEMY_NOSTAT] = {'English': 'Enemy', 'French': 'Ennemi', 'German': 'Gegner', 'Spanish': 'Enemigo', 'Polish': 'Wr\u00f3g', 'Italian': 'Nemico',
+	'Portuguese': 'Inimigo'};
+translate[EVENT] = {'English': 'Event', 'French': '\u00c9v\u00e9nement', 'German': 'Ereignis', 'Spanish': 'Evento', 'Polish': 'Wydarzenie', 'Italian': 'Evento',
+	'Portuguese': 'Evento'};
+translate[FULL_ART_LANDSCAPE] = {'English': 'Full Art Landscape', 'French': 'Full Art Landscape', 'German': 'Full Art Landscape', 'Spanish': 'Full Art Landscape',
+	'Polish': 'Full Art Landscape', 'Italian': 'Full Art Landscape', 'Portuguese': 'Full Art Landscape'};
+translate[FULL_ART_PORTRAIT] = {'English': 'Full Art Portrait', 'French': 'Full Art Portrait', 'German': 'Full Art Portrait', 'Spanish': 'Full Art Portrait',
+	'Polish': 'Full Art Portrait', 'Italian': 'Full Art Portrait', 'Portuguese': 'Full Art Portrait'};
+translate[HERO] = {'English': 'Hero', 'French': 'H\u00e9ros', 'German': 'Held', 'Spanish': 'H\u00e9roe', 'Polish': 'Bohater', 'Italian': 'Eroe',
+	'Portuguese': 'Her\u00f3i'};
+translate[HERO_PROMO] = {'English': 'Hero', 'French': 'H\u00e9ros', 'German': 'Held', 'Spanish': 'H\u00e9roe', 'Polish': 'Bohater', 'Italian': 'Eroe',
+	'Portuguese': 'Her\u00f3i'};
+translate[LOCATION] = {'English': 'Location', 'French': 'Lieu', 'German': 'Ort', 'Spanish': 'Lugar', 'Polish': 'Obszar', 'Italian': 'Luogo',
+	'Portuguese': 'Localiza\u00e7\u00e3o'};
+translate[NIGHTMARE] = {'English': 'Setup', 'French': 'Pr\u00e9paration', 'German': 'Vorbereitung', 'Spanish': 'Preparaci\u00f3n', 'Polish': 'Przygotowanie',
+	'Italian': 'Preparazione', 'Portuguese': 'Prepara\u00e7\u00e3o'};
+translate[OBJECTIVE] = {'English': 'Objective', 'French': 'Objectif', 'German': 'Ziel', 'Spanish': 'Objetivo', 'Polish': 'Cel', 'Italian': 'Obiettivo',
+	'Portuguese': 'Objetivo'};
+translate[OBJECTIVE_ALLY] = {'English': 'Objective-Ally', 'French': 'Objectif-Alli\u00e9', 'German': 'Ziel-Verb\u00fcndeter', 'Spanish': 'Objetivo-Aliado',
+	'Polish': 'Cel-Sprzymierzeniec', 'Italian': 'Obiettivo-Alleato', 'Portuguese': 'Objetivo-Aliado'};
+translate[OBJECTIVE_HERO] = {'English': 'Objective-Hero', 'French': 'Objectif-H\u00e9ros', 'German': 'Ziel-Held', 'Spanish': 'H\u00e9roe-Objetivo',
+	'Polish': 'Cel-Bohater', 'Italian': 'Eroe-Obiettivo', 'Portuguese': 'Objetivo-Her\u00f3i'};
+translate[OBJECTIVE_LOCATION] = {'English': 'Objective-Location', 'French': 'Objectif-Lieu', 'German': 'Ziel-Ort', 'Spanish': 'Lugar-Objetivo', 'Polish': 'Cel-Obszar',
+	'Italian': 'Luogo-Obiettivo', 'Portuguese': 'Objetivo-Localiza\u00e7\u00e3o'};
+translate[PLAYER_OBJECTIVE] = {'English': 'Player Objective', 'French': 'Objectif Joueur', 'German': 'Spieler-Ziel', 'Spanish': 'Objetivo de Jugador',
+	'Polish': 'Cel Gracza', 'Italian': 'Obiettivo dei Giocatori', 'Portuguese': 'T.B.D.'};
+translate[PLAYER_SIDE_QUEST] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria',
+	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria', 'Portuguese': 'Miss\u00e3o Secund\u00e1ria'};
+translate[PRESENTATION] = {'English': 'Presentation', 'French': 'Presentation', 'German': 'Presentation', 'Spanish': 'Presentation', 'Polish': 'Presentation',
+	'Italian': 'Presentation', 'Portuguese': 'Presentation'};
+translate[QUEST] = {'English': 'Quest', 'French': 'Qu\u00eate', 'German': 'Abenteuer', 'Spanish': 'Misi\u00f3n', 'Polish': 'Wyprawa', 'Italian': 'Ricerca',
+	'Portuguese': 'Miss\u00e3o'};
+translate[REGION] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria',
+	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria', 'Portuguese': 'Miss\u00e3o Secund\u00e1ria'};
+translate[RULES] = {'English': 'Rules', 'French': 'Rules', 'German': 'Rules', 'Spanish': 'Rules', 'Polish': 'Rules', 'Italian': 'Rules', 'Portuguese': 'Rules'};
+translate[SETUP] = {'English': 'Setup', 'French': 'Pr\u00e9paration', 'German': 'Vorbereitung', 'Spanish': 'Preparaci\u00f3n', 'Polish': 'Przygotowanie',
+	'Italian': 'Preparazione', 'Portuguese': 'Prepara\u00e7\u00e3o'};
+translate[SHIP_ENEMY] = {'English': 'Ship-Enemy', 'French': 'Navire-Ennemi', 'German': 'Schiff-Gegner', 'Spanish': 'Barco-Enemigo', 'Polish': 'Statek-Wr\u00f3g',
+	'Italian': 'Nave-Nemico', 'Portuguese': 'Navio-Inimigo'};
+translate[SHIP_OBJECTIVE] = {'English': 'Ship-Objective', 'French': 'Navire-Objectif', 'German': 'Schiff-Ziel', 'Spanish': 'Barco-Objetivo', 'Polish': 'Statek-Cel',
+	'Italian': 'Nave-Obiettivo', 'Portuguese': 'Navio-Objetivo'};
+translate[TREACHERY] = {'English': 'Treachery', 'French': 'Tra\u00eetrise', 'German': 'Verrat', 'Spanish': 'Traici\u00f3n', 'Polish': 'Podst\u0119p',
+	'Italian': 'Perfidia', 'Portuguese': 'Infort\u00fanio'};
+translate[TREASURE] = {'English': 'Treasure', 'French': 'Tr\u00e9sor', 'German': 'Schatz', 'Spanish': 'Tesoro', 'Polish': 'Skarb', 'Italian': 'Tesoro',
+	'Portuguese': 'Tesouro'};
+
 translate['BoonLeadership'] = {'English': 'Boon', 'French': 'Avantage', 'German': 'Gunst', 'Spanish': 'Ayuda', 'Polish': '\u0141aska', 'Italian': 'Vantaggio',
 	'Portuguese': 'D\u00e1diva'};
 translate['BoonLore'] = {'English': 'Boon', 'French': 'Avantage', 'German': 'Gunst', 'Spanish': 'Ayuda', 'Polish': '\u0141aska', 'Italian': 'Vantaggio',
@@ -786,71 +889,13 @@ translate['BoonSpirit'] = {'English': 'Boon', 'French': 'Avantage', 'German': 'G
 	'Portuguese': 'D\u00e1diva'};
 translate['BoonTactics'] = {'English': 'Boon', 'French': 'Avantage', 'German': 'Gunst', 'Spanish': 'Ayuda', 'Polish': '\u0141aska', 'Italian': 'Vantaggio',
 	'Portuguese': 'D\u00e1diva'};
-translate['Burden'] = {'English': 'Burden', 'French': 'Fardeau', 'German': 'B\u00fcrde', 'Spanish': 'Carga', 'Polish': 'Brzemi\u0119', 'Italian': 'Svantaggio',
-	'Portuguese': 'Fardo'};
-translate['Campaign'] = {'English': 'Campaign', 'French': 'Campagne', 'German': 'Kampagne', 'Spanish': 'Campa\u00f1a', 'Polish': 'Kampania', 'Italian': 'Campagna',
-	'Portuguese': 'Campanha'};
-translate['Cave'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria',
-	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria', 'Portuguese': 'Miss\u00e3o Secund\u00e1ria'};
-translate['Contract'] = {'English': 'Contract', 'French': 'Contrat', 'German': 'Abkommen', 'Spanish': 'Contrato', 'Polish': 'Kontrakt', 'Italian': 'Contratto',
-	'Portuguese': 'Contrato'};
 translate['Encounter Keyword'] = {'English': 'Encounter', 'French': 'Rencontre', 'German': 'Begegnung', 'Spanish': 'Encuentro', 'Polish': 'Spotkanie',
 	'Italian': 'Incontro', 'Portuguese': 'Encontro'};
-translate['Encounter Side Quest'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria',
-	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria', 'Portuguese': 'Miss\u00e3o Secund\u00e1ria'};
-translate['Encounter Side Quest SmallTextArea'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria',
-	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria', 'Portuguese': 'Miss\u00e3o Secund\u00e1ria'};
-translate['Enemy'] = {'English': 'Enemy', 'French': 'Ennemi', 'German': 'Gegner', 'Spanish': 'Enemigo', 'Polish': 'Wr\u00f3g', 'Italian': 'Nemico', 'Portuguese': 'Inimigo'};
-translate['Enemy NoStat'] = {'English': 'Enemy', 'French': 'Ennemi', 'German': 'Gegner', 'Spanish': 'Enemigo', 'Polish': 'Wr\u00f3g', 'Italian': 'Nemico',
-	'Portuguese': 'Inimigo'};
-translate['Event'] = {'English': 'Event', 'French': '\u00c9v\u00e9nement', 'German': 'Ereignis', 'Spanish': 'Evento', 'Polish': 'Wydarzenie', 'Italian': 'Evento',
-	'Portuguese': 'Evento'};
-translate['Full Art Landscape'] = {'English': 'Full Art Landscape', 'French': 'Full Art Landscape', 'German': 'Full Art Landscape', 'Spanish': 'Full Art Landscape',
-	'Polish': 'Full Art Landscape', 'Italian': 'Full Art Landscape', 'Portuguese': 'Full Art Landscape'};
-translate['Full Art Portrait'] = {'English': 'Full Art Portrait', 'French': 'Full Art Portrait', 'German': 'Full Art Portrait', 'Spanish': 'Full Art Portrait',
-	'Polish': 'Full Art Portrait', 'Italian': 'Full Art Portrait', 'Portuguese': 'Full Art Portrait'};
-translate['Hero'] = {'English': 'Hero', 'French': 'H\u00e9ros', 'German': 'Held', 'Spanish': 'H\u00e9roe', 'Polish': 'Bohater', 'Italian': 'Eroe',
-	'Portuguese': 'Her\u00f3i'};
-translate['Hero Promo'] = {'English': 'Hero', 'French': 'H\u00e9ros', 'German': 'Held', 'Spanish': 'H\u00e9roe', 'Polish': 'Bohater', 'Italian': 'Eroe',
-	'Portuguese': 'Her\u00f3i'};
 translate['Illustrator'] = {'English': 'Illus.', 'French': 'Illus.', 'German': 'Illus.', 'Spanish': 'Ilus.', 'Polish': 'Illus.', 'Italian': 'Illus.',
 	'Portuguese': 'Ilust.'};
-translate['Location'] = {'English': 'Location', 'French': 'Lieu', 'German': 'Ort', 'Spanish': 'Lugar', 'Polish': 'Obszar', 'Italian': 'Luogo',
-	'Portuguese': 'Localiza\u00e7\u00e3o'};
-translate['Nightmare'] = {'English': 'Setup', 'French': 'Pr\u00e9paration', 'German': 'Vorbereitung', 'Spanish': 'Preparaci\u00f3n', 'Polish': 'Przygotowanie',
-	'Italian': 'Preparazione', 'Portuguese': 'Prepara\u00e7\u00e3o'};
-translate['Objective'] = {'English': 'Objective', 'French': 'Objectif', 'German': 'Ziel', 'Spanish': 'Objetivo', 'Polish': 'Cel', 'Italian': 'Obiettivo',
-	'Portuguese': 'Objetivo'};
-translate['Objective Ally'] = {'English': 'Objective-Ally', 'French': 'Objectif-Alli\u00e9', 'German': 'Ziel-Verb\u00fcndeter', 'Spanish': 'Objetivo-Aliado',
-	'Polish': 'Cel-Sprzymierzeniec', 'Italian': 'Obiettivo-Alleato', 'Portuguese': 'Objetivo-Aliado'};
-translate['Objective Hero'] = {'English': 'Objective-Hero', 'French': 'Objectif-H\u00e9ros', 'German': 'Ziel-Held', 'Spanish': 'H\u00e9roe-Objetivo',
-	'Polish': 'Cel-Bohater', 'Italian': 'Eroe-Obiettivo', 'Portuguese': 'Objetivo-Her\u00f3i'};
-translate['Objective Location'] = {'English': 'Objective-Location', 'French': 'Objectif-Lieu', 'German': 'Ziel-Ort', 'Spanish': 'Lugar-Objetivo', 'Polish': 'Cel-Obszar',
-	'Italian': 'Luogo-Obiettivo', 'Portuguese': 'Objetivo-Localiza\u00e7\u00e3o'};
 translate['Page'] = {'English': 'Page', 'French': 'Page', 'German': 'Seite', 'Spanish': 'P\u00e1gina', 'Polish': 'Strona', 'Italian': 'Pagina',
 	'Portuguese': 'P\u00e1gina'};
-translate['Player Objective'] = {'English': 'Player Objective', 'French': 'Objectif Joueur', 'German': 'Spieler-Ziel', 'Spanish': 'Objetivo de Jugador',
-	'Polish': 'Cel Gracza', 'Italian': 'Obiettivo dei Giocatori', 'Portuguese': 'T.B.D.'};
-translate['Player Side Quest'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria',
-	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria', 'Portuguese': 'Miss\u00e3o Secund\u00e1ria'};
-translate['Presentation'] = {'English': 'Presentation', 'French': 'Presentation', 'German': 'Presentation', 'Spanish': 'Presentation', 'Polish': 'Presentation',
-	'Italian': 'Presentation', 'Portuguese': 'Presentation'};
-translate['Quest'] = {'English': 'Quest', 'French': 'Qu\u00eate', 'German': 'Abenteuer', 'Spanish': 'Misi\u00f3n', 'Polish': 'Wyprawa', 'Italian': 'Ricerca',
-	'Portuguese': 'Miss\u00e3o'};
-translate['Region'] = {'English': 'Side Quest', 'French': 'Qu\u00eate Annexe', 'German': 'Nebenabenteuer', 'Spanish': 'Misi\u00f3n Secundaria',
-	'Polish': 'Poboczna wyprawa', 'Italian': 'Ricerca Secondaria', 'Portuguese': 'Miss\u00e3o Secund\u00e1ria'};
-translate['Rules'] = {'English': 'Rules', 'French': 'Rules', 'German': 'Rules', 'Spanish': 'Rules', 'Polish': 'Rules', 'Italian': 'Rules', 'Portuguese': 'Rules'};
-translate['Setup'] = {'English': 'Setup', 'French': 'Pr\u00e9paration', 'German': 'Vorbereitung', 'Spanish': 'Preparaci\u00f3n', 'Polish': 'Przygotowanie',
-	'Italian': 'Preparazione', 'Portuguese': 'Prepara\u00e7\u00e3o'};
-translate['Ship Enemy'] = {'English': 'Ship-Enemy', 'French': 'Navire-Ennemi', 'German': 'Schiff-Gegner', 'Spanish': 'Barco-Enemigo', 'Polish': 'Statek-Wr\u00f3g',
-	'Italian': 'Nave-Nemico', 'Portuguese': 'Navio-Inimigo'};
-translate['Ship Objective'] = {'English': 'Ship-Objective', 'French': 'Navire-Objectif', 'German': 'Schiff-Ziel', 'Spanish': 'Barco-Objetivo', 'Polish': 'Statek-Cel',
-	'Italian': 'Nave-Obiettivo', 'Portuguese': 'Navio-Objetivo'};
 translate['Side'] = {'English': 'Side', 'French': 'Face', 'German': 'Seite', 'Spanish': 'Lado', 'Polish': 'Strona', 'Italian': 'Lato', 'Portuguese': 'Lado'};
-translate['Treachery'] = {'English': 'Treachery', 'French': 'Tra\u00eetrise', 'German': 'Verrat', 'Spanish': 'Traici\u00f3n', 'Polish': 'Podst\u0119p',
-	'Italian': 'Perfidia', 'Portuguese': 'Infort\u00fanio'};
-translate['Treasure'] = {'English': 'Treasure', 'French': 'Tr\u00e9sor', 'German': 'Schatz', 'Spanish': 'Tesoro', 'Polish': 'Skarb', 'Italian': 'Tesoro',
-	'Portuguese': 'Tesouro'};
 translate['Unknown Artist'] = {'English': 'Unknown Artist', 'French': 'Artiste inconnu', 'German': 'Unbekannter K\u00fcnstler', 'Spanish': 'Artista desconocido',
 	'Polish': 'Artysta nieznany', 'Italian': 'Artista sconosciuto', 'Portuguese': 'Artista Desconhecido'};
 translate['Victory'] = {'English': 'Victory', 'French': 'Victoire', 'German': 'Sieg', 'Spanish': 'Victoria', 'Polish': 'Zwyci\u0119stwo', 'Italian': 'Vittoria',
@@ -904,7 +949,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 
 		let doubleSide = isDoubleSide(card['Type'], card['BType']);
 
-		if ((card['Type'] + '' == 'Quest') && card['BQuest Points']) {
+		if ((card['Type'] + '' == QUEST) && card['BQuest Points']) {
 			card['Quest Points'] = card['BQuest Points'];
 		}
 
@@ -920,7 +965,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 			card['Artist'] = 'Unknown Artist';
 		}
 
-		if (((card['Type'] + '' == 'Contract') || (card['Type'] + '' == 'Player Objective')) && !card['BArtist']) {
+		if (((card['Type'] + '' == CONTRACT) || (card['Type'] + '' == PLAYER_OBJECTIVE)) && !card['BArtist']) {
 			card['BArtist'] = card['Artist'];
 		}
 
@@ -980,36 +1025,36 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						flags.push(card['Flags'][idx_f]);
 					}
 
-					if ((cardType == 'Hero') && (flags.indexOf('Promo') > -1)) {
-						cardType = 'Hero Promo';
-						cardSphere = 'Promo' + card['Sphere'];
+					if ((cardType == HERO) && (flags.indexOf(PROMO) > -1)) {
+						cardType = HERO_PROMO;
+						cardSphere = PROMO + card['Sphere'];
 						card['Sphere'] = cardSphere;
 					}
-					else if ((cardType == 'Enemy') && (card['Sphere'] + '' == 'NoStat')) {
-						cardType = 'Enemy NoStat';
+					else if ((cardType == ENEMY) && (card['Sphere'] + '' == 'NoStat')) {
+						cardType = ENEMY_NOSTAT;
 					}
-					else if ((cardType == 'Encounter Side Quest') && (card['Sphere'] + '' == 'SmallTextArea')) {
-						cardType = 'Encounter Side Quest SmallTextArea';
+					else if ((cardType == ENCOUNTER_SIDE_QUEST) && (card['Sphere'] + '' == 'SmallTextArea')) {
+						cardType = ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA;
 					}
-					else if ((cardType == 'Encounter Side Quest') && (card['Sphere'] + '' == 'Cave')) {
-						cardType = 'Cave';
+					else if ((cardType == ENCOUNTER_SIDE_QUEST) && (card['Sphere'] + '' == CAVE)) {
+						cardType = CAVE;
 					}
-					else if ((cardType == 'Encounter Side Quest') && (card['Sphere'] + '' == 'Region')) {
-						cardType = 'Region';
+					else if ((cardType == ENCOUNTER_SIDE_QUEST) && (card['Sphere'] + '' == REGION)) {
+						cardType = REGION;
 					}
-					else if (cardType == 'Objective Hero') {
-						cardSphere = 'Hero';
+					else if (cardType == OBJECTIVE_HERO) {
+						cardSphere = HERO;
 						card['Sphere'] = cardSphere;
 					}
-					else if (cardType == 'Objective Location') {
-						cardSphere = 'Location';
+					else if (cardType == OBJECTIVE_LOCATION) {
+						cardSphere = LOCATION;
 						card['Sphere'] = cardSphere;
 					}
-					else if ((cardType == 'Ship Enemy') && (card['Sphere'] + '' == 'Nightmare')) {
+					else if ((cardType == SHIP_ENEMY) && (card['Sphere'] + '' == NIGHTMARE)) {
 						cardSphere = 'ShipNightmare';
 						card['Sphere'] = cardSphere;
 					}
-					else if ((cardType == 'Ship Enemy') && (card['Sphere'] + '' == 'Burden')) {
+					else if ((cardType == SHIP_ENEMY) && (card['Sphere'] + '' == BURDEN)) {
 						cardSphere = 'ShipBurden';
 						card['Sphere'] = cardSphere;
 					}
@@ -1079,36 +1124,36 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						flags.push(card['BFlags'][idx_f]);
 					}
 
-					if ((cardType == 'Hero') && (flags.indexOf('Promo') > -1)) {
-						cardType = 'Hero Promo';
-						cardSphere = 'Promo' + card['BSphere'];
+					if ((cardType == HERO) && (flags.indexOf(PROMO) > -1)) {
+						cardType = HERO_PROMO;
+						cardSphere = PROMO + card['BSphere'];
 						card['BSphere'] = cardSphere;
 					}
-					else if ((cardType == 'Enemy') && (card['BSphere'] + '' == 'NoStat')) {
-						cardType = 'Enemy NoStat';
+					else if ((cardType == ENEMY) && (card['BSphere'] + '' == 'NoStat')) {
+						cardType = ENEMY_NOSTAT;
 					}
-					else if ((cardType == 'Encounter Side Quest') && (card['BSphere'] + '' == 'SmallTextArea')) {
-						cardType = 'Encounter Side Quest SmallTextArea';
+					else if ((cardType == ENCOUNTER_SIDE_QUEST) && (card['BSphere'] + '' == 'SmallTextArea')) {
+						cardType = ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA;
 					}
-					else if ((cardType == 'Encounter Side Quest') && (card['BSphere'] + '' == 'Cave')) {
-						cardType = 'Cave';
+					else if ((cardType == ENCOUNTER_SIDE_QUEST) && (card['BSphere'] + '' == CAVE)) {
+						cardType = CAVE;
 					}
-					else if ((cardType == 'Encounter Side Quest') && (card['BSphere'] + '' == 'Region')) {
-						cardType = 'Region';
+					else if ((cardType == ENCOUNTER_SIDE_QUEST) && (card['BSphere'] + '' == REGION)) {
+						cardType = REGION;
 					}
-					else if (cardType == 'Objective Hero') {
-						cardSphere = 'Hero';
+					else if (cardType == OBJECTIVE_HERO) {
+						cardSphere = HERO;
 						card['BSphere'] = cardSphere;
 					}
-					else if (cardType == 'Objective Location') {
-						cardSphere = 'Location';
+					else if (cardType == OBJECTIVE_LOCATION) {
+						cardSphere = LOCATION;
 						card['BSphere'] = cardSphere;
 					}
-					else if ((cardType == 'Ship Enemy') && (card['BSphere'] + '' == 'Nightmare')) {
+					else if ((cardType == SHIP_ENEMY) && (card['BSphere'] + '' == NIGHTMARE)) {
 						cardSphere = 'ShipNightmare';
 						card['BSphere'] = cardSphere;
 					}
-					else if ((cardType == 'Ship Enemy') && (card['BSphere'] + '' == 'Burden')) {
+					else if ((cardType == SHIP_ENEMY) && (card['BSphere'] + '' == BURDEN)) {
 						cardSphere = 'ShipBurden';
 						card['BSphere'] = cardSphere;
 					}
@@ -1173,9 +1218,9 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 
 					if (['Victory Points', 'BVictory Points'].indexOf(nXml + '') > -1) {
-						if ((cardType != 'Presentation') && (cardType != 'Rules') && vXml.match(/^[0-9]+$/)) {
+						if ((cardType != PRESENTATION) && (cardType != RULES) && vXml.match(/^[0-9]+$/)) {
 							vXml = translate['Victory'][lang].toUpperCase() + ' ' + vXml;
-							if (lang == 'German') {
+							if (lang == GERMAN) {
 								vXml += '.';
 							}
 						}
@@ -1198,7 +1243,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 							vXml = keywordsBack + '\n\n' + vXml;
 						}
 					}
-					else if ((nXml == 'Adventure') && (cardType != 'Campaign')) {
+					else if ((nXml == 'Adventure') && (cardType != CAMPAIGN)) {
 						vXml = vXml.toUpperCase();
 					}
 
@@ -1255,21 +1300,21 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 
 				if (context == 'renderer') {
 					let bodyShapeNeeded = false;
-					if (((cardType == 'Hero') && (cardSphere != 'Neutral')) || (cardType == 'Treasure') ||
-						((['Encounter Side Quest', 'Encounter Side Quest SmallTextArea', 'Player Side Quest', 'Quest'].indexOf(cardType) > -1) &&
+					if (((cardType == HERO) && (cardSphere != 'Neutral')) || (cardType == TREASURE) ||
+						(([ENCOUNTER_SIDE_QUEST, ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA, PLAYER_SIDE_QUEST, QUEST].indexOf(cardType) > -1) &&
 						(s.get('OptionRight') && (s.get('OptionRight') + '').length))) {
 						bodyShapeNeeded = true;
 					}
 					s.set('BodyShapeNeededRenderer', bodyShapeNeeded);
 
 					let bodyShapeNeededBack = false;
-					if ((cardType == 'Quest') && s.get('OptionRightBack') && (s.get('OptionRightBack') + '').length) {
+					if ((cardType == QUEST) && s.get('OptionRightBack') && (s.get('OptionRightBack') + '').length) {
 						bodyShapeNeededBack = true;
 					}
 					s.set('BodyShapeNeededBackRenderer', bodyShapeNeededBack);
 				}
 
-				if (cardType == 'Cave') {
+				if (cardType == CAVE) {
 					if (s.get('Rules').search('\\[split\\]') > -1) {
 						if (context == 'renderer') {
 							s.set('RulesRight', s.get('Rules').split('[split]')[1].trim());
@@ -1285,7 +1330,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 				}
 
-				if ((cardType == 'Presentation') || (cardType == 'Rules')) {
+				if ((cardType == PRESENTATION) || (cardType == RULES)) {
 					if (s.get('OptionRight').search('/') > -1) {
 						s.set('PageFrontShow', 'true');
 						s.set('PageNumber', s.get('OptionRight').split('/')[0]);
@@ -1314,19 +1359,19 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('Name-external-path', 'project:imagesRaw/' + card['ArtworkBottom']);
 				}
 
-				if (cardType == 'Contract') {
+				if (cardType == CONTRACT) {
 					s.set('Side', '');
 					s.set('SideA', markUp(translate['Side'][lang].toUpperCase() + ' A', 'Side', cardType, lang, setID));
 					s.set('SideB', markUp(translate['Side'][lang].toUpperCase() + ' B', 'Side', cardType, lang, setID));
 
-					if (card['BType'] + '' == 'Contract') {
+					if (card['BType'] + '' == CONTRACT) {
 						s.set('Template', 'DoubleSided');
 					}
 					else {
 						s.set('Template', 'Neutral');
 					}
 				}
-				else if (cardType == 'Player Objective') {
+				else if (cardType == PLAYER_OBJECTIVE) {
 					let playerObjectiveSide;
 					if (side == 'front') {
 						playerObjectiveSide = 'A';
@@ -1337,15 +1382,15 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('Side', markUp(translate['Side'][lang].toUpperCase() + ' ' + playerObjectiveSide, 'Side', cardType, lang, setID));
 				}
 
-				if (['Boon', 'Burden'].indexOf(cardSphere) > -1) {
+				if ([BOON, BURDEN].indexOf(cardSphere) > -1) {
 					s.set('Subtype', markUp(translate[cardSphere][lang].toUpperCase(), 'Subtype', cardType, lang, setID));
 				}
 				else {
 					s.set('Subtype', '');
 				}
 
-				if ((cardType == 'Campaign') && (cardSphere == 'Setup')) {
-					s.set('Type', markUp(translate['Setup'][lang].toUpperCase(), 'Type', cardType, lang, setID));
+				if ((cardType == CAMPAIGN) && (cardSphere == SETUP)) {
+					s.set('Type', markUp(translate[SETUP][lang].toUpperCase(), 'Type', cardType, lang, setID));
 					s.set('Template', 'Standard');
 				}
 				else {
@@ -1355,11 +1400,11 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				if (side == 'front') {
 					if (card['Portrait Shadow']) {
 						s.set('PortraitShadow', card['Portrait Shadow']);
-						if ((cardType == 'Quest') && (!card['BArtwork'] || (card['BArtwork'] == card['Artwork']))) {
+						if ((cardType == QUEST) && (!card['BArtwork'] || (card['BArtwork'] == card['Artwork']))) {
 							s.set('PortraitBackShadow', card['Portrait Shadow']);
 						}
 					}
-					if ((cardType == 'Quest') && card['BPortrait Shadow'] && card['BArtwork'] && (card['BArtwork'] != card['Artwork'])) {
+					if ((cardType == QUEST) && card['BPortrait Shadow'] && card['BArtwork'] && (card['BArtwork'] != card['Artwork'])) {
 						s.set('PortraitBackShadow', card['BPortrait Shadow']);
 					}
 					if (card['Artwork']) {
@@ -1373,7 +1418,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					else {
 						s.set('Portrait-external-path', 'project:imagesDefault/white.jpg');
 					}
-					if ((cardType == 'Quest') || ((cardType == 'Contract') && (card['BType'] + '' == 'Contract'))) {
+					if ((cardType == QUEST) || ((cardType == CONTRACT) && (card['BType'] + '' == CONTRACT))) {
 						if (card['BArtwork'] && (card['BArtwork'] != card['Artwork'])) {
 							s.set('PortraitBack-external-path', 'project:imagesRaw/' + card['BArtwork']);
 							s.set('PortraitShare', 0);
@@ -1409,7 +1454,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 							s.set('Portrait-external-scale', card['BScale'] / 100);
 						}
 					}
-					else if (((card['Type'] + '' == 'Contract') || (card['Type'] + '' == 'Player Objective')) && card['Artwork']) {
+					else if (((card['Type'] + '' == CONTRACT) || (card['Type'] + '' == PLAYER_OBJECTIVE)) && card['Artwork']) {
 						s.set('Portrait-external-path', 'project:imagesRaw/' + card['Artwork']);
 						if (card['PanX'] && card['PanY'] && card['Scale']) {
 							s.set('Portrait-external-panx', card['PanX']);
@@ -1446,7 +1491,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('EncounterSet-external-path', '');
 				}
 
-				if (cardType == 'Quest') {
+				if (cardType == QUEST) {
 					let encounterSets = [];
 					if (card['Additional Encounter Sets']) {
 						let encounterSetsRaw = card['Additional Encounter Sets'].split(';');
@@ -1509,7 +1554,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('Difficulty', 'Standard');
 				}
 
-				if (((cardType == 'Presentation') && (['BlueNightmare', 'GreenNightmare', 'PurpleNightmare', 'RedNightmare', 'BrownNightmare', 'YellowNightmare'].indexOf(cardSphere) == -1)) || (cardType == 'Rules')) {
+				if (((cardType == PRESENTATION) && (['BlueNightmare', 'GreenNightmare', 'PurpleNightmare', 'RedNightmare', 'BrownNightmare', 'YellowNightmare'].indexOf(cardSphere) == -1)) || (cardType == RULES)) {
 					s.set('Collection', 'Empty');
 					s.set('Collection-external-path', '');
 				}
@@ -1526,7 +1571,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 
 					let iconName;
-					if (flags.indexOf('Promo') > -1) {
+					if (flags.indexOf(PROMO) > -1) {
 						iconName = escapeIconFileName(selectedIcon) + '_black';
 					}
 					else {
@@ -1556,7 +1601,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('Copyright', setCopyright);
 				}
 
-				if ((cardType == 'Full Art Landscape') || (cardType == 'Full Art Portrait')) {
+				if ((cardType == FULL_ART_LANDSCAPE) || (cardType == FULL_ART_PORTRAIT)) {
 					s.set('Artist', '<right>' + s.get('Artist'));
 				}
 
@@ -1648,7 +1693,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				s.set('LRL-PageOf', '</size><size 3> </size><size 7>/</size><size 3> </size><size 7>');
 				s.set('HorizontalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.3 0.1>');
 
-				if ((cardType == 'Presentation') || (cardType == 'Rules')) {
+				if ((cardType == PRESENTATION) || (cardType == RULES)) {
 					s.set('VerticalSpacer-tag-replacement', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.1>');
 					s.set('Body-lineTightness', 0.8);
 					s.set('BodyRight-lineTightness', 0.8);
@@ -1659,7 +1704,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('BodyRight-lineTightness', 0.2);
 				}
 
-				if (cardType == 'Hero Promo') {
+				if (cardType == HERO_PROMO) {
 					s.set('Bottom-colour', '#000000');
 					s.set('Bottom-stroke', 'Custom');
 					s.set('Bottom-stroke-colour', '#00000000');
@@ -1672,7 +1717,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('Bottom-stroke-width', 2);
 				}
 
-				if ((cardType == 'Cave') || (cardType == 'Region')) {
+				if ((cardType == CAVE) || (cardType == REGION)) {
 					s.set('Body-colour', '#FFFFFF');
 					s.set('BodyRight-colour', '#FFFFFF');
 					s.set('Name-colour', '#FFFFFF');
@@ -1699,7 +1744,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				}
 				else {
 					s.set('TraitOut', 'true');
-					if ((cardType == 'Hero Promo') && (lang in bodyRegionHeroPromo)) {
+					if ((cardType == HERO_PROMO) && (lang in bodyRegionHeroPromo)) {
 						s.set('TraitOut-Body-region', bodyRegionHeroPromo[lang]);
 					}
 					else if (cardType in bodyRegion) {
@@ -1716,10 +1761,10 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						s.set('Name-region', nameUniqueRegion[cardType]);
 					}
 				}
-				else if ((cardType == 'Treachery') && (cardName == 'Dziewi\u0119ciu Kr\u0105\u017cy po \u015awiecie')) { // workaround for the Polish card
+				else if ((cardType == TREACHERY) && (cardName == 'Dziewi\u0119ciu Kr\u0105\u017cy po \u015awiecie')) { // workaround for the Polish card
 					s.set('Name-region', '54,101,26,178');
 				}
-				else if ((cardType == 'Treachery') && (cardName == 'Zagubiony w mie\u015bcie goblin\u00f3w')) { // workaround for the Polish card
+				else if ((cardType == TREACHERY) && (cardName == 'Zagubiony w mie\u015bcie goblin\u00f3w')) { // workaround for the Polish card
 					s.set('Name-region', '55,100,26,180');
 				}
 				else {
@@ -1739,7 +1784,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 				}
 
-				if ((cardType == 'Hero Promo') && (translate[cardType][lang].length > 4)) {
+				if ((cardType == HERO_PROMO) && (translate[cardType][lang].length > 4)) {
 					s.set('Type-region', '279,448,39,15');
 				}
 				else {
@@ -1748,7 +1793,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 				}
 
-				if (cardType == 'Quest') {
+				if (cardType == QUEST) {
 					s.set('Stage-region', questStageRegion[s.get('Stage') + '']);
 				}
 
@@ -1802,7 +1847,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 
 				if (s.get('Name-region') && cardName && cardName.match(/[\u00c0\u00c1\u00c2\u00c3\u00c4\u00c8\u00c9\u00ca\u00cb\u00cc\u00cd\u00ce\u00cf\u00d1\u00d2\u00d3\u00d4\u00d5\u00d6\u00d9\u00da\u00db\u00dc\u0106\u0108\u0143\u015a\u0179\u017b]/)) {
 					let parts = s.get('Name-region').split(',');
-					if (['Event', 'Treachery'].indexOf(cardType) > -1) {
+					if ([EVENT, TREACHERY].indexOf(cardType) > -1) {
 						parts[0] = (parseInt(parts[0]) + 1).toString();
 					}
 					else {
@@ -1897,7 +1942,7 @@ function isDoubleSide(cardType, cardTypeBack) {
 	if (doubleSideTypes.indexOf(cardType + '') > -1) {
 		return true;
 	}
-	else if ((cardType + '' == 'Contract') && (cardTypeBack + '' == 'Contract')) {
+	else if ((cardType + '' == CONTRACT) && (cardTypeBack + '' == CONTRACT)) {
 		return true;
 	}
 	else {
@@ -1944,14 +1989,14 @@ function escapeIconFileName(value) {
 }
 
 function updatePunctuation(value, lang) {
-	if (lang == 'Polish') {
+	if (lang == POLISH) {
 		value = value.replace(/\u201c/g, '\u201e');
 	}
-	else if (lang == 'German') {
+	else if (lang == GERMAN) {
 		value = value.replace(/\u201c/g, '\u201e');
 		value = value.replace(/\u201d/g, '\u201c');
 	}
-	else if (lang == 'French') {
+	else if (lang == FRENCH) {
 		value = value.replace(/\u201c[ \u00a0]?/g, '\u00ab\u00a0');
 		value = value.replace(/[ \u00a0]?\u201d/g, '\u00a0\u00bb');
 		value = value.replace(/[ \u00a0]?([:;?!])/g, '\u00a0$1');
@@ -2034,7 +2079,7 @@ function markUp(value, key, cardType, lang, setID) {
 			lowerSize = namePointSize[cardType];
 		}
 
-		if (lang == 'French') {
+		if (lang == FRENCH) {
 			value = value.replace(/ /g, '\u00a0');
 			let valueOld;
 			do {
@@ -2045,11 +2090,11 @@ function markUp(value, key, cardType, lang, setID) {
 		}
 		return updateVafthrudnir(value, lowerSize, lang);
 	}
-	else if ((['Victory Points', 'BVictory Points'].indexOf(key + '') > -1) && (['Presentation', 'Rules'].indexOf(cardType) == -1)) {
+	else if ((['Victory Points', 'BVictory Points'].indexOf(key + '') > -1) && ([PRESENTATION, RULES].indexOf(cardType) == -1)) {
 		return updateVafthrudnir(value, 3.69, lang);
 	}
 	else if (key == 'Adventure') {
-		if (cardType == 'Campaign') {
+		if (cardType == CAMPAIGN) {
 			return updateVafthrudnir(value, 5.6, lang);
 		}
 		else {
@@ -2058,43 +2103,43 @@ function markUp(value, key, cardType, lang, setID) {
 	}
 
 	if (['Text', 'BText', 'Shadow', 'BShadow'].indexOf(key + '') > -1) {
-		if (lang == 'English') {
+		if (lang == ENGLISH) {
 			value = value.replace(/\b(Valour )?(Resource |Planning |Quest |Travel |Encounter |Combat |Refresh )?(Action):/g, '[b]$1$2$3[/b]:');
 			value = value.replace(/\b(When Revealed|Forced|Valour Response|Response|Travel|Shadow|Resolution):/g, '[b]$1[/b]:');
 			value = value.replace(/\b(Setup)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			value = value.replace(/\b(Condition)\b/g, '[bi]$1[/bi]');
 		}
-		else if (lang == 'French') {
+		else if (lang == FRENCH) {
 			value = value.replace(/(\[Vaillance\] )?(\[Ressource\] |\[Organisation\] |\[Qu\u00eate\] |\[Voyage\] |\[Rencontre\] |\[Combat\] |\[Restauration\] )?\b(Action) ?:/g, '[b]$1$2$3[/b] :');
 			value = value.replace(/\b(Une fois r\u00e9v\u00e9l\u00e9e|Forc\u00e9|\[Vaillance\] R\u00e9ponse|R\u00e9ponse|Trajet|Ombre|R\u00e9solution) ?:/g, '[b]$1[/b] :');
 			value = value.replace(/\b(Mise en place)( \([^\)]+\))? ?:/g, '[b]$1[/b]$2 :');
 			value = value.replace(/\b(Condition)\b/g, '[bi]$1[/bi]');
 		}
-		else if (lang == 'German') {
+		else if (lang == GERMAN) {
 			value = value.replace(/\b(Ehrenvolle )?(Ressourcenaktion|Planungsaktion|Abenteueraktion|Reiseaktion|Begegnungsaktion|Kampfaktion|Auffrischungsaktion|Aktion):/g, '[b]$1$2[/b]:');
 			value = value.replace(/\b(Wenn aufgedeckt|Erzwungen|Ehrenvolle Reaktion|Reaktion|Reise|Schatten|Aufl\u00f6sung):/g, '[b]$1[/b]:');
 			value = value.replace(/\b(Vorbereitung)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			value = value.replace(/\b(Zustand)\b/g, '[bi]$1[/bi]');
 		}
-		else if (lang == 'Italian') {
+		else if (lang == ITALIAN) {
 			value = value.replace(/\b(Azione)( Valorosa)?( di Risorse| di Pianificazione| di Ricerca| di Viaggio| di Incontri| di Combattimento| di Riordino)?:/g, '[b]$1$2$3[/b]:');
 			value = value.replace(/\b(Quando Rivelata|Obbligato|Risposta Valorosa|Risposta|Viaggio|Ombra|Risoluzione):/g, '[b]$1[/b]:');
 			value = value.replace(/\b(Preparazione)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			value = value.replace(/\b(Condizione)\b/g, '[bi]$1[/bi]');
 		}
-		else if (lang == 'Polish') {
+		else if (lang == POLISH) {
 			value = value.replace(/\b(Akcja)( Zasob\u00f3w| Planowania| Wyprawy| Podr\u00f3\u017cy| Spotkania| Walki| Odpoczynku)?( M\u0119stwa)?:/g, '[b]$1$2$3[/b]:');
 			value = value.replace(/\b(Po odkryciu|Wymuszony|Odpowied\u017a M\u0119stwa|Odpowied\u017a|Podr\u00f3\u017c|Cie\u0144|Nast\u0119pstwa):/g, '[b]$1[/b]:');
 			value = value.replace(/\b(Przygotowanie)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			value = value.replace(/\b(Stan)\b/g, '[bi]$1[/bi]');
 		}
-		else if (lang == 'Portuguese') {
+		else if (lang == PORTUGUESE) {
 			value = value.replace(/\b(A\u00e7\u00e3o)( Valorosa)?( de Recursos| de Planejamento| de Miss\u00e3o| de Viagem| de Encontro| de Combate| de Renova\u00e7\u00e3o)?:/g, '[b]$1$2$3[/b]:');
 			value = value.replace(/\b(Efeito Revelado|Efeito For\u00e7ado|Resposta Valorosa|Resposta|Viagem|Efeito Sombrio|Resolu\u00e7\u00e3o):/g, '[b]$1[/b]:');
 			value = value.replace(/\b(Prepara\u00e7\u00e3o)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
 			value = value.replace(/\b(Condi\u00e7\u00e3o)\b/g, '[bi]$1[/bi]');
 		}
-		else if (lang == 'Spanish') {
+		else if (lang == SPANISH) {
 			value = value.replace(/\b(Acci\u00f3n)( de Recursos| de Planificaci\u00f3n| de Misi\u00f3n| de Viaje| de Encuentro| de Combate| de Recuperaci\u00f3n)?( de Valor)?:/g, '[b]$1$2$3[/b]:');
 			value = value.replace(/\b(Al ser revelada|Obligado|Respuesta de Valor|Respuesta|Viaje|Sombra|Resoluci\u00f3n):/g, '[b]$1[/b]:');
 			value = value.replace(/\b(Preparaci\u00f3n)( \([^\)]+\))?:/g, '[b]$1[/b]$2:');
@@ -2268,7 +2313,7 @@ function markUp(value, key, cardType, lang, setID) {
 
 	value = value.replace(/<hs>/g, '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.3 0.1>');
 
-	if ((cardType == 'Presentation') || (cardType == 'Rules')) {
+	if ((cardType == PRESENTATION) || (cardType == RULES)) {
 		value = value.replace(/<vs>/g, '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.1>');
 	}
 	else {
@@ -2276,7 +2321,7 @@ function markUp(value, key, cardType, lang, setID) {
 	}
 
 	value = updatePunctuation(value, lang);
-	if ((['Traits', 'BTraits'].indexOf(key + '') > -1) && (lang == 'Spanish')) {
+	if ((['Traits', 'BTraits'].indexOf(key + '') > -1) && (lang == SPANISH)) {
 		value = value.replace(/\. /g, ' \u2022 ');
 		value = value.replace(/\.$/g, '');
 	}
