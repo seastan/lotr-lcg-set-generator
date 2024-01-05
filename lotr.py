@@ -814,19 +814,19 @@ DESCRIPTIVE_LAST_TRAITS = {
     'Boar', 'Boar Clan', 'Captain', 'Flame', 'Lieutenant', 'Olog-hai',
     'Raven', 'Raven Clan', 'Uruk-hai', 'Wolf', 'Wolf Clan', 'Wolf-cult'}
 DESCRIPTIVE_TRAITS = {
-    'Archer', 'Assault', 'Attack', 'Besieger', 'Black Speech',
+    'Advice', 'Archer', 'Assault', 'Attack', 'Besieger', 'Black Speech',
     'Brigand', 'Burglar', 'Capture', 'Captured', 'Champion', 'Clue',
     'Corruption', 'Craftsman', 'Cultist', 'Damaged', 'Defense', 'Despair',
-    'Disaster', 'Doom', 'Enchantment', 'Escape', 'Fear', 'Fellowship', 'Food',
-    'Found', 'Gossip', 'Guardian', 'Hazard', 'Healer', 'Hungry', 'Inferno',
-    'Information', 'Instrument', 'Key', 'Light', 'Master', 'Mathom',
-    'Minstrel', 'Mission', 'Mustering', 'Night', 'Panic', 'Party',
+    'Disaster', 'Distracting', 'Doom', 'Enchantment', 'Escape', 'Fear',
+    'Fellowship', 'Food', 'Found', 'Gossip', 'Guardian', 'Hazard', 'Healer',
+    'Hungry', 'Inferno', 'Information', 'Instrument', 'Key', 'Light', 'Master',
+    'Mathom', 'Minstrel', 'Mission', 'Mustering', 'Night', 'Panic', 'Party',
     'Pillager', 'Pipe', 'Pipeweed', 'Plot', 'Poison', 'Raider', 'Ranger',
     'Record', 'Refuge', 'Ring-bearer', 'Ruffian', 'Sack', 'Scheme', 'Scout',
-    'Scroll', 'Search', 'Servant', 'Shadow', 'Sharkey', 'Shirriff', 'Song',
-    'Sorcerer', 'Sorcery', 'Spy', 'Staff', 'Stalking', 'Steward', 'Summoned',
-    'Summoner', 'Tantrum', 'Thaurdir', 'Thug', 'Time', 'Tools', 'Traitor',
-    'Treasure', 'Villain', 'Warden', 'Warrior', 'Weather', 'Wound'}
+    'Scroll', 'Search', 'Servant', 'Shadow', 'Sharkey', 'Shirriff', 'Sorcerer',
+    'Sorcery', 'Spy', 'Staff', 'Stalking', 'Steward', 'Summoned', 'Summoner',
+    'Tantrum', 'Thaurdir', 'Thug', 'Time', 'Tools', 'Traitor', 'Treasure',
+    'Villain', 'Warden', 'Warrior', 'Weather', 'Wound'}
 LOCATION_SUBTYPE_TRAITS = {
     'Battleground', 'Besieged', 'Camp', 'Castle', 'Dark', 'Deck', 'Downs',
     'Fords', 'Fortification', 'Garrison', 'Gate', 'Hideout', 'Highlands',
@@ -842,13 +842,13 @@ LOCATION_TYPE_TRAITS = {
 NOBLE_TRAITS = {'Noble'}
 RACE_FIRST_TRAITS = {'Creature', 'Nazgûl', 'Orc', 'Undead'}
 RACE_TRAITS = {
-    'Balrog', 'Beorning', 'Body', 'Corsair', 'Dale', 'Dorwinion', 'Dragon',
-    'Dúnedain', 'Dunland', 'Dwarf', 'Eagle', 'Easterling', 'Ent', 'Giant',
-    'Goblin', 'Gollum', 'Gondor', 'Harad', 'Hobbit', 'Huorn', 'Insect',
-    'Istari', 'Legend', 'Mearas', 'Nameless', 'Noldor', 'Oathbreaker',
-    'Outlands', 'Pony', 'Rat', 'Rohan', 'Silvan', 'Snaga', 'Spider', 'Spirit',
-    'Tentacle', 'Tree', 'Troll', 'Uruk', 'Warg', 'Werewolf', 'Wight',
-    'Woodman', 'Wose', 'Wraith'}
+    'Balrog', 'Beorning', 'Body', 'Chicken', 'Corsair', 'Dale', 'Dorwinion',
+    'Dragon', 'Dúnedain', 'Dunland', 'Dwarf', 'Eagle', 'Easterling', 'Ent',
+    'Giant', 'Goblin', 'Gollum', 'Gondor', 'Harad', 'Hobbit', 'Huorn',
+    'Insect', 'Istari', 'Legend', 'Mearas', 'Nameless', 'Noldor',
+    'Oathbreaker', 'Outlands', 'Pony', 'Rat', 'Rohan', 'Silvan', 'Snaga',
+    'Spider', 'Spirit', 'Tentacle', 'Tree', 'Troll', 'Uruk', 'Warg',
+    'Werewolf', 'Wight', 'Woodman', 'Wose', 'Wraith'}
 REGION_TRAITS = {
     'Aldburg', 'Angmar', 'Arnor', 'Blackroot Vale', 'Bree', 'Cair Andros',
     'Carn Dûm', 'Cirith Ungol', 'Dead Marshes', 'Dol Amroth', 'Dol Guldur',
@@ -862,8 +862,8 @@ TYPE_FIRST_TRAITS = {
     'Artifact', 'Item', 'Suspect', 'Stronghold'}
 TYPE_TRAITS = {
     'Adaptation', 'Armor', 'Assassin', 'Boon', 'Captive', 'Condition', 'Favor',
-    'Gift', 'Morgul', 'Mount', 'Ring', 'Signal', 'Skill', 'Spell', 'Tale',
-    'Title', 'Trap', 'Weapon'}
+    'Gift', 'Morgul', 'Mount', 'Ring', 'Signal', 'Skill', 'Song', 'Spell',
+    'Tale', 'Title', 'Trap', 'Weapon'}
 TRAITS_ORDER = [TYPE_FIRST_TRAITS, TYPE_TRAITS, RACE_FIRST_TRAITS,
                 RACE_TRAITS, REGION_TRAITS, LOCATION_TYPE_FIRST_TRAITS,
                 LOCATION_TYPE_TRAITS, LOCATION_SUBTYPE_TRAITS, NOBLE_TRAITS,
