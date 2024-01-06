@@ -4069,6 +4069,12 @@ Targets removed.
             old_dict = {}
 
         members = self.guilds[0].members
+        if not members:
+            message = "Can't obtain Discord users"
+            logging.error(message)
+            create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
+            return
+
         new_dict = {}
         for member in members:
             if member.display_name == member.name:
