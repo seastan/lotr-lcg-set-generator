@@ -70,8 +70,7 @@ def extract_archive():
     """
     path = os.path.join(TEMP_FOLDER, SEVENZ_SOURCE_FILENAME)
     cmd = SEVENZ_READ_COMMAND.format(SEVENZ_PATH, TEMP_FOLDER, path)
-    res = lotr.run_cmd(cmd)
-    logging.info(res)
+    lotr.run_cmd(cmd)
 
 
 def fix_content():
@@ -160,8 +159,7 @@ def create_pdf(archive_filename):
     cmd = lotr.MAGICK_COMMAND_MBPRINT_PDF.format(
         MAGICK_PATH, TEMP_FOLDER, os.sep,
         os.path.join(TEMP_FOLDER, pdf_filename))
-    res = lotr.run_cmd(cmd)
-    logging.info(res)
+    lotr.run_cmd(cmd)
 
 
 def create_pdf_archive(archive_filename):

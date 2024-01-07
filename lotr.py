@@ -2151,8 +2151,7 @@ def upload_stable_data():
 
     cmd = COPY_STABLE_DATA_COMMAND.format(
         os.path.join(DOWNLOAD_PATH, '{}.json'.format(CARD_SHEET)))
-    res = run_cmd(cmd)
-    logging.info(res)
+    run_cmd(cmd)
 
     logging.info('...Uploading the latest stable data to Google Drive (%ss)',
                  round(time.time() - timestamp, 3))
@@ -10848,18 +10847,24 @@ def copy_xml(set_id, set_name, lang):
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
-def run_cmd(cmd):
+def run_cmd(cmd, log_prefix=''):
     """ Run bash command.
     """
-    logging.info('Running the command: %s', cmd)
+    logging.info('%sRunning the command: %s', log_prefix, cmd)
     try:
         res = subprocess.run(cmd, stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT, shell=True, check=True)
-        if res and 'Error' in res.stdout.decode('utf-8'):
-            raise RuntimeError('Command "{}" contains error message(s): {}'
-                               .format(cmd, res.stdout.decode('utf-8')))
+                             stderr=subprocess.PIPE, shell=True, check=True)
+        if res.stdout:
+            stdout = res.stdout.decode('utf-8').strip()
+        else:
+            stdout = ''
 
-        return res
+        logging.info('%sCommand result: %s', log_prefix, stdout)
+        if 'Error' in stdout:
+            raise RuntimeError('Command "{}" contains error message(s): {}'
+                               .format(cmd, stdout))
+
+        return stdout
     except subprocess.CalledProcessError as exc:
         raise RuntimeError('Command "{}" returned error with code {}: {}'
                            .format(cmd, exc.returncode, exc.output)) from exc
@@ -10872,8 +10877,7 @@ def generate_dragncards_proxies(sets):
     timestamp = time.time()
 
     cmd = GENERATE_DRAGNCARDS_COMMAND.format(','.join(sets))
-    res = run_cmd(cmd)
-    logging.info(res)
+    run_cmd(cmd)
 
     if os.path.exists(GENERATE_DRAGNCARDS_LOG_PATH):
         with open(GENERATE_DRAGNCARDS_LOG_PATH, 'r', encoding='utf-8') as fobj:
@@ -11035,8 +11039,7 @@ def generate_png300_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
         'python-cut-bleed-margins-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = run_cmd(cmd)
-    logging.info('[%s, %s] %s', set_name, lang, res)
+    run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
     output_cnt = 0
     for _, _, filenames in os.walk(temp_path2):
@@ -11112,8 +11115,7 @@ def generate_png480_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
         'python-cut-bleed-margins-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = run_cmd(cmd)
-    logging.info('[%s, %s] %s', set_name, lang, res)
+    run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
     output_cnt = 0
     for _, _, filenames in os.walk(temp_path2):
@@ -11190,8 +11192,7 @@ def generate_png800_nobleed(conf, set_id, set_name, lang, skip_ids):  # pylint: 
         'python-cut-bleed-margins-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = run_cmd(cmd)
-    logging.info('[%s, %s] %s', set_name, lang, res)
+    run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
     output_cnt = 0
     for _, _, filenames in os.walk(temp_path2):
@@ -11268,8 +11269,7 @@ def generate_png300_db(conf, set_id, set_name, lang, skip_ids):  # pylint: disab
         'python-prepare-db-output-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = run_cmd(cmd)
-    logging.info('[%s, %s] %s', set_name, lang, res)
+    run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
     output_cnt = 0
     for _, _, filenames in os.walk(temp_path2):
@@ -11462,8 +11462,7 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
         'python-prepare-pdf-back-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = run_cmd(cmd)
-    logging.info('[%s, %s] %s', set_name, lang, res)
+    run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
     output_cnt = 0
     for _, _, filenames in os.walk(temp_path2):
@@ -11510,8 +11509,7 @@ def generate_png300_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
         'python-prepare-pdf-front-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path3.replace('\\', '\\\\'))
-    res = run_cmd(cmd)
-    logging.info('[%s, %s] %s', set_name, lang, res)
+    run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
     output_cnt = 0
     for _, _, filenames in os.walk(temp_path3):
@@ -11594,8 +11592,7 @@ def generate_png800_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
         'python-prepare-pdf-back-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = run_cmd(cmd)
-    logging.info('[%s, %s] %s', set_name, lang, res)
+    run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
     output_cnt = 0
     for _, _, filenames in os.walk(temp_path2):
@@ -11642,8 +11639,7 @@ def generate_png800_pdf(conf, set_id, set_name, lang, skip_ids):  # pylint: disa
         'python-prepare-pdf-front-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path3.replace('\\', '\\\\'))
-    res = run_cmd(cmd)
-    logging.info('[%s, %s] %s', set_name, lang, res)
+    run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
     output_cnt = 0
     for _, _, filenames in os.walk(temp_path3):
@@ -11726,8 +11722,7 @@ def generate_png800_bleedmpc(conf, set_id, set_name, lang, skip_ids):  # pylint:
         'python-prepare-makeplayingcards-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = run_cmd(cmd)
-    logging.info('[%s, %s] %s', set_name, lang, res)
+    run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
     output_cnt = 0
     for _, _, filenames in os.walk(temp_path2):
@@ -11802,8 +11797,7 @@ def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint:
         'python-prepare-drivethrucards-jpg-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = run_cmd(cmd)
-    logging.info('[%s, %s] %s', set_name, lang, res)
+    run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
     output_cnt = 0
     for _, _, filenames in os.walk(temp_path2):
@@ -11881,8 +11875,7 @@ def generate_jpg800_bleedmbprint(conf, set_id, set_name, lang, skip_ids):  # pyl
         'python-prepare-mbprint-jpg-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = run_cmd(cmd)
-    logging.info('[%s, %s] %s', set_name, lang, res)
+    run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
     output_cnt = 0
     for _, _, filenames in os.walk(temp_path2):
@@ -11959,8 +11952,7 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
         'python-prepare-generic-png-folder',
         temp_path.replace('\\', '\\\\'),
         temp_path2.replace('\\', '\\\\'))
-    res = run_cmd(cmd)
-    logging.info('[%s, %s] %s', set_name, lang, res)
+    run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
     output_cnt = 0
     for _, _, filenames in os.walk(temp_path2):
@@ -12008,8 +12000,7 @@ def _make_low_quality(conf, input_path):
     if input_cnt:
         cmd = MAGICK_COMMAND_LOW.format(conf['magick_path'], input_path,
                                         os.sep)
-        res = run_cmd(cmd)
-        logging.info(res)
+        run_cmd(cmd)
 
     output_cnt = 0
     for _, _, filenames in os.walk(input_path):
@@ -12040,8 +12031,7 @@ def _make_jpg(conf, input_path, min_size):
     if input_cnt:
         cmd = MAGICK_COMMAND_JPG.format(conf['magick_path'], input_path,
                                         os.sep)
-        res = run_cmd(cmd)
-        logging.info(res)
+        run_cmd(cmd)
 
     output_cnt = 0
     for _, _, filenames in os.walk(input_path):
@@ -12202,8 +12192,7 @@ def generate_tts(conf, set_id, set_name, lang, card_dict, scratch):  # pylint: d
             'python-prepare-tts-folder',
             temp_path.replace('\\', '\\\\'),
             output_path.replace('\\', '\\\\'))
-        res = run_cmd(cmd)
-        logging.info('[%s, %s] %s', set_name, lang, res)
+        run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
         output_cnt = 0
         for _, _, filenames in os.walk(output_path):
@@ -12412,8 +12401,7 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
             'python-generate-renderer-artwork',
             json_path.replace('\\', '\\\\'),
             temp_path.replace('\\', '\\\\'))
-        res = run_cmd(cmd)
-        logging.info('[%s] %s', set_name, res)
+        run_cmd(cmd, '[{}] '.format(set_name))
 
         output_cnt = 0
         for _, _, filenames in os.walk(temp_path):
@@ -12461,8 +12449,7 @@ def generate_renderer_artwork(conf, set_id, set_name):  # pylint: disable=R0912,
                 'python-generate-renderer-custom-image-folder',
                 temp_path.replace('\\', '\\\\'),
                 temp_path.replace('\\', '\\\\'))
-            res = run_cmd(cmd)
-            logging.info('[%s] %s', set_name, res)
+            run_cmd(cmd, '[{}] '.format(set_name))
 
             for _, _, filenames in os.walk(temp_path):
                 for filename in filenames:
@@ -12740,8 +12727,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                         'python-glue-ringsdb-images',
                         front_path.replace('\\', '\\\\'),
                         back_path.replace('\\', '\\\\'))
-                    res = run_cmd(cmd)
-                    logging.info('[%s, %s] %s', set_name, lang, res)
+                    run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
                 break
 
@@ -13004,8 +12990,7 @@ def generate_rules_pdf(conf, set_id, set_name, lang):
         break
 
     cmd = MAGICK_COMMAND_JPG.format(conf['magick_path'], temp_path, os.sep)
-    res = run_cmd(cmd)
-    logging.info(res)
+    run_cmd(cmd)
 
     output_path = os.path.join(OUTPUT_RULES_PDF_PATH, '{}.{}'.format(
         escape_filename(set_name), lang))
@@ -13015,8 +13000,7 @@ def generate_rules_pdf(conf, set_id, set_name, lang):
     pdf_path = os.path.join(output_path, pdf_filename)
     cmd = MAGICK_COMMAND_RULES_PDF.format(conf['magick_path'], temp_path,
                                           os.sep, pdf_path)
-    res = run_cmd(cmd)
-    logging.info(res)
+    run_cmd(cmd)
 
     delete_folder(temp_path)
     logging.info('[%s, %s] ...Generating Rules PDF outputs (%ss)',
@@ -13304,8 +13288,7 @@ def _make_cmyk(conf, input_path, min_size):
     if input_cnt:
         cmd = MAGICK_COMMAND_CMYK.format(conf['magick_path'], input_path,
                                          os.sep)
-        res = run_cmd(cmd)
-        logging.info(res)
+        run_cmd(cmd)
 
     output_cnt = 0
     for _, _, filenames in os.walk(input_path):
@@ -13790,8 +13773,7 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):  # pylint: disabl
         pdf_path = os.path.join(temp_path, pdf_filename)
         cmd = MAGICK_COMMAND_MBPRINT_PDF.format(conf['magick_path'], temp_path,
                                                 os.sep, pdf_path)
-        res = run_cmd(cmd)
-        logging.info(res)
+        run_cmd(cmd)
 
         output_path = os.path.join(OUTPUT_MBPRINT_PDF_PATH, '{}.{}'.format(
             escape_filename(set_name), lang))

@@ -119,8 +119,7 @@ def get_drive_set_ids():
     set_ids = set()
     duplicate_ids = set()
     for path in ('Set Folders', 'Scratch Set Folders'):
-        res = run_cmd(RCLONE_OCTGN_FILES_CMD.format(path))
-        stdout = res.stdout.decode('utf-8').strip()
+        stdout = run_cmd(RCLONE_OCTGN_FILES_CMD.format(path))
         filenames = [f['Name'] for f in json.loads(stdout)]
         new_set_ids = [f for f in filenames if re.match(UUID_REGEX, f)]
         new_duplicate_ids = set_ids.intersection(new_set_ids)
