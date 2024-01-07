@@ -10853,7 +10853,7 @@ def run_cmd(cmd, log_prefix=''):
     logging.info('%sRunning the command: %s', log_prefix, cmd)
     try:
         res = subprocess.run(cmd, stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE, shell=True, check=True)
+                             stderr=subprocess.STDOUT, shell=True, check=True)
         if res.stdout:
             stdout = res.stdout.decode('utf-8').strip()
         else:
@@ -11814,7 +11814,7 @@ def generate_jpg300_bleeddtc(conf, set_id, set_name, lang, skip_ids):  # pylint:
         raise GIMPError('Wrong number of output files: {} instead of {}'
                         .format(output_cnt, input_cnt))
 
-    _make_cmyk(conf, temp_path2, JPG_300CMYK_MIN_SIZE)
+    _make_cmyk(conf, temp_path2, JPG_300CMYK_MIN_SIZE, set_name, lang)
 
     output_path = os.path.join(IMAGES_EONS_PATH,
                                JPG300BLEEDDTC,
@@ -11892,7 +11892,7 @@ def generate_jpg800_bleedmbprint(conf, set_id, set_name, lang, skip_ids):  # pyl
         raise GIMPError('Wrong number of output files: {} instead of {}'
                         .format(output_cnt, input_cnt))
 
-    _make_cmyk(conf, temp_path2, JPG_800CMYK_MIN_SIZE)
+    _make_cmyk(conf, temp_path2, JPG_800CMYK_MIN_SIZE, set_name, lang)
 
     output_path = os.path.join(IMAGES_EONS_PATH,
                                JPG800BLEEDMBPRINT,
@@ -11987,7 +11987,7 @@ def generate_png800_bleedgeneric(conf, set_id, set_name, lang, skip_ids):  # pyl
                  lang, round(time.time() - timestamp, 3))
 
 
-def _make_low_quality(conf, input_path):
+def _make_low_quality(conf, input_path, set_name, lang):
     """ Make low quality 600x429 JPG images from PNG inputs.
     """
     input_cnt = 0
@@ -12000,7 +12000,7 @@ def _make_low_quality(conf, input_path):
     if input_cnt:
         cmd = MAGICK_COMMAND_LOW.format(conf['magick_path'], input_path,
                                         os.sep)
-        run_cmd(cmd)
+        run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
     output_cnt = 0
     for _, _, filenames in os.walk(input_path):
@@ -12018,7 +12018,7 @@ def _make_low_quality(conf, input_path):
                                .format(output_cnt, input_cnt))
 
 
-def _make_jpg(conf, input_path, min_size):
+def _make_jpg(conf, input_path, min_size, set_name, lang):
     """ Make JPG images from PNG inputs.
     """
     input_cnt = 0
@@ -12031,7 +12031,7 @@ def _make_jpg(conf, input_path, min_size):
     if input_cnt:
         cmd = MAGICK_COMMAND_JPG.format(conf['magick_path'], input_path,
                                         os.sep)
-        run_cmd(cmd)
+        run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
     output_cnt = 0
     for _, _, filenames in os.walk(input_path):
@@ -12562,7 +12562,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
 
             break
 
-        _make_low_quality(conf, temp_path)
+        _make_low_quality(conf, temp_path, set_name, lang)
 
         for _, _, filenames in os.walk(temp_path):
             for filename in filenames:
@@ -12859,7 +12859,7 @@ def generate_dragncards_hq(conf, set_id, set_name, lang, card_data):  # pylint: 
 
         break
 
-    _make_jpg(conf, temp_path, JPG_480_MIN_SIZE)
+    _make_jpg(conf, temp_path, JPG_480_MIN_SIZE, set_name, lang)
 
     known_filenames = set()
     for _, _, filenames in os.walk(temp_path):
@@ -12923,7 +12923,7 @@ def generate_octgn(conf, set_id, set_name, lang, card_data):  # pylint: disable=
 
         break
 
-    _make_low_quality(conf, temp_path)
+    _make_low_quality(conf, temp_path, set_name, lang)
 
     pack_path = os.path.join(output_path,
                              escape_octgn_filename('{}.{}.o8c'.format(
@@ -12990,7 +12990,7 @@ def generate_rules_pdf(conf, set_id, set_name, lang):
         break
 
     cmd = MAGICK_COMMAND_JPG.format(conf['magick_path'], temp_path, os.sep)
-    run_cmd(cmd)
+    run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
     output_path = os.path.join(OUTPUT_RULES_PDF_PATH, '{}.{}'.format(
         escape_filename(set_name), lang))
@@ -13000,7 +13000,7 @@ def generate_rules_pdf(conf, set_id, set_name, lang):
     pdf_path = os.path.join(output_path, pdf_filename)
     cmd = MAGICK_COMMAND_RULES_PDF.format(conf['magick_path'], temp_path,
                                           os.sep, pdf_path)
-    run_cmd(cmd)
+    run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
     delete_folder(temp_path)
     logging.info('[%s, %s] ...Generating Rules PDF outputs (%ss)',
@@ -13275,7 +13275,7 @@ def generate_genericpng_pdf(conf, set_id, set_name, lang, card_data):  # pylint:
                  set_name, lang, round(time.time() - timestamp, 3))
 
 
-def _make_cmyk(conf, input_path, min_size):
+def _make_cmyk(conf, input_path, min_size, set_name, lang):
     """ Convert RGB to CMYK.
     """
     input_cnt = 0
@@ -13288,7 +13288,7 @@ def _make_cmyk(conf, input_path, min_size):
     if input_cnt:
         cmd = MAGICK_COMMAND_CMYK.format(conf['magick_path'], input_path,
                                          os.sep)
-        run_cmd(cmd)
+        run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
     output_cnt = 0
     for _, _, filenames in os.walk(input_path):
@@ -13773,7 +13773,7 @@ def generate_mbprint(conf, set_id, set_name, lang, card_data):  # pylint: disabl
         pdf_path = os.path.join(temp_path, pdf_filename)
         cmd = MAGICK_COMMAND_MBPRINT_PDF.format(conf['magick_path'], temp_path,
                                                 os.sep, pdf_path)
-        run_cmd(cmd)
+        run_cmd(cmd, '[{}, {}] '.format(set_name, lang))
 
         output_path = os.path.join(OUTPUT_MBPRINT_PDF_PATH, '{}.{}'.format(
             escape_filename(set_name), lang))
