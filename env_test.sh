@@ -5,7 +5,17 @@ ENV_FILE="env_health_check.txt"
 MAX_DIFF=43200
 
 if [ -f "$ENV_FILE" ]; then
-  let "DIFF = `date +%s` - `cat $ENV_FILE`"
+  CONTENT=`cat $ENV_FILE`
+  if [ ! "$CONTENT" ]; then
+    sleep 2
+    CONTENT=`cat $ENV_FILE`
+  fi
+
+  if [ ! "$CONTENT" ]; then
+    exit 1
+  fi
+
+  let "DIFF = `date +%s` - $CONTENT"
 
   if (( $DIFF > $MAX_DIFF )); then
     exit 1
