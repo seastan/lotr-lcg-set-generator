@@ -10863,7 +10863,9 @@ def run_cmd(cmd, log_prefix=''):
                 'Command "{}" contains error message(s) in stdout: {}'
                 .format(cmd, stdout))
 
-        if 'Error' in stderr:
+        if ('Error' in stderr and
+                not 'Error renaming temporary file: Permission denied'
+                in stderr):
             raise RuntimeError(
                 'Command "{}" contains error message(s) in stderr: {}'
                 .format(cmd, stderr))
