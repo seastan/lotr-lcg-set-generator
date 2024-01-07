@@ -10854,15 +10854,19 @@ def run_cmd(cmd, log_prefix=''):
     try:
         res = subprocess.run(cmd, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE, shell=True, check=True)
-        if res.stdout:
-            stdout = res.stdout.decode('utf-8').strip()
-        else:
-            stdout = ''
-
-        logging.info('%sCommand result: %s', log_prefix, stdout)
+        stdout = res.stdout.decode('utf-8').strip()
+        logging.info('%sCommand stdout: %s', log_prefix, stdout)
+        stderr = res.stderr.decode('utf-8').strip()
+        logging.info('%sCommand stderr: %s', log_prefix, stderr)
         if 'Error' in stdout:
-            raise RuntimeError('Command "{}" contains error message(s): {}'
-                               .format(cmd, stdout))
+            raise RuntimeError(
+                'Command "{}" contains error message(s) in stdout: {}'
+                .format(cmd, stdout))
+
+        if 'Error' in stderr:
+            raise RuntimeError(
+                'Command "{}" contains error message(s) in stderr: {}'
+                .format(cmd, stderr))
 
         return stdout
     except subprocess.CalledProcessError as exc:
