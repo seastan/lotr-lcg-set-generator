@@ -61,17 +61,17 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
 
     if (not conf['reprocess_all'] and conf['reprocess_all_on_error'] and
             os.path.exists(lotr.PIPELINE_STARTED_PATH)):
+        conf['reprocess_all'] = True
+        logging.info('The previous update did not succeed, setting '
+                     '"reprocess_all" to "true" for this run')
         count = get_reprocess_count()
         if count >= lotr.REPROCESS_RETRIES:
             logging.info('Maximum number of reprocessing retries exceeded')
         else:
-            conf['reprocess_all'] = True
             force_reprocessing = True
             count += 1
             save_reprocess_count(count)
-            logging.info('The previous update did not succeed, setting '
-                         '"reprocess_all" to "true" for this run '
-                         '(attempt #%s)', count)
+            logging.info('Reprocessing retry #%s)', count)
 
     if (conf['upload_dragncards'] and
             conf['dragncards_hostname'] and
