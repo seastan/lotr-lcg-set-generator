@@ -24,8 +24,8 @@ Output/*/*/*
 Output/Scripts/*.csv
 Output/Scripts/*.json
 Output/Scripts/*.sh
-Renderer/Fonts/*.ttf
-Renderer/Fonts/*.TTF
+Renderer/Fonts/times.ttf
+Renderer/Fonts/VAFTHRUD.TTF
 Renderer/GeneratedImages/*.jpg
 Renderer/GeneratedImages/*.png
 Renderer/GeneratedImages/*.json
