@@ -101,25 +101,23 @@ described below.  Right-click on the folder, then click `Offline access` and `Av
 5. If you plan to upload to Google Drive any card outputs or log files, you might need to create shortcuts for more
 existing Google Drive folders and use their local paths in the configuration (repeat the instructions above).
 
-6. Install the design tool and the custom plugin.  Follow these steps:
+6. Install the tool and the plugin.  Follow these steps:
 
-  - Clone the plugin repo to a new local folder.  Go to that folder.
-  - Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir, extract the archive, and
-    put `VAFTHRUD.TTF` into `TheLordOfTheRingsLCG-B/resources/TheLordOfTheRingsLCG/font/` folder.
-  - Run `setup.bat` (Windows) or `setup.sh` (Mac/Linux) to generate the `.seext` files.
   - Make sure that `Times New Roman` font is installed.  If you have a Mac or Linux, it may be not installed by default.
-  - Install the design tool, `Build 3970`.  Please note that the latest version from the site may not work as expected.  Use the following links:
+  - Install the tool, `Build 3970`.  Please note that the latest version from the site may not work as expected.  Use the following links:
     - Windows (64-bit): https://drive.google.com/file/d/1tqzVeZB27MC_EaOwKXipBODbRL3wBdSr/view?usp=sharing
     - Windows (32-bit): https://drive.google.com/file/d/1QbruPIOyioZ4MWpLF1YUMaAgnGq8Ch_Y/view?usp=sharing
     - Mac: https://drive.google.com/file/d/1QcDhm0Bv9de81DNnp0E4obMGtVBtcCnV/view?usp=sharing
     - Linux: https://drive.google.com/file/d/1QeTjzV4OWdvaEP8oGGX9kIeflGdtlrzH/view?usp=sharing
-  - Run the design tool and install `The Lord of the Rings LCG` plugin.
+  - Run the tool and install `The Lord of the Rings LCG` plugin.
   - Click `Edit` -> `Preferences` -> `Language`.  Make sure that "English-United States" is chosen for both `Game Language` and `User Interface Language`.
     Click `Drawing`.  Make sure that `Text Fitting Methods` is set to `Reduce Line Spacing and Shrink Text`.  Don't change any other preferences.
-  - Go to the plugins folder (run the design tool, then click `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`), close the program, and
-    delete or move all files, whose names start with `TheLordOfTheRingsLCG`.  Instead of them, copy all `.seext` files that you generated.
+  - If you have any custom plugin files, do the following: Go to the plugins folder (run the tool, then click
+    `Toolbox` -> `Manage Plug-ins` -> `Open Plug-in Folder`), close the tool, delete all files, whose names start with `TheLordOfTheRingsLCG`,
+    and copy your custom `.seext` files instead of them.
 
-7. Install the latest GIMP version from https://www.gimp.org/downloads/.
+7. Install the latest GIMP version from https://www.gimp.org/downloads/.  If for some reason it doesn't work as expected,
+try to install version 2.10.20.
 
 8. Open GIMP, go to `Edit` -> `Preferences` -> `Folders` -> `Plug-ins`, add `GIMP` folder
 from this repo, click `OK`, and then close GIMP.
@@ -210,7 +208,7 @@ See `configuration.release.yaml` for a configuration example.
 To run the workflow, go to the root folder of this repo and follow these steps:
 
 - [skip this step, if you don't use VirtualEnv] `env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux).
-- Make sure that the design tool is closed.
+- Make sure that the tool is closed.
 - `python run_before_se.py`.
 - Pay attention to possible errors in the script output.
 - Open `setGenerator.seproject` and run `makeCards` script by double-clicking it.
@@ -250,7 +248,7 @@ To run the workflow as one script, run:
 Please note, this script is for the Windows platform only.  It uses AutoHotkey to emulate UI commands
 and is not 100% reliable (it may be stuck on the manual step).  To minimize the risks:
 
-- Make sure the design tool window was maximized when you closed it.
+- Make sure the tool window was maximized when you closed it.
 - Make sure the screen is not locked (and doesn't lock automatically).
 - If the script starts, don't touch the keyboard or mouse.
 
@@ -376,10 +374,10 @@ Additional steps:
     or in some external folder (if you already have other crons).  Set `<path to a local configuration backup folder>`
     to some backup folder outside of the root folder.
 
-7. Copy `LOTRHeader.ttf`, `LRLsymbols.ttf`, and `Vafthaurdir.ttf` from `TheLordOfTheRingsLCG-B/resources/TheLordOfTheRingsLCG/font`
-folder of the plugin repo to `Renderer/Fonts` folder.  Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir, extract the archive, and
-put `VAFTHRUD.TTF` into `Renderer/Fonts` folder too.  Find a `ttf` file for the `Times New Roman` font (you may find it in
-`c:\Windows\Fonts` folder on a Windows machine or download it from the Internet) and put it into `Renderer/Fonts` folder as `times.ttf`.
+7. Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir, extract the archive, and
+put `VAFTHRUD.TTF` into `Renderer/Fonts` folder.  Find a `ttf` file for the `Times New Roman` font (you may find it in
+`c:\Windows\Fonts` folder on a Windows machine or download it from the Internet) and put it into `Renderer/Fonts`
+folder as `times.ttf`.
 
 If you want to manually restart the scripts, run:
 
