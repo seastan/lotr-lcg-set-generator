@@ -10854,9 +10854,9 @@ def run_cmd(cmd, log_prefix=''):
     try:
         res = subprocess.run(cmd, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE, shell=True, check=True)
-        stdout = res.stdout.decode('utf-8').strip()
+        stdout = res.stdout.decode('unicode-escape', errors='ignore').strip()
         logging.info('%sCommand stdout: %s', log_prefix, stdout)
-        stderr = res.stderr.decode('utf-8').strip()
+        stderr = res.stderr.decode('unicode-escape', errors='ignore').strip()
         logging.info('%sCommand stderr: %s', log_prefix, stderr)
         if 'Error' in stdout:
             raise RuntimeError(
