@@ -17,7 +17,7 @@ def get_content(url):
     for i in range(URL_RETRIES):
         try:
             req = requests.get(url, timeout=URL_TIMEOUT)
-            res = req.content.decode()
+            res = req.content.decode('utf-8')
             break
         except Exception:  # pylint: disable=W0703
             if i < URL_RETRIES - 1:
