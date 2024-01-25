@@ -217,11 +217,6 @@ Some report
     'stat': """
 List of **!stat** commands:
 ` `
-**!stat assistants** - display the list of assistants (all Discord users except for those who have a role)
-**!stat channels** - display the number of Discord channels and free channel slots
-**!stat dragncards build** - display information about the latest DragnCards build
-**!stat quest <quest name or set name or set code>** - display the quest statistics (for example: `!stat quest Ambush at Erelas` or `!stat quest Children of Eorl` or `!stat quest CoE`)
-` `
 **!stat player cards <set name or set code>** - display DragnCards player cards statistics for the set (no earlier than the Last Design Change Date) (for example: `!stat player cards Children of Eorl` or `!stat player cards CoE`)
 **!stat player cards <set name or set code> <date in YYYY-MM-DD format>** - display DragnCards player cards statistics for the set starting from the specified date (but no earlier than the Last Design Change Date) (for example: `!stat player cards Children of Eorl 2022-01-01` or `!stat player cards CoE 2022-01-01`)
 **!stat player cards full <set name or set code>** - display DragnCards player cards statistics for the set (regardless of the Last Design Change Date) (for example: `!stat player cards full Children of Eorl` or `!stat player cards full CoE`)
@@ -239,6 +234,12 @@ List of **!stat** commands:
 **!stat quests** - display aggregated DragnCards statistics for all released quests
 **!stat quests <date in YYYY-MM-DD format>** - display aggregated DragnCards statistics for all released quests starting from the specified date (for example: `!stat quests 2022-01-01`)
 **!stat quests help** - display additional help about aggregated DragnCards statistics for all released quests
+` `
+**!stat quest <quest name or set name or set code>** - display the quest statistics (for example: `!stat quest Ambush at Erelas` or `!stat quest Children of Eorl` or `!stat quest CoE`)
+` `
+**!stat assistants** - display the list of assistants (all Discord users except for those who have a role)
+**!stat channels** - display the number of Discord channels and free channel slots
+**!stat dragncards build** - display information about the latest DragnCards build
 ` `
 **!stat help** - display this help message
 """,
