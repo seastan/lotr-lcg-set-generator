@@ -914,6 +914,8 @@ ALLOWED_FIRST_WORDS = {
     'Heal',
     'Heroes',
     'If',
+    'Ignore',
+    'It',
     'Its',
     'Immune',
     'Increase',
@@ -923,6 +925,7 @@ ALLOWED_FIRST_WORDS = {
     'Make',
     'Move',
     'Name',
+    'Non-unique',
     'One',
     'Only',
     'Otherwise',
@@ -954,6 +957,7 @@ ALLOWED_FIRST_WORDS = {
     'They',
     'That',
     'This',
+    'Those',
     'Treat',
     'Turn',
     'Until',
@@ -3243,7 +3247,7 @@ def is_capitalized(word):
     """ Check whether the word is capitalized or not.
     """
     res = word and (word[0] != word[0].lower() or
-                    re.match(r'[0-9_]', word[0]))
+                    re.match(r'^[0-9_]', word[0]))
     return res
 
 
@@ -4691,7 +4695,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_type == T_HERO and
-              not re.match('^[1-9]?[0-9]$', str(card_cost))):
+              not re.match(r'^[1-9]?[0-9]$', str(card_cost))):
             message = 'Incorrect cost value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -4699,7 +4703,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 errors.append(message)
             else:
                 broken_set_ids.add(set_id)
-        elif card_type == T_QUEST and not re.match('^[1-9]$', str(card_cost)):
+        elif card_type == T_QUEST and not re.match(r'^[1-9]$', str(card_cost)):
             message = 'Incorrect cost value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -4708,7 +4712,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_type not in {T_HERO, T_QUEST} and card_cost is not None and
-              not re.match('^[1-9]?[0-9]$', str(card_cost)) and
+              not re.match(r'^[1-9]?[0-9]$', str(card_cost)) and
               card_cost != '-' and card_cost != 'X'):
             message = 'Incorrect cost value for row #{}{}'.format(
                 i, row_info)
@@ -4752,7 +4756,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_type_back == T_HERO and
-              not re.match('^[1-9]?[0-9]$', str(card_cost_back))):
+              not re.match(r'^[1-9]?[0-9]$', str(card_cost_back))):
             message = 'Incorrect cost back value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -4761,7 +4765,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_type_back == T_QUEST and
-              not re.match('^[1-9]$', str(card_cost_back))):
+              not re.match(r'^[1-9]$', str(card_cost_back))):
             message = 'Incorrect cost back value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -4771,7 +4775,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_type_back not in {T_HERO, T_QUEST} and
               card_cost_back is not None and
-              not re.match('^[1-9]?[0-9]$', str(card_cost_back)) and
+              not re.match(r'^[1-9]?[0-9]$', str(card_cost_back)) and
               card_cost_back != '-' and card_cost_back != 'X'):
             message = 'Incorrect cost back value for row #{}{}'.format(
                 i, row_info)
@@ -4810,7 +4814,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_type == T_QUEST and
-              not re.match('^[ACEG]$', str(card_engagement))):
+              not re.match(r'^[ACEG]$', str(card_engagement))):
             message = 'Incorrect engagement cost value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -4819,7 +4823,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_type != T_QUEST and card_engagement is not None and
-              not re.match('^[1-9]?[0-9]$', str(card_engagement)) and
+              not re.match(r'^[1-9]?[0-9]$', str(card_engagement)) and
               card_engagement != '-' and card_engagement != 'X'):
             message = 'Incorrect engagement cost value for row #{}{}'.format(
                 i, row_info)
@@ -4856,7 +4860,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_type_back == T_QUEST and
-              not re.match('^[BDFH]$', str(card_engagement_back))):
+              not re.match(r'^[BDFH]$', str(card_engagement_back))):
             message = ('Incorrect engagement cost back value for row #{}{}'
                        .format(i, row_info))
             logging.error(message)
@@ -4866,7 +4870,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_type_back != T_QUEST and
               card_engagement_back is not None and
-              not re.match('^[1-9]?[0-9]$', str(card_engagement_back)) and
+              not re.match(r'^[1-9]?[0-9]$', str(card_engagement_back)) and
               card_engagement_back != '-' and card_engagement_back != 'X'):
             message = (
                 'Incorrect engagement cost back value for row #{}{}'.format(
@@ -4892,7 +4896,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_threat is not None and
-              not re.match('^[1-9]?[0-9]$', str(card_threat)) and
+              not re.match(r'^[1-9]?[0-9]$', str(card_threat)) and
               card_threat != '-' and card_threat != 'X'):
             message = 'Incorrect threat value for row #{}{}'.format(
                 i, row_info)
@@ -4925,7 +4929,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_threat_back is not None and
-              not re.match('^[1-9]?[0-9]$', str(card_threat_back)) and
+              not re.match(r'^[1-9]?[0-9]$', str(card_threat_back)) and
               card_threat_back != '-' and card_threat_back != 'X'):
             message = 'Incorrect threat back value for row #{}{}'.format(
                 i, row_info)
@@ -4951,7 +4955,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_willpower is not None and
-              not re.match('^[1-9]?[0-9]$', str(card_willpower)) and
+              not re.match(r'^[1-9]?[0-9]$', str(card_willpower)) and
               card_willpower != '-' and card_willpower != 'X'):
             message = 'Incorrect willpower value for row #{}{}'.format(
                 i, row_info)
@@ -4988,7 +4992,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_willpower_back is not None and
-              not re.match('^[1-9]?[0-9]$', str(card_willpower_back)) and
+              not re.match(r'^[1-9]?[0-9]$', str(card_willpower_back)) and
               card_willpower_back != '-' and card_willpower_back != 'X'):
             message = 'Incorrect willpower back value for row #{}{}'.format(
                 i, row_info)
@@ -5014,7 +5018,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_attack is not None and
-              not re.match('^[1-9]?[0-9]$', str(card_attack)) and
+              not re.match(r'^[1-9]?[0-9]$', str(card_attack)) and
               card_attack != '-' and card_attack != 'X'):
             message = 'Incorrect attack value for row #{}{}'.format(
                 i, row_info)
@@ -5049,7 +5053,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_attack_back is not None and
-              not re.match('^[1-9]?[0-9]$', str(card_attack_back)) and
+              not re.match(r'^[1-9]?[0-9]$', str(card_attack_back)) and
               card_attack_back != '-' and card_attack_back != 'X'):
             message = 'Incorrect attack back value for row #{}{}'.format(
                 i, row_info)
@@ -5075,7 +5079,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_defense is not None and
-              not re.match('^[1-9]?[0-9]$', str(card_defense)) and
+              not re.match(r'^[1-9]?[0-9]$', str(card_defense)) and
               card_defense != '-' and card_defense != 'X'):
             message = 'Incorrect defense value for row #{}{}'.format(
                 i, row_info)
@@ -5111,7 +5115,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_defense_back is not None and
-              not re.match('^[1-9]?[0-9]$', str(card_defense_back)) and
+              not re.match(r'^[1-9]?[0-9]$', str(card_defense_back)) and
               card_defense_back != '-' and card_defense_back != 'X'):
             message = 'Incorrect defense back value for row #{}{}'.format(
                 i, row_info)
@@ -5137,7 +5141,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_health is not None and
-              not re.match('^[1-9]?[0-9]$', str(card_health)) and
+              not re.match(r'^[1-9]?[0-9]$', str(card_health)) and
               card_health != '-' and card_health != 'X'):
             message = 'Incorrect health value for row #{}{}'.format(
                 i, row_info)
@@ -5172,7 +5176,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_health_back is not None and
-              not re.match('^[1-9]?[0-9]$', str(card_health_back)) and
+              not re.match(r'^[1-9]?[0-9]$', str(card_health_back)) and
               card_health_back != '-' and card_health_back != 'X'):
             message = 'Incorrect health back value for row #{}{}'.format(
                 i, row_info)
@@ -5201,7 +5205,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_quest is not None and
-              not re.match('^[1-9]?[0-9]$', str(card_quest)) and
+              not re.match(r'^[1-9]?[0-9]$', str(card_quest)) and
               card_quest != '-' and card_quest != 'X'):
             message = 'Incorrect quest points value for row #{}{}'.format(
                 i, row_info)
@@ -5242,7 +5246,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_quest_back is not None and
-              not re.match('^[1-9]?[0-9]$', str(card_quest_back)) and
+              not re.match(r'^[1-9]?[0-9]$', str(card_quest_back)) and
               card_quest_back != '-' and card_quest_back != 'X'):
             message = 'Incorrect quest points back value for row #{}{}'.format(
                 i, row_info)
@@ -12510,9 +12514,9 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
 
             output_filename = '{}-{}----{}{}{}'.format(
                 filename[:3],
-                re.sub('-+$', '', filename[8:50]),
+                re.sub(r'-+$', '', filename[8:50]),
                 filename[50:86],
-                re.sub('-1$', '', filename[86:88]),
+                re.sub(r'-1$', '', filename[86:88]),
                 filename[88:])
             if output_filename not in known_filenames:
                 known_filenames.add(output_filename)
@@ -13352,7 +13356,7 @@ def _prepare_printing_images(input_path, output_path, service):  # pylint: disab
                     front_output_path = os.path.join(
                         output_path, re.sub(
                             r'-(?:e|p)-', '-',
-                            re.sub('-+', '-',
+                            re.sub(r'-+', '-',
                                    re.sub(r'.{36}-1(?=\.(?:png|jpg))', '-1o',
                                           '-'.join(parts)))))
                     shutil.copyfile(os.path.join(input_path, filename),
@@ -13360,7 +13364,7 @@ def _prepare_printing_images(input_path, output_path, service):  # pylint: disab
                     back_unofficial_output_path = os.path.join(
                         output_path, re.sub(
                             r'-(?:e|p)-', '-',
-                            re.sub('-+', '-',
+                            re.sub(r'-+', '-',
                                    re.sub(r'.{36}(?=-2u\.(?:png|jpg)$)', '',
                                           '{}-2u.{}'.format(
                                               '-'.join(parts[:-1]),
@@ -13371,7 +13375,7 @@ def _prepare_printing_images(input_path, output_path, service):  # pylint: disab
                         back_official_output_path = os.path.join(
                             output_path, re.sub(
                                 r'-(?:e|p)-', '-',
-                                re.sub('-+', '-',
+                                re.sub(r'-+', '-',
                                        re.sub(r'.{36}(?=-2o\.(?:png|jpg)$)',
                                               '', '{}-2o.{}'.format(
                                                   '-'.join(parts[:-1]),
@@ -13383,7 +13387,7 @@ def _prepare_printing_images(input_path, output_path, service):  # pylint: disab
                 front_output_path = os.path.join(
                     output_path, re.sub(
                         r'-(?:e|p)-', '-',
-                        re.sub('-+', '-',
+                        re.sub(r'-+', '-',
                                re.sub(r'.{36}-1(?=\.(?:png|jpg))', '-1o',
                                       '-'.join(parts)))))
                 shutil.copyfile(os.path.join(input_path, filename),
@@ -13391,7 +13395,7 @@ def _prepare_printing_images(input_path, output_path, service):  # pylint: disab
                 back_unofficial_output_path = os.path.join(
                     output_path, re.sub(
                         r'-(?:e|p)-', '-',
-                        re.sub('-+', '-',
+                        re.sub(r'-+', '-',
                                re.sub(r'.{36}(?=-2u\.(?:png|jpg)$)', '',
                                       '{}-2u.{}'.format(
                                           '-'.join(parts[:-1]),
@@ -13402,7 +13406,7 @@ def _prepare_printing_images(input_path, output_path, service):  # pylint: disab
                     back_official_output_path = os.path.join(
                         output_path, re.sub(
                             r'-(?:e|p)-', '-',
-                            re.sub('-+', '-',
+                            re.sub(r'-+', '-',
                                    re.sub(r'.{36}(?=-2o\.(?:png|jpg)$)', '',
                                           '{}-2o.{}'.format(
                                               '-'.join(parts[:-1]),

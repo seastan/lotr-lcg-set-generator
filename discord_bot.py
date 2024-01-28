@@ -1753,11 +1753,11 @@ def detect_names(text, card_type):  # pylint: disable=R0912
                         name = name[:-1]
 
                     if not re.match(
-                            r'Condition|Forced|Resolution|'
+                            r'^(?:Condition|Forced|Resolution|Last Gasp|Fowl|'
                             r'Response|Restricted|Setup|Shadow|Travel|'
                             r'Valour Response|When Revealed|(?:(?:Valour )?'
                             r'(?:Combat |Encounter |Planning |Quest |Refresh |'
-                            r'Resource |Travel )?Action)', name):
+                            r'Resource |Travel )?Action))', name):
                         names.append((first_pos, name))
 
                     first_pos = None
@@ -1924,7 +1924,7 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
             sentence = re.sub(
                 r'\badd(?!.+?\bplace.+?resource)(?!.+?\bput.+?resource).+?'
                 r'resource.+?\bpool', '', sentence, flags=re.IGNORECASE)
-            if (re.search('token', sentence, flags=re.IGNORECASE) and (
+            if (re.search(r'token', sentence, flags=re.IGNORECASE) and (
                     re.search(r'\badd', sentence, flags=re.IGNORECASE) or
                     re.search(r'\bput', sentence, flags=re.IGNORECASE) or
                     re.search(r'\bpool', sentence, flags=re.IGNORECASE))):
@@ -1937,7 +1937,7 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
                         'row': card[lotr.ROW_COLUMN]}
                 res.setdefault('Place vs Put vs Add', []).append(data)
 
-            if (re.search('progress', sentence, flags=re.IGNORECASE) and (
+            if (re.search(r'progress', sentence, flags=re.IGNORECASE) and (
                     re.search(r'\badd', sentence, flags=re.IGNORECASE) or
                     re.search(r'\bput', sentence, flags=re.IGNORECASE))):
                 data = {'name': card[lotr.CARD_NAME],
@@ -1949,7 +1949,7 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
                         'row': card[lotr.ROW_COLUMN]}
                 res.setdefault('Place vs Put vs Add', []).append(data)
 
-            if (re.search('resource(?! token)', sentence,
+            if (re.search(r'resource(?! token)', sentence,
                           flags=re.IGNORECASE) and (
                     re.search(r'\badd', sentence, flags=re.IGNORECASE) or
                     re.search(r'\bput', sentence, flags=re.IGNORECASE) or
@@ -2143,13 +2143,18 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
             res.setdefault('Printed cost', []).append(data)
 
         if re.search(r': [A-Z]', paragraph):
-            paragraph = re.sub(r'\b(?:Valour )?(?:Resource |Planning |Quest '
-                               r'|Travel |Encounter |Combat |Refresh )?'
-                               r'(?:Action):', '\\*\\*\\*', paragraph)
-            paragraph = re.sub(r'\b(?:When Revealed|Forced|Valour Response'
-                               r'|Response|Travel|Shadow|Resolution):',
+            paragraph = re.sub(r'(?:\[b\])?\b(?:Valour )?(?:Resource '
+                               r'|Planning |Quest |Travel |Encounter |Combat '
+                               r'|Refresh )?(?:Action)(?:\[\/b\])?:',
                                '\\*\\*\\*', paragraph)
-            paragraph = re.sub(r'\bSetup(?: \([^\)]+\))?:', '\\*\\*\\*',
+            paragraph = re.sub(r'(?:\[b\])?\b(?:When Revealed|Forced'
+                               r'|Valour Response|Response|Travel|Shadow'
+                               r'|Resolution)(?:\[\/b\])?:', '\\*\\*\\*',
+                               paragraph)
+            paragraph = re.sub(
+                r'(?:\[b\])?\bSetup(?: \([^\)]+\))?(?:\[\/b\])?:', '\\*\\*\\*',
+                paragraph)
+            paragraph = re.sub(r'\[b\](?:Fowl|Last Gasp)\[\/b\]:', '\\*\\*\\*',
                                paragraph)
             paragraph = re.sub(r'^\[i\]\[b\]Rumor\[\/b\]:', '\\*\\*\\*',
                                paragraph)
