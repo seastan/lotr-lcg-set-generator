@@ -3663,7 +3663,18 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
 
         if re.search(r'^\[b\]Rumor\[\/b\]:', paragraph):
             errors.append(
-                'Rumor text must be inside [i] tags (including "Rumor:")')
+                'rumor text must be inside [i] tags '
+                '(including "[b]Rumor[/b]:")')
+        elif re.search(r'^Rumor:', paragraph):
+            errors.append(
+                '"Rumor" must be inside [b] tags, rumor text must be inside '
+                '[i] tags (including "[b]Rumor[/b]:")')
+
+        if re.search(r'^(?:\[bi\])?Last Gasp(?:\[\/bi\])?:', paragraph):
+            errors.append('"Last Gasp" must be inside [b] tags')
+
+        if re.search(r'^(?:\[bi\])?Fowl(?:\[\/bi\])?:', paragraph):
+            errors.append('"Fowl" must be inside [b] tags')
 
         if (re.search(r'(?:\[bi\]forced\[\/bi\]|forced|"forced") effect',
                       paragraph, flags=re.IGNORECASE) or
@@ -3679,6 +3690,18 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                       paragraph, flags=re.IGNORECASE) or
                 '[b]rumor[/b] effect' in paragraph):
             errors.append('use [b]Rumor[/b] in the middle of the text')
+
+        if (re.search(
+                r'(?:\[bi\]last gasp\[\/bi\]|last gasp|"last gasp") effect',
+                paragraph, flags=re.IGNORECASE) or
+                '[b]last gasp[/b] effect' in paragraph or
+                '[b]Last gasp[/b] effect' in paragraph):
+            errors.append('use [b]Last Gasp[/b] in the middle of the text')
+
+        if (re.search(r'(?:\[bi\]fowl\[\/bi\]|fowl|"fowl") effect',
+                      paragraph, flags=re.IGNORECASE) or
+                '[b]fowl[/b] effect' in paragraph):
+            errors.append('use [b]Fowl[/b] in the middle of the text')
 
         if (re.search(r'(?:\[bi\]shadow\[\/bi\]|\[b\]shadow\[\/b\]|"shadow") '
                       r'effect', paragraph, flags=re.IGNORECASE) or
