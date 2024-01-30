@@ -2387,17 +2387,37 @@ def _clean_value(value):  # pylint: disable=R0915
     return value
 
 
-def get_similar_names(value, card_names, scratch_card_names=None):
-    """ Get similar card names.
+def _get_regex(value):
+    """ Get a regex to match the string value.
     """
-    value_regex = r'\b' + re.escape(value) + r'\b'
+    value_regex = re.escape(value)
+    if re.search(r'^\w', value):
+        value_regex = r'\b' + value_regex
+
+    if re.search(r'\w$', value):
+        value_regex = value_regex + r'\b'
+
+    return value_regex
+
+
+def get_similar_names_regex(value, card_names, scratch_card_names=None):
+    """ Get similar card names regex.
+    """
+    value_regex = _get_regex(value)
+
     res = {n for n in card_names if re.search(value_regex, n) and value != n}
     if scratch_card_names:
         res_scratch = {n for n in scratch_card_names
                        if re.search(value_regex, n) and value != n}
         res.update(res_scratch)
 
-    return res
+    names = []
+    for name in res:
+        name_regex = _get_regex(name)
+        name_regex = r'(?<!\[bi\])' + name_regex
+        names.append(name_regex)
+
+    return names
 
 
 def parse_flavour(value, lang, value_id=None):  # pylint: disable=R0912,R0915
@@ -2567,7 +2587,8 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                 not (row[CARD_FLAGS] and
                      F_IGNORENAME in extract_flags(
                          row[CARD_FLAGS], conf['ignore_ignore_flags']))):
-            card_name_regex = r'(?<!\[bi\])\b' + re.escape(card_name) + r'\b'
+            card_name_regex = _get_regex(card_name)
+            card_name_regex = r'(?<!\[bi\])\b' + card_name_regex
         else:
             card_name_regex = None
 
@@ -2579,8 +2600,8 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                      F_IGNORENAME in
                      extract_flags(row[BACK_PREFIX + CARD_FLAGS],
                                    conf['ignore_ignore_flags']))):
-            card_name_regex_back = (
-                r'(?<!\[bi\])\b' + re.escape(card_name_back) + r'\b')
+            card_name_regex_back = _get_regex(card_name_back)
+            card_name_regex_back = r'(?<!\[bi\])\b' + card_name_regex_back
         else:
             card_name_regex_back = None
 
@@ -2611,14 +2632,11 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
             if card_name_regex:
                 if key == CARD_TEXT and re.search(card_name_regex, value):
                     prepared_value = value
-                    similar_names = get_similar_names(
+                    similar_names = get_similar_names_regex(
                         card_name, ALL_CARD_NAMES[L_ENGLISH],
                         row[CARD_SCRATCH] and ALL_SCRATCH_CARD_NAMES or None)
                     for similar_name in similar_names:
-                        similar_name_regex = (
-                            r'(?<!\[bi\])\b' + re.escape(similar_name) +
-                            r'\b')
-                        prepared_value = re.sub(similar_name_regex, '',
+                        prepared_value = re.sub(similar_name, '',
                                                 prepared_value)
 
                     if re.search(card_name_regex, prepared_value):
@@ -2631,14 +2649,11 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                 elif (key == CARD_SHADOW and
                       re.search(card_name_regex, value)):
                     prepared_value = value
-                    similar_names = get_similar_names(
+                    similar_names = get_similar_names_regex(
                         card_name, ALL_CARD_NAMES[L_ENGLISH],
                         row[CARD_SCRATCH] and ALL_SCRATCH_CARD_NAMES or None)
                     for similar_name in similar_names:
-                        similar_name_regex = (
-                            r'(?<!\[bi\])\b' + re.escape(similar_name) +
-                            r'\b')
-                        prepared_value = re.sub(similar_name_regex, '',
+                        prepared_value = re.sub(similar_name, '',
                                                 prepared_value)
 
                     if re.search(card_name_regex, prepared_value):
@@ -2653,14 +2668,11 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                 if (key == BACK_PREFIX + CARD_TEXT and
                         re.search(card_name_regex_back, value)):
                     prepared_value = value
-                    similar_names = get_similar_names(
+                    similar_names = get_similar_names_regex(
                         card_name_back, ALL_CARD_NAMES[L_ENGLISH],
                         row[CARD_SCRATCH] and ALL_SCRATCH_CARD_NAMES or None)
                     for similar_name in similar_names:
-                        similar_name_regex = (
-                            r'(?<!\[bi\])\b' + re.escape(similar_name) +
-                            r'\b')
-                        prepared_value = re.sub(similar_name_regex, '',
+                        prepared_value = re.sub(similar_name, '',
                                                 prepared_value)
 
                     if re.search(card_name_regex_back, prepared_value):
@@ -2673,14 +2685,11 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                 elif (key == BACK_PREFIX + CARD_SHADOW and
                           re.search(card_name_regex_back, value)):
                     prepared_value = value
-                    similar_names = get_similar_names(
+                    similar_names = get_similar_names_regex(
                         card_name_back, ALL_CARD_NAMES[L_ENGLISH],
                         row[CARD_SCRATCH] and ALL_SCRATCH_CARD_NAMES or None)
                     for similar_name in similar_names:
-                        similar_name_regex = (
-                            r'(?<!\[bi\])\b' + re.escape(similar_name) +
-                            r'\b')
-                        prepared_value = re.sub(similar_name_regex, '',
+                        prepared_value = re.sub(similar_name, '',
                                                 prepared_value)
 
                     if re.search(card_name_regex_back, prepared_value):
@@ -3847,8 +3856,7 @@ def _replace_numbers(value, lang=L_ENGLISH):
     for key, translations in NUMBER_TRANSLATIONS.items():
         translation = translations.get(lang, [])
         for word in translation:
-            value = re.sub(r'\b' + re.escape(word) + r'\b', key, value,
-                           flags=re.IGNORECASE)
+            value = re.sub(_get_regex(word), key, value, flags=re.IGNORECASE)
 
     return value
 
@@ -6750,8 +6758,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
                         value_translated = value
                         for term_english, lang_dict in TRANSLATION_MATCH:
-                            regex_english = (r'\b' + re.escape(term_english)
-                                             + r'\b')
+                            regex_english = _get_regex(term_english)
                             regex_translated = lang_dict.get(lang)
                             if not regex_translated:
                                 continue

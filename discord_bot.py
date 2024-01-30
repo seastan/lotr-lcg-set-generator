@@ -1966,11 +1966,10 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
         value = paragraph.replace('Encounter Cards', '')
         match = re.search(keywords_regex, value)
         if match:
-            similar_names = lotr.get_similar_names(match[0], all_card_names)
+            similar_names = lotr.get_similar_names_regex(match[0],
+                                                         all_card_names)
             for similar_name in similar_names:
-                similar_name_regex = (
-                    r'(?<!\[bi\])\b' + re.escape(similar_name) + r'\b')
-                value = re.sub(similar_name_regex, '', value)
+                value = re.sub(similar_name, '', value)
 
             if re.search(keywords_regex, value):
                 data = {'name': card[lotr.CARD_NAME],
