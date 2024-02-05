@@ -3029,7 +3029,7 @@ def _read_sheet_json(sheet):
     return data
 
 
-def extract_data(conf):
+def extract_data(conf):  # pylint: disable=R0912,R0915
     """ Extract data from the spreadsheet.
     """
     logging.info('Extracting data from the spreadsheet...')
