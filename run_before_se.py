@@ -78,24 +78,23 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
             conf['dragncards_id_rsa_path']):
         lotr.write_remote_dragncards_folder(conf)
 
-    sheet_changes, scratch_changes = lotr.download_sheet(conf)
+    sheet_changes = lotr.download_sheet(conf)
     if force_reprocessing or not conf['exit_if_no_spreadsheet_changes']:
         sheet_changes = True
-        scratch_changes = True
 
-    if not sheet_changes and not scratch_changes:
+    if not sheet_changes:
         if os.path.exists(lotr.RUN_BEFORE_SE_STARTED_PATH):
             os.remove(lotr.RUN_BEFORE_SE_STARTED_PATH)
 
         logging.info('No spreadsheet changes, exiting')
         logging.info('Done (%ss)', round(time.time() - timestamp, 3))
-        return (sheet_changes, scratch_changes)
+        return False
 
     with open(lotr.PIPELINE_STARTED_PATH, 'w', encoding='utf-8'):
         pass
 
-    lotr.extract_data(conf, sheet_changes, scratch_changes)
-    sets = lotr.get_sets(conf, sheet_changes, scratch_changes)
+    lotr.extract_data(conf)
+    sets = lotr.get_sets(conf)
 
     if conf['stable_data_user'] == 'reader':
         try:
@@ -105,9 +104,8 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
             logging.info(
                 'Sanity check failed, retrying with the latest stable data...')
             lotr.read_stable_data(conf)
-            sheet_changes = True
-            lotr.extract_data(conf, sheet_changes, scratch_changes)
-            sets = lotr.get_sets(conf, sheet_changes, scratch_changes)
+            lotr.extract_data(conf)
+            sets = lotr.get_sets(conf)
             sets = lotr.sanity_check(conf, sets)
     else:
         sets = lotr.sanity_check(conf, sets)
@@ -115,8 +113,7 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
     if conf['stable_data_user'] == 'writer':
         lotr.upload_stable_data()
 
-    if sheet_changes or scratch_changes:
-        lotr.save_data_for_bot(conf, sets)
+    lotr.save_data_for_bot(conf, sets)
 
     if conf['renderer']:
         lotr.expire_dragncards_hashes()
@@ -236,7 +233,7 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
         os.remove(lotr.RUN_BEFORE_SE_STARTED_PATH)
 
     logging.info('Done (%ss)', round(time.time() - timestamp, 3))
-    return (sheet_changes, scratch_changes)
+    return True
 
 
 if __name__ == '__main__':

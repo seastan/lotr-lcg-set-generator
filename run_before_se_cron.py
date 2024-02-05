@@ -283,17 +283,14 @@ def run(conf=None):  # pylint: disable=R0912,R0915
         conf = read_conf()
 
     sheet_changes = True
-    scratch_changes = True
     timestamp = time.time()
     try:  # pylint: disable=R1702
         if not internet_state():
             logging.warning('Internet is not available right now, exiting')
             sheet_changes = False
-            scratch_changes = False
             return
 
-        sheet_changes, scratch_changes = main(conf)
-
+        sheet_changes = main(conf)
         if sheet_changes:
             if get_sanity_check_message():
                 message = 'Sanity check passed'
@@ -305,8 +302,6 @@ def run(conf=None):  # pylint: disable=R0912,R0915
                     logging.exception(str(exc_new)[:LOG_LIMIT])
 
             rclone(conf)
-
-        if scratch_changes:
             rclone_scratch(conf)
 
     except SanityCheckError as exc:
@@ -332,10 +327,11 @@ def run(conf=None):  # pylint: disable=R0912,R0915
         except Exception as exc_new:
             logging.exception(str(exc_new)[:LOG_LIMIT])
     finally:
-        if not sheet_changes and not scratch_changes:
-            logging.info('Finished (No Changes): %s', cron_id)
-        else:
+        if sheet_changes:
             logging.info('Finished: %s', cron_id)
+        else:
+            logging.info('Finished (No Changes): %s', cron_id)
+
         logging.info('')
         logging.info('')
 

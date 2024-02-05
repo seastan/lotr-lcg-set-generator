@@ -566,6 +566,7 @@ RENDERER_PATH = 'Renderer'
 TEMP_ROOT_PATH = 'Temp'
 UTC_TIMESTAMP_PATH = 'utc_timestamp.txt'
 
+CHOSEN_SETS_PATH = os.path.join(DATA_PATH, 'chosen_sets.json')
 CONFIGURATION_PATH = 'configuration.yaml'
 DISCORD_CARD_DATA_PATH = os.path.join(DISCORD_PATH, 'Data', 'card_data.json')
 DISCORD_CARD_DATA_RAW_PATH = os.path.join(DISCORD_PATH, 'Data',
@@ -1172,28 +1173,30 @@ TRANSLATION_MATCH = [
 ]
 
 CARD_COLUMNS = {}
-SHEET_IDS = {}
-SETS = {}
 DATA = []
+SETS = {}
+SHEET_IDS = {}
+
 ACCENTS = set()
-ALL_NAMES = set()
-ALL_SET_AND_QUEST_NAMES = set()
-ALL_ENCOUNTER_SET_NAMES = set()
 ALL_CARD_NAMES = {L_ENGLISH: set()}
+ALL_ENCOUNTER_SET_NAMES = set()
+ALL_NAMES = set()
 ALL_SCRATCH_CARD_NAMES = set()
-ALL_TRAITS = set()
 ALL_SCRATCH_TRAITS = set()
-PRE_SANITY_CHECK = {'name': {}, 'ref': {}, 'flavour': {}, 'shadow': {}}
+ALL_SET_AND_QUEST_NAMES = set()
+ALL_TRAITS = set()
+CHOSEN_SETS = []
 FLAVOUR_BOOKS = {}
 FLAVOUR_WARNINGS = {'missing_quotes': set(), 'redundant_quotes': set()}
-TRANSLATIONS = {}
-SELECTED_CARDS = set()
-FOUND_SETS = set()
 FOUND_SCRATCH_SETS = set()
+FOUND_SETS = set()
 IMAGE_CACHE = {}
 JSON_CACHE = {}
-XML_CACHE = {}
+PRE_SANITY_CHECK = {'name': {}, 'ref': {}, 'flavour': {}, 'shadow': {}}
 RINGSDB_COOKIES = {}
+SELECTED_CARDS = set()
+TRANSLATIONS = {}
+XML_CACHE = {}
 
 
 class SheetError(Exception):
@@ -2009,7 +2012,6 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
 
     utc_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
     changes = False
-    scratch_changes = False
     sheets = [SET_SHEET, CARD_SHEET, SCRATCH_SHEET]
     for lang in set(conf['languages']).difference(set([L_ENGLISH])):
         sheets.append(lang)
@@ -2098,22 +2100,12 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
         new_checksums[sheet] = hashlib.md5(res.encode('utf-8')).hexdigest()
         if new_checksums[sheet] != old_checksums.get(sheet, ''):
             logging.info('Sheet %s changed', sheet)
-
-            # we can't do that, because we need to include scratch artwork ids
-            # into card_data.json
-            # if sheet != SCRATCH_SHEET:
-            #     changes = True
-            # if sheet in {SET_SHEET, SCRATCH_SHEET}:
-            #    scratch_changes = True
-
             changes = True
-            scratch_changes = True
-
             path = os.path.join(DOWNLOAD_PATH, '{}.json'.format(sheet))
             with open(path, 'w', encoding='utf-8') as fobj:
                 fobj.write(res)
 
-    if changes or scratch_changes:
+    if changes:
         with open(SHEETS_JSON_PATH, 'w', encoding='utf-8') as fobj:
             json.dump(new_checksums, fobj)
 
@@ -2122,7 +2114,7 @@ def download_sheet(conf):  # pylint: disable=R0912,R0914,R0915
 
     logging.info('...Downloading cards spreadsheet from Google Sheets (%ss)',
                  round(time.time() - timestamp, 3))
-    return (changes, scratch_changes)
+    return changes
 
 
 def _verify_drive_timestamp(folder_path):
@@ -3037,7 +3029,7 @@ def _read_sheet_json(sheet):
     return data
 
 
-def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: disable=R0912,R0915
+def extract_data(conf):
     """ Extract data from the spreadsheet.
     """
     logging.info('Extracting data from the spreadsheet...')
@@ -3085,27 +3077,25 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
             SETS[row[SET_ID]] = row
             set_names.add(row[SET_NAME])
 
-    if sheet_changes or scratch_changes:
-        data = _read_sheet_json(CARD_SHEET)
-        if data:
+    data = _read_sheet_json(CARD_SHEET)
+    if data:
+        CARD_COLUMNS.update(_extract_column_names(data[0]))
+        data = _transform_to_dict(data)
+        for row in data:
+            row[CARD_SCRATCH] = None
+
+        DATA.extend(data)
+
+    data = _read_sheet_json(SCRATCH_SHEET)
+    if data:
+        if not CARD_COLUMNS:
             CARD_COLUMNS.update(_extract_column_names(data[0]))
-            data = _transform_to_dict(data)
-            for row in data:
-                row[CARD_SCRATCH] = None
 
-            DATA.extend(data)
+        data = _transform_to_dict(data)
+        for row in data:
+            row[CARD_SCRATCH] = 1
 
-    if scratch_changes:
-        data = _read_sheet_json(SCRATCH_SHEET)
-        if data:
-            if not CARD_COLUMNS:
-                CARD_COLUMNS.update(_extract_column_names(data[0]))
-
-            data = _transform_to_dict(data)
-            for row in data:
-                row[CARD_SCRATCH] = 1
-
-            DATA.extend(data)
+        DATA.extend(data)
 
     DATA[:] = [row for row in DATA if not _skip_row(row)]
     PRE_SANITY_CHECK['name'] = {}
@@ -3180,7 +3170,7 @@ def extract_data(conf, sheet_changes=True, scratch_changes=True):  # pylint: dis
                  round(time.time() - timestamp, 3))
 
 
-def get_sets(conf, sheet_changes=True, scratch_changes=True):
+def get_sets(conf):
     """ Get all sets to work on and return list of (set id, set name) tuples.
     """
     logging.info('Getting all sets to work on...')
@@ -3189,14 +3179,14 @@ def get_sets(conf, sheet_changes=True, scratch_changes=True):
     chosen_sets = set()
     for row in SETS.values():
         if (row[SET_ID] in conf['set_ids'] and
-                ((row[SET_ID] in FOUND_SETS and sheet_changes) or
-                 (row[SET_ID] in FOUND_SCRATCH_SETS and scratch_changes))):
+                (row[SET_ID] in FOUND_SETS or
+                 row[SET_ID] in FOUND_SCRATCH_SETS)):
             chosen_sets.add(row[SET_ID])
 
-    if 'all' in conf['set_ids'] and sheet_changes:
+    if 'all' in conf['set_ids']:
         chosen_sets.update(s for s in FOUND_SETS if not SETS[s][SET_IGNORE])
 
-    if 'all_scratch' in conf['set_ids'] and scratch_changes:
+    if 'all_scratch' in conf['set_ids']:
         chosen_sets.update(s for s in FOUND_SCRATCH_SETS
                            if not SETS[s][SET_IGNORE])
 
@@ -3208,6 +3198,11 @@ def get_sets(conf, sheet_changes=True, scratch_changes=True):
     chosen_sets = list(chosen_sets)
     chosen_sets = [s for s in chosen_sets if s not in conf['ignore_set_ids']]
     chosen_sets = [[SETS[s][SET_ID], SETS[s][SET_NAME]] for s in chosen_sets]
+    CHOSEN_SETS[:] = chosen_sets
+    with open(CHOSEN_SETS_PATH, 'w', encoding='utf-8') as obj:
+        res = json.dumps(chosen_sets, ensure_ascii=False)
+        obj.write(res)
+
     logging.info('...Getting all sets to work on (%ss)',
                  round(time.time() - timestamp, 3))
     return chosen_sets
@@ -14576,6 +14571,9 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
                         if not filename.endswith('.json'):
                             continue
 
+                        if filename.endswith('.menu.json'):
+                            continue
+
                         if filename.startswith('Player-'):
                             continue
 
@@ -14603,6 +14601,57 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
                             beta=True)
 
                     break
+
+        menus = []
+        for _, set_name in CHOSEN_SETS:
+            output_path = os.path.join(OUTPUT_OCTGN_DECKS_PATH,
+                                       escape_filename(set_name))
+            if (conf['dragncards_remote_deck_json_path'] and
+                    conf['octgn_o8d'] and os.path.exists(output_path)):
+                for _, _, filenames in os.walk(output_path):
+                    for filename in filenames:
+                        if not filename.endswith('.menu.json'):
+                            continue
+
+                        file_path = os.path.join(output_path, filename)
+                        with open(file_path, 'r', encoding='utf-8') as fobj:
+                            content = json.load(fobj)
+                            menus.extend(
+                                content['deckMenu']['subMenus'][0]['subMenus'])
+
+                    break
+
+        menus.sort(key=lambda m:
+            ([d for d in m['deckLists'] if d['label'] == 'id:normal'] or
+             [{}])[0].get('deckListId', ''))
+        if menus:
+            temp_path = os.path.join(
+                TEMP_ROOT_PATH, 'upload_dragncards_decks_and_json')
+            create_folder(temp_path)
+            clear_folder(temp_path)
+            json_data = {'deckMenu': {
+                'subMenus': [{'label': DRAGNCARDS_MENU_LABEL,
+                              'subMenus': menus}]}}
+            file_path = os.path.join(
+                temp_path,
+                escape_octgn_filename(
+                    '{}.menu.json'.format(DRAGNCARDS_MENU_LABEL)))
+            with open(file_path, 'w', encoding='utf-8') as fobj:
+                json.dump(json_data, fobj)
+
+            if not client:
+                client = _get_ssh_client(conf, beta=True)
+                scp_client = SCPClient(client.get_transport())
+
+            client, scp_client = _scp_upload(
+                client,
+                scp_client,
+                conf,
+                file_path,
+                conf['dragncards_remote_deck_json_path'],
+                beta=True)
+
+            delete_folder(temp_path)
 
         for set_id, set_name in sets:
             output_path = os.path.join(

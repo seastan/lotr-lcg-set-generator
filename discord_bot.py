@@ -4171,7 +4171,8 @@ Targets removed.
         data = await read_card_data()
         if card_id:
             if card_id not in data['artwork_ids']:
-                return 'card id not found or is locked'
+                return ("card id is either not found or locked or relates to "
+                        "a scratch set that didn't pass the sanity check")
         elif channel_id:
             channel_name = self.get_channel_name_by_id(channel_id)
             if not channel_name:
@@ -4281,7 +4282,8 @@ Targets removed.
         data = await read_card_data()
         if card_id:
             if card_id not in data['artwork_ids']:
-                return 'card id not found or is locked'
+                return ("card id is either not found or locked or relates to "
+                        "a scratch set that didn't pass the sanity check")
         elif channel_id:
             channel_name = self.get_channel_name_by_id(channel_id)
             if not channel_name:
@@ -4370,7 +4372,8 @@ Targets removed.
         data = await read_card_data()
         if card_id:
             if card_id not in data['artwork_ids']:
-                return 'card id not found or is locked'
+                return ("card id is either not found or locked or relates to "
+                        "a scratch set that didn't pass the sanity check")
 
             card = data['artwork_ids'][card_id]
             card[lotr.CARD_ID] = card_id
