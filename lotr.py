@@ -7642,8 +7642,7 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
             timestamps[card_id] = utc_time
 
         with open(DISCORD_TIMESTAMPS_PATH, 'w', encoding='utf-8') as obj:
-            res = json.dumps(timestamps)
-            obj.write(res)
+            json.dump(timestamps, obj)
 
     logging.info('...Saving the data for the Discord bot (%ss)',
                  round(time.time() - timestamp, 3))
@@ -8670,8 +8669,9 @@ def generate_octgn_o8d(conf, set_id, set_name):
         json_data = {'deckMenu': {
             'subMenus': [{'label': DRAGNCARDS_MENU_LABEL, 'subMenus': menus}]}}
         with open(os.path.join(output_path, '{}.menu.json'.format(set_id)),
-                  'w', encoding='utf-8') as obj:
-            json.dump(json_data, obj, ensure_ascii=True, indent=4)
+                  'w', encoding='utf-8') as fobj:
+            res = json.dumps(json_data, ensure_ascii=True, indent=4)
+            fobj.write(res)
 
     _generate_octgn_o8d_player(conf, set_id, set_name)
 
@@ -14637,7 +14637,8 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
                 escape_octgn_filename(
                     '{}.menu.json'.format(DRAGNCARDS_MENU_LABEL)))
             with open(file_path, 'w', encoding='utf-8') as fobj:
-                json.dump(json_data, fobj)
+                res = json.dumps(json_data, ensure_ascii=True, indent=4)
+                fobj.write(res)
 
             if not client:
                 client = _get_ssh_client(conf, beta=True)
