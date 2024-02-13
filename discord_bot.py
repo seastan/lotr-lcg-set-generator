@@ -615,11 +615,11 @@ def format_playtest_message(data):
     for line in data['targets']:
         completed = '~~' if line['completed'] else ''
         user = ' (**{}**)'.format(line['user']) if line['user'] else ''
-        res += '{}{}. {}{}{}\n'.format(completed,  # pylint: disable=W1308
-                                       line['num'],
-                                       line['title'],
-                                       completed,
-                                       user)
+        res += '` `{}{}. {}{}{}\n'.format(completed,  # pylint: disable=W1308
+                                          line['num'],
+                                          line['title'],
+                                          completed,
+                                          user)
 
     res = res.strip()
     return res
