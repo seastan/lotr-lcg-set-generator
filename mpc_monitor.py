@@ -45,10 +45,10 @@ PREVIEW_REGEX = r'(?<=javascript:oTempSave\.show\()[^\)]+'
 IMAGE_REGEX = r'(?<=<img src=")[^"]+'
 
 DEFAULT_VIEWSTATE = \
-    '/wEPDwUJNjAwNDE3MDgyDxYCHhNWYWxpZGF0ZVJlcXVlc3RNb2RlAgFkZKxwlxJ+dQzVGn0L8+0kT3Qk5oie'
+    '/wEPDwUKMTk3MTM0MTI5NGRkq5zAH+KPIx3IAH6syg3EXVOr5hc='
 DEFAULT_VIEWSTATEGENERATOR = '7D57AF60'
 DEFAULT_HIDDGRECAPTCHAV3TOKEN = \
-    '03AGdBq25A2GL4dhQ7lzrQbq4yeJycZQ2Hgi-5zhDei6hpGs3eap2F_eyLtIPSdtMPn5ardl-fTRFaxI8mj12HNBp-ezuEiTdRXRCHnuRt5039oDE1znUCzJhxz1l_R-kqpgGQoaXGPPjXvgOxeTYCaHXUcuq1PgCJrz4LPId18uvY0bZwPM9hdVA6avdiS_K_Ia7eLfWaPrBbuJvrS9L7hwW0uCP3cgaxRQdRF9tpLzo1ZEWEPmDUeYUaz_iHKoW44oZkthNjnb1SbJir0gz3_jmpslf4b-UUQZvO_-JNjkvYPmU9aOPmakhrk0WrdMzl74C5PlDEZSKdHmLUqSGlZ2OhgGu_2N9tbIVDlA5vkxL4koRPD2EQsnFoiDW5WZAmlzjdCzRjeDY79Aphs-PM508cKnl9CrDvvu9zDn36_jqqrRAf_YzJ-Rl1_VfMMoKpa-DAi_mUWleLWURV-Ik3b3YZbuCHe8gxQA'
+    '03AFcWeA7vbjH-M3idb7CW2LqXo4MoFTWSVlpdn7vRbGTObMtZvnmpKhl0Shxc-O9PDF-PWvE7Ywx04nO8OGMxid9qPoNW6enVustmzlLfihWuZNzedovk4yBS1A_1dzDravFutU8EmeOQSw30c1m-SgosDqQQFKykljigYWtcYuYOYf2i4JKSAG96I0Tw7ayCQmN72C0PEazLqZw4E41tet1bavuSbEtAU_QqoxOnLH8RCXk1siWVfYtJ1oEq_l_PZbC-GTLNTvdY6obgiyHQqlQm2Kt_ZSnCF3YIQq81stYMwAvsPMo8AJE14rXsJjhtQby8NVmTQzNdo7P3QaSj3QSOuUZwXbw4c0Y-LfD-gj_csro_Ba1uL1kx8Ge4KTUo3qp8AO9HRIo_YJFH9JCjwRx2F5Xy8ykU0aQWsF1LYkM-O1ylm2chsBtaJTS4B97Cb7ahN58g-V68wvel5cancpxnReLvKdt-XqpzAfeS1fYXxHFfkqSqg-GroRwIj8yGgrulkb3j51Dy8MuF-KUbvWPzERdGVPU9G57IqJZ60MBtwInM54c9XQZ-juFV4AcUvN23C7F8-H0FZ2vZBouzRTjWeTLOSWFfwth8kZ7IBQOGX8hFx-UkAU0DW2eMObvU8osI6ThyKjSa0IC0wgoDlGSNR72gJXP_C0gbEw6Bk7Edc2ttmdZ_8m8'
 
 ALERT_SUBJECT_TEMPLATE = 'LotR MPC Monitor ALERT: {}'
 ERROR_SUBJECT_TEMPLATE = 'LotR MPC Monitor ERROR: {}'
@@ -436,6 +436,10 @@ def get_decks(session):
         return ''
 
     if 'My saved projects' not in content:
+        if DEBUG:
+            with open(DEBUG_PATH, 'w', encoding='utf-8') as fobj:
+                fobj.write(content)
+
         raise ResponseError('No saved projects found, content length: {}'
                             .format(len(content)))
 
