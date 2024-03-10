@@ -14636,7 +14636,7 @@ def _upload_dragncards_decks_and_json(conf, sets):  # pylint: disable=R0912,R091
             file_path = os.path.join(
                 temp_path,
                 escape_octgn_filename(
-                    '{}.menu.json'.format(DRAGNCARDS_MENU_LABEL)))
+                    'zz-{}.menu.json'.format(DRAGNCARDS_MENU_LABEL)))
             with open(file_path, 'w', encoding='utf-8') as fobj:
                 res = json.dumps(json_data, ensure_ascii=True, indent=4)
                 fobj.write(res)
