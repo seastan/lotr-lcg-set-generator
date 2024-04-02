@@ -548,9 +548,7 @@ def create_ringsdb_csv(pack_name, pack_code):
                 if isinstance(value, str):
                     row[key] = value.replace('\r\n', '\n')
 
-            if row['type_name'] == 'Player Objective':
-                type_name = 'Contract'
-            elif (row['type_name'] == 'Treasure' or
+            if (row['type_name'] == 'Treasure' or
                   row.get('subtype_code') in {'Boon', 'Burden'}):
                 type_name = 'Campaign'
             else:

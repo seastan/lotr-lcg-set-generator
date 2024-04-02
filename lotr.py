@@ -8798,9 +8798,7 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
             else:
                 sphere = row[CARD_SPHERE]
 
-            if row[CARD_TYPE] == T_PLAYER_OBJECTIVE:
-                card_type = T_CONTRACT
-            elif (row[CARD_TYPE] == T_TREASURE or
+            if (row[CARD_TYPE] == T_TREASURE or
                   row[CARD_SPHERE] in CARD_SPHERES_BOON or
                   row[CARD_SPHERE] == S_BURDEN):
                 card_type = T_CAMPAIGN
