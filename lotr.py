@@ -1951,12 +1951,13 @@ def reset_project_folders(conf):
                  round(time.time() - timestamp, 3))
 
 
-def get_content(url):
+def get_content(url, custom_timeout=None):
     """ Get URL content.
     """
+    timeout = custom_timeout or URL_TIMEOUT
     for i in range(URL_RETRIES):
         try:
-            req = requests.get(url, timeout=URL_TIMEOUT)
+            req = requests.get(url, timeout=timeout)
             res = req.content
             break
         except Exception:

@@ -17,9 +17,9 @@ from lotr import (create_folder, escape_filename, get_content, handle_int,
                   is_int)
 
 
-HALLOFBEORN_CARDS_URL = 'http://hallofbeorn.com/Export/ALeP'
-HALLOFBEORN_SCENARIO_URL = 'http://hallofbeorn.com/Cards/ScenarioDetails/{}'
-HALLOFBEORN_SCENARIOS_URL = 'http://hallofbeorn.com/LotR/Scenarios/'
+HALLOFBEORN_CARDS_URL = 'https://hallofbeorn.com/Export/ALeP'
+HALLOFBEORN_SCENARIO_URL = 'https://hallofbeorn.com/Cards/ScenarioDetails/{}'
+HALLOFBEORN_SCENARIOS_URL = 'https://hallofbeorn.com/LotR/Scenarios/'
 RINGSDB_URL = 'https://ringsdb.com/api/public/cards/'
 HALLOFBEORN_PATH = os.path.join('Output', 'HallOfBeorn')
 OUTPUT_PATH = os.path.join('Output', 'Scripts')
@@ -27,7 +27,10 @@ OUTPUT_SCENARIOS_PATH = os.path.join('Output', 'Scripts', 'Scenarios')
 
 EXCLUDE_SETS = {
     'Revised Core Set', 'Angmar Awakened Hero Expansion',
-    'Angmar Awakened Campaign Expansion', 'The Fellowship of the RIng',
+    'Angmar Awakened Campaign Expansion', 'Dream-chaser Hero Expansion',
+    'Dream-chaser Campaign Expansion', 'Ered Mithrin Hero Expansion',
+    'Ered Mithrin Campaign Expansion', 'The Fellowship of the Ring',
+    'The Two Towers', 'The Return of the King',
     'Two-Player Limited Edition Starter', 'Dwarves of Durin',
     'Elves of Lórien', 'Defenders of Gondor', 'Riders of Rohan',
     'The Massing at Osgiliath', 'The Battle of Lake-town',
@@ -36,12 +39,15 @@ EXCLUDE_SETS = {
     'The Siege of Annúminas', 'Attack on Dol Guldur', 'The Wizard\'s Quest',
     'The Woodland Realm', 'The Mines of Moria', 'Escape from Khazad-dûm',
     'First Age', 'Trial Upon the Marches', 'Among the Outlaws',
-    'The Betrayal of Mîm', 'The Fall of Nargothrond'}
-PROMO_HEROES_SETS = {'The Scouring of the Shire', 'The Nine are Abroad'}
-FUTURE_SETS = {'Blood in the Isen', 'The Nine are Abroad'}
+    'The Betrayal of Mîm', 'The Fall of Nargothrond', 'The Legacy of Fëanor',
+    'Betraying the Falathrim', 'Trial Upon the Maches'}  # remove "Trial Upon the Maches"
+PROMO_HEROES_SETS = {'The Scouring of the Shire', 'The Nine are Abroad',
+                     'The Siege of Erebor'}
+FUTURE_SETS = {}
 
 SCENARIOS_REGEX = r' href="\/LotR\/Scenarios/([^"]+)">'
 
+CUSTOM_TIMEOUT = 120
 USE_HALLOFBEORN_CARDS_CACHE = False
 
 
@@ -60,7 +66,8 @@ def get_hall_data():
             pass
 
     if not data:
-        data = get_content(HALLOFBEORN_CARDS_URL)
+        data = get_content(HALLOFBEORN_CARDS_URL,
+                           custom_timeout=CUSTOM_TIMEOUT)
         data = json.loads(data)
         print('Downloading Hall of Beorn data from the site')
         with open(cache_path, 'w', encoding='utf-8') as fobj:
@@ -119,6 +126,8 @@ def filter_hall_data(data):
             and c['sphere_name'] not in {'Baggins', 'Fellowship'}
             and (c['pack_name'] not in PROMO_HEROES_SETS
                  or c['type_name'] != 'Hero')]
+    print('Found packs: {}'.format(
+        ', '.join(sorted({c['pack_name'] for c in data}))))
     return data
 
 
@@ -505,13 +514,14 @@ def collect_scenarios():
     """ Collect scenarios statistics from Hall of Beorn.
     """
     create_folder(OUTPUT_SCENARIOS_PATH)
-    html_data = get_content(HALLOFBEORN_SCENARIOS_URL).decode('utf-8')
+    html_data = get_content(HALLOFBEORN_SCENARIOS_URL,
+                            custom_timeout=CUSTOM_TIMEOUT).decode('utf-8')
     scenarios = re.findall(SCENARIOS_REGEX, html_data)
     cnt = 0
     for scenario in scenarios:
         scenario = html.unescape(scenario)
         url = HALLOFBEORN_SCENARIO_URL.format(scenario)
-        data = get_content(url)
+        data = get_content(url, custom_timeout=CUSTOM_TIMEOUT)
         try:
             json.loads(data)
         except Exception:  # pylint: disable=W0703
@@ -595,7 +605,7 @@ def create_ringsdb_csv(pack_name, pack_code):
 def get_ringsdb_data():
     """ Get RingsDB data.
     """
-    data = get_content(RINGSDB_URL)
+    data = get_content(RINGSDB_URL, custom_timeout=CUSTOM_TIMEOUT)
     data = json.loads(data)
     return data
 
