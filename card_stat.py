@@ -40,7 +40,7 @@ EXCLUDE_SETS = {
     'The Woodland Realm', 'The Mines of Moria', 'Escape from Khazad-dûm',
     'First Age', 'Trial Upon the Marches', 'Among the Outlaws',
     'The Betrayal of Mîm', 'The Fall of Nargothrond', 'The Legacy of Fëanor',
-    'Betraying the Falathrim', 'Trial Upon the Maches'}  # remove "Trial Upon the Maches"
+    'Betraying the Falathrim'}
 PROMO_HEROES_SETS = {'The Scouring of the Shire', 'The Nine are Abroad',
                      'The Siege of Erebor'}
 FUTURE_SETS = {}
