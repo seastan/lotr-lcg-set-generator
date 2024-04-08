@@ -1747,6 +1747,9 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					if ((cardType == HERO_PROMO) && (lang in bodyRegionHeroPromo)) {
 						s.set('TraitOut-Body-region', bodyRegionHeroPromo[lang]);
 					}
+					else if ((cardType == ENEMY) && (cardName == 'Touque Papotant')) { // workaround for the French card
+						s.set('TraitOut-Body-region', '57,377,299,123');
+					}
 					else if (cardType in bodyRegion) {
 						s.set('TraitOut-Body-region', bodyRegion[cardType]);
 					}
