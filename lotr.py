@@ -8301,12 +8301,14 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
 
         rules_list = [(r[0].strip(),
                        [i.strip() for i in r[1].strip().split(';')
-                        if i.strip()])
+                        if i.strip()] if not r[0].strip().startswith('_DC2_')
+                       else [r[1].strip()])
                       for r in rules_list if len(r) == 2]
         rules = OrderedDict()
         key_count = {}
         for key, value in rules_list:
-            if key.lower() not in {
+            key_lower = key if key.startswith('_DC2_') else key.lower()
+            if not key_lower.startswith('_DC2_') and key_lower not in {
                     'sets', 'encounter sets', 'prefix', 'external xml',
                     'remove', 'second quest deck', 'special',
                     'second special', 'setup', 'active setup',
@@ -8315,17 +8317,27 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                 errors.append('Unknown key "{}"'.format(key))
                 continue
 
-            if key.lower() not in key_count:
-                key_count[key.lower()] = 0
+            if key_lower not in key_count:
+                key_count[key_lower] = 0
             else:
-                key_count[key.lower()] += 1
+                key_count[key_lower] += 1
 
-            if (key.lower() in {'sets', 'encounter sets', 'prefix',
-                                'external xml'} and
-                    key_count.get(key.lower(), 0) > 0):
+            if ((key_lower.startswith('_DC2_') or
+                     key_lower in {'sets', 'encounter sets', 'prefix',
+                                   'external xml'}) and
+                    key_count.get(key_lower, 0) > 0):
                 errors.append('Duplicate key "{}"'.format(key))
+                continue
 
-            rules[(key.lower(), key_count[key.lower()])] = value
+            if key_lower.startswith('_DC2_'):
+                try:
+                    value = json.loads(
+                        value[0].replace('“', '"').replace('”', '"'))
+                except Exception:
+                    errors.append('Incorrect JSON for key "{}"'.format(key))
+                    continue
+
+            rules[(key_lower, key_count[key_lower])] = value
 
         if rules.get(('prefix', 0)):
             quest['prefix'] = rules[('prefix', 0)][0]
@@ -8602,9 +8614,13 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
             else:
                 name_suffix = ''
 
-            res = {'preBuiltDecks': {
-                prefix: {'label': '{}{}'.format(quest_name, name_suffix),
-                         'cards': res}}}
+            content = {'label': '{}{}'.format(quest_name, name_suffix),
+                       'cards': res}
+            for (key, _), value in rules.items():
+                if key.startswith('_DC2_'):
+                    content[re.sub(r'^_DC2_', '', key)] = value
+
+            res = {'preBuiltDecks': {prefix: content}}
             res = json.dumps(res, ensure_ascii=True, indent=4)
             res = re.sub(r'(?<=,)\n                    ([^\n]+)', ' \\1', res)
             res = res.replace('{\n                    ', '{')
