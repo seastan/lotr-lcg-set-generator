@@ -3725,6 +3725,12 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if 'When revealed:' in paragraph:
             errors.append('use "When Revealed:"')
 
+        if 'stage number of the quest' in paragraph:
+            errors.append('use "stage number of the main quest"')
+
+        if 'setup hand' in paragraph or 'opening hand' in paragraph:
+            errors.append('use "starting hand"')
+
         if 'to a minimum of 0' in paragraph:
             errors.append('redundant "to a minimum of 0" statement')
         elif re.search(r'[^\(]to a minimum of ', paragraph,
