@@ -8319,7 +8319,8 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                     'remove', 'second quest deck', 'special',
                     'second special', 'setup', 'active setup',
                     'staging setup', 'player', 'main quest', 'extra1',
-                    'extra2', 'extra3', 'extra4'}:
+                    'extra2', 'extra3', 'extra4', 'extra5', 'extra6', 'extra7',
+                    'extra8'}:
                 errors.append('Unknown key "{}"'.format(key))
                 continue
 
@@ -8434,6 +8435,10 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
             extra2_cards = []
             extra3_cards = []
             extra4_cards = []
+            extra5_cards = []
+            extra6_cards = []
+            extra7_cards = []
+            extra8_cards = []
             for card in cards:
                 if not card[CARD_ENCOUNTER_SET]:
                     other_cards.append(_update_card_for_rules(card.copy()))
@@ -8499,6 +8504,22 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                     mode_errors.extend(_apply_rules(
                         quest_cards + default_setup_cards + encounter_cards +
                         other_cards, extra4_cards, value, key))
+                elif key == 'extra5':
+                    mode_errors.extend(_apply_rules(
+                        quest_cards + default_setup_cards + encounter_cards +
+                        other_cards, extra5_cards, value, key))
+                elif key == 'extra6':
+                    mode_errors.extend(_apply_rules(
+                        quest_cards + default_setup_cards + encounter_cards +
+                        other_cards, extra6_cards, value, key))
+                elif key == 'extra7':
+                    mode_errors.extend(_apply_rules(
+                        quest_cards + default_setup_cards + encounter_cards +
+                        other_cards, extra7_cards, value, key))
+                elif key == 'extra8':
+                    mode_errors.extend(_apply_rules(
+                        quest_cards + default_setup_cards + encounter_cards +
+                        other_cards, extra8_cards, value, key))
 
             setup_cards.extend(default_setup_cards)
 
@@ -8511,7 +8532,8 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
 
             setup_cards_octgn = copy.deepcopy(setup_cards)
             for card in (extra1_cards + extra2_cards + extra3_cards +
-                         extra4_cards):
+                         extra4_cards + extra5_cards + extra6_cards +
+                         extra7_cards + extra8_cards):
                 if card[CARD_TYPE] == 'quest':
                     quest_cards_octgn.append(card)
                 else:
@@ -8521,12 +8543,17 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
             extra2_cards = copy.deepcopy(extra2_cards)
             extra3_cards = copy.deepcopy(extra3_cards)
             extra4_cards = copy.deepcopy(extra4_cards)
+            extra5_cards = copy.deepcopy(extra5_cards)
+            extra6_cards = copy.deepcopy(extra6_cards)
+            extra7_cards = copy.deepcopy(extra7_cards)
+            extra8_cards = copy.deepcopy(extra8_cards)
 
             for section in (
                     quest_cards, second_quest_cards, encounter_cards,
                     special_cards, second_special_cards, setup_cards,
                     staging_setup_cards, active_setup_cards, main_quest_cards,
                     extra1_cards, extra2_cards, extra3_cards, extra4_cards,
+                    extra5_cards, extra6_cards, extra7_cards, extra8_cards,
                     chosen_player_cards, quest_cards_octgn, setup_cards_octgn):
                 _filter_section_cards(section)
                 section.sort(key=lambda card: (
@@ -8609,6 +8636,10 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                     (extra2_cards, 'sharedExtra2'),
                     (extra3_cards, 'sharedExtra3'),
                     (extra4_cards, 'sharedExtra4'),
+                    (extra5_cards, 'sharedExtra5'),
+                    (extra6_cards, 'sharedExtra6'),
+                    (extra7_cards, 'sharedExtra7'),
+                    (extra8_cards, 'sharedExtra8'),
                     (staging_setup_cards, 'sharedStagingArea'),
                     (active_setup_cards, 'sharedActiveLocation')):
                 _append_cards(res, section, group_name)
