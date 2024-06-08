@@ -3596,7 +3596,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
             r'(?<!the )(?:printed )?\[bi\][^\[]+\[\/bi\]'
             r'(?:(?:, | or |, or | and |, and )\[bi\][^\[]+\[\/bi\])* '
             r'traits?\b',
-            re.sub(r'the (?:printed )?\[bi\][^\[]+\[\/bi\]'
+            re.sub(r'(?:the|their) (?:printed )?\[bi\][^\[]+\[\/bi\]'
                    r'(?:(?:, | or |, or | and |, and )\[bi\][^\[]+\[\/bi\])* '
                    r'traits?\b', '', paragraph), flags=re.IGNORECASE):
             errors.append('use "the {Trait} trait"')
