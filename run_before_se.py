@@ -71,7 +71,7 @@ def main(conf=None):  # pylint: disable=R0912,R0914,R0915
             force_reprocessing = True
             count += 1
             save_reprocess_count(count)
-            logging.info('Reprocessing retry #%s)', count)
+            logging.info('Reprocessing retry #%s', count)
 
     if (conf['upload_dragncards'] and
             conf['dragncards_hostname'] and
