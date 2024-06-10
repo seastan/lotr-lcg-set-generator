@@ -16,14 +16,14 @@ if [ ! -f "$BEFORE_LOG_PATH" ]; then
 fi
 ID=`grep -a "$DATE" "$BEFORE_LOG_PATH" | grep -a "Finished: " | tail -n 1 | awk '{print $5}'`
 if [ ! "$ID" ]; then
-  echo "11 No Before script logs for today"
+  echo "11 No Before script logs for $DATE"
   echo "$ERRORS"
   exit
 fi
 BEFORE_LOG=`grep -a "$DATE" "$BEFORE_LOG_PATH" | grep -a -A 10000 "Started: $ID" | grep -a -B 10000 "Finished: $ID"`
 BEFORE_DONE=`echo "$BEFORE_LOG" | grep -a "INFO: Done"`
 if [ ! "$BEFORE_DONE" ]; then
-  echo "12 Before script didn't finish"
+  echo "12 Before script didn't finish on $DATE"
   echo "$ERRORS"
   exit
 fi
@@ -42,14 +42,14 @@ if [ ! -f "$AFTER_LOG_PATH" ]; then
 fi
 ID=`grep -a "$DATE" "$AFTER_LOG_PATH" | grep -a "Finished: " | tail -n 1 | awk '{print $5}'`
 if [ ! "$ID" ]; then
-  echo "13 No After script logs for today"
+  echo "13 No After script logs for $DATE"
   echo "$ERRORS"
   exit
 fi
 AFTER_LOG=`grep -a "$DATE" "$AFTER_LOG_PATH" | grep -a -A 10000 "Started: $ID" | grep -a -B 10000 "Finished: $ID"`
 AFTER_DONE=`echo "$AFTER_LOG" | grep -a "INFO: Done"`
 if [ ! "$AFTER_DONE" ]; then
-  echo "14 After script didn't finish"
+  echo "14 After script didn't finish on $DATE"
   echo "$ERRORS"
   exit
 fi
