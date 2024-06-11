@@ -3739,6 +3739,12 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         elif 'To a minimum of ' in paragraph:
             errors.append('"to a minimum of ..." must be in lower case')
 
+        if re.search(r'^(?:\[b\])?Forced(?:\[\/b\])?:', paragraph):
+            if re.search(r'\b[Mm]ust ',
+                         re.sub(r'\b[Mm]ust [^.]+ or ', '',
+                                re.sub(r'\b[Mm]ust either ', '', paragraph))):
+                errors.append('redundant "must" in Forced effects')
+
         updated_paragraph = re.sub(
             r'\b(?:Valour )?(?:Resource |Planning |Quest |Travel |Encounter '
             r'|Combat |Refresh )?(?:Action):', '', paragraph)
