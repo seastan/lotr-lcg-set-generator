@@ -14829,8 +14829,13 @@ def update_ringsdb(conf, sets):  # pylint: disable=R0914
 
         res = res.content.decode('utf-8').strip()
         if res != 'Done':
+            if '<h3 class="panel-title" id="title">Login</h3>' in res:
+                res = 'Login session expired'
+            else:
+                res = res[:LOG_LIMIT]
+
             raise RingsDBError('Error uploading {} to ringsdb.com: {}'
-                               .format(set_name, res[:LOG_LIMIT]))
+                               .format(set_name, res))
 
         cookies = session.cookies.get_dict()
         _write_ringsdb_cookies(cookies)
