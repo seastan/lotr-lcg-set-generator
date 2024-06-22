@@ -8145,7 +8145,7 @@ def _test_rule(card, rule):  # pylint: disable=R0911,R0912
         qty = min(int(res.groups()[0]), card[CARD_QUANTITY])
         rule = re.sub(r'^[0-9]+ +', '', rule)
     else:
-        qty = card[CARD_QUANTITY]
+        qty = card[CARD_QUANTITY] or 0
 
     parts = [p.strip() for p in str(rule).split('&') if p.strip()]
     for part in parts:
