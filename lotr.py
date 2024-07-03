@@ -3731,6 +3731,10 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if 'setup hand' in paragraph or 'opening hand' in paragraph:
             errors.append('use "starting hand"')
 
+        if ('for the remainder of the game' in paragraph.lower() or
+                'for the rest of the game' in paragraph.lower()):
+            errors.append('use "until the end of the game"')
+
         if 'to a minimum of 0' in paragraph:
             errors.append('redundant "to a minimum of 0" statement')
         elif re.search(r'[^\(]to a minimum of ', paragraph,
