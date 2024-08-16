@@ -2493,8 +2493,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                 if (card[lotr.CARD_DISCORD_CATEGORY] !=
                         channels[name]['category_name']):
                     message = (
-                        'Card {} ({}) has a wrong channel category: {} '
-                        'instead of {}'.format(
+                        'Testing channels: card {} ({}) has a wrong channel '
+                        'category: {} instead of {}'.format(
                             card[lotr.CARD_NAME],
                             card[lotr.CARD_DISCORD_CHANNEL],
                             channels[name]['category_name'],
@@ -2505,7 +2505,8 @@ class MyClient(discord.Client):  # pylint: disable=R0902
                 del channels[name]
             elif not card.get(lotr.CARD_SET_LOCKED):
                 message = (
-                    "Card {} from {} doesn't have the channel {}".format(
+                    "Testing channels: Card {} from {} doesn't have the "
+                    "channel {}".format(
                         card[lotr.CARD_NAME],
                         card[lotr.CARD_SET_NAME],
                         card[lotr.CARD_DISCORD_CHANNEL]))
@@ -2514,7 +2515,7 @@ class MyClient(discord.Client):  # pylint: disable=R0902
 
         if not self.non_card_channels_analyzed:
             if channels:
-                logging.info('Non-card channels detected:')
+                logging.info('Testing channels: non-card channels detected:')
                 non_card_channels = []
                 for channel in channels:
                     non_card_channels.append(
