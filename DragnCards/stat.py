@@ -67,7 +67,8 @@ PACK_ALIAS = {
     'Angmar Awakened': 'The Wastes of Eriador',
     'Dream-chaser': 'Flight of the Stormcaller',
     'Dreamchaser': 'Flight of the Stormcaller',
-    'Dream-chaser Campaign Expansion': 'The City of Corsairs'
+    'Dream-chaser Campaign Expansion': 'The City of Corsairs',
+    'Ered Mithrin Campaign Expansion': 'The Fate of Wilderland'
 }
 
 
