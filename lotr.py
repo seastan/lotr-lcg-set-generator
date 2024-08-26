@@ -429,11 +429,12 @@ CARD_TYPES_ONE_COPY = {T_CAMPAIGN, T_CONTRACT, T_ENCOUNTER_SIDE_QUEST,
                        T_NIGHTMARE, T_OBJECTIVE_HERO, T_PLAYER_OBJECTIVE,
                        T_PRESENTATION, T_QUEST, T_RULES, T_TREASURE}
 CARD_TYPES_THREE_COPIES = {T_ALLY, T_ATTACHMENT, T_EVENT, T_PLAYER_SIDE_QUEST}
-CARD_TYPES_BOON = {T_ALLY, T_ATTACHMENT, T_EVENT, T_OBJECTIVE_ALLY}
+CARD_TYPES_BOON = {T_ALLY, T_ATTACHMENT, T_EVENT, T_OBJECTIVE,
+                   T_OBJECTIVE_ALLY}
 CARD_TYPES_BOON_SPHERE = {T_ATTACHMENT, T_EVENT}
 CARD_SPHERES_BOON = {S_BOON, S_BOONLEADERSHIP, S_BOONLORE, S_BOONSPIRIT,
                      S_BOONTACTICS}
-CARD_TYPES_BURDEN = {T_ENCOUNTER_SIDE_QUEST, T_ENEMY, T_OBJECTIVE,
+CARD_TYPES_BURDEN = {T_ENCOUNTER_SIDE_QUEST, T_ENEMY, T_LOCATION, T_OBJECTIVE,
                      T_SHIP_ENEMY, T_TREACHERY}
 CARD_TYPES_NIGHTMARE = {T_ENCOUNTER_SIDE_QUEST, T_ENEMY, T_LOCATION,
                         T_OBJECTIVE, T_QUEST, T_SHIP_ENEMY, T_TREACHERY}
@@ -4221,11 +4222,12 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_encounter_set is None and
+        if (card_encounter_set is None and  # pylint: disable=R0916
                 ((card_type in CARD_TYPES_ENCOUNTER_SET and
-                  card_sphere != S_BOON) or
+                  (card_sphere != S_BOON or card_type == T_OBJECTIVE)) or
                  (card_type_back in CARD_TYPES_ENCOUNTER_SET and
-                  card_sphere_back != S_BOON))):
+                  (card_sphere_back != S_BOON or
+                   card_type_back == T_OBJECTIVE)))):
             message = 'Missing encounter set for row #{}{}'.format(i, row_info)
             logging.error(message)
             if not card_scratch:
@@ -4234,9 +4236,10 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_encounter_set is not None and  # pylint: disable=R0916
               (card_type in CARD_TYPES_NO_ENCOUNTER_SET
-               or card_sphere == S_BOON) and
+               or (card_sphere == S_BOON and card_type != T_OBJECTIVE)) and
               (card_type_back in CARD_TYPES_NO_ENCOUNTER_SET or
-               card_type_back is None or card_sphere_back == S_BOON)):
+               card_type_back is None or (card_sphere_back == S_BOON and
+                                          card_type_back != T_OBJECTIVE))):
             message = 'Redundant encounter set for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
