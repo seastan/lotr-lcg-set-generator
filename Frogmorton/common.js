@@ -1865,6 +1865,22 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('NameBack-region', parts.join(','));
 				}
 
+				if ((cardType == 'Objective') && (cardSphere == 'Burden')) {
+					s.set('Name-region', '65,35,283,34');
+					s.set('Adventure-region', '65,74,283,15');
+					s.set('Subtype-region', '146,300,124,20');
+					s.set('EncounterSet-portrait-clip-region', '315,260,43,43');
+					s.set('EncounterSetNumber-region', '323,316,26,10');
+					s.set('TraitOut-Body-region', '65,345,283,147');
+					s.set('TraitOut-Trait-region', '65,325,283,20');
+				}
+
+				if ((cardType == 'Treachery') && (cardSphere == 'Burden')) {
+					s.set('Subtype-region', '146,304,124,20');
+					s.set('EncounterSet-portrait-clip-region', '320,266,43,43');
+					s.set('EncounterSetNumber-region', '329,315,26,10');
+				}
+
 				if ((cardType in sphereOptionBodyShape) && s.get('OptionRight') && (s.get('OptionRight') + '').length) {
 					s.set('Sphere-Body-shape', sphereOptionBodyShape[cardType]);
 				}
