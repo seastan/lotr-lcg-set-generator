@@ -816,16 +816,17 @@ DESCRIPTIVE_LAST_TRAITS = {
     'Boar', 'Boar Clan', 'Captain', 'Flame', 'Lieutenant', 'Olog-hai',
     'Raven', 'Raven Clan', 'Uruk-hai', 'Wolf', 'Wolf Clan', 'Wolf-cult'}
 DESCRIPTIVE_TRAITS = {
-    'Advice', 'Archer', 'Assault', 'Attack', 'Besieger', 'Black Speech',
-    'Brigand', 'Burglar', 'Capture', 'Captured', 'Champion', 'Clue',
-    'Corruption', 'Craftsman', 'Cultist', 'Damaged', 'Defense', 'Despair',
-    'Disaster', 'Distracting', 'Doom', 'Enchantment', 'Escape', 'Fear',
-    'Fellowship', 'Food', 'Found', 'Gossip', 'Guardian', 'Hazard', 'Healer',
-    'Hungry', 'Inferno', 'Information', 'Instrument', 'Key', 'Light', 'Master',
-    'Mathom', 'Minstrel', 'Mission', 'Mustering', 'Night', 'Panic', 'Party',
-    'Pillager', 'Pipe', 'Pipeweed', 'Plot', 'Poison', 'Raider', 'Ranger',
-    'Record', 'Refuge', 'Ring-bearer', 'Ruffian', 'Sack', 'Scheme', 'Scout',
-    'Scroll', 'Search', 'Servant', 'Shadow', 'Sharkey', 'Shirriff', 'Sorcerer',
+    'Adventure', 'Advice', 'Archer', 'Assault', 'Attack', 'Besieger',
+    'Black Speech', 'Brigand', 'Burglar', 'Capture', 'Captured', 'Champion',
+    'Clue', 'Corruption', 'Craftsman', 'Cultist', 'Damaged', 'Defense',
+    'Despair', 'Disaster', 'Distracting', 'Doom', 'Enchantment', 'Escape',
+    'Fear', 'Fellowship', 'Food', 'Found', 'Game', 'Gossip', 'Guardian',
+    'Hazard', 'Healer', 'Hungry', 'Inferno', 'Information', 'Instrument',
+    'Key', 'Light', 'Master', 'Mathom', 'Minstrel', 'Mission', 'Mustering',
+    'Night', 'Panic', 'Party', 'Pillager', 'Pipe', 'Pipeweed', 'Plight',
+    'Plot', 'Poison', 'Raider', 'Ranger', 'Record', 'Refuge', 'Riddle',
+    'Ring-bearer', 'Ruffian', 'Sack', 'Scheme', 'Scout', 'Scroll', 'Search',
+    'Servant', 'Service', 'Shadow', 'Sharkey', 'Shirriff', 'Sorcerer',
     'Sorcery', 'Spy', 'Staff', 'Stalking', 'Steward', 'Summoned', 'Summoner',
     'Tantrum', 'Thaurdir', 'Thug', 'Time', 'Tools', 'Traitor', 'Treasure',
     'Villain', 'Warden', 'Warrior', 'Weather', 'Wound'}
@@ -861,11 +862,12 @@ REGION_TRAITS = {
     'Shire', 'Trollshaws', 'Umbar', 'Underworld', 'West Bank',
     'Western Lands', 'Westfarthing', 'Westfold', 'Wilderlands'}
 TYPE_FIRST_TRAITS = {
-    'Artifact', 'Item', 'Suspect', 'Stronghold'}
+    'Artifact', 'Item', 'Suspect', 'Stronghold', 'Stage 1', 'Stage 2',
+    'Stage 3', 'Stage 4', 'Stage 5', 'Stage 6'}
 TYPE_TRAITS = {
-    'Adaptation', 'Armor', 'Assassin', 'Boon', 'Captive', 'Condition', 'Favor',
-    'Gift', 'Morgul', 'Mount', 'Ring', 'Signal', 'Skill', 'Song', 'Spell',
-    'Tale', 'Title', 'Trap', 'Weapon'}
+    'Adaptation', 'Armor', 'Army', 'Assassin', 'Boon', 'Captive', 'Condition',
+    'Favor', 'Gift', 'Morgul', 'Mount', 'Ring', 'Signal', 'Skill', 'Song',
+    'Spell', 'Tale', 'Title', 'Trap', 'Weapon'}
 TRAITS_ORDER = [TYPE_FIRST_TRAITS, TYPE_TRAITS, RACE_FIRST_TRAITS,
                 RACE_TRAITS, REGION_TRAITS, LOCATION_TYPE_FIRST_TRAITS,
                 LOCATION_TYPE_TRAITS, LOCATION_SUBTYPE_TRAITS, NOBLE_TRAITS,
