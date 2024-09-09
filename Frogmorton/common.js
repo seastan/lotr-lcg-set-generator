@@ -485,7 +485,7 @@ subtypeRegion[ALLY] = '146,301,124,20';
 subtypeRegion[ATTACHMENT] = '146,301,124,20';
 subtypeRegion[ENEMY] = '146,302,124,20';
 subtypeRegion[EVENT] = '146,303,124,20';
-subtypeRegion[OBJECTIVE] = '144,308,129,20';
+subtypeRegion[OBJECTIVE] = '144,308,129,20'; // 163,309,95,20 for Burden
 subtypeRegion[OBJECTIVE_ALLY] = '144,308,129,20';
 subtypeRegion[OBJECTIVE_HERO] = '146,309,124,20';
 subtypeRegion[OBJECTIVE_LOCATION] = '146,309,124,20';
@@ -1863,6 +1863,10 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					let parts = s.get('NameBack-region').split(',');
 					parts[1] = (parseInt(parts[1]) + 2).toString();
 					s.set('NameBack-region', parts.join(','));
+				}
+
+				if ((cardType == 'Objective') && (cardSphere == 'Burden')) {
+					s.set('Subtype-region', '163,309,95,20');
 				}
 
 				if ((cardType == 'Treachery') && (cardSphere == 'Burden')) {
