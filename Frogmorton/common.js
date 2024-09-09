@@ -1870,9 +1870,8 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				}
 
 				if ((cardType == 'Treachery') && (cardSphere == 'Burden')) {
-					s.set('Subtype-region', '146,304,124,20');
-					s.set('EncounterSet-portrait-clip-region', '320,266,43,43');
-					s.set('EncounterSetNumber-region', '329,315,26,10');
+					s.set('Subtype-region', '161,305,97,20');
+					s.set('Type-region', '136,506,141,20');
 				}
 
 				if ((cardType in sphereOptionBodyShape) && s.get('OptionRight') && (s.get('OptionRight') + '').length) {
