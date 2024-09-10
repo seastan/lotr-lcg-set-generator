@@ -8580,6 +8580,8 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                 section.sort(key=lambda card: (
                     card[CARD_TYPE] != 'rules',
                     card[CARD_TYPE] not in {'campaign', 'nightmare'},
+                    card[CARD_SPHERE] != 'boon',
+                    card[CARD_SPHERE] != 'burden',
                     card[CARD_TYPE],
                     card[CARD_TYPE] == 'quest' and (card[CARD_COST] or 0) or 0,
                     card[CARD_SET_NAME],
