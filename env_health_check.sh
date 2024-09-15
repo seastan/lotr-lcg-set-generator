@@ -7,7 +7,13 @@ REMOTE_UUID_FILE="env_uuid_remote.txt"
 MAX_DIFF=43200
 
 if [ -f "$ENV_FILE" ]; then
-  let "DIFF = `date +%s` - `cat $ENV_FILE`"
+  CONTENT=`cat $ENV_FILE`
+  if [ ! "$CONTENT" ]; then
+    sleep 2
+    CONTENT=`cat $ENV_FILE`
+  fi
+
+  let "DIFF = `date +%s` - $CONTENT"
 
   if (( $DIFF > $MAX_DIFF )); then
     if [ -f "$REMOTE_UUID_FILE" ]; then
