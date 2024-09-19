@@ -3347,6 +3347,11 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                      flags=re.IGNORECASE):
             errors.append('use "(Limit 3 times per _.)" format')
 
+        if re.search(r'limit [0-9]+(?:\[pp\])? times per',
+                     re.sub(r'\(Limit [0-9]+(?:\[pp\])? times per .+\.\)”?$',
+                            '', paragraph), flags=re.IGNORECASE):
+            errors.append('use "(Limit _ times per _.)" format')
+
         if ' to travel here' in paragraph:
             errors.append('redundant "to travel here" statement')
 
