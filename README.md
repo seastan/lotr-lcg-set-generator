@@ -566,6 +566,7 @@ List of available sphere values:
 - `Back` (`Rules` only)
 - `Cave` (`Encounter Side Quest` only)
 - `NoIcon` (`Objective` only)
+- `Ring` (`Objective` only)
 - `NoProgress` (`Encounter Side Quest` only)
 - `NoStat` (`Enemy` only)
 - `Region` (`Encounter Side Quest` only)

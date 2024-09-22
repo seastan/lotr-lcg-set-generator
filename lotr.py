@@ -216,6 +216,7 @@ S_NOICON = 'NoIcon'
 S_NOPROGRESS = 'NoProgress'
 S_NOSTAT = 'NoStat'
 S_REGION = 'Region'
+S_RING = 'Ring'
 S_SETUP = 'Setup'
 S_SMALLTEXTAREA = 'SmallTextArea'
 S_SPIRIT = 'Spirit'
@@ -330,13 +331,13 @@ CARD_TYPES_ENCOUNTER_SET_NUMBER = {T_ENCOUNTER_SIDE_QUEST, T_ENEMY, T_LOCATION,
                                    T_OBJECTIVE, T_OBJECTIVE_ALLY,
                                    T_OBJECTIVE_HERO, T_OBJECTIVE_LOCATION,
                                    T_SHIP_ENEMY, T_SHIP_OBJECTIVE, T_TREACHERY}
-CARD_SPHERES_NO_ENCOUNTER_SET_NUMBER = {S_BOON, S_BURDEN, S_NOICON}
+CARD_SPHERES_NO_ENCOUNTER_SET_NUMBER = {S_BOON, S_BURDEN, S_NOICON, S_RING}
 CARD_TYPES_ENCOUNTER_SET_ICON = {T_CAMPAIGN, T_ENCOUNTER_SIDE_QUEST, T_ENEMY,
                                  T_LOCATION, T_NIGHTMARE, T_OBJECTIVE,
                                  T_OBJECTIVE_ALLY, T_OBJECTIVE_HERO,
                                  T_OBJECTIVE_LOCATION, T_QUEST, T_SHIP_ENEMY,
                                  T_SHIP_OBJECTIVE, T_TREACHERY, T_TREASURE}
-CARD_SPHERES_NO_ENCOUNTER_SET_ICON = {S_BOON, S_NOICON}
+CARD_SPHERES_NO_ENCOUNTER_SET_ICON = {S_BOON, S_NOICON, S_RING}
 CARD_TYPES_FLAGS = {F_NOTRAITS:
                     {T_ALLY, T_ENEMY, T_HERO, T_LOCATION, T_OBJECTIVE_ALLY,
                      T_OBJECTIVE_HERO, T_OBJECTIVE_LOCATION, T_SHIP_ENEMY,
@@ -411,12 +412,12 @@ CARD_TYPES_NO_ARTWORK_BACK = {T_CAMPAIGN, T_NIGHTMARE, T_PRESENTATION, T_RULES}
 CARD_TYPES_EASY_MODE = {T_ENCOUNTER_SIDE_QUEST, T_ENEMY, T_LOCATION,
                         T_SHIP_ENEMY, T_TREACHERY}
 CARD_SPHERES_NO_EASY_MODE = {S_BOON, S_BURDEN, S_CAVE, S_NOICON, S_NOSTAT,
-                             S_REGION}
+                             S_REGION, S_RING}
 CARD_TYPES_ADDITIONAL_ENCOUNTER_SETS = {T_QUEST}
 CARD_TYPES_ADVENTURE = {T_CAMPAIGN, T_OBJECTIVE, T_OBJECTIVE_ALLY,
                         T_OBJECTIVE_HERO, T_OBJECTIVE_LOCATION,
                         T_QUEST, T_SHIP_OBJECTIVE}
-CARD_SPHERES_NO_ADVENTURE = {S_NOICON}
+CARD_SPHERES_NO_ADVENTURE = {S_NOICON, S_RING}
 CARD_TYPES_SUBTITLE = {T_CAMPAIGN, T_OBJECTIVE, T_OBJECTIVE_ALLY,
                        T_OBJECTIVE_HERO, T_OBJECTIVE_LOCATION,
                        T_QUEST, T_SHIP_OBJECTIVE}
@@ -450,7 +451,7 @@ FLAGS = {F_ADDITIONALCOPIES, F_IGNORENAME, F_IGNORERULES, F_NOARTIST,
 RING_FLAGS = {F_BLUERING, F_GREENRING, F_REDRING}
 SPHERES = set()
 SPHERES_CAMPAIGN = {S_SETUP}
-SPHERES_OBJECTIVE = {S_NOICON}
+SPHERES_OBJECTIVE = {S_NOICON, S_RING}
 SPHERES_PLAYER = {S_BAGGINS, S_FELLOWSHIP, S_LEADERSHIP, S_LORE, S_NEUTRAL,
                   S_SPIRIT, S_TACTICS}
 SPHERES_PRESENTATION = {'Blue', 'Green', 'Purple', 'Red', 'Brown', 'Yellow',
@@ -7746,7 +7747,7 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
         elif card_type in {T_PRESENTATION, T_RULES}:
             value = ''
         elif value in {S_CAVE, S_NOICON, S_NOPROGRESS, S_NOSTAT, S_REGION,
-                       S_SMALLTEXTAREA, S_UPGRADED}:
+                       S_RING, S_SMALLTEXTAREA, S_UPGRADED}:
             value = ''
         elif card_type == T_CAMPAIGN:
             value = str(value).upper() if value else 'CAMPAIGN'
@@ -9150,7 +9151,7 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
         if row[CARD_TYPE] == T_TREASURE:
             sphere = S_NEUTRAL
         elif row[CARD_SPHERE] in {S_CAVE, S_NOICON, S_NOPROGRESS, S_NOSTAT,
-                                  S_REGION, S_SETUP, S_SMALLTEXTAREA,
+                                  S_REGION, S_RING, S_SETUP, S_SMALLTEXTAREA,
                                   S_UPGRADED}:
             sphere = ''
         else:
@@ -9193,7 +9194,7 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
                 sphere = S_NEUTRAL
             elif row[BACK_PREFIX + CARD_SPHERE] in {
                     S_CAVE, S_NOICON, S_NOPROGRESS, S_NOSTAT, S_REGION,
-                    S_SETUP, S_SMALLTEXTAREA, S_UPGRADED}:
+                    S_RING, S_SETUP, S_SMALLTEXTAREA, S_UPGRADED}:
                 sphere = ''
             else:
                 sphere = row[BACK_PREFIX + CARD_SPHERE]
@@ -9399,7 +9400,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
         elif card_type in {T_CAMPAIGN, T_PRESENTATION, T_RULES}:
             sphere = 'None'
         elif row[CARD_SPHERE] in {S_CAVE, S_NIGHTMARE, S_NOICON, S_NOPROGRESS,
-                                  S_NOSTAT, S_REGION, S_SMALLTEXTAREA,
+                                  S_NOSTAT, S_REGION, S_RING, S_SMALLTEXTAREA,
                                   S_UPGRADED}:
             sphere = 'None'
         elif row[CARD_SPHERE] is not None:
