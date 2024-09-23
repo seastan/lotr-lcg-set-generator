@@ -1017,7 +1017,7 @@ register(
 register(
     'python_prepare_pdf_back',
     'Prepare a back image for PDF document',
-    '1. Rotate a landscape image. 2. Remove redundant bleed margins. 3. Export PNG.',
+    '1. Rotate a landscape image. 2. Remove bleed margins. 3. Export PNG.',
     'A.R.',
     'A.R.',
     '2020',
@@ -1035,7 +1035,7 @@ register(
 register(
     'python_prepare_pdf_back_folder',
     'Prepare a folder of back images for PDF document',
-    '1. Rotate a landscape image. 2. Remove redundant bleed margins. 3. Export PNG.',
+    '1. Rotate a landscape image. 2. Remove bleed margins. 3. Export PNG.',
     'A.R.',
     'A.R.',
     '2020',
