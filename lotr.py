@@ -2391,7 +2391,7 @@ def _clean_value(value):  # pylint: disable=R0915
     return value
 
 
-def _get_regex(value):
+def get_regex(value):
     """ Get a regex to match the string value.
     """
     value_regex = re.escape(value)
@@ -2407,7 +2407,7 @@ def _get_regex(value):
 def get_similar_names_regex(value, card_names, scratch_card_names=None):
     """ Get similar card names regex.
     """
-    value_regex = _get_regex(value)
+    value_regex = get_regex(value)
 
     res = {n for n in card_names if re.search(value_regex, n) and value != n}
     if scratch_card_names:
@@ -2417,7 +2417,7 @@ def get_similar_names_regex(value, card_names, scratch_card_names=None):
 
     names = []
     for name in res:
-        name_regex = _get_regex(name)
+        name_regex = get_regex(name)
         name_regex = r'(?<!\[bi\])' + name_regex
         names.append(name_regex)
 
@@ -2591,7 +2591,7 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                 not (row[CARD_FLAGS] and
                      F_IGNORENAME in extract_flags(
                          row[CARD_FLAGS], conf['ignore_ignore_flags']))):
-            card_name_regex = _get_regex(card_name)
+            card_name_regex = get_regex(card_name)
             card_name_regex = r'(?<!\[bi\])\b' + card_name_regex
         else:
             card_name_regex = None
@@ -2604,7 +2604,7 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                      F_IGNORENAME in
                      extract_flags(row[BACK_PREFIX + CARD_FLAGS],
                                    conf['ignore_ignore_flags']))):
-            card_name_regex_back = _get_regex(card_name_back)
+            card_name_regex_back = get_regex(card_name_back)
             card_name_regex_back = r'(?<!\[bi\])\b' + card_name_regex_back
         else:
             card_name_regex_back = None
@@ -3884,7 +3884,7 @@ def _replace_numbers(value, lang=L_ENGLISH):
     for key, translations in NUMBER_TRANSLATIONS.items():
         translation = translations.get(lang, [])
         for word in translation:
-            value = re.sub(_get_regex(word), key, value, flags=re.IGNORECASE)
+            value = re.sub(get_regex(word), key, value, flags=re.IGNORECASE)
 
     return value
 
@@ -6788,7 +6788,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
                         value_translated = value
                         for term_english, lang_dict in TRANSLATION_MATCH:
-                            regex_english = _get_regex(term_english)
+                            regex_english = get_regex(term_english)
                             regex_translated = lang_dict.get(lang)
                             if not regex_translated:
                                 continue

@@ -1766,9 +1766,9 @@ def detect_names(text, card_type):  # pylint: disable=R0912
     return names
 
 
-def verify_known_name(pos, name, card_type, all_card_names,  # pylint: disable=R0911,R0912,R0913
-                      all_set_and_quest_names, all_encounter_set_names):
-    """ Check whether the name is known or not.
+def get_all_names(card_type, all_card_names, all_set_and_quest_names,
+                  all_encounter_set_names):
+    """ Collect all known names that can be mentioned on the card.
     """
     all_names = set(all_card_names)
     if card_type == lotr.T_RULES:
@@ -1783,6 +1783,15 @@ def verify_known_name(pos, name, card_type, all_card_names,  # pylint: disable=R
     elif card_type == lotr.T_QUEST:
         all_names.update(all_encounter_set_names)
 
+    return all_names
+
+
+def verify_known_name(pos, name, card_type, all_card_names,  # pylint: disable=R0911,R0912,R0913
+                      all_set_and_quest_names, all_encounter_set_names):
+    """ Check whether the name is known or not.
+    """
+    all_names = get_all_names(card_type, all_card_names,
+                              all_set_and_quest_names, all_encounter_set_names)
     if name in all_names:
         return True
 
@@ -1885,7 +1894,8 @@ def get_unknown_names(text, field, card, res, all_card_names,  # pylint: disable
 
 
 def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disable=R0912,R0913,R0914,R0915
-                         all_card_names, all_traits):
+                         all_card_names, all_set_and_quest_names,
+                         all_encounter_set_names, all_traits):
     """ Detect text rules precedents.
     """
     text = re.sub(r'(^|\n)(?:\[[^\]]+\])*\[i\](?!\[b\]Rumor\[\/b\]|Example:)'
@@ -1894,6 +1904,9 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
     paragraphs = [p.strip() for p in re.split(r'\n{2,}', text) if p.strip()]
     if not paragraphs:
         return
+
+    all_names = get_all_names(card[lotr.CARD_TYPE], all_card_names,
+                              all_set_and_quest_names, all_encounter_set_names)
 
     for paragraph in paragraphs:
         paragraph = paragraph.replace('\n', ' ')
@@ -2053,15 +2066,24 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
                     'row': card[lotr.ROW_COLUMN]}
             res.setdefault('Use of singular "any"', []).append(data)
 
-        if re.search(r'\b(?:one|two|three|four|five|six)\b', paragraph,
-                     flags=re.IGNORECASE):
-            data = {'name': card[lotr.CARD_NAME],
-                    'field': field,
-                    'text': re.sub(r'\b(one|two|three|four|five|six)\b',
-                                   '__**\\1**__', paragraph,
-                                   flags=re.IGNORECASE),
-                    'row': card[lotr.ROW_COLUMN]}
-            res.setdefault('Use of numerals', []).append(data)
+        if re.search(
+                r'\b(?:one|two|three|four|five|six|seven|eight|nine|ten)\b',
+                paragraph, flags=re.IGNORECASE):
+            temp_paragraph = paragraph
+            for name in all_names:
+                temp_paragraph = re.sub(lotr.get_regex(name), 'Name',
+                                        temp_paragraph)
+
+            if re.search(
+                    r'\b(?:one|two|three|four|five|six|seven|eight|nine|ten)\b',
+                    temp_paragraph, flags=re.IGNORECASE):
+                data = {'name': card[lotr.CARD_NAME],
+                        'field': field,
+                        'text': re.sub(
+                            r'\b(one|two|three|four|five|six|seven|eight|nine|ten)\b',
+                            '__**\\1**__', paragraph, flags=re.IGNORECASE),
+                        'row': card[lotr.ROW_COLUMN]}
+                res.setdefault('Use of numerals', []).append(data)
 
         if re.search(r'\b(?:a|an)\b', paragraph, flags=re.IGNORECASE):
             data = {'name': card[lotr.CARD_NAME],
@@ -2157,6 +2179,8 @@ def get_rules_precedents(text, field, card, res, keywords_regex,  # pylint: disa
                                paragraph)
             paragraph = re.sub(r'^\[i\]\[b\]Rumor\[\/b\]:', '\\*\\*\\*',
                                paragraph)
+            paragraph = re.sub(r'[0-9\.]:', '\\*\\*\\*', paragraph)
+            paragraph = re.sub(r'\b(?:Q|A):', '\\*\\*\\*', paragraph)
             if re.search(r': [A-Z]',
                          paragraph.replace(card[lotr.CARD_NAME], '\\*\\*\\*')):
                 data = {'name': card[lotr.CARD_NAME],
@@ -5896,24 +5920,32 @@ Targets removed.
             if card.get(lotr.CARD_TEXT) is not None:
                 get_rules_precedents(
                     card[lotr.CARD_TEXT], lotr.CARD_TEXT, card, res,
-                    keywords_regex, data['card_names'], data['traits'])
+                    keywords_regex, data['card_names'],
+                    data['set_and_quest_names'], data['encounter_set_names'],
+                    data['traits'])
 
             if card.get(lotr.BACK_PREFIX + lotr.CARD_TEXT) is not None:
                 get_rules_precedents(
                     card[lotr.BACK_PREFIX + lotr.CARD_TEXT],
-                         lotr.BACK_PREFIX + lotr.CARD_TEXT, card, res,
-                         keywords_regex, data['card_names'], data['traits'])
+                    lotr.BACK_PREFIX + lotr.CARD_TEXT, card, res,
+                    keywords_regex, data['card_names'],
+                    data['set_and_quest_names'], data['encounter_set_names'],
+                    data['traits'])
 
             if card.get(lotr.CARD_SHADOW) is not None:
                 get_rules_precedents(
                     card[lotr.CARD_SHADOW], lotr.CARD_SHADOW, card, res,
-                    keywords_regex, data['card_names'], data['traits'])
+                    keywords_regex, data['card_names'],
+                    data['set_and_quest_names'], data['encounter_set_names'],
+                    data['traits'])
 
             if card.get(lotr.BACK_PREFIX + lotr.CARD_SHADOW) is not None:
                 get_rules_precedents(
                     card[lotr.BACK_PREFIX + lotr.CARD_SHADOW],
-                         lotr.BACK_PREFIX + lotr.CARD_SHADOW, card, res,
-                         keywords_regex, data['card_names'], data['traits'])
+                    lotr.BACK_PREFIX + lotr.CARD_SHADOW, card, res,
+                    keywords_regex, data['card_names'],
+                    data['set_and_quest_names'], data['encounter_set_names'],
+                    data['traits'])
 
         output = []
         for rule, card_list in res.items():
