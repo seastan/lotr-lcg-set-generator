@@ -3772,6 +3772,12 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                 paragraph):
             errors.append('reduce "amount" not "damage"')
 
+        if re.search(r'\bexchange', paragraph, flags=re.IGNORECASE):
+            errors.append('use "switch" not "exchange"')
+
+        if re.search(r'\bswap', paragraph, flags=re.IGNORECASE):
+            errors.append('use "switch" not "swap"')
+
         updated_paragraph = re.sub(
             r'\b(?:Valour )?(?:Resource |Planning |Quest |Travel |Encounter '
             r'|Combat |Refresh )?(?:Action):', '', paragraph)
