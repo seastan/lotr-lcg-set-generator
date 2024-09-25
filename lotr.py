@@ -3764,6 +3764,14 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                                 re.sub(r'\b[Mm]ust either ', '', paragraph))):
                 errors.append('unnecessary "must" in Forced effects')
 
+        if re.search(r' (?:takes?|dealt)[^.]*? damage[^.]*? reduce',
+                     paragraph.replace('amount of damage', 'amount')):
+            errors.append('use "amount of damage" not "damage"')
+        elif re.search(
+                r' (?:takes?|dealt)[^.]*? damage[^.]*? reduce[^.]*? damage',
+                paragraph):
+            errors.append('reduce "amount" not "damage"')
+
         updated_paragraph = re.sub(
             r'\b(?:Valour )?(?:Resource |Planning |Quest |Travel |Encounter '
             r'|Combat |Refresh )?(?:Action):', '', paragraph)
