@@ -10854,7 +10854,7 @@ def calculate_hashes(set_id, set_name, lang):  # pylint: disable=R0912,R0914
 def verify_images(conf):
     """ Verify images from Google Drive.
     """
-    logging.info('Verifying image from Google Drive...')
+    logging.info('Verifying images from Google Drive...')
     logging.info('')
     timestamp = time.time()
 
