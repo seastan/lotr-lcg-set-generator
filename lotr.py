@@ -3778,6 +3778,15 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if re.search(r'\bswap', paragraph, flags=re.IGNORECASE):
             errors.append('use "switch" not "swap"')
 
+        if ' eliminated.' in paragraph or ' eliminated,' in paragraph:
+            errors.append('use "eliminated from the game"')
+
+        if re.search(r'\bsearch[^.]*? encounter deck or discard pile',
+                     paragraph, flags=re.IGNORECASE):
+            errors.append(
+                'use "encounter deck and discard pile" not '
+                '"encounter deck or discard pile"')
+
         updated_paragraph = re.sub(
             r'\b(?:Valour )?(?:Resource |Planning |Quest |Travel |Encounter '
             r'|Combat |Refresh )?(?:Action):', '', paragraph)
