@@ -98,8 +98,11 @@ If the artwork folder is a shortcut, click on the shortcut and copy the actual p
 `G:\.shortcut-targets-by-id\1FY4jVevupiOL48eYOPCPAWqVZq3pQKvO\<folder name>`.  Use that path in the configuration file
 described below.  Right-click on the folder, then click `Offline access` and `Available offline`.
 
+If you plan to use the latest stable data when a sanity check fails, create a shortcut for the stable data folder on Google Drive
+and use its local path in the configuration (repeat the instruction above).
+
 5. If you plan to upload to Google Drive any card outputs or log files, you might need to create shortcuts for more
-existing Google Drive folders and use their local paths in the configuration (repeat the instructions above).
+existing Google Drive folders and use their local paths in the configuration (repeat the instruction above).
 
 6. Install the tool and the plugin.  Follow these steps:
 
