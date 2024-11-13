@@ -491,7 +491,7 @@ subtypeRegion[OBJECTIVE_HERO] = '146,309,124,20';
 subtypeRegion[OBJECTIVE_LOCATION] = '146,309,124,20';
 subtypeRegion[SHIP_ENEMY] = '146,302,124,20';
 subtypeRegion[SHIP_OBJECTIVE] = '146,309,124,20';
-subtypeRegion[TREACHERY] = '146,305,124,20';
+subtypeRegion[TREACHERY] = '161,304,97,20';
 
 var hitPointsRegion = {};
 hitPointsRegion[ALLY] = '66,269,58,40';
@@ -601,7 +601,7 @@ encounterPortraitRegion[QUEST] = '474,185,43,43';
 encounterPortraitRegion[REGION] = '37,341,35,35';
 encounterPortraitRegion[SHIP_ENEMY] = '321,265,43,43';
 encounterPortraitRegion[SHIP_OBJECTIVE] = '315,268,43,43';
-encounterPortraitRegion[TREACHERY] = '320,268,43,43';
+encounterPortraitRegion[TREACHERY] = '321,266,43,43';
 encounterPortraitRegion[TREASURE] = '327,478,43,43';
 
 var encounterNumberRegion = {};
@@ -618,7 +618,7 @@ encounterNumberRegion[OBJECTIVE_LOCATION] = '323,316,26,10';
 encounterNumberRegion[REGION] = '41,332,26,10';
 encounterNumberRegion[SHIP_ENEMY] = '329,313,26,10';
 encounterNumberRegion[SHIP_OBJECTIVE] = '323,316,26,10';
-encounterNumberRegion[TREACHERY] = '329,317,26,10';
+encounterNumberRegion[TREACHERY] = '330,314,26,10';
 
 var optionLeftRegion = {};
 optionLeftRegion[ENEMY] = '43,490,48,24';
@@ -1871,11 +1871,6 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 
 				if ((cardType == 'Objective') && (cardSphere == 'Burden')) {
 					s.set('Subtype-region', '163,309,95,20');
-				}
-
-				if ((cardType == 'Treachery') && (cardSphere == 'Burden')) {
-					s.set('Subtype-region', '161,305,97,20');
-					s.set('Type-region', '136,506,141,20');
 				}
 
 				if ((cardType in sphereOptionBodyShape) && s.get('OptionRight') && (s.get('OptionRight') + '').length) {
