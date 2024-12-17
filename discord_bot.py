@@ -1704,6 +1704,7 @@ def detect_names(text, card_type):  # pylint: disable=R0912
     text = re.sub(r'\[red\][^\[]+\[\/red\]', ' [] ', text)
     text = re.sub(r'\[lotrheader[^\[]+\[\/lotrheader\]', ' [] ', text)
     text = re.sub(r'\[bi\][^\[]+\[\/bi\]', ' text ', text)
+    text = re.sub(r'\[\/?b\]', ' [] ', text)
     text = re.sub(r'\[[^\]]+\]', ' separator ', text)
     text = re.sub(r'\.”|[.:()]', ' [] ', text)
     text = re.sub(r'(?![“”!?…,’\- \[\]]|\w).', ' unknown ', text)

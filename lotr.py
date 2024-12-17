@@ -120,6 +120,7 @@ CARD_LAST_DESIGN_CHANGE_DATE = 'Last Design Change Date'
 
 CARD_SCRATCH = '_Scratch'
 CARD_SET_NAME = '_Set Name'
+CARD_SET_COLLECTION_ICON = '_Set Collection Icon'
 CARD_SET_RINGSDB_CODE = '_Set RingsDB Code'
 CARD_SET_HOB_CODE = '_Set HoB Code'
 CARD_SET_LOCKED = '_Locked'
@@ -143,7 +144,8 @@ DISCORD_IGNORE_COLUMNS = {
     CARD_PORTRAIT_SHADOW, BACK_PREFIX + CARD_PANX, BACK_PREFIX + CARD_PANY,
     BACK_PREFIX + CARD_SCALE, BACK_PREFIX + CARD_PORTRAIT_SHADOW, CARD_SIDE_B,
     CARD_SELECTED, CARD_CHANGED, CARD_SCRATCH,
-    CARD_ENCOUNTER_SET_NUMBER_START, CARD_ENCOUNTER_SET_TOTAL
+    CARD_ENCOUNTER_SET_NUMBER_START, CARD_ENCOUNTER_SET_TOTAL,
+    CARD_SET_COLLECTION_ICON
 }
 DISCORD_IGNORE_CHANGES_COLUMNS = {
     CARD_SET, CARD_NUMBER, CARD_SET_NAME, CARD_SET_RINGSDB_CODE,
@@ -971,6 +973,7 @@ ALLOWED_FIRST_WORDS = {
     'This',
     'Those',
     'Treat',
+    'Trigger',
     'Turn',
     'Until',
     'When',
@@ -982,7 +985,7 @@ COMMON_ACCENTS = {'Annuminas', 'Cuarthol', 'Din', 'Druadan', 'Druedain',
                   'Dum', 'dum', 'Dunedain', 'Iarion', 'Lorien', 'Mumakil',
                   'Nazgul', 'Nin', 'Numenor', 'Rhun'}
 COMMON_KEYWORDS = {'Devoted', 'Doomed', 'Encounter', 'Guarded', 'Ranged',
-                   'Restricted', 'Secrecy', 'Sentinel', 'Surge'}
+                   'Restricted', 'Secrecy', 'Sentinel', 'Surge', 'Turncoat'}
 LOWERCASE_WORDS = {
     'a', 'an', 'the', 'and', 'as', 'at', 'but', 'by', 'for', 'from', 'if',
     'in', 'into', 'nor', 'of', 'on', 'onto', 'or', 'out', 'so', 'than',
@@ -2259,6 +2262,10 @@ def _extract_all_set_and_quest_names(data):
                 ALL_SET_AND_QUEST_NAMES.add(re.sub(r'^ALeP - ', '',
                                                    row[CARD_SET_NAME]))
 
+            if row[CARD_SET_COLLECTION_ICON]:
+                ALL_SET_AND_QUEST_NAMES.add(
+                    re.sub(r'^ALeP - ', '', row[CARD_SET_COLLECTION_ICON]))
+
             if (row[CARD_ADVENTURE] and
                     row[CARD_ADVENTURE] not in {'[space]', '[nobr]'} and
                     row[CARD_TYPE] != T_CAMPAIGN):
@@ -2843,6 +2850,8 @@ def _update_data(data):
     """
     for row in data:
         row[CARD_SET_NAME] = SETS.get(row[CARD_SET], {}).get(SET_NAME, '')
+        row[CARD_SET_COLLECTION_ICON] = SETS.get(
+            row[CARD_SET], {}).get(SET_COLLECTION_ICON, '')
         row[CARD_SET_HOB_CODE] = SETS.get(row[CARD_SET],
                                           {}).get(SET_HOB_CODE, '')
         set_ringsdb_code = SETS.get(row[CARD_SET],
