@@ -10533,10 +10533,17 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
         if properties:
             properties[-1].tail = '{}  '.format(properties[-1].tail)
 
-        image_id = '{}_{}'.format(card.attrib['id'], 'A')
+        image_id = '{}_{}_{}'.format(card.attrib['id'], 'A', lang)
         if image_id in images:
-            filename = images[image_id][0]
+            default_image_id = '{}_{}'.format(card.attrib['id'], 'A')
+            if default_image_id in images:
+                images[default_image_id][1] = True
+        else:
+            image_id = '{}_{}'.format(card.attrib['id'], 'A')
+
+        if image_id in images:
             images[image_id][1] = True
+            filename = images[image_id][0]
             prop = _get_property(card, 'Artwork')
             prop.set('value', os.path.split(filename)[-1])
             prop.tail = '\n      '
@@ -10739,8 +10746,7 @@ def update_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R09
         if is_used:
             continue
 
-        parts = filename.split('_')
-        if len(parts) == 3 and parts[2] != lang:
+        if filename.split('.')[-2] in conf['all_languages']:
             continue
 
         logging.error('Unused image detected: %s', filename)
