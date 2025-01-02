@@ -2745,6 +2745,9 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                 else:
                     value = parts[0]
 
+                value = re.sub(r'\n?\[center\]\n', '\n[center]', value)
+                value = re.sub(r'\n?\[right\]\n', '\n[right]', value)
+
             if key in {CARD_SHADOW, BACK_PREFIX + CARD_SHADOW}:
                 field = 'shadow' if key == CARD_SHADOW else 'shadow back'
                 if (lang == L_ENGLISH and
