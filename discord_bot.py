@@ -79,6 +79,7 @@ WATCH_CHANGES_SLEEP_TIME = 5
 WATCH_SANITY_CHECK_SLEEP_TIME = 120
 CHECK_USER_CHANGES_SLEEP_TIME = 86400
 
+IMAGE_MIN_SIZE = 1024
 ARTWORK_JPG_MIN_SIZE = 250000
 ARTWORK_PNG_MIN_SIZE = 1000000
 
@@ -4371,6 +4372,10 @@ Targets removed.
                 filetype = 'jpg'
 
         content = await get_attachment_content(message)
+        if len(content) < IMAGE_MIN_SIZE:
+            return ('either the image file is corrupted or the download '
+                    'process failed')
+
         root_folder = os.path.join(artwork_destination_path, KEEP_FOLDER)
         folder = os.path.join(root_folder, card_id)
         filename = '{}_{}.{}'.format(uuid.uuid4(), artist, filetype)
@@ -4463,6 +4468,10 @@ Targets removed.
                 filetype = 'jpg'
 
         content = await get_attachment_content(message)
+        if len(content) < IMAGE_MIN_SIZE:
+            return ('either the image file is corrupted or the download '
+                    'process failed')
+
         folder = os.path.join(artwork_destination_path, card[lotr.CARD_SET])
         filename = '{}_{}_{}_Artist_{}.{}'.format(
             card[lotr.CARD_ID],
@@ -4627,6 +4636,10 @@ Targets removed.
         filename = filename.replace(' ', '_')
 
         content = await get_attachment_content(message)
+        if len(content) < IMAGE_MIN_SIZE:
+            return ('either the image file is corrupted or the download '
+                    'process failed')
+
         folder = os.path.join(artwork_destination_path, SCRATCH_FOLDER)
         path = os.path.join(folder, filename)
 
