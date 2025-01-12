@@ -4799,7 +4799,11 @@ Targets removed.
                     not filename.endswith('.jpg')):
                 continue
 
-            parts = '.'.join(filename.split('.')[:-1]).split(
+            parts = filename.split('.')
+            if parts[-2] in lotr.LANGUAGES:
+                continue
+
+            parts = '.'.join(parts[:-1]).split(
                 '_Artist_', maxsplit=1)
             if len(parts) != 2:
                 continue
