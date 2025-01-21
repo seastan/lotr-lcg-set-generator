@@ -357,7 +357,7 @@ Additional steps:
   - `*/2 * * * *   <path>/monitor_discord_changes.sh >> <path>/cron.log 2>&1`
   - `15 0 * * *    <path>/monitor_discord_log.sh >> <path>/cron.log 2>&1`
   - `29 4 * * *    <path>/monitor_images_upload.sh >> <path>/cron.log 2>&1`
-  - `36 9 * * *    <path>/monitor_remote_pipeline.sh >> <path>/cron.log 2>&1`
+  - `36 8 * * *    <path>/monitor_remote_pipeline.sh >> <path>/cron.log 2>&1`
   - `36 8 * * *    <path>/monitor_wordpress_site.sh >> <path>/cron.log 2>&1`
   - `36 7 * * *    <path>/monitor_mpc_url_format.sh >> <path>/cron.log 2>&1`
   - `0 1 * * *     <path>/monitor_wordpress_token.sh >> <path>/cron.log 2>&1`
