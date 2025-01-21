@@ -367,20 +367,24 @@ def init_session(cookies):
     """
     session = requests.Session()
     session.cookies.update(cookies)
+
     session.headers['Accept'] = \
-        'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
-    session.headers['Accept-Encoding'] = 'gzip, deflate, br'
+        'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+    session.headers['Accept-Encoding'] = 'gzip, deflate, br, zstd'
     session.headers['Accept-Language'] = 'en-US'
-    session.headers['Cache-Control'] = 'no-cache'
     session.headers['Connection'] = 'keep-alive'
     session.headers['DNT'] = '1'
     session.headers['Host'] = 'www.makeplayingcards.com'
     session.headers['Origin'] = 'https://www.makeplayingcards.com'
-    session.headers['Pragma'] = 'no-cache'
+    session.headers['Priority'] = 'u=0, i'
     session.headers['Referer'] = SAVED_PROJECTS_URL
+    session.headers['Sec-Fetch-Dest'] = 'document'
+    session.headers['Sec-Fetch-Mode'] = 'navigate'
+    session.headers['Sec-Fetch-Site'] = 'same-origin'
+    session.headers['Sec-Fetch-User'] = '?1'
     session.headers['Upgrade-Insecure-Requests'] = '1'
     session.headers['User-Agent'] = \
-        'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0'
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'
     return session
 
 
