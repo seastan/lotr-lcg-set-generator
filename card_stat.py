@@ -42,7 +42,7 @@ EXCLUDE_SETS = {
     'The Betrayal of Mîm', 'The Fall of Nargothrond', 'The Legacy of Fëanor',
     'Betraying the Falathrim'}
 PROMO_HEROES_SETS = {'The Scouring of the Shire', 'The Nine are Abroad',
-                     'The Siege of Erebor'}
+                     'The Siege of Erebor', 'The Hobbit'}
 FUTURE_SETS = {}
 
 SCENARIOS_REGEX = r' href="\/LotR\/Scenarios/([^"]+)">'
