@@ -2797,6 +2797,16 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
                     PRE_SANITY_CHECK['shadow'].setdefault(
                         (row[ROW_COLUMN], row[CARD_SCRATCH], lang),
                         []).append(error)
+                elif (lang == L_PORTUGUESE and
+                        not re.search(
+                            r'^(?:\[[^\]]+\])?Efeito Sombrio(?:\[[^\]]+\])? ?:',
+                            value)):
+                    value = 'Efeito Sombrio: {}'.format(value)
+                    error = ('Appending missing "Efeito Sombrio:" text to the {} '
+                             'effect'.format(field))
+                    PRE_SANITY_CHECK['shadow'].setdefault(
+                        (row[ROW_COLUMN], row[CARD_SCRATCH], lang),
+                        []).append(error)
                 elif (lang == L_SPANISH and
                         not re.search(r'^(?:\[[^\]]+\])?Sombra(?:\[[^\]]+\])? ?:',
                                       value)):
@@ -7325,6 +7335,12 @@ def _verify_shadow_case(shadow_text, lang):  # pylint: disable=R0911
 
     if (lang == L_POLISH and
             re.search(r'^(?:\[[^\]]+\])?Cień(?:\[[^\]]+\])?: '
+                      r'[a-zàáâãäąæçćĉèéêëęìíîïłñńòóôõöœśßùúûüźż]',
+                      shadow_text)):
+        return False
+
+    if (lang == L_PORTUGUESE and
+            re.search(r'^(?:\[[^\]]+\])?Efeito Sombrio(?:\[[^\]]+\])?: '
                       r'[a-zàáâãäąæçćĉèéêëęìíîïłñńòóôõöœśßùúûüźż]',
                       shadow_text)):
         return False
