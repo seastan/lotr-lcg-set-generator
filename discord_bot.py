@@ -175,6 +175,7 @@ List of **!cron** commands:
 ` `
 **!cron dragncards build** - trigger a DragnCards build
 **!cron errors** - display all errors from the latest cron run
+**!cron errors <text>** - display all errors from the latest cron run that match the text (for example: `!cron errors The Aldburg Plot`)
 **!cron log** - display a full execution log of the latest cron run
 **!cron restart bot** - restart the Discord bot
 **!cron restart cron** - restart the cron process
@@ -3240,6 +3241,22 @@ Card "{}" has been updated:
 
             res = res.replace('_', '\\_').replace('*', '\\*')
             await self._send_channel(message.channel, res)
+        elif command.lower().startswith('errors '):
+            text = re.sub(r'^errors ', '', command, flags=re.IGNORECASE)
+            res, _ = await run_shell(CRON_ERRORS_CMD)
+            if not res:
+                res = 'no cron logs found'
+                await self._send_channel(message.channel, res)
+            else:
+                res = res.split('\n')
+                res = [r for r in res if text in r or ' INFO: ' in r]
+                if not [r for r in res if ' ERROR: ' in r]:
+                    res = 'no errors that match the text'
+                    await self._send_channel(message.channel, res)
+                else:
+                    res = '\n'.join(res)
+                    res = res.replace('_', '\\_').replace('*', '\\*')
+                    await self._send_channel(message.channel, res)
         elif command.lower() == 'trigger':
             delete_sheet_checksums()
             await self._send_channel(message.channel, 'done')
