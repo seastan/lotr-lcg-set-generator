@@ -8472,7 +8472,9 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
             if res:
                 cards.extend(res)
             else:
-                errors.append('URL {} doesn\'t match any cards'.format(url))
+                errors.append(
+                    'URL {} doesn\'t match any cards for "{}" and "{}"'
+                    .format(url, quest['sets'], quest['encounter sets']))
 
         redundant_sets = [
             s for s in rules.get(('sets', 0), [])
