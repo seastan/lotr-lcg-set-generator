@@ -8,8 +8,7 @@ any kind of support.
 To generate final image outputs, you must run this workflow on a Windows platform because each platform
 renders the fonts differently.
 
-1. Clone this repo to a new local folder.  The easiest way is to click `Code` and then `Download ZIP`.
-At the same time, the preferable way is to use Git.
+1. Clone this repo to a new local folder:
 
     You can install the Git client from https://git-scm.com/downloads
     (default settings should be fine).  On GitHub UI click `Code`, then click `HTTPS` and copy the URL.
