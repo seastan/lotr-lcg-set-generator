@@ -2512,15 +2512,18 @@ def parse_flavour(value, lang, value_id=None):  # pylint: disable=R0912,R0915
                 parts[2] = re.sub(r'\s+', '[nobr]', parts[2])
 
             if lang == L_POLISH:
-                if not parts[0].startswith('“'):
-                    parts[0] = '“{}'.format(parts[0])
+                if not re.sub(r'^\[[^\]]+\]', '', parts[0]).startswith('“'):
+                    parts[0] = re.sub(r'^((?:\[[^\]]+\])?)', '\\1“', parts[0])
 
-                if not parts[0].endswith('”'):
-                    parts[0] = '{}”'.format(parts[0])
+                if not re.sub(r'\[[^\]]+\]$', '', parts[0]).endswith('”'):
+                    parts[0] = re.sub(r'(.)((?:\[[^\]]+\])?)$', '\\1”\\2',
+                                      parts[0])
             else:
                 if len(source_parts) == 2:
-                    if (not parts[0].startswith('“') and
-                            not parts[0].endswith('”')):
+                    if (not re.sub(r'^\[[^\]]+\]', '',
+                                   parts[0]).startswith('“') and
+                            not re.sub(r'\[[^\]]+\]$', '',
+                                       parts[0]).endswith('”')):
                         if lang == L_ENGLISH:
                             errors.append('Possibly missing double quotes')
                             if value_id:
@@ -2530,8 +2533,8 @@ def parse_flavour(value, lang, value_id=None):  # pylint: disable=R0912,R0915
                               value_id not in
                               FLAVOUR_WARNINGS['missing_quotes']):
                             errors.append('Possibly missing double quotes')
-                elif (parts[0].startswith('“') or
-                      parts[0].endswith('”')):
+                elif (re.sub(r'^\[[^\]]+\]', '', parts[0]).startswith('“') or
+                      re.sub(r'\[[^\]]+\]$', '', parts[0]).endswith('”')):
                     if lang == L_ENGLISH:
                         errors.append('Possibly unnecessary double quotes')
                         if value_id:
@@ -2564,7 +2567,8 @@ def parse_flavour(value, lang, value_id=None):  # pylint: disable=R0912,R0915
         dash = '{}[nobr]'.format(dash)
 
     if (lang in {L_GERMAN, L_POLISH, L_SPANISH} and
-            separator in {'\n\n', '\n'} and len(parts) >= 2):
+            separator in {'\n\n', '\n'} and len(parts) >= 2 and
+            not re.search(r'\[[^\]]+\]$', parts[-1])):
         dash = '[right]{}'.format(dash)
         parts[-1] = '{}[/right]'.format(parts[-1])
 
