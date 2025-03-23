@@ -7086,11 +7086,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     translated_keys = [k for k in keys_by_hash[
                         (lang, row[CARD_SET], hash_by_key[(lang, value_key)])]
                                        if k != value_key]
-                    english_keys = [k for k in keys_by_hash[
-                        (L_ENGLISH, row[CARD_SET], hash_by_key[(L_ENGLISH,
-                                                                value_key)])]
+                    if hash_by_key.get((L_ENGLISH, value_key)):
+                        english_keys = [k for k in keys_by_hash[
+                            (L_ENGLISH, row[CARD_SET], hash_by_key[
+                                (L_ENGLISH, value_key)])]
                                     if k != value_key]
-                    if sorted(translated_keys) != sorted(english_keys):
+                    else:
+                        logging.warning(TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+                    if (english_keys is not None and
+                            sorted(translated_keys) != sorted(english_keys)):
                         if translated_keys:
                             translated_keys = ', '.join([
                                 '{} for card ID {}'.format(
