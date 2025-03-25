@@ -264,7 +264,7 @@ List of **!art** commands:
 **!art savescr <artist>** (as a reply to a message with an image attachment, empty artist means "Midjourney") - save image to the scratch folder, <artist> is optional (for example: `!art savescr Ted Nasmith` or `!art savescr`)
 **!art verify <set name or set code>** - verify artwork for a set (for example: `!art verify Children of Eorl` or `!art verify CoE`)
 **!asm** - alias for **!art save Midjourney** (see above)
-**!asbm** - alias for **!art saveb Midjourney** (see above)
+**!asbm** or **!asmb** - aliases for **!art saveb Midjourney** (see above)
 **!art help** - display this help message
 """,
     'image': """
@@ -5010,6 +5010,8 @@ Targets removed.
             command = 'save Midjourney'
         elif message.content.lower() == '!asbm':
             command = 'saveb Midjourney'
+        elif message.content.lower() == '!asmb':
+            command = 'saveb Midjourney'
         else:
             command = re.sub(r'^!art ', '', message.content,
                              flags=re.IGNORECASE).split('\n')[0].strip()
@@ -6309,7 +6311,8 @@ Targets removed.
             elif (message.content.lower().startswith('!art ') or
                   message.content.lower() == '!art' or
                   message.content.lower() == '!asm' or
-                  message.content.lower() == '!asbm'):
+                  message.content.lower() == '!asbm' or
+                  message.content.lower() == '!asmb'):
                 await self._process_art_command(message)
             elif (message.content.lower().startswith('!image ') or
                   message.content.lower() == '!image'):
