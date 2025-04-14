@@ -237,8 +237,8 @@ To generate only a subset of cards (produce one artifact regardless of the sets)
 - Add that new set to `configuration.yaml` and comment out any other sets.
 - In the spreadsheet, set `Selected` column to the ID of that new set for all the needed cards.
 - In the artwork folder, temporarily create a new folder named the new set ID and copy all images and subfolders
-  from the folders with the set IDs that you refer to in your selected cards (there should be no naming conflicts between files
-  from the different folders).  After you finish generating the cards, you can safely delete this folder.
+  from the folders with the set IDs that you refer to in your selected cards (usually, there should be no naming
+  conflicts between files from the different folders).  After you finish generating the cards, you can safely delete this folder.
   Also, when running the scripts you can ignore any `Unused image detected` errors.
 
 **Automatic Pipeline**
