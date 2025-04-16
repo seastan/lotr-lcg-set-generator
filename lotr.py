@@ -3306,8 +3306,8 @@ def _get_capitalization_errors(text):  # pylint: disable=R0912
     text = re.sub(r'\[[^\]]+\]', '', text)
     text = text.replace(' son of ', ' sonof_ ')
     parts = text.split(' ')
-    parts = [re.sub(r'^[…“’]', '',
-                    re.sub(r'[,.?!”’…]$', '', p)) for p in parts
+    parts = [re.sub(r'^[…“’(]', '',
+                    re.sub(r'[,.?!”’)…]$', '', p)) for p in parts
              if p not in {'-', '+'}]
     if '' in parts:
         errors.append('"an empty word"')
