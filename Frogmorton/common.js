@@ -1974,11 +1974,15 @@ function capitalizeText(value) {
 
 function convertIconName(value) {
 	value = value + '';
+	value = value.replace(/[,\(\)'"\u2013\u2014\u2026\u2019\u201c\u201d\u201e\u00ab\u00bb]/g, '');
 	value = value.replace(/\u00c2/g, 'A');
 	value = value.replace(/\u00e2/g, 'a');
+	value = value.replace(/\u00ce/g, 'I');
+	value = value.replace(/\u00ee/g, 'i');
+	value = value.replace(/\u00d3/g, 'O');
+	value = value.replace(/\u00f3/g, 'o');
 	value = value.replace(/[\u00da\u00db]/g, 'U');
 	value = value.replace(/[\u00fa\u00fb]/g, 'u');
-	value = value.replace(/[,\(\)'"\u2013\u2014\u2026\u2019\u201c\u201d\u201e\u00ab\u00bb]/g, '');
 	value = capitalizeText(value);
 	value = value.replace(/[\-\u2013\u2014 ]/g, '');
 	return value;
@@ -1992,9 +1996,15 @@ function escapeFileName(value) {
 }
 
 function escapeIconFileName(value) {
-	value += '';
-	value = value.replace(/[<>:\/\\|?*'"\u2013\u2014\u2026\u2019\u201c\u201d\u201e\u00ab\u00bb\u00bf\u00a1]/g, '');
-	value = value.trim();
+	value = escapeFileName(value);
+	value = value.replace(/\u00c2/g, 'A');
+	value = value.replace(/\u00e2/g, 'a');
+	value = value.replace(/\u00ce/g, 'I');
+	value = value.replace(/\u00ee/g, 'i');
+	value = value.replace(/\u00d3/g, 'O');
+	value = value.replace(/\u00f3/g, 'o');
+	value = value.replace(/[\u00da\u00db]/g, 'U');
+	value = value.replace(/[\u00fa\u00fb]/g, 'u');
 	value = value.replace(/ /g, '-');
 	return value;
 }
