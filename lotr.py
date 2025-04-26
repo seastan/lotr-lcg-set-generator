@@ -4574,6 +4574,16 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 else:
                     broken_set_ids.add(set_id)
 
+        if (card_type == T_QUEST and card_sphere == T_NIGHTMARE and
+                card_sphere_back is None):
+            message = 'Sphere back must be "Nightmare" for row #{}{}'.format(
+                i, row_info)
+            logging.error(message)
+            if not card_scratch:
+                errors.append(message)
+            else:
+                broken_set_ids.add(set_id)
+
         if (card_traits is None and
                 card_type in CARD_TYPES_TRAITS and
                 not (card_flags and F_NOTRAITS in extract_flags(card_flags))):

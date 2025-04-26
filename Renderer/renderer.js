@@ -1063,7 +1063,12 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             '}';
     }
 
-    var background = (data.TypeRenderer + template + additionalEncounterSets).replace(/ /g, '');
+    var templateFront = template;
+    if (templateFront == 'HalfNightmare') {
+        templateFront = '';
+    }
+
+    var background = (data.TypeRenderer + templateFront + additionalEncounterSets).replace(/ /g, '');
     var prefix = 'portrait.';
     var width = 429;
     var height = 600;
@@ -1171,7 +1176,12 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                 '}';
         }
 
-        background = (data.TypeRenderer + template + 'Back').replace(/ /g, '');
+        var templateBack = template;
+        if (templateBack == 'HalfNightmare') {
+            templateBack = 'Nightmare';
+        }
+
+        background = (data.TypeRenderer + templateBack + 'Back').replace(/ /g, '');
         prefix = 'portrait.';
         width = 429;
         height = 600;

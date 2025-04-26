@@ -953,6 +953,10 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 			card['Quest Points'] = card['BQuest Points'];
 		}
 
+		if ((card['Type'] + '' == QUEST) && !card['Sphere'] && (card['BSphere'] == 'Nightmare')) {
+			card['Sphere'] = 'HalfNightmare';
+		}
+
 		if (!card['Text']) {
 			card['Text'] = ' ';
 		}
