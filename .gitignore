@@ -18,6 +18,7 @@ Frogmorton/imagesIcons/*.png
 Frogmorton/imagesRaw/*.jpg
 Frogmorton/imagesRaw/*.png
 Frogmorton/XML/*.xml
+Frogmorton/custom.js
 imagesEons/*/*/*
 imagesTTS/*/*
 Output/*/*/*

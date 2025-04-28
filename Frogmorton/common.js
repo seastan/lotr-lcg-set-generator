@@ -901,6 +901,11 @@ translate['Unknown Artist'] = {'English': 'Unknown Artist', 'French': 'Artiste i
 translate['Victory'] = {'English': 'Victory', 'French': 'Victoire', 'German': 'Sieg', 'Spanish': 'Victoria', 'Polish': 'Zwyci\u0119stwo', 'Italian': 'Vittoria',
 	'Portuguese': 'Vit\u00f3ria'};
 
+if (project.findChild('custom.js')) {
+	Console.err.println('\nImporting custom.js...');
+	useLibrary('project:custom.js');
+}
+
 function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progress) {
 	var docElement = doc.getDocumentElement();
 	var setName = docElement.getAttribute('name');
@@ -1734,13 +1739,23 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 
 				if ((optionalTraitTypes.indexOf(cardType) > -1) && cardTrait) {
 					s.set('TraitOut', 'true');
-					if (cardType in bodyRegion) {
+					if (cardType + cardSphere in bodyRegion) {
+						s.set('TraitOut-Body-region', bodyRegion[cardType + cardSphere]);
+					}
+					else if (cardType in bodyRegion) {
 						s.set('TraitOut-Body-region', bodyRegion[cardType]);
 					}
 
-					if (cardType in traitRegion) {
+					if (cardType + cardSphere in traitRegion) {
+						s.set('TraitOut-Trait-region', traitRegion[cardType + cardSphere]);
+					}
+					else if (cardType in traitRegion) {
 						s.set('TraitOut-Trait-region', traitRegion[cardType]);
 					}
+				}
+				else if (cardType + cardSphere in bodyNoTraitRegion) {
+					s.set('TraitOut', 'false');
+					s.set('Body-region', bodyNoTraitRegion[cardType + cardSphere]);
 				}
 				else if (cardType in bodyNoTraitRegion) {
 					s.set('TraitOut', 'false');
@@ -1754,17 +1769,26 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					else if ((cardType == ENEMY) && (cardName == 'Touque Rapporteuse')) { // workaround for the French card
 						s.set('TraitOut-Body-region', '57,377,299,123');
 					}
+					else if (cardType + cardSphere in bodyRegion) {
+						s.set('TraitOut-Body-region', bodyRegion[cardType + cardSphere]);
+					}
 					else if (cardType in bodyRegion) {
 						s.set('TraitOut-Body-region', bodyRegion[cardType]);
 					}
 
-					if (cardType in traitRegion) {
+					if (cardType + cardSphere in traitRegion) {
+						s.set('TraitOut-Trait-region', traitRegion[cardType + cardSphere]);
+					}
+					else if (cardType in traitRegion) {
 						s.set('TraitOut-Trait-region', traitRegion[cardType]);
 					}
 				}
 
 				if (s.get('Unique') + '' == '1') {
-					if (cardType in nameUniqueRegion) {
+					if (cardType + cardSphere in nameUniqueRegion) {
+						s.set('Name-region', nameUniqueRegion[cardType + cardSphere]);
+					}
+					else if (cardType in nameUniqueRegion) {
 						s.set('Name-region', nameUniqueRegion[cardType]);
 					}
 				}
@@ -1775,18 +1799,27 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('Name-region', '55,100,26,180');
 				}
 				else {
-					if (cardType in nameRegion) {
+					if (cardType + cardSphere in nameRegion) {
+						s.set('Name-region', nameRegion[cardType + cardSphere]);
+					}
+					else if (cardType in nameRegion) {
 						s.set('Name-region', nameRegion[cardType]);
 					}
 				}
 
 				if (s.get('UniqueBack') + '' == '1') {
-					if (cardType in nameUniqueBackRegion) {
+					if (cardType + cardSphere in nameUniqueBackRegion) {
+						s.set('NameBack-region', nameUniqueBackRegion[cardType + cardSphere]);
+					}
+					else if (cardType in nameUniqueBackRegion) {
 						s.set('NameBack-region', nameUniqueBackRegion[cardType]);
 					}
 				}
 				else {
-					if (cardType in nameBackRegion) {
+					if (cardType + cardSphere in nameBackRegion) {
+						s.set('NameBack-region', nameBackRegion[cardType + cardSphere]);
+					}
+					else if (cardType in nameBackRegion) {
 						s.set('NameBack-region', nameBackRegion[cardType]);
 					}
 				}
@@ -1795,7 +1828,10 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('Type-region', '279,448,39,15');
 				}
 				else {
-					if (cardType in typeRegion) {
+					if (cardType + cardSphere in typeRegion) {
+						s.set('Type-region', typeRegion[cardType + cardSphere]);
+					}
+					else if (cardType in typeRegion) {
 						s.set('Type-region', typeRegion[cardType]);
 					}
 				}
@@ -1847,7 +1883,10 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					['Option-Body-shape', optionBodyShape]
 				];
 				for (let k = 0; k < relations.length; k++) {
-					if (cardType in relations[k][1]) {
+					if (cardType + cardSphere in relations[k][1]) {
+						s.set(relations[k][0], relations[k][1][cardType + cardSphere]);
+					}
+					else if (cardType in relations[k][1]) {
 						s.set(relations[k][0], relations[k][1][cardType]);
 					}
 				}
