@@ -7376,8 +7376,10 @@ def _verify_shadow_case(shadow_text, lang):  # pylint: disable=R0911
 def _has_discord_channel(card):
     """ Check whether a card has Discord channel or not.
     """
-    if (card[CARD_NAME] == 'T.B.D.'
-            or card[CARD_TYPE] in CARD_TYPES_NO_DISCORD_CHANNEL):
+    if (not card.get(CARD_NAME) or
+            card.get(CARD_NAME) == 'T.B.D.' or
+            not card.get(CARD_TYPE) or
+            card[CARD_TYPE] in CARD_TYPES_NO_DISCORD_CHANNEL):
         return False
 
     return True
@@ -7462,7 +7464,9 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
         'https://docs.google.com/spreadsheets/d/{}/edit#gid={}'
         .format(conf['sheet_gdid'], SHEET_IDS[CARD_SHEET]))
     data = [{key: value for key, value in row.items() if value is not None}
-            for row in DATA if not row[CARD_SCRATCH]]
+            for row in DATA if not row.get(CARD_SCRATCH) and
+            row.get(CARD_SET) and row.get(CARD_SET_NAME) and
+            row.get(CARD_NAME) and row.get(CARD_NUMBER) is not None]
     data_raw = [
         {key: value for key, value in row.items() if value is not None}
         for row in DATA if row.get(CARD_ID) and row.get(CARD_SET) and
@@ -7522,7 +7526,7 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 del row[key]
 
     data.sort(key=lambda row: (
-        row[CARD_SET_RINGSDB_CODE],
+        row.get(CARD_SET_RINGSDB_CODE),
         is_positive_or_zero_int(row[CARD_NUMBER])
         and int(row[CARD_NUMBER]) or 0,
         row[CARD_NUMBER]))
@@ -8842,9 +8846,11 @@ def generate_octgn_o8d(conf, set_id, set_name):
 def _needed_for_ringsdb(card):
     """ Check whether a card is needed for RingsDB or not.
     """
-    return (card.get(CARD_TYPE) in CARD_TYPES_PLAYER or
-            card.get(CARD_SPHERE) in CARD_SPHERES_BOON or
-            card.get(CARD_SPHERE) == S_BURDEN)
+    return (card.get(CARD_NUMBER) is not None and
+            card.get(CARD_SET_RINGSDB_CODE) and
+            (card.get(CARD_TYPE) in CARD_TYPES_PLAYER or
+             card.get(CARD_SPHERE) in CARD_SPHERES_BOON or
+             card.get(CARD_SPHERE) == S_BURDEN))
 
 
 def _needed_for_frenchdb(card):

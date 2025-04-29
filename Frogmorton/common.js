@@ -403,8 +403,8 @@ bodyNoTraitRegion[CAMPAIGN] = '56,277,301,211';
 bodyNoTraitRegion[CONTRACT] = '65,313,283,176';
 bodyNoTraitRegion[NIGHTMARE] = '54,325,305,192';
 bodyNoTraitRegion[PRESENTATION] = '48,73,317,418';
-bodyNoTraitRegion[RULES] = '48,73,317,418';
 bodyNoTraitRegion[QUEST] = '51,249,461,114';
+bodyNoTraitRegion[RULES] = '48,73,317,418';
 
 bodyNoTraitRegion[CAVE] = '50,283,171,80';
 bodyNoTraitRegion[ENCOUNTER_SIDE_QUEST] = '51,249,461,114';
