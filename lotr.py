@@ -3283,7 +3283,7 @@ def _verify_period(value):
                 re.search(
                     r'\.”\) ?(?:\[\/b\]|\[\/i\]|\[\/bi\])?$', paragraph) or
                 re.search(
-                    r'\.’”\) ?(?:\[\/b\]|\[\/i\]|\[\/bi\])?$', paragraph)):
+                    r'\.’”\)? ?(?:\[\/b\]|\[\/i\]|\[\/bi\])?$', paragraph)):
             res = False
             break
 
