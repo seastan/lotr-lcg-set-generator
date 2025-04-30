@@ -901,9 +901,13 @@ translate['Unknown Artist'] = {'English': 'Unknown Artist', 'French': 'Artiste i
 translate['Victory'] = {'English': 'Victory', 'French': 'Victoire', 'German': 'Sieg', 'Spanish': 'Victoria', 'Polish': 'Zwyci\u0119stwo', 'Italian': 'Vittoria',
 	'Portuguese': 'Vit\u00f3ria'};
 
-if (project.findChild('custom.js')) {
-	Console.err.println('\nImporting custom.js...');
-	useLibrary('project:custom.js');
+try {
+	if (project.findChild('custom.js')) {
+		useLibrary('project:custom.js');
+	}
+}
+catch (err) {
+	// ignore
 }
 
 function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progress) {
