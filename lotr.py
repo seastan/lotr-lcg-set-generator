@@ -521,7 +521,7 @@ ANCHORS_REGEX = (
     r'|\[unique\]|\[threat\]|\[attack\]|\[defense\]|\[willpower\]'
     r'|\[leadership\]|\[lore\]|\[spirit\]|\[tactics\]|\[baggins\]'
     r'|\[fellowship\]|\[sunny\]|\[cloudy\]|\[rainy\]|\[stormy\]|\[sailing\]'
-    r'|\[eos\]|\[pp\])')
+    r'|\[eos\]|\[pp\]|\[ringa\]|\[ringb\])')
 CARD_NAME_REFERENCE_REGEX = r'\[\[([^\]]+)\]\]'
 DECK_PREFIX_REGEX = r'^[QN][A-Z0-9][A-Z0-9]\.[0-9][0-9]?(?:-|$)'
 KEYWORDS_REGEX = (r'^(?: ?[A-Z][A-Za-z\'\-]+(?: [0-9X]+(?:\[pp\])?)?\.|'
@@ -1505,6 +1505,8 @@ def _clean_tags(text):  # pylint: disable=R0915
     text = text.replace('[sailing]', '')
     text = text.replace('[eos]', '')
     text = text.replace('[pp]', '')
+    text = text.replace('[ringa]', 'A')
+    text = text.replace('[ringb]', 'B')
 
     text = text.replace('[unmatched quot]', '')
     return text
@@ -1512,7 +1514,7 @@ def _clean_tags(text):  # pylint: disable=R0915
 
 def _update_card_text(text, lang=L_ENGLISH, skip_rules=False,  # pylint: disable=R0915
                       fix_linebreaks=True):
-    """ Update card text for RingsDB, Hall of Beorn, French and Spanish DBs.
+    """ Update card text for RingsDB, Hall of Beorn and Spanish DBs.
     """
     text = str(text)
     if lang == L_SPANISH and not skip_rules:
@@ -1570,6 +1572,9 @@ def _update_card_text(text, lang=L_ENGLISH, skip_rules=False,  # pylint: disable
     text = text.replace('[lsb]', '[')
     text = text.replace('[rsb]', ']')
     text = text.replace('[split]', '')
+
+    text = text.replace('[ringa]', 'A')
+    text = text.replace('[ringb]', 'B')
 
     text = re.sub(r'\[lotr [^\]]+\]', '', text)
     text = re.sub(r'\[lotrheader [^\]]+\]', '', text)
@@ -3306,6 +3311,7 @@ def _get_capitalization_errors(text):  # pylint: disable=R0912
         return errors
 
     text = re.sub(r'\[[^\]]+\]', '', text)
+    text = text.strip()
     text = text.replace(' son of ', ' sonof_ ')
     parts = text.split(' ')
     parts = [re.sub(r'^[…“’(]', '',
@@ -6463,17 +6469,18 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
                 match = re.search(r' ((?:\[[^\]]+\])+)(?:\n\n|$)', value)
                 if match:
-                    message = (
-                        'Unnecessary space before "{}" in {} column for '
-                        'row #{}{}'.format(
-                            match.groups()[0],
-                            key.replace(BACK_PREFIX, BACK_PREFIX_LOG), i,
-                            row_info))
-                    logging.error(message)
-                    if not card_scratch:
-                        errors.append(message)
-                    else:
-                        broken_set_ids.add(set_id)
+                    if match.groups()[0] not in ('[ringa]', '[ringb]'):
+                        message = (
+                            'Unnecessary space before "{}" in {} column for '
+                            'row #{}{}'.format(
+                                match.groups()[0],
+                                key.replace(BACK_PREFIX, BACK_PREFIX_LOG), i,
+                                row_info))
+                        logging.error(message)
+                        if not card_scratch:
+                            errors.append(message)
+                        else:
+                            broken_set_ids.add(set_id)
 
                 cleaned_value = _clean_tags(value)
                 if key == CARD_SET:
@@ -6742,12 +6749,14 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
                     match = re.search(r' ((?:\[[^\]]+\])+)(?:\n\n|$)', value)
                     if match:
-                        logging.error(
-                            'Unnecessary space before "%s" in %s column for '
-                            'card ID %s in %s translations, row #%s',
-                            match.groups()[0],
-                            key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
-                            lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+                        if match.groups()[0] not in ('[ringa]', '[ringb]'):
+                            logging.error(
+                                'Unnecessary space before "%s" in %s column '
+                                'for card ID %s in %s translations, row #%s',
+                                match.groups()[0],
+                                key.replace(BACK_PREFIX, BACK_PREFIX_LOG),
+                                card_id, lang,
+                                TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                     cleaned_value = _clean_tags(value)
                     if key in {CARD_FLAVOUR, BACK_PREFIX + CARD_FLAVOUR}:

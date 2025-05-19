@@ -518,6 +518,8 @@ Icons:
 - `[sailing]`
 - `[eos]`: Eye of Sauron
 - `[pp]`: per player
+- `[ringa]`: "special" A
+- `[ringb]`: "special" B
 
 **Card Types & Spheres**
 

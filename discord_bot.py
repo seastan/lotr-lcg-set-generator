@@ -795,6 +795,8 @@ def update_emojis(text):
     text = text.replace('[sailing]', EMOJIS['[sailing]'])
     text = text.replace('[eos]', EMOJIS['[eos]'])
     text = text.replace('[pp]', EMOJIS['[pp]'])
+    text = text.replace('[ringa]', 'A')
+    text = text.replace('[ringb]', 'B')
     return text
 
 def update_text(text):  # pylint: disable=R0915

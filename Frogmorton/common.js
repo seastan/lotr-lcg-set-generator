@@ -1788,7 +1788,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 				}
 
-				if (s.get('Unique') + '' == '1') {
+				if ((s.get('Unique') + '' == '1') || (cardName.indexOf('[ringa]') != -1) || (cardName.indexOf('[ringb]') != -1)) {
 					if (cardType + cardSphere in nameUniqueRegion) {
 						s.set('Name-region', nameUniqueRegion[cardType + cardSphere]);
 					}
@@ -1811,7 +1811,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 				}
 
-				if (s.get('UniqueBack') + '' == '1') {
+				if ((s.get('UniqueBack') + '' == '1') || (cardNameBack.indexOf('[ringa]') != -1) || (cardNameBack.indexOf('[ringb]') != -1)) {
 					if (cardType + cardSphere in nameUniqueBackRegion) {
 						s.set('NameBack-region', nameUniqueBackRegion[cardType + cardSphere]);
 					}
@@ -2086,6 +2086,8 @@ function updateVafthrudnir(value, lowerSize, lang) {
 	var tag = false;
 	value = value.replace(/\[space\]/g, ' ');
 	value = value.replace(/\[SPACE\]/g, ' ');
+	value = value.replace(/\[ringa\]/g, '<ringa>');
+	value = value.replace(/\[ringb\]/g, '<ringb>');
 	value = updatePunctuation(value, lang);
 	for (let i = 0; i < value.length; i++) {
 		let ch = value[i];
@@ -2120,6 +2122,8 @@ function updateVafthrudnir(value, lowerSize, lang) {
 			}
 		}
 	}
+	res = res.replace(/<ringa>/g, '</size></family><lrs>A</lrs><family "Vafthrudnir"><size ' + lowerSize + '>');
+	res = res.replace(/<ringb>/g, '</size></family><lrs>B</lrs><family "Vafthrudnir"><size ' + lowerSize + '>');
 	res = '<family "Vafthrudnir"><size ' + lowerSize + '>' + res + '</size></family>';
 	res = res.replace(/<size [^>]+><\/size>/g, '');
 	res = res.replace(/<family [^>]+><\/family>/g, '');
@@ -2272,7 +2276,7 @@ function markUp(value, key, cardType, lang, setID) {
 	}
 
 	function updateItalicIconsReplacer(match, offset, string) {
-		var res = match.replace(/(\[unique\]|\[threat\]|\[attack\]|\[defense\]|\[willpower\]|\[leadership\]|\[lore\]|\[spirit\]|\[tactics\]|\[baggins\]|\[fellowship\]|\[sunny\]|\[cloudy\]|\[rainy\]|\[stormy\]|\[sailing\]|\[eos\]|\[pp\])/g, '[/i]$1[i]');
+		var res = match.replace(/(\[unique\]|\[threat\]|\[attack\]|\[defense\]|\[willpower\]|\[leadership\]|\[lore\]|\[spirit\]|\[tactics\]|\[baggins\]|\[fellowship\]|\[sunny\]|\[cloudy\]|\[rainy\]|\[stormy\]|\[sailing\]|\[eos\]|\[pp\]|\[ringa\]|\[ringb\])/g, '[/i]$1[i]');
 		return res;
 	}
 	value = value.replace(/\[i\](?:.|\n)+?\[\/i\]/g, updateItalicIconsReplacer);
@@ -2305,6 +2309,8 @@ function markUp(value, key, cardType, lang, setID) {
 	value = value.replace(/\[sailing\]/g, tagPrefix + '<sai>' + tagSuffix);
 	value = value.replace(/\[eos\]/g, tagPrefix + '<eos>' + tagSuffix);
 	value = value.replace(/\[pp\]/g, tagPrefix + '<pp>' + tagSuffix);
+	value = value.replace(/\[ringa\]/g, tagPrefix + '<lrs>A</lrs>' + tagSuffix);
+	value = value.replace(/\[ringb\]/g, tagPrefix + '<lrs>B</lrs>' + tagSuffix);
 	value = value.replace(/\[center\]/g, '<center>');
 	value = value.replace(/([^\n])\<center\>/g, '$1\n<center>');
 	value = value.replace(/\[\/center\]\n?/g, '\n<left>');
@@ -2344,7 +2350,7 @@ function markUp(value, key, cardType, lang, setID) {
 	value = value.replace(/<lsb>/g, '[');
 	value = value.replace(/<rsb>/g, ']');
 
-	value = value.replace(/([^:;,.?!\u2026]) ((?:<\/b>)?(?:<\/i>)?(?:<\/size>)?(?:<\/family>)?(?:<size [^>]+>)?)(<uni>|<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<bag>|<fel>|<mas>|<hon>|<hof>|<hb>|<hw>|<sai>|<eos>|<per>|<pp>)/g, '$1\u00a0$2$3');
+	value = value.replace(/([^:;,.?!\u2026]) ((?:<\/b>)?(?:<\/i>)?(?:<\/size>)?(?:<\/family>)?(?:<size [^>]+>)?)(<uni>|<thr>|<att>|<def>|<wil>|<lea>|<lor>|<spi>|<tac>|<bag>|<fel>|<mas>|<hon>|<hof>|<hb>|<hw>|<sai>|<eos>|<per>|<pp>|<lrs>)/g, '$1\u00a0$2$3');
 	value = value.replace(/([0-9]+) /g, '$1\u00a0');
 	value = value.replace(/ ([0-9]+)([:;,.?!\)\u2026])/g, '\u00a0$1$2');
 	value = value.replace(/(^|[ \n"\u201c\u201d\(])([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,4})([:;,.?!"\u2026\u201c\u201d\)]*) (["\u201c\u201d\(]*)([\-\u2013\u2014'\u2019A-Za-z\u00c0-\u017e]{1,4})([:;,.?!"\u2026\u201c\u201d\)]+(?:<\/[^>]+>)*)(\n|$)/g, '$1$2$3\u00a0$4$5$6$7');
