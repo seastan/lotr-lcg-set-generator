@@ -868,8 +868,8 @@ REGION_TRAITS = {
     'Underworld', 'West Bank', 'Western Lands', 'Westfarthing', 'Westfold',
     'Wilderlands'}
 TYPE_FIRST_TRAITS = {
-    'Artifact', 'Item', 'Suspect', 'Stronghold', 'Stage 1', 'Stage 2',
-    'Stage 3', 'Stage 4', 'Stage 5', 'Stage 6'}
+    'Artifact', 'Item', 'Stage 1', 'Stage 2', 'Stage 3', 'Stage 4', 'Stage 5',
+    'Stage 6', 'Suspect', 'Stronghold', 'Wall'}
 TYPE_TRAITS = {
     'Adaptation', 'Armor', 'Army', 'Assassin', 'Boon', 'Captive', 'Condition',
     'Favor', 'Gift', 'Morgul', 'Mount', 'Ring', 'Signal', 'Skill', 'Song',
