@@ -799,6 +799,15 @@ def update_emojis(text):
     text = text.replace('[ringb]', 'B')
     return text
 
+
+def update_name(text):
+    """ Update card name.
+    """
+    text = text.replace('[ringa]', 'A')
+    text = text.replace('[ringb]', 'B')
+    return text
+
+
 def update_text(text):  # pylint: disable=R0915
     """ Update card text.
     """
@@ -853,7 +862,7 @@ def update_text(text):  # pylint: disable=R0915
 def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
     """ Format a card side.
     """
-    card_name = '**{}**'.format(card[prefix + lotr.CARD_NAME])
+    card_name = '**{}**'.format(update_name(card[prefix + lotr.CARD_NAME]))
     card_type = card[prefix + lotr.CARD_TYPE]
 
     card_unique = ('{} '.format(EMOJIS['[unique]'])
@@ -1105,7 +1114,7 @@ def format_match(card, num):
     card_unique = ('{} '.format(EMOJIS['[unique]'])
                    if card.get(lotr.CARD_UNIQUE)
                    else '')
-    card_name = card[lotr.CARD_NAME]
+    card_name = update_name(card[lotr.CARD_NAME])
     card_type = card[lotr.CARD_TYPE]
     sphere = card.get(lotr.CARD_SPHERE, '')
     if sphere in {lotr.S_BAGGINS, lotr.S_FELLOWSHIP, lotr.S_LEADERSHIP,
@@ -1120,12 +1129,12 @@ def format_match(card, num):
         card_type = '{} {}'.format(sphere, card_type)
 
     card_name_back = card.get(lotr.BACK_PREFIX + lotr.CARD_NAME)
-    if card_name_back and card_name_back != card_name:
+    if card_name_back and update_name(card_name_back) != card_name:
         card_unique_back = ('{} '.format(EMOJIS['[unique]'])
                             if card.get(lotr.BACK_PREFIX + lotr.CARD_UNIQUE)
                             else '')
         card_name = '{} / {}{}'.format(card_name, card_unique_back,
-                                       card_name_back)
+                                       update_name(card_name_back))
 
     card_type_back = card.get(lotr.BACK_PREFIX + lotr.CARD_TYPE, '')
     sphere = card.get(lotr.BACK_PREFIX + lotr.CARD_SPHERE, '')
@@ -1533,7 +1542,7 @@ async def get_dragncards_player_cards_stat(set_name, start_date, full_data):  # 
 
     cards = {c[lotr.CARD_ID]:
              {'id': c[lotr.CARD_ID],
-              'name': c[lotr.CARD_NAME],
+              'name': update_name(c[lotr.CARD_NAME]),
               'date': '' if full_data else
                 c.get(lotr.CARD_LAST_DESIGN_CHANGE_DATE, '')}
              for c in matches}

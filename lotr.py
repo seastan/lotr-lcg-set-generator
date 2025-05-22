@@ -1306,6 +1306,7 @@ def _write_ringsdb_cookies(data):
 def normalized_name(value):
     """ Return a normalized card name.
     """
+    value = _update_card_name(value)
     value = unidecode.unidecode(str(value)).lower().replace(' ', '-')
     value = re.sub(r'[^a-z0-9\-]', '', value)[:98]
     return value
@@ -1509,6 +1510,14 @@ def _clean_tags(text):  # pylint: disable=R0915
     text = text.replace('[ringb]', 'B')
 
     text = text.replace('[unmatched quot]', '')
+    return text
+
+
+def _update_card_name(text):
+    """ Update card name for all DBs.
+    """
+    text = text.replace('[ringa]', 'A')
+    text = text.replace('[ringb]', 'B')
     return text
 
 
@@ -1735,7 +1744,7 @@ def simplify_keyword(keyword):
 def extract_keywords(value):
     """ Extract all keywords from the string.
     """
-    keywords = [k.strip() for k in str(value or '').replace(
+    keywords = [k.strip() for k in _to_str(value).replace(
                 '[inline]', '').split('.') if k.strip() != '']
     keywords = [re.sub(r' ([0-9]+)\[pp\]$', ' \\1 Per Player', k, re.I)
                 for k in keywords]
@@ -1745,7 +1754,7 @@ def extract_keywords(value):
 def extract_traits(value):
     """ Extract all traits from the string.
     """
-    value = re.sub(r'\[[^\]]+\]', '', str(value or ''))
+    value = re.sub(r'\[[^\]]+\]', '', _to_str(value))
     traits = [t.strip() for t in value.split('.') if t.strip() != '']
     return traits
 
@@ -2592,11 +2601,11 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
     """
     auto_page_rows = []
     for i, row in enumerate(data):  # pylint: disable=R1702
-        card_name = _clean_value(row.get(CARD_NAME)) or ''
+        card_name = _to_str(_clean_value(row.get(CARD_NAME)))
         if len(card_name) == 1:
             card_name = card_name.upper()
 
-        card_name_back = _clean_value(row.get(CARD_SIDE_B)) or ''
+        card_name_back = _to_str(_clean_value(row.get(CARD_SIDE_B)))
         if len(card_name_back) == 1:
             card_name_back = card_name_back.upper()
 
@@ -3258,7 +3267,7 @@ def extract_flags(value, ignore_flags=False):
     """ Extract flags from a string value.
     """
     flags = [f.strip() for f in
-             str(value or '').replace(';', '\n').split('\n') if f.strip()]
+             _to_str(value).replace(';', '\n').split('\n') if f.strip()]
     if ignore_flags:
         flags = [f for f in flags if f not in {F_IGNORENAME, F_IGNORERULES}]
 
@@ -3850,7 +3859,8 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
             errors.append('use response (without tags and double quotes)')
 
         if field == CARD_TEXT and card[CARD_TYPE] == T_QUEST:
-            name_regex = (r'(?<!\[bi\])\b' + re.escape(card[CARD_NAME] or '') +
+            name_regex = (r'(?<!\[bi\])\b' +
+                          re.escape(_to_str(card[CARD_NAME])) +
                           r'\b(?!\[\/bi\])')
             if re.search(name_regex, paragraph):
                 errors.append('use "this stage" rather than card name')
@@ -3860,7 +3870,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
         if (field == BACK_PREFIX + CARD_TEXT and
                 card[BACK_PREFIX + CARD_TYPE] == T_QUEST):
             name_regex = (r'(?<!\[bi\])\b' +
-                          re.escape(card[BACK_PREFIX + CARD_NAME] or '') +
+                          re.escape(_to_str(card[BACK_PREFIX + CARD_NAME])) +
                           r'\b(?!\[\/bi\])')
             if re.search(name_regex, paragraph):
                 errors.append('use "this stage" rather than card name')
@@ -3869,7 +3879,8 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
 
         if (field == CARD_TEXT and card[CARD_TYPE] in
                 {T_ENCOUNTER_SIDE_QUEST, T_PLAYER_SIDE_QUEST}):
-            name_regex = (r'(?<!\[bi\])\b' + re.escape(card[CARD_NAME] or '') +
+            name_regex = (r'(?<!\[bi\])\b' +
+                          re.escape(_to_str(card[CARD_NAME])) +
                           r'\b(?!\[\/bi\]| (?:is )?in the victory display)')
             if re.search(name_regex, paragraph):
                 errors.append('use "this quest" rather than card name')
@@ -3880,7 +3891,7 @@ def _get_rules_errors(text, field, card):  # pylint: disable=R0912,R0915
                 card[BACK_PREFIX + CARD_TYPE] in
                 {T_ENCOUNTER_SIDE_QUEST, T_PLAYER_SIDE_QUEST}):
             name_regex = (r'(?<!\[bi\])\b' +
-                          re.escape(card[BACK_PREFIX + CARD_NAME] or '') +
+                          re.escape(_to_str(card[BACK_PREFIX + CARD_NAME])) +
                           r'\b(?!\[\/bi\]| (?:is )?in the victory display)')
             if re.search(name_regex, paragraph):
                 errors.append('use "this quest" rather than card name')
@@ -6854,10 +6865,10 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         value_english = row[key]
                         if key in {CARD_TEXT, CARD_SHADOW}:
                             value_english = value_english.replace(
-                                row.get(CARD_NAME) or '', '')
+                                _to_str(row.get(CARD_NAME)), '')
                         else:
                             value_english = value_english.replace(
-                                row.get(BACK_PREFIX + CARD_NAME) or '', '')
+                                _to_str(row.get(BACK_PREFIX + CARD_NAME)), '')
 
                         value_translated = value
                         for term_english, lang_dict in TRANSLATION_MATCH:
@@ -6888,12 +6899,12 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                         value_translated = value
                         if key in {CARD_TEXT, CARD_SHADOW}:
                             value_translated = value_translated.replace(
-                                TRANSLATIONS[lang][card_id].get(
-                                    CARD_NAME) or '', '')
+                                _to_str(TRANSLATIONS[lang][card_id].get(
+                                    CARD_NAME)), '')
                         else:
                             value_translated = value_translated.replace(
-                                TRANSLATIONS[lang][card_id].get(
-                                    BACK_PREFIX + CARD_NAME) or '', '')
+                                _to_str(TRANSLATIONS[lang][card_id].get(
+                                    BACK_PREFIX + CARD_NAME)), '')
 
                         for term_english, lang_dict in TRANSLATION_MATCH:
                             regex_english = lang_dict.get(L_ENGLISH)
@@ -6995,21 +7006,21 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                                                row[key])
                         if key in {CARD_TEXT, CARD_SHADOW}:
                             value_english = value_english.replace(
-                                row.get(CARD_NAME) or '', '')
+                                _to_str(row.get(CARD_NAME)), '')
                         else:
                             value_english = value_english.replace(
-                                row.get(BACK_PREFIX + CARD_NAME) or '', '')
+                                _to_str(row.get(BACK_PREFIX + CARD_NAME)), '')
 
                         value_translated = re.sub(TAGS_WITH_NUMBERS_REGEX, '',
                                                   value)
                         if key in {CARD_TEXT, CARD_SHADOW}:
                             value_translated = value_translated.replace(
-                                TRANSLATIONS[lang][card_id].get(
-                                    CARD_NAME) or '', '')
+                                _to_str(TRANSLATIONS[lang][card_id].get(
+                                    CARD_NAME)), '')
                         else:
                             value_translated = value_translated.replace(
-                                TRANSLATIONS[lang][card_id].get(
-                                    BACK_PREFIX + CARD_NAME) or '', '')
+                                _to_str(TRANSLATIONS[lang][card_id].get(
+                                    BACK_PREFIX + CARD_NAME)), '')
 
                         anchors_issue = False
                         anchors_english = re.findall(ANCHORS_REGEX,
@@ -7503,13 +7514,12 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
             channels.add(channel)
             row[CARD_DISCORD_CHANNEL] = channel
 
-        locked = str(SETS[row[CARD_SET]].get(SET_LOCKED, '') or '')
+        locked = _to_str(SETS[row[CARD_SET]].get(SET_LOCKED))
         if locked:
             row[CARD_SET_LOCKED] = locked
 
         card_set = re.sub(r'^ALeP - ', '', row[CARD_SET_NAME])
-        discord_prefix = str(SETS[row[CARD_SET]].get(SET_DISCORD_PREFIX, '')
-                             or '')
+        discord_prefix = _to_str(SETS[row[CARD_SET]].get(SET_DISCORD_PREFIX))
         if discord_prefix:
             discord_prefix = '{} '.format(discord_prefix)
 
@@ -7866,7 +7876,7 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
     if name == CARD_TEXT and card_type == T_PRESENTATION:
         value = ''
     elif name == BACK_PREFIX + CARD_TEXT and card_type == T_PRESENTATION:
-        value = row[CARD_TEXT] or ''
+        value = _to_str(row[CARD_TEXT])
     elif name == CARD_TEXT and row[CARD_KEYWORDS]:
         if row[CARD_SHADOW]:
             value = '{} {}'.format(row[CARD_KEYWORDS], value)
@@ -7950,7 +7960,7 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
 
         card = ET.SubElement(cards, 'card')
         card.set('id', str(row[CARD_ID]))
-        card.set('name', _update_octgn_card_text(row[CARD_NAME] or ''))
+        card.set('name', _update_octgn_card_text(_to_str(row[CARD_NAME])))
 
         card_type = row[CARD_TYPE]
         if card_type == T_PLAYER_SIDE_QUEST:
@@ -8004,7 +8014,7 @@ def generate_octgn_set_xml(conf, set_id, set_name):  # pylint: disable=R0912,R09
 
             alternate = ET.SubElement(card, 'alternate')
             alternate.set('name',
-                          _update_octgn_card_text(alternate_name or ''))
+                          _update_octgn_card_text(_to_str(alternate_name)))
             alternate.set('type', 'B')
             if card_size:
                 alternate.set('size', card_size)
@@ -8491,13 +8501,13 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
         cards = [r for r in DATA
                  if r[CARD_ID] is not None
                  and _needed_for_octgn(r)
-                 and str(r[CARD_SET_NAME] or '').lower() in quest['sets']
+                 and _to_str(r[CARD_SET_NAME]).lower() in quest['sets']
                  and (not r[CARD_ENCOUNTER_SET] or
                       str(r[CARD_ENCOUNTER_SET]).lower()
                       in quest['encounter sets'])
                  and (r[CARD_TYPE] != T_RULES or
-                      (r.get(CARD_TEXT) or '') not in {'', 'T.B.D.'} or
-                      (r.get(BACK_PREFIX + CARD_TEXT) or '')
+                      _to_str(r.get(CARD_TEXT)) not in {'', 'T.B.D.'} or
+                      _to_str(r.get(BACK_PREFIX + CARD_TEXT))
                       not in {'', 'T.B.D.'})]
 
         for url in rules.get(('external xml', 0), []):
@@ -8512,14 +8522,14 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
 
         redundant_sets = [
             s for s in rules.get(('sets', 0), [])
-            if str(s).lower() not in [str(c[CARD_SET_NAME] or '').lower()
+            if str(s).lower() not in [_to_str(c[CARD_SET_NAME]).lower()
                                       for c in cards]]
         for item in redundant_sets:
             errors.append('Set "{}" doesn\'t match any cards'.format(item))
 
         redundant_encounter_sets = [
             s for s in rules.get(('encounter sets', 0), [])
-            if str(s).lower() not in [str(c[CARD_ENCOUNTER_SET] or '').lower()
+            if str(s).lower() not in [_to_str(c[CARD_ENCOUNTER_SET]).lower()
                                       for c in cards]]
         for item in redundant_encounter_sets:
             errors.append('Encounter set "{}" doesn\'t match any cards'
@@ -8683,7 +8693,7 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                     card[CARD_SET_NAME],
                     is_positive_or_zero_int(card[CARD_NUMBER])
                     and int(card[CARD_NUMBER]) or 0,
-                    card[CARD_NUMBER] or '',
+                    _to_str(card[CARD_NUMBER]),
                     card[CARD_NAME]))
 
             for card in chosen_player_cards:
@@ -8946,7 +8956,7 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
 
             if row[CARD_TYPE] in CARD_TYPES_PLAYER_DECK:
                 limit = re.search(r'limit .*([0-9]+) per deck',
-                                  row[CARD_TEXT] or '',
+                                  _to_str(row[CARD_TEXT]),
                                   re.I)
                 if limit:
                     limit = int(limit.groups()[0])
@@ -8984,18 +8994,18 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                         if is_int(row[CARD_QUANTITY]) else 1)
 
             text = _update_card_text('{}\n\n{}'.format(
-                row[CARD_KEYWORDS] or '',
-                row[CARD_TEXT] or '')).strip()
+                _to_str(row[CARD_KEYWORDS]),
+                _to_str(row[CARD_TEXT]))).strip()
 
             if (row[BACK_PREFIX + CARD_NAME] is not None and
                     row[BACK_PREFIX + CARD_TEXT] is not None):
                 text_back = _update_card_text('{}\n\n{}'.format(
-                    row[BACK_PREFIX + CARD_KEYWORDS] or '',
+                    _to_str(row[BACK_PREFIX + CARD_KEYWORDS]),
                     row[BACK_PREFIX + CARD_TEXT])).strip()
                 text = '<b>Side A</b>\n{}\n<b>Side B</b>\n{}'.format(
                     text, text_back)
 
-            flavor = _update_card_text(row[CARD_FLAVOUR] or '',
+            flavor = _update_card_text(_to_str(row[CARD_FLAVOUR]),
                                        skip_rules=True, fix_linebreaks=False)
             if (row[BACK_PREFIX + CARD_NAME] is not None and
                     row[BACK_PREFIX + CARD_FLAVOUR] is not None):
@@ -9011,8 +9021,8 @@ def generate_ringsdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R0914
                 'sphere': sphere,
                 'position': int(ringsdb_code[-3:]),
                 'code': ringsdb_code,
-                'name': row[CARD_NAME].replace('’', "'"),
-                'traits': _update_card_text(row[CARD_TRAITS] or '',
+                'name': _update_card_name(row[CARD_NAME].replace('’', "'")),
+                'traits': _update_card_text(_to_str(row[CARD_TRAITS]),
                                             skip_rules=True,
                                             fix_linebreaks=False),
                 'text': text,
@@ -9255,8 +9265,9 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
             victory = row[CARD_VICTORY]
 
         side_a = {
-            'name': unidecode.unidecode(_to_str(row[CARD_NAME])),
-            'printname': _to_str(row[CARD_NAME]),
+            'name': unidecode.unidecode(
+                _update_card_name(_to_str(row[CARD_NAME]))),
+            'printname': _update_card_name(_to_str(row[CARD_NAME])),
             'unique': _to_str(handle_int(row[CARD_UNIQUE])),
             'type': _to_str(card_type),
             'sphere': _to_str(sphere),
@@ -9298,9 +9309,10 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
                 victory = row[BACK_PREFIX + CARD_VICTORY]
 
             side_b = {
-                'name': unidecode.unidecode(_to_str(
-                    row[BACK_PREFIX + CARD_NAME])),
-                'printname': _to_str(row[BACK_PREFIX + CARD_NAME]),
+                'name': unidecode.unidecode(_update_card_name(_to_str(
+                    row[BACK_PREFIX + CARD_NAME]))),
+                'printname': _update_card_name(
+                    _to_str(row[BACK_PREFIX + CARD_NAME])),
                 'unique': _to_str(handle_int(row[BACK_PREFIX + CARD_UNIQUE])),
                 'type': _to_str(card_type),
                 'sphere': _to_str(sphere),
@@ -9455,7 +9467,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
         card_type = row[CARD_TYPE]
         if card_type in CARD_TYPES_PLAYER_DECK:
             limit = re.search(r'limit .*([0-9]+) per deck',
-                              row[CARD_TEXT] or '',
+                              _to_str(row[CARD_TEXT]),
                               re.I)
             if limit:
                 limit = int(limit.groups()[0])
@@ -9521,7 +9533,8 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
                 translated_row[BACK_PREFIX + CARD_NAME] !=
                 translated_row.get(CARD_NAME, '') and
                 is_doubleside(card_type, row[BACK_PREFIX + CARD_TYPE])):
-            opposite_title = translated_row[BACK_PREFIX + CARD_NAME]
+            opposite_title = _update_card_name(
+                translated_row[BACK_PREFIX + CARD_NAME])
         else:
             opposite_title = None
 
@@ -9545,10 +9558,10 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
                         is_positive_or_zero_int(row[CARD_PRINTED_NUMBER]))
                     else position)
 
-        encounter_set = ((row[CARD_ENCOUNTER_SET] or '')
+        encounter_set = (_to_str(row[CARD_ENCOUNTER_SET])
                          if card_type in CARD_TYPES_ENCOUNTER_SET
                          else row[CARD_ENCOUNTER_SET])
-        subtitle = ((translated_row.get(CARD_ADVENTURE) or '')
+        subtitle = (_to_str(translated_row.get(CARD_ADVENTURE))
                     if card_type in CARD_TYPES_SUBTITLE
                     else translated_row.get(CARD_ADVENTURE))
 
@@ -9565,7 +9578,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
               row[CARD_SPHERE] == S_REGION):
             type_name = S_REGION
         else:
-            type_name = card_type or ''
+            type_name = _to_str(card_type)
 
         if card_type in CARD_TYPES_PAGES:
             victory_points = None
@@ -9589,15 +9602,15 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
             tokens = None
 
         additional_encounter_sets = [
-            s.strip() for s in str(row[CARD_ADDITIONAL_ENCOUNTER_SETS] or ''
-                                   ).split(';')
+            s.strip() for s in _to_str(row[CARD_ADDITIONAL_ENCOUNTER_SETS]
+                                       ).split(';')
             if s.strip()] or None
 
         fix_linebreaks = card_type not in {T_PRESENTATION, T_RULES}
 
         text = _update_card_text('{}\n\n{}'.format(
-            translated_row.get(CARD_KEYWORDS) or '',
-            translated_row.get(CARD_TEXT) or ''
+            _to_str(translated_row.get(CARD_KEYWORDS)),
+            _to_str(translated_row.get(CARD_TEXT))
             ), fix_linebreaks=fix_linebreaks).replace('\n', '\r\n').strip()
         if (card_type in CARD_TYPES_PAGES and
                 translated_row.get(CARD_VICTORY) is not None):
@@ -9611,7 +9624,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
                   is not None)) and
                 is_doubleside(card_type, row[BACK_PREFIX + CARD_TYPE])):
             text_back = _update_card_text(
-                translated_row.get(BACK_PREFIX + CARD_TEXT) or '',
+                _to_str(translated_row.get(BACK_PREFIX + CARD_TEXT)),
                 fix_linebreaks=fix_linebreaks
                 ).replace('\n', '\r\n').strip()
             if (card_type in CARD_TYPES_PAGES and
@@ -9621,7 +9634,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
                     text_back, translated_row[BACK_PREFIX + CARD_VICTORY])
             text = '<b>Side A</b> {} <b>Side B</b> {}'.format(text, text_back)
 
-        flavor = (_update_card_text(translated_row.get(CARD_FLAVOUR) or '',
+        flavor = (_update_card_text(_to_str(translated_row.get(CARD_FLAVOUR)),
                                     skip_rules=True,
                                     fix_linebreaks=False
                                     ).replace('\n', '\r\n').strip())
@@ -9649,7 +9662,7 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
             'is_unique': bool(row[CARD_UNIQUE]),
             'keywords': keywords,
             'keywords_original': keywords_original,
-            'name': translated_row.get(CARD_NAME, ''),
+            'name': _update_card_name(translated_row.get(CARD_NAME, '')),
             'octgnid': row[CARD_ID],
             'pack_code': row[CARD_SET_HOB_CODE],
             'pack_name': set_name,
@@ -9757,14 +9770,14 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 threat = None
 
             text = _update_french_card_text('{}\n\n{}'.format(
-                french_row.get(CARD_KEYWORDS) or '',
-                french_row.get(CARD_TEXT) or '')).strip()
+                _to_str(french_row.get(CARD_KEYWORDS)),
+                _to_str(french_row.get(CARD_TEXT)))).strip()
 
             if ((is_doubleside(row[CARD_TYPE], row[BACK_PREFIX + CARD_TYPE]) or
                  row[BACK_PREFIX + CARD_NAME] is not None) and
                     french_row.get(BACK_PREFIX + CARD_TEXT)):
                 text_back = _update_french_card_text('{}\n\n{}'.format(
-                    french_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
+                    _to_str(french_row.get(BACK_PREFIX + CARD_KEYWORDS)),
                     french_row[BACK_PREFIX + CARD_TEXT])).strip()
                 text = '<b>Face A</b><br>{}<br><b>Face B</b><br>{}'.format(
                     text, text_back)
@@ -9790,7 +9803,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                     row[CARD_SPHERE]),
                 'id_sphere_influence': CARD_SPHERE_FRENCH_IDS.get(sphere, 0),
                 'id_octgn': row[CARD_ID],
-                'titre': french_row.get(CARD_NAME) or '',
+                'titre': _update_card_name(french_row.get(CARD_NAME, '')),
                 'cout': cost,
                 'menace': threat,
                 'volonte': _update_french_non_int(
@@ -9802,7 +9815,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 'point_vie': _update_french_non_int(
                     handle_int(row[CARD_HEALTH])),
                 'trait': _update_french_card_text(
-                    french_row.get(CARD_TRAITS) or ''),
+                    _to_str(french_row.get(CARD_TRAITS))),
                 'texte': text,
                 'indic_unique': int(row[CARD_UNIQUE] or 0),
                 'indic_recto_verso': row[BACK_PREFIX + CARD_NAME] is not None
@@ -9838,14 +9851,14 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 card_type = row[CARD_TYPE]
 
             text = _update_french_card_text('{}\n\n{}'.format(
-                french_row.get(CARD_KEYWORDS) or '',
-                french_row.get(CARD_TEXT) or '')).strip()
+                _to_str(french_row.get(CARD_KEYWORDS)),
+                _to_str(french_row.get(CARD_TEXT)))).strip()
 
             if ((is_doubleside(row[CARD_TYPE], row[BACK_PREFIX + CARD_TYPE])
                  or row[BACK_PREFIX + CARD_NAME] is not None) and
                     french_row.get(BACK_PREFIX + CARD_TEXT)):
                 text_back = _update_french_card_text('{}\n\n{}'.format(
-                    french_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
+                    _to_str(french_row.get(BACK_PREFIX + CARD_KEYWORDS)),
                     french_row[BACK_PREFIX + CARD_TEXT])).strip()
                 text = '<b>Face A</b><br>{}<br><b>Face B</b><br>{}'.format(
                     text, text_back)
@@ -9871,8 +9884,8 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 'id_type_carte': CARD_TYPE_FRENCH_IDS.get(card_type, 0),
                 'id_sous_type_carte': CARD_SUBTYPE_FRENCH_IDS.get(
                     row[CARD_SPHERE]),
-                'id_set_rencontre': row[CARD_ENCOUNTER_SET] or '',
-                'titre': french_row.get(CARD_NAME) or '',
+                'id_set_rencontre': _to_str(row[CARD_ENCOUNTER_SET]),
+                'titre': _update_card_name(french_row.get(CARD_NAME, '')),
                 'cout_engagement': _update_french_non_int(
                     handle_int(row[CARD_ENGAGEMENT])),
                 'menace': _update_french_non_int(
@@ -9886,7 +9899,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 'point_vie': _update_french_non_int(
                     handle_int(row[CARD_HEALTH])),
                 'trait': _update_french_card_text(
-                    french_row.get(CARD_TRAITS) or ''),
+                    _to_str(french_row.get(CARD_TRAITS))),
                 'texte': text,
                 'effet_ombre': shadow,
                 'titre_quete': french_row.get(CARD_ADVENTURE),
@@ -9915,19 +9928,21 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
 
             french_row = TRANSLATIONS[L_FRENCH].get(row[CARD_ID], {})
 
-            name = french_row.get(CARD_NAME) or ''
+            name = _update_card_name(french_row.get(CARD_NAME, ''))
             if (french_row.get(BACK_PREFIX + CARD_NAME) and
-                    french_row[BACK_PREFIX + CARD_NAME] != name):
-                name = '{} / {}'.format(name,
-                                        french_row[BACK_PREFIX + CARD_NAME])
+                    _update_card_name(
+                        french_row[BACK_PREFIX + CARD_NAME]) != name):
+                name = '{} / {}'.format(
+                    name, _update_card_name(
+                        french_row[BACK_PREFIX + CARD_NAME]))
 
             text = _update_french_card_text('{}\n\n{}'.format(
-                french_row.get(CARD_KEYWORDS) or '',
-                french_row.get(CARD_TEXT) or '')).strip()
+                _to_str(french_row.get(CARD_KEYWORDS)),
+                _to_str(french_row.get(CARD_TEXT)))).strip()
 
             text_back = _update_french_card_text('{}\n\n{}'.format(
-                french_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
-                french_row.get(BACK_PREFIX + CARD_TEXT) or '')).strip()
+                _to_str(french_row.get(BACK_PREFIX + CARD_KEYWORDS)),
+                _to_str(french_row.get(BACK_PREFIX + CARD_TEXT)))).strip()
 
             quantity = (int(row[CARD_QUANTITY])
                         if is_int(row[CARD_QUANTITY])
@@ -9938,7 +9953,7 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                 'numero_identification': int(row[CARD_NUMBER])
                                          if is_int(row[CARD_NUMBER])
                                          else 0,
-                'id_set_rencontre': row[CARD_ENCOUNTER_SET] or '',
+                'id_set_rencontre': _to_str(row[CARD_ENCOUNTER_SET]),
                 'titre': name,
                 'sequence': _to_str(handle_int(row[CARD_COST])),
                 'texteA': text,
@@ -9971,8 +9986,8 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                      if row[CARD_SET] == set_id and
                      row[CARD_TYPE] == T_PRESENTATION]
     if presentations:
-        spanish_name = TRANSLATIONS[L_SPANISH].get(
-            presentations[0][CARD_ID], {}).get(CARD_NAME)
+        spanish_name = _update_card_name(TRANSLATIONS[L_SPANISH].get(
+            presentations[0][CARD_ID], {}).get(CARD_NAME, ''))
         if spanish_name:
             cycle = spanish_name
 
@@ -10024,12 +10039,14 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                         spanish_row[key.replace(BACK_PREFIX, '')] = (
                             spanish_row[key])
 
-            name = spanish_row.get(CARD_NAME)
+            name = _update_card_name(spanish_row.get(CARD_NAME, ''))
             if (is_doubleside(row[CARD_TYPE], row[BACK_PREFIX + CARD_TYPE]) and
                     spanish_row.get(BACK_PREFIX + CARD_NAME) and
-                    spanish_row[BACK_PREFIX + CARD_NAME] != name):
-                name = '{} / {}'.format(name,
-                                        spanish_row[BACK_PREFIX + CARD_NAME])
+                    _update_card_name(
+                        spanish_row[BACK_PREFIX + CARD_NAME]) != name):
+                name = '{} / {}'.format(
+                    name, _update_card_name(
+                        spanish_row[BACK_PREFIX + CARD_NAME]))
 
             quantity = (int(row[CARD_QUANTITY])
                         if is_int(row[CARD_QUANTITY])
@@ -10041,8 +10058,8 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 quest_points = handle_int(row[BACK_PREFIX + CARD_QUEST])
                 engagement = handle_int(row[CARD_COST])
                 threat = '{}-{}'.format(
-                    row[CARD_ENGAGEMENT] or '',
-                    row[BACK_PREFIX + CARD_ENGAGEMENT] or '')
+                    _to_str(row[CARD_ENGAGEMENT]),
+                    _to_str(row[BACK_PREFIX + CARD_ENGAGEMENT]))
             else:
                 quest_points = handle_int(row[CARD_QUEST])
                 engagement = handle_int(row[CARD_ENGAGEMENT])
@@ -10058,8 +10075,8 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 victory_points = handle_int(spanish_row.get(CARD_VICTORY))
 
             text = _update_card_text('{}\n\n{}'.format(
-                spanish_row.get(CARD_KEYWORDS) or '',
-                spanish_row.get(CARD_TEXT) or ''), lang=L_SPANISH).strip()
+                _to_str(spanish_row.get(CARD_KEYWORDS)),
+                _to_str(spanish_row.get(CARD_TEXT))), lang=L_SPANISH).strip()
             if text:
                 text = '<p>{}</p>'.format(text.replace('\n', '</p><p>'))
 
@@ -10070,7 +10087,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                                 row[BACK_PREFIX + CARD_TYPE]) and
                   spanish_row.get(BACK_PREFIX + CARD_TEXT) is not None):
                 shadow = _update_card_text('{}\n\n{}'.format(
-                    spanish_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
+                    _to_str(spanish_row.get(BACK_PREFIX + CARD_KEYWORDS)),
                     spanish_row.get(BACK_PREFIX + CARD_TEXT)),
                                            lang=L_SPANISH).strip()
             else:
@@ -10091,7 +10108,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 'position': handle_int(row[CARD_NUMBER]),
                 'code': _spanishdb_code(row),
                 'nombre': name,
-                'nombreb': row[CARD_NAME],
+                'nombreb': _update_card_name(row[CARD_NAME]),
                 'quantity': quantity,
                 'easy_mode': quantity - easy_mode,
                 'tipo': SPANISH.get(row[CARD_TYPE]),
@@ -10103,7 +10120,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 'mision': quest_points,
                 'victory': victory_points,
                 'traits': _update_card_text(
-                    spanish_row.get(CARD_TRAITS) or ''),
+                    _to_str(spanish_row.get(CARD_TRAITS))),
                 'text': text,
                 'sombra': shadow
                 }
@@ -10148,8 +10165,8 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 threat = None
 
             text = _update_card_text('{}\n\n{}'.format(
-                spanish_row.get(CARD_KEYWORDS) or '',
-                spanish_row.get(CARD_TEXT) or ''), lang=L_SPANISH).strip()
+                _to_str(spanish_row.get(CARD_KEYWORDS)),
+                _to_str(spanish_row.get(CARD_TEXT))), lang=L_SPANISH).strip()
             if (row[CARD_TYPE] == T_RULES and
                     spanish_row.get(CARD_VICTORY) is not None):
                 text = '{}\n\nPage {}'.format(text, spanish_row[CARD_VICTORY])
@@ -10160,7 +10177,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
             if (is_doubleside(row[CARD_TYPE], row[BACK_PREFIX + CARD_TYPE]) and
                     spanish_row.get(BACK_PREFIX + CARD_TEXT)):
                 text_back = _update_card_text('{}\n\n{}'.format(
-                    spanish_row.get(BACK_PREFIX + CARD_KEYWORDS) or '',
+                    _to_str(spanish_row.get(BACK_PREFIX + CARD_KEYWORDS)),
                     spanish_row[BACK_PREFIX + CARD_TEXT]),
                                               lang=L_SPANISH).strip()
                 if (row[CARD_TYPE] == T_RULES and
@@ -10176,7 +10193,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 text = ('<p><b>Lado A.</b></p>\n{}\n<p><b>Lado B.</b></p>\n{}'
                         .format(text, text_back))
 
-            flavor = _update_card_text(spanish_row.get(CARD_FLAVOUR) or '',
+            flavor = _update_card_text(_to_str(spanish_row.get(CARD_FLAVOUR)),
                                        lang=L_SPANISH,
                                        skip_rules=True,
                                        fix_linebreaks=False).strip()
@@ -10207,7 +10224,7 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
 
             if row[CARD_TYPE] in CARD_TYPES_PLAYER_DECK:
                 limit = re.search(r'limit .*([0-9]+) per deck',
-                                  row[CARD_TEXT] or '',
+                                  _to_str(row[CARD_TEXT]),
                                   re.I)
                 if limit:
                     limit = int(limit.groups()[0])
@@ -10222,9 +10239,9 @@ def generate_spanishdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R09
                 'sphere_id': sphere,
                 'position': handle_int(row[CARD_NUMBER]),
                 'code': _spanishdb_code(row),
-                'name': spanish_row.get(CARD_NAME),
+                'name': _update_card_name(spanish_row.get(CARD_NAME, '')),
                 'traits': _update_card_text(
-                    spanish_row.get(CARD_TRAITS) or ''),
+                    _to_str(spanish_row.get(CARD_TRAITS))),
                 'text': text,
                 'flavor': flavor,
                 'is_unique': int(row[CARD_UNIQUE] or 0),
@@ -10323,8 +10340,8 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
     root = ET.fromstring(XML_TEMPLATE)
     root.set('name', set_name)
     root.set('id', set_id)
-    root.set('icon', SETS[set_id][SET_COLLECTION_ICON] or '')
-    root.set('copyright', SETS[set_id][SET_COPYRIGHT] or '')
+    root.set('icon', _to_str(SETS[set_id][SET_COLLECTION_ICON]))
+    root.set('copyright', _to_str(SETS[set_id][SET_COPYRIGHT]))
     root.set('language', lang)
     cards = root.findall("./cards")[0]
 
@@ -10351,12 +10368,12 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
 
         card = ET.SubElement(cards, 'card')
         card.set('id', row[CARD_ID])
-        card.set('name', row[CARD_NAME] or '')
+        card.set('name', _to_str(row[CARD_NAME]))
         if not _needed_for_dragncards(row):
             card.set('noDragncards', '1')
 
         dragncards_values = []
-        dragncards_values.append(str(row[CARD_NAME] or ''))
+        dragncards_values.append(_to_str(row[CARD_NAME]))
         dragncards_properties = {CARD_UNIQUE, CARD_TYPE, CARD_SPHERE,
                                  CARD_TRAITS, CARD_KEYWORDS, CARD_COST,
                                  CARD_ENGAGEMENT, CARD_THREAT, CARD_WILLPOWER,
@@ -10388,8 +10405,8 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
 
         properties.append(('Set Name', set_name))
         properties.append(('Set Icon',
-                           SETS[set_id][SET_COLLECTION_ICON] or ''))
-        properties.append(('Set Copyright', SETS[set_id][SET_COPYRIGHT] or ''))
+                           _to_str(SETS[set_id][SET_COLLECTION_ICON])))
+        properties.append(('Set Copyright', _to_str(SETS[set_id][SET_COPYRIGHT])))
 
         side_b = (card_type != T_PRESENTATION and (
             card_type in CARD_TYPES_DOUBLESIDE_DEFAULT or
@@ -10408,11 +10425,11 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                 alternate_name = row[BACK_PREFIX + CARD_NAME]
 
             alternate = ET.SubElement(card, 'alternate')
-            alternate.set('name', alternate_name or '')
+            alternate.set('name', _to_str(alternate_name))
             alternate.set('type', 'B')
             alternate.tail = '\n    '
 
-            dragncards_values.append(str(alternate_name or ''))
+            dragncards_values.append(_to_str(alternate_name))
 
             properties = []
             for name in (CARD_UNIQUE, CARD_TYPE, CARD_SPHERE, CARD_TRAITS,
@@ -12822,8 +12839,9 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                             card_dict[card_id][BACK_PREFIX + CARD_TYPE]):
                         card_name = card_dict[card_id][CARD_NAME]
                         side = (
-                            card_dict[card_id][BACK_PREFIX + CARD_ENGAGEMENT]
-                            or '' if card_type == T_QUEST else 'B')
+                            _to_str(card_dict[card_id][
+                                BACK_PREFIX + CARD_ENGAGEMENT])
+                            if card_type == T_QUEST else 'B')
                     else:
                         card_name = card_dict[card_id][BACK_PREFIX + CARD_NAME]
                         side = ''
@@ -12835,7 +12853,7 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                     if is_doubleside(
                             card_dict[card_id][CARD_TYPE],
                             card_dict[card_id][BACK_PREFIX + CARD_TYPE]):
-                        side = (card_dict[card_id][CARD_ENGAGEMENT] or ''
+                        side = (_to_str(card_dict[card_id][CARD_ENGAGEMENT])
                                 if card_type == T_QUEST else 'A')
                     else:
                         side = ''
@@ -12850,9 +12868,9 @@ def generate_db(conf, set_id, set_name, lang, card_data):  # pylint: disable=R09
                 if card_type == T_QUEST:
                     if filename.endswith('-2.png'):
                         card_suffix = (
-                            card_dict[card_id][BACK_PREFIX + CARD_COST] or '')
+                            _to_str(card_dict[card_id][BACK_PREFIX + CARD_COST]))
                     else:
-                        card_suffix = card_dict[card_id][CARD_COST] or ''
+                        card_suffix = _to_str(card_dict[card_id][CARD_COST])
                 else:
                     card_suffix = CARD_TYPE_SUFFIX_HALLOFBEORN.get(card_type,
                                                                    '')
