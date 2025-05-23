@@ -1811,7 +1811,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 				}
 
-				if ((s.get('UniqueBack') + '' == '1') || (cardNameBack.indexOf('[ringa]') != -1) || (cardNameBack.indexOf('[ringb]') != -1)) {
+				if ((s.get('UniqueBack') + '' == '1') || (cardNameBack && ((cardNameBack.indexOf('[ringa]') != -1) || (cardNameBack.indexOf('[ringb]') != -1)))) {
 					if (cardType + cardSphere in nameUniqueBackRegion) {
 						s.set('NameBack-region', nameUniqueBackRegion[cardType + cardSphere]);
 					}
