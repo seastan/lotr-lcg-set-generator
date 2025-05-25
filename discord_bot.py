@@ -1003,7 +1003,7 @@ def format_card(card, spreadsheet_url, channel_url):  # pylint: disable=R0912,R0
     else:
         res_b = ''
 
-    adventure = card.get(lotr.CARD_ADVENTURE, '')
+    adventure = update_name(card.get(lotr.CARD_ADVENTURE, ''))
     if adventure == '':
         card_adventure = ''
     elif card_type == lotr.T_CAMPAIGN:

@@ -422,9 +422,6 @@ CARD_TYPES_ADVENTURE = {T_CAMPAIGN, T_OBJECTIVE, T_OBJECTIVE_ALLY,
                         T_OBJECTIVE_HERO, T_OBJECTIVE_LOCATION,
                         T_QUEST, T_SHIP_OBJECTIVE}
 CARD_SPHERES_NO_ADVENTURE = {S_NOICON, S_RING}
-CARD_TYPES_SUBTITLE = {T_CAMPAIGN, T_OBJECTIVE, T_OBJECTIVE_ALLY,
-                       T_OBJECTIVE_HERO, T_OBJECTIVE_LOCATION,
-                       T_QUEST, T_SHIP_OBJECTIVE}
 CARD_TYPES_NO_COLLECTION_ICON = {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT,
                                  T_RULES}
 CARD_TYPES_NO_COPYRIGHT = {T_PRESENTATION, T_RULES}
@@ -6342,9 +6339,9 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_adventure is None and
-              ((card_type in CARD_TYPES_SUBTITLE and
+              ((card_type in CARD_TYPES_ADVENTURE and
                 card_sphere not in CARD_SPHERES_NO_ADVENTURE) or
-               (card_type_back in CARD_TYPES_SUBTITLE and
+               (card_type_back in CARD_TYPES_ADVENTURE and
                 card_sphere_back not in CARD_SPHERES_NO_ADVENTURE))):
             message = 'Missing adventure for row #{}{}'.format(
                 i, row_info)
@@ -8233,7 +8230,7 @@ def _append_cards(res, cards, group_name):
         res.append({'databaseId': card[CARD_ID],
                     'quantity': int(card[CARD_QUANTITY]),
                     'loadGroupId': group_name,
-                    '_name': card[CARD_ORIGINAL_NAME]
+                    '_name': _update_card_name(card[CARD_ORIGINAL_NAME])
                     })
 
 
@@ -8247,7 +8244,7 @@ def _append_cards_octgn(parent, cards):
 
     for i, card in enumerate(cards):
         element = ET.SubElement(parent, 'card')
-        element.text = card[CARD_ORIGINAL_NAME]
+        element.text = _update_card_name(card[CARD_ORIGINAL_NAME])
         element.set('qty', str(int(card[CARD_QUANTITY])))
         element.set('id', card[CARD_ID])
         if i == len(cards) - 1:
@@ -8394,7 +8391,8 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
     files = []
 
     quests = []
-    quest = {'name': row[CARD_ADVENTURE] or row[CARD_NAME],
+    quest = {'name': _update_card_name(row[CARD_ADVENTURE]) or
+                 _update_card_name(row[CARD_NAME]),
              'sets': set([str(row[CARD_SET_NAME]).lower()]),
              'encounter sets': set(),
              'prefix': '',
@@ -9561,9 +9559,10 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
         encounter_set = (_to_str(row[CARD_ENCOUNTER_SET])
                          if card_type in CARD_TYPES_ENCOUNTER_SET
                          else row[CARD_ENCOUNTER_SET])
-        subtitle = (_to_str(translated_row.get(CARD_ADVENTURE))
-                    if card_type in CARD_TYPES_SUBTITLE
-                    else translated_row.get(CARD_ADVENTURE))
+        subtitle = (_update_card_name(_to_str(
+                        translated_row.get(CARD_ADVENTURE)))
+                    if card_type in CARD_TYPES_ADVENTURE
+                    else None)
 
         if card_type in {T_PRESENTATION, T_RULES}:
             type_name = S_SETUP
@@ -9902,7 +9901,8 @@ def generate_frenchdb_csv(conf, set_id, set_name):  # pylint: disable=R0912,R091
                     _to_str(french_row.get(CARD_TRAITS))),
                 'texte': text,
                 'effet_ombre': shadow,
-                'titre_quete': french_row.get(CARD_ADVENTURE),
+                'titre_quete': _update_card_name(_to_str(
+                    french_row.get(CARD_ADVENTURE))),
                 'indic_unique': int(row[CARD_UNIQUE] or 0),
                 'indic_recto_verso': row[BACK_PREFIX + CARD_NAME] is not None
                                      and 1 or 0,
