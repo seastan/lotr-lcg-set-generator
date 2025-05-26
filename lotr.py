@@ -1513,6 +1513,9 @@ def _clean_tags(text):  # pylint: disable=R0915
 def _update_card_name(text):
     """ Update card name for all DBs.
     """
+    if not text:
+        return text
+
     text = text.replace('[ringa]', 'A')
     text = text.replace('[ringb]', 'B')
     return text
