@@ -1709,7 +1709,7 @@ def detect_traits(text):
     return traits
 
 
-def detect_names(text, card_type):  # pylint: disable=R0912
+def detect_names(text, card_type):  # pylint: disable=R0912,R0915
     """ Detect names in the text.
     """
     text = re.sub(r'\n{2,}', ' [] ', text)
