@@ -2122,8 +2122,8 @@ function updateVafthrudnir(value, lowerSize, lang) {
 			}
 		}
 	}
-	res = res.replace(/<ringa>/g, '</size></family><lrs>A</lrs><family "Vafthrudnir"><size ' + lowerSize + '>');
-	res = res.replace(/<ringb>/g, '</size></family><lrs>B</lrs><family "Vafthrudnir"><size ' + lowerSize + '>');
+	res = res.replace(/<ringa>/g, '</size></family><lrs><size ' + upperSize + '>A</size></lrs><family "Vafthrudnir"><size ' + lowerSize + '>');
+	res = res.replace(/<ringb>/g, '</size></family><lrs><size ' + upperSize + '>B</size></lrs><family "Vafthrudnir"><size ' + lowerSize + '>');
 	res = '<family "Vafthrudnir"><size ' + lowerSize + '>' + res + '</size></family>';
 	res = res.replace(/<size [^>]+><\/size>/g, '');
 	res = res.replace(/<family [^>]+><\/family>/g, '');
