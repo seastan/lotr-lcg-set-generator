@@ -1718,7 +1718,11 @@ def detect_names(text, card_type):  # pylint: disable=R0912
     text = re.sub(r'\[lotrheader[^\[]+\[\/lotrheader\]', ' [] ', text)
     text = re.sub(r'\[bi\][^\[]+\[\/bi\]', ' text ', text)
     text = re.sub(r'\[\/?b\]', ' [] ', text)
+    text = text.replace('[ringa]', '<ringa>')
+    text = text.replace('[ringb]', '<ringb>')
     text = re.sub(r'\[[^\]]+\]', ' separator ', text)
+    text = text.replace('<ringa>', '[ringa]')
+    text = text.replace('<ringb>', '[ringb]')
     text = re.sub(r'\.”|[.:()]', ' [] ', text)
     text = re.sub(r'(?![“”!?…,’\- \[\]]|\w).', ' unknown ', text)
     text = re.sub(r' stage [0-9][A-F]\b', ' text ', text)
@@ -1739,7 +1743,8 @@ def detect_names(text, card_type):  # pylint: disable=R0912
         first_pos = None
         for pos, word in enumerate(words):
             cleaned_word = re.sub(r'[“”!?…,]', '', word)
-            if lotr.is_capitalized(cleaned_word) and cleaned_word != 'X':
+            if ((lotr.is_capitalized(cleaned_word) and cleaned_word != 'X') or
+                    cleaned_word in ('[ringa]', '[ringb]')):
                 if not last_name:
                     first_pos = pos
 
@@ -1750,7 +1755,8 @@ def detect_names(text, card_type):  # pylint: disable=R0912
             else:
                 while last_name:
                     cleaned_word = re.sub(r'[“”!?…,]', '', last_name[-1])
-                    if lotr.is_capitalized(cleaned_word):
+                    if (lotr.is_capitalized(cleaned_word) or
+                            cleaned_word in ('[ringa]', '[ringb]')):
                         break
 
                     last_name = last_name[:-1]
