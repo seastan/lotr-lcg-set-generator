@@ -869,8 +869,8 @@ TYPE_FIRST_TRAITS = {
     'Stage 6', 'Suspect', 'Stronghold', 'Wall'}
 TYPE_TRAITS = {
     'Adaptation', 'Armor', 'Army', 'Assassin', 'Boon', 'Captive', 'Condition',
-    'Favor', 'Gift', 'Morgul', 'Mount', 'Ring', 'Signal', 'Skill', 'Song',
-    'Spell', 'Tale', 'Title', 'Trap', 'Weapon'}
+    'Faction', 'Favor', 'Gift', 'Morgul', 'Mount', 'Ring', 'Signal', 'Skill',
+    'Song', 'Spell', 'Tale', 'Title', 'Trap', 'Weapon'}
 TRAITS_ORDER = [TYPE_FIRST_TRAITS, TYPE_TRAITS, RACE_FIRST_TRAITS,
                 RACE_TRAITS, REGION_TRAITS, LOCATION_TYPE_FIRST_TRAITS,
                 LOCATION_TYPE_TRAITS, LOCATION_SUBTYPE_TRAITS, NOBLE_TRAITS,
