@@ -2083,6 +2083,7 @@ function updatePunctuation(value, lang) {
 
 function updateVafthrudnir(value, lowerSize, lang) {
 	var upperSize = Math.round(lowerSize * 1.423 * 100) / 100;
+	var ringSize = Math.round(lowerSize * 1.692 * 100) / 100;
 	var res = '';
 	var tag = false;
 	value = value.replace(/\[space\]/g, ' ');
@@ -2123,8 +2124,9 @@ function updateVafthrudnir(value, lowerSize, lang) {
 			}
 		}
 	}
-	res = res.replace(/<ringa>/g, '</size></family><lrs><size ' + upperSize + '>A</size></lrs><family "Vafthrudnir"><size ' + lowerSize + '>');
-	res = res.replace(/<ringb>/g, '</size></family><lrs><size ' + upperSize + '>B</size></lrs><family "Vafthrudnir"><size ' + lowerSize + '>');
+	res = res.replace(/<ringa>/g, '</size></family><lrs><size ' + ringSize + '>A</size></lrs><family "Vafthrudnir"><size ' + lowerSize + '>');
+	res = res.replace(/<ringb>/g, '</size></family><lrs><size ' + ringSize + '>B</size></lrs><family "Vafthrudnir"><size ' + lowerSize + '>');
+	res = res.replace(/<size [^>]+> <\/size>(?:<size [^>]+><\/size>)*<\/family><lrs>/g, '<size ' + lowerSize + '> </size></family><lrs>')
 	res = '<family "Vafthrudnir"><size ' + lowerSize + '>' + res + '</size></family>';
 	res = res.replace(/<size [^>]+><\/size>/g, '');
 	res = res.replace(/<family [^>]+><\/family>/g, '');
