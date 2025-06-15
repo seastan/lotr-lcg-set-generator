@@ -891,6 +891,7 @@ ALLOWED_FIRST_WORDS = {
     'All',
     'Allies',
     'Any',
+    'Arrange',
     'At',
     'Attach',
     'Attached',
