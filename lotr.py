@@ -9290,7 +9290,8 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
         }
 
         if row[BACK_PREFIX + CARD_NAME]:
-            if row[BACK_PREFIX + CARD_TYPE] == T_ENCOUNTER_SIDE_QUEST:
+            if (row[BACK_PREFIX + CARD_TYPE] in
+                    {T_ENCOUNTER_SIDE_QUEST, T_PLAYER_SIDE_QUEST}):
                 card_type = T_ALIAS_SIDE_QUEST
             else:
                 card_type = row[BACK_PREFIX + CARD_TYPE]
