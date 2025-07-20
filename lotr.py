@@ -277,6 +277,7 @@ CARD_TYPES_NO_ENCOUNTER_SET = {T_ALLY, T_ATTACHMENT, T_CONTRACT, T_EVENT,
                                T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT,
                                T_HERO, T_PLAYER_OBJECTIVE, T_PLAYER_SIDE_QUEST,
                                T_PRESENTATION}
+CARD_SPHERES_NO_ENCOUNTER_SET = {S_NOICON, S_RING}
 CARD_TYPES_UNIQUE = {T_HERO, T_OBJECTIVE_HERO, T_PLAYER_OBJECTIVE, T_TREASURE}
 CARD_TYPES_NO_UNIQUE = {T_CAMPAIGN, T_EVENT, T_FULL_ART_LANDSCAPE,
                         T_FULL_ART_PORTRAIT, T_NIGHTMARE, T_PRESENTATION,
@@ -336,12 +337,6 @@ CARD_TYPES_ENCOUNTER_SET_NUMBER = {T_ENCOUNTER_SIDE_QUEST, T_ENEMY, T_LOCATION,
                                    T_OBJECTIVE_HERO, T_OBJECTIVE_LOCATION,
                                    T_SHIP_ENEMY, T_SHIP_OBJECTIVE, T_TREACHERY}
 CARD_SPHERES_NO_ENCOUNTER_SET_NUMBER = {S_BOON, S_BURDEN, S_NOICON, S_RING}
-CARD_TYPES_ENCOUNTER_SET_ICON = {T_CAMPAIGN, T_ENCOUNTER_SIDE_QUEST, T_ENEMY,
-                                 T_LOCATION, T_NIGHTMARE, T_OBJECTIVE,
-                                 T_OBJECTIVE_ALLY, T_OBJECTIVE_HERO,
-                                 T_OBJECTIVE_LOCATION, T_QUEST, T_SHIP_ENEMY,
-                                 T_SHIP_OBJECTIVE, T_TREACHERY, T_TREASURE}
-CARD_SPHERES_NO_ENCOUNTER_SET_ICON = {S_BOON, S_NOICON, S_RING}
 CARD_TYPES_FLAGS = {F_NOTRAITS:
                     {T_ALLY, T_ENEMY, T_HERO, T_LOCATION, T_OBJECTIVE_ALLY,
                      T_OBJECTIVE_HERO, T_OBJECTIVE_LOCATION, T_SHIP_ENEMY,
@@ -4314,10 +4309,10 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
         if (card_encounter_set is None and  # pylint: disable=R0916
                 ((card_type in CARD_TYPES_ENCOUNTER_SET and
-                  (card_sphere != S_BOON or card_type == T_OBJECTIVE)) or
-                 (card_type_back in CARD_TYPES_ENCOUNTER_SET and
-                  (card_sphere_back != S_BOON or
-                   card_type_back == T_OBJECTIVE)))):
+                  card_sphere not in CARD_SPHERES_NO_ENCOUNTER_SET) or
+                 (card_name_back is not None and
+                  card_type_back in CARD_TYPES_ENCOUNTER_SET and
+                  card_sphere_back not in CARD_SPHERES_NO_ENCOUNTER_SET))):
             message = 'Missing encounter set for row #{}{}'.format(i, row_info)
             logging.error(message)
             if not card_scratch:
@@ -4325,11 +4320,11 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_encounter_set is not None and  # pylint: disable=R0916
-              (card_type in CARD_TYPES_NO_ENCOUNTER_SET
-               or (card_sphere == S_BOON and card_type != T_OBJECTIVE)) and
-              (card_type_back in CARD_TYPES_NO_ENCOUNTER_SET or
-               card_type_back is None or (card_sphere_back == S_BOON and
-                                          card_type_back != T_OBJECTIVE))):
+              ((card_type in CARD_TYPES_NO_ENCOUNTER_SET or
+                card_sphere in CARD_SPHERES_NO_ENCOUNTER_SET) and
+               (card_name_back is None or
+                card_type_back in CARD_TYPES_NO_ENCOUNTER_SET or
+                card_sphere_back in CARD_SPHERES_NO_ENCOUNTER_SET))):
             message = 'Unnecessary encounter set for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -5785,8 +5780,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
 
         if (card_encounter_set_icon is not None and
-                (card_type not in CARD_TYPES_ENCOUNTER_SET_ICON or
-                 card_sphere in CARD_SPHERES_NO_ENCOUNTER_SET_ICON)):
+                (card_type not in CARD_TYPES_ENCOUNTER_SET or
+                 card_sphere in CARD_SPHERES_NO_ENCOUNTER_SET)):
             message = 'Unnecessary encounter set icon for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -5805,8 +5800,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
         elif (card_encounter_set_icon_back is not None and
-              (card_type_back not in CARD_TYPES_ENCOUNTER_SET_ICON or
-               card_sphere_back in CARD_SPHERES_NO_ENCOUNTER_SET_ICON)):
+              (card_type_back not in CARD_TYPES_ENCOUNTER_SET or
+               card_sphere_back in CARD_SPHERES_NO_ENCOUNTER_SET)):
             message = ('Unnecessary encounter set icon back for row #{}{}'
                        .format(i, row_info))
             logging.error(message)
