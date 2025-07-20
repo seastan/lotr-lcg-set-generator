@@ -3153,7 +3153,11 @@ def extract_data(conf):  # pylint: disable=R0912,R0915
 
         DATA.extend(data)
 
-    DATA[:] = [row for row in DATA if not _skip_row(row)]
+    try:
+        DATA[:] = [row for row in DATA if not _skip_row(row)]
+    except KeyError as exc:
+        raise SheetError('Broken Google Sheet columns: {}'.format(exc))
+
     PRE_SANITY_CHECK['name'] = {}
     PRE_SANITY_CHECK['ref'] = {}
     PRE_SANITY_CHECK['flavour'] = {}
