@@ -3151,7 +3151,8 @@ def extract_data(conf):  # pylint: disable=R0912,R0915
     try:
         DATA[:] = [row for row in DATA if not _skip_row(row)]
     except KeyError as exc:
-        raise SheetError('Broken Google Sheet columns: {}'.format(exc))
+        raise SheetError(
+            'Broken Google Sheet columns: {}'.format(exc)) from exc
 
     PRE_SANITY_CHECK['name'] = {}
     PRE_SANITY_CHECK['ref'] = {}
@@ -8175,6 +8176,9 @@ def load_external_xml(url, sets=None, encounter_sets=None):  # pylint: disable=R
         cost = _find_properties(card, 'Cost')
         cost = handle_int(cost[0].attrib['value']) if cost else None
 
+        victory = _find_properties(card, 'Victory Points')
+        victory = victory[0].attrib['value'] if victory else None
+
         if not card.attrib.get('size'):
             row[CARD_BACK] = B_PLAYER
         elif card.attrib.get('size') == 'EncounterCard':
@@ -8194,6 +8198,7 @@ def load_external_xml(url, sets=None, encounter_sets=None):  # pylint: disable=R
         row[CARD_SET_NAME] = set_name
         row[CARD_UNIQUE] = unique
         row[CARD_COST] = cost
+        row[CARD_VICTORY] = victory
         row[CARD_EASY_MODE] = None
         res.append(row)
 
@@ -8212,6 +8217,8 @@ def _update_card_for_rules(card):
     card[CARD_TYPE] = str(card[CARD_TYPE]).lower() if card[CARD_TYPE] else ''
     card[CARD_SPHERE] = (str(card[CARD_SPHERE]).lower()
                          if card[CARD_SPHERE] else '')
+    card[CARD_VICTORY] = (str(card[CARD_VICTORY]).lower()
+                         if card[CARD_VICTORY] else '')
     card[CARD_TRAITS] = (
         [t.lower().strip()
          for t in re.sub(r'\[[^\]]+\]', '', str(card[CARD_TRAITS])).split('.')
@@ -8293,6 +8300,9 @@ def _test_rule(card, rule):  # pylint: disable=R0911,R0912
         elif re.match(r'^keyword:', part):
             if (re.sub(r'^keyword:', '', part).strip()
                     not in card[CARD_KEYWORDS]):
+                return 0
+        elif re.match(r'^victory:', part):
+            if re.sub(r'^victory:', '', part).strip() != card[CARD_VICTORY]:
                 return 0
         elif re.match(
                 r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',

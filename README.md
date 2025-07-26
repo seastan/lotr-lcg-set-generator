@@ -685,6 +685,7 @@ Below is a list of all supported filters:
 - `Sphere:card sphere` - all cards with a particular sphere.  For example: `Sphere:Boon`.
 - `Trait:card trait` - all cards with a particular trait.  For example: `Trait:Rohan`.
 - `Keyword:keyword` - all cards with a particular keyword.  For example: `Keyword:Safe`.
+- `Victory:victory` - all cards with a particular victory value.  For example: `Victory:1`.
 - `Unique:1` - all unique cards.
 - `card name` - all copies of a card with a particular name.  For example: `Shores of Anduin`.
 - `card GUID` - all copies of a card with a particular GUID.  For example: `de8c3087-3a5d-424c-b137-fb548beb659e`.
