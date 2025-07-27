@@ -542,8 +542,8 @@ def create_ringsdb_csv(pack_name, pack_code):
     """
     data = get_hall_data()
     data = [c for c in data if c['pack_name'] == pack_name]
-    file_path = os.path.join(OUTPUT_PATH, '{}.csv'.format(
-        escape_filename(pack_name)))
+    file_path = os.path.join(OUTPUT_PATH, escape_filename(
+        '{}.csv'.format(pack_name)))
     with open(file_path, 'w', newline='', encoding='utf-8') as obj:
         obj.write(codecs.BOM_UTF8.decode('utf-8'))
         fieldnames = ['pack', 'type', 'sphere', 'position', 'code', 'name',
@@ -713,14 +713,14 @@ def create_dragncards_json(pack_name, pack_id):  # pylint: disable=R0912,R0914
 
         sh_data += line
 
-    file_path = os.path.join(OUTPUT_PATH, '{}.json'.format(
-        escape_filename(pack_name)))
+    file_path = os.path.join(OUTPUT_PATH, escape_filename(
+        '{}.json'.format(pack_name)))
     with open(file_path, 'w', encoding='utf-8') as obj:
         res = json.dumps(json_data, ensure_ascii=True, indent=4)
         obj.write(res)
 
-    file_path = os.path.join(OUTPUT_PATH, '{}.sh'.format(
-        escape_filename(pack_name)))
+    file_path = os.path.join(OUTPUT_PATH, escape_filename(
+        '{}.sh'.format(pack_name)))
     with open(file_path, 'w', encoding='utf-8') as obj:
         obj.write(sh_data)
     print('Done')

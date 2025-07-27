@@ -571,6 +571,7 @@ List of available sphere values:
 - `Cave` (`Encounter Side Quest` only)
 - `NoIcon` (`Objective` only)
 - `Ring` (`Objective` only)
+- `RingAttachment` (`Objective` only)
 - `NoProgress` (`Encounter Side Quest` only)
 - `NoStat` (`Enemy` only)
 - `Region` (`Encounter Side Quest` only)

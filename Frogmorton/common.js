@@ -26,6 +26,8 @@ const PRESENTATION = 'Presentation';
 const PROMO = 'Promo';
 const QUEST = 'Quest';
 const REGION = 'Region';
+const RING = 'Ring';
+const RING_ATTACHMENT = 'RingAttachment';
 const RULES = 'Rules';
 const SETUP = 'Setup';
 const SHIP_ENEMY = 'Ship Enemy';
@@ -1405,6 +1407,10 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				if ((cardType == CAMPAIGN) && (cardSphere == SETUP)) {
 					s.set('Type', markUp(translate[SETUP][lang].toUpperCase(), 'Type', cardType, lang, setID));
 					s.set('Template', 'Standard');
+				}
+				else if ((cardType == OBJECTIVE) && (cardSphere == RING_ATTACHMENT)) {
+					s.set('Type', markUp(translate[ATTACHMENT][lang].toUpperCase(), 'Type', cardType, lang, setID));
+					s.set('Template', RING);
 				}
 				else {
 					s.set('Type', markUp(translate[cardType][lang].toUpperCase(), 'Type', cardType, lang, setID));

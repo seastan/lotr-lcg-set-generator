@@ -1421,7 +1421,7 @@ async def get_rendered_images(set_name):  # pylint: disable=R0914
     lotr.create_folder(local_path)
 
     download_time_file = os.path.split(lotr.DOWNLOAD_TIME_PATH)[-1]
-    folder = '{}.English'.format(lotr.escape_filename(set_name))
+    folder = lotr.escape_filename('{}.English'.format(set_name))
     stdout, stderr = await run_shell(RCLONE_RENDERED_FOLDER_CMD.format(folder))
     try:
         items = sorted(json.loads(stdout),
@@ -3146,10 +3146,10 @@ Card "{}" has been updated:
             return
 
         for old_set_name, new_set_name in set_name_changes:
-            old_folder_name = '{}.English'.format(
-                lotr.escape_filename(old_set_name))
-            new_folder_name = '{}.English'.format(
-                lotr.escape_filename(new_set_name))
+            old_folder_name = lotr.escape_filename(
+                '{}.English'.format(old_set_name))
+            new_folder_name = lotr.escape_filename(
+                '{}.English'.format(new_set_name))
             stdout, stderr = await run_shell(
                 RCLONE_COPY_CLOUD_FOLDER_CMD.format(old_folder_name,
                                                     new_folder_name))
@@ -3737,7 +3737,7 @@ Targets removed.
         if quest.lower() in data['sets_by_code']:
             quest = data['sets_by_code'][quest.lower()].replace('ALeP - ', '')
 
-        quest_folder = lotr.escape_filename(quest).lower()
+        quest_folder = lotr.escape_filename(quest.lower())
         quest_file = lotr.escape_octgn_filename(quest_folder)
         set_folders = {lotr.escape_filename(s) for s in data['set_names']}
         quests = {}
@@ -4507,12 +4507,8 @@ Targets removed.
                     'process failed')
 
         folder = os.path.join(artwork_destination_path, card[lotr.CARD_SET])
-        filename = '{}_{}_{}_Artist_{}.{}'.format(
-            card[lotr.CARD_ID],
-            side,
-            lotr.escape_filename(card[lotr.CARD_NAME]),
-            artist,
-            filetype)
+        filename = lotr.escape_filename('{}_{}_{}_Artist_{}.{}'.format(
+            card[lotr.CARD_ID], side, card[lotr.CARD_NAME], artist, filetype))
         filename = filename.replace(' ', '_')
         path = os.path.join(folder, filename)
 
@@ -4665,8 +4661,7 @@ Targets removed.
             filename = re.sub(r'\/$', '', url.split('#')[0].split('?')[0]
                              ).split('/')[-1]
 
-        filename = lotr.escape_filename(filename)
-        filename = '{}_{}'.format(artist, filename)
+        filename = lotr.escape_filename('{}_{}'.format(artist, filename))
         filename = filename.replace(' ', '_')
 
         content = await get_attachment_content(message)
@@ -4770,10 +4765,10 @@ Targets removed.
                 new_set_id not in data['sets_by_id']):
             return
 
-        old_set_folder = '{}.English'.format(
-            lotr.escape_filename(data['sets_by_id'][old_set_id]))
-        new_set_folder = '{}.English'.format(
-            lotr.escape_filename(data['sets_by_id'][new_set_id]))
+        old_set_folder = lotr.escape_filename(
+            '{}.English'.format(data['sets_by_id'][old_set_id]))
+        new_set_folder = lotr.escape_filename(
+            '{}.English'.format(data['sets_by_id'][new_set_id]))
 
         filenames = await self._get_image_files(old_set_folder)
         for filename in filenames:
@@ -5281,7 +5276,7 @@ Targets removed.
                 if not os.path.exists(image_path):
                     stdout, stderr = await run_shell(
                         RCLONE_COPY_IMAGE_CMD.format(
-                            '{}.English'.format(lotr.escape_filename(set_name)),
+                            lotr.escape_filename('{}.English'.format(set_name)),
                             image['filename'], local_path))
                     if not os.path.exists(image_path):
                         if stdout or stderr:
@@ -5341,7 +5336,7 @@ Targets removed.
             modified_times.append(image['modified'])
             if not os.path.exists(image_path):
                 stdout, stderr = await run_shell(RCLONE_COPY_IMAGE_CMD.format(
-                    '{}.English'.format(lotr.escape_filename(set_name)),
+                    lotr.escape_filename('{}.English'.format(set_name)),
                     image['filename'], local_path))
 
                 if not os.path.exists(image_path):
