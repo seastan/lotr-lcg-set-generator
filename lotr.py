@@ -2347,6 +2347,25 @@ def _extract_all_accents():
         ACCENTS.update(_get_accents(name))
 
 
+def _clean_value_deck_rules(value):
+    """ Clean a deck rules value from the spreadsheet.
+    """
+    if not value:
+        return None
+
+    value = str(value).strip()
+    value = value.replace('\t', ' ')
+    value = value.replace('\r\n', '\n')
+    value = value.replace('\r', '\n')
+    value = re.sub(r' +(?=\n)', '', value)
+    value = re.sub(r' +', ' ', value)
+
+    if value == '':
+        value = None
+
+    return value
+
+
 def _clean_value(value):  # pylint: disable=R0915
     """ Clean a value from the spreadsheet.
     """
@@ -2639,7 +2658,11 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
             if not isinstance(value, str):
                 continue
 
-            value = _clean_value(value)
+            if key == CARD_DECK_RULES:
+                value = _clean_value_deck_rules(value)
+            else:
+                value = _clean_value(value)
+
             if not value:
                 row[key] = value
                 continue
@@ -8444,7 +8467,7 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
             errors.append('Incorrect rule "{}"'.format(item))
 
         rules_list = [(r[0].strip(),
-                       [i.strip() for i in r[1].strip().split(';')
+                       [i.strip() for i in _clean_value(r[1]).split(';')
                         if i.strip()] if not r[0].strip().startswith('_DC2_')
                        else [r[1].strip()])
                       for r in rules_list if len(r) == 2]
@@ -8476,10 +8499,10 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
 
             if key_lower.startswith('_DC2_'):
                 try:
-                    value = json.loads(
-                        value[0].replace('“', '"').replace('”', '"'))
+                    value = json.loads(value[0])
                 except Exception:
-                    errors.append('Incorrect JSON for key "{}"'.format(key))
+                    errors.append('Incorrect JSON for key "{}": "{}"'.format(
+                        key, value[0]))
                     continue
 
             rules[(key_lower, key_count[key_lower])] = value
