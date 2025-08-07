@@ -662,10 +662,11 @@ Below is a list of all supported rules:
   `Remove: Type:Campaign` (remove any cards with `Campaign` type from the normal deck).
 - `Second Quest Deck`, `Special`, `Second Special`, `Setup`, `Staging Setup`, and `Active Setup`:
   List of filters to select cards for that OCTGN section.  For example: `Setup: Saruman; Grima; Brandywine Gate`.
-- `Main Quest`, `Extra1`, `Extra2`, `Extra3`, `Extra4`, `Extra5`, `Extra6`, `Extra7`, and `Extra8`:
+- `Main Quest`, `Shared Boons`, `Extra1`, `Extra2`, `Extra3`, `Extra4`, `Extra5`, `Extra6`, `Extra7`, and `Extra8`:
   List of filters to select cards for that DragnCards-only section.  For example:
-  `Main Quest: Drive Them Away`.  Please note that all `Main Quest` cards are put into `Quest` OCTGN section and
-  all `ExtraN` cards are put into either `Quest` or `Setup` OCTGN sections, depending on the card type.
+  `Main Quest: Drive Them Away`.  Please note that all `Main Quest` cards are put into `Quest` OCTGN section,
+  all `Shared Boons` cards are put into `Setup` OCTGN section, and all `ExtraN` cards are put into either
+  `Quest` or `Setup` OCTGN sections, depending on the card type.
 - `Player`: List of filters to select cards for `Hero`, `Ally`, `Attachment`, `Event`, and `Side Quest`
   sections (exact section is defined automatically).  For example: `Player: Frodo Baggins`.
 - `_DC2_<key>"`: Additional JSON values for DragnCards 2 decks, for example "_DC2_postLoadActionList" (make sure that everything is on one line).

@@ -8479,9 +8479,9 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                     'sets', 'encounter sets', 'prefix', 'external xml',
                     'remove', 'second quest deck', 'special',
                     'second special', 'setup', 'active setup',
-                    'staging setup', 'player', 'main quest', 'extra1',
-                    'extra2', 'extra3', 'extra4', 'extra5', 'extra6', 'extra7',
-                    'extra8'}:
+                    'staging setup', 'player', 'main quest', 'shared boons',
+                    'extra1', 'extra2', 'extra3', 'extra4', 'extra5', 'extra6',
+                    'extra7', 'extra8'}:
                 errors.append('Unknown key "{}"'.format(key))
                 continue
 
@@ -8585,6 +8585,7 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
             second_special_cards = []
             default_setup_cards = []
             setup_cards = []
+            shared_boons_cards = []
             staging_setup_cards = []
             active_setup_cards = []
             chosen_player_cards = []
@@ -8651,6 +8652,10 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                 elif key == 'main quest':
                     mode_errors.extend(_apply_rules(
                         quest_cards, main_quest_cards, value, key))
+                elif key == 'shared boons':
+                    mode_errors.extend(_apply_rules(
+                        encounter_cards + other_cards, shared_boons_cards,
+                        value, key))
                 elif key == 'extra1':
                     mode_errors.extend(_apply_rules(
                         quest_cards + default_setup_cards + encounter_cards +
@@ -8694,6 +8699,8 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
             main_quest_cards = copy.deepcopy(main_quest_cards)
 
             setup_cards_octgn = copy.deepcopy(setup_cards)
+            setup_cards_octgn.extend(shared_boons_cards)
+            shared_boons_cards = copy.deepcopy(shared_boons_cards)
             for card in (extra1_cards + extra2_cards + extra3_cards +
                          extra4_cards + extra5_cards + extra6_cards +
                          extra7_cards + extra8_cards):
@@ -8715,9 +8722,10 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
                     quest_cards, second_quest_cards, encounter_cards,
                     special_cards, second_special_cards, setup_cards,
                     staging_setup_cards, active_setup_cards, main_quest_cards,
-                    extra1_cards, extra2_cards, extra3_cards, extra4_cards,
-                    extra5_cards, extra6_cards, extra7_cards, extra8_cards,
-                    chosen_player_cards, quest_cards_octgn, setup_cards_octgn):
+                    shared_boons_cards, extra1_cards, extra2_cards,
+                    extra3_cards, extra4_cards, extra5_cards, extra6_cards,
+                    extra7_cards, extra8_cards, chosen_player_cards,
+                    quest_cards_octgn, setup_cards_octgn):
                 _filter_section_cards(section)
                 section.sort(key=lambda card: (
                     card[CARD_TYPE] != 'rules',
@@ -8791,6 +8799,7 @@ def _generate_octgn_o8d_quest(row):  # pylint: disable=R0912,R0914,R0915
             for section, group_name in (
                     (chosen_player_cards, 'player1Play1'),
                     (main_quest_cards, 'sharedMainQuest'),
+                    (shared_boons_cards, 'sharedBoons'),
                     (quest_cards, 'sharedQuestDeck'),
                     (second_quest_cards, 'sharedQuestDeck2'),
                     (encounter_cards, 'sharedEncounterDeck'),
