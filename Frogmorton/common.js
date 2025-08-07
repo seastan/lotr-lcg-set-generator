@@ -1918,11 +1918,11 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('NameBack-region', parts.join(','));
 				}
 
-				if ((cardType == 'Objective') && (cardSphere == 'Ring')) {
+				if ((cardType == OBJECTIVE) && ((cardSphere == RING) || (cardSphere == RING_ATTACHMENT))) {
 					s.set('Portrait-portrait-clip-region', '0,0,413,563');
 				}
 
-				if ((cardType == 'Objective') && (cardSphere == 'Burden')) {
+				if ((cardType == OBJECTIVE) && (cardSphere == BURDEN)) {
 					s.set('Subtype-region', '163,309,95,20');
 				}
 
