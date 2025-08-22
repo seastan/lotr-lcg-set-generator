@@ -1233,7 +1233,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 
 					if (['Victory Points', 'BVictory Points'].indexOf(nXml + '') > -1) {
-						if ((cardType != PRESENTATION) && (cardType != RULES) && vXml.match(/^[0-9]+$/)) {
+						if ((cardType != PRESENTATION) && (cardType != RULES) && vXml.match(/^-?[0-9]+$/)) {
 							vXml = translate['Victory'][lang].toUpperCase() + ' ' + vXml;
 							if (lang == GERMAN) {
 								vXml += '.';

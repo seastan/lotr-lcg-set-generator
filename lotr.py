@@ -7250,8 +7250,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
 
             if (card_victory is not None and
                     TRANSLATIONS[lang][card_id].get(CARD_VICTORY) and
-                    (is_positive_or_zero_int(card_victory) or
-                     card_type in CARD_TYPES_PAGES) and
+                    (is_int(card_victory) or card_type in CARD_TYPES_PAGES) and
                     card_victory !=
                     TRANSLATIONS[lang][card_id][CARD_VICTORY]):
                 logging.error(
@@ -7262,8 +7261,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             if (card_victory_back is not None and
                     TRANSLATIONS[lang][card_id].get(
                         BACK_PREFIX + CARD_VICTORY) and
-                    (is_positive_or_zero_int(card_victory_back) or
-                     card_type == T_RULES) and
+                    (is_int(card_victory_back) or card_type == T_RULES) and
                     card_victory_back !=
                     TRANSLATIONS[lang][card_id][BACK_PREFIX + CARD_VICTORY]):
                 logging.error(
@@ -7888,7 +7886,7 @@ def _get_set_xml_property_value(row, name, card_type):  # pylint: disable=R0911,
         if card_type in CARD_TYPES_PAGES:
             if value:
                 value = 'Page {}'.format(value)
-        elif is_positive_or_zero_int(value):
+        elif is_int(value):
             value = 'VICTORY {}'.format(value)
 
         return value
