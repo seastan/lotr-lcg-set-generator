@@ -6449,9 +6449,10 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
             else:
                 broken_set_ids.add(set_id)
 
-        if (card_last_design_change_date is not None and
+        if (card_last_design_change_date is not None and (
+                not isinstance(card_last_design_change_date, str) or
                 not re.match(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}$',
-                             card_last_design_change_date)):
+                             card_last_design_change_date))):
             message = ('Incorrect last design change date format for row '
                        '#{}{}: must be YYYY-MM-DD'.format(i, row_info))
             logging.error(message)
