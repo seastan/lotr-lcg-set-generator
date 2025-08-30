@@ -696,16 +696,21 @@ def generate_renderer_artwork(json_path, output_folder):  # pylint: disable=R091
     portrait['Enemy'] = '87,0,326,330'
     portrait['Enemy NoStat'] = '0,0,413,563'
     portrait['Event'] = '60,0,353,330'
+    portrait['Full Art Landscape'] = '0,0,563,413'
+    portrait['Full Art Portrait'] = '0,0,413,563'
     portrait['Hero'] = '87,0,326,330'
     portrait['Hero Promo'] = '0,0,413,563'
     portrait['Location'] = '0,60,413,268'
     portrait['Nightmare'] = '0,77,413,245'
     portrait['Objective'] = '0,69,413,300'
+    portrait['Objective Ring'] = '0,0,413,563'
+    portrait['Objective RingAttachment'] = '0,0,413,563'
     portrait['Objective Ally'] = '78,81,335,268'
     portrait['Objective Hero'] = '78,81,335,268'
     portrait['Objective Location'] = '0,69,413,300'
     portrait['Player Objective'] = '0,69,413,300'
     portrait['Player Side Quest'] = '0,0,563,413'
+    portrait['Presentation'] = '0,140,413,285'
     portrait['Quest'] = '0,0,563,413'
     portrait['Ship Enemy'] = '87,0,326,330'
     portrait['Ship Objective'] = '78,81,335,268'
@@ -725,7 +730,7 @@ def generate_renderer_artwork(json_path, output_folder):  # pylint: disable=R091
 
     for card_id, data in images.items():
         card_type = data['card_type']
-        if data['card_sphere'] == 'NoStat':
+        if data['card_sphere'] in ('NoStat', 'Ring', 'RingAttachment'):
             card_type = '%s %s' % (card_type, data['card_sphere'])
         elif data['flags'] == 'Promo':
             card_type = '%s Promo' % (card_type,)

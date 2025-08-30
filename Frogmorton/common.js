@@ -117,7 +117,7 @@ var encounterSet6PortraitRegion = {};
 encounterSet6PortraitRegion[QUEST] = '330,213,20,20';
 
 var starRegion = {};
-starRegion[ALLY] = '372,524,11,11';
+starRegion[ALLY] = '373,524,11,11';
 starRegion[ATTACHMENT] = '373,524,11,11';
 starRegion[CAMPAIGN] = '373,524,11,11';
 starRegion[CAVE] = '529,374,11,11';
@@ -145,7 +145,7 @@ starRegion[TREACHERY] = '373,524,11,11';
 starRegion[TREASURE] = '377,524,11,11';
 
 var collectionInfoRegion = {};
-collectionInfoRegion[ALLY] = '357,526,26,15';
+collectionInfoRegion[ALLY] = '358,526,26,15';
 collectionInfoRegion[ATTACHMENT] = '358,526,26,15';
 collectionInfoRegion[CAMPAIGN] = '358,526,26,15';
 collectionInfoRegion[CAVE] = '516,374,26,15';
@@ -183,7 +183,7 @@ collectionNumberRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '403,375,24,15';
 collectionNumberRegion[ENEMY] = '334,527,24,15';
 collectionNumberRegion[ENEMY_NOSTAT] = '334,527,24,15';
 collectionNumberRegion[EVENT] = '334,527,24,15';
-collectionNumberRegion[FULL_ART_LANDSCAPE] = '334,527,24,15';
+collectionNumberRegion[FULL_ART_LANDSCAPE] = '403,375,24,15';
 collectionNumberRegion[FULL_ART_PORTRAIT] = '334,527,24,15';
 collectionNumberRegion[HERO] = '334,527,24,15';
 collectionNumberRegion[HERO_PROMO] = '314,510,24,12';
@@ -233,6 +233,7 @@ collectionPortraitRegion[TREASURE] = '322,528,12,12';
 
 var typeRegion = {};
 typeRegion[ALLY] = '136,504,141,20';
+typeRegion[ALLY + BOON] = '135,507,143,20';
 typeRegion[ATTACHMENT] = '136,504,142,20';
 typeRegion[CAMPAIGN] = '135,504,142,20';
 typeRegion[CONTRACT] = '136,504,141,20';
@@ -331,6 +332,8 @@ portraitRegion[HERO_PROMO] = '0,0,413,563';
 portraitRegion[LOCATION] = '0,60,413,268';
 portraitRegion[NIGHTMARE] = '0,77,413,245';
 portraitRegion[OBJECTIVE] = '0,69,413,300';
+portraitRegion[OBJECTIVE + RING] = '0,0,413,563';
+portraitRegion[OBJECTIVE + RING_ATTACHMENT] = '0,0,413,563';
 portraitRegion[OBJECTIVE_ALLY] = '78,81,335,268';
 portraitRegion[OBJECTIVE_HERO] = '78,81,335,268';
 portraitRegion[OBJECTIVE_LOCATION] = '0,69,413,300';
@@ -353,6 +356,7 @@ bodyRegionHeroPromo[GERMAN] = '73,467,269,45';
 
 var bodyRegion = {};
 bodyRegion[ALLY] = '57,378,299,114';
+bodyRegion[ALLY + BOON] = '55,380,303,115';
 bodyRegion[ATTACHMENT] = '57,347,299,144';
 bodyRegion[ENEMY] = '57,377,299,114';
 bodyRegion[ENEMY_NOSTAT] = '57,484,299,32';
@@ -377,6 +381,7 @@ bodyRegion[PLAYER_SIDE_QUEST] = '51,271,461,94';
 
 var traitRegion = {};
 traitRegion[ALLY] = '57,358,299,20';
+traitRegion[ALLY + BOON] = '55,360,303,20';
 traitRegion[ATTACHMENT] = '85,327,243,20';
 traitRegion[ENEMY] = '57,357,299,20';
 traitRegion[ENEMY_NOSTAT] = '57,470,299,14';
@@ -425,6 +430,7 @@ bodyBackRegion[RULES] = '48,73,317,418';
 
 var nameRegion = {};
 nameRegion[ALLY] = '99,326,215,30';
+nameRegion[ALLY + BOON] = '97,328,219,30';
 nameRegion[ATTACHMENT] = '131,36,185,30';
 nameRegion[CAMPAIGN] = '107,41,199,30';
 nameRegion[CAVE] = '79,41,162,30';
@@ -457,6 +463,7 @@ nameBackRegion[QUEST] = '143,42,370,33';
 
 var nameUniqueRegion = {};
 nameUniqueRegion[ALLY] = '99,324,215,31';
+nameUniqueRegion[ALLY + BOON] = '97,326,219,31';
 nameUniqueRegion[ATTACHMENT] = '131,34,185,31';
 nameUniqueRegion[CAVE] = '79,39,162,31';
 nameUniqueRegion[CONTRACT] = '83,241,247,34';
@@ -483,11 +490,12 @@ var nameUniqueBackRegion = {};
 nameUniqueBackRegion[CONTRACT] = '83,241,247,34';
 
 var subtypeRegion = {};
-subtypeRegion[ALLY] = '146,301,124,20';
+subtypeRegion[ALLY] = '146,305,124,20';
 subtypeRegion[ATTACHMENT] = '146,301,124,20';
 subtypeRegion[ENEMY] = '146,302,124,20';
 subtypeRegion[EVENT] = '146,303,124,20';
-subtypeRegion[OBJECTIVE] = '144,308,129,20'; // 163,309,95,20 for Burden
+subtypeRegion[OBJECTIVE] = '144,308,129,20';
+subtypeRegion[OBJECTIVE + BURDEN] = '163,309,95,20';
 subtypeRegion[OBJECTIVE_ALLY] = '144,308,129,20';
 subtypeRegion[OBJECTIVE_HERO] = '146,309,124,20';
 subtypeRegion[OBJECTIVE_LOCATION] = '146,309,124,20';
@@ -497,6 +505,7 @@ subtypeRegion[TREACHERY] = '161,304,97,20';
 
 var hitPointsRegion = {};
 hitPointsRegion[ALLY] = '66,269,58,40';
+hitPointsRegion[ALLY + BOON] = '63,270,58,40';
 hitPointsRegion[ENEMY] = '64,269,58,40';
 hitPointsRegion[HERO] = '64,269,58,40';
 hitPointsRegion[HERO_PROMO] = '46,408,58,40';
@@ -511,6 +520,7 @@ engagementRegion[SHIP_ENEMY] = '76,48,36,25';
 
 var attackRegion = {};
 attackRegion[ALLY] = '70,157,26,16';
+attackRegion[ALLY + BOON] = '66,159,26,16';
 attackRegion[ENEMY] = '68,156,26,16';
 attackRegion[HERO] = '68,157,26,16';
 attackRegion[HERO_PROMO] = '42,128,26,16';
@@ -521,6 +531,7 @@ attackRegion[SHIP_OBJECTIVE] = '65,159,26,16';
 
 var defenseRegion = {};
 defenseRegion[ALLY] = '70,200,26,16';
+defenseRegion[ALLY + BOON] = '66,203,26,16';
 defenseRegion[ENEMY] = '68,199,26,16';
 defenseRegion[HERO] = '68,200,26,16';
 defenseRegion[HERO_PROMO] = '42,166,26,16';
@@ -531,6 +542,7 @@ defenseRegion[SHIP_OBJECTIVE] = '65,203,26,16';
 
 var willpowerRegion = {};
 willpowerRegion[ALLY] = '70,117,26,16';
+willpowerRegion[ALLY + BOON] = '66,119,26,16';
 willpowerRegion[HERO] = '68,117,26,16';
 willpowerRegion[HERO_PROMO] = '42,94,26,16';
 willpowerRegion[OBJECTIVE_ALLY] = '66,113,26,16';
@@ -567,6 +579,7 @@ cycleRegion[CAMPAIGN] = '68,243,274,32';
 
 var resourceCostRegion = {};
 resourceCostRegion[ALLY] = '67,41,56,37';
+resourceCostRegion[ALLY + BOON] = '64,44,56,37';
 resourceCostRegion[ATTACHMENT] = '37,44,56,37';
 resourceCostRegion[EVENT] = '37,38,56,37';
 resourceCostRegion[PLAYER_SIDE_QUEST] = '43,44,56,37';
@@ -1916,14 +1929,6 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					let parts = s.get('NameBack-region').split(',');
 					parts[1] = (parseInt(parts[1]) + 2).toString();
 					s.set('NameBack-region', parts.join(','));
-				}
-
-				if ((cardType == OBJECTIVE) && ((cardSphere == RING) || (cardSphere == RING_ATTACHMENT))) {
-					s.set('Portrait-portrait-clip-region', '0,0,413,563');
-				}
-
-				if ((cardType == OBJECTIVE) && (cardSphere == BURDEN)) {
-					s.set('Subtype-region', '163,309,95,20');
 				}
 
 				if ((cardType in sphereOptionBodyShape) && s.get('OptionRight') && (s.get('OptionRight') + '').length) {

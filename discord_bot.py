@@ -142,16 +142,21 @@ PORTRAIT = {
     lotr.T_ENEMY: '87,0,326,330',
     lotr.T_ENEMY + lotr.S_NOSTAT: '0,0,413,563',
     lotr.T_EVENT: '60,0,353,330',
+    lotr.T_FULL_ART_LANDSCAPE: '0,0,563,413',
+    lotr.T_FULL_ART_PORTRAIT: '0,0,413,563',
     lotr.T_HERO: '87,0,326,330',
     lotr.T_HERO + lotr.F_PROMO: '0,0,413,563',
     lotr.T_LOCATION: '0,60,413,268',
     lotr.T_NIGHTMARE: '0,77,413,245',
     lotr.T_OBJECTIVE: '0,69,413,300',
+    lotr.T_OBJECTIVE + lotr.S_RING : '0,0,413,563',
+    lotr.T_OBJECTIVE + lotr.S_RINGATTACHMENT : '0,0,413,563',
     lotr.T_OBJECTIVE_ALLY: '78,81,335,268',
     lotr.T_OBJECTIVE_HERO: '78,81,335,268',
     lotr.T_OBJECTIVE_LOCATION: '0,69,413,300',
     lotr.T_PLAYER_OBJECTIVE: '0,69,413,300',
     lotr.T_PLAYER_SIDE_QUEST: '0,0,563,413',
+    lotr.T_PRESENTATION: '0,140,413,285',
     lotr.T_QUEST: '0,0,563,413',
     lotr.T_SHIP_ENEMY: '87,0,326,330',
     lotr.T_SHIP_OBJECTIVE: '78,81,335,268',
@@ -4550,19 +4555,19 @@ Targets removed.
         """
         if side == 'A':
             card_type = card[lotr.CARD_TYPE]
-            if (card_type == lotr.T_ENEMY and
-                    card.get(lotr.CARD_SPHERE) == lotr.S_NOSTAT):
-                card_type = lotr.T_ENEMY + lotr.S_NOSTAT
+            if card.get(lotr.CARD_SPHERE) in (
+                    lotr.S_NOSTAT, lotr.S_RING, lotr.S_RINGATTACHMENT):
+                card_type = card_type + card[lotr.CARD_SPHERE]
             elif (card_type == lotr.T_HERO and
                   lotr.F_PROMO in
                   lotr.extract_flags(card.get(lotr.CARD_FLAGS))):
                 card_type = lotr.T_HERO + lotr.F_PROMO
         else:
             card_type = card.get(lotr.BACK_PREFIX + lotr.CARD_TYPE, '')
-            if (card_type == lotr.T_ENEMY and
-                    card.get(lotr.BACK_PREFIX + lotr.CARD_SPHERE) ==
-                    lotr.S_NOSTAT):
-                card_type = lotr.T_ENEMY + lotr.S_NOSTAT
+            if card.get(lotr.BACK_PREFIX + lotr.CARD_SPHERE) in (
+                    lotr.S_NOSTAT, lotr.S_RING, lotr.S_RINGATTACHMENT):
+                card_type = (
+                    card_type + card[lotr.BACK_PREFIX + lotr.CARD_SPHERE])
             elif (card_type == lotr.T_HERO and
                   lotr.F_PROMO in
                   lotr.extract_flags(card.get(
