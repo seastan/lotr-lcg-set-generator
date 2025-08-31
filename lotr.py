@@ -2520,14 +2520,15 @@ def parse_flavour(value, lang, value_id=None):  # pylint: disable=R0912,R0915
         source_book = re.sub(r'\[[^\]]+\]$', '', source_parts[-1])
         if not KNOWN_BOOKS.get(lang):
             parts = [original_value]
-        elif source_book not in KNOWN_BOOKS[lang]:
+        elif source_book.strip() not in KNOWN_BOOKS[lang]:
             parts = [original_value]
             if not false_split:
                 errors.append('Possibly unknown source book: {}'.format(
                     source_book))
         else:
             if lang == L_ENGLISH and value_id:
-                FLAVOUR_BOOKS[value_id] = KNOWN_BOOKS[lang].index(source_book)
+                FLAVOUR_BOOKS[value_id] = KNOWN_BOOKS[lang].index(
+                    source_book.strip())
 
             if len(source_parts) == 2:
                 parts = [parts[0], source_parts[0], source_parts[1]]
@@ -2581,8 +2582,8 @@ def parse_flavour(value, lang, value_id=None):  # pylint: disable=R0912,R0915
                 parts[0] = parts[0].replace('—', '-')
 
     if lang != L_ENGLISH and KNOWN_BOOKS.get(lang) and value_id:
-        if source_book and source_book in KNOWN_BOOKS[lang]:
-            book_index = KNOWN_BOOKS[lang].index(source_book)
+        if source_book and source_book.strip() in KNOWN_BOOKS[lang]:
+            book_index = KNOWN_BOOKS[lang].index(source_book.strip())
         else:
             book_index = -1
 
