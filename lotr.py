@@ -808,14 +808,16 @@ KNOWN_BOOKS = {
         'El Hobbit', 'La Comunidad del Anillo', 'Las Dos Torres',
         'El Retorno del Rey', 'El Silmarillion', 'La Caída de Gondolin'],
     }
+ALWAYS_FIRST_TRAITS = {
+    'Stage 1', 'Stage 2', 'Stage 3', 'Stage 4', 'Stage 5', 'Stage 6', 'Tier 1',
+    'Tier 2', 'Wave 1', 'Wave 2'}
 AUXILIARY_TRAITS = {
-    'Abroad', 'Basic', 'Broken', 'Claimed', 'Corrupt', 'Cursed', 'Elite',
-    'Epic', 'Massing', 'Reforged', 'Standard', 'Suspicious', 'Tempting',
-    'Upgraded'}
+    'Abroad', 'Basic', 'Broken', 'Claimed', 'Commander', 'Corrupt', 'Cursed',
+    'Elite', 'Epic', 'Massing', 'Reforged', 'Standard', 'Suspicious',
+    'Tempting', 'Upgraded'}
 DESCRIPTIVE_LAST_TRAITS = {
-    'Boar', 'Boar Clan', 'Captain', 'Commander', 'Flame', 'Lieutenant',
-    'Olog-hai', 'Raven', 'Raven Clan', 'Uruk-hai', 'Wolf', 'Wolf Clan',
-    'Wolf-cult'}
+    'Boar', 'Boar Clan', 'Captain', 'Flame', 'Lieutenant', 'Olog-hai',
+    'Raven', 'Raven Clan', 'Uruk-hai', 'Wolf', 'Wolf Clan', 'Wolf-cult'}
 DESCRIPTIVE_TRAITS = {
     'Adventure', 'Advice', 'Archer', 'Assault', 'Attack', 'Besieger',
     'Black Speech', 'Brigand', 'Burglar', 'Capture', 'Captured', 'Champion',
@@ -835,17 +837,16 @@ DESCRIPTIVE_TRAITS = {
 LOCATION_SUBTYPE_TRAITS = {
     'Battleground', 'Besieged', 'Camp', 'Castle', 'Dark', 'Deck', 'Downs',
     'Dwelling', 'Fords', 'Fortification', 'Garrison', 'Gate', 'Hideout',
-    'Highlands', 'Inn', 'Lair', 'Lawn', 'Level 0', 'Level 1', 'Level 2',
-    'Level 3', 'Level 4', 'Level 5', 'Level 6', 'Level 7', 'Marsh',
-    'Marshland', 'Pier', 'Polluted', 'Riverland', 'Siege', 'Snow', 'Stair',
-    'Wasteland'}
+    'Highlands', 'Inn', 'Lair', 'Lawn', 'Marsh', 'Marshland', 'Pier',
+    'Polluted', 'Riverland', 'Siege', 'Snow', 'Stair', 'Wasteland'}
 LOCATION_TYPE_FIRST_TRAITS = {
     'Barrow', 'Blight', 'City', 'Desert', 'Forest', 'Mountain', 'Plains',
     'Ruins', 'Underground', 'Underwater', 'Village'}
 LOCATION_TYPE_TRAITS = {
     'Bridge', 'Cave', 'Coastland', 'Dungeon', 'Grotto', 'Hills', 'Lake',
-    'Ocean', 'River', 'Road', 'Ship', 'Stream', 'Swamp', 'Town', 'Vale',
-    'Valley'}
+    'Level 0', 'Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5',
+    'Level 6', 'Level 7', 'Ocean', 'River', 'Road', 'Ship', 'Stream', 'Swamp',
+    'Town', 'Vale', 'Valley'}
 NOBLE_TRAITS = {'Noble'}
 RACE_FIRST_TRAITS = {'Creature', 'Istari', 'Nazgûl', 'Orc', 'Undead'}
 RACE_TRAITS = {
@@ -866,18 +867,16 @@ REGION_TRAITS = {
     'Ost-in-Edhil', 'Pelennor', 'Rhûn', 'Shire', 'Trollshaws', 'Umbar',
     'Underworld', 'West Bank', 'Western Lands', 'Westfarthing', 'Westfold',
     'Wilderlands'}
-TYPE_FIRST_TRAITS = {
-    'Artifact', 'Item', 'Stage 1', 'Stage 2', 'Stage 3', 'Stage 4', 'Stage 5',
-    'Stage 6', 'Suspect', 'Stronghold', 'Tier 1', 'Tier 2', 'Wall', 'Wave 1',
-    'Wave 2'}
+TYPE_FIRST_TRAITS = {'Artifact', 'Item', 'Suspect', 'Stronghold', 'Wall'}
 TYPE_TRAITS = {
     'Adaptation', 'Armor', 'Army', 'Assassin', 'Boon', 'Captive', 'Condition',
     'Faction', 'Favor', 'Gift', 'Maia', 'Morgul', 'Mount', 'Ring', 'Scenario',
     'Signal', 'Skill', 'Song', 'Spell', 'Tale', 'Title', 'Trap', 'Weapon'}
-TRAITS_ORDER = [TYPE_FIRST_TRAITS, TYPE_TRAITS, RACE_FIRST_TRAITS,
-                RACE_TRAITS, REGION_TRAITS, LOCATION_TYPE_FIRST_TRAITS,
-                LOCATION_TYPE_TRAITS, LOCATION_SUBTYPE_TRAITS, NOBLE_TRAITS,
-                DESCRIPTIVE_TRAITS, DESCRIPTIVE_LAST_TRAITS, AUXILIARY_TRAITS]
+TRAITS_ORDER = [
+    ALWAYS_FIRST_TRAITS, TYPE_FIRST_TRAITS, TYPE_TRAITS, RACE_FIRST_TRAITS,
+    RACE_TRAITS, REGION_TRAITS, LOCATION_TYPE_FIRST_TRAITS,
+    LOCATION_TYPE_TRAITS, LOCATION_SUBTYPE_TRAITS, NOBLE_TRAITS,
+    DESCRIPTIVE_TRAITS, DESCRIPTIVE_LAST_TRAITS, AUXILIARY_TRAITS]
 COMMON_TRAITS = set.union(*(TRAITS_ORDER + [{'Trait', 'Traits'}]))
 
 ALLOWED_CAMPAIGN_NAMES = {
@@ -988,8 +987,9 @@ ALLOWED_FIRST_WORDS = {
 COMMON_ACCENTS = {'Annuminas', 'Cuarthol', 'Din', 'Druadan', 'Druedain',
                   'Dum', 'dum', 'Dunedain', 'Iarion', 'Lorien', 'Mumakil',
                   'Nazgul', 'Nin', 'Numenor', 'Rhun'}
-COMMON_KEYWORDS = {'Devoted', 'Doomed', 'Encounter', 'Guarded', 'Ranged',
-                   'Restricted', 'Secrecy', 'Sentinel', 'Surge', 'Turncoat'}
+COMMON_KEYWORDS = {'Archery', 'Devoted', 'Doomed', 'Encounter', 'Guarded',
+                   'Ranged', 'Restricted', 'Secrecy', 'Sentinel', 'Surge',
+                   'Turncoat'}
 LOWERCASE_WORDS = {
     'a', 'an', 'the', 'and', 'as', 'at', 'but', 'by', 'for', 'from', 'if',
     'in', 'into', 'nor', 'of', 'on', 'onto', 'or', 'out', 'so', 'than',
