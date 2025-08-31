@@ -809,11 +809,13 @@ KNOWN_BOOKS = {
         'El Retorno del Rey', 'El Silmarillion', 'La Caída de Gondolin'],
     }
 AUXILIARY_TRAITS = {
-    'Abroad', 'Basic', 'Broken', 'Corrupt', 'Cursed', 'Elite', 'Epic',
-    'Massing', 'Reforged', 'Standard', 'Suspicious', 'Upgraded'}
+    'Abroad', 'Basic', 'Broken', 'Claimed', 'Corrupt', 'Cursed', 'Elite',
+    'Epic', 'Massing', 'Reforged', 'Standard', 'Suspicious', 'Tempting',
+    'Upgraded'}
 DESCRIPTIVE_LAST_TRAITS = {
-    'Boar', 'Boar Clan', 'Captain', 'Flame', 'Lieutenant', 'Olog-hai',
-    'Raven', 'Raven Clan', 'Uruk-hai', 'Wolf', 'Wolf Clan', 'Wolf-cult'}
+    'Boar', 'Boar Clan', 'Captain', 'Commander', 'Flame', 'Lieutenant',
+    'Olog-hai', 'Raven', 'Raven Clan', 'Uruk-hai', 'Wolf', 'Wolf Clan',
+    'Wolf-cult'}
 DESCRIPTIVE_TRAITS = {
     'Adventure', 'Advice', 'Archer', 'Assault', 'Attack', 'Besieger',
     'Black Speech', 'Brigand', 'Burglar', 'Capture', 'Captured', 'Champion',
@@ -823,17 +825,20 @@ DESCRIPTIVE_TRAITS = {
     'Hazard', 'Healer', 'Hungry', 'Inferno', 'Information', 'Instrument',
     'Key', 'Light', 'Master', 'Mathom', 'Minstrel', 'Mission', 'Mustering',
     'Nervous', 'Night', 'Panic', 'Panicked', 'Party', 'Pillager', 'Pipe',
-    'Pipeweed', 'Plight', 'Plot', 'Poison', 'Raider', 'Ranger', 'Record',
-    'Refuge', 'Riddle', 'Ring-bearer', 'Ruffian', 'Sack', 'Scheme', 'Scout',
-    'Scroll', 'Search', 'Servant', 'Service', 'Shadow', 'Sharkey', 'Shirriff',
-    'Sorcerer', 'Sorcery', 'Spy', 'Staff', 'Stalking', 'Steward', 'Summoned',
-    'Summoner', 'Tantrum', 'Thaurdir', 'Thug', 'Time', 'Tools', 'Traitor',
-    'Treasure', 'Villain', 'Warden', 'Warrior', 'Weather', 'Wound'}
+    'Pipeweed', 'Plight', 'Plot', 'Poison', 'Providence', 'Raider', 'Ranger',
+    'Record', 'Refuge', 'Riddle', 'Ring-bearer', 'Ruffian', 'Sack', 'Sauron',
+    'Scheme', 'Scout', 'Scroll', 'Search', 'Servant', 'Service', 'Shadow',
+    'Sharkey', 'Shirriff', 'Sorcerer', 'Sorcery', 'Spy', 'Staff', 'Stalking',
+    'Steward', 'Summoned', 'Summoner', 'Tantrum', 'Thaurdir', 'Thug', 'Time',
+    'Tools', 'Traitor', 'Treasure', 'Villain', 'Warden', 'Warrior', 'Weather',
+    'Wound'}
 LOCATION_SUBTYPE_TRAITS = {
     'Battleground', 'Besieged', 'Camp', 'Castle', 'Dark', 'Deck', 'Downs',
-    'Fords', 'Fortification', 'Garrison', 'Gate', 'Hideout', 'Highlands',
-    'Inn', 'Lair', 'Lawn', 'Marsh', 'Marshland', 'Pier', 'Polluted',
-    'Riverland', 'Siege', 'Snow', 'Stair', 'Wasteland'}
+    'Dwelling', 'Fords', 'Fortification', 'Garrison', 'Gate', 'Hideout',
+    'Highlands', 'Inn', 'Lair', 'Lawn', 'Level 0', 'Level 1', 'Level 2',
+    'Level 3', 'Level 4', 'Level 5', 'Level 6', 'Level 7', 'Marsh',
+    'Marshland', 'Pier', 'Polluted', 'Riverland', 'Siege', 'Snow', 'Stair',
+    'Wasteland'}
 LOCATION_TYPE_FIRST_TRAITS = {
     'Barrow', 'Blight', 'City', 'Desert', 'Forest', 'Mountain', 'Plains',
     'Ruins', 'Underground', 'Underwater', 'Village'}
@@ -863,11 +868,12 @@ REGION_TRAITS = {
     'Wilderlands'}
 TYPE_FIRST_TRAITS = {
     'Artifact', 'Item', 'Stage 1', 'Stage 2', 'Stage 3', 'Stage 4', 'Stage 5',
-    'Stage 6', 'Suspect', 'Stronghold', 'Wall'}
+    'Stage 6', 'Suspect', 'Stronghold', 'Tier 1', 'Tier 2', 'Wall', 'Wave 1',
+    'Wave 2'}
 TYPE_TRAITS = {
     'Adaptation', 'Armor', 'Army', 'Assassin', 'Boon', 'Captive', 'Condition',
-    'Faction', 'Favor', 'Gift', 'Morgul', 'Mount', 'Ring', 'Signal', 'Skill',
-    'Song', 'Spell', 'Tale', 'Title', 'Trap', 'Weapon'}
+    'Faction', 'Favor', 'Gift', 'Maia', 'Morgul', 'Mount', 'Ring', 'Scenario',
+    'Signal', 'Skill', 'Song', 'Spell', 'Tale', 'Title', 'Trap', 'Weapon'}
 TRAITS_ORDER = [TYPE_FIRST_TRAITS, TYPE_TRAITS, RACE_FIRST_TRAITS,
                 RACE_TRAITS, REGION_TRAITS, LOCATION_TYPE_FIRST_TRAITS,
                 LOCATION_TYPE_TRAITS, LOCATION_SUBTYPE_TRAITS, NOBLE_TRAITS,
