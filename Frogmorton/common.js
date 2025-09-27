@@ -231,7 +231,7 @@ collectionPortraitRegion[TREASURE] = '322,528,12,12';
 
 var typeRegion = {};
 typeRegion[ALLY] = '135,507,143,20';
-typeRegion[ATTACHMENT] = '136,504,142,20';
+typeRegion[ATTACHMENT] = '135,507,143,20';
 typeRegion[CAMPAIGN] = '135,504,142,20';
 typeRegion[CONTRACT] = '136,504,141,20';
 typeRegion[ENEMY] = '136,504,141,20';
@@ -248,7 +248,7 @@ typeRegion[PLAYER_OBJECTIVE] = '138,502,141,20';
 typeRegion[SHIP_ENEMY] = '136,504,141,20';
 typeRegion[SHIP_OBJECTIVE] = '136,504,141,20';
 typeRegion[TREACHERY] = '136,504,141,20';
-typeRegion[TREASURE] = '136,504,141,20';
+typeRegion[TREASURE] = '135,507,143,20';
 
 var copyrightRegion = {};
 copyrightRegion[ALLY] = '158,527,124,15';
@@ -342,7 +342,7 @@ portraitRegion[REGION] = '0,0,563,413';
 portraitRegion[SHIP_ENEMY] = '87,0,326,330';
 portraitRegion[SHIP_OBJECTIVE] = '78,81,335,268';
 portraitRegion[TREACHERY] = '60,0,353,330';
-portraitRegion[TREASURE] = '0,61,413,265';
+portraitRegion[TREASURE] = '0,50,413,290';
 
 var portraitBackRegion = {};
 portraitBackRegion[CONTRACT] = '0,0,413,315';
@@ -353,7 +353,7 @@ bodyRegionHeroPromo[GERMAN] = '73,467,269,45';
 
 var bodyRegion = {};
 bodyRegion[ALLY] = '55,380,303,115';
-bodyRegion[ATTACHMENT] = '57,347,299,144';
+bodyRegion[ATTACHMENT] = '55,351,303,145';
 bodyRegion[ENEMY] = '57,377,299,114';
 bodyRegion[ENEMY_NOSTAT] = '57,484,299,32';
 bodyRegion[EVENT] = '65,351,283,140';
@@ -368,7 +368,7 @@ bodyRegion[PLAYER_OBJECTIVE] = '65,355,283,137';
 bodyRegion[SHIP_ENEMY] = '57,377,299,114';
 bodyRegion[SHIP_OBJECTIVE] = '65,355,283,137';
 bodyRegion[TREACHERY] = '65,356,283,135';
-bodyRegion[TREASURE] = '57,347,299,144';
+bodyRegion[TREASURE] = '55,351,303,145';
 
 bodyRegion[CAVE] = '50,303,171,60';
 bodyRegion[ENCOUNTER_SIDE_QUEST] = '51,269,461,94';
@@ -377,7 +377,7 @@ bodyRegion[PLAYER_SIDE_QUEST] = '51,271,461,94';
 
 var traitRegion = {};
 traitRegion[ALLY] = '55,360,303,20';
-traitRegion[ATTACHMENT] = '85,327,243,20';
+traitRegion[ATTACHMENT] = '55,331,303,20';
 traitRegion[ENEMY] = '57,357,299,20';
 traitRegion[ENEMY_NOSTAT] = '57,470,299,14';
 traitRegion[EVENT] = '78,331,257,20';
@@ -392,7 +392,7 @@ traitRegion[PLAYER_OBJECTIVE] = '65,335,283,20';
 traitRegion[SHIP_ENEMY] = '57,357,299,20';
 traitRegion[SHIP_OBJECTIVE] = '65,335,283,20';
 traitRegion[TREACHERY] = '65,336,283,20';
-traitRegion[TREASURE] = '85,327,243,20';
+traitRegion[TREASURE] = '55,331,303,20';
 
 traitRegion[CAVE] = '50,283,171,20';
 traitRegion[ENCOUNTER_SIDE_QUEST] = '51,249,461,20';
@@ -425,7 +425,7 @@ bodyBackRegion[RULES] = '48,73,317,418';
 
 var nameRegion = {};
 nameRegion[ALLY] = '97,328,219,30';
-nameRegion[ATTACHMENT] = '131,36,185,30';
+nameRegion[ATTACHMENT] = '127,41,193,30';
 nameRegion[CAMPAIGN] = '107,41,199,30';
 nameRegion[CAVE] = '79,41,162,30';
 nameRegion[CONTRACT] = '83,243,247,33';
@@ -449,7 +449,7 @@ nameRegion[REGION] = '79,347,162,30';
 nameRegion[SHIP_ENEMY] = '93,325,227,30';
 nameRegion[SHIP_OBJECTIVE] = '74,46,265,33';
 nameRegion[TREACHERY] = '55,108,26,164';
-nameRegion[TREASURE] = '131,42,185,30';
+nameRegion[TREASURE] = '127,41,193,30';
 
 var nameBackRegion = {};
 nameBackRegion[CONTRACT] = '83,243,247,33';
@@ -457,7 +457,7 @@ nameBackRegion[QUEST] = '143,42,370,33';
 
 var nameUniqueRegion = {};
 nameUniqueRegion[ALLY] = '97,326,219,31';
-nameUniqueRegion[ATTACHMENT] = '131,34,185,31';
+nameUniqueRegion[ATTACHMENT] = '127,39,193,31';
 nameUniqueRegion[CAVE] = '79,39,162,31';
 nameUniqueRegion[CONTRACT] = '83,241,247,34';
 nameUniqueRegion[ENCOUNTER_SIDE_QUEST] = '99,38,365,34';
@@ -477,14 +477,14 @@ nameUniqueRegion[REGION] = '79,345,162,31';
 nameUniqueRegion[SHIP_ENEMY] = '93,323,227,31';
 nameUniqueRegion[SHIP_OBJECTIVE] = '74,44,265,34';
 nameUniqueRegion[TREACHERY] = '52,108,29,164';
-nameUniqueRegion[TREASURE] = '131,40,185,31';
+nameUniqueRegion[TREASURE] = '127,39,193,31';
 
 var nameUniqueBackRegion = {};
 nameUniqueBackRegion[CONTRACT] = '83,241,247,34';
 
 var subtypeRegion = {};
 subtypeRegion[ALLY] = '146,305,124,20';
-subtypeRegion[ATTACHMENT] = '146,301,124,20';
+subtypeRegion[ATTACHMENT] = '146,305,124,20';
 subtypeRegion[ENEMY] = '146,302,124,20';
 subtypeRegion[EVENT] = '146,303,124,20';
 subtypeRegion[OBJECTIVE] = '144,308,129,20';
@@ -568,10 +568,10 @@ cycleRegion[CAMPAIGN] = '68,243,274,32';
 
 var resourceCostRegion = {};
 resourceCostRegion[ALLY] = '64,44,56,37';
-resourceCostRegion[ATTACHMENT] = '37,44,56,37';
+resourceCostRegion[ATTACHMENT] = '36,48,56,37';
 resourceCostRegion[EVENT] = '37,38,56,37';
 resourceCostRegion[PLAYER_SIDE_QUEST] = '43,44,56,37';
-resourceCostRegion[TREASURE] = '45,61,44,30';
+resourceCostRegion[TREASURE] = '37,58,56,37';
 
 var difficultyRegion = {};
 difficultyRegion[ENCOUNTER_SIDE_QUEST] = '0,0,563,413';
@@ -605,7 +605,7 @@ encounterPortraitRegion[REGION] = '37,341,35,35';
 encounterPortraitRegion[SHIP_ENEMY] = '321,265,43,43';
 encounterPortraitRegion[SHIP_OBJECTIVE] = '315,268,43,43';
 encounterPortraitRegion[TREACHERY] = '321,266,43,43';
-encounterPortraitRegion[TREASURE] = '327,478,43,43';
+encounterPortraitRegion[TREASURE] = '328,481,43,43';
 
 var encounterNumberRegion = {};
 encounterNumberRegion[CAVE] = '41,70,26,10';
@@ -636,13 +636,13 @@ optionLeftRegion[TREACHERY] = '43,490,48,24';
 
 var optionRightDecorationRegion = {};
 optionRightDecorationRegion[ALLY] = '300,506,72,18';
-optionRightDecorationRegion[ATTACHMENT] = '300,503,72,18';
+optionRightDecorationRegion[ATTACHMENT] = '300,506,72,18';
 optionRightDecorationRegion[ENCOUNTER_SIDE_QUEST] = '452,347,72,18';
 optionRightDecorationRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '452,347,72,18';
 optionRightDecorationRegion[ENEMY] = '301,503,72,18';
 optionRightDecorationRegion[EVENT] = '298,503,72,18';
 optionRightDecorationRegion[HERO] = '300,506,72,18';
-optionRightDecorationRegion[HERO_PROMO] = '282,495,72,18';
+optionRightDecorationRegion[HERO_PROMO] = '300,506,72,18';
 optionRightDecorationRegion[LOCATION] = '301,503,72,18';
 optionRightDecorationRegion[OBJECTIVE] = '290,500,72,18';
 optionRightDecorationRegion[OBJECTIVE_ALLY] = '290,500,72,18';
@@ -654,17 +654,17 @@ optionRightDecorationRegion[QUEST] = '450,350,72,18';
 optionRightDecorationRegion[SHIP_ENEMY] = '301,503,72,18';
 optionRightDecorationRegion[SHIP_OBJECTIVE] = '290,502,72,18';
 optionRightDecorationRegion[TREACHERY] = '301,503,72,18';
-optionRightDecorationRegion[TREASURE] = '253,477,72,18';
+optionRightDecorationRegion[TREASURE] = '41,506,72,18';
 
 var optionRightRegion = {};
 optionRightRegion[ALLY] = '307,507,59,20';
-optionRightRegion[ATTACHMENT] = '307,504,59,20';
+optionRightRegion[ATTACHMENT] = '307,507,59,20';
 optionRightRegion[ENCOUNTER_SIDE_QUEST] = '459,348,59,20';
 optionRightRegion[ENCOUNTER_SIDE_QUEST_SMALLTEXTAREA] = '459,348,59,20';
 optionRightRegion[ENEMY] = '308,504,59,20';
 optionRightRegion[EVENT] = '305,504,59,20';
 optionRightRegion[HERO] = '307,507,59,20';
-optionRightRegion[HERO_PROMO] = '289,496,59,20';
+optionRightRegion[HERO_PROMO] = '307,507,59,20';
 optionRightRegion[LOCATION] = '308,504,59,20';
 optionRightRegion[OBJECTIVE] = '297,501,59,20';
 optionRightRegion[OBJECTIVE_ALLY] = '297,501,59,20';
@@ -676,7 +676,7 @@ optionRightRegion[QUEST] = '457,351,59,20';
 optionRightRegion[SHIP_ENEMY] = '308,504,59,20';
 optionRightRegion[SHIP_OBJECTIVE] = '297,503,59,20';
 optionRightRegion[TREACHERY] = '308,504,59,20';
-optionRightRegion[TREASURE] = '260,478,59,20';
+optionRightRegion[TREASURE] = '48,507,59,20';
 
 var bodyPointSize = {};
 bodyPointSize[ALLY] = 7.5;
@@ -796,7 +796,7 @@ threatCostTint[HERO_PROMO] = '0.0,0.0,0.95';
 var sphereBodyShape = {};
 sphereBodyShape[HERO] = '0,0,472,40,0';
 sphereBodyShape[HERO_PROMO] = '0,0,0,0,0';
-sphereBodyShape[TREASURE] = '0,0,472,0,34';
+sphereBodyShape[TREASURE] = '0,0,472,0,40';
 
 var sphereOptionBodyShape = {};
 sphereOptionBodyShape[TREASURE] = '0,0,472,0,104';
@@ -1651,7 +1651,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				}
 
 				let defaultStarPointSize = 6.5;
-				let defaultOptionLeftPointSize = 12;
+				let defaultOptionPointSize = 12;
 				let defaultPagePointSize = 7;
 				let defaultEncounterSetNumberPointSize = 4;
 
@@ -1698,9 +1698,11 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				s.set('Name-pointsize', Math.round(defaultNamePointSize * 1.734 * 100) / 100);
 				s.set('Bottom-pointsize', defaultBottomPointSize);
 				s.set('Star-pointsize', defaultStarPointSize);
-				s.set('OptionLeft-pointsize', defaultOptionLeftPointSize);
+				s.set('Option-pointsize', defaultOptionPointSize);
+				s.set('OptionLeft-pointsize', defaultOptionPointSize);
 				s.set('EncounterSetNumber-pointsize', defaultEncounterSetNumberPointSize);
-				s.set('OptionLeft-alignment', 'bottom,center');
+				s.set('Option-alignment', 'middle,center');
+				s.set('OptionLeft-alignment', 'middle,center');
 				s.set('Engagement-tint', '32.0,1.0,0.9');
 				s.set('Progress-tint', '32.0,1.0,0.9');
 				s.set('HitPoints-tint', '0.0,0.8,1.0');
@@ -1975,7 +1977,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('Bottom-formatEnd', '</b></size></family></width>');
 					s.set('EncounterSetNumber-format', '<family "Times New Roman"><size ' + defaultEncounterSetNumberPointSize + '><b>');
 					s.set('EncounterSetNumber-formatEnd', '</b></size></family>');
-					s.set('OptionLeft-format', '<family "Times New Roman"><size ' + defaultOptionLeftPointSize + '>');
+					s.set('OptionLeft-format', '<family "Times New Roman"><size ' + defaultOptionPointSize + '>');
 					s.set('OptionLeft-formatEnd', '</size></family>');
 					s.set('OptionRight-format', '<width semicondensed>');
 					s.set('OptionRight-formatEnd', '</width>');
