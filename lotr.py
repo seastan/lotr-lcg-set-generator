@@ -3358,7 +3358,7 @@ def _get_capitalization_errors(text):  # pylint: disable=R0912
     parts = text.split(' ')
     parts = [re.sub(r'^[…“’(]', '',
                     re.sub(r'[,.?!”’)…]$', '', p)) for p in parts
-             if p not in {'-', '+'}]
+             if p not in {'-', '+', '&', '/'}]
     if '' in parts:
         errors.append('"an empty word"')
 
@@ -7543,6 +7543,7 @@ def save_data_for_bot(conf, sets):  # pylint: disable=R0912,R0914,R0915
             while channel in channels:
                 channel = _increment_channel_name(channel)
 
+            channel = re.sub(r'-{2,}', '-', channel)
             channels.add(channel)
             row[CARD_DISCORD_CHANNEL] = channel
 
