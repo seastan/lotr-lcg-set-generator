@@ -7176,8 +7176,6 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             (L_ENGLISH, row[CARD_SET], hash_by_key[
                                 (L_ENGLISH, value_key)])]
                                     if k != value_key]
-                    else:
-                        logging.warning(TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
                     if (english_keys is not None and
                             sorted(translated_keys) != sorted(english_keys)):
@@ -9335,6 +9333,10 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
         else:
             victory = row[CARD_VICTORY]
 
+        keywords = '. '.join(extract_keywords(row[CARD_KEYWORDS], card=row))
+        if keywords:
+            keywords = '{}.'.format(keywords)
+
         side_a = {
             'name': unidecode.unidecode(
                 _update_card_name(_to_str(row[CARD_NAME]))),
@@ -9343,8 +9345,7 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
             'type': _to_str(card_type),
             'sphere': _to_str(sphere),
             'traits': _update_dragncards_card_text(_to_str(row[CARD_TRAITS])),
-            'keywords': _update_dragncards_card_text(_to_str(
-                row[CARD_KEYWORDS])),
+            'keywords': _update_dragncards_card_text(_to_str(keywords)),
             'cost': _to_str(handle_int(row[CARD_COST])),
             'engagementcost': _to_str(handle_int(row[CARD_ENGAGEMENT])),
             'threat': _to_str(handle_int(row[CARD_THREAT])),
@@ -9381,6 +9382,11 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
             else:
                 victory = row[BACK_PREFIX + CARD_VICTORY]
 
+            keywords = '. '.join(extract_keywords(
+                row[BACK_PREFIX + CARD_KEYWORDS], card=row, back_side=True))
+            if keywords:
+                keywords = '{}.'.format(keywords)
+
             side_b = {
                 'name': unidecode.unidecode(_update_card_name(_to_str(
                     row[BACK_PREFIX + CARD_NAME]))),
@@ -9391,8 +9397,7 @@ def generate_dragncards_json(conf, set_id, set_name):  # pylint: disable=R0912,R
                 'sphere': _to_str(sphere),
                 'traits': _update_dragncards_card_text(
                     _to_str(row[BACK_PREFIX + CARD_TRAITS])),
-                'keywords': _update_dragncards_card_text(_to_str(
-                    row[BACK_PREFIX + CARD_KEYWORDS])),
+                'keywords': _update_dragncards_card_text(_to_str(keywords)),
                 'cost': _to_str(handle_int(row[BACK_PREFIX + CARD_COST])),
                 'engagementcost': _to_str(
                     handle_int(row[BACK_PREFIX + CARD_ENGAGEMENT])),
@@ -9528,6 +9533,9 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
             translated_row = row
         else:
             translated_row = TRANSLATIONS[lang].get(row[CARD_ID], {}).copy()
+            translated_row[CARD_FLAGS] = row[CARD_FLAGS]
+            translated_row[BACK_PREFIX + CARD_FLAGS] = (
+                row[BACK_PREFIX + CARD_FLAGS])
             if row.get(CARD_DOUBLESIDE):
                 translated_row[CARD_NAME] = translated_row.get(
                     BACK_PREFIX + CARD_NAME, '')
