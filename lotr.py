@@ -227,6 +227,8 @@ S_TACTICS = 'Tactics'
 S_UPGRADED = 'Upgraded'
 
 F_ADDITIONALCOPIES = 'AdditionalCopies'
+F_DEFAULTCOPYRIGHT = 'DefaultCopyright'
+F_EXTRACTSECONDKEYWORD = 'ExtractSecondKeyword'
 F_IGNORENAME = 'IgnoreName'
 F_IGNORERULES = 'IgnoreRules'
 F_NOARTIST = 'NoArtist'
@@ -379,6 +381,11 @@ CARD_TYPES_FLAGS_BACK = {F_NOTRAITS:
                           T_TREACHERY}}
 CARD_TYPES_NO_FLAGS = {F_STAR: {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT,
                                 T_PRESENTATION, T_RULES},
+                       F_EXTRACTSECONDKEYWORD: {T_CAMPAIGN, T_CONTRACT,
+                                                T_FULL_ART_LANDSCAPE,
+                                                T_FULL_ART_PORTRAIT,
+                                                T_NIGHTMARE, T_PRESENTATION,
+                                                T_RULES},
                        F_IGNORENAME: {T_FULL_ART_LANDSCAPE,
                                       T_FULL_ART_PORTRAIT, T_PRESENTATION,
                                       T_RULES},
@@ -389,6 +396,9 @@ CARD_TYPES_NO_FLAGS = {F_STAR: {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT,
 CARD_TYPES_NO_FLAGS_BACK = {
     F_STAR: {T_CAMPAIGN, T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT,
              T_NIGHTMARE, T_PRESENTATION, T_RULES},
+    F_EXTRACTSECONDKEYWORD: {T_CAMPAIGN, T_CONTRACT, T_FULL_ART_LANDSCAPE,
+                             T_FULL_ART_PORTRAIT, T_NIGHTMARE, T_PRESENTATION,
+                             T_RULES},
     F_IGNORENAME: {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT, T_PRESENTATION,
                    T_RULES},
     F_IGNORERULES: {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT, T_PRESENTATION},
@@ -443,9 +453,9 @@ CARD_TYPES_NO_DISCORD_CHANNEL = {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT,
 CARD_TYPES_NO_NAME_TAG = {T_CAMPAIGN, T_NIGHTMARE, T_PRESENTATION, T_RULES}
 CARD_TYPES_PAGES = {T_PRESENTATION, T_RULES}
 
-FLAGS = {F_ADDITIONALCOPIES, F_IGNORENAME, F_IGNORERULES, F_NOARTIST,
-         F_NOCOPYRIGHT, F_NOTRAITS, F_PROMO, F_STAR, F_BLUERING, F_GREENRING,
-         F_REDRING}
+FLAGS = {F_ADDITIONALCOPIES, F_DEFAULTCOPYRIGHT, F_EXTRACTSECONDKEYWORD,
+         F_IGNORENAME, F_IGNORERULES, F_NOARTIST, F_NOCOPYRIGHT, F_NOTRAITS,
+         F_PROMO, F_STAR, F_BLUERING, F_GREENRING, F_REDRING}
 RING_FLAGS = {F_BLUERING, F_GREENRING, F_REDRING}
 SPHERES = set()
 SPHERES_CAMPAIGN = {S_SETUP}
@@ -1745,11 +1755,20 @@ def simplify_keyword(keyword):
     return keyword
 
 
-def extract_keywords(value):
-    """ Extract all keywords from the string.
+def extract_keywords(keywords, card=None, back_side=False):
+    """ Extract all keywords from the card fields.
     """
-    keywords = [k.strip() for k in _to_str(value).replace(
+    keywords = [k.strip() for k in _to_str(keywords).replace(
                 '[inline]', '').split('.') if k.strip() != '']
+
+    prefix = BACK_PREFIX if back_side else ''
+    if (card and F_EXTRACTSECONDKEYWORD in
+            extract_flags(card.get(prefix + CARD_FLAGS, ''))):
+        card_text = card.get(prefix + CARD_TEXT, '')
+        parts = card_text.split('\n')[0].split('.')
+        if len(parts) > 1 and parts[1].strip() != '':
+            keywords.append(parts[1].strip())
+
     keywords = [re.sub(r' ([0-9]+)\[pp\]$', ' \\1 Per Player', k, re.I)
                 for k in keywords]
     return keywords
@@ -9591,8 +9610,9 @@ def generate_hallofbeorn_json(conf, set_id, set_name, lang):  # pylint: disable=
         else:
             opposite_title = None
 
-        keywords = extract_keywords(translated_row.get(CARD_KEYWORDS))
-        keywords_original = extract_keywords(row.get(CARD_KEYWORDS))
+        keywords = extract_keywords(translated_row.get(CARD_KEYWORDS),
+                                    card=translated_row)
+        keywords_original = extract_keywords(row.get(CARD_KEYWORDS), card=row)
 
         if (row.get(CARD_TEXT) and
                 (' Restricted.' in row[CARD_TEXT] or

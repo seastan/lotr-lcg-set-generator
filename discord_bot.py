@@ -1240,13 +1240,21 @@ def get_quest_stat(cards):  # pylint: disable=R0912,R0915
     card_types = {}
 
     for card in cards:
-        if card.get(lotr.CARD_KEYWORDS):
-            keywords = keywords.union(
-                lotr.extract_keywords(card[lotr.CARD_KEYWORDS]))
+        keywords = keywords.union(
+            lotr.extract_keywords(card.get(lotr.CARD_KEYWORDS), card=card))
+        keywords = keywords.union(
+            lotr.extract_keywords(
+                card.get(lotr.BACK_PREFIX + lotr.CARD_KEYWORDS), card=card,
+                back_side=True))
 
         if (card.get(lotr.CARD_TEXT) and
                 (' Restricted.' in card[lotr.CARD_TEXT] or
                  '\nRestricted.' in card[lotr.CARD_TEXT])):
+            keywords.add('Restricted')
+
+        if (card.get(lotr.BACK_PREFIX + lotr.CARD_TEXT) and
+                (' Restricted.' in card[lotr.BACK_PREFIX + lotr.CARD_TEXT] or
+                 '\nRestricted.' in card[lotr.BACK_PREFIX + lotr.CARD_TEXT])):
             keywords.add('Restricted')
 
         if card.get(lotr.CARD_ENCOUNTER_SET):
@@ -1305,9 +1313,9 @@ def get_quest_stat(cards):  # pylint: disable=R0912,R0915
         if card.get(lotr.CARD_SHADOW):
             shadow += card[lotr.CARD_QUANTITY]
 
-        if card.get(lotr.CARD_KEYWORDS):
-            if 'Surge' in lotr.extract_keywords(card[lotr.CARD_KEYWORDS]):
-                surge += card[lotr.CARD_QUANTITY]
+        if ('Surge' in lotr.extract_keywords(
+                card.get(lotr.CARD_KEYWORDS), card=card)):
+            surge += card[lotr.CARD_QUANTITY]
 
     if not card_types:
         return res
@@ -3754,12 +3762,12 @@ Targets removed.
                 path = os.path.join(lotr.OUTPUT_OCTGN_DECKS_PATH, subfolder)
                 for _, _, filenames in os.walk(path):
                     for filename in filenames:
-                        if ((filename.endswith('.o8d') and
-                             not filename.startswith('Player-') and
-                             ('-{}-'.format(quest_file) in filename.lower() or
-                              '-{}.'.format(quest_file) in filename.lower()))
+                        if (filename.endswith('.o8d') and (
+                                (not filename.startswith('Player-') and
+                                 ('-{}-'.format(quest_file) in filename.lower() or
+                                  '-{}.'.format(quest_file) in filename.lower()))
                                 or (quest_folder ==
-                                    subfolder.replace('ALeP - ', '').lower())):
+                                    subfolder.replace('ALeP - ', '').lower()))):
                             quest_name = re.sub(r'\.o8d$', '', filename)
                             cards = await read_deck_xml(
                                 os.path.join(path, filename))
@@ -5952,8 +5960,13 @@ Targets removed.
             if not matches:
                 return 'no cards found for the set'
 
-        keywords = [lotr.extract_keywords(card[lotr.CARD_KEYWORDS])
-                    for card in data['data'] if card.get(lotr.CARD_KEYWORDS)]
+        keywords = [lotr.extract_keywords(
+                        card.get(lotr.CARD_KEYWORDS), card=card)
+                    for card in data['data']]
+        keywords.extend(
+            [lotr.extract_keywords(
+                card.get(lotr.BACK_PREFIX + lotr.CARD_KEYWORDS), card=card,
+                back_side=True) for card in data['data']])
         keywords = [item for sublist in keywords for item in sublist]
         keywords = {lotr.simplify_keyword(k) for k in keywords}
         keywords.union(lotr.COMMON_KEYWORDS)
