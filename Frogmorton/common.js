@@ -1798,7 +1798,10 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				}
 
 				if ((s.get('Unique') + '' == '1') || (cardName.indexOf('[ringa]') != -1) || (cardName.indexOf('[ringb]') != -1)) {
-					if (cardType + cardSphere in nameUniqueRegion) {
+					if ((cardType == TREACHERY) && (cardName == 'Comandante degli Uruk-hai')) { // workaround for the Italian card
+						s.set('Name-region', '52,100,29,174');
+					}
+					else if (cardType + cardSphere in nameUniqueRegion) {
 						s.set('Name-region', nameUniqueRegion[cardType + cardSphere]);
 					}
 					else if (cardType in nameUniqueRegion) {
