@@ -823,7 +823,7 @@ translate[ALLY] = {'English': 'Ally', 'French': 'Alli\u00e9', 'German': 'Verb\u0
 	'Portuguese': 'Aliado'};
 translate[ATTACHMENT] = {'English': 'Attachment', 'French': 'Attachement', 'German': 'Verst\u00e4rkung', 'Spanish': 'Vinculada', 'Polish': 'Dodatek',
 	'Italian': 'Aggregato', 'Portuguese': 'Acess\u00f3rio'};
-translate[BOON] = {'English': 'Boon', 'French': 'Avantage', 'German': 'Gunst', 'Spanish': 'Ayuda', 'Polish': '\u0141aska', 'Italian': 'Vantaggio',
+translate[BOON] = {'English': 'Boon', 'French': 'Avantage', 'German': 'Gunst', 'Spanish': 'Ayuda', 'Polish': '\u0141aska', 'Italian': 'Beneficio',
 	'Portuguese': 'D\u00e1diva'};
 translate[BURDEN] = {'English': 'Burden', 'French': 'Fardeau', 'German': 'B\u00fcrde', 'Spanish': 'Carga', 'Polish': 'Brzemi\u0119', 'Italian': 'Svantaggio',
 	'Portuguese': 'Fardo'};
@@ -884,13 +884,13 @@ translate[TREACHERY] = {'English': 'Treachery', 'French': 'Tra\u00eetrise', 'Ger
 translate[TREASURE] = {'English': 'Treasure', 'French': 'Tr\u00e9sor', 'German': 'Schatz', 'Spanish': 'Tesoro', 'Polish': 'Skarb', 'Italian': 'Tesoro',
 	'Portuguese': 'Tesouro'};
 
-translate['BoonLeadership'] = {'English': 'Boon', 'French': 'Avantage', 'German': 'Gunst', 'Spanish': 'Ayuda', 'Polish': '\u0141aska', 'Italian': 'Vantaggio',
+translate['BoonLeadership'] = {'English': 'Boon', 'French': 'Avantage', 'German': 'Gunst', 'Spanish': 'Ayuda', 'Polish': '\u0141aska', 'Italian': 'Beneficio',
 	'Portuguese': 'D\u00e1diva'};
-translate['BoonLore'] = {'English': 'Boon', 'French': 'Avantage', 'German': 'Gunst', 'Spanish': 'Ayuda', 'Polish': '\u0141aska', 'Italian': 'Vantaggio',
+translate['BoonLore'] = {'English': 'Boon', 'French': 'Avantage', 'German': 'Gunst', 'Spanish': 'Ayuda', 'Polish': '\u0141aska', 'Italian': 'Beneficio',
 	'Portuguese': 'D\u00e1diva'};
-translate['BoonSpirit'] = {'English': 'Boon', 'French': 'Avantage', 'German': 'Gunst', 'Spanish': 'Ayuda', 'Polish': '\u0141aska', 'Italian': 'Vantaggio',
+translate['BoonSpirit'] = {'English': 'Boon', 'French': 'Avantage', 'German': 'Gunst', 'Spanish': 'Ayuda', 'Polish': '\u0141aska', 'Italian': 'Beneficio',
 	'Portuguese': 'D\u00e1diva'};
-translate['BoonTactics'] = {'English': 'Boon', 'French': 'Avantage', 'German': 'Gunst', 'Spanish': 'Ayuda', 'Polish': '\u0141aska', 'Italian': 'Vantaggio',
+translate['BoonTactics'] = {'English': 'Boon', 'French': 'Avantage', 'German': 'Gunst', 'Spanish': 'Ayuda', 'Polish': '\u0141aska', 'Italian': 'Beneficio',
 	'Portuguese': 'D\u00e1diva'};
 translate['Encounter Keyword'] = {'English': 'Encounter', 'French': 'Rencontre', 'German': 'Begegnung', 'Spanish': 'Encuentro', 'Polish': 'Spotkanie',
 	'Italian': 'Incontro', 'Portuguese': 'Encontro'};
