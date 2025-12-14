@@ -1263,7 +1263,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 						vXml = vXml.toUpperCase();
 					}
 
-					vXml = markUp(vXml, nXml, cardType, lang, setID);
+					vXml = markUp(vXml, nXml, cardType, lang, setID, flags);
 					s.set(nEon, vXml);
 				}
 
@@ -1377,8 +1377,8 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 
 				if (cardType == CONTRACT) {
 					s.set('Side', '');
-					s.set('SideA', markUp(translate['Side'][lang].toUpperCase() + ' A', 'Side', cardType, lang, setID));
-					s.set('SideB', markUp(translate['Side'][lang].toUpperCase() + ' B', 'Side', cardType, lang, setID));
+					s.set('SideA', markUp(translate['Side'][lang].toUpperCase() + ' A', 'Side', cardType, lang, setID, flags));
+					s.set('SideB', markUp(translate['Side'][lang].toUpperCase() + ' B', 'Side', cardType, lang, setID, flags));
 
 					if (card['BType'] + '' == CONTRACT) {
 						s.set('Template', 'DoubleSided');
@@ -1395,26 +1395,26 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					else {
 						playerObjectiveSide = 'B';
 					}
-					s.set('Side', markUp(translate['Side'][lang].toUpperCase() + ' ' + playerObjectiveSide, 'Side', cardType, lang, setID));
+					s.set('Side', markUp(translate['Side'][lang].toUpperCase() + ' ' + playerObjectiveSide, 'Side', cardType, lang, setID, flags));
 				}
 
 				if ([BOON, BURDEN].indexOf(cardSphere) > -1) {
-					s.set('Subtype', markUp(translate[cardSphere][lang].toUpperCase(), 'Subtype', cardType, lang, setID));
+					s.set('Subtype', markUp(translate[cardSphere][lang].toUpperCase(), 'Subtype', cardType, lang, setID, flags));
 				}
 				else {
 					s.set('Subtype', '');
 				}
 
 				if ((cardType == CAMPAIGN) && (cardSphere == SETUP)) {
-					s.set('Type', markUp(translate[SETUP][lang].toUpperCase(), 'Type', cardType, lang, setID));
+					s.set('Type', markUp(translate[SETUP][lang].toUpperCase(), 'Type', cardType, lang, setID, flags));
 					s.set('Template', 'Standard');
 				}
 				else if ((cardType == OBJECTIVE) && (cardSphere == RING_ATTACHMENT)) {
-					s.set('Type', markUp(translate[ATTACHMENT][lang].toUpperCase(), 'Type', cardType, lang, setID));
+					s.set('Type', markUp(translate[ATTACHMENT][lang].toUpperCase(), 'Type', cardType, lang, setID, flags));
 					s.set('Template', RING);
 				}
 				else {
-					s.set('Type', markUp(translate[cardType][lang].toUpperCase(), 'Type', cardType, lang, setID));
+					s.set('Type', markUp(translate[cardType][lang].toUpperCase(), 'Type', cardType, lang, setID, flags));
 				}
 
 				if (side == 'front') {
@@ -2137,7 +2137,7 @@ function updateVafthrudnir(value, lowerSize, lang) {
 	return res;
 }
 
-function markUp(value, key, cardType, lang, setID) {
+function markUp(value, key, cardType, lang, setID, flags) {
 	value += '';
 	value = value.replace(/ +(?=\n|$)/g, '');
 	value = value.replace(/\n+$/g, '');
@@ -2181,7 +2181,7 @@ function markUp(value, key, cardType, lang, setID) {
 		}
 	}
 
-	if (['Text', 'BText', 'Shadow', 'BShadow'].indexOf(key + '') > -1) {
+	if ((['Text', 'BText', 'Shadow', 'BShadow'].indexOf(key + '') > -1) && (flags.indexOf('IgnoreAutomaticTags') == -1)) {
 		if (lang == ENGLISH) {
 			value = value.replace(/\b(Valour )?(Resource |Planning |Quest |Travel |Encounter |Combat |Refresh )?(Action):/g, '[b]$1$2$3[/b]:');
 			value = value.replace(/\b(When Revealed|Forced|Valour Response|Response|Travel|Shadow|Resolution):/g, '[b]$1[/b]:');

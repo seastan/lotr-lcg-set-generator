@@ -596,6 +596,7 @@ List of available sphere values:
 - `AdditionalCopies`
 - `DefaultCopyright`
 - `ExtractSecondKeyword`
+- `IgnoreAutomaticTags`
 - `IgnoreName`
 - `IgnoreRules`
 - `NoArtist`

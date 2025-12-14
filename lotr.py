@@ -229,6 +229,7 @@ S_UPGRADED = 'Upgraded'
 F_ADDITIONALCOPIES = 'AdditionalCopies'
 F_DEFAULTCOPYRIGHT = 'DefaultCopyright'
 F_EXTRACTSECONDKEYWORD = 'ExtractSecondKeyword'
+F_IGNOREAUTOMATICTAGS = 'IgnoreAutomaticTags'
 F_IGNORENAME = 'IgnoreName'
 F_IGNORERULES = 'IgnoreRules'
 F_NOARTIST = 'NoArtist'
@@ -386,6 +387,9 @@ CARD_TYPES_NO_FLAGS = {F_STAR: {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT,
                                                 T_FULL_ART_PORTRAIT,
                                                 T_NIGHTMARE, T_PRESENTATION,
                                                 T_RULES},
+                       F_IGNOREAUTOMATICTAGS: {T_FULL_ART_LANDSCAPE,
+                                              T_FULL_ART_PORTRAIT,
+                                              T_PRESENTATION},
                        F_IGNORENAME: {T_FULL_ART_LANDSCAPE,
                                       T_FULL_ART_PORTRAIT, T_PRESENTATION,
                                       T_RULES},
@@ -399,6 +403,8 @@ CARD_TYPES_NO_FLAGS_BACK = {
     F_EXTRACTSECONDKEYWORD: {T_CAMPAIGN, T_CONTRACT, T_FULL_ART_LANDSCAPE,
                              T_FULL_ART_PORTRAIT, T_NIGHTMARE, T_PRESENTATION,
                              T_RULES},
+    F_IGNOREAUTOMATICTAGS: {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT,
+                            T_PRESENTATION},
     F_IGNORENAME: {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT, T_PRESENTATION,
                    T_RULES},
     F_IGNORERULES: {T_FULL_ART_LANDSCAPE, T_FULL_ART_PORTRAIT, T_PRESENTATION},
@@ -454,8 +460,9 @@ CARD_TYPES_NO_NAME_TAG = {T_CAMPAIGN, T_NIGHTMARE, T_PRESENTATION, T_RULES}
 CARD_TYPES_PAGES = {T_PRESENTATION, T_RULES}
 
 FLAGS = {F_ADDITIONALCOPIES, F_DEFAULTCOPYRIGHT, F_EXTRACTSECONDKEYWORD,
-         F_IGNORENAME, F_IGNORERULES, F_NOARTIST, F_NOCOPYRIGHT, F_NOTRAITS,
-         F_PROMO, F_STAR, F_BLUERING, F_GREENRING, F_REDRING}
+         F_IGNOREAUTOMATICTAGS, F_IGNORENAME, F_IGNORERULES, F_NOARTIST,
+         F_NOCOPYRIGHT, F_NOTRAITS, F_PROMO, F_STAR, F_BLUERING, F_GREENRING,
+         F_REDRING}
 RING_FLAGS = {F_BLUERING, F_GREENRING, F_REDRING}
 SPHERES = set()
 SPHERES_CAMPAIGN = {S_SETUP}
@@ -6575,7 +6582,12 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     else:
                         broken_set_ids.add(set_id)
 
-                unmatched_tags = _detect_unmatched_tags(value)
+                if key == CARD_SHADOW:
+                    unmatched_tags = _detect_unmatched_tags(
+                        '[i]{}[/i]'.format(value))
+                else:
+                    unmatched_tags = _detect_unmatched_tags(value)
+
                 if unmatched_tags:
                     message = ('Unmatched tag(s) in {} column for row #{}{}: '
                                '{}'.format(key.replace(BACK_PREFIX,
@@ -6849,8 +6861,12 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
                             lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
+                    if key == CARD_SHADOW:
+                        unmatched_tags = _detect_unmatched_tags(
+                            '[i]{}[/i]'.format(value))
+                    else:
+                        unmatched_tags = _detect_unmatched_tags(value)
 
-                    unmatched_tags = _detect_unmatched_tags(value)
                     if unmatched_tags:
                         logging.error(
                             'Unmatched tag(s) in %s column for card ID %s in '
