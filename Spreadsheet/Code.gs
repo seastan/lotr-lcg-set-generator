@@ -242,7 +242,7 @@ function differences(value1, value2) {
   return res.trim();
 }
 
-function SHEETS() {
+function LIST_OF_SHEETS() {
   // Print the list of all sheets and their IDs
   var res = new Array();
   var sheets = SpreadsheetApp.getActiveSpreadsheet().getSheets();
