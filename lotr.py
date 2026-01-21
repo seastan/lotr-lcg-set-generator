@@ -6693,6 +6693,21 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     else:
                         broken_set_ids.add(set_id)
 
+                if (key not in (CARD_NUMBER, CARD_ARTIST,
+                                BACK_PREFIX + CARD_ARTIST) and
+                        card_sphere != S_BACK and
+                        re.search(r'(?<!\b[A-Z]|\.)\.[A-Z]', value)):
+                    message = (
+                        'Missing space after "." in {} column for row '
+                        '#{}{}'.format(
+                            key.replace(BACK_PREFIX, BACK_PREFIX_LOG), i,
+                            row_info))
+                    logging.error(message)
+                    if not card_scratch:
+                        errors.append(message)
+                    else:
+                        broken_set_ids.add(set_id)
+
                 ignore_accents = False
                 if key.startswith(BACK_PREFIX):
                     if (card_flags_back and
@@ -6926,6 +6941,15 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             ' ID %s in %s translations, row #%s',
                             key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
                             lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
+                    if (card_sphere != S_BACK and
+                            re.search(r'(?<!\b[A-Z]|\.)\.[A-Z]', value)):
+                        logging.error(
+                            'Missing space after "." in %s column for card'
+                            ' ID %s in %s translations, row #%s',
+                            key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
+                            lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
+
 
                     if (key in {CARD_TEXT, BACK_PREFIX + CARD_TEXT,
                                 CARD_SHADOW, BACK_PREFIX + CARD_SHADOW} and
