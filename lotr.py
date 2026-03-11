@@ -6583,7 +6583,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                     else:
                         broken_set_ids.add(set_id)
 
-                if key == CARD_SHADOW:
+                if key in (CARD_SHADOW, CARD_FLAVOUR,
+                           BACK_PREFIX + CARD_FLAVOUR):
                     unmatched_tags = _detect_unmatched_tags(
                         '[i]{}[/i]'.format(value))
                 else:
@@ -6877,7 +6878,8 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                             key.replace(BACK_PREFIX, BACK_PREFIX_LOG), card_id,
                             lang, TRANSLATIONS[lang][card_id][ROW_COLUMN])
 
-                    if key == CARD_SHADOW:
+                    if key in (CARD_SHADOW, CARD_FLAVOUR,
+                               BACK_PREFIX + CARD_FLAVOUR):
                         unmatched_tags = _detect_unmatched_tags(
                             '[i]{}[/i]'.format(value))
                     else:
