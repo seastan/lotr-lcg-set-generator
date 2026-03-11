@@ -839,23 +839,23 @@ DESCRIPTIVE_TRAITS = {
     'Adventure', 'Advice', 'Archer', 'Assault', 'Attack', 'Besieger',
     'Black Speech', 'Brigand', 'Burglar', 'Capture', 'Captured', 'Champion',
     'Clue', 'Corruption', 'Craftsman', 'Cultist', 'Damaged', 'Defense',
-    'Despair', 'Disaster', 'Distracting', 'Doom', 'Enchantment', 'Escape',
-    'Fear', 'Fellowship', 'Food', 'Found', 'Game', 'Gossip', 'Guardian',
-    'Hazard', 'Healer', 'Hungry', 'Inferno', 'Information', 'Instrument',
-    'Key', 'Light', 'Master', 'Mathom', 'Minstrel', 'Mission', 'Mustering',
-    'Nervous', 'Night', 'Panic', 'Panicked', 'Party', 'Pillager', 'Pipe',
-    'Pipeweed', 'Plight', 'Plot', 'Poison', 'Providence', 'Raider', 'Ranger',
-    'Record', 'Refuge', 'Riddle', 'Ring-bearer', 'Ruffian', 'Sack', 'Sauron',
-    'Scheme', 'Scout', 'Scroll', 'Search', 'Servant', 'Service', 'Shadow',
-    'Sharkey', 'Shirriff', 'Sorcerer', 'Sorcery', 'Spy', 'Staff', 'Stalking',
-    'Steward', 'Summoned', 'Summoner', 'Tantrum', 'Thaurdir', 'Thug', 'Time',
-    'Tools', 'Traitor', 'Treasure', 'Villain', 'Warden', 'Warrior', 'Weather',
-    'Wound'}
+    'Despair', 'Disaster', 'Distracting', 'Doom', 'Drowning', 'Enchantment',
+    'Escape', 'Fear', 'Fellowship', 'Food', 'Found', 'Game', 'Gossip',
+    'Guardian', 'Hazard', 'Healer', 'Hungry', 'Inferno', 'Information',
+    'Instrument', 'Key', 'Light', 'Master', 'Mathom', 'Minstrel', 'Mission',
+    'Mustering', 'Nervous', 'Night', 'Panic', 'Panicked', 'Party', 'Pillager',
+    'Pipe', 'Pipeweed', 'Plight', 'Plot', 'Poison', 'Providence', 'Raider',
+    'Ranger', 'Record', 'Refuge', 'Riddle', 'Ring-bearer', 'Ruffian', 'Sack',
+    'Sauron', 'Scheme', 'Scout', 'Scroll', 'Search', 'Servant', 'Service',
+    'Shadow', 'Sharkey', 'Shirriff', 'Sorcerer', 'Sorcery', 'Spy', 'Staff',
+    'Stalking', 'Steward', 'Summoned', 'Summoner', 'Tantrum', 'Thaurdir',
+    'Thug', 'Time', 'Tools', 'Traitor', 'Treasure', 'Villain', 'Warden',
+    'Warrior', 'Weather', 'Wound'}
 LOCATION_SUBTYPE_TRAITS = {
     'Battleground', 'Besieged', 'Camp', 'Castle', 'Dark', 'Deck', 'Downs',
     'Dwelling', 'Fords', 'Fortification', 'Garrison', 'Gate', 'Hideout',
-    'Highlands', 'Inn', 'Lair', 'Lawn', 'Marsh', 'Marshland', 'Pier',
-    'Polluted', 'Riverland', 'Siege', 'Snow', 'Stair', 'Wasteland'}
+    'Highlands', 'Inn', 'Lair', 'Lawn', 'Main Current', 'Marsh', 'Marshland',
+    'Pier', 'Polluted', 'Riverland', 'Siege', 'Snow', 'Stair', 'Wasteland'}
 LOCATION_TYPE_FIRST_TRAITS = {
     'Barrow', 'Blight', 'City', 'Desert', 'Forest', 'Mountain', 'Plains',
     'Ruins', 'Underground', 'Underwater', 'Village'}
@@ -887,8 +887,9 @@ REGION_TRAITS = {
 TYPE_FIRST_TRAITS = {'Artifact', 'Item', 'Suspect', 'Stronghold', 'Wall'}
 TYPE_TRAITS = {
     'Adaptation', 'Armor', 'Army', 'Assassin', 'Boon', 'Captive', 'Condition',
-    'Faction', 'Favor', 'Gift', 'Maia', 'Morgul', 'Mount', 'Ring', 'Scenario',
-    'Signal', 'Skill', 'Song', 'Spell', 'Tale', 'Title', 'Trap', 'Weapon'}
+    'Faction', 'Favor', 'Gift', 'Maia', 'Morgul', 'Mount', 'Raft', 'Ring',
+    'Scenario', 'Signal', 'Skill', 'Song', 'Spell', 'Tale', 'Title', 'Trap',
+    'Weapon'}
 TRAITS_ORDER = [
     ALWAYS_FIRST_TRAITS, TYPE_FIRST_TRAITS, TYPE_TRAITS, RACE_FIRST_TRAITS,
     RACE_TRAITS, REGION_TRAITS, LOCATION_TYPE_FIRST_TRAITS,
