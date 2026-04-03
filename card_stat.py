@@ -40,10 +40,12 @@ EXCLUDE_SETS = {
     'The Woodland Realm', 'The Mines of Moria', 'Escape from Khazad-dûm',
     'First Age', 'Trial Upon the Marches', 'Among the Outlaws',
     'The Betrayal of Mîm', 'The Fall of Nargothrond', 'The Legacy of Fëanor',
-    'Betraying the Falathrim'}
+    'Betraying the Falathrim', 'Fangs in the Dark'}
 PROMO_HEROES_SETS = {'The Scouring of the Shire', 'The Nine are Abroad',
-                     'The Siege of Erebor', 'The Hobbit'}
-FUTURE_SETS = {}
+                     'The Siege of Erebor', 'The Hobbit',
+                     'The Mirror of Galadriel'}
+FUTURE_SETS = {'Fangs in the Dark', 'The Mirror of Galadriel',
+               'The Brandywine Pursuit'}
 
 SCENARIOS_REGEX = r' href="\/LotR\/Scenarios/([^"]+)">'
 
@@ -72,6 +74,9 @@ def get_hall_data():
         print('Downloading Hall of Beorn data from the site')
         with open(cache_path, 'w', encoding='utf-8') as fobj:
             json.dump(data, fobj)
+
+    data = [c for c in data if c['pack_name'] not in EXCLUDE_SETS
+            and 'Preorder Promotion' not in c['pack_name']]
 
     current_sets = {c['pack_name'] for c in data}
     for future_set in FUTURE_SETS:
@@ -102,6 +107,7 @@ def get_hall_data():
                 additional_data = []
 
         for card in additional_data:
+            card['pack_name'] = card['pack_name'].replace('ALeP - ', '')
             if card.get('traits'):
                 card['traits'] = '{}.'.format('. '.join(card['traits']))
 
@@ -110,24 +116,18 @@ def get_hall_data():
 
         data.extend(additional_data)
 
-    return data
-
-
-def filter_hall_data(data):
-    """ Filter Hall of Beorn data.
-    """
     data = [c for c in data
             if c['type_name'] in {'Ally', 'Attachment', 'Contract', 'Event',
                                   'Hero', 'Player Objective',
                                   'Player Side Quest'}
-            and c['pack_name'] not in EXCLUDE_SETS
-            and 'Preorder Promotion' not in c['pack_name']
             and c.get('subtype_code') != 'boon'
             and c['sphere_name'] not in {'Baggins', 'Fellowship'}
+            and (c.get('card_side') != 'B' or c['type_name'] == 'Hero')
             and (c['pack_name'] not in PROMO_HEROES_SETS
                  or c['type_name'] != 'Hero')]
     print('Found packs: {}'.format(
         ', '.join(sorted({c['pack_name'] for c in data}))))
+
     return data
 
 
@@ -502,7 +502,6 @@ def collect_stat():
     """ Collect traits and keywords statistics from Hall of Beorn.
     """
     data = get_hall_data()
-    data = filter_hall_data(data)
     collect_spheres(data)
     collect_numbers(data)
     collect_traits(data)
@@ -728,7 +727,7 @@ def create_dragncards_json(pack_name, pack_id):  # pylint: disable=R0912,R0914
 
 if __name__ == '__main__':
     collect_stat()
-    collect_scenarios()
+    # collect_scenarios()
     # create_ringsdb_csv('Dwarves of Durin', '31')
     # create_dragncards_json('Dwarves of Durin', '5971cfbb-b5e4-40aa-be0f-3cc575141f18')
     # create_dragncards_json('Elves of Lórien', '1dffad96-4516-4da5-9b5c-31596784040f')
