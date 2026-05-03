@@ -1797,7 +1797,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 				}
 
-				if ((s.get('Unique') + '' == '1') || (cardName.indexOf('[ringa]') != -1) || (cardName.indexOf('[ringb]') != -1)) {
+				if ((s.get('Unique') + '' == '1') || (cardName.indexOf('[ringa]') != -1) || (cardName.indexOf('[ringb]') != -1) || (cardName.indexOf('[unique]') != -1)) {
 					if ((cardType == TREACHERY) && (cardName == 'Comandante degli Uruk-hai')) { // workaround for the Italian card
 						s.set('Name-region', '52,100,29,174');
 					}
@@ -1823,7 +1823,8 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					}
 				}
 
-				if ((s.get('UniqueBack') + '' == '1') || (cardNameBack && ((cardNameBack.indexOf('[ringa]') != -1) || (cardNameBack.indexOf('[ringb]') != -1)))) {
+				if ((s.get('UniqueBack') + '' == '1') || (cardNameBack && ((cardNameBack.indexOf('[ringa]') != -1) || (cardNameBack.indexOf('[ringb]') != -1) ||
+						(cardNameBack.indexOf('[unique]') != -1)))) {
 					if (cardType + cardSphere in nameUniqueBackRegion) {
 						s.set('NameBack-region', nameUniqueBackRegion[cardType + cardSphere]);
 					}
@@ -2087,11 +2088,13 @@ function updatePunctuation(value, lang) {
 
 function updateVafthrudnir(value, lowerSize, lang) {
 	var upperSize = Math.round(lowerSize * 1.423 * 100) / 100;
+	var uniqueSize = Math.round(lowerSize * 1.734 * 100) / 100;
 	var ringSize = Math.round(lowerSize * 1.692 * 100) / 100;
 	var res = '';
 	var tag = false;
 	value = value.replace(/\[space\]/g, ' ');
 	value = value.replace(/\[SPACE\]/g, ' ');
+	value = value.replace(/\[unique\]/g, '<unique>');
 	value = value.replace(/\[ringa\]/g, '<ringa>');
 	value = value.replace(/\[ringb\]/g, '<ringb>');
 	value = updatePunctuation(value, lang);
@@ -2128,6 +2131,7 @@ function updateVafthrudnir(value, lowerSize, lang) {
 			}
 		}
 	}
+	res = res.replace(/<unique>/g, '</size></family><lrs><size ' + uniqueSize + '>u</size></lrs><size ' + (uniqueSize / 2) + '>\u00a0</size><family "Vafthrudnir"><size ' + lowerSize + '>');
 	res = res.replace(/<ringa>/g, '</size></family><lrs><size ' + ringSize + '>A</size></lrs><family "Vafthrudnir"><size ' + lowerSize + '>');
 	res = res.replace(/<ringb>/g, '</size></family><lrs><size ' + ringSize + '>B</size></lrs><family "Vafthrudnir"><size ' + lowerSize + '>');
 	res = res.replace(/<size [^>]+> <\/size>(?:<size [^>]+><\/size>)*<\/family><lrs>/g, '<size ' + lowerSize + '> </size></family><lrs>')

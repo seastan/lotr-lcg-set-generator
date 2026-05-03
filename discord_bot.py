@@ -810,6 +810,7 @@ def update_name(text):
     """
     text = text.replace('[ringa]', 'A')
     text = text.replace('[ringb]', 'B')
+    text = text.replace('[unique]', '')
     return text
 
 

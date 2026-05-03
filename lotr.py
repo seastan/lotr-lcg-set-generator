@@ -1540,6 +1540,7 @@ def _update_card_name(text):
 
     text = text.replace('[ringa]', 'A')
     text = text.replace('[ringb]', 'B')
+    text = text.replace('[unique]', '')
     return text
 
 
@@ -3379,6 +3380,7 @@ def _get_capitalization_errors(text):  # pylint: disable=R0912
     if text in {'[space]', '[nobr]'}:
         return errors
 
+    text = re.sub(r' \[[^\]]+\] ', ' ', text)
     text = re.sub(r'\[[^\]]+\]', '', text)
     text = text.strip()
     text = text.replace(' son of ', ' sonof_ ')
