@@ -1544,6 +1544,16 @@ def _update_card_name(text):
     return text
 
 
+def _update_name_tag(text):
+    """ Update the value of [name] tag.
+    """
+    if not text:
+        return text
+
+    text = text.replace('[unique]', '')
+    return text
+
+
 def _update_card_text(text, lang=L_ENGLISH, skip_rules=False,  # pylint: disable=R0915
                       fix_linebreaks=True):
     """ Update card text for RingsDB, Hall of Beorn and Spanish DBs.
@@ -2653,11 +2663,12 @@ def _clean_data(conf, data, lang):  # pylint: disable=R0912,R0914,R0915
     """
     auto_page_rows = []
     for i, row in enumerate(data):  # pylint: disable=R1702
-        card_name = _to_str(_clean_value(row.get(CARD_NAME)))
+        card_name = _to_str(_update_name_tag(_clean_value(row.get(CARD_NAME))))
         if len(card_name) == 1:
             card_name = card_name.upper()
 
-        card_name_back = _to_str(_clean_value(row.get(CARD_SIDE_B)))
+        card_name_back = _to_str(
+            _update_name_tag(_clean_value(row.get(CARD_SIDE_B))))
         if len(card_name_back) == 1:
             card_name_back = card_name_back.upper()
 
