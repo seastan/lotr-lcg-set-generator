@@ -3,6 +3,8 @@
 """
 from datetime import datetime
 from email.header import Header
+import copy
+import html
 import json
 import logging
 import os
@@ -24,6 +26,15 @@ PREVIEW_URL = (
     'https://www.makeplayingcards.com/design/dn_parse_products.aspx?'
     'product={}&pieces={}&attach={}&give=&orderno=&sellID=&effectNo='
     '&componentList={}&rm={}')
+EDIT_URL = (
+    'https://www.makeplayingcards.com/design/dn_temporary_parse.aspx?id={}'
+    '&edit=Y')
+FRONT_URL = (
+    'https://www.makeplayingcards.com/products/playingcard/design/'
+    'dn_playingcards_front_dynamic.aspx?ssid={}')
+BACK_URL = (
+    'https://www.makeplayingcards.com/products/playingcard/design/'
+    'dn_playingcards_back_dynamic.aspx?ssid={}')
 
 DECK_REGEX = (
     r'<a href="javascript:oTempSave.show\(\'([^\']+)\'[^"]+">'
@@ -43,6 +54,13 @@ NEXT_REGEX = (
     r'&#39;([^&]+)&#39;\)" style="[^"]+">Next<\/a>')
 PREVIEW_REGEX = r'(?<=javascript:oTempSave\.show\()[^\)]+'
 IMAGE_REGEX = r'(?<=<img src=")[^"]+'
+EDIT_REGEX = (
+    r'(?<=<input name="hdParameter" type="hidden" id="hdParameter" value=")'
+    r'[^"]+')
+
+JSON_TEMPLATE = {
+    'version': 3,
+    'parts': [{'code': '', 'name': '', 'cards': []}]}
 
 DEFAULT_VIEWSTATE = \
     '/wEPDwUKMTk3MTM0MTI5NGRkq5zAH+KPIx3IAH6syg3EXVOr5hc='
@@ -258,6 +276,24 @@ def send_discord(message):
         create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
 
     return False
+
+
+def get_redirected_url(session, url, timeout=None):
+    """ Get redirected URL after GET request.
+    """
+    timeout = timeout or URL_TIMEOUT
+    for i in range(URL_RETRIES):
+        try:
+            req = session.get(url, allow_redirects=True, timeout=timeout)
+            redirected_url = req.url
+            break
+        except Exception:
+            if i < URL_RETRIES - 1:
+                time.sleep(URL_SLEEP)
+            else:
+                raise
+
+    return redirected_url
 
 
 def send_get(session, url, timeout=None):
@@ -985,6 +1021,109 @@ def test():  # pylint: disable=R0911,R0914,R0915
         json.dump(cookies, fobj, indent=4)
 
 
+def save(selected_deck):
+    """ Save JSON representations for the decks.
+    """
+    logging.info('Saving JSON representations for the decks')
+    try:
+        with open(CONF_PATH, 'r', encoding='utf-8') as fobj:
+            data = json.load(fobj)
+    except Exception as exc:
+        raise ConfigurationError('No configuration found') from exc
+
+    try:
+        with open(COOKIES_PATH, 'r', encoding='utf-8') as fobj:
+            cookies = json.load(fobj)
+    except Exception as exc:
+        raise ConfigurationError('No cookies found') from exc
+
+    session = init_session(cookies)
+    content = get_decks(session)
+    if not content:
+        logging.info('The site is undergoing system upgrade')
+        return
+
+    preview_data = re.findall(PREVIEW_REGEX, content)
+    for i in range(len(preview_data)):  # pylint: disable=C0200
+        preview_data[i] = preview_data[i][1:-1].split("','")
+
+    preview_data = {p[0]:p for p in preview_data}
+
+    if selected_deck:
+        data['decks'] = {
+            key:value for key, value in data.get('decks', {}).items()
+            if key == selected_deck}
+
+    decks = []
+    for deck_name in data.get('decks', {}):
+        decks.append({'name': deck_name,
+                      'id': data['decks'][deck_name]['deck_id']})
+
+    for deck in decks:
+        if deck['id'] not in preview_data:
+            logging.error('Deck %s not found, content length: %s',
+                          deck['name'], len(content))
+            continue
+
+        logging.info('Saving JSON representations for deck %s', deck['name'])
+        edit_url = EDIT_URL.format(preview_data[deck['id']][0])
+        redirected_url = get_redirected_url(session, edit_url)
+        ssid = redirected_url.split('=')[-1]
+
+        front_url = FRONT_URL.format(ssid)
+        front_content = send_get(session, front_url)
+        front_content = re.search(EDIT_REGEX, front_content)
+        if not front_content:
+            logging.error(
+                'Front content for deck %s not found, content length: %s',
+                deck['name'], len(content))
+            continue
+
+        front_content = html.unescape(front_content.group(0))
+        try:
+            front_info = json.loads(front_content)['Base']['ImageInfo']
+            front_info = json.loads(front_info)
+        except Exception:
+            logging.error(
+                'Incorrect front content for deck %s, content length: %s',
+                deck['name'], len(content))
+            continue
+
+        print(front_info)
+
+        back_url = BACK_URL.format(ssid)
+        back_content = send_get(session, back_url)
+        back_content = re.search(EDIT_REGEX, back_content)
+        if not back_content:
+            logging.error(
+                'Back content for deck %s not found, content length: %s',
+                deck['name'], len(content))
+            continue
+
+        back_content = html.unescape(back_content.group(0))
+        try:
+            back_info = json.loads(back_content)['Base']['ImageInfo']
+            back_info = json.loads(back_info)
+        except Exception:
+            logging.error(
+                'Incorrect back content for deck %s, content length: %s',
+                deck['name'], len(content))
+            continue
+
+        print(back_info)
+
+        if len(front_info) != len(back_info):
+            logging.error(
+                'Different number of front and back cards for deck %s',
+                deck['name'])
+            continue
+
+        res = copy.deepcopy(JSON_TEMPLATE)
+        res['parts']['code'] = None
+        res['parts']['name'] = deck['name']
+        cards = res['parts']['cards']
+
+
 def refresh():  # pylint: disable=R0914
     """ Refresh all decks.
     """
@@ -1175,6 +1314,8 @@ def main():  # pylint: disable=R0912
         if len(sys.argv) > 1:
             if sys.argv[1] == 'refresh':
                 refresh()
+            elif sys.argv[1] == 'save':
+                save('The Siege of Erebor 1.1')
             elif sys.argv[1] == 'backup':
                 backup()
             elif sys.argv[1] == 'test':
@@ -1205,7 +1346,8 @@ def main():  # pylint: disable=R0912
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    if len(sys.argv) > 1 and sys.argv[1] not in {'refresh', 'backup', 'test'}:
+    if len(sys.argv) > 1 and sys.argv[1] not in {'refresh', 'save', 'backup',
+                                                 'test'}:
         init_logging_manual()
     else:
         init_logging()
