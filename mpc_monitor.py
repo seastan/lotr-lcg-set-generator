@@ -60,7 +60,7 @@ EDIT_REGEX = (
 
 JSON_TEMPLATE = {
     'version': 3,
-    'parts': [{'code': '', 'name': '', 'cards': []}]}
+    'parts': [{'code': '6229BAC504DC5BB4', 'name': '', 'cards': []}]}
 
 DEFAULT_VIEWSTATE = \
     '/wEPDwUKMTk3MTM0MTI5NGRkq5zAH+KPIx3IAH6syg3EXVOr5hc='
@@ -262,7 +262,8 @@ def send_discord(message):
                     time.sleep(1)
 
                 data = {'content': chunk}
-                res = requests.post(conf['webhook_url'], json=data)
+                res = requests.post(conf['webhook_url'], json=data,
+                                    timeout=URL_TIMEOUT)
                 res = res.content.decode('utf-8')
                 if res != '':
                     raise DiscordResponseError(
@@ -445,7 +446,7 @@ def get_viewstate(session, content=''):
     return viewstate, viewstategenerator
 
 
-def init_form_data(eventtarget, viewstate, viewstategenerator, hidd_type='',  # pylint: disable=R0913
+def init_form_data(eventtarget, viewstate, viewstategenerator, hidd_type='',  # pylint: disable=R0913,R0917
                    hidd_value='', hidd_project_name='', hidd_product_type='',
                    eventargument=''):
     """ Init POST data.
@@ -569,7 +570,7 @@ def rename_deck(session, deck_id, deck_name, actual_deck_name):
     return content
 
 
-def fix_deck(session, data, content, deck_id, backup_id, deck_name,  # pylint: disable=R0912,R0913,R0914,R0915
+def fix_deck(session, data, content, deck_id, backup_id, deck_name,  # pylint: disable=R0912,R0913,R0914,R0915,R0917
              actual_deck_name, content_id, actual_content_id):
     """ Fix a corrupted deck.
     """
@@ -1021,7 +1022,7 @@ def test():  # pylint: disable=R0911,R0914,R0915
         json.dump(cookies, fobj, indent=4)
 
 
-def save(selected_deck):
+def save(selected_deck):  # pylint: disable=R0912,R0914,R0915
     """ Save JSON representations for the decks.
     """
     logging.info('Saving JSON representations for the decks')
@@ -1081,15 +1082,14 @@ def save(selected_deck):
 
         front_content = html.unescape(front_content.group(0))
         try:
-            front_info = json.loads(front_content)['Base']['ImageInfo']
-            front_info = json.loads(front_info)
+            front_content =  json.loads(front_content)
+            front_crop_info = json.loads(front_content['Base']['CropInfo'])
+            front_image_info = json.loads(front_content['Base']['ImageInfo'])
         except Exception:
             logging.error(
                 'Incorrect front content for deck %s, content length: %s',
                 deck['name'], len(content))
             continue
-
-        print(front_info)
 
         back_url = BACK_URL.format(ssid)
         back_content = send_get(session, back_url)
@@ -1102,26 +1102,55 @@ def save(selected_deck):
 
         back_content = html.unescape(back_content.group(0))
         try:
-            back_info = json.loads(back_content)['Base']['ImageInfo']
-            back_info = json.loads(back_info)
+            back_content = json.loads(back_content)
+            back_crop_info = json.loads(back_content['Base']['CropInfo'])
+            back_image_info = json.loads(back_content['Base']['ImageInfo'])
         except Exception:
             logging.error(
                 'Incorrect back content for deck %s, content length: %s',
                 deck['name'], len(content))
             continue
 
-        print(back_info)
-
-        if len(front_info) != len(back_info):
+        if len(front_image_info) != len(back_image_info):
             logging.error(
                 'Different number of front and back cards for deck %s',
                 deck['name'])
             continue
 
         res = copy.deepcopy(JSON_TEMPLATE)
-        res['parts']['code'] = None
-        res['parts']['name'] = deck['name']
-        cards = res['parts']['cards']
+        res['parts'][0]['name'] = deck['name']
+        cards = res['parts'][0]['cards']
+        try:
+            for i in range(len(front_image_info)):  # pylint: disable=C0200
+                card = {
+                    'count': 1,
+                    'front': {
+                        'Name': '{}-1.{}'.format(i + 1,
+                                                 front_image_info[i]['Exp']),
+                        'ID': front_crop_info[i][0]['ID'],
+                        'SourceID': front_crop_info[i][0]['SourceID'],
+                        'Exp': front_image_info[i]['Exp'],
+                        'Width': front_image_info[i]['Width'],
+                        'Height': front_image_info[i]['Height']
+                    },
+                    'back': {
+                        'Name': '{}-2.{}'.format(i + 1,
+                                                 back_image_info[i]['Exp']),
+                        'ID': back_crop_info[i][0]['ID'],
+                        'SourceID': back_crop_info[i][0]['SourceID'],
+                        'Exp': back_image_info[i]['Exp'],
+                        'Width': back_image_info[i]['Width'],
+                        'Height': back_image_info[i]['Height']
+                    }
+                }
+                cards.append(card)
+        except Exception:
+            logging.error(
+                'Error parsing card information for deck %s', deck['name'])
+            continue
+
+        with open('deck.json', 'w', encoding='utf-8') as fobj:
+            fobj.write(json.dumps(res, indent=4))
 
 
 def refresh():  # pylint: disable=R0914
