@@ -10,6 +10,7 @@ import logging
 import os
 import random
 import re
+import subprocess
 import sys
 import time
 import uuid
@@ -386,17 +387,17 @@ def update_wordpress_content(data, content):
                 create_mail(ERROR_SUBJECT_TEMPLATE.format(message), message)
 
 
-def replace_url(data, old_id, new_id):
+def replace_url(data, old_value, new_value):
     """ Replace deck ID on Wordpress site.
     """
     old_content = get_wordpress_content(data)
-    if old_id not in old_content:
+    if old_value not in old_content:
         return False
 
-    new_content = old_content.replace(old_id, new_id)
+    new_content = old_content.replace(old_value, new_value)
     update_wordpress_content(data, new_content)
     new_content = get_wordpress_content(data)
-    return new_id in new_content
+    return new_value in new_content
 
 
 def init_session(cookies):
@@ -713,23 +714,30 @@ Do the following:
 WordPress web-site is already updated."""
             send_discord(discord_message)
         else:
-            message = ('Attempt to fix deck {} automatically succeeded, but '
-                       'updating WordPress web-site failed. New deck ID: {}'
-                       .format(deck_name, new_deck_id))
+#            message = ('Attempt to fix deck {} automatically succeeded, but '
+#                       'updating WordPress web-site failed. New deck ID: {}'
+#                       .format(deck_name, new_deck_id))
+#            logging.info(message)
+#            body = f"""Do the following:
+#1. Open https://wordpress.com, login (if needed), click Pages and open "MakePlayingCards Direct Links"
+#2. Update the link to:
+#https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id={new_deck_id}
+#"""
+#            create_mail(ALERT_SUBJECT_TEMPLATE.format(message), body)
+#            discord_message = f"""Attempt to fix deck **{deck_name}** automatically succeeded!
+#At the same time, updating WordPress web-site failed.
+#Do the following:
+#1. Open https://wordpress.com, login (if needed), click Pages and open "MakePlayingCards Direct Links"
+#2. Update the link to:
+#https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id={new_deck_id}
+#{discord_users}"""
+#            send_discord(discord_message)
+            message = ('Attempt to fix deck {} automatically succeeded!'
+                       .format(deck_name))
             logging.info(message)
-            body = f"""Do the following:
-1. Open https://wordpress.com, login (if needed), click Pages and open "MakePlayingCards Direct Links"
-2. Update the link to:
-https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id={new_deck_id}
-"""
+            body = ''
             create_mail(ALERT_SUBJECT_TEMPLATE.format(message), body)
-            discord_message = f"""Attempt to fix deck **{deck_name}** automatically succeeded!
-At the same time, updating WordPress web-site failed.
-Do the following:
-1. Open https://wordpress.com, login (if needed), click Pages and open "MakePlayingCards Direct Links"
-2. Update the link to:
-https://www.makeplayingcards.com/products/playingcard/design/dn_playingcards_front_dynamic.aspx?id={new_deck_id}
-{discord_users}"""
+            discord_message = f"""Attempt to fix deck **{deck_name}** automatically succeeded!"""
             send_discord(discord_message)
 
         return content, new_deck_id
@@ -823,6 +831,14 @@ def add_deck(deck_name):  # pylint: disable=R0915
         deck_name, deck_url)
     logging.info(message)
     print(message)
+
+    print('Saving JSON representation for the deck...')
+    url = save(deck_name)
+    if url:
+        print('Shared URL: {}'.format(url))
+    else:
+        print('Error generating or uploading JSON representation for the deck')
+
     print('See {} for details'.format(LOG_PATH))
 
 
@@ -1022,10 +1038,28 @@ def test():  # pylint: disable=R0911,R0914,R0915
         json.dump(cookies, fobj, indent=4)
 
 
-def save(selected_deck):  # pylint: disable=R0912,R0914,R0915
-    """ Save JSON representations for the decks.
+def rclone_mpc(path):
+    """ Upload JSON representation to Google Drive.
     """
-    logging.info('Saving JSON representations for the decks')
+    res = subprocess.run(
+        './rclone_mpc.sh "{}"'.format(path), capture_output=True, shell=True,
+        check=True)
+    stdout = res.stdout.decode('utf-8').strip()
+    stderr = res.stderr.decode('utf-8').strip()
+    url = stdout.split('\n')[-1]
+    if url.startswith('https://'):
+        logging.info('Rclone finished, stdout: %s, stderr: %s', stdout, stderr)
+    else:
+        logging.error('Rclone failed, stdout: %s, stderr: %s', stdout, stderr)
+        url = None
+
+    return url
+
+
+def save(selected_deck_name=None):  # pylint: disable=R0912,R0914,R0915
+    """ Save JSON representation for all decks or one selected deck.
+    """
+    logging.info('Saving JSON representation for the decks')
     try:
         with open(CONF_PATH, 'r', encoding='utf-8') as fobj:
             data = json.load(fobj)
@@ -1038,11 +1072,12 @@ def save(selected_deck):  # pylint: disable=R0912,R0914,R0915
     except Exception as exc:
         raise ConfigurationError('No cookies found') from exc
 
+    last_url = None
     session = init_session(cookies)
     content = get_decks(session)
     if not content:
         logging.info('The site is undergoing system upgrade')
-        return
+        return last_url
 
     preview_data = re.findall(PREVIEW_REGEX, content)
     for i in range(len(preview_data)):  # pylint: disable=C0200
@@ -1050,10 +1085,10 @@ def save(selected_deck):  # pylint: disable=R0912,R0914,R0915
 
     preview_data = {p[0]:p for p in preview_data}
 
-    if selected_deck:
+    if selected_deck_name:
         data['decks'] = {
             key:value for key, value in data.get('decks', {}).items()
-            if key == selected_deck}
+            if key == selected_deck_name}
 
     decks = []
     for deck_name in data.get('decks', {}):
@@ -1066,7 +1101,8 @@ def save(selected_deck):  # pylint: disable=R0912,R0914,R0915
                           deck['name'], len(content))
             continue
 
-        logging.info('Saving JSON representations for deck %s', deck['name'])
+        logging.info('Saving JSON representation for the deck %s',
+                     deck['name'])
         edit_url = EDIT_URL.format(preview_data[deck['id']][0])
         redirected_url = get_redirected_url(session, edit_url)
         ssid = redirected_url.split('=')[-1]
@@ -1076,7 +1112,7 @@ def save(selected_deck):  # pylint: disable=R0912,R0914,R0915
         front_content = re.search(EDIT_REGEX, front_content)
         if not front_content:
             logging.error(
-                'Front content for deck %s not found, content length: %s',
+                'Front content for the deck %s not found, content length: %s',
                 deck['name'], len(content))
             continue
 
@@ -1087,7 +1123,7 @@ def save(selected_deck):  # pylint: disable=R0912,R0914,R0915
             front_image_info = json.loads(front_content['Base']['ImageInfo'])
         except Exception:
             logging.error(
-                'Incorrect front content for deck %s, content length: %s',
+                'Incorrect front content for the deck %s, content length: %s',
                 deck['name'], len(content))
             continue
 
@@ -1096,7 +1132,7 @@ def save(selected_deck):  # pylint: disable=R0912,R0914,R0915
         back_content = re.search(EDIT_REGEX, back_content)
         if not back_content:
             logging.error(
-                'Back content for deck %s not found, content length: %s',
+                'Back content for the deck %s not found, content length: %s',
                 deck['name'], len(content))
             continue
 
@@ -1107,13 +1143,13 @@ def save(selected_deck):  # pylint: disable=R0912,R0914,R0915
             back_image_info = json.loads(back_content['Base']['ImageInfo'])
         except Exception:
             logging.error(
-                'Incorrect back content for deck %s, content length: %s',
+                'Incorrect back content for the deck %s, content length: %s',
                 deck['name'], len(content))
             continue
 
         if len(front_image_info) != len(back_image_info):
             logging.error(
-                'Different number of front and back cards for deck %s',
+                'Different number of front and back cards for the deck %s',
                 deck['name'])
             continue
 
@@ -1146,11 +1182,34 @@ def save(selected_deck):  # pylint: disable=R0912,R0914,R0915
                 cards.append(card)
         except Exception:
             logging.error(
-                'Error parsing card information for deck %s', deck['name'])
+                'Error parsing card information for the deck %s', deck['name'])
             continue
 
-        with open('deck.json', 'w', encoding='utf-8') as fobj:
+        path = os.path.join(data['mpc_json_path'],
+                            '{}.json'.format(deck['name']))
+        with open(path, 'w', encoding='utf-8') as fobj:
             fobj.write(json.dumps(res, indent=4))
+
+        logging.info('Saved JSON representation into %s', path)
+        url = rclone_mpc(path)
+        if url:
+            last_url = url
+            logging.info('Obtained a shared URL for the deck %s: %s',
+                         deck['name'], url)
+            old_url = (
+                'https://www.makeplayingcards.com/products/playingcard/design/'
+                'dn_playingcards_front_dynamic.aspx?id={}'.format(deck['id']))
+            res = replace_url(data, old_url, url)
+            if res:
+                logging.info(
+                    'Updated the link on WordPress web-site for the deck %s',
+                    deck['name'])
+        else:
+            logging.error(
+                'Error uploading the file for the deck %s to Google Drive',
+                deck['name'])
+
+    return last_url
 
 
 def refresh():  # pylint: disable=R0914
@@ -1344,7 +1403,7 @@ def main():  # pylint: disable=R0912
             if sys.argv[1] == 'refresh':
                 refresh()
             elif sys.argv[1] == 'save':
-                save('The Siege of Erebor 1.1')
+                save()
             elif sys.argv[1] == 'backup':
                 backup()
             elif sys.argv[1] == 'test':

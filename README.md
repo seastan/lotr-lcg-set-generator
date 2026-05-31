@@ -334,6 +334,7 @@ Additional steps:
   - `ALePIcons` (points to `CardImages/icons`)
   - `ALePLinksBackup` (points to `Links Backup`)
   - `ALePLogs` (points to `Logs`)
+  - `ALePMakePlayingCards` (points to `MakePlayingCards` folder on the shared drive with release artifacts)
   - `ALePOCTGN` (points to `Playtesting/OCTGN Files`)
   - `ALePRenderedImages` (points to `RenderedImages`)
   - `ALePStableData` (points to `StableData`)
@@ -346,7 +347,7 @@ Additional steps:
   - `* * * * *     <path>/check_discord_bot.sh >> <path>/cron.log 2>&1`
   - `* * * * *     <path>/check_internet_state.sh >> <path>/cron.log 2>&1`
   - `* * * * *     <path>/check_mail.sh >> <path>/cron.log 2>&1`
-  - `*/10 * * * *  <path>/check_mpc_monitor.sh >> <path>/cron.log 2>&1`
+  - `*/30 * * * *  <path>/check_mpc_monitor.sh >> <path>/cron.log 2>&1`
   - `19 * * * *    <path>/check_playtesting_sets.sh >> <path>/cron.log 2>&1`
   - `9 * * * *     <path>/check_ringsdb_decks.sh >> <path>/cron.log 2>&1`
   - `* * * * *     <path>/check_run_before_se_service.sh >> <path>/cron.log 2>&1`
@@ -361,7 +362,7 @@ Additional steps:
   - `36 7 * * *    <path>/monitor_mpc_url_format.sh >> <path>/cron.log 2>&1`
   - `0 1 * * *     <path>/monitor_wordpress_token.sh >> <path>/cron.log 2>&1`
   - `17 7 1 */2 *  <path>/mpc_backup.sh >> <path>/cron.log 2>&1`
-  - `*/5 * * * *   <path>/mpc_monitor.sh >> <path>/cron.log 2>&1`
+  - `19 * * * *   <path>/mpc_monitor.sh >> <path>/cron.log 2>&1`
   - `17 6 * * 0    <path>/mpc_refresh.sh >> <path>/cron.log 2>&1`
   - `7 0 * * *     <path>/rclone_backup.sh "<local Drive/Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
   - `12,42 * * * * <path>/rclone_data_remotely.sh >> <path>/cron.log 2>&1`
