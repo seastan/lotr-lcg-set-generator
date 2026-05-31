@@ -8,7 +8,6 @@ import os
 import re
 import time
 import uuid
-#import warnings
 
 import requests
 
@@ -25,9 +24,6 @@ LOG_LIMIT = 5000
 URL_TEMPLATE = (
     'https://www.makeplayingcards.com/products/playingcard/design/'
     'dn_playingcards_front_dynamic.aspx?id={}')
-
-
-#warnings.filterwarnings('ignore', category=DeprecationWarning)
 
 
 def init_logging():

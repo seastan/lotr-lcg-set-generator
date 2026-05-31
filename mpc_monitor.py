@@ -14,11 +14,15 @@ import subprocess
 import sys
 import time
 import uuid
+import warnings
 
 import requests
 import yaml
 
 import common
+
+
+warnings.filterwarnings('ignore', category=DeprecationWarning)
 
 
 SAVED_PROJECTS_URL = \
