@@ -669,6 +669,8 @@ URL_TIMEOUT = 15
 URL_RETRIES = 3
 URL_SLEEP = 10
 
+ALLOWED_NON_INT = {'-', 'X', 'G'}
+
 O8D_TEMPLATE = """<deck game="a21af4e8-be4b-4cda-a6b6-534f9717391f"
     sleeveid="0">
   <section name="Hero" shared="False" />
@@ -1718,9 +1720,9 @@ def _update_french_card_text(text):
 
 
 def _update_french_non_int(value):
-    """ Update non-int values like "X" or "-".
+    """ Update non-int values like "X", "G" or "-".
     """
-    if value == 'X':
+    if value in ('X', 'G'):
         return 99
 
     if value == '-':
@@ -4928,7 +4930,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_type not in {T_HERO, T_QUEST} and card_cost is not None and
               not re.match(r'^[1-9]?[0-9]$', str(card_cost)) and
-              card_cost != '-' and card_cost != 'X'):
+              card_cost not in ALLOWED_NON_INT):
             message = 'Incorrect cost value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -4991,7 +4993,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_type_back not in {T_HERO, T_QUEST} and
               card_cost_back is not None and
               not re.match(r'^[1-9]?[0-9]$', str(card_cost_back)) and
-              card_cost_back != '-' and card_cost_back != 'X'):
+              card_cost_back not in ALLOWED_NON_INT):
             message = 'Incorrect cost back value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -5039,7 +5041,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_type != T_QUEST and card_engagement is not None and
               not re.match(r'^[1-9]?[0-9]$', str(card_engagement)) and
-              card_engagement != '-' and card_engagement != 'X'):
+              card_engagement not in ALLOWED_NON_INT):
             message = 'Incorrect engagement cost value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -5086,7 +5088,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
         elif (card_type_back != T_QUEST and
               card_engagement_back is not None and
               not re.match(r'^[1-9]?[0-9]$', str(card_engagement_back)) and
-              card_engagement_back != '-' and card_engagement_back != 'X'):
+              card_engagement_back not in ALLOWED_NON_INT):
             message = (
                 'Incorrect engagement cost back value for row #{}{}'.format(
                     i, row_info))
@@ -5112,7 +5114,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_threat is not None and
               not re.match(r'^[1-9]?[0-9]$', str(card_threat)) and
-              card_threat != '-' and card_threat != 'X'):
+              card_threat not in ALLOWED_NON_INT):
             message = 'Incorrect threat value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -5145,7 +5147,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_threat_back is not None and
               not re.match(r'^[1-9]?[0-9]$', str(card_threat_back)) and
-              card_threat_back != '-' and card_threat_back != 'X'):
+              card_threat_back not in ALLOWED_NON_INT):
             message = 'Incorrect threat back value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -5171,7 +5173,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_willpower is not None and
               not re.match(r'^[1-9]?[0-9]$', str(card_willpower)) and
-              card_willpower != '-' and card_willpower != 'X'):
+              card_willpower not in ALLOWED_NON_INT):
             message = 'Incorrect willpower value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -5208,7 +5210,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_willpower_back is not None and
               not re.match(r'^[1-9]?[0-9]$', str(card_willpower_back)) and
-              card_willpower_back != '-' and card_willpower_back != 'X'):
+              card_willpower_back not in ALLOWED_NON_INT):
             message = 'Incorrect willpower back value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -5234,7 +5236,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_attack is not None and
               not re.match(r'^[1-9]?[0-9]$', str(card_attack)) and
-              card_attack != '-' and card_attack != 'X'):
+              card_attack not in ALLOWED_NON_INT):
             message = 'Incorrect attack value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -5269,7 +5271,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_attack_back is not None and
               not re.match(r'^[1-9]?[0-9]$', str(card_attack_back)) and
-              card_attack_back != '-' and card_attack_back != 'X'):
+              card_attack_back not in ALLOWED_NON_INT):
             message = 'Incorrect attack back value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -5295,7 +5297,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_defense is not None and
               not re.match(r'^[1-9]?[0-9]$', str(card_defense)) and
-              card_defense != '-' and card_defense != 'X'):
+              card_defense not in ALLOWED_NON_INT):
             message = 'Incorrect defense value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -5331,7 +5333,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_defense_back is not None and
               not re.match(r'^[1-9]?[0-9]$', str(card_defense_back)) and
-              card_defense_back != '-' and card_defense_back != 'X'):
+              card_defense_back not in ALLOWED_NON_INT):
             message = 'Incorrect defense back value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -5357,7 +5359,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_health is not None and
               not re.match(r'^[1-9]?[0-9]$', str(card_health)) and
-              card_health != '-' and card_health != 'X'):
+              card_health not in ALLOWED_NON_INT):
             message = 'Incorrect health value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -5392,7 +5394,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_health_back is not None and
               not re.match(r'^[1-9]?[0-9]$', str(card_health_back)) and
-              card_health_back != '-' and card_health_back != 'X'):
+              card_health_back not in ALLOWED_NON_INT):
             message = 'Incorrect health back value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -5421,7 +5423,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_quest is not None and
               not re.match(r'^[1-9]?[0-9]$', str(card_quest)) and
-              card_quest != '-' and card_quest != 'X'):
+              card_quest not in ALLOWED_NON_INT):
             message = 'Incorrect quest points value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
@@ -5462,7 +5464,7 @@ def sanity_check(conf, sets):  # pylint: disable=R0912,R0914,R0915
                 broken_set_ids.add(set_id)
         elif (card_quest_back is not None and
               not re.match(r'^[1-9]?[0-9]$', str(card_quest_back)) and
-              card_quest_back != '-' and card_quest_back != 'X'):
+              card_quest_back not in ALLOWED_NON_INT):
             message = 'Incorrect quest points back value for row #{}{}'.format(
                 i, row_info)
             logging.error(message)
