@@ -597,6 +597,7 @@ List of available sphere values:
 - `AdditionalCopies`
 - `DefaultCopyright`
 - `ExtractSecondKeyword`
+- `FTCL`
 - `IgnoreAutomaticTags`
 - `IgnoreName`
 - `IgnoreRules`

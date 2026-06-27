@@ -875,6 +875,11 @@ def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
                    if card.get(prefix + lotr.CARD_UNIQUE)
                    else '')
 
+    if lotr.F_FTCL in lotr.extract_flags(card.get(prefix + lotr.CARD_FLAGS)):
+        card_ftcl = ' [FTCL]'
+    else:
+        card_ftcl = ''
+
     sphere = card.get(prefix + lotr.CARD_SPHERE, '')
     if sphere in {lotr.S_BAGGINS, lotr.S_FELLOWSHIP, lotr.S_LEADERSHIP,
                   lotr.S_LORE, lotr.S_SPIRIT, lotr.S_TACTICS}:
@@ -982,7 +987,7 @@ def format_side(card, prefix):  # pylint: disable=R0912,R0914,R0915
             lotr.extract_flags(card.get(prefix + lotr.CARD_FLAGS))):
         card_artist = '{} *(not displayed on the card)*'.format(card_artist)
 
-    res = f"""{card_unique}{card_name}
+    res = f"""{card_unique}{card_name}{card_ftcl}
 {card_sphere}{card_type}{card_promo}{card_cost}{card_engagement}{card_stage}{card_skills}
 
 {card_traits}{card_keywords}{card_text}{card_shadow}{card_victory}{card_icons}{card_info}{card_flavour}{card_artist}"""  # pylint: disable=C0301

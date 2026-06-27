@@ -144,6 +144,16 @@ starRegion[SHIP_OBJECTIVE] = '363,524,11,11';
 starRegion[TREACHERY] = '373,524,11,11';
 starRegion[TREASURE] = '377,524,11,11';
 
+var FTCLRegion = {};
+FTCLRegion[ALLY] = '273,424,41,25';
+FTCLRegion[ATTACHMENT] = '273,424,41,25';
+FTCLRegion[CONTRACT] = '273,424,41,25';
+FTCLRegion[EVENT] = '273,424,41,25';
+FTCLRegion[HERO] = '273,424,41,25';
+FTCLRegion[HERO_PROMO] = '251,424,41,25';
+FTCLRegion[PLAYER_OBJECTIVE] = '263,424,41,25';
+FTCLRegion[PLAYER_SIDE_QUEST] = '429,274,41,25';
+
 var collectionInfoRegion = {};
 collectionInfoRegion[ALLY] = '358,526,26,15';
 collectionInfoRegion[ATTACHMENT] = '358,526,26,15';
@@ -1288,6 +1298,12 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				else {
 					s.set('Star', 0);
 				}
+				if (flags.indexOf('FTCL') > -1) {
+					s.set('FTCL', 1);
+				}
+				else {
+					s.set('FTCL', 0);
+				}
 
 				if (flags.indexOf('NoArtistBack') > -1) {
 					s.set('NoArtistBack', 1);
@@ -1312,6 +1328,12 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				}
 				else {
 					s.set('StarBack', 0);
+				}
+				if (flags.indexOf('FTCLBack') > -1) {
+					s.set('FTCLBack', 1);
+				}
+				else {
+					s.set('FTCLBack', 0);
 				}
 
 				if (context == 'renderer') {
@@ -1888,6 +1910,7 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					['PageIn-region', pageInRegion],
 					['Side-region', sideRegion],
 					['Star-region', starRegion],
+					['FTCL-region', FTCLRegion],
 					['GameName-portrait-clip-region', gameNamePortraitRegion],
 					['Name-portrait-clip-region', namePortraitRegion],
 					['EncounterSet1-portrait-clip-region', encounterSet1PortraitRegion],
