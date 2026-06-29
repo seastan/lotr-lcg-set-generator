@@ -556,6 +556,13 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
 
             return '<div style="text-align: center; color: #C46900; font-family: Vafthrudnir; font-size: 29px; width: ' + data['Engagement-region'][2] + 'px">' + data.Engagement + '</div>';
         },
+        'FTCL': function(data) {
+            if (parseInt(data.ShowFTCL) == 0) {
+                return '';
+            }
+
+            return '<img src="' + imagesFolder + 'ftcl.png" width="100%" height="100%">';
+        },
         'HitPoints': function(data) {
             if (data.HitPoints + '' == '') {
                 return '';
@@ -785,6 +792,13 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
             var content = '<img src="' + data['EncounterSet-external-path'] + '" width="' + data['EncounterSetBack-portrait-clip-region'][2] + '" height="' + data['EncounterSetBack-portrait-clip-region'][3] + '">';
             return content;
         },
+        'FTCLBack': function(data) {
+            if (parseInt(data.ShowFTCLBack) == 0) {
+                return '';
+            }
+
+            return '<img src="' + imagesFolder + 'ftcl.png" width="100%" height="100%">';
+        },
         'NameBack': function(data) {
             if (data.NameBack + '' == '') {
                 return '';
@@ -947,6 +961,10 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
         data['SideBack-region'] = data['Side-region'];
     }
 
+    if (data['FTCL-region'] && data.DoubleSide && (['Contract', 'Quest'].indexOf(data.TypeRenderer) > -1)) {
+        data['FTCLBack-region'] = data['FTCL-region'];
+    }
+
     if (data['Type-region'] && data.DoubleSide && (data.TypeRenderer == 'Contract')) {
         data['TypeBack-region'] = data['Type-region'];
     }
@@ -1017,6 +1035,11 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                     content += '<div style="position: absolute; left: ' + data[key + 'Decoration-region'][0] + 'px; top: ' + data[key + 'Decoration-region'][1] + 'px; width: ' +
                         data[key + 'Decoration-region'][2] + 'px; height: ' + data[key + 'Decoration-region'][3] + 'px; overflow-x: visible; overflow-y: visible">' +
                         '<img src="' + imagesFolder + 'victorydecoration.png" width="82" height="20"></div>';
+                }
+                else if (key == 'FTCL') {
+                    content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
+                        data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: auto">' +
+                        shapeDiv + containerRules[key](data) + '</div>';
                 }
                 else if (data[key + '-region'][3] > data[key + '-region'][2] * 3) {
                     content = '<div id="' + key + '" style="position: absolute; left: ' + (parseInt(data[key + '-region'][0]) + parseInt(data[key + '-region'][2])) + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
@@ -1130,6 +1153,11 @@ function saveResultRenderer(settings, _1, _2, _3, _4, _5, _6, _7, _8) {
                         content += '<div style="position: absolute; left: ' + data[key + 'Decoration-region'][0] + 'px; top: ' + data[key + 'Decoration-region'][1] + 'px; width: ' +
                             data[key + 'Decoration-region'][2] + 'px; height: ' + data[key + 'Decoration-region'][3] + 'px; overflow-x: visible; overflow-y: visible">' +
                             '<img src="' + imagesFolder + 'victorydecoration.png" width="82" height="20"></div>';
+                    }
+                    else if (key == 'FTCLBack') {
+                        content = '<div id="' + key + '" style="position: absolute; left: ' + data[key + '-region'][0] + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +
+                            data[key + '-region'][2] + 'px; height: ' + data[key + '-region'][3] + 'px; overflow-x: visible; overflow-y: auto">' +
+                            shapeDiv + containerRulesBack[key](data) + '</div>';
                     }
                     else if (data[key + '-region'][3] > data[key + '-region'][2] * 3) {
                         content = '<div id="' + key + '" style="position: absolute; left: ' + (parseInt(data[key + '-region'][0]) + parseInt(data[key + '-region'][2])) + 'px; top: ' + data[key + '-region'][1] + 'px; width: ' +

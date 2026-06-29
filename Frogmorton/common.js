@@ -145,14 +145,14 @@ starRegion[TREACHERY] = '373,524,11,11';
 starRegion[TREASURE] = '377,524,11,11';
 
 var FTCLRegion = {};
-FTCLRegion[ALLY] = '273,424,41,25';
-FTCLRegion[ATTACHMENT] = '273,424,41,25';
-FTCLRegion[CONTRACT] = '273,424,41,25';
-FTCLRegion[EVENT] = '273,424,41,25';
-FTCLRegion[HERO] = '273,424,41,25';
-FTCLRegion[HERO_PROMO] = '251,424,41,25';
-FTCLRegion[PLAYER_OBJECTIVE] = '263,424,41,25';
-FTCLRegion[PLAYER_SIDE_QUEST] = '429,274,41,25';
+FTCLRegion[ALLY] = '65,500,33,20';
+FTCLRegion[ATTACHMENT] = '65,500,33,20';
+FTCLRegion[CONTRACT] = '65,489,33,20';
+FTCLRegion[EVENT] = '65,495,33,20';
+FTCLRegion[HERO] = '315,500,33,20';
+FTCLRegion[HERO_PROMO] = '285,510,16,10';
+FTCLRegion[PLAYER_OBJECTIVE] = '65,495,33,20';
+FTCLRegion[PLAYER_SIDE_QUEST] = '65,251,33,20';
 
 var collectionInfoRegion = {};
 collectionInfoRegion[ALLY] = '358,526,26,15';
@@ -1299,10 +1299,10 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('Star', 0);
 				}
 				if (flags.indexOf('FTCL') > -1) {
-					s.set('FTCL', 1);
+					s.set('ShowFTCL', 1);
 				}
 				else {
-					s.set('FTCL', 0);
+					s.set('ShowFTCL', 0);
 				}
 
 				if (flags.indexOf('NoArtistBack') > -1) {
@@ -1330,10 +1330,10 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 					s.set('StarBack', 0);
 				}
 				if (flags.indexOf('FTCLBack') > -1) {
-					s.set('FTCLBack', 1);
+					s.set('ShowFTCLBack', 1);
 				}
 				else {
-					s.set('FTCLBack', 0);
+					s.set('ShowFTCLBack', 0);
 				}
 
 				if (context == 'renderer') {
