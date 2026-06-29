@@ -10525,8 +10525,9 @@ def generate_xml(conf, set_id, set_name, lang):  # pylint: disable=R0912,R0914,R
                                  CARD_TRAITS, CARD_KEYWORDS, CARD_COST,
                                  CARD_ENGAGEMENT, CARD_THREAT, CARD_WILLPOWER,
                                  CARD_ATTACK, CARD_DEFENSE, CARD_HEALTH,
-                                 CARD_QUEST, CARD_VICTORY, CARD_TEXT, CARD_SHADOW,
-                                 CARD_ICONS, CARD_INFO, CARD_ADVENTURE}
+                                 CARD_QUEST, CARD_VICTORY, CARD_TEXT,
+                                 CARD_SHADOW, CARD_FLAGS, CARD_ICONS,
+                                 CARD_INFO, CARD_ADVENTURE}
 
         card_type = row[CARD_TYPE]
         properties = []
