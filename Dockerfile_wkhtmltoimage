@@ -1,0 +1,24 @@
+FROM debian:bullseye-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV HOME=/tmp
+
+ARG WKHTMLTOX_DEB_URL="https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_arm64.deb"
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      ca-certificates \
+      wget \
+      fontconfig \
+      fonts-dejavu-core \
+      fonts-liberation \
+      xfonts-base \
+      xfonts-75dpi \
+ && wget -O /tmp/wkhtmltox.deb "$WKHTMLTOX_DEB_URL" \
+ && apt-get install -y --no-install-recommends /tmp/wkhtmltox.deb \
+ && rm -rf /var/lib/apt/lists/* /tmp/wkhtmltox.deb \
+ && test -x /usr/local/bin/wkhtmltoimage \
+ && test -x /usr/local/bin/wkhtmltopdf \
+ && /usr/local/bin/wkhtmltoimage --version
+
+CMD ["sleep", "infinity"]

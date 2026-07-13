@@ -1,0 +1,63 @@
+#!/bin/bash
+set -euo pipefail
+
+IMAGE="local/wkhtmltox-bullseye-arm64:0.12.6.1-2"
+CONTAINER="wkhtmltox-runtime"
+LOCKFILE="/tmp/${CONTAINER}.lock"
+
+ensure_container() {
+  if docker inspect "$CONTAINER" >/dev/null 2>&1; then
+    restart_policy="$(docker inspect -f '{{.HostConfig.RestartPolicy.Name}}' "$CONTAINER")"
+
+    if [ "$restart_policy" != "unless-stopped" ]; then
+      docker update --restart unless-stopped "$CONTAINER" >/dev/null
+    fi
+
+    running="$(docker inspect -f '{{.State.Running}}' "$CONTAINER")"
+
+    if [ "$running" != "true" ]; then
+      docker start "$CONTAINER" >/dev/null
+    fi
+  else
+    if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
+      echo "ERROR: Docker image not found: $IMAGE" >&2
+      echo "Build the Docker image first, then rerun this command." >&2
+      exit 127
+    fi
+
+    docker run -d \
+      --name "$CONTAINER" \
+      --restart unless-stopped \
+      --network host \
+      --security-opt no-new-privileges \
+      --cap-drop ALL \
+      -e HOME=/tmp \
+      -v /home:/home \
+      -v /tmp:/tmp \
+      "$IMAGE" \
+      sleep infinity >/dev/null
+  fi
+}
+
+(
+  flock -x 9
+  ensure_container
+) 9>"$LOCKFILE"
+
+PWD_REAL="$(pwd -P)"
+
+case "$PWD_REAL" in
+  /home/*|/mnt/*|/media/*|/tmp/*|/var/tmp/*|/srv/*|/opt/*)
+    WORKDIR="$PWD_REAL"
+    ;;
+  *)
+    WORKDIR="/tmp"
+    ;;
+esac
+
+exec docker exec \
+  --user "$(id -u):$(id -g)" \
+  -e HOME=/tmp \
+  -w "$WORKDIR" \
+  "$CONTAINER" \
+  /usr/local/bin/wkhtmltoimage "$@"

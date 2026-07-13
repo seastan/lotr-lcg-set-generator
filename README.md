@@ -326,11 +326,22 @@ Additional steps:
   - `npm install fast-xml-parser he`
   - `cd ..`
 
-4. Install wkhtmltopdf:
+4. Install wkhtmltoimage:
 
     If there is a stable package for your platform on https://wkhtmltopdf.org/downloads.html, download it locally and run `sudo apt-get install <absolute path to the package file> -y`.
 
-    If you use a modern system, that's probably not the case and you need to run it inside a docker.  Follow the steps below:
+    If you use a modern system, that's probably not the case and you need to run it inside a Docker.  Follow the steps below.
+    Please note that they assume the arm64 architecture - if needed, modify the URL inside Dockerfile to point to the right package.
+
+  - `sudo apt-get install docker.io -y`
+  - `sudo systemctl enable --now docker`
+  - `sudo docker run --rm hello-world`
+  - `sudo usermod -aG docker <your user>`
+  - Log out and log back in
+  - `docker run --rm hello-world`
+  - `docker build -f Dockerfile_wkhtmltoimage -t local/wkhtmltox-bullseye-arm64:0.12.6.1-2 .`
+  - `sudo cp wkhtmltoimage /usr/local/bin/`
+  - `wkhtmltoimage --version`
 
 5. Create `discord.yaml` using `discord.default.yaml` as a template.
 
