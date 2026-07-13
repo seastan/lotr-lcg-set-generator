@@ -1,6 +1,8 @@
 #!/bin/bash
 cd "$(dirname "$0")"
 ./env_test.sh || exit
+source env_set.sh
+
 if [ $(ls mpc_monitor.log 2>/dev/null) ]; then
   LOG_RAW=`tail -n 1000 mpc_monitor.log | grep ' INFO: Finished' | tail -n 1 | awk '{print $1,$2}'`
   LOG_TS=`date -d "$LOG_RAW" +"%s"`

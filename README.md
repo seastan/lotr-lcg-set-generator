@@ -143,11 +143,11 @@ or `bash` (Mac/Linux).  To navigate to the right folder inside your CLI you can 
 
   - [skip this step, if you don't use VirtualEnv] `virtualenv env --python=python3.9` (replace `3.9` with your actual Python version)
   - [skip this step, if you don't use VirtualEnv] `env\Scripts\activate.bat` (Windows) or `source env/bin/activate` (Mac/Linux)
-  - `pip install -r requirements.txt`
+  - `python -m pip install -r requirements.txt`
 
     If for debugging purposes you plan to use Jupyter notebook, additionally run:
 
-  - `pip install jupyter`
+  - `python -m pip install jupyter`
 
 14. Create `configuration.yaml`: copy `configuration.default.yaml` to `configuration.yaml` and set the following values:
 
@@ -306,42 +306,59 @@ or somewhere else).  It should have the following structure:
 
 Additional steps:
 
-1. Install all dependencies:
+1. Install package and Python dependencies:
 
-  - `pip install -r requirements.txt`
-  - `pip install discord.py==1.7.3 aiohttp`
-  - Patch discord.py package: find the folder where it's installed (something like `/usr/local/lib/python<version of Python>/dist-packages/discord`) and run: `sudo cp _discord_1_7_3_patch/* <discord.py folder>/`.
-  - `sudo apt-get install nodejs npm imagemagick`
-  - Download the latest stable `wkhtmltopdf` package for your platform from https://wkhtmltopdf.org/downloads.html and run `sudo apt-get install <absolute path to the package file>`.
-  - `cd Renderer/; npm install fast-xml-parser he; cd ..`
+  - `sudo apt-get install imagemagick`
+  - `python3 -m venv .venv`
+  - `source .venv/bin/activate`
+  - `python3 -m pip install --upgrade pip setuptools wheel`
+  - `python3 -m pip install -r requirements_cron.txt`
+  - Patch discord.py package: find the folder where it's installed (like `.venv/lib/python<version>/site-packages/discord/`) and run `cp _discord_1_7_3_patch/* <folder>`
 
-2. Create `discord.yaml` (see `discord.default.yaml`).
+2. Install NodeJS and NPM (if they are not yet installed).  You may follow the steps below:
 
-3. Create `mpc_monitor.json` (see `mpc_monitor.default.json`), `mpc_monitor_cookies.json` (see `mpc_monitor_cookies.default.json`),
-`ringsdb_prod_cookies.json` (see `ringsdb_prod_cookies.default.json`), `scheduled_backup.json` (see `scheduled_backup.default.json`) and
+  - curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+  - sudo apt-get install nodejs -y
+
+3. Install NodeJS dependencies:
+
+  - `cd Renderer/`
+  - `npm install fast-xml-parser he`
+  - `cd ..`
+
+4. Install wkhtmltopdf:
+
+    If there is a stable package for your platform on https://wkhtmltopdf.org/downloads.html, download it locally and run `sudo apt-get install <absolute path to the package file> -y`.
+
+    If you use a modern system, that's probably not the case and you need to run it inside a docker.  Follow the steps below:
+
+5. Create `discord.yaml` using `discord.default.yaml` as a template.
+
+6. Create `mpc_monitor.json` (see `mpc_monitor.default.json`), `mpc_monitor_cookies.json` (see `mpc_monitor_cookies.default.json`),
+`ringsdb_prod_cookies.json` (see `ringsdb_prod_cookies.default.json`), `scheduled_backup.json` (see `scheduled_backup.default.json`), and
 `mail.yaml` (see `mail.default.json`).
 
-4. Setup rclone:
+7. Setup rclone:
 
   - `curl https://rclone.org/install.sh | sudo bash`
   - `rclone config`
 
     You will need to set up the following remotes:
 
-  - `ALePCardImages` (points to `CardImages`)
-  - `ALePCron` (points to `Cron`)
-  - `ALePGeneratedImages` (points to `CardImages/generated`)
-  - `ALePIcons` (points to `CardImages/icons`)
-  - `ALePLinksBackup` (points to `Links Backup`)
-  - `ALePLogs` (points to `Logs`)
+  - `ALePCardImages` (points to `CardImages` folder)
+  - `ALePCron` (points to `Cron` folder)
+  - `ALePGeneratedImages` (points to `CardImages/generated` folder)
+  - `ALePIcons` (points to `CardImages/icons` folder)
+  - `ALePLinksBackup` (points to `Links Backup` folder)
+  - `ALePLogs` (points to `Logs` folder)
   - `ALePMakePlayingCards` (points to `MakePlayingCards` folder on the shared drive with release artifacts)
-  - `ALePOCTGN` (points to `Playtesting/OCTGN Files`)
-  - `ALePRenderedImages` (points to `RenderedImages`)
-  - `ALePStableData` (points to `StableData`)
+  - `ALePOCTGN` (points to `Playtesting/OCTGN Files` folder)
+  - `ALePRenderedImages` (points to `RenderedImages` folder)
+  - `ALePStableData` (points to `StableData` folder)
 
-5. In the root folder of this repo create `id_rsa` to upload files to DragnCards.
+8. In the root folder of this repo create a valid `id_rsa` to upload files to DragnCards.
 
-6. Setup crons:
+9. Setup crons:
 
   - `*/5 * * * *   <path>/check_cron.sh >> <path>/cron.log 2>&1`
   - `* * * * *     <path>/check_discord_bot.sh >> <path>/cron.log 2>&1`
@@ -362,7 +379,7 @@ Additional steps:
   - `36 7 * * *    <path>/monitor_mpc_url_format.sh >> <path>/cron.log 2>&1`
   - `0 1 * * *     <path>/monitor_wordpress_token.sh >> <path>/cron.log 2>&1`
   - `17 7 1 */2 *  <path>/mpc_backup.sh >> <path>/cron.log 2>&1`
-  - `19 * * * *   <path>/mpc_monitor.sh >> <path>/cron.log 2>&1`
+  - `19 * * * *    <path>/mpc_monitor.sh >> <path>/cron.log 2>&1`
   - `17 6 * * 0    <path>/mpc_refresh.sh >> <path>/cron.log 2>&1`
   - `7 0 * * *     <path>/rclone_backup.sh "<local Drive/Playtesting/OCTGN Files path>" >> <path>/cron.log 2>&1`
   - `12,42 * * * * <path>/rclone_data_remotely.sh >> <path>/cron.log 2>&1`
@@ -377,7 +394,7 @@ Additional steps:
     or in some external folder (if you already have other crons).  Set `<path to a local configuration backup folder>`
     to some backup folder outside of the root folder.
 
-7. Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir, extract the archive, and
+10. Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir, extract the archive, and
 put `VAFTHRUD.TTF` into `Renderer/Fonts` folder.  Find a `ttf` file for the `Times New Roman` font (you may find it in
 `c:\Windows\Fonts` folder on a Windows machine or download it from the Internet) and put it into `Renderer/Fonts`
 folder as `times.ttf`.
@@ -399,10 +416,10 @@ you may copy its configuration file from the old host (run `rclone config file` 
 (you may just wait for up to 5 minutes).
 
 3. Run `tail -f run_before_se.log` on the old host.  After another iteration has been finished,
-kill `python3 run_before_se_service.py` process (use `ps aux | grep run_before_se` and `kill <process id>` commands).
+kill `python3 run_before_se_service.py` process (use `ps aux | grep run_before_se_service` and `kill <process id>` commands).
 
 4. Wait until no files remain in `Discord/Changes`, `Discord/Images`, and `Discord/Temp` folders on the old host and kill
-`python3 discord_bot.py` process (use `ps aux | grep discord` and `kill <process id>` commands).
+`python3 discord_bot.py` process (use `ps aux | grep discord_bot` and `kill <process id>` commands).
 
 5. Run `./rclone_data_remotely.sh` on the old host.
 

@@ -1,6 +1,8 @@
 #!/bin/bash
 cd "$(dirname "$0")"
 ./env_test.sh || exit
+source env_set.sh
+
 DATE=$(date -d '1 days ago' '+%Y-%m-%d')
 ERRORS=`grep -s "$DATE" discord_bot.log | grep 'ERROR:' | grep -v 'Attempting a reconnect' | grep -v 'Discord error:' | grep -v ', stderr:'`
 if [ "$ERRORS" ]; then

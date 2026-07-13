@@ -1,5 +1,7 @@
 #!/bin/bash
 cd "$(dirname "$0")"
+source env_set.sh
+
 DECK="$1"
 if [[ ! "$DECK" ]]; then
   echo 'No deck name specified'

@@ -1,5 +1,6 @@
 #!/bin/bash
 cd "$(dirname "$0")"
+source env_set.sh
 
 ENV_FILE="env_health_check.txt"
 UUID_FILE="env_uuid.txt"
@@ -20,12 +21,12 @@ if [ -f "$ENV_FILE" ]; then
       exit 0
     fi
 
-    if [[ $(ps aux | grep ' python3 run_before_se_service.py' | grep -v grep) ]]; then
-      kill `ps aux | grep ' python3 run_before_se_service.py' | grep -v grep | awk '{print $2}'`
+    if [[ $(ps aux | grep 'python3 run_before_se_service.py' | grep -v grep) ]]; then
+      kill `ps aux | grep 'python3 run_before_se_service.py' | grep -v grep | awk '{print $2}'`
     fi
 
-    if [[ $(ps aux | grep ' python3 discord_bot.py' | grep -v grep) ]]; then
-      kill `ps aux | grep ' python3 discord_bot.py' | grep -v grep | awk '{print $2}'`
+    if [[ $(ps aux | grep 'python3 discord_bot.py' | grep -v grep) ]]; then
+      kill `ps aux | grep 'python3 discord_bot.py' | grep -v grep | awk '{print $2}'`
     fi
 
     if [ ! -f "$UUID_FILE" ]; then

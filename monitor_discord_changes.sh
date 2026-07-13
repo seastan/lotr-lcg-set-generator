@@ -1,6 +1,8 @@
 #!/bin/bash
 cd "$(dirname "$0")"
 ./env_test.sh || exit
+source env_set.sh
+
 FLAG_FILE="Temp/monitor_discord_changes.txt"
 LAST_TIME_RAW=`ls -alst Discord/Changes/ | grep -a '\.json' | tail -1 | awk '{print $7,$8,$9}'`
 if [[ "$LAST_TIME_RAW" ]]; then

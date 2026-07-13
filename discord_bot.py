@@ -44,7 +44,7 @@ CRON_LOG_CMD = './cron_log.sh'
 MAGICK_GENERATE_CMD = (
     'convert -resize {}x{} -gravity center -background black -extent {}x{} '
     '-crop {}x{}+0+0 -format jpg {} {}')
-MONITOR_REMOTE_PIPELINE_CMD = 'python3 monitor_remote_pipeline.py'
+MONITOR_REMOTE_PIPELINE_CMD = './monitor_remote_pipeline_discord.sh'
 RCLONE_ART_CMD = "rclone copy '{}' 'ALePCardImages:/'"
 RCLONE_ART_FOLDER_CMD = "rclone lsjson 'ALePCardImages:/{}/'"
 RCLONE_COPY_KEEP_ART_CMD = \

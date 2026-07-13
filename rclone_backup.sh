@@ -1,6 +1,7 @@
 #!/bin/bash
 cd "$(dirname "$0")"
 ./env_test.sh || exit
+
 DATE=$(date +%Y-%m-%d)
 rclone copy "$1/Set Folders" "ALePOCTGN:/Backup/$DATE/Set Folders"
 rclone copy "$1/Encounter Decks" "ALePOCTGN:/Backup/$DATE/Encounter Decks"

@@ -1,0 +1,11 @@
+aiohttp
+audioop-lts
+discord.py==1.7.3
+legacy-cgi
+paramiko
+pylint
+pyyaml
+requests
+scp
+unidecode
+urllib3

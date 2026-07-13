@@ -1,5 +1,6 @@
 #!/bin/bash
 cd "$(dirname "$0")"
+
 SETIDS="$1"
 if [[ ! "$SETIDS" ]]; then
   echo 'No set IDs specified'
