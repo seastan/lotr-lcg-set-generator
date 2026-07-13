@@ -369,7 +369,12 @@ Additional steps:
 
 8. In the root folder of this repo create a valid `id_rsa` to upload files to DragnCards.
 
-9. Setup crons:
+9. Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir, extract the archive, and
+put `VAFTHRUD.TTF` into `Renderer/Fonts` folder.  Find a `ttf` file for the `Times New Roman` font (you may find it in
+`c:\Windows\Fonts` folder on a Windows machine or download it from the Internet) and put it into `Renderer/Fonts`
+folder as `times.ttf`.
+
+10. Setup crons:
 
   - `*/5 * * * *   <path>/check_cron.sh >> <path>/cron.log 2>&1`
   - `* * * * *     <path>/check_discord_bot.sh >> <path>/cron.log 2>&1`
@@ -405,16 +410,11 @@ Additional steps:
     or in some external folder (if you already have other crons).  Set `<path to a local configuration backup folder>`
     to some backup folder outside of the root folder.
 
-10. Download `Vafthrudnir` font from https://www.wfonts.com/font/vafthrudnir, extract the archive, and
-put `VAFTHRUD.TTF` into `Renderer/Fonts` folder.  Find a `ttf` file for the `Times New Roman` font (you may find it in
-`c:\Windows\Fonts` folder on a Windows machine or download it from the Internet) and put it into `Renderer/Fonts`
-folder as `times.ttf`.
-
 If you want to manually restart the scripts, run:
 
+- `./restart_run_before_se_service.sh`
 - `./restart_discord_bot.sh`
 - `./restart_mail.sh`
-- `./restart_run_before_se_service.sh`
 
 If you want to migrate the pipeline to a different host, do the following steps:
 
