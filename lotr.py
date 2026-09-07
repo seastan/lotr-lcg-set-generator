@@ -966,6 +966,7 @@ ALLOWED_FIRST_WORDS = {
     'Instead',
     'Limit',
     'Locations',
+    'Look',
     'Make',
     'Move',
     'Name',
