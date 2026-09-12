@@ -496,10 +496,12 @@ Please note that all tags are case-sensitive.
 - `[u]` ... `[/u]`: underlined text
 - `[strike]` ... `[/strike]`: strikethrough text
 - `[red]` ... `[/red]`: red (#8B1C23) text
+- `[size X]` ... `[/size]`: text size X (X may be float)
+- `[defaultsize X]`: put it at the beginning of a field to set default text size X (X may be float)
 - `[lotr X]` ... `[/lotr]`: Vafthrudnir font + text size X (X may be float)
 - `[lotrheader X]` ... `[/lotrheader]`: Lord of the Headers font + text size X (X may be float)
-- `[size X]` ... `[/size]`: text size X (X may be float)
-- `[defaultsize X]`: put it at the beginning of a field, to set default text size X (X may be float)
+- `[lotrheader1]` ... `[/lotrheader1]`: equals to `[lotrheader <1.148 of the defaultsize value>][red]` ... `[/red][/lotrheader]`
+- `[lotrheader2]` ... `[/lotrheader2]`: equals to `[lotrheader <0.926 of the defaultsize value>]` ... `[/lotrheader]`
 - `[img PATH]`: insert image from PATH (PATH may start either with "custom/" or "icons/")
 - `[img PATH Xin]`: insert image from PATH and set its width to X inches
 - `[img PATH Xin Yin]`: insert image from PATH and set its width to X inches and its height to Y inches

@@ -1436,7 +1436,8 @@ def _detect_unmatched_tags(text):
     errors = []
     text_copy = text
     # 'right' is removed from the list to make the life of translators easier
-    for tag in ('center', 'b', 'i', 'bi', 'u', 'strike', 'red'):
+    for tag in ('center', 'b', 'i', 'bi', 'u', 'strike', 'red', 'lotrheader1',
+                'lotrheader2'):
         open_tag = '[{}]'.format(tag)
         close_tag = '[/{}]'.format(tag)
         diff = text_copy.count(open_tag) - text_copy.count(close_tag)
@@ -1512,15 +1513,20 @@ def _clean_tags(text):  # pylint: disable=R0915
     text = text.replace('[rfb]', '')
     text = text.replace('[split]', '')
 
-    text = re.sub(r'\[lotr [^\]]+\]', '', text)
-    text = re.sub(r'\[lotrheader [^\]]+\]', '', text)
-    text = re.sub(r'\[size [^\]]+\]', '', text)
     text = re.sub(r'\[defaultsize [^\]]+\]', '', text)
     text = re.sub(r'\[img [^\]]+\]', '', text)
 
+    text = re.sub(r'\[size [^\]]+\]', '', text)
+    text = re.sub(r'\[lotr [^\]]+\]', '', text)
+    text = re.sub(r'\[lotrheader [^\]]+\]', '', text)
+    text = text.replace('[lotrheader1]', '')
+    text = text.replace('[lotrheader2]', '')
+
+    text = text.replace('[/size]', '')
     text = text.replace('[/lotr]', '')
     text = text.replace('[/lotrheader]', '')
-    text = text.replace('[/size]', '')
+    text = text.replace('[/lotrheader1]', '')
+    text = text.replace('[/lotrheader2]', '')
 
     text = text.replace('[unique]', '')
     text = text.replace('[threat]', '')
@@ -1633,17 +1639,22 @@ def _update_card_text(text, lang=L_ENGLISH, skip_rules=False,  # pylint: disable
     text = text.replace('[ringa]', 'A')
     text = text.replace('[ringb]', 'B')
 
-    text = re.sub(r'\[lotr [^\]]+\]', '', text)
-    text = re.sub(r'\[lotrheader [^\]]+\]', '', text)
-    text = re.sub(r'\[size [^\]]+\]', '', text)
     text = re.sub(r'\[defaultsize [^\]]+\]', '', text)
     text = re.sub(r'\[img [^\]]+\]', '', text)
     text = re.sub(r'\[inline\]\n+', ' ', text)
-
     text = text.replace('[inline]', '')
+
+    text = re.sub(r'\[size [^\]]+\]', '', text)
+    text = re.sub(r'\[lotr [^\]]+\]', '', text)
+    text = re.sub(r'\[lotrheader [^\]]+\]', '', text)
+    text = text.replace('[lotrheader1]', '')
+    text = text.replace('[lotrheader2]', '')
+
+    text = text.replace('[/size]', '')
     text = text.replace('[/lotr]', '')
     text = text.replace('[/lotrheader]', '')
-    text = text.replace('[/size]', '')
+    text = text.replace('[/lotrheader1]', '')
+    text = text.replace('[/lotrheader2]', '')
 
     text = text.replace('<b><b>', '<b>')
     text = text.replace('</b></b>', '</b>')

@@ -2160,7 +2160,7 @@ function updateVafthrudnir(value, lowerSize, lang) {
 	res = res.replace(/<unique>/g, '</size></family><lrs><size ' + uniqueSize + '>u</size></lrs><size ' + (uniqueSize / 2) + '>\u00a0</size><family "Vafthrudnir"><size ' + lowerSize + '>');
 	res = res.replace(/<ringa>/g, '</size></family><lrs><size ' + ringSize + '>A</size></lrs><family "Vafthrudnir"><size ' + lowerSize + '>');
 	res = res.replace(/<ringb>/g, '</size></family><lrs><size ' + ringSize + '>B</size></lrs><family "Vafthrudnir"><size ' + lowerSize + '>');
-	res = res.replace(/<size [^>]+> <\/size>(?:<size [^>]+><\/size>)*<\/family><lrs>/g, '<size ' + lowerSize + '> </size></family><lrs>')
+	res = res.replace(/<size [^>]+> <\/size>(?:<size [^>]+><\/size>)*<\/family><lrs>/g, '<size ' + lowerSize + '> </size></family><lrs>');
 	res = '<family "Vafthrudnir"><size ' + lowerSize + '>' + res + '</size></family>';
 	res = res.replace(/<size [^>]+><\/size>/g, '');
 	res = res.replace(/<family [^>]+><\/family>/g, '');
@@ -2324,6 +2324,12 @@ function markUp(value, key, cardType, lang, setID, flags) {
 	value = value.replace(/\[\/b\]\[\/b\]/g, '[/b]');
 	value = value.replace(/\[i\]\[i\]/g, '[i]');
 	value = value.replace(/\[\/i\]\[\/i\]/g, '[/i]');
+
+	value = value.replace(/\[lotrheader1\]/g, '[lotrheader ' + (Math.round(defaultPointSize * 1.148 * 100) / 100) + '][red]');
+	value = value.replace(/\[\/lotrheader1\]/g, '[/red][/lotrheader]');
+	value = value.replace(/\[lotrheader2\]/g, '[lotrheader ' + (Math.round(defaultPointSize * 0.926 * 100) / 100) + ']');
+	value = value.replace(/\[\/lotrheader2\]/g, '[/lotrheader]');
+
 	value = value.replace(/</g, '[lt]');
 	value = value.replace(/>/g, '[gt]');
 	value = value.replace(/\[lt\]/g, '<lt>');
