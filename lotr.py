@@ -15157,7 +15157,7 @@ def update_ringsdb(conf, sets):  # pylint: disable=R0914
                 data={'code': code, 'old_code': old_code, 'name': set_name})
 
         res = res.content.decode('utf-8').strip()
-        if res != 'Done':
+        if res != 'Done' and 'RINGSDB_CSV_IMPORT_OK' not in res:
             if '<h3 class="panel-title" id="title">Login</h3>' in res:
                 res = 'Login session expired'
             else:
