@@ -2491,7 +2491,7 @@ def _clean_value(value):  # pylint: disable=R0915
         if value == value_old:
             break
 
-    value = re.sub(r'--([^\[\]]+)\]', " -\\1]", value)
+    value = re.sub(r' --([0-9\.]+)\]', " -\\1]", value)
 
     value = value.replace('\t', '[[')
     value = value.replace('\r', ']]')
