@@ -2121,6 +2121,7 @@ function updateVafthrudnir(value, lowerSize, lang) {
 	var res = '';
 	var tag = false;
 
+	value = value.replace(/\bIII\b/g, '[tracking -0.3]II[/tracking]I');
 	value = value.replace(/\bII\b/g, '[tracking -0.3]I[/tracking]I');
 	value = value.replace(/\[space\]/g, ' ');
 	value = value.replace(/\[SPACE\]/g, ' ');
