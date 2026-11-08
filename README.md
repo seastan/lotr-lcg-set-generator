@@ -496,6 +496,7 @@ Please note that all tags are case-sensitive.
 - `[u]` ... `[/u]`: underlined text
 - `[strike]` ... `[/strike]`: strikethrough text
 - `[red]` ... `[/red]`: red (#8B1C23) text
+- `[tracking X]` ... `[/tracking]`: font tracking X (X may be float)
 - `[size X]` ... `[/size]`: text size X (X may be float)
 - `[defaultsize X]`: put it at the beginning of a field to set default text size X (X may be float)
 - `[lotr X]` ... `[/lotr]`: Vafthrudnir font + text size X (X may be float)

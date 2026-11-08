@@ -1458,7 +1458,7 @@ def _detect_unmatched_tags(text):
         if close_tag in text:
             errors.append(close_tag)
 
-    for tag in ('lotr', 'lotrheader', 'size'):
+    for tag in ('lotr', 'lotrheader', 'size', 'tracking'):
         open_tag = '[{}]'.format(tag)
         close_tag = '[/{}]'.format(tag)
         diff = text_copy.count('[{} '.format(tag)) - text_copy.count(close_tag)
@@ -1516,12 +1516,14 @@ def _clean_tags(text):  # pylint: disable=R0915
     text = re.sub(r'\[defaultsize [^\]]+\]', '', text)
     text = re.sub(r'\[img [^\]]+\]', '', text)
 
+    text = re.sub(r'\[tracking [^\]]+\]', '', text)
     text = re.sub(r'\[size [^\]]+\]', '', text)
     text = re.sub(r'\[lotr [^\]]+\]', '', text)
     text = re.sub(r'\[lotrheader [^\]]+\]', '', text)
     text = text.replace('[lotrheader1]', '')
     text = text.replace('[lotrheader2]', '')
 
+    text = text.replace('[/tracking]', '')
     text = text.replace('[/size]', '')
     text = text.replace('[/lotr]', '')
     text = text.replace('[/lotrheader]', '')
@@ -1644,12 +1646,14 @@ def _update_card_text(text, lang=L_ENGLISH, skip_rules=False,  # pylint: disable
     text = re.sub(r'\[inline\]\n+', ' ', text)
     text = text.replace('[inline]', '')
 
+    text = re.sub(r'\[tracking [^\]]+\]', '', text)
     text = re.sub(r'\[size [^\]]+\]', '', text)
     text = re.sub(r'\[lotr [^\]]+\]', '', text)
     text = re.sub(r'\[lotrheader [^\]]+\]', '', text)
     text = text.replace('[lotrheader1]', '')
     text = text.replace('[lotrheader2]', '')
 
+    text = text.replace('[/tracking]', '')
     text = text.replace('[/size]', '')
     text = text.replace('[/lotr]', '')
     text = text.replace('[/lotrheader]', '')
@@ -2486,6 +2490,8 @@ def _clean_value(value):  # pylint: disable=R0915
         value = re.sub(r'–([^\[]*)\]', "--\\1]", value)
         if value == value_old:
             break
+
+    value = re.sub(r'--([^\[\]]+)\]', " -\\1]", value)
 
     value = value.replace('\t', '[[')
     value = value.replace('\r', ']]')

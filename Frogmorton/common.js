@@ -1676,29 +1676,30 @@ function run(context, doc, setID, lang, icons, getCardObjects, saveResult, progr
 				let defaultOptionPointSize = 12;
 				let defaultPagePointSize = 7;
 				let defaultEncounterSetNumberPointSize = 4;
+				let defaultTracking = -0.005;
 
-				s.set('Rules-format', '<left><tracking -0.005><family "Times New Roman"><size ' + defaultBodyPointSize + '>');
+				s.set('Rules-format', '<left><tracking ' + defaultTracking + '><family "Times New Roman"><size ' + defaultBodyPointSize + '>');
 				s.set('Rules-formatEnd', '</size></family>');
-				s.set('RulesBack-format', '<left><tracking -0.005><family "Times New Roman"><size ' + defaultBodyPointSize + '>');
+				s.set('RulesBack-format', '<left><tracking ' + defaultTracking + '><family "Times New Roman"><size ' + defaultBodyPointSize + '>');
 				s.set('RulesBack-formatEnd', '</size></family>');
-				s.set('RulesRight-format', '<left><tracking -0.005><family "Times New Roman"><size ' + defaultBodyPointSize + '>');
+				s.set('RulesRight-format', '<left><tracking ' + defaultTracking + '><family "Times New Roman"><size ' + defaultBodyPointSize + '>');
 				s.set('RulesRight-formatEnd', '</size></family>');
 				s.set('Shadow-format', '<image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
 					'<br><center><image res://TheLordOfTheRingsLCG/image/ShadowSeparator.png 1.55in>' +
 					'<br><image res://TheLordOfTheRingsLCG/image/empty1x1.png 0.1 0.005>' +
-					'<br><left><tracking -0.005><family "Times New Roman"><size ' + defaultBodyPointSize + '><i>');
+					'<br><left><tracking ' + defaultTracking + '><family "Times New Roman"><size ' + defaultBodyPointSize + '><i>');
 				s.set('Shadow-formatEnd', '</i></size></family>');
-				s.set('Flavour-format', '<left><tracking -0.005><family "Times New Roman"><size ' + defaultFlavourPointSize + '><i>');
+				s.set('Flavour-format', '<left><tracking ' + defaultTracking + '><family "Times New Roman"><size ' + defaultFlavourPointSize + '><i>');
 				s.set('Flavour-formatEnd', '</i></size></family>');
-				s.set('FlavourBack-format', '<left><tracking -0.005><family "Times New Roman"><size ' + defaultFlavourPointSize + '><i>');
+				s.set('FlavourBack-format', '<left><tracking ' + defaultTracking + '><family "Times New Roman"><size ' + defaultFlavourPointSize + '><i>');
 				s.set('FlavourBack-formatEnd', '</i></size></family>');
-				s.set('Story-format', '<left><tracking -0.005><family "Times New Roman"><size ' + defaultFlavourPointSize + '><i>');
+				s.set('Story-format', '<left><tracking ' + defaultTracking + '><family "Times New Roman"><size ' + defaultFlavourPointSize + '><i>');
 				s.set('Story-formatEnd', '</i></size></family>');
-				s.set('StoryBack-format', '<left><tracking -0.005><family "Times New Roman"><size ' + defaultFlavourPointSize + '><i>');
+				s.set('StoryBack-format', '<left><tracking ' + defaultTracking + '><family "Times New Roman"><size ' + defaultFlavourPointSize + '><i>');
 				s.set('StoryBack-formatEnd', '</i></size></family>');
-				s.set('Trait-format', '<center><tracking -0.005><family "Times New Roman"><size ' + defaultTraitPointSize + '><i><b>');
+				s.set('Trait-format', '<center><tracking ' + defaultTracking + '><family "Times New Roman"><size ' + defaultTraitPointSize + '><i><b>');
 				s.set('Trait-formatEnd', '</b></i></size></family>');
-				s.set('PageIn-format', '<right><tracking -0.005><family "Times New Roman"><size ' + defaultPagePointSize + '><b>');
+				s.set('PageIn-format', '<right><tracking ' + defaultTracking + '><family "Times New Roman"><size ' + defaultPagePointSize + '><b>');
 				s.set('PageIn-formatEnd', '</b></size></family>');
 
 				s.set('Body-style', 'FAMILY: {"Times New Roman"}');
@@ -2116,13 +2117,18 @@ function updateVafthrudnir(value, lowerSize, lang) {
 	var upperSize = Math.round(lowerSize * 1.423 * 100) / 100;
 	var uniqueSize = Math.round(lowerSize * 1.734 * 100) / 100;
 	var ringSize = Math.round(lowerSize * 1.692 * 100) / 100;
+	var defaultTracking = -0.005;
 	var res = '';
 	var tag = false;
+
+	value = value.replace(/\bII\b/g, '[tracking -0.3]I[/tracking]I');
 	value = value.replace(/\[space\]/g, ' ');
 	value = value.replace(/\[SPACE\]/g, ' ');
 	value = value.replace(/\[unique\]/g, '<unique>');
 	value = value.replace(/\[ringa\]/g, '<ringa>');
 	value = value.replace(/\[ringb\]/g, '<ringb>');
+	value = value.replace(/\[tracking (-?[0-9\.]+)\]/g, '</tracking><tracking $1>');
+	value = value.replace(/\[\/tracking\]/g, '</tracking><tracking ' + defaultTracking + '>');
 	value = updatePunctuation(value, lang);
 	for (let i = 0; i < value.length; i++) {
 		let ch = value[i];
@@ -2291,6 +2297,7 @@ function markUp(value, key, cardType, lang, setID, flags) {
 		defaultPointSize = match[1];
 	}
 	var iconPointSize = defaultPointSize * 1.2;
+	var defaultTracking = -0.005;
 
 	var tagPrefix;
 	var tagSuffix;
@@ -2382,6 +2389,8 @@ function markUp(value, key, cardType, lang, setID, flags) {
 	value = value.replace(/\[\/lotr\]/g, '</lotr>');
 	value = value.replace(/\[lotrheader ([0-9\.]+)\]/g, '<lotrheader $1>');
 	value = value.replace(/\[\/lotrheader\]/g, '</lotrheader>');
+	value = value.replace(/\[tracking (-?[0-9\.]+)\]/g, '</tracking><tracking $1>');
+	value = value.replace(/\[\/tracking\]/g, '</tracking><tracking ' + defaultTracking + '>');
 	value = value.replace(/\[size ([0-9\.]+)\]/g, '</size><size $1>');
 	value = value.replace(/\[\/size\]/g, '</size><size ' + defaultPointSize + '>');
 	value = value.replace(/^\[defaultsize ([0-9\.]+)\]\n*/g, '</size><size $1>');
